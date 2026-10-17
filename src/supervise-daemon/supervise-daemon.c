@@ -500,12 +500,6 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	}
 #endif
 
-	/* remove the controlling tty */
-#ifdef TIOCNOTTY
-	ioctl(tty_fd, TIOCNOTTY, 0);
-	close(tty_fd);
-#endif
-
 	/* Clean the environment of any RC_ variables */
 	env_list = rc_stringlist_new();
 	i = 0;
@@ -683,12 +677,6 @@ RC_NORETURN static void supervisor(char *exec, char **argv)
 	if (svcname)
 		rc_service_daemon_set(svcname, exec, (const char * const *) argv,
 				pidfile, true);
-
-	/* remove the controlling tty */
-#ifdef TIOCNOTTY
-	ioctl(tty_fd, TIOCNOTTY, 0);
-	close(tty_fd);
-#endif
 
 	/*
 	 * Supervisor main loop
@@ -1280,6 +1268,8 @@ int main(int argc, char **argv)
 
 #ifdef TIOCNOTTY
 		tty_fd = open("/dev/tty", O_RDWR);
+		ioctl(tty_fd, TIOCNOTTY, 0);
+		close(tty_fd);
 #endif
 		devnull_fd = open("/dev/null", O_RDWR);
 		dup2(devnull_fd, STDIN_FILENO);
