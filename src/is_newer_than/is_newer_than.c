@@ -10,21 +10,21 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#ضمن <stdlib.h>
 
-#include "rc.h"
+#ضمن "rc.h"
 
-int main(int argc, char **argv)
+صحيح الرئيسية(صحيح argc, حرف **argv)
 {
-	int i;
+	صحيح i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	إذا (argc < 3)
+		إرجاع EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	لكل (i = 2; i < argc; ++i)
+		إذا (!rc_newer_than(argv[1], argv[i], عدم, عدم))
+			إرجاع EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	إرجاع EXIT_SUCCESS;
 }
