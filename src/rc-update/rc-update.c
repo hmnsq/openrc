@@ -55,70 +55,70 @@ const char * const longopts_help[] = {
  *   0 = no changes (nothing to do)
  *  1+ = number of runlevels updated
  */
-static int
+static цео
 add(const char *runlevel, const char *service)
 {
-	int retval = -1;
+	цео retval = -1;
 
-	if (!rc_service_exists(service)) {
-		if (errno == ENOEXEC)
+	ако (!rc_service_exists(service)) {
+		ако (errno == ENOEXEC)
 			eerror("%s: service `%s' is not executable",
 			    applet, service);
-		else
+		инако
 			eerror("%s: service `%s' does not exist",
 			    applet, service);
-	} else if (rc_service_in_runlevel(service, runlevel)) {
+	} инако ако (rc_service_in_runlevel(service, runlevel)) {
 		einfo("%s: %s already installed in runlevel `%s'; skipping",
 		    applet, service, runlevel);
 		retval = 0;
-	} else if (rc_service_add(runlevel, service)) {
+	} инако ако (rc_service_add(runlevel, service)) {
 		einfo("service %s added to runlevel %s", service, runlevel);
 		retval = 1;
-	} else
+	} инако
 		eerror("%s: failed to add service `%s' to runlevel `%s': %s",
 		    applet, service, runlevel, strerror (errno));
 
-	return retval;
+	врати retval;
 }
 
-static int
+static цео
 delete(const char *runlevel, const char *service)
 {
-	int retval = -1;
+	цео retval = -1;
 
 	errno = 0;
-	if (rc_service_delete(runlevel, service)) {
+	ако (rc_service_delete(runlevel, service)) {
 		einfo("service %s deleted from runlevel %s",
 		    service, runlevel);
-		return 1;
+		врати 1;
 	}
 
-	if (errno == ENOENT)
+	ако (errno == ENOENT)
 		eerror("%s: service `%s' is not in the runlevel `%s'",
 		    applet, service, runlevel);
-	else
+	инако
 		eerror("%s: failed to delete service `%s' from runlevel `%s': %s",
 		    applet, service, runlevel, strerror (errno));
 
-	return retval;
+	врати retval;
 }
 
-static int
+static цео
 addstack(const char *runlevel, const char *stack)
 {
-	if (!rc_runlevel_exists(runlevel)) {
+	ако (!rc_runlevel_exists(runlevel)) {
 		eerror("%s: runlevel `%s' does not exist", applet, runlevel);
-		return -1;
+		врати -1;
 	}
-	if (!rc_runlevel_exists(stack)) {
+	ако (!rc_runlevel_exists(stack)) {
 		eerror("%s: runlevel `%s' does not exist", applet, stack);
-		return -1;
+		врати -1;
 	}
-	if (strcmp(runlevel, stack) == 0) {
+	ако (strcmp(runlevel, stack) == 0) {
 		eerror("%s: cannot stack `%s' onto itself", applet, stack);
-		return -1;
+		врати -1;
 	}
-	if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
+	ако (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
 	    strcmp(stack, RC_LEVEL_SYSINIT) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_BOOT) == 0 ||
 	    strcmp(stack, RC_LEVEL_BOOT) == 0 ||
@@ -129,33 +129,33 @@ addstack(const char *runlevel, const char *stack)
 	{
 		eerror("%s: cannot stack the %s runlevel",
 		    applet, RC_LEVEL_SYSINIT);
-		return -1;
+		врати -1;
 	}
-	if (!rc_runlevel_stack(runlevel, stack)) {
+	ако (!rc_runlevel_stack(runlevel, stack)) {
 		eerror("%s: failed to stack `%s' to `%s': %s",
 		    applet, stack, runlevel, strerror(errno));
-		return -1;
+		врати -1;
 	}
 	einfo("runlevel %s added to runlevel %s", stack, runlevel);
-	return 1;
+	врати 1;
 }
 
-static int
+static цео
 delstack(const char *runlevel, const char *stack)
 {
-	if (rc_runlevel_unstack(runlevel, stack)) {
+	ако (rc_runlevel_unstack(runlevel, stack)) {
 		einfo("runlevel %s deleted from runlevel %s", stack, runlevel);
-		return 1;
+		врати 1;
 	}
 
-	if (errno == ENOENT)
+	ако (errno == ENOENT)
 		eerror("%s: runlevel `%s' is not in the runlevel `%s'",
 		    applet, stack, runlevel);
-	else
+	инако
 		eerror("%s: failed to delete runlevel `%s' from runlevel `%s': %s",
 		    applet, stack, runlevel, strerror (errno));
 
-	return -1;
+	врати -1;
 }
 
 static void
@@ -175,12 +175,12 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 		inone = false;
 
 		TAILQ_FOREACH(runlevel, runlevels, entries) {
-			if (rc_service_in_runlevel(service->value,
+			ако (rc_service_in_runlevel(service->value,
 				runlevel->value))
 			{
 				rc_stringlist_add(in, runlevel->value);
 				inone = true;
-			} else {
+			} инако {
 				l = strlen(runlevel->value);
 				buffer = xmalloc(l+1);
 				memset(buffer, ' ', l);
@@ -190,7 +190,7 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 			}
 		}
 
-		if (inone || verbose) {
+		ако (inone || verbose) {
 			/* For more information on why padding is 26, see issue 937: */
 			/* https://github.com/OpenRC/openrc/issues/937 */
 			printf(" %26s |", service->value);
@@ -208,24 +208,24 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 #define DODELETE (1 << 2)
 #define DOSHOW   (1 << 3)
 
-int main(int argc, char **argv)
+цео main(цео argc, char **argv)
 {
 	RC_DEPTREE *deptree;
 	RC_STRINGLIST *runlevels;
 	RC_STRING *runlevel;
 	char *service = NULL;
 	char *p;
-	int action = 0;
+	цео action = 0;
 	bool verbose = false, stack = false, all_runlevels = false;
-	int opt;
-	int retval = EXIT_FAILURE;
-	int num_updated = 0;
-	int (*actfunc)(const char *, const char *);
-	int ret;
+	цео opt;
+	цео retval = EXIT_FAILURE;
+	цео num_updated = 0;
+	цео (*actfunc)(const char *, const char *);
+	цео ret;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *)0)) != -1)
+	док ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (цео *)0)) != -1)
 		switch (opt) {
 		case 'a':
 		    all_runlevels = true;
@@ -235,50 +235,50 @@ int main(int argc, char **argv)
 		break;
 		case 'u':
 			deptree = _rc_deptree_load(-1, &ret);
-			if (deptree)
+			ако (deptree)
 				rc_deptree_free(deptree);
-			return ret;
+			врати ret;
 		case_RC_COMMON_GETOPT
 		}
 
 	verbose = rc_yesno(getenv ("EINFO_VERBOSE"));
 
-	if ((action & DOSHOW   && action != DOSHOW) ||
+	ако ((action & DOSHOW   && action != DOSHOW) ||
 	    (action & DOADD    && action != DOADD) ||
 	    (action & DODELETE && action != DODELETE))
 		eerrorx("%s: cannot mix commands", applet);
 
 	/* We need to be backwards compatible */
-	if (optind < argc) {
-		if (strcmp(argv[optind], "add") == 0)
+	ако (optind < argc) {
+		ако (strcmp(argv[optind], "add") == 0)
 			action = DOADD;
-		else if (strcmp(argv[optind], "delete") == 0 ||
+		инако ако (strcmp(argv[optind], "delete") == 0 ||
 		    strcmp(argv[optind], "del") == 0)
 			action = DODELETE;
-		else if (strcmp(argv[optind], "show") == 0)
+		инако ако (strcmp(argv[optind], "show") == 0)
 			action = DOSHOW;
-		if (action)
+		ако (action)
 			optind++;
-		else
+		инако
 			eerrorx("%s: invalid command `%s'",
 			    applet, argv[optind]);
 	}
-	if (!action)
+	ако (!action)
 		action = DOSHOW;
 
 	runlevels = rc_stringlist_new();
 
-	if (optind >= argc) {
-		if (!(action & DOSHOW))
+	ако (optind >= argc) {
+		ако (!(action & DOSHOW))
 			eerrorx("%s: no service specified", applet);
-	} else {
+	} инако {
 		service = argv[optind];
 		optind++;
 
-		while (optind < argc)
-			if (rc_runlevel_exists(argv[optind]))
+		док (optind < argc)
+			ако (rc_runlevel_exists(argv[optind]))
 				rc_stringlist_add(runlevels, argv[optind++]);
-			else {
+			инако {
 				rc_stringlist_free(runlevels);
 				eerrorx ("%s: `%s' is not a valid runlevel",
 				    applet, argv[optind]);
@@ -286,38 +286,38 @@ int main(int argc, char **argv)
 	}
 
 	retval = EXIT_SUCCESS;
-	if (action & DOSHOW) {
-		if (service)
+	ако (action & DOSHOW) {
+		ако (service)
 			rc_stringlist_add(runlevels, service);
-		if (!TAILQ_FIRST(runlevels)) {
+		ако (!TAILQ_FIRST(runlevels)) {
 			rc_stringlist_free(runlevels);
 			runlevels = rc_runlevel_list();
 		}
 
 		rc_stringlist_sort(&runlevels);
 		show (runlevels, verbose);
-	} else {
-		if (!service)
+	} инако {
+		ако (!service)
 			eerror ("%s: no service specified", applet);
-		else {
-			if (action & DOADD) {
-				if (all_runlevels) {
+		инако {
+			ако (action & DOADD) {
+				ако (all_runlevels) {
 					rc_stringlist_free(runlevels);
 					eerrorx("%s: the -a option is invalid with add", applet);
 				}
 				actfunc = stack ? addstack : add;
-			} else if (action & DODELETE) {
+			} инако ако (action & DODELETE) {
 				actfunc = stack ? delstack : delete;
-			} else {
+			} инако {
 				rc_stringlist_free(runlevels);
 				eerrorx("%s: invalid action", applet);
 			}
 
-			if (!TAILQ_FIRST(runlevels)) {
-				if (all_runlevels) {
+			ако (!TAILQ_FIRST(runlevels)) {
+				ако (all_runlevels) {
 					free(runlevels);
 					runlevels = rc_runlevel_list();
-				} else {
+				} инако {
 					p = rc_runlevel_get();
 					rc_stringlist_add(runlevels,
 					    p ? p : default_runlevel());
@@ -325,25 +325,25 @@ int main(int argc, char **argv)
 				}
 			}
 
-			if (!TAILQ_FIRST(runlevels)) {
+			ако (!TAILQ_FIRST(runlevels)) {
 				free(runlevels);
 				eerrorx("%s: no runlevels found", applet);
 			}
 
 			TAILQ_FOREACH(runlevel, runlevels, entries) {
-				if (!rc_runlevel_exists(runlevel->value)) {
+				ако (!rc_runlevel_exists(runlevel->value)) {
 					eerror ("%s: runlevel `%s' does not exist",
 					    applet, runlevel->value);
 					continue;
 				}
 
 				ret = actfunc(runlevel->value, service);
-				if (ret < 0)
+				ако (ret < 0)
 					retval = EXIT_FAILURE;
 				num_updated += ret;
 			}
 
-			if (retval == EXIT_SUCCESS &&
+			ако (retval == EXIT_SUCCESS &&
 			    num_updated == 0 && action & DODELETE)
 				ewarnx("%s: service `%s' not found in any"
 				    " of the specified runlevels",
@@ -352,5 +352,5 @@ int main(int argc, char **argv)
 	}
 
 	rc_stringlist_free(runlevels);
-	return retval;
+	врати retval;
 }

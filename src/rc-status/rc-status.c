@@ -82,18 +82,18 @@ static void print_level(const char *prefix, const char *level,
 {
 	switch (format) {
 	case FORMAT_DEFAULT:
-		if (prefix)
+		ако (prefix)
 			printf("%s ", prefix);
 		printf ("Runlevel: ");
-		if (isatty(fileno(stdout)))
+		ако (isatty(fileno(stdout)))
 			printf("%s%s%s\n",
 					ecolor(ECOLOR_HILITE), level, ecolor(ECOLOR_NORMAL));
-		else
+		инако
 			printf("%s\n", level);
 		break;
 	case FORMAT_INI:
 		printf("%s", "[");
-		if (prefix)
+		ако (prefix)
 			printf("%s ", prefix);
 		printf("%s]\n", level);
 		break;
@@ -112,10 +112,10 @@ static char *get_uptime(const char *service)
 	int64_t diff_secs;
 	char *uptime = NULL;
 
-	if (state & RC_SERVICE_STARTED) {
+	ако (state & RC_SERVICE_STARTED) {
 		start_count = rc_service_value_get(service, "start_count");
 		start_time_string = rc_service_value_get(service, "start_time");
-		if (start_count && start_time_string) {
+		ако (start_count && start_time_string) {
 			start_time = to_time_t(start_time_string);
 			diff_secs = (int64_t) difftime(time(NULL), start_time);
 			diff_days = diff_secs / 86400;
@@ -124,12 +124,12 @@ static char *get_uptime(const char *service)
 			diff_secs = diff_secs % 3600;
 			diff_mins = diff_secs / 60;
 			diff_secs = diff_secs % 60;
-			if (diff_days > 0)
+			ако (diff_days > 0)
 				xasprintf(&uptime,
 						"%"PRId64" day(s) %02"PRId64":%02"PRId64":%02"PRId64" (%s)",
 						diff_days, diff_hours, diff_mins, diff_secs,
 						start_count);
-			else
+			инако
 				xasprintf(&uptime,
 						"%02"PRId64":%02"PRId64":%02"PRId64" (%s)",
 						diff_hours, diff_mins, diff_secs, start_count);
@@ -137,7 +137,7 @@ static char *get_uptime(const char *service)
 		free(start_count);
 		free(start_time_string);
 	}
-	return uptime;
+	врати uptime;
 }
 
 static void print_service(const char *service, enum format_t format,
@@ -147,57 +147,57 @@ static void print_service(const char *service, enum format_t format,
 	char *uptime = NULL;
 	char *child_pid = NULL;
 	char *start_time = NULL;
-	int cols;
+	цео cols;
 	const char *c = ecolor(ECOLOR_GOOD);
 	RC_SERVICE state = rc_service_state(service);
 	ECOLOR color = ECOLOR_BAD;
 
-	if (!(state & accept) || (state & reject))
-		return;
+	ако (!(state & accept) || (state & reject))
+		врати;
 
-	if (state & RC_SERVICE_STOPPING)
+	ако (state & RC_SERVICE_STOPPING)
 		xasprintf(&status, "stopping ");
-	else if (state & RC_SERVICE_STARTING) {
+	инако ако (state & RC_SERVICE_STARTING) {
 		xasprintf(&status, "starting ");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_INACTIVE) {
+	} инако ако (state & RC_SERVICE_INACTIVE) {
 		xasprintf(&status, "inactive ");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_STARTED) {
+	} инако ако (state & RC_SERVICE_STARTED) {
 		errno = 0;
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+		ако (rc_service_daemons_crashed(service) && errno != EACCES)
 		{
 			child_pid = rc_service_value_get(service, "child_pid");
 			start_time = rc_service_value_get(service, "start_time");
-			if (start_time && child_pid)
+			ако (start_time && child_pid)
 				xasprintf(&status, " unsupervised ");
-			else
+			инако
 				xasprintf(&status, " crashed ");
 			free(child_pid);
 			free(start_time);
-		} else {
+		} инако {
 			uptime = get_uptime(service);
-			if (uptime) {
+			ако (uptime) {
 				xasprintf(&status, " started %s", uptime);
 				free(uptime);
-			} else
+			} инако
 				xasprintf(&status, " started ");
 			color = ECOLOR_GOOD;
 		}
-	} else if (state & RC_SERVICE_SCHEDULED) {
+	} инако ако (state & RC_SERVICE_SCHEDULED) {
 		xasprintf(&status, "scheduled");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_FAILED) {
+	} инако ако (state & RC_SERVICE_FAILED) {
 		xasprintf(&status, "failed");
 		color = ECOLOR_WARN;
-	} else
+	} инако
 		xasprintf(&status, " stopped ");
 
 	errno = 0;
 	switch (format) {
 	case FORMAT_DEFAULT:
 		cols =  printf(" %s", service);
-		if (c && *c && isatty(fileno(stdout)))
+		ако (c && *c && isatty(fileno(stdout)))
 			printf("\n");
 		ebracket(cols, color, status);
 		break;
@@ -215,34 +215,34 @@ static void print_services_in_state(const char *runlevel, RC_STRINGLIST *svcs,
 	RC_STRING *s;
 	char *r = NULL;
 
-	if (!svcs)
-		return;
-	if (!deptree)
+	ако (!svcs)
+		врати;
+	ако (!deptree)
 		deptree = _rc_deptree_load(0, NULL);
-	if (!deptree) {
+	ако (!deptree) {
 		TAILQ_FOREACH(s, svcs, entries)
-			if (!runlevel ||
+			ако (!runlevel ||
 			    rc_service_in_runlevel(s->value, runlevel))
 				print_service(s->value, format, accept, reject);
-		return;
+		врати;
 	}
-	if (!types) {
+	ако (!types) {
 		types = rc_stringlist_new();
 		rc_stringlist_add(types, "ineed");
 		rc_stringlist_add(types, "iuse");
 		rc_stringlist_add(types, "iafter");
 	}
-	if (!runlevel)
+	ако (!runlevel)
 		r = default_runlevel();
 	l = rc_deptree_depends(deptree, types, svcs, r ? r : runlevel,
 			       RC_DEP_STRICT | RC_DEP_TRACE | RC_DEP_START);
 	free(r);
-	if (!l)
-		return;
+	ако (!l)
+		врати;
 	TAILQ_FOREACH(s, l, entries) {
-		if (!rc_stringlist_find(svcs, s->value))
+		ако (!rc_stringlist_find(svcs, s->value))
 			continue;
-		if (!runlevel || rc_service_in_runlevel(s->value, runlevel))
+		ако (!runlevel || rc_service_in_runlevel(s->value, runlevel))
 			print_service(s->value, format, accept, reject);
 	}
 	rc_stringlist_free(l);
@@ -262,7 +262,7 @@ static void print_stacked_services(const char *runlevel, enum format_t format,
 
 	stackedlevels = rc_runlevel_stacks(runlevel);
 	TAILQ_FOREACH(stackedlevel, stackedlevels, entries) {
-		if (rc_stringlist_find(levels, stackedlevel->value) != NULL)
+		ако (rc_stringlist_find(levels, stackedlevel->value) != NULL)
 			continue;
 		print_level("Stacked", stackedlevel->value, format);
 		servicelist = rc_services_in_runlevel(stackedlevel->value);
@@ -274,7 +274,7 @@ static void print_stacked_services(const char *runlevel, enum format_t format,
 	stackedlevels = NULL;
 }
 
-int main(int argc, char **argv)
+цео main(цео argc, char **argv)
 {
 	RC_SERVICE state;
 	RC_SERVICE accept = -1;
@@ -285,11 +285,11 @@ int main(int argc, char **argv)
 	bool levels_given = false;
 	bool show_all = false;
 	char *p, *runlevel = NULL;
-	int opt, retval = 0;
+	цео opt, retval = 0;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts,
-				  (int *) 0)) != -1)
+	док ((opt = getopt_long(argc, argv, getoptstring, longopts,
+				  (цео *) 0)) != -1)
 		switch (opt) {
 		case 'a':
 			show_all = true;
@@ -299,34 +299,34 @@ int main(int argc, char **argv)
 			services = rc_services_in_state(RC_SERVICE_STARTED);
 			retval = 1;
 			TAILQ_FOREACH(s, services, entries)
-				if (rc_service_daemons_crashed(s->value)) {
+				ако (rc_service_daemons_crashed(s->value)) {
 					printf("%s\n", s->value);
 					retval = 0;
 				}
 			goto exit;
 			/* NOTREACHED */
 		case 'f':
-			if (strcasecmp(optarg, "ini") == 0) {
+			ако (strcasecmp(optarg, "ini") == 0) {
 				format = FORMAT_INI;
 				setenv("EINFO_QUIET", "YES", 1);
-			} else
+			} инако
 				eerrorx("%s: invalid argument to --format switch", applet);
 			break;
 		case 'i':
-			if (accept == (RC_SERVICE)-1)
+			ако (accept == (RC_SERVICE)-1)
 				accept = 0;
-			for (it = rc_service_state_names; it->name; ++it) {
+			за (it = rc_service_state_names; it->name; ++it) {
 				/*
 				 * print_service() doesn't print wasinactive
 				 */
-				if (it->state == RC_SERVICE_WASINACTIVE)
+				ако (it->state == RC_SERVICE_WASINACTIVE)
 					continue;
-				if (strcmp(optarg, it->name) == 0) {
+				ако (strcmp(optarg, it->name) == 0) {
 					state = it->state;
 					break;
 				}
 			}
-			if (it->name == NULL)
+			ако (it->name == NULL)
 				eerrorx("%s: invalid argument to --in-state"
 					" switch: %s", applet, optarg);
 			accept |= state;
@@ -334,16 +334,16 @@ int main(int argc, char **argv)
 			 * for `-i started` we don't want to show crashed
 			 * services unless `-i crashed` was used beforehand
 			 */
-			if (state == RC_SERVICE_STARTED && !(accept & RC_SERVICE_CRASHED)) {
+			ако (state == RC_SERVICE_STARTED && !(accept & RC_SERVICE_CRASHED)) {
 				reject |= RC_SERVICE_CRASHED;
-			} else if (state == RC_SERVICE_CRASHED) {
+			} инако ако (state == RC_SERVICE_CRASHED) {
 				/* clear it in case `-i started` set it beforehand */
 				reject &= ~RC_SERVICE_CRASHED;
 			}
 			/* similar situation here with `failed` and `stopped` */
-			if (state == RC_SERVICE_STOPPED && !(accept & RC_SERVICE_FAILED)) {
+			ако (state == RC_SERVICE_STOPPED && !(accept & RC_SERVICE_FAILED)) {
 				reject |= RC_SERVICE_FAILED;
-			} else if (state == RC_SERVICE_FAILED) {
+			} инако ако (state == RC_SERVICE_FAILED) {
 				reject &= ~RC_SERVICE_FAILED;
 			}
 			break;
@@ -358,7 +358,7 @@ int main(int argc, char **argv)
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				TAILQ_FOREACH(l, levels, entries)
-					if (rc_service_in_runlevel(s->value, l->value)) {
+					ако (rc_service_in_runlevel(s->value, l->value)) {
 						TAILQ_REMOVE(services, s, entries);
 						free(s->value);
 						free(s);
@@ -366,7 +366,7 @@ int main(int argc, char **argv)
 					}
 			}
 			TAILQ_FOREACH_SAFE(s, services, entries, t)
-				if (rc_service_state(s->value) &
+				ако (rc_service_state(s->value) &
 					(RC_SERVICE_STOPPED | RC_SERVICE_HOTPLUGGED)) {
 					TAILQ_REMOVE(services, s, entries);
 					free(s->value);
@@ -384,7 +384,7 @@ int main(int argc, char **argv)
 			services = rc_services_in_state(RC_SERVICE_STARTED);
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				char *ret = rc_service_value_get(s->value, "child_pid");
-				if (!ret) {
+				ако (!ret) {
 					TAILQ_REMOVE(services, s, entries);
 					free(s->value);
 					free(s);
@@ -404,7 +404,7 @@ int main(int argc, char **argv)
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				TAILQ_FOREACH(l, levels, entries)
-					if (rc_service_in_runlevel(s->value, l->value)) {
+					ако (rc_service_in_runlevel(s->value, l->value)) {
 						TAILQ_REMOVE(services, s, entries);
 						free(s->value);
 						free(s);
@@ -418,20 +418,20 @@ int main(int argc, char **argv)
 		case_RC_COMMON_GETOPT
 		}
 
-	if (!levels)
+	ако (!levels)
 		levels = rc_stringlist_new();
 	opt = (optind < argc) ? 0 : 1;
-	while (optind < argc) {
-		if (rc_runlevel_exists(argv[optind])) {
+	док (optind < argc) {
+		ако (rc_runlevel_exists(argv[optind])) {
 			levels_given = true;
 			rc_stringlist_add(levels, argv[optind++]);
 			opt++;
-		} else
+		} инако
 			eerror("runlevel `%s' does not exist", argv[optind++]);
 	}
-	if (opt == 0)
+	ако (opt == 0)
 		exit(EXIT_FAILURE);
-	if (!TAILQ_FIRST(levels)) {
+	ако (!TAILQ_FIRST(levels)) {
 		runlevel = default_runlevel();
 		rc_stringlist_add(levels, runlevel);
 	}
@@ -450,7 +450,7 @@ int main(int argc, char **argv)
 		services = NULL;
 	}
 
-	if (show_all || !levels_given) {
+	ако (show_all || !levels_given) {
 		/* Show hotplugged services */
 		print_level("Dynamic", "hotplugged", format);
 		services = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
@@ -459,10 +459,10 @@ int main(int argc, char **argv)
 		services = NULL;
 
 		/* Show manually started and unassigned depended services */
-		if (show_all) {
+		ако (show_all) {
 			rc_stringlist_free(levels);
 			levels = rc_stringlist_new();
-			if (!runlevel)
+			ако (!runlevel)
 				runlevel = default_runlevel();
 			rc_stringlist_add(levels, runlevel);
 		}
@@ -477,9 +477,9 @@ int main(int argc, char **argv)
 		}
 		TAILQ_FOREACH_SAFE(s, services, entries, t) {
 			state = rc_service_state(s->value);
-			if ((rc_stringlist_find(sservices, s->value) ||
+			ако ((rc_stringlist_find(sservices, s->value) ||
 			    (state & ( RC_SERVICE_STOPPED | RC_SERVICE_HOTPLUGGED)))) {
-				if (!(state & RC_SERVICE_FAILED)) {
+				ако (!(state & RC_SERVICE_FAILED)) {
 					TAILQ_REMOVE(services, s, entries);
 					free(s->value);
 					free(s);
@@ -498,7 +498,7 @@ int main(int argc, char **argv)
 				l->value = s->value;
 				setenv("RC_SVCNAME", l->value, 1);
 				tmp = rc_deptree_depends(deptree, needsme, alist, level->value, RC_DEP_TRACE);
-				if (TAILQ_FIRST(tmp)) {
+				ако (TAILQ_FIRST(tmp)) {
 					TAILQ_REMOVE(services, s, entries);
 					TAILQ_INSERT_TAIL(nservices, s, entries);
 				}
@@ -529,5 +529,5 @@ exit:
 	rc_stringlist_free(levels);
 	rc_deptree_free(deptree);
 
-	return retval;
+	врати retval;
 }

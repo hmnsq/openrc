@@ -23,46 +23,46 @@
 
 const char *applet = NULL;
 
-int main(int argc, char **argv)
+цео main(цео argc, char **argv)
 {
 	bool ok = false;
 	char *service;
 	char *exec;
-	int idx = 0;
+	цео idx = 0;
 	RC_SERVICE state, bit;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	ако (argc > 1)
 		service = argv[1];
-	else
+	инако
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	ако (service == NULL || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
 	bit = lookup_service_state(applet);
-	if (bit) {
+	ако (bit) {
 		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	} инако ако (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		ако (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
 			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+		} инако ако (argc == 3) {
+			ако (sscanf(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
 		ok = rc_service_started_daemon(service, exec, NULL, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} инако ако (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} инако
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	врати ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

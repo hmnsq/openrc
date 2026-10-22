@@ -15,20 +15,20 @@
 
 #ifdef HAVE_SELINUX
 
-int selinux_util_open(void);
-int selinux_util_label(const char *path);
-int selinux_util_close(void);
+цео selinux_util_open(void);
+цео selinux_util_label(const char *path);
+цео selinux_util_close(void);
 
 void selinux_setup(char **argv);
 
-#else
+#инако
 
 /* always return false for selinux_util_open() */
 #define selinux_util_open() (0)
-#define selinux_util_label(x) do { } while (0)
-#define selinux_util_close() do { } while (0)
+#define selinux_util_label(x) do { } док (0)
+#define selinux_util_close() do { } док (0)
 
-#define selinux_setup(x) do { } while (0)
+#define selinux_setup(x) do { } док (0)
 
 #endif
 
