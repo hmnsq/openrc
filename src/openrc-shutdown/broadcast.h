@@ -11,6 +11,6 @@
 #ifndef BROADCAST_H
 #define BROADCAST_H
 
-void broadcast(char *text);
+শূন্য broadcast(বর্ণ *text);
 
 #endif

@@ -16,27 +16,27 @@
 #define EINFO_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 #define EINFO_XPRINTF(a, b) __attribute__((__noreturn__, __format__(__printf__, a, b)))
 
-#include <sys/types.h>
-#include <stdbool.h>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <stdbool.h>
 
 /* Although OpenRC requires C99, linking to us should not. */
 #ifdef restrict
 # define EINFO_RESTRICT restrict
-#else
+#অন্যথা
 # ifdef __restrict
 #  define EINFO_RESTRICT __restrict
-# else
+# অন্যথা
 #  define EINFO_RESTRICT
 # endif
 #endif
 
 /* __BEGIN_DECLS */
 #ifdef __cplusplus
-extern "C" {
+বাহ্য "C" {
 #endif
 
 /*! @brief Color types to use */
-typedef enum
+প্রকারনির্দেশ গণনা
 {
 	ECOLOR_NORMAL	= 1,
 	ECOLOR_GOOD	= 2,
@@ -47,10 +47,10 @@ typedef enum
 } ECOLOR;
 
 /*! @brief Returns the ASCII code for the color */
-const char *ecolor(ECOLOR);
+ধ্রুব বর্ণ *ecolor(ECOLOR);
 
 /*! @brief Writes to syslog. */
-void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+শূন্য elog(পূর্ণাঙ্ক, ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 
 /*!
  * @brief Display informational messages.
@@ -69,22 +69,22 @@ void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  * The x suffix means function will exit() returning failure.
  */
 /*@{*/
-int einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void ewarnx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
-int eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void eerrorx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+পূর্ণাঙ্ক einfon(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক ewarnn(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক eerrorn(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক einfo(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক ewarn(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+শূন্য ewarnx(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+পূর্ণাঙ্ক eerror(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+শূন্য eerrorx(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
 
-int einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক einfovn(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক ewarnvn(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক ebeginvn(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক eendvn(পূর্ণাঙ্ক, ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+পূর্ণাঙ্ক ewendvn(পূর্ণাঙ্ক, ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+পূর্ণাঙ্ক einfov(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক ewarnv(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup ebegin
@@ -92,8 +92,8 @@ int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * Similar to einfo, but we add ... to the end of the message */
 /*@{*/
-int ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক ebeginv(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+পূর্ণাঙ্ক ebegin(ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup eend
@@ -105,12 +105,12 @@ int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * ebracket allows you to specify the position, color and message */
 /*@{*/
-int eend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-void ebracket(int, ECOLOR, const char * EINFO_RESTRICT);
+পূর্ণাঙ্ক eend(পূর্ণাঙ্ক, ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+পূর্ণাঙ্ক ewend(পূর্ণাঙ্ক, ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+শূন্য ebracket(পূর্ণাঙ্ক, ECOLOR, ধ্রুব বর্ণ * EINFO_RESTRICT);
 
-int eendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+পূর্ণাঙ্ক eendv(পূর্ণাঙ্ক, ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+পূর্ণাঙ্ক ewendv(পূর্ণাঙ্ক, ধ্রুব বর্ণ * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 /*@}*/
 
 /*! @ingroup eindent
@@ -118,13 +118,13 @@ int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  *
  * For each indent you should outdent when done */
 /*@{*/
-void eindent(void);
-void eoutdent(void);
-void eindentv(void);
-void eoutdentv(void);
+শূন্য eindent(শূন্য);
+শূন্য eoutdent(শূন্য);
+শূন্য eindentv(শূন্য);
+শূন্য eoutdentv(শূন্য);
 
 /*! @brief Prefix each einfo line with something */
-void eprefix(const char * EINFO_RESTRICT);
+শূন্য eprefix(ধ্রুব বর্ণ * EINFO_RESTRICT);
 
 /* __END_DECLS */
 #ifdef __cplusplus

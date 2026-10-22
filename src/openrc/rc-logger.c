@@ -16,220 +16,220 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <time.h>
-#include <unistd.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <ctype.h>
+#অন্তর্ভাব <fcntl.h>
+#অন্তর্ভাব <poll.h>
+#অন্তর্ভাব <signal.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <sys/ioctl.h>
+#অন্তর্ভাব <sys/wait.h>
+#অন্তর্ভাব <termios.h>
+#অন্তর্ভাব <time.h>
+#অন্তর্ভাব <unistd.h>
 
-#if defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#যদি defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 #  include <pty.h>
-#elif defined(__NetBSD__) || defined(__OpenBSD__)
+#নোচেদ্যদি defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <util.h>
-#else
+#অন্যথা
 #  include <libutil.h>
 #endif
 
-#include "einfo.h"
-#include "rc-logger.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#অন্তর্ভাব "einfo.h"
+#অন্তর্ভাব "rc-logger.h"
+#অন্তর্ভাব "rc.h"
+#অন্তর্ভাব "misc.h"
+#অন্তর্ভাব "helpers.h"
 
 #define DEFAULTLOG "/var/log/rc.log"
 
-static int signal_pipe[2] = { -1, -1 };
-static int fd_stdout = -1;
-static int fd_stderr = -1;
-static const char *runlevel = NULL;
-static bool in_escape = false;
-static bool in_term = false;
+স্থির পূর্ণাঙ্ক signal_pipe[2] = { -1, -1 };
+স্থির পূর্ণাঙ্ক fd_stdout = -1;
+স্থির পূর্ণাঙ্ক fd_stderr = -1;
+স্থির ধ্রুব বর্ণ *runlevel = রিক্ত;
+স্থির bool in_escape = false;
+স্থির bool in_term = false;
 
-static char *logbuf = NULL;
-static size_t logbuf_size = 0;
-static size_t logbuf_len = 0;
+স্থির বর্ণ *logbuf = রিক্ত;
+স্থির size_t logbuf_size = 0;
+স্থির size_t logbuf_len = 0;
 
 pid_t rc_logger_pid = -1;
-int rc_logger_tty = -1;
+পূর্ণাঙ্ক rc_logger_tty = -1;
 bool rc_in_logger = false;
 
-static void
-write_log(int logfd, const char *buffer, size_t bytes)
+স্থির শূন্য
+write_log(পূর্ণাঙ্ক logfd, ধ্রুব বর্ণ *buffer, size_t bytes)
 {
-	const char *p = buffer;
+	ধ্রুব বর্ণ *p = buffer;
 
-	while ((size_t)(p - buffer) < bytes) {
-		switch (*p) {
-		case '\r':
-			goto cont;
-		case '\033':
+	যাবত্ ((size_t)(p - buffer) < bytes) {
+		বিকল্প (*p) {
+		পক্ষ '\r':
+			গচ্ছ cont;
+		পক্ষ '\033':
 			in_escape = true;
 			in_term = false;
-			goto cont;
-		case '\n':
+			গচ্ছ cont;
+		পক্ষ '\n':
 			in_escape = in_term = false;
-			break;
-		case '[':
-			if (in_escape)
+			ভঙ্গ;
+		পক্ষ '[':
+			যদি (in_escape)
 				in_term = true;
-			break;
+			ভঙ্গ;
 		}
 
-		if (!in_escape) {
-			if (!isprint((int) *p) && *p != '\n')
-				goto cont;
-			if (write(logfd, p++, 1) == -1)
+		যদি (!in_escape) {
+			যদি (!isprint((পূর্ণাঙ্ক) *p) && *p != '\n')
+				গচ্ছ cont;
+			যদি (লিখ(logfd, p++, 1) == -1)
 				eerror("write: %s", strerror(errno));
-			continue;
+			অনুবর্ত;
 		}
 
-		if (!in_term || isalpha((unsigned char)*p))
+		যদি (!in_term || isalpha((unsigned বর্ণ)*p))
 			in_escape = in_term = false;
 cont:
 		p++;
 	}
 }
 
-static void
-write_time(FILE *f, const char *s)
+স্থির শূন্য
+write_time(FILE *f, ধ্রুব বর্ণ *s)
 {
-	time_t now = time(NULL);
-	struct tm *tm = localtime(&now);
+	time_t now = time(রিক্ত);
+	সংরচনা tm *tm = localtime(&now);
 
 	fprintf(f, "\nrc %s logging %s at %s\n", runlevel, s, asctime(tm));
 	fflush(f);
 }
 
-static void
-mkpath(const char *path)
+স্থির শূন্য
+mkpath(ধ্রুব বর্ণ *path)
 {
-	char *dir = xstrdup(path), *slash = dir;
-	while ((slash = strchr(slash + 1, '/'))) {
+	বর্ণ *dir = xstrdup(path), *slash = dir;
+	যাবত্ ((slash = strchr(slash + 1, '/'))) {
 		*slash = '\0';
-		if (mkdir(path, 0755) == -1 && errno != EEXIST)
-			break;
+		যদি (mkdir(path, 0755) == -1 && errno != EEXIST)
+			ভঙ্গ;
 		*slash = '/';
 	}
 	mkdir(path, 0755);
-	free(dir);
+	মুক্ত(dir);
 }
 
-void
-rc_logger_close(void)
+শূন্য
+rc_logger_close(শূন্য)
 {
-	int sig = SIGTERM;
+	পূর্ণাঙ্ক sig = SIGTERM;
 
-	if (signal_pipe[1] > -1) {
-		if (write(signal_pipe[1], &sig, sizeof(sig)) == -1)
+	যদি (signal_pipe[1] > -1) {
+		যদি (লিখ(signal_pipe[1], &sig, পরিমাণ(sig)) == -1)
 			eerror("write: %s", strerror(errno));
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 	}
 
-	if (rc_logger_pid > 0)
+	যদি (rc_logger_pid > 0)
 		waitpid(rc_logger_pid, 0, 0);
 
-	if (fd_stdout > -1)
+	যদি (fd_stdout > -1)
 		dup2(fd_stdout, STDOUT_FILENO);
-	if (fd_stderr > -1)
+	যদি (fd_stderr > -1)
 		dup2(fd_stderr, STDERR_FILENO);
 }
 
-void
-rc_logger_open(const char *level)
+শূন্য
+rc_logger_open(ধ্রুব বর্ণ *level)
 {
-	int slave_tty;
-	struct termios tt;
-	struct winsize ws;
-	char buffer[BUFSIZ];
-	struct pollfd fd[2];
-	int s = 0;
+	পূর্ণাঙ্ক slave_tty;
+	সংরচনা termios tt;
+	সংরচনা winsize ws;
+	বর্ণ buffer[BUFSIZ];
+	সংরচনা pollfd fd[2];
+	পূর্ণাঙ্ক s = 0;
 	size_t bytes;
-	FILE *log = NULL;
-	FILE *plog = NULL;
-	const char *logfile;
-	char *tmplog, *usrlog = NULL;
-	int log_error = 0;
+	FILE *log = রিক্ত;
+	FILE *plog = রিক্ত;
+	ধ্রুব বর্ণ *logfile;
+	বর্ণ *tmplog, *usrlog = রিক্ত;
+	পূর্ণাঙ্ক log_error = 0;
 
-	if (!rc_conf_yesno("rc_logger"))
-		return;
+	যদি (!rc_conf_yesno("rc_logger"))
+		প্রত্যাগম;
 
-	if (pipe2(signal_pipe, O_CLOEXEC) == -1)
+	যদি (pipe2(signal_pipe, O_CLOEXEC) == -1)
 		eerrorx("pipe2: %s", strerror(errno));
 
-	if (isatty(STDOUT_FILENO)) {
+	যদি (isatty(STDOUT_FILENO)) {
 		tcgetattr(STDOUT_FILENO, &tt);
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, &tt, &ws))
-			return;
-	} else
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, NULL, NULL))
-			return;
+		যদি (openpty(&rc_logger_tty, &slave_tty, রিক্ত, &tt, &ws))
+			প্রত্যাগম;
+	} অন্যথা
+		যদি (openpty(&rc_logger_tty, &slave_tty, রিক্ত, রিক্ত, রিক্ত))
+			প্রত্যাগম;
 
-	if ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
+	যদি ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
 		fcntl(rc_logger_tty, F_SETFD, s | FD_CLOEXEC);
 
-	if ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
+	যদি ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
 		fcntl(slave_tty, F_SETFD, s | FD_CLOEXEC);
 
 	rc_logger_pid = fork();
-	switch (rc_logger_pid) {
-	case -1:
+	বিকল্প (rc_logger_pid) {
+	পক্ষ -1:
 		eerror("fork: %s", strerror(errno));
-		break;
-	case 0:
+		ভঙ্গ;
+	পক্ষ 0:
 		rc_in_logger = true;
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 
 		runlevel = level;
 		xasprintf(&tmplog, "%s/rc.log", rc_svcdir());
-		if ((log = fopen(tmplog, "ae")))
+		যদি ((log = fopen(tmplog, "ae")))
 			write_time(log, "started");
-		else {
-			free(logbuf);
+		অন্যথা {
+			মুক্ত(logbuf);
 			logbuf_size = BUFSIZ * 10;
-			logbuf = xmalloc(sizeof (char) * logbuf_size);
+			logbuf = xmalloc(পরিমাণ (বর্ণ) * logbuf_size);
 			logbuf_len = 0;
 		}
 
 		fd[0].fd = signal_pipe[0];
 		fd[0].events = fd[1].events = POLLIN;
 		fd[0].revents = fd[1].revents = 0;
-		if (rc_logger_tty >= 0)
+		যদি (rc_logger_tty >= 0)
 			fd[1].fd = rc_logger_tty;
-		for (;;) {
-			if ((s = poll(fd,
+		প্রতি (;;) {
+			যদি ((s = poll(fd,
 				    rc_logger_tty >= 0 ? 2 : 1, -1)) == -1)
 			{
 				eerror("poll: %s", strerror(errno));
-				break;
-			} else if (s == 0)
-				continue;
+				ভঙ্গ;
+			} অন্যথা যদি (s == 0)
+				অনুবর্ত;
 
-			if (fd[1].revents & (POLLIN | POLLHUP)) {
+			যদি (fd[1].revents & (POLLIN | POLLHUP)) {
 				memset(buffer, 0, BUFSIZ);
-				bytes = read(rc_logger_tty, buffer, BUFSIZ);
-				if (write(STDOUT_FILENO, buffer, bytes) == -1)
+				bytes = পঠ(rc_logger_tty, buffer, BUFSIZ);
+				যদি (লিখ(STDOUT_FILENO, buffer, bytes) == -1)
 					eerror("write: %s", strerror(errno));
 
-				if (log)
+				যদি (log)
 					write_log(fileno (log), buffer, bytes);
-				else {
-					if (logbuf_size - logbuf_len < bytes) {
+				অন্যথা {
+					যদি (logbuf_size - logbuf_len < bytes) {
 						logbuf_size += BUFSIZ * 10;
 						logbuf = xrealloc(logbuf,
-						    sizeof(char ) *
+						    পরিমাণ(বর্ণ ) *
 						    logbuf_size);
 					}
 
@@ -240,31 +240,31 @@ rc_logger_open(const char *level)
 			}
 
 			/* Only SIGTERMS signals come down this pipe */
-			if (fd[0].revents & (POLLIN | POLLHUP))
-				break;
+			যদি (fd[0].revents & (POLLIN | POLLHUP))
+				ভঙ্গ;
 		}
-		if (logbuf) {
-			if ((log = fopen(tmplog, "ae"))) {
+		যদি (logbuf) {
+			যদি ((log = fopen(tmplog, "ae"))) {
 				write_time(log, "started");
 				write_log(fileno(log), logbuf, logbuf_len);
 			}
-			free(logbuf);
+			মুক্ত(logbuf);
 		}
-		if (log) {
+		যদি (log) {
 			write_time(log, "stopped");
 			fclose(log);
 		}
 
 		/* Append the temporary log to the real log */
-		logfile = rc_conf_value("rc_log_path");
-		if (logfile == NULL) {
-			if (!rc_is_user()) {
+		logfile = rc_conf_মান("rc_log_path");
+		যদি (logfile == রিক্ত) {
+			যদি (!rc_is_user()) {
 				logfile = DEFAULTLOG;
-			} else {
-				const char *state_home = getenv("XDG_STATE_HOME");
-				if (state_home) {
+			} অন্যথা {
+				ধ্রুব বর্ণ *state_home = getenv("XDG_STATE_HOME");
+				যদি (state_home) {
 					xasprintf(&usrlog, "%s/rc.log", state_home);
-				} else if ((state_home = getenv("HOME"))) {
+				} অন্যথা যদি ((state_home = getenv("HOME"))) {
 					xasprintf(&usrlog, "%s/.local/state/rc.log", state_home);
 					state_home = ".local/state";
 				}
@@ -272,71 +272,71 @@ rc_logger_open(const char *level)
 				logfile = usrlog;
 			}
 		}
-		if (!strcmp(logfile, tmplog)) {
+		যদি (!strcmp(logfile, tmplog)) {
 			eerror("Cowardly refusing to concatenate a logfile into itself.");
 			eerrorx("Please change rc_log_path to something other than %s to get rid of this message", tmplog);
 		}
 
-		if ((plog = fopen(logfile, "ae"))) {
-			if ((log = fopen(tmplog, "re"))) {
-				while ((bytes = fread(buffer, sizeof(*buffer), BUFSIZ, log)) > 0) {
-					if (fwrite(buffer, sizeof(*buffer), bytes, plog) < bytes) {
+		যদি ((plog = fopen(logfile, "ae"))) {
+			যদি ((log = fopen(tmplog, "re"))) {
+				যাবত্ ((bytes = fread(buffer, পরিমাণ(*buffer), BUFSIZ, log)) > 0) {
+					যদি (fwrite(buffer, পরিমাণ(*buffer), bytes, plog) < bytes) {
 						log_error = 1;
 						eerror("Error: write(%s) failed: %s", logfile, strerror(errno));
-						break;
+						ভঙ্গ;
 					}
 				}
 				fclose(log);
-			} else {
+			} অন্যথা {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", tmplog, strerror(errno));
 			}
 
 			fclose(plog);
-		} else {
+		} অন্যথা {
 			/*
 			 * logfile or its basedir may be read-only during sysinit and
 			 * shutdown so skip the error in this case
 			 */
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
+			যদি (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", logfile, strerror(errno));
 			}
 		}
 
-		free(usrlog);
+		মুক্ত(usrlog);
 
 		/* Try to keep the temporary log in case of errors */
-		if (!log_error) {
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
-				if (unlink(tmplog) == -1)
+		যদি (!log_error) {
+			যদি (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
+				যদি (unlink(tmplog) == -1)
 					eerror("Error: unlink(%s) failed: %s", tmplog, strerror(errno));
-		} else if (access(tmplog, F_OK) == 0) {
+		} অন্যথা যদি (access(tmplog, F_OK) == 0) {
 			eerrorx("Warning: temporary logfile left behind: %s", tmplog);
 		}
 
-		free(tmplog);
+		মুক্ত(tmplog);
 
 		exit(0);
 		/* NOTREACHED */
 
-	default:
+	স্বভাব:
 		setpgid(rc_logger_pid, 0);
 		fd_stdout = dup(STDOUT_FILENO);
 		fd_stderr = dup(STDERR_FILENO);
-		if ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
+		যদি ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
 			fcntl(fd_stdout, F_SETFD, s | FD_CLOEXEC);
 
-		if ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
+		যদি ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
 			fcntl(fd_stderr, F_SETFD, s | FD_CLOEXEC);
 		dup2(slave_tty, STDOUT_FILENO);
 		dup2(slave_tty, STDERR_FILENO);
-		if (slave_tty != STDIN_FILENO &&
+		যদি (slave_tty != STDIN_FILENO &&
 		    slave_tty != STDOUT_FILENO &&
 		    slave_tty != STDERR_FILENO)
 			close(slave_tty);
 		close(signal_pipe[0]);
 		signal_pipe[0] = -1;
-		break;
+		ভঙ্গ;
 	}
 }

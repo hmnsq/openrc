@@ -14,52 +14,52 @@
  */
 
 
-#include <fcntl.h>
-#include <paths.h>
-#include <pwd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/sysmacros.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <time.h>
-#include <unistd.h>
-#include <utmpx.h>
+#অন্তর্ভাব <fcntl.h>
+#অন্তর্ভাব <paths.h>
+#অন্তর্ভাব <pwd.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <sys/stat.h>
+#অন্তর্ভাব <sys/sysmacros.h>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <sys/utsname.h>
+#অন্তর্ভাব <time.h>
+#অন্তর্ভাব <unistd.h>
+#অন্তর্ভাব <utmpx.h>
 
-#include "broadcast.h"
-#include "helpers.h"
+#অন্তর্ভাব "broadcast.h"
+#অন্তর্ভাব "helpers.h"
 
 #ifndef _PATH_DEV
 # define _PATH_DEV	"/dev/"
 #endif
 
 
-static void getuidtty(char **userp, char **ttyp)
+স্থির শূন্য getuidtty(বর্ণ **userp, বর্ণ **ttyp)
 {
-	struct passwd 		*pwd;
+	সংরচনা passwd 		*pwd;
 	uid_t			uid;
-	char			*tty;
-	static char		uidbuf[32];
-	char		*ttynm = NULL;
+	বর্ণ			*tty;
+	স্থির বর্ণ		uidbuf[32];
+	বর্ণ		*ttynm = রিক্ত;
 
 	uid = getuid();
-	if ((pwd = getpwuid(uid)) != NULL) {
+	যদি ((pwd = getpwuid(uid)) != রিক্ত) {
 		uidbuf[0] = 0;
-		strncat(uidbuf, pwd->pw_name, sizeof(uidbuf) - 1);
-	} else {
-		if (uid)
-			sprintf(uidbuf, "uid %d", (int) uid);
-		else
+		strncat(uidbuf, pwd->pw_name, পরিমাণ(uidbuf) - 1);
+	} অন্যথা {
+		যদি (uid)
+			sprintf(uidbuf, "uid %d", (পূর্ণাঙ্ক) uid);
+		অন্যথা
 			sprintf(uidbuf, "root");
 	}
 
-	if ((tty = ttyname(0)) != NULL) {
-		const size_t plen = strlen(_PATH_DEV);
-		if (strncmp(tty, _PATH_DEV, plen) == 0) {
+	যদি ((tty = ttyname(0)) != রিক্ত) {
+		ধ্রুব size_t plen = strlen(_PATH_DEV);
+		যদি (strncmp(tty, _PATH_DEV, plen) == 0) {
 			tty += plen;
-			if (tty[0] == '/')
+			যদি (tty[0] == '/')
 				tty++;
 		}
 		xasprintf(&ttynm, "(%s) ", tty);
@@ -72,16 +72,16 @@ static void getuidtty(char **userp, char **ttyp)
 /*
  *	Check whether the given filename looks like a tty device.
  */
-static int file_isatty(const char *fname)
+স্থির পূর্ণাঙ্ক file_isatty(ধ্রুব বর্ণ *fname)
 {
-	struct stat		st;
-	int			major;
+	সংরচনা stat		st;
+	পূর্ণাঙ্ক			major;
 
-	if (stat(fname, &st) < 0)
-		return 0;
+	যদি (stat(fname, &st) < 0)
+		প্রত্যাগম 0;
 
-	if (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
-		return 0;
+	যদি (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
+		প্রত্যাগম 0;
 
 	/*
 	 *	It would be an impossible task to list all major/minors
@@ -90,12 +90,12 @@ static int file_isatty(const char *fname)
 	 *	printers and tapes.
 	 */
 	major = major(st.st_dev);
-	if (major == 1 || major == 2 || major == 6 || major == 9 ||
+	যদি (major == 1 || major == 2 || major == 6 || major == 9 ||
 	    major == 12 || major == 16 || major == 21 || major == 27 ||
 	    major == 37 || major == 96 || major == 97 || major == 206 ||
 	    major == 230)
-		return 0;
-	return 1;
+		প্রত্যাগম 0;
+	প্রত্যাগম 1;
 }
 
 /*
@@ -103,19 +103,19 @@ static int file_isatty(const char *fname)
  *
  *	NB: Not multithread safe.
  */
-void broadcast(char *text)
+শূন্য broadcast(বর্ণ *text)
 {
-	char *tty;
-	char *user;
-	struct utsname name;
+	বর্ণ *tty;
+	বর্ণ *user;
+	সংরচনা utsname name;
 	time_t t;
-	char *date;
-	char *p;
-	char *line = NULL;
-	int len;
-	int fd;
-	char *term = NULL;
-	struct utmpx *utmp;
+	বর্ণ *date;
+	বর্ণ *p;
+	বর্ণ *সারি = রিক্ত;
+	পূর্ণাঙ্ক len;
+	পূর্ণাঙ্ক fd;
+	বর্ণ *term = রিক্ত;
+	সংরচনা utmpx *utmp;
 
 	getuidtty(&user, &tty);
 
@@ -129,42 +129,42 @@ void broadcast(char *text)
 	time(&t);
 	date = ctime(&t);
 	p = strchr(date, '\n');
-	if (p)
+	যদি (p)
 		*p = 0;
 
-	len = xasprintf(&line, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
+	len = xasprintf(&সারি, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
 			user, name.nodename, tty, date, text);
-	free(tty);
+	মুক্ত(tty);
 
 	/*
 	 *	Fork to avoid hanging in a write()
 	 */
-	if (fork() != 0)
-		return;
+	যদি (fork() != 0)
+		প্রত্যাগম;
 
 	setutxent();
 
-	while ((utmp = getutxent()) != NULL) {
-		if (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
-			continue;
-		if (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
+	যাবত্ ((utmp = getutxent()) != রিক্ত) {
+		যদি (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
+			অনুবর্ত;
+		যদি (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
 			xasprintf(&term, "%s", utmp->ut_line);
-		else
+		অন্যথা
 			xasprintf(&term, "%s%s", _PATH_DEV, utmp->ut_line);
-		if (strstr(term, "/../")) {
-			free(term);
-			continue;
+		যদি (strstr(term, "/../")) {
+			মুক্ত(term);
+			অনুবর্ত;
 		}
 
 		/* Open it non-delay */
-		if (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
-			if (isatty(fd))
-				write(fd, line, len);
+		যদি (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
+			যদি (isatty(fd))
+				লিখ(fd, সারি, len);
 			close(fd);
 		}
-		free(term);
+		মুক্ত(term);
 	}
 	endutxent();
-	free(line);
+	মুক্ত(সারি);
 	exit(0);
 }

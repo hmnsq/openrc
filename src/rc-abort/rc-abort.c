@@ -10,25 +10,25 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <signal.h>
+#অন্তর্ভাব <string.h>
 
-#include "einfo.h"
+#অন্তর্ভাব "einfo.h"
 
-int main(void)
+পূর্ণাঙ্ক main(শূন্য)
 {
-	const char *p = getenv("RC_PID");
-	int pid;
+	ধ্রুব বর্ণ *p = getenv("RC_PID");
+	পূর্ণাঙ্ক pid;
 
-	if (p && sscanf(p, "%d", &pid) == 1) {
-		if (kill(pid, SIGUSR1) != 0)
+	যদি (p && sscanf(p, "%d", &pid) == 1) {
+		যদি (kill(pid, SIGUSR1) != 0)
 			eerrorx("rc-abort: failed to signal parent %d: %s",
 			    pid, strerror(errno));
-		return EXIT_SUCCESS;
+		প্রত্যাগম EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	প্রত্যাগম EXIT_FAILURE;
 }

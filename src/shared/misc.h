@@ -18,42 +18,42 @@
 #ifndef __RC_MISC_H__
 #define __RC_MISC_H__
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+#অন্তর্ভাব <sys/stat.h>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <time.h>
+#অন্তর্ভাব <unistd.h>
 
-#include "helpers.h"
-#include "rc.h"
+#অন্তর্ভাব "helpers.h"
+#অন্তর্ভাব "rc.h"
 
 #define RC_LEVEL_BOOT           "boot"
 #define RC_LEVEL_DEFAULT        "default"
 
 #define RC_KRUNLEVEL            RC_SVCDIR "/krunlevel"
 
-char *rc_conf_value(const char *var);
-bool rc_conf_yesno(const char *var);
-char *default_runlevel(void);
-void env_filter(void);
-void env_config(void);
-int signal_setup(int sig, void (*handler)(int));
-int svc_lock(const char *, bool);
-int svc_unlock(const char *, int);
-pid_t exec_service(const char *, const char *);
+বর্ণ *rc_conf_মান(ধ্রুব বর্ণ *var);
+bool rc_conf_yesno(ধ্রুব বর্ণ *var);
+বর্ণ *default_runlevel(শূন্য);
+শূন্য env_filter(শূন্য);
+শূন্য env_config(শূন্য);
+পূর্ণাঙ্ক signal_setup(পূর্ণাঙ্ক sig, শূন্য (*handler)(পূর্ণাঙ্ক));
+পূর্ণাঙ্ক svc_lock(ধ্রুব বর্ণ *, bool);
+পূর্ণাঙ্ক svc_unlock(ধ্রুব বর্ণ *, পূর্ণাঙ্ক);
+pid_t exec_service(ধ্রুব বর্ণ *, ধ্রুব বর্ণ *);
 
-typedef struct rc_service_state_name {
+প্রকারনির্দেশ সংরচনা rc_service_state_name {
 	RC_SERVICE state;
-	enum rc_dir dir;
-	const char *const name;
+	গণনা rc_dir dir;
+	ধ্রুব বর্ণ *ধ্রুব name;
 } rc_service_state_name_t;
 
 /* We MUST list the states below 0x10 first
  * The rest can be in any order */
-static const rc_service_state_name_t rc_service_state_names[] = {
+স্থির ধ্রুব rc_service_state_name_t rc_service_state_names[] = {
 	{ RC_SERVICE_STARTED,     RC_DIR_STARTED,     "started" },
 	{ RC_SERVICE_STOPPED,     RC_DIR_INVALID,     "stopped" },
 	{ RC_SERVICE_STARTING,    RC_DIR_STARTING,    "starting" },
@@ -64,37 +64,37 @@ static const rc_service_state_name_t rc_service_state_names[] = {
 	{ RC_SERVICE_FAILED,      RC_DIR_FAILED,      "failed" },
 	{ RC_SERVICE_SCHEDULED,   RC_DIR_SCHEDULED,   "scheduled"},
 	{ RC_SERVICE_CRASHED,     RC_DIR_INVALID,     "crashed"},
-	{ 0, -1, NULL}
+	{ 0, -1, রিক্ত}
 };
 
 #define service_start(service) exec_service(service, "start")
 #define service_stop(service)  exec_service(service, "stop")
 
-int parse_mode(mode_t *, char *);
+পূর্ণাঙ্ক parse_mode(mode_t *, বর্ণ *);
 
 /* Handy function so we can wrap einfo around our deptree */
-RC_DEPTREE *_rc_deptree_load (int, int *);
+RC_DEPTREE *_rc_deptree_load (পূর্ণাঙ্ক, পূর্ণাঙ্ক *);
 
-RC_SERVICE lookup_service_state(const char *service);
-void from_time_t(char *time_string, time_t tv);
-time_t to_time_t(char *timestring);
-pid_t get_pid(const char *applet, const char *pidfile);
+RC_SERVICE lookup_service_state(ধ্রুব বর্ণ *service);
+শূন্য from_time_t(বর্ণ *time_string, time_t tv);
+time_t to_time_t(বর্ণ *timestring);
+pid_t get_pid(ধ্রুব বর্ণ *applet, ধ্রুব বর্ণ *pidfile);
 
-void cloexec_fds_from(int);
+শূন্য cloexec_fds_from(পূর্ণাঙ্ক);
 
-struct notify {
-	enum {
+সংরচনা notify {
+	গণনা {
 		NOTIFY_NONE = 0,
 		NOTIFY_FD,
 		NOTIFY_SOCKET
 	} type;
 
-	char *path;
-	int pipe[2];
-	int fd;
+	বর্ণ *path;
+	পূর্ণাঙ্ক pipe[2];
+	পূর্ণাঙ্ক fd;
 };
 
-struct notify notify_parse(const char *applet, const char *ready_string);
-bool notify_wait(const char *applet, struct notify ready);
+সংরচনা notify notify_parse(ধ্রুব বর্ণ *applet, ধ্রুব বর্ণ *ready_string);
+bool notify_wait(ধ্রুব বর্ণ *applet, সংরচনা notify ready);
 
 #endif
