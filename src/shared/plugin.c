@@ -15,110 +15,110 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <dirent.h>
-#include <dlfcn.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#ضمن <sys/types.h>
+#ضمن <sys/wait.h>
+#ضمن <dirent.h>
+#ضمن <dlfcn.h>
+#ضمن <errno.h>
+#ضمن <fcntl.h>
+#ضمن <signal.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "plugin.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "queue.h"
+#ضمن "rc.h"
+#ضمن "rc_exec.h"
+#ضمن "plugin.h"
+#ضمن "helpers.h"
 
 #define RC_PLUGIN_HOOK "rc_plugin_hook"
 
 bool rc_in_plugin = false;
 
-typedef struct plugin
+تعريفنوع بنية plugin
 {
-	char *name;
-	void *handle;
-	int (*hook)(RC_HOOK, const char *);
+	حرف *name;
+	فراغ *handle;
+	صحيح (*hook)(RC_HOOK, ثابت حرف *);
 	TAILQ_ENTRY(plugin) entries;
 } PLUGIN;
 TAILQ_HEAD(, plugin) plugins;
 
-void
-rc_plugin_load(void)
+فراغ
+rc_plugin_load(فراغ)
 {
 	DIR *dp;
-	struct dirent *d;
+	بنية dirent *d;
 	PLUGIN *plugin;
-	char *file = NULL;
-	void *h;
-	union {
-		void *sym;
-		int (*func)(RC_HOOK, const char *);
+	حرف *file = عدم;
+	فراغ *h;
+	اتحاد {
+		فراغ *sym;
+		صحيح (*func)(RC_HOOK, ثابت حرف *);
 	} fptr;
 
 	/* Don't load plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	إذا (rc_in_plugin)
+		أرجع;
 
 	TAILQ_INIT(&plugins);
 
-	if (!(dp = opendir(RC_PLUGINDIR)))
-		return;
+	إذا (!(dp = opendir(RC_PLUGINDIR)))
+		أرجع;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	طالما ((d = readdir(dp))) {
+		إذا (d->d_name[0] == '.')
+			استمر;
 
 		xasprintf(&file, RC_PLUGINDIR "/%s",  d->d_name);
 		h = dlopen(file, RTLD_LAZY);
-		free(file);
-		if (h == NULL) {
+		حرر(file);
+		إذا (h == عدم) {
 			eerror("dlopen: %s", dlerror());
-			continue;
+			استمر;
 		}
 
 		fptr.sym = dlsym(h, RC_PLUGIN_HOOK);
-		if (fptr.func == NULL) {
+		إذا (fptr.func == عدم) {
 			eerror("%s: cannot find symbol `%s'",
 			    d->d_name, RC_PLUGIN_HOOK);
 			dlclose(h);
-		} else {
-			plugin = xmalloc(sizeof(*plugin));
+		} وإلا {
+			plugin = xmalloc(حجم(*plugin));
 			plugin->name = xstrdup(d->d_name);
 			plugin->handle = h;
 			plugin->hook = fptr.func;
-			TAILQ_INSERT_TAIL(&plugins, plugin, entries);
+			TAILQ_سك_TAIL(&plugins, plugin, entries);
 		}
 	}
 	closedir(dp);
 }
 
-void
-rc_plugin_run(RC_HOOK hook, const char *value)
+فراغ
+rc_plugin_run(RC_HOOK hook, ثابت حرف *درج)
 {
 	PLUGIN *plugin;
-	struct sigaction sa;
+	بنية sigaction sa;
 	sigset_t empty;
 	sigset_t full;
 	sigset_t old;
-	int pfd[2];
+	صحيح pfd[2];
 	pid_t pid;
-	char *buffer;
-	char *token;
-	char *p;
+	حرف *buffer;
+	حرف *token;
+	حرف *p;
 	ssize_t nr;
-	int retval;
+	صحيح retval;
 
 	/* Don't run plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	إذا (rc_in_plugin)
+		أرجع;
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, حجم(sa));
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
 	sigemptyset(&empty);
@@ -130,81 +130,81 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 		 * O_CLOEXEC to stop any scripts from inheriting us.
 		 * This is actually quite important as without this, the splash
 		 * plugin will probably hang when running in silent mode. */
-		if (pipe2(pfd, O_CLOEXEC) == -1) {
+		إذا (pipe2(pfd, O_CLOEXEC) == -1) {
 			eerror("pipe2: %s", strerror(errno));
-			return;
+			أرجع;
 		}
 
 		sigprocmask(SIG_SETMASK, &full, &old);
 
 		/* We run the plugin in a new process so we never crash
 		 * or otherwise affected by it */
-		if ((pid = fork()) == -1) {
+		إذا ((pid = fork()) == -1) {
 			eerror("fork: %s", strerror(errno));
-			break;
+			اكسر;
 		}
 
-		if (pid == 0) {
+		إذا (pid == 0) {
 			/* Restore default handlers */
-			sigaction(SIGCHLD, &sa, NULL);
-			sigaction(SIGHUP,  &sa, NULL);
-			sigaction(SIGINT,  &sa, NULL);
-			sigaction(SIGQUIT, &sa, NULL);
-			sigaction(SIGTERM, &sa, NULL);
-			sigaction(SIGUSR1, &sa, NULL);
-			sigaction(SIGWINCH, &sa, NULL);
-			sigprocmask(SIG_SETMASK, &old, NULL);
+			sigaction(SIGCHLD, &sa, عدم);
+			sigaction(SIGHUP,  &sa, عدم);
+			sigaction(SIGINT,  &sa, عدم);
+			sigaction(SIGQUIT, &sa, عدم);
+			sigaction(SIGTERM, &sa, عدم);
+			sigaction(SIGUSR1, &sa, عدم);
+			sigaction(SIGWINCH, &sa, عدم);
+			sigprocmask(SIG_SETMASK, &old, عدم);
 
 			rc_in_plugin = true;
 			close(pfd[0]);
 			rc_environ_fd = fdopen(pfd[1], "w");
-			retval = plugin->hook(hook, value);
+			retval = plugin->hook(hook, درج);
 			fclose(rc_environ_fd);
-			rc_environ_fd = NULL;
+			rc_environ_fd = عدم;
 
 			/* Just in case the plugin sets this to false */
 			rc_in_plugin = true;
 			exit(retval);
 		}
 
-		sigprocmask(SIG_SETMASK, &old, NULL);
+		sigprocmask(SIG_SETMASK, &old, عدم);
 		close(pfd[1]);
-		buffer = xmalloc(sizeof(char) * BUFSIZ);
+		buffer = xmalloc(حجم(حرف) * BUFSIZ);
 		memset(buffer, 0, BUFSIZ);
 
-		while ((nr = read(pfd[0], buffer, BUFSIZ)) > 0) {
+		طالما ((nr = اقرأ(pfd[0], buffer, BUFSIZ)) > 0) {
 			p = buffer;
-			while (*p && p - buffer < nr) {
+			طالما (*p && p - buffer < nr) {
 				token = strsep(&p, "=");
-				if (token) {
+				إذا (token) {
 					unsetenv(token);
-					if (*p) {
+					إذا (*p) {
 						setenv(token, p, 1);
 						p += strlen(p) + 1;
-					} else
+					} وإلا
 						p++;
 				}
 			}
 		}
 
-		free(buffer);
+		حرر(buffer);
 		close(pfd[0]);
 
 		rc_waitpid(pid);
 	}
 }
 
-void
-rc_plugin_unload(void)
+فراغ
+rc_plugin_unload(فراغ)
 {
 	PLUGIN *plugin = TAILQ_FIRST(&plugins);
 	PLUGIN *next;
 
-	while (plugin) {
+	طالما (plugin) {
 		next = TAILQ_NEXT(plugin, entries);
 		dlclose(plugin->handle);
-		free(plugin->name);
-		free(plugin);
+		حرر(plugin->name);
+		حرر(plugin);
 		plugin = next;
 	}
 	TAILQ_INIT(&plugins);
