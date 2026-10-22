@@ -22,7 +22,7 @@
  * here instead of ad-hoc coding fork+exec yourself.
  */
 
-enum {
+ga_nanaa {
 	/* default */
 	EXEC_NO_REDIRECT = -1,
 	/* make a pipe and redirect to it */
@@ -31,30 +31,30 @@ enum {
 	EXEC_DEVNULL = -3,
 };
 
-struct exec_args {
-	const char **argv;
-	const char *cmd;  /* if NULL, argv[0] is used */
-	int redirect_stdin;
-	int redirect_stdout;
-	int redirect_stderr;
+sa_nracanaa exec_args {
+	const var_na **argv;
+	const var_na *cmd;  /* if NULL, argv[0] is used */
+	ຈຳນວນເຕັມ redirect_stdin;
+	ຈຳນວນເຕັມ redirect_stdout;
+	ຈຳນວນເຕັມ redirect_stderr;
 	uid_t uid;
 	gid_t gid;
 	bool setsid : 1;
 };
 
-struct exec_result {
+sa_nracanaa exec_result {
 	pid_t pid;
 	/* returned in case of RC_EXEC_MKPIPE */
-	int proc_stdin;
-	int proc_stdout;
-	int proc_stderr;
+	ຈຳນວນເຕັມ proc_stdin;
+	ຈຳນວນເຕັມ proc_stdout;
+	ຈຳນວນເຕັມ proc_stderr;
 };
 
-struct exec_args exec_init(const char **argv);
-struct exec_result do_exec(struct exec_args *args);
+sa_nracanaa exec_args exec_init(const var_na **argv);
+sa_nracanaa exec_result do_exec(sa_nracanaa exec_args *args);
 
 /* some exec related helplers */
-int rc_waitpid(pid_t pid);
-int rc_pipe_command(const char *cmd, int devnullfd);
+ຈຳນວນເຕັມ rc_waitpid(pid_t pid);
+ຈຳນວນເຕັມ rc_pipe_command(const var_na *cmd, ຈຳນວນເຕັມ devnullfd);
 
 #endif

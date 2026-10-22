@@ -35,20 +35,20 @@
 
 #define RC_KRUNLEVEL            RC_SVCDIR "/krunlevel"
 
-char *rc_conf_value(const char *var);
-bool rc_conf_yesno(const char *var);
-char *default_runlevel(void);
+var_na *rc_conf_value(const var_na *var);
+bool rc_conf_yesno(const var_na *var);
+var_na *default_runlevel(void);
 void env_filter(void);
 void env_config(void);
-int signal_setup(int sig, void (*handler)(int));
-int svc_lock(const char *, bool);
-int svc_unlock(const char *, int);
-pid_t exec_service(const char *, const char *);
+ຈຳນວນເຕັມ signal_setup(ຈຳນວນເຕັມ sig, void (*handler)(ຈຳນວນເຕັມ));
+ຈຳນວນເຕັມ svc_lock(const var_na *, bool);
+ຈຳນວນເຕັມ svc_unlock(const var_na *, ຈຳນວນເຕັມ);
+pid_t exec_service(const var_na *, const var_na *);
 
-typedef struct rc_service_state_name {
+typedef sa_nracanaa rc_service_state_name {
 	RC_SERVICE state;
-	enum rc_dir dir;
-	const char *const name;
+	ga_nanaa rc_dir dir;
+	const var_na *const name;
 } rc_service_state_name_t;
 
 /* We MUST list the states below 0x10 first
@@ -70,31 +70,31 @@ static const rc_service_state_name_t rc_service_state_names[] = {
 #define service_start(service) exec_service(service, "start")
 #define service_stop(service)  exec_service(service, "stop")
 
-int parse_mode(mode_t *, char *);
+ຈຳນວນເຕັມ parse_mode(mode_t *, var_na *);
 
 /* Handy function so we can wrap einfo around our deptree */
-RC_DEPTREE *_rc_deptree_load (int, int *);
+RC_DEPTREE *_rc_deptree_load (ຈຳນວນເຕັມ, ຈຳນວນເຕັມ *);
 
-RC_SERVICE lookup_service_state(const char *service);
-void from_time_t(char *time_string, time_t tv);
-time_t to_time_t(char *timestring);
-pid_t get_pid(const char *applet, const char *pidfile);
+RC_SERVICE lookup_service_state(const var_na *service);
+void from_time_t(var_na *time_string, time_t tv);
+time_t to_time_t(var_na *timestring);
+pid_t get_pid(const var_na *applet, const var_na *pidfile);
 
-void cloexec_fds_from(int);
+void cloexec_fds_from(ຈຳນວນເຕັມ);
 
-struct notify {
-	enum {
+sa_nracanaa notify {
+	ga_nanaa {
 		NOTIFY_NONE = 0,
 		NOTIFY_FD,
 		NOTIFY_SOCKET
 	} type;
 
-	char *path;
-	int pipe[2];
-	int fd;
+	var_na *path;
+	ຈຳນວນເຕັມ pipe[2];
+	ຈຳນວນເຕັມ fd;
 };
 
-struct notify notify_parse(const char *applet, const char *ready_string);
-bool notify_wait(const char *applet, struct notify ready);
+sa_nracanaa notify notify_parse(const var_na *applet, const var_na *ready_string);
+bool notify_wait(const var_na *applet, sa_nracanaa notify ready);
 
 #endif

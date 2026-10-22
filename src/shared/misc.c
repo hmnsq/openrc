@@ -49,15 +49,15 @@
 #include "version.h"
 #include "helpers.h"
 
-extern char **environ;
+extern var_na **environ;
 
 bool
-rc_conf_yesno(const char *setting)
+rc_conf_yesno(const var_na *setting)
 {
-	return rc_yesno(rc_conf_value (setting));
+	ສົ່ງຄືນ rc_yesno(rc_conf_value (setting));
 }
 
-static const char *const env_allowlist[] = {
+static const var_na *const env_allowlist[] = {
 	"EERROR_QUIET", "EINFO_QUIET",
 	"IN_BACKGROUND", "IN_DRYRUN", "IN_HOTPLUG",
 	"RC_DEBUG", "RC_NODEPS", "RC_USER_SERVICES",
@@ -67,19 +67,19 @@ static const char *const env_allowlist[] = {
 	NULL
 };
 
-static const char *const usrenv_allowlist[] = {
+static const var_na *const usrenv_allowlist[] = {
 	"USER", "LOGNAME", "HOME", "SHELL",
 	"XDG_*", "DIFFTOOL", "LESS", "PAGER",
 	"EDITOR", "VISUAL", NULL
 };
 
 static bool
-env_allowed(const char *const list[], const char *value)
+env_allowed(const var_na *const list[], const var_na *value)
 {
-	for (size_t i = 0; list[i]; i++)
-		if (fnmatch(list[i], value, FNM_NOESCAPE | FNM_PERIOD) == 0)
-			return true;
-	return false;
+	ສຳລັບ (size_t i = 0; list[i]; i++)
+		ຖ້າ (fnmatch(list[i], value, FNM_NOESCAPE | FNM_PERIOD) == 0)
+			ສົ່ງຄືນ true;
+	ສົ່ງຄືນ false;
 }
 
 void
@@ -88,9 +88,9 @@ env_filter(void)
 	RC_STRINGLIST *env_allow;
 	RC_STRINGLIST *profile;
 	RC_STRINGLIST *env_list;
-	char *profile_path;
+	var_na *profile_path;
 	RC_STRING *env;
-	char *e;
+	var_na *e;
 	size_t i = 0;
 
 	/* Add the user defined list of vars */
@@ -99,16 +99,16 @@ env_filter(void)
 	 * If '*' is an entry in rc_env_allow, do nothing as we are to pass
 	 * through all environment variables.
 	 */
-	if (rc_stringlist_find(env_allow, "*")) {
+	ຖ້າ (rc_stringlist_find(env_allow, "*")) {
 		rc_stringlist_free(env_allow);
-		return;
+		ສົ່ງຄືນ;
 	}
 
 	xasprintf(&profile_path, "%s/profile.env", rc_sysconfdir());
 	profile = rc_config_load(profile_path);
 	free(profile_path);
 
-	if (rc_is_user()) {
+	ຖ້າ (rc_is_user()) {
 		RC_STRINGLIST *usrprofile;
 		xasprintf(&profile_path, "%s/profile.env", rc_usrconfdir());
 		usrprofile = rc_config_load(profile_path);
@@ -119,10 +119,10 @@ env_filter(void)
 
 	/* Copy the env and work from this so we can manipulate it safely */
 	env_list = rc_stringlist_new();
-	while (environ && environ[i]) {
+	ໃນຂະນະທີ່ (environ && environ[i]) {
 		env = rc_stringlist_add(env_list, environ[i++]);
 		e = strchr(env->value, '=');
-		if (e)
+		ຖ້າ (e)
 			*e = '\0';
 	}
 
@@ -130,14 +130,14 @@ env_filter(void)
 		RC_STRING *var;
 
 		/* Check the whitelist */
-		if (env_allowed(env_allowlist, env->value))
+		ຖ້າ (env_allowed(env_allowlist, env->value))
 			continue;
-		if (rc_is_user() && env_allowed(usrenv_allowlist, env->value))
+		ຖ້າ (rc_is_user() && env_allowed(usrenv_allowlist, env->value))
 			continue;
 
 		/* Check our user defined list */
 		TAILQ_FOREACH(var, env_allow, entries)
-			if (fnmatch(var->value, env->value, FNM_NOESCAPE | FNM_PERIOD) == 0)
+			ຖ້າ (fnmatch(var->value, env->value, FNM_NOESCAPE | FNM_PERIOD) == 0)
 				goto next;
 
 		/* OK, not allowed! */
@@ -149,7 +149,7 @@ next:;
 	TAILQ_FOREACH(env, profile, entries) {
 		e = strchr(env->value, '=');
 		*e = '\0';
-		if (!getenv(env->value))
+		ຖ້າ (!getenv(env->value))
 			setenv(env->value, e + 1, 1);
 	}
 
@@ -158,60 +158,60 @@ next:;
 	rc_stringlist_free(profile);
 }
 
-char *
+var_na *
 default_runlevel(void)
 {
-	char *runlevel = rc_runlevel_get();
+	var_na *runlevel = rc_runlevel_get();
 
-	if (!runlevel)
+	ຖ້າ (!runlevel)
 		runlevel = xstrdup(rc_conf_value("rc_default_runlevel"));
-	if (!runlevel || !*runlevel) {
+	ຖ້າ (!runlevel || !*runlevel) {
 		free(runlevel);
 		runlevel = xstrdup(RC_LEVEL_DEFAULT);
 	}
 
-	return runlevel;
+	ສົ່ງຄືນ runlevel;
 }
 
 void
 env_config(void)
 {
 	size_t pplen = strlen(RC_PATH_PREFIX);
-	char *path;
-	char *p;
-	char *e;
+	var_na *path;
+	var_na *p;
+	var_na *e;
 	size_t l;
-	struct utsname uts;
+	sa_nracanaa utsname uts;
 	FILE *fp;
-	char *token;
-	char *np;
-	char *npp;
-	char *tok;
-	const char *sys = rc_sys();
-	const char *svcdir = rc_svcdir();
-	const char *const *init_path = rc_scriptdirs();
-	char *buffer = NULL;
-	char *tmpdir;
+	var_na *token;
+	var_na *np;
+	var_na *npp;
+	var_na *tok;
+	const var_na *sys = rc_sys();
+	const var_na *svcdir = rc_svcdir();
+	const var_na *const *init_path = rc_scriptdirs();
+	var_na *buffer = NULL;
+	var_na *tmpdir;
 	size_t size = 0;
 
 	/* Ensure our PATH is prefixed with the system locations first
 	   for a little extra security */
 	path = getenv("PATH");
-	if (!path)
+	ຖ້າ (!path)
 		setenv("PATH", RC_PATH_PREFIX, 1);
-	else if (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
 		l = strlen(path) + pplen + 3;
-		e = p = xmalloc(sizeof(char) * l);
+		e = p = xmalloc(parimaa_na(var_na) * l);
 		p += snprintf(p, l, "%s", RC_PATH_PREFIX);
 
 		/* Now go through the env var and only add bits not in our
 		 * PREFIX */
-		while ((token = strsep(&path, ":"))) {
+		ໃນຂະນະທີ່ ((token = strsep(&path, ":"))) {
 			np = npp = xstrdup(RC_PATH_PREFIX);
-			while ((tok = strsep(&npp, ":")))
-				if (strcmp(tok, token) == 0)
-					break;
-			if (!tok)
+			ໃນຂະນະທີ່ ((tok = strsep(&npp, ":")))
+				ຖ້າ (strcmp(tok, token) == 0)
+					bha_nga;
+			ຖ້າ (!tok)
 				p += snprintf(p, l - (p - e), ":%s", token);
 			free (np);
 		}
@@ -221,18 +221,18 @@ env_config(void)
 		free(e);
 	}
 
-	if (!rc_is_user()) {
+	ຖ້າ (!rc_is_user()) {
 		setenv("RC_CACHEDIR", "/var/cache/rc", 1);
-	} else {
-		const char *cache_home = getenv("XDG_CACHE_HOME");
-		char *cachedir = NULL;
+	} ບໍ່ດັ່ງນັ້ນ {
+		const var_na *cache_home = getenv("XDG_CACHE_HOME");
+		var_na *cachedir = NULL;
 
-		if (cache_home)
+		ຖ້າ (cache_home)
 			xasprintf(&cachedir, "%s/rc", cache_home);
-		else if ((cache_home = getenv("HOME")))
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ ((cache_home = getenv("HOME")))
 			xasprintf(&cachedir, "%s/.cache/rc", cache_home);
 
-		if (cachedir)
+		ຖ້າ (cachedir)
 			setenv("RC_CACHEDIR", cachedir, 1);
 
 		free(cachedir);
@@ -250,8 +250,8 @@ env_config(void)
 
 	fp = xopen_memstream(&path, &size);
 	fputs("RC_PATH=", fp);
-	for (bool first = true; *init_path; init_path++, first = false) {
-		if (!first)
+	ສຳລັບ (bool first = true; *init_path; init_path++, first = false) {
+		ຖ້າ (!first)
 			fputc(':', fp);
 		fputs(*init_path, fp);
 	}
@@ -263,59 +263,59 @@ env_config(void)
 
 	/* krunlevel is a system-wide override; it never applies to
 	 * user sessions. */
-	if (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
-		if (xgetline(&buffer, &size, fp) != -1)
+	ຖ້າ (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
+		ຖ້າ (xgetline(&buffer, &size, fp) != -1)
 			setenv("RC_DEFAULTLEVEL", buffer, 1);
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
 		free(buffer);
 		fclose(fp);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
 	}
 
-	if (sys)
+	ຖ້າ (sys)
 		setenv("RC_SYS", sys, 1);
 
 	/* Some scripts may need to take a different code path if
 	   Linux/FreeBSD, etc
 	   To save on calling uname, we store it in an environment variable */
-	if (uname(&uts) == 0)
+	ຖ້າ (uname(&uts) == 0)
 		setenv("RC_UNAME", uts.sysname, 1);
 
 	/* Be quiet or verbose as necessary */
-	if (rc_conf_yesno("rc_quiet"))
+	ຖ້າ (rc_conf_yesno("rc_quiet"))
 		setenv("EINFO_QUIET", "YES", 1);
-	if (rc_conf_yesno("rc_verbose"))
+	ຖ້າ (rc_conf_yesno("rc_verbose"))
 		setenv("EINFO_VERBOSE", "YES", 1);
 
 	errno = 0;
-	if ((!rc_conf_yesno("rc_color") && errno == 0) ||
+	ຖ້າ ((!rc_conf_yesno("rc_color") && errno == 0) ||
 	    rc_conf_yesno("rc_nocolor"))
 		setenv("EINFO_COLOR", "NO", 1);
 }
 
-int
-signal_setup(int sig, void (*handler)(int))
+ຈຳນວນເຕັມ
+signal_setup(ຈຳນວນເຕັມ sig, void (*handler)(ຈຳນວນເຕັມ))
 {
-	struct sigaction sa;
+	sa_nracanaa sigaction sa;
 
-	memset(&sa, 0, sizeof (sa));
+	memset(&sa, 0, parimaa_na (sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = handler;
-	return sigaction(sig, &sa, NULL);
+	ສົ່ງຄືນ sigaction(sig, &sa, NULL);
 }
 
-int
-svc_lock(const char *applet, bool ignore_lock_failure)
+ຈຳນວນເຕັມ
+svc_lock(const var_na *applet, bool ignore_lock_failure)
 {
-	int fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
+	ຈຳນວນເຕັມ fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
 
-	if (fd == -1)
-		return -1;
-	if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
-		int saved_errno = errno;
-		if (ignore_lock_failure) {
+	ຖ້າ (fd == -1)
+		ສົ່ງຄືນ -1;
+	ຖ້າ (flock(fd, LOCK_EX | LOCK_NB) == -1) {
+		ຈຳນວນເຕັມ saved_errno = errno;
+		ຖ້າ (ignore_lock_failure) {
 			/* Two services with a need b, and b's start()
 			 * calling restart --no-deps on a would cause
 			 * harmless errors: just ignore them.
@@ -326,35 +326,35 @@ svc_lock(const char *applet, bool ignore_lock_failure)
 		eerror("Call to flock failed: %s", strerror(errno));
 		close(fd);
 		errno = saved_errno;
-		return -1;
+		ສົ່ງຄືນ -1;
 	}
-	return fd;
+	ສົ່ງຄືນ fd;
 }
 
-int
-svc_unlock(const char *applet, int fd)
+ຈຳນວນເຕັມ
+svc_unlock(const var_na *applet, ຈຳນວນເຕັມ fd)
 {
 	unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, 0);
 	close(fd);
-	return -1;
+	ສົ່ງຄືນ -1;
 }
 
 pid_t
-exec_service(const char *service, const char *arg)
+exec_service(const var_na *service, const var_na *arg)
 {
-	char *file, sfd[32];
-	const char *argv[] = { service, "--lockfd", sfd, arg, NULL };
-	int fd = svc_lock(basename_c(service), false);
+	var_na *file, sfd[32];
+	const var_na *argv[] = { service, "--lockfd", sfd, arg, NULL };
+	ຈຳນວນເຕັມ fd = svc_lock(basename_c(service), false);
 	posix_spawnattr_t chldmask;
 	sigset_t empty;
 	pid_t pid = 0;
 
-	if (fd == -1)
-		return -1;
-	snprintf(sfd, sizeof(sfd), "%d", fd);
+	ຖ້າ (fd == -1)
+		ສົ່ງຄືນ -1;
+	snprintf(sfd, parimaa_na(sfd), "%d", fd);
 
 	file = rc_service_resolve(service);
-	if (access(file, F_OK) != 0) {
+	ຖ້າ (access(file, F_OK) != 0) {
 		rc_service_mark(service, RC_SERVICE_STOPPED);
 		svc_unlock(basename_c(service), fd);
 		goto out;
@@ -369,7 +369,7 @@ exec_service(const char *service, const char *arg)
 	posix_spawnattr_setflags(&chldmask, POSIX_SPAWN_SETSIGMASK);
 	posix_spawnattr_setsigmask(&chldmask, &empty);
 
-	if ((errno = posix_spawn(&pid, file, NULL, &chldmask, UNCONST(argv), environ))) {
+	ຖ້າ ((errno = posix_spawn(&pid, file, NULL, &chldmask, UNCONST(argv), environ))) {
 		fprintf(stderr, "posix_spawn: %s\n", strerror(errno));
 		svc_unlock(basename_c(service), fd);
 	}
@@ -379,91 +379,91 @@ exec_service(const char *service, const char *arg)
 
 out:
 	free(file);
-	return pid;
+	ສົ່ງຄືນ pid;
 }
 
-int
-parse_mode(mode_t *mode, char *text)
+ຈຳນວນເຕັມ
+parse_mode(mode_t *mode, var_na *text)
 {
-	char *p;
+	var_na *p;
 	unsigned long l;
 
 	/* Check for a numeric mode */
-	if ((*text - '0') < 8) {
+	ຖ້າ ((*text - '0') < 8) {
 		l = strtoul(text, &p, 8);
-		if (*p || l > 07777U) {
+		ຖ້າ (*p || l > 07777U) {
 			errno = EINVAL;
-			return -1;
+			ສົ່ງຄືນ -1;
 		}
 		*mode = (mode_t) l;
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
 	/* We currently don't check g+w type stuff */
 	errno = EINVAL;
-	return -1;
+	ສົ່ງຄືນ -1;
 }
 
-RC_DEPTREE * _rc_deptree_load(int force, int *regen)
+RC_DEPTREE * _rc_deptree_load(ຈຳນວນເຕັມ force, ຈຳນວນເຕັມ *regen)
 {
-	int fd;
-	int retval;
-	int serrno = errno;
-	int merrno;
+	ຈຳນວນເຕັມ fd;
+	ຈຳນວນເຕັມ retval;
+	ຈຳນວນເຕັມ serrno = errno;
+	ຈຳນວນເຕັມ merrno;
 	time_t t;
-	char file[PATH_MAX];
-	struct stat st;
+	var_na file[PATH_MAX];
+	sa_nracanaa stat st;
 	FILE *fp;
 
 	t = 0;
-	if (rc_deptree_update_needed(&t, file) || force != 0) {
-		int svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
+	ຖ້າ (rc_deptree_update_needed(&t, file) || force != 0) {
+		ຈຳນວນເຕັມ svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
 
 		/* Test if we have permission to update the deptree */
 		fd = openat(svcdirfd, "deptree", O_WRONLY);
 		merrno = errno;
 		errno = serrno;
-		if (fd == -1 && merrno == EACCES)
-			return rc_deptree_load();
+		ຖ້າ (fd == -1 && merrno == EACCES)
+			ສົ່ງຄືນ rc_deptree_load();
 		close(fd);
 
-		if (regen)
+		ຖ້າ (regen)
 			*regen = 1;
 		ebegin("Caching service dependencies");
 		retval = rc_deptree_update() ? 0 : -1;
 		eend(retval, "Failed to update the dependency tree");
 
-		if (retval == 0) {
-			if (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
+		ຖ້າ (retval == 0) {
+			ຖ້າ (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
 				eerror("stat(%s): %s/deptree", rc_svcdir(), strerror(errno));
-				return NULL;
+				ສົ່ງຄືນ NULL;
 			}
 
-			if (st.st_mtime >= t) {
+			ຖ້າ (st.st_mtime >= t) {
 				unlinkat(svcdirfd, "clock-skewed", 0);
 				goto out;
 			}
 
 			eerror("Clock skew detected with '%s'", file);
 			eerrorn("Adjusting mtime of '%s/deptree' to %s", rc_svcdir(), ctime(&t));
-			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (struct timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
+			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (sa_nracanaa timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
 
-			if ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
+			ຖ້າ ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
 				fprintf(fp, "%s\n", file);
 				fclose(fp);
 			}
 		}
 
 out:
-		if (force == -1 && regen != NULL)
+		ຖ້າ (force == -1 && regen != NULL)
 			*regen = retval;
 	}
 
-	return rc_deptree_load();
+	ສົ່ງຄືນ rc_deptree_load();
 }
 
-static const struct {
-	const char * const name;
+static const sa_nracanaa {
+	const var_na * const name;
 	RC_SERVICE bit;
 } service_bits[] = {
 	{ "service_started",     RC_SERVICE_STARTED,     },
@@ -477,35 +477,35 @@ static const struct {
 	{ "service_crashed",     RC_SERVICE_CRASHED,     },
 };
 
-RC_SERVICE lookup_service_state(const char *service)
+RC_SERVICE lookup_service_state(const var_na *service)
 {
 	size_t i;
-	for (i = 0; i < ARRAY_SIZE(service_bits); ++i)
-		if (!strcmp(service, service_bits[i].name))
-			return service_bits[i].bit;
-	return 0;
+	ສຳລັບ (i = 0; i < ARRAY_SIZE(service_bits); ++i)
+		ຖ້າ (!strcmp(service, service_bits[i].name))
+			ສົ່ງຄືນ service_bits[i].bit;
+	ສົ່ງຄືນ 0;
 }
 
-void from_time_t(char *time_string, time_t tv)
+void from_time_t(var_na *time_string, time_t tv)
 {
 	strftime(time_string, 20, "%Y-%m-%d %H:%M:%S", localtime(&tv));
 }
 
-time_t to_time_t(char *timestring)
+time_t to_time_t(var_na *timestring)
 {
-	int check = 0;
-	int year = 0;
-	int month = 0;
-	int day = 0;
-	int hour = 0;
-	int min = 0;
-	int sec = 0;
-	struct tm breakdown = {0};
+	ຈຳນວນເຕັມ check = 0;
+	ຈຳນວນເຕັມ year = 0;
+	ຈຳນວນເຕັມ month = 0;
+	ຈຳນວນເຕັມ day = 0;
+	ຈຳນວນເຕັມ hour = 0;
+	ຈຳນວນເຕັມ min = 0;
+	ຈຳນວນເຕັມ sec = 0;
+	sa_nracanaa tm breakdown = {0};
 	time_t result = -1;
 
 	check = sscanf(timestring, "%4d-%2d-%2d %2d:%2d:%2d",
 			&year, &month, &day, &hour, &min, &sec);
-	if (check == 6) {
+	ຖ້າ (check == 6) {
 		breakdown.tm_year = year - 1900; /* years since 1900 */
 		breakdown.tm_mon = month - 1;
 		breakdown.tm_mday = day;
@@ -515,130 +515,130 @@ time_t to_time_t(char *timestring)
 		breakdown.tm_isdst = -1;
 		result = mktime(&breakdown);
 	}
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-pid_t get_pid(const char *applet,const char *pidfile)
+pid_t get_pid(const var_na *applet,const var_na *pidfile)
 {
 	FILE *fp;
 	pid_t pid;
 
-	if (!pidfile)
-		return -1;
+	ຖ້າ (!pidfile)
+		ສົ່ງຄືນ -1;
 
-	if ((fp = fopen(pidfile, "r")) == NULL) {
+	ຖ້າ ((fp = fopen(pidfile, "r")) == NULL) {
 		ewarnv("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
-		return -1;
+		ສົ່ງຄືນ -1;
 	}
 
-	if (fscanf(fp, "%d", &pid) != 1) {
+	ຖ້າ (fscanf(fp, "%d", &pid) != 1) {
 		ewarnv("%s: no pid found in `%s'", applet, pidfile);
 		fclose(fp);
-		return -1;
+		ສົ່ງຄືນ -1;
 	}
 
 	fclose(fp);
 
-	return pid;
+	ສົ່ງຄືນ pid;
 }
 
-struct notify notify_parse(const char *applet, const char *notify_string)
+sa_nracanaa notify notify_parse(const var_na *applet, const var_na *notify_string)
 {
-	struct notify notify = {0};
-	if (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
+	sa_nracanaa notify notify = {0};
+	ຖ້າ (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
 		notify.type = NOTIFY_FD;
-		if (pipe(notify.pipe) == -1)
+		ຖ້າ (pipe(notify.pipe) == -1)
 			eerrorx("%s: pipe: %s", applet, strerror(errno));
-	} else if (strncmp(notify_string, "socket", sizeof("socket") - 1) == 0) {
-		union {
-			struct sockaddr header;
-			struct sockaddr_un unix;
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (strncmp(notify_string, "socket", parimaa_na("socket") - 1) == 0) {
+		sa_ngha {
+			sa_nracanaa sockaddr header;
+			sa_nracanaa sockaddr_un unix;
 		} addr = { .unix = { .sun_family = AF_UNIX } };
-		int written;
-		const char *opts = strchr(notify_string, ':');
+		ຈຳນວນເຕັມ written;
+		const var_na *opts = strchr(notify_string, ':');
 
-		if (!opts || opts[1] == '\0')
-			return notify;
-		if (strcmp(opts + 1, "ready") != 0)
-			return notify;
+		ຖ້າ (!opts || opts[1] == '\0')
+			ສົ່ງຄືນ notify;
+		ຖ້າ (strcmp(opts + 1, "ready") != 0)
+			ສົ່ງຄືນ notify;
 
-		written = snprintf(addr.unix.sun_path, sizeof(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
-		if (written >= (int)sizeof(addr.unix.sun_path))
+		written = snprintf(addr.unix.sun_path, parimaa_na(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
+		ຖ້າ (written >= (ຈຳນວນເຕັມ)parimaa_na(addr.unix.sun_path))
 			eerrorx("%s: socket path '%s/supervise-%s.sock' too long.", applet, rc_svcdir(), applet);
 		setenv("NOTIFY_SOCKET", addr.unix.sun_path, true);
 
 		notify.type = NOTIFY_SOCKET;
-		if ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
+		ຖ້າ ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
 			eerrorx("%s: socket: %s", applet, strerror(errno));
-		if (bind(notify.fd, &addr.header, sizeof(addr.unix)) == -1)
+		ຖ້າ (bind(notify.fd, &addr.header, parimaa_na(addr.unix)) == -1)
 			eerrorx("%s: bind: %s", applet, strerror(errno));
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		eerrorx("%s: invalid ready '%s'.", applet, optarg);
 	}
 
-	return notify;
+	ສົ່ງຄືນ notify;
 }
 
-bool notify_wait(const char *applet, struct notify notify)
+bool notify_wait(const var_na *applet, sa_nracanaa notify notify)
 {
 	switch (notify.type) {
-	case NOTIFY_NONE:
-		return true;
-	case NOTIFY_FD:
+	pak_sa NOTIFY_NONE:
+		ສົ່ງຄືນ true;
+	pak_sa NOTIFY_FD:
 		close(notify.pipe[1]);
 		notify.fd = notify.pipe[0];
-		break;
-	case NOTIFY_SOCKET:
-		break;
+		bha_nga;
+	pak_sa NOTIFY_SOCKET:
+		bha_nga;
 	}
 
-	for (;;) {
-		char buf[BUFSIZ];
+	ສຳລັບ (;;) {
+		var_na buf[BUFSIZ];
 		ssize_t bytes = read(notify.fd, buf, BUFSIZ);
 
-		if (bytes == 0)
-			return false;
-		if (bytes == -1) {
-			if (errno != EINTR) {
+		ຖ້າ (bytes == 0)
+			ສົ່ງຄືນ false;
+		ຖ້າ (bytes == -1) {
+			ຖ້າ (errno != EINTR) {
 				eerror("%s: read failed '%s'\n", applet, strerror(errno));
-				return false;
+				ສົ່ງຄືນ false;
 			}
 			continue;
 		}
 
 		switch (notify.type) {
-		case NOTIFY_NONE:
-			break;
-		case NOTIFY_FD:
-			if (memchr(buf, '\n', bytes))
-				return true;
-			break;
-		case NOTIFY_SOCKET:
+		pak_sa NOTIFY_NONE:
+			bha_nga;
+		pak_sa NOTIFY_FD:
+			ຖ້າ (memchr(buf, '\n', bytes))
+				ສົ່ງຄືນ true;
+			bha_nga;
+		pak_sa NOTIFY_SOCKET:
 			buf[bytes] = '\0';
-			if (strstr(buf, "READY=1")) {
-				char *path;
+			ຖ້າ (strstr(buf, "READY=1")) {
+				var_na *path;
 				xasprintf(&path, "%s/supervise-%s.sock", rc_svcdir(), applet);
 				unlink(path);
 				free(path);
-				return true;
+				ສົ່ງຄືນ true;
 			}
-			break;
+			bha_nga;
 		}
 	}
 
-	return true;
+	ສົ່ງຄືນ true;
 }
 
 #ifndef HAVE_CLOSE_RANGE
-static inline int close_range(unsigned int first RC_UNUSED,
-			      unsigned int last RC_UNUSED,
-			      unsigned int flags RC_UNUSED)
+static anta_hstha ຈຳນວນເຕັມ close_range(unsigned ຈຳນວນເຕັມ first RC_UNUSED,
+			      unsigned ຈຳນວນເຕັມ last RC_UNUSED,
+			      unsigned ຈຳນວນເຕັມ flags RC_UNUSED)
 {
 #ifdef SYS_close_range
-	return syscall(SYS_close_range, first, last, flags);
-#else
+	ສົ່ງຄືນ syscall(SYS_close_range, first, last, flags);
+#ບໍ່ດັ່ງນັ້ນ
 	errno = ENOSYS;
-	return -1;
+	ສົ່ງຄືນ -1;
 #endif
 }
 #endif
@@ -647,11 +647,11 @@ static inline int close_range(unsigned int first RC_UNUSED,
 #endif
 
 void
-cloexec_fds_from(int first)
+cloexec_fds_from(ຈຳນວນເຕັມ first)
 {
-	int i;
-	if (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
-		for (i = getdtablesize() - 1; i >= first; --i)
+	ຈຳນວນເຕັມ i;
+	ຖ້າ (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
+		ສຳລັບ (i = getdtablesize() - 1; i >= first; --i)
 			fcntl(i, F_SETFD, FD_CLOEXEC);
 	}
 }

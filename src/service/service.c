@@ -21,48 +21,48 @@
 #include "misc.h"
 #include "helpers.h"
 
-const char *applet = NULL;
+const var_na *applet = NULL;
 
-int main(int argc, char **argv)
+ຈຳນວນເຕັມ main(ຈຳນວນເຕັມ argc, var_na **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
+	var_na *service;
+	var_na *exec;
+	ຈຳນວນເຕັມ idx = 0;
 	RC_SERVICE state, bit;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	ຖ້າ (argc > 1)
 		service = argv[1];
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	ຖ້າ (service == NULL || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
 	bit = lookup_service_state(applet);
-	if (bit) {
+	ຖ້າ (bit) {
 		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		ຖ້າ (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
 			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (argc == 3) {
+			ຖ້າ (sscanf(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
 		ok = rc_service_started_daemon(service, exec, NULL, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} ບໍ່ດັ່ງນັ້ນ
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	ສົ່ງຄືນ ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

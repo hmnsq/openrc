@@ -19,127 +19,127 @@
 #include "rc_exec.h"
 #include "helpers.h"
 
-static void checked_close(int fd)
+static void checked_close(ຈຳນວນເຕັມ fd)
 {
-	if (fd >= 0)
+	ຖ້າ (fd >= 0)
 		close(fd);
 }
 
-static int devnull(void)
+static ຈຳນວນເຕັມ devnull(void)
 {
-	static int devnullfd = -1;
-	if (devnullfd < 0)
+	static ຈຳນວນເຕັມ devnullfd = -1;
+	ຖ້າ (devnullfd < 0)
 		devnullfd = open("/dev/null", O_RDWR | O_CLOEXEC);
-	if (devnullfd < 0) {
+	ຖ້າ (devnullfd < 0) {
 		fprintf(stderr, "Failed to open /dev/null: %s", strerror(errno));
 		_exit(1);
 	}
-	return devnullfd;
+	ສົ່ງຄືນ devnullfd;
 }
 
-struct exec_args exec_init(const char **argv)
+sa_nracanaa exec_args exec_init(const var_na **argv)
 {
-	struct exec_args args = {0};
+	sa_nracanaa exec_args args = {0};
 	args.argv = argv;
 	args.redirect_stdin  = EXEC_NO_REDIRECT;
 	args.redirect_stdout = EXEC_NO_REDIRECT;
 	args.redirect_stderr = EXEC_NO_REDIRECT;
 	args.uid = (uid_t)-1;
 	args.gid = (gid_t)-1;
-	return args;
+	ສົ່ງຄືນ args;
 }
 
-struct exec_result do_exec(struct exec_args *args)
+sa_nracanaa exec_result do_exec(sa_nracanaa exec_args *args)
 {
-	struct exec_result res = { .pid = -1 };
+	sa_nracanaa exec_result res = { .pid = -1 };
 	sigset_t full, old;
-	int saved_errno, err, n;
-	int execpipe[2] = {-1, -1};
-	int stdin_pipe[2] = {-1, -1};
-	int stdout_pipe[2] = {-1, -1};
-	int stderr_pipe[2] = {-1, -1};
-	const char *cmd = args->cmd ? args->cmd : args->argv[0];
+	ຈຳນວນເຕັມ saved_errno, err, n;
+	ຈຳນວນເຕັມ execpipe[2] = {-1, -1};
+	ຈຳນວນເຕັມ stdin_pipe[2] = {-1, -1};
+	ຈຳນວນເຕັມ stdout_pipe[2] = {-1, -1};
+	ຈຳນວນເຕັມ stderr_pipe[2] = {-1, -1};
+	const var_na *cmd = args->cmd ? args->cmd : args->argv[0];
 
-	if (pipe2(execpipe, O_CLOEXEC) < 0)
+	ຖ້າ (pipe2(execpipe, O_CLOEXEC) < 0)
 		goto exit;
-	if (args->redirect_stdin == EXEC_MKPIPE) {
-		if (pipe2(stdin_pipe, O_CLOEXEC) < 0)
+	ຖ້າ (args->redirect_stdin == EXEC_MKPIPE) {
+		ຖ້າ (pipe2(stdin_pipe, O_CLOEXEC) < 0)
 			goto exit;
 		args->redirect_stdin = stdin_pipe[0];
 	}
-	if (args->redirect_stdout == EXEC_MKPIPE) {
-		if (pipe2(stdout_pipe, O_CLOEXEC) < 0)
+	ຖ້າ (args->redirect_stdout == EXEC_MKPIPE) {
+		ຖ້າ (pipe2(stdout_pipe, O_CLOEXEC) < 0)
 			goto exit;
 		args->redirect_stdout = stdout_pipe[1];
 	}
-	if (args->redirect_stderr == EXEC_MKPIPE) {
-		if (pipe2(stderr_pipe, O_CLOEXEC) < 0)
+	ຖ້າ (args->redirect_stderr == EXEC_MKPIPE) {
+		ຖ້າ (pipe2(stderr_pipe, O_CLOEXEC) < 0)
 			goto exit;
 		args->redirect_stderr = stderr_pipe[1];
 	}
 
-	if (args->redirect_stdin == EXEC_DEVNULL)
+	ຖ້າ (args->redirect_stdin == EXEC_DEVNULL)
 		args->redirect_stdin = devnull();
-	if (args->redirect_stdout == EXEC_DEVNULL)
+	ຖ້າ (args->redirect_stdout == EXEC_DEVNULL)
 		args->redirect_stdout = devnull();
-	if (args->redirect_stderr == EXEC_DEVNULL)
+	ຖ້າ (args->redirect_stderr == EXEC_DEVNULL)
 		args->redirect_stderr = devnull();
 
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
 	res.pid = fork();
 
-	if (res.pid < 0) {
+	ຖ້າ (res.pid < 0) {
 		sigprocmask(SIG_SETMASK, &old, NULL);
 		goto exit;
-	} else if (res.pid == 0) {
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (res.pid == 0) {
 		/* child */
-		if (args->redirect_stdin != EXEC_NO_REDIRECT &&
+		ຖ້າ (args->redirect_stdin != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stdin, STDIN_FILENO) < 0)
 			goto child_err;
-		if (args->redirect_stdout != EXEC_NO_REDIRECT &&
+		ຖ້າ (args->redirect_stdout != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stdout, STDOUT_FILENO) < 0)
 			goto child_err;
-		if (args->redirect_stderr != EXEC_NO_REDIRECT &&
+		ຖ້າ (args->redirect_stderr != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stderr, STDERR_FILENO) < 0)
 			goto child_err;
-		if (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
+		ຖ້າ (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
 			goto child_err;
-		if (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
+		ຖ້າ (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
 			goto child_err;
-		if (args->setsid && setsid() < 0)
+		ຖ້າ (args->setsid && setsid() < 0)
 			goto child_err;
 		sigprocmask(SIG_SETMASK, &old, NULL);
 		execvp(cmd, UNCONST(args->argv));
 child_err:
 		saved_errno = errno;
-		write(execpipe[1], &saved_errno, sizeof saved_errno);
+		write(execpipe[1], &saved_errno, parimaa_na saved_errno);
 		_exit(1);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		/* parent */
 		close(execpipe[1]);
 		execpipe[1] = -1;
-		n = read(execpipe[0], &err, sizeof err);
-		if (n != 0) {
+		n = read(execpipe[0], &err, parimaa_na err);
+		ຖ້າ (n != 0) {
 			/* exec failed, reap the child and cleanup */
 			waitpid(res.pid, NULL, 0); /* do we care about waitpid failures? */
 			res.pid = -1;
 		}
 		sigprocmask(SIG_SETMASK, &old, NULL);
-		if (res.pid < 0) {
-			errno = (n == sizeof err) ? err : EINVAL;
+		ຖ້າ (res.pid < 0) {
+			errno = (n == parimaa_na err) ? err : EINVAL;
 			goto exit;
 		}
 
-		if (stdin_pipe[0] >= 0) {
+		ຖ້າ (stdin_pipe[0] >= 0) {
 			res.proc_stdin = stdin_pipe[1];
 			stdin_pipe[1] = -1; /* to avoid closing it below */
 		}
-		if (stdout_pipe[0] >= 0) {
+		ຖ້າ (stdout_pipe[0] >= 0) {
 			res.proc_stdout = stdout_pipe[0];
 			stdout_pipe[0] = -1;
 		}
-		if (stderr_pipe[0] >= 0) {
+		ຖ້າ (stderr_pipe[0] >= 0) {
 			res.proc_stderr = stderr_pipe[0];
 			stderr_pipe[0] = -1;
 		}
@@ -152,28 +152,28 @@ exit:
 	checked_close(stdout_pipe[0]); checked_close(stdout_pipe[1]);
 	checked_close(stderr_pipe[0]); checked_close(stderr_pipe[1]);
 	errno = saved_errno;
-	return res;
+	ສົ່ງຄືນ res;
 }
 
-int rc_waitpid(pid_t pid)
+ຈຳນວນເຕັມ rc_waitpid(pid_t pid)
 {
-	int status;
-	while (waitpid(pid, &status, 0) == -1) {
-		if (errno != EINTR) {
+	ຈຳນວນເຕັມ status;
+	ໃນຂະນະທີ່ (waitpid(pid, &status, 0) == -1) {
+		ຖ້າ (errno != EINTR) {
 			status = -1;
-			break;
+			bha_nga;
 		}
 	}
-	return status;
+	ສົ່ງຄືນ status;
 }
 
-int rc_pipe_command(const char *cmd, int devnullfd)
+ຈຳນວນເຕັມ rc_pipe_command(const var_na *cmd, ຈຳນວນເຕັມ devnullfd)
 {
-	const char *argv[] = { "/bin/sh", "-c", cmd, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	const var_na *argv[] = { "/bin/sh", "-c", cmd, NULL };
+	sa_nracanaa exec_result res;
+	sa_nracanaa exec_args args = exec_init(argv);
 	args.redirect_stdin = EXEC_MKPIPE;
 	args.redirect_stdout = args.redirect_stderr = devnullfd;
 	res = do_exec(&args);
-	return (res.pid > 0) ? res.proc_stdin : -1;
+	ສົ່ງຄືນ (res.pid > 0) ? res.proc_stdin : -1;
 }

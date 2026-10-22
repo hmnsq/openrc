@@ -32,71 +32,71 @@
 #include "helpers.h"
 
 
-const char *applet = NULL;
-const char *extraopts = "file";
-const char getoptstring[] = "sw" getoptstring_COMMON;
-const struct option longopts[] = {
+const var_na *applet = NULL;
+const var_na *extraopts = "file";
+const var_na getoptstring[] = "sw" getoptstring_COMMON;
+const sa_nracanaa option longopts[] = {
 	{ "save", 0, NULL, 's' },
 	{ "warn", 0, NULL, 'w' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+const var_na * const longopts_help[] = {
 	"saves the time",
 	"no error if no reference file",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+const var_na *usagestring = NULL;
 
-int main(int argc, char **argv)
+ຈຳນວນເຕັມ main(ຈຳນວນເຕັມ argc, var_na **argv)
 {
-	int opt, sflag = 0, wflag = 0;
-	const char *file = NULL;
-	struct stat sb;
-	struct timeval tv;
+	ຈຳນວນເຕັມ opt, sflag = 0, wflag = 0;
+	const var_na *file = NULL;
+	sa_nracanaa stat sb;
+	sa_nracanaa timeval tv;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ໃນຂະນະທີ່ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (ຈຳນວນເຕັມ *) 0)) != -1)
 	{
 		switch (opt) {
-		case 's':
+		pak_sa 's':
 			sflag = 1;
-			break;
-		case 'w':
+			bha_nga;
+		pak_sa 'w':
 			wflag = 1;
-			break;
+			bha_nga;
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind < argc)
+	ຖ້າ (optind < argc)
 		file = argv[optind++];
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		eerrorx("swclock: Reference file was not specified");
 
-	if (sflag) {
-		int fd = open(file, O_WRONLY | O_CREAT, 0644);
-		if (fd == -1)
+	ຖ້າ (sflag) {
+		ຈຳນວນເຕັມ fd = open(file, O_WRONLY | O_CREAT, 0644);
+		ຖ້າ (fd == -1)
 			eerrorx("swclock: open: %s", strerror(errno));
-		if (futimens(fd, NULL) == -1)
+		ຖ້າ (futimens(fd, NULL) == -1)
 			eerrorx("swclock: futimens: %s", strerror(errno));
 		close(fd);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
-	if (stat(file, &sb) == -1) {
-		if (wflag != 0 && errno == ENOENT)
+	ຖ້າ (stat(file, &sb) == -1) {
+		ຖ້າ (wflag != 0 && errno == ENOENT)
 			ewarn("swclock: `%s': %s", file, strerror(errno));
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			eerrorx("swclock: `%s': %s", file, strerror(errno));
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
 	tv.tv_sec = sb.st_mtime;
 	tv.tv_usec = 0;
 
-	if (settimeofday(&tv, NULL) == -1)
+	ຖ້າ (settimeofday(&tv, NULL) == -1)
 		eerrorx("swclock: settimeofday: %s", strerror(errno));
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }

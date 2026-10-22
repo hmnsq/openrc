@@ -38,15 +38,15 @@
 #include "schedules.h"
 #include "helpers.h"
 
-typedef struct scheduleitem {
-	enum {
+typedef sa_nracanaa scheduleitem {
+	ga_nanaa {
 		SC_TIMEOUT,
 		SC_SIGNAL,
 		SC_GOTO,
 		SC_FOREVER,
 	} type;
-	int value;
-	struct scheduleitem *gotoitem;
+	ຈຳນວນເຕັມ value;
+	sa_nracanaa scheduleitem *gotoitem;
 	TAILQ_ENTRY(scheduleitem) entries;
 } SCHEDULEITEM;
 
@@ -57,7 +57,7 @@ void free_schedulelist(void)
 	SCHEDULEITEM *s1 = TAILQ_FIRST(&schedule);
 	SCHEDULEITEM *s2;
 
-	while (s1) {
+	ໃນຂະນະທີ່ (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
 		free(s1);
 		s1 = s2;
@@ -65,12 +65,12 @@ void free_schedulelist(void)
 	TAILQ_INIT(&schedule);
 }
 
-int parse_signal(const char *applet, const char *sig)
+ຈຳນວນເຕັມ parse_signal(const var_na *applet, const var_na *sig)
 {
-	typedef struct signalpair
+	typedef sa_nracanaa signalpair
 	{
-		const char *name;
-		int signal;
+		const var_na *name;
+		ຈຳນວນເຕັມ sa_nkeeta;
 	} SIGNALPAIR;
 
 #define signalpair_item(name) { #name, SIG##name },
@@ -115,104 +115,104 @@ int parse_signal(const char *applet, const char *sig)
 		{ "NULL",	0 },
 	};
 
-	unsigned int i = 0;
-	const char *s;
+	unsigned ຈຳນວນເຕັມ i = 0;
+	const var_na *s;
 
-	if (!sig || *sig == '\0')
-		return -1;
+	ຖ້າ (!sig || *sig == '\0')
+		ສົ່ງຄືນ -1;
 
-	if (sscanf(sig, "%u", &i) == 1) {
-		if (i < NSIG)
-			return i;
+	ຖ້າ (sscanf(sig, "%u", &i) == 1) {
+		ຖ້າ (i < NSIG)
+			ສົ່ງຄືນ i;
 		eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	}
 
-	if (strncmp(sig, "SIG", 3) == 0)
+	ຖ້າ (strncmp(sig, "SIG", 3) == 0)
 		s = sig + 3;
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		s = NULL;
 
-	for (i = 0; i < ARRAY_SIZE(signallist); ++i)
-		if (strcmp(sig, signallist[i].name) == 0 ||
+	ສຳລັບ (i = 0; i < ARRAY_SIZE(signallist); ++i)
+		ຖ້າ (strcmp(sig, signallist[i].name) == 0 ||
 		    (s && strcmp(s, signallist[i].name) == 0))
-			return signallist[i].signal;
+			ສົ່ງຄືນ signallist[i].sa_nkeeta;
 
 	eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	/* NOTREACHED */
 }
 
-static SCHEDULEITEM *parse_schedule_item(const char *applet, const char *string)
+static SCHEDULEITEM *parse_schedule_item(const var_na *applet, const var_na *string)
 {
-	const char *after_hyph;
-	int sig;
-	SCHEDULEITEM *item = xmalloc(sizeof(*item));
+	const var_na *after_hyph;
+	ຈຳນວນເຕັມ sig;
+	SCHEDULEITEM *item = xmalloc(parimaa_na(*item));
 
 	item->value = 0;
 	item->gotoitem = NULL;
-	if (strcmp(string,"forever") == 0)
+	ຖ້າ (strcmp(string,"forever") == 0)
 		item->type = SC_FOREVER;
-	else if (isdigit((unsigned char)string[0])) {
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (isdigit((unsigned var_na)string[0])) {
 		item->type = SC_TIMEOUT;
 		errno = 0;
-		if (sscanf(string, "%d", &item->value) != 1)
+		ຖ້າ (sscanf(string, "%d", &item->value) != 1)
 			eerrorx("%s: invalid timeout value in schedule '%s'",
 			    applet, string);
-	} else if ((after_hyph = string + (string[0] == '-')) &&
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ ((after_hyph = string + (string[0] == '-')) &&
 	    ((sig = parse_signal(applet, after_hyph)) != -1))
 	{
 		item->type = SC_SIGNAL;
-		item->value = (int)sig;
-	} else
+		item->value = (ຈຳນວນເຕັມ)sig;
+	} ບໍ່ດັ່ງນັ້ນ
 		eerrorx("%s: invalid schedule item `%s'", applet, string);
 
-	return item;
+	ສົ່ງຄືນ item;
 }
 
-void parse_schedule(const char *applet, const char *string, int timeout)
+void parse_schedule(const var_na *applet, const var_na *string, ຈຳນວນເຕັມ timeout)
 {
-	char buffer[20];
-	const char *slash;
-	int count = 0;
+	var_na buffer[20];
+	const var_na *slash;
+	ຈຳນວນເຕັມ count = 0;
 	SCHEDULEITEM *repeatat = NULL;
 	size_t len;
 	SCHEDULEITEM *item;
 
 	TAILQ_INIT(&schedule);
-	if (string)
-		for (slash = string; *slash; slash++)
-			if (*slash == '/')
+	ຖ້າ (string)
+		ສຳລັບ (slash = string; *slash; slash++)
+			ຖ້າ (*slash == '/')
 				count++;
 
 	free_schedulelist();
 
-	if (count == 0) {
-		item = xmalloc(sizeof(*item));
+	ຖ້າ (count == 0) {
+		item = xmalloc(parimaa_na(*item));
 		item->type = SC_SIGNAL;
 		item->value = timeout;
 		item->gotoitem = NULL;
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
 
-		item = xmalloc(sizeof(*item));
+		item = xmalloc(parimaa_na(*item));
 		item->type = SC_TIMEOUT;
 		item->gotoitem = NULL;
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (string) {
-			if (sscanf(string, "%d", &item->value) != 1)
+		ຖ້າ (string) {
+			ຖ້າ (sscanf(string, "%d", &item->value) != 1)
 				eerrorx("%s: invalid timeout value in schedule '%s'",
 					applet, string);
-		} else
+		} ບໍ່ດັ່ງນັ້ນ
 			item->value = 5;
 
-		return;
+		ສົ່ງຄືນ;
 	}
 
-	while (string != NULL) {
-		if ((slash = strchr(string, '/')))
+	ໃນຂະນະທີ່ (string != NULL) {
+		ຖ້າ ((slash = strchr(string, '/')))
 			len = slash - string;
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			len = strlen(string);
 
-		if (len >= (ptrdiff_t)sizeof(buffer))
+		ຖ້າ (len >= (ptrdiff_t)parimaa_na(buffer))
 			eerrorx("%s: invalid schedule item, far too long",
 			    applet);
 
@@ -222,8 +222,8 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 
 		item = parse_schedule_item(applet, buffer);
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (item->type == SC_FOREVER) {
-			if (repeatat)
+		ຖ້າ (item->type == SC_FOREVER) {
+			ຖ້າ (repeatat)
 				eerrorx("%s: invalid schedule, `forever' "
 				    "appears more than once", applet);
 
@@ -232,67 +232,67 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 		}
 	}
 
-	if (repeatat) {
-		item = xmalloc(sizeof(*item));
+	ຖ້າ (repeatat) {
+		item = xmalloc(parimaa_na(*item));
 		item->type = SC_GOTO;
 		item->value = 0;
 		item->gotoitem = repeatat;
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
 	}
 
-	return;
+	ສົ່ງຄືນ;
 }
 
 /* return number of processes killed, -1 on error */
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-    pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet)
+ຈຳນວນເຕັມ do_stop(const var_na *applet, const var_na *exec, const var_na *const *argv,
+    pid_t pid, uid_t uid, ຈຳນວນເຕັມ sig, bool group, bool test, bool quiet)
 {
-	const char *kind = "PID";
+	const var_na *kind = "PID";
 	RC_PIDLIST *pids;
 	RC_PID *pi;
 	RC_PID *np;
 	bool killed;
-	int nkilled = 0;
+	ຈຳນວນເຕັມ nkilled = 0;
 	uid_t target;
-	if (group)
+	ຖ້າ (group)
 		kind = "GID";
 
-	if (pid > 0)
+	ຖ້າ (pid > 0)
 		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		pids = rc_find_pids(exec, argv, uid, 0);
 
-	if (!pids)
-		return 0;
+	ຖ້າ (!pids)
+		ສົ່ງຄືນ 0;
 
 	LIST_FOREACH_SAFE(pi, pids, entries, np) {
-		if (test) {
+		ຖ້າ (test) {
 			einfo("Would send signal %d to %s %d", sig, kind, pi->pid);
 			nkilled++;
-		} else {
-			if (sig) {
+		} ບໍ່ດັ່ງນັ້ນ {
+			ຖ້າ (sig) {
 				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, kind, pi->pid);
-				if (!quiet)
+				ຖ້າ (!quiet)
 					ebeginv("Sending signal %d to %s %d", sig, kind, pi->pid);
 			}
 			errno = 0;
-			if (group)
+			ຖ້າ (group)
 				target = -pi->pid;
-			else
+			ບໍ່ດັ່ງນັ້ນ
 				target = pi->pid;
 			killed = (kill(target, sig) == 0 ||
 			    errno == ESRCH ? true : false);
-			if (!quiet)
+			ຖ້າ (!quiet)
 				eendv(killed ? 0 : 1,
 				"%s: failed to send signal %d to %s %d: %s",
 				applet, sig, kind, pi->pid, strerror(errno));
-			else if (!killed)
+			ບໍ່ດັ່ງນັ້ນ ຖ້າ (!killed)
 				syslog(LOG_ERR, "Failed to send signal %d to %s %d: %s",
 						sig, kind, pi->pid, strerror(errno));
-			if (!killed) {
+			ຖ້າ (!killed) {
 				nkilled = -1;
-			} else {
-				if (nkilled != -1)
+			} ບໍ່ດັ່ງນັ້ນ {
+				ຖ້າ (nkilled != -1)
 					nkilled++;
 			}
 		}
@@ -300,48 +300,48 @@ int do_stop(const char *applet, const char *exec, const char *const *argv,
 	}
 
 	free(pids);
-	return nkilled;
+	ສົ່ງຄືນ nkilled;
 }
 
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+ຈຳນວນເຕັມ run_stop_schedule(const var_na *applet,
+		const var_na *exec, const var_na *const *argv,
 		pid_t pid, uid_t uid, bool group,
     bool test, bool progress, bool quiet)
 {
 	SCHEDULEITEM *item = TAILQ_FIRST(&schedule);
-	int nkilled = 0;
-	int tkilled = 0;
-	int nrunning = 0;
+	ຈຳນວນເຕັມ nkilled = 0;
+	ຈຳນວນເຕັມ tkilled = 0;
+	ຈຳນວນເຕັມ nrunning = 0;
 	long nloops, nsecs;
-	struct timespec ts;
-	const char *const *p;
+	sa_nracanaa timespec ts;
+	const var_na *const *p;
 	bool progressed = false;
 
-	if (!(pid > 0 || exec || uid || (argv && *argv)))
-		return 0;
+	ຖ້າ (!(pid > 0 || exec || uid || (argv && *argv)))
+		ສົ່ງຄືນ 0;
 
-	if (exec) {
+	ຖ້າ (exec) {
 		einfov("Will stop %s", exec);
 		syslog(LOG_DEBUG, "Will stop %s", exec);
 	}
-	if (pid > 0) {
-		if (!group) {
+	ຖ້າ (pid > 0) {
+		ຖ້າ (!group) {
 			einfov("Will stop PID %d", pid);
 			syslog(LOG_DEBUG, "Will stop PID %d", pid);
-		} else {
+		} ບໍ່ດັ່ງນັ້ນ {
 			einfov("Will stop GID %d", pid);
 			syslog(LOG_DEBUG, "Will stop GID %d", pid);
 		}
 	}
-	if (uid) {
+	ຖ້າ (uid) {
 		einfov("Will stop processes owned by UID %d", uid);
 		syslog(LOG_DEBUG, "Will stop processes owned by UID %d", uid);
 	}
-	if (argv && *argv) {
+	ຖ້າ (argv && *argv) {
 		einfovn("Will stop processes of `");
-		if (rc_yesno(getenv("EINFO_VERBOSE"))) {
-			for (p = argv; p && *p; p++) {
-				if (p != argv)
+		ຖ້າ (rc_yesno(getenv("EINFO_VERBOSE"))) {
+			ສຳລັບ (p = argv; p && *p; p++) {
+				ຖ້າ (p != argv)
 					printf(" ");
 				printf("%s", *p);
 			}
@@ -349,93 +349,93 @@ int run_stop_schedule(const char *applet,
 		}
 	}
 
-	while (item) {
+	ໃນຂະນະທີ່ (item) {
 		switch (item->type) {
-		case SC_GOTO:
+		pak_sa SC_GOTO:
 			item = item->gotoitem;
 			continue;
 
-		case SC_SIGNAL:
+		pak_sa SC_SIGNAL:
 			nrunning = 0;
 			nkilled = do_stop(applet, exec, argv, pid, uid, item->value, group,
 					test, quiet);
-			if (nkilled == 0) {
-				if (tkilled == 0) {
-					if (progressed)
+			ຖ້າ (nkilled == 0) {
+				ຖ້າ (tkilled == 0) {
+					ຖ້າ (progressed)
 						printf("\n");
 					eerror("%s: no matching processes found", applet);
 				}
-				return tkilled;
+				ສົ່ງຄືນ tkilled;
 			}
-			else if (nkilled == -1)
-				return 0;
+			ບໍ່ດັ່ງນັ້ນ ຖ້າ (nkilled == -1)
+				ສົ່ງຄືນ 0;
 
 			tkilled += nkilled;
-			break;
-		case SC_FOREVER:
-		case SC_TIMEOUT:
-			if (item->type == SC_TIMEOUT && item->value < 1) {
+			bha_nga;
+		pak_sa SC_FOREVER:
+		pak_sa SC_TIMEOUT:
+			ຖ້າ (item->type == SC_TIMEOUT && item->value < 1) {
 				item = NULL;
-				break;
+				bha_nga;
 			}
 
 			ts.tv_sec = 0;
 			ts.tv_nsec = POLL_INTERVAL;
 
-			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
-				for (nloops = 0;
+			ສຳລັບ (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
+				ສຳລັບ (nloops = 0;
 				     nloops < ONE_SECOND / POLL_INTERVAL;
 				     nloops++)
 				{
-					if ((nrunning = do_stop(applet, exec, argv,
+					ຖ້າ ((nrunning = do_stop(applet, exec, argv,
 						    pid, uid, 0, group, test, quiet)) == 0)
-						return 0;
+						ສົ່ງຄືນ 0;
 
 
-					if (nanosleep(&ts, NULL) == -1) {
-						if (progressed) {
+					ຖ້າ (nanosleep(&ts, NULL) == -1) {
+						ຖ້າ (progressed) {
 							printf("\n");
 							progressed = false;
 						}
-						if (errno != EINTR) {
+						ຖ້າ (errno != EINTR) {
 							eerror("%s: nanosleep: %s",
 							    applet, strerror(errno));
-							return 0;
+							ສົ່ງຄືນ 0;
 						}
 					}
 				}
-				if (progress) {
+				ຖ້າ (progress) {
 					printf(".");
 					fflush(stdout);
 					progressed = true;
 				}
 			}
-			break;
+			bha_nga;
 		default:
-			if (progressed) {
+			ຖ້າ (progressed) {
 				printf("\n");
 				progressed = false;
 			}
 			eerror("%s: invalid schedule item `%d'",
 			    applet, item->type);
-			return 0;
+			ສົ່ງຄືນ 0;
 		}
 
-		if (item)
+		ຖ້າ (item)
 			item = TAILQ_NEXT(item, entries);
 	}
 
-	if (test || (tkilled > 0 && nrunning == 0))
-		return nkilled;
+	ຖ້າ (test || (tkilled > 0 && nrunning == 0))
+		ສົ່ງຄືນ nkilled;
 
-	if (progressed)
+	ຖ້າ (progressed)
 		printf("\n");
-	if (!quiet) {
-		if (nrunning == 1)
+	ຖ້າ (!quiet) {
+		ຖ້າ (nrunning == 1)
 			eerror("%s: %d process refused to stop", applet, nrunning);
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			eerror("%s: %d process(es) refused to stop", applet, nrunning);
 	}
 
-	return -nrunning;
+	ສົ່ງຄືນ -nrunning;
 }

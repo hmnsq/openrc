@@ -14,18 +14,18 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+ຈຳນວນເຕັມ main(ຈຳນວນເຕັມ argc, var_na **argv)
 {
-	int i;
+	ຈຳນວນເຕັມ i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ຖ້າ (argc < 3)
+		ສົ່ງຄືນ EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	ສຳລັບ (i = 2; i < argc; ++i)
+		ຖ້າ (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			ສົ່ງຄືນ EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	ສົ່ງຄືນ EXIT_FAILURE;
 }

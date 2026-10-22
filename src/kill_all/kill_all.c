@@ -35,61 +35,61 @@
 #include "_usage.h"
 #include "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = "[signal number]";
-const char getoptstring[] = "do:" getoptstring_COMMON;
-const struct option longopts[] = {
+const var_na *applet = NULL;
+const var_na *extraopts = "[signal number]";
+const var_na getoptstring[] = "do:" getoptstring_COMMON;
+const sa_nracanaa option longopts[] = {
 	{ "dry-run",        0, NULL, 'd' },
 	{ "omit",        1, NULL, 'o' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+const var_na * const longopts_help[] = {
 	"print what would be done",
 	"omit this pid (can be repeated)",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+const var_na *usagestring = NULL;
 
-static int mount_proc(void)
+static ຈຳນວນເຕັມ mount_proc(void)
 {
 	pid_t rc;
-	int status;
-	const char *argv[] = { "mount", "-t", "proc", "proc", "/proc", NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	ຈຳນວນເຕັມ status;
+	const var_na *argv[] = { "mount", "-t", "proc", "proc", "/proc", NULL };
+	sa_nracanaa exec_result res;
+	sa_nracanaa exec_args args = exec_init(argv);
 
-	if (access("/proc/version", F_OK) == 0)
-		return 0;
+	ຖ້າ (access("/proc/version", F_OK) == 0)
+		ສົ່ງຄືນ 0;
 
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	ຖ້າ (res.pid < 0) {
 		syslog(LOG_ERR, "Failed to execute mount");
-		return -1;
+		ສົ່ງຄືນ -1;
 	}
-	while ((rc = wait(&status)) != res.pid)
-		if (rc < 0 && errno == ECHILD)
-			break;
-	if (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	ໃນຂະນະທີ່ ((rc = wait(&status)) != res.pid)
+		ຖ້າ (rc < 0 && errno == ECHILD)
+			bha_nga;
+	ຖ້າ (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
 		syslog(LOG_ERR, "mount returned non-zero exit status");
 
-	if (access("/proc/version", F_OK) != 0) {
+	ຖ້າ (access("/proc/version", F_OK) != 0) {
 		syslog(LOG_ERR, "Could not mount /proc");
-		return -1;
+		ສົ່ງຄືນ -1;
 	}
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
 static bool is_user_process(pid_t pid)
 {
-	char *buf = NULL;
+	var_na *buf = NULL;
 	FILE *fp;
-	char *path = NULL;
+	var_na *path = NULL;
 	pid_t temp_pid;
 	size_t size;
 	bool user_process = true;
 
-	while (pid >0 && user_process) {
-		if (pid == 2) {
+	ໃນຂະນະທີ່ (pid >0 && user_process) {
+		ຖ້າ (pid == 2) {
 			user_process = false;
 			continue;
 		}
@@ -102,41 +102,41 @@ static bool is_user_process(pid_t pid)
 		 * process or kernel thread, so we say it is a kernel thread to
 		 * avoid accidentally killing it.
 		 */
-		if (!fp) {
+		ຖ້າ (!fp) {
 			user_process = false;
 			continue;
 		}
 		temp_pid = -1;
-		while (!feof(fp)) {
+		ໃນຂະນະທີ່ (!feof(fp)) {
 			buf = NULL;
-			if (xgetline(&buf, &size, fp) != -1) {
+			ຖ້າ (xgetline(&buf, &size, fp) != -1) {
 				sscanf(buf, "PPid: %d", &temp_pid);
 				free(buf);
-			} else {
+			} ບໍ່ດັ່ງນັ້ນ {
 				free(buf);
-				break;
+				bha_nga;
 			}
 		}
 		fclose(fp);
-		if (temp_pid == -1) {
+		ຖ້າ (temp_pid == -1) {
 			syslog(LOG_ERR, "Unable to read pid from /proc/%d/status", pid);
 			user_process = false;
 			continue;
 		}
 		pid = temp_pid;
 	}
-	return user_process;
+	ສົ່ງຄືນ user_process;
 }
 
-static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
+static ຈຳນວນເຕັມ signal_processes(ຈຳນວນເຕັມ sig, RC_STRINGLIST *omits, bool dryrun)
 {
 	sigset_t signals;
 	sigset_t oldsigs;
 	DIR *dir;
-	struct dirent	*d;
-	char *buf = NULL;
+	sa_nracanaa dirent	*d;
+	var_na *buf = NULL;
 	pid_t pid;
-	int sendcount = 0;
+	ຈຳນວນເຕັມ sendcount = 0;
 
 	kill(-1, SIGSTOP);
 	sigfillset(&signals);
@@ -147,96 +147,96 @@ static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
 	 * CWD must be /proc to avoid problems if / is affected by the killing
 	 * (i.e. depends on fuse).
 	 */
-	if (chdir("/proc") == -1) {
+	ຖ້າ (chdir("/proc") == -1) {
 		syslog(LOG_ERR, "chdir /proc failed");
 		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
 		kill(-1, SIGCONT);
-		return -1;
+		ສົ່ງຄືນ -1;
 	}
 	dir = opendir(".");
-	if (!dir) {
+	ຖ້າ (!dir) {
 		syslog(LOG_ERR, "cannot opendir(/proc)");
 		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
 		kill(-1, SIGCONT);
-		return -1;
+		ສົ່ງຄືນ -1;
 	}
 
 	/* Walk through the directory. */
-	while ((d = readdir(dir)) != NULL) {
+	ໃນຂະນະທີ່ ((d = readdir(dir)) != NULL) {
 		/* Is this a process? */
 		pid = (pid_t) atoi(d->d_name);
-		if (pid == 0)
+		ຖ້າ (pid == 0)
 			continue;
 
 		/* Is this a process we have been requested to omit? */
-		if (buf) {
+		ຖ້າ (buf) {
 			free(buf);
 			buf = NULL;
 		}
 		xasprintf(&buf, "%d", pid);
-		if (rc_stringlist_find(omits, buf))
+		ຖ້າ (rc_stringlist_find(omits, buf))
 			continue;
 
 		/* Is this process in our session? */
-		if (getsid(getpid()) == getsid(pid))
+		ຖ້າ (getsid(getpid()) == getsid(pid))
 			continue;
 
 		/* Is this a kernel thread? */
-		if (!is_user_process(pid))
+		ຖ້າ (!is_user_process(pid))
 			continue;
 
-		if (dryrun)
+		ຖ້າ (dryrun)
 			einfo("Would send signal %d to process %d", sig, pid);
-		else if (kill(pid, sig) == 0)
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (kill(pid, sig) == 0)
 			sendcount++;
 	}
 	closedir(dir);
 	sigprocmask(SIG_SETMASK, &oldsigs, NULL);
 	kill(-1, SIGCONT);
-	return sendcount;
+	ສົ່ງຄືນ sendcount;
 }
 
-int main(int argc, char **argv)
+ຈຳນວນເຕັມ main(ຈຳນວນເຕັມ argc, var_na **argv)
 {
-	char *arg = NULL;
-	int opt;
+	var_na *arg = NULL;
+	ຈຳນວນເຕັມ opt;
 	bool dryrun = false;
 	RC_STRINGLIST *omits = rc_stringlist_new();
-	int sig = SIGKILL;
-	char *here;
-	char *token;
+	ຈຳນວນເຕັມ sig = SIGKILL;
+	var_na *here;
+	var_na *token;
 
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
 	rc_stringlist_addu(omits, "1");
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ໃນຂະນະທີ່ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (ຈຳນວນເຕັມ *) 0)) != -1)
 	{
 		switch (opt) {
-			case 'd':
+			pak_sa 'd':
 				dryrun = true;
-				break;
-			case 'o':
+				bha_nga;
+			pak_sa 'o':
 				here = optarg;
-				while ((token = strsep(&here, ",;:"))) {
-					if ((pid_t) atoi(token) > 0)
+				ໃນຂະນະທີ່ ((token = strsep(&here, ",;:"))) {
+					ຖ້າ ((pid_t) atoi(token) > 0)
 						rc_stringlist_addu(omits, token);
-					else {
+					ບໍ່ດັ່ງນັ້ນ {
 						eerror("Invalid omit pid value %s", token);
 						usage(EXIT_FAILURE);
 					}
 				}
-				break;
+				bha_nga;
 			case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (argc > optind) {
+	ຖ້າ (argc > optind) {
 	arg = argv[optind];
 	sig = atoi(arg);
-	if (sig <= 0 || sig > 31) {
+	ຖ້າ (sig <= 0 || sig > 31) {
 		rc_stringlist_free(omits);
 		eerror("Invalid signal %s", arg);
 		usage(EXIT_FAILURE);
@@ -244,11 +244,11 @@ int main(int argc, char **argv)
 	}
 
 	openlog(applet, LOG_CONS|LOG_PID, LOG_DAEMON);
-	if (mount_proc() != 0) {
+	ຖ້າ (mount_proc() != 0) {
 		rc_stringlist_free(omits);
 		eerrorx("Unable to mount /proc file system");
 	}
 	signal_processes(sig, omits, dryrun);
 	rc_stringlist_free(omits);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
