@@ -30,10 +30,10 @@
 #include "_usage.h"
 #include "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "aot:suTF:" getoptstring_COMMON;
-const struct option longopts[] = {
+const var_na *applet = NULL;
+const var_na *extraopts = NULL;
+const var_na getoptstring[] = "aot:suTF:" getoptstring_COMMON;
+const sa_nracanaa option longopts[] = {
 	{ "starting", 0, NULL, 'a'},
 	{ "stopping", 0, NULL, 'o'},
 	{ "type",     1, NULL, 't'},
@@ -43,7 +43,7 @@ const struct option longopts[] = {
 	{ "deptree-file", 1, NULL, 'F'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+const var_na * const longopts_help[] = {
 	"Order services as if runlevel is starting",
 	"Order services as if runlevel is stopping",
 	"Type(s) of dependency to list",
@@ -53,9 +53,9 @@ const char * const longopts_help[] = {
 	"File to load cached deptree from",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+const var_na *usagestring = NULL;
 
-int main(int argc, char **argv)
+පූර්ණ_සංඛ්‍යා main(පූර්ණ_සංඛ්‍යා argc, var_na **argv)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *types;
@@ -63,85 +63,85 @@ int main(int argc, char **argv)
 	RC_STRINGLIST *depends;
 	RC_STRING *s;
 	RC_DEPTREE *deptree = NULL;
-	int options = RC_DEP_TRACE, update = 0;
+	පූර්ණ_සංඛ්‍යා options = RC_DEP_TRACE, update = 0;
 	bool first = true;
-	char *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
-	int opt;
-	char *token;
-	char *deptree_file = NULL;
+	var_na *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
+	පූර්ණ_සංඛ්‍යා opt;
+	var_na *token;
+	var_na *deptree_file = NULL;
 
 	applet = basename_c(argv[0]);
 	types = rc_stringlist_new();
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	අතරතුර ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (පූර්ණ_සංඛ්‍යා *) 0)) != -1)
 	{
 		switch (opt) {
-		case 'a':
+		pak_sa 'a':
 			options |= RC_DEP_START;
-			break;
-		case 'o':
+			bha_nga;
+		pak_sa 'o':
 			options |= RC_DEP_STOP;
-			break;
-		case 's':
+			bha_nga;
+		pak_sa 's':
 			options |= RC_DEP_STRICT;
-			break;
-		case 't':
-			while ((token = strsep(&optarg, ",")))
+			bha_nga;
+		pak_sa 't':
+			අතරතුර ((token = strsep(&optarg, ",")))
 				rc_stringlist_add(types, token);
-			break;
-		case 'u':
+			bha_nga;
+		pak_sa 'u':
 			update = 1;
-			break;
-		case 'T':
+			bha_nga;
+		pak_sa 'T':
 			options &= RC_DEP_TRACE;
-			break;
-		case 'F':
+			bha_nga;
+		pak_sa 'F':
 			deptree_file = xstrdup(optarg);
-			break;
+			bha_nga;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (deptree_file) {
-		if (!(deptree = rc_deptree_load_file(deptree_file)))
+	නම් (deptree_file) {
+		නම් (!(deptree = rc_deptree_load_file(deptree_file)))
 			eerrorx("failed to load deptree");
-	} else {
-		if (!(deptree = _rc_deptree_load(update, NULL)))
+	} නැතහොත් {
+		නම් (!(deptree = _rc_deptree_load(update, NULL)))
 			eerrorx("failed to load deptree");
 	}
 
-	if (!runlevel)
+	නම් (!runlevel)
 		runlevel = default_runlevel();
 
 	services = rc_stringlist_new();
-	while (optind < argc) {
+	අතරතුර (optind < argc) {
 		list = rc_stringlist_new();
 		rc_stringlist_add(list, argv[optind]);
 		errno = 0;
 		depends = rc_deptree_depends(deptree, NULL, list, runlevel, 0);
-		if (!depends && errno == ENOENT)
+		නම් (!depends && errno == ENOENT)
 			eerror("no dependency info for service `%s'",
 			    argv[optind]);
-		else
+		නැතහොත්
 			rc_stringlist_add(services, argv[optind]);
 
 		rc_stringlist_free(depends);
 		rc_stringlist_free(list);
 		optind++;
 	}
-	if (!TAILQ_FIRST(services)) {
+	නම් (!TAILQ_FIRST(services)) {
 		rc_stringlist_free(services);
 		rc_stringlist_free(types);
 		rc_deptree_free(deptree);
 		free(runlevel);
-		if (update)
-			return EXIT_SUCCESS;
+		නම් (update)
+			ආපසු EXIT_SUCCESS;
 		eerrorx("no services specified");
 	}
 
 	/* If we don't have any types, then supply some defaults */
-	if (!TAILQ_FIRST(types)) {
+	නම් (!TAILQ_FIRST(types)) {
 		rc_stringlist_add(types, "ineed");
 		rc_stringlist_add(types, "iuse");
 	}
@@ -149,11 +149,11 @@ int main(int argc, char **argv)
 	depends = rc_deptree_depends(deptree, types, services,
 	    runlevel, options);
 
-	if (TAILQ_FIRST(depends)) {
+	නම් (TAILQ_FIRST(depends)) {
 		TAILQ_FOREACH(s, depends, entries) {
-			if (first)
+			නම් (first)
 				first = false;
-			else
+			නැතහොත්
 				printf (" ");
 			printf ("%s", s->value);
 
@@ -166,5 +166,5 @@ int main(int argc, char **argv)
 	rc_stringlist_free(depends);
 	rc_deptree_free(deptree);
 	free(runlevel);
-	return EXIT_SUCCESS;
+	ආපසු EXIT_SUCCESS;
 }

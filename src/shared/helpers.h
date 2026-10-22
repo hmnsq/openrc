@@ -31,7 +31,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } අතරතුර (0)
 
 #define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
 
@@ -39,7 +39,7 @@
 #define RC_NORETURN __attribute__((__noreturn__))
 #define RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define ARRAY_SIZE(a) (parimaa_na(a) / parimaa_na((a)[0]))
 
 #ifndef HAVE_STRLCPY
 #    define strlcpy(dst, src, size) snprintf(dst, size, "%s", src)
@@ -50,19 +50,19 @@
 	do {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		නම් ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
+	} අතරතුර (/* CONSTCOND */ 0)
 #endif
 
 RC_UNUSED static void *xmalloc (size_t size)
 {
 	void *value = malloc(size);
 
-	if (value)
-		return (value);
+	නම් (value)
+		ආපසු (value);
 
 	ERRX;
 	/* NOTREACHED */
@@ -72,41 +72,41 @@ RC_UNUSED static void *xrealloc(void *ptr, size_t size)
 {
 	void *value = realloc(ptr, size);
 
-	if (value)
-		return (value);
+	නම් (value)
+		ආපසු (value);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static char *xstrdup(const char *str)
+RC_UNUSED static var_na *xstrdup(const var_na *str)
 {
-	char *value;
+	var_na *value;
 
-	if (!str)
-		return (NULL);
+	නම් (!str)
+		ආපසු (NULL);
 
 	value = strdup(str);
 
-	if (value)
-		return (value);
+	නම් (value)
+		ආපසු (value);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
+RC_UNUSED static FILE *xopen_memstream(var_na **ptr, size_t *sizeloc)
 {
 	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	නම් (f)
+		ආපසු f;
 	ERRX;
 }
 
 RC_UNUSED static void xclose_memstream(FILE *f)
 {
 	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	නම් (ferror(f) || fclose(f) != 0)
 		ERRX;
 }
 
@@ -116,23 +116,23 @@ RC_UNUSED static void xclose_memstream(FILE *f)
  * basename_c never modifies the argument. As such, if there is a trailing
  * slash then an empty string is returned.
  */
-RC_UNUSED static const char *basename_c(const char *path)
+RC_UNUSED static const var_na *basename_c(const var_na *path)
 {
-	const char *slash = strrchr(path, '/');
+	const var_na *slash = strrchr(path, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	නම් (slash)
+		ආපසු (++slash);
+	ආපසු (path);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_UNUSED static FILE *do_fopenat(පූර්ණ_සංඛ්‍යා dirfd, const var_na *pathname, පූර්ණ_සංඛ්‍යා mode)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
-	const char *fmode;
+	පූර්ණ_සංඛ්‍යා fd = openat(dirfd, pathname, mode, 0666);
+	const var_na *fmode;
 	FILE *fp;
 
-	if (fd == -1)
-		return NULL;
+	නම් (fd == -1)
+		ආපසු NULL;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	නම් ((mode & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	නැතහොත් නම් ((mode & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	නැතහොත්
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
+	නම් (!(fp = fdopen(fd, fmode)))
 		close(fd);
-	return fp;
+	ආපසු fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_UNUSED static DIR *do_opendirat(පූර්ණ_සංඛ්‍යා dirfd, const var_na *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	පූර්ණ_සංඛ්‍යා fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	නම් (fd == -1)
+		ආපසු NULL;
 
-	if (!(dp = fdopendir(fd)))
+	නම් (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	ආපසු dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_UNUSED static DIR *do_dopendir(පූර්ණ_සංඛ්‍යා dirfd)
 {
-	int fd = dup(dirfd);
+	පූර්ණ_සංඛ්‍යා fd = dup(dirfd);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	නම් (fd == -1)
+		ආපසු NULL;
 
-	if (!(dp = fdopendir(fd)))
+	නම් (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	ආපසු dp;
 }
 
 /*
@@ -188,12 +188,12 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_UNUSED RC_PRINTF(2,3) static පූර්ණ_සංඛ්‍යා xasprintf(var_na **strp, const var_na *fmt, ...)
 {
 	va_list ap;
-	int len;
-	int memlen;
-	char *ret;
+	පූර්ණ_සංඛ්‍යා len;
+	පූර්ණ_සංඛ්‍යා memlen;
+	var_na *ret;
 
 	/*
 	 * Start with a buffer size that should cover the vast majority of uses
@@ -205,7 +205,7 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
 	va_end(ap);
-	if (len >= memlen) {
+	නම් (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
@@ -215,86 +215,86 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 		len = vsnprintf(ret, len + 1, fmt, ap);
 		va_end(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	නම් (len < 0 || len >= memlen) {
 		/* Give up! */
 		fprintf(stderr, "xasprintf: unable to format a buffer\n");
 		free(ret);
 		exit(1);
 	}
 	*strp = ret;
-	return len;
+	ආපසු len;
 }
 
-RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
+RC_UNUSED static ssize_t xgetline(var_na **restrict lineptr, size_t *restrict n, FILE *restrict stream)
 {
 	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	නම් (ret <= 0)
+		ආපසු ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	නම් ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	ආපසු ret;
 }
 
-RC_UNUSED static char *env_findvar(const char *name, char **envp)
+RC_UNUSED static var_na *env_findvar(const var_na *name, var_na **envp)
 {
 	size_t len = strlen(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	සඳහා (var_na **var = envp; *var; var++)
+		නම් (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
+			ආපසු *var;
+	ආපසු NULL;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_UNUSED static පූර්ණ_සංඛ්‍යා xopen_nonblock(const var_na *filename, පූර්ණ_සංඛ්‍යා flags, mode_t mode)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
+	පූර්ණ_සංඛ්‍යා fd = open(filename, flags | O_NONBLOCK, mode);
+	නම් (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		පූර්ණ_සංඛ්‍යා saved_errno = errno;
 		close(fd);
 		fd = -1;
 		errno = saved_errno;
 	}
-	return fd;
+	ආපසු fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_UNUSED static පූර්ණ_සංඛ්‍යා open_rwfifo(const var_na *path, bool nonblock)
 {
-	int r, w, err;
+	පූර්ණ_සංඛ්‍යා r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	නම් (mkfifo(path, 0600) == -1 && errno != EEXIST)
+		ආපසු -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	නම් ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		ආපසු -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+	නම් ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		err = errno;
 		goto r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+	නම් (!nonblock) {
+		පූර්ණ_සංඛ්‍යා flags = fcntl(r, F_GETFL);
+		නම් (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
 			err = errno;
 			goto w_err;
 		}
 	}
 
-	return r;
+	ආපසු r;
 
 w_err:
 	close(w);
 r_err:
 	close(r);
 	errno = err;
-	return -1;
+	ආපසු -1;
 }
 
 #endif

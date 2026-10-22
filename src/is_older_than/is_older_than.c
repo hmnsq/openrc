@@ -14,18 +14,18 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+පූර්ණ_සංඛ්‍යා main(පූර්ණ_සංඛ්‍යා argc, var_na **argv)
 {
-	int i;
+	පූර්ණ_සංඛ්‍යා i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	නම් (argc < 3)
+		ආපසු EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	සඳහා (i = 2; i < argc; ++i)
+		නම් (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			ආපසු EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	ආපසු EXIT_FAILURE;
 }

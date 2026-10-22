@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+පූර්ණ_සංඛ්‍යා main(පූර්ණ_සංඛ්‍යා argc, var_na **argv)
 {
-	int i;
-	char *p;
-	int c;
+	පූර්ණ_සංඛ්‍යා i;
+	var_na *p;
+	පූර්ණ_සංඛ්‍යා c;
 
-	for (i = 1; i < argc; i++) {
+	සඳහා (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		නම් (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		අතරතුර (*p) {
+			c = (unsigned var_na)*p++;
+			නම් (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	ආපසු EXIT_SUCCESS;
 }
