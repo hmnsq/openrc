@@ -31,8 +31,8 @@
  *	@(#)queue.h	8.5 (Berkeley) 8/20/94
  */
 
-#ifndef	_SYS_QUEUE_H_
-#define	_SYS_QUEUE_H_
+#که_نه_تعریف_شوی	SYS_کتار_H
+#تعریف_کړه	SYS_کتار_H
 
 /*
  * This file defines five types of data structures: singly-linked lists,
@@ -87,576 +87,576 @@
  * The caveat is that on other systems some other header
  * must provide NULL before the macros can be used.
  */
-#ifdef __NetBSD__
-#include <sys/null.h>
-#endif
+#که_تعریف_شوی __NetBSD__
+#ضمن <sys/null.h>
+#د_که_پای
 
-#if defined(QUEUEDEBUG)
-# if defined(_KERNEL)
+#إذا defined(QUEUEDEBUG)
+# إذا defined(_KERNEL)
 #  define QUEUEDEBUG_ABORT(...) panic(__VA_ARGS__)
-# else
+# وإلا
 #  include <err.h>
 #  define QUEUEDEBUG_ABORT(...) err(1, __VA_ARGS__)
 # endif
-#endif
+#د_که_پای
 
 /*
  * Singly-linked List definitions.
  */
-#define	SLIST_HEAD(name, type)						\
-struct name {								\
-	struct type *slh_first;	/* first element */			\
+#تعریف_کړه	SLIST_سر(name, type)						\
+بنية name {								\
+	بنية type *slh_لومړی;	/* first element */			\
 }
 
-#define	SLIST_HEAD_INITIALIZER(head)					\
-	{ NULL }
+#تعریف_کړه	SLIST_سر_INITIALIZER(سر_2)					\
+	{ عدم }
 
-#define	SLIST_ENTRY(type)						\
-struct {								\
-	struct type *sle_next;	/* next element */			\
+#تعریف_کړه	SLIST_ثبت(type)						\
+بنية {								\
+	بنية type *sle_بل;	/* next element */			\
 }
 
 /*
  * Singly-linked List access methods.
  */
-#define	SLIST_FIRST(head)	((head)->slh_first)
-#define	SLIST_END(head)		NULL
-#define	SLIST_EMPTY(head)	((head)->slh_first == NULL)
-#define	SLIST_NEXT(elm, field)	((elm)->field.sle_next)
+#تعریف_کړه	SLIST_لومړی(سر_2)	((سر_2)->slh_لومړی)
+#تعریف_کړه	SLIST_پای_ټکی(سر_2)		عدم
+#تعریف_کړه	SLIST_تشه(سر_2)	((سر_2)->slh_لومړی == عدم)
+#تعریف_کړه	SLIST_بل(elm, ډګر)	((elm)->ډګر.sle_بل)
 
-#define	SLIST_FOREACH(var, head, field)					\
-	for((var) = (head)->slh_first;					\
-	    (var) != SLIST_END(head);					\
-	    (var) = (var)->field.sle_next)
+#تعریف_کړه	SLIST_FOREACH(var, سر_2, ډګر)					\
+	لكل((var) = (سر_2)->slh_لومړی;					\
+	    (var) != SLIST_پای_ټکی(سر_2);					\
+	    (var) = (var)->ډګر.sle_بل)
 
-#define	SLIST_FOREACH_SAFE(var, head, field, tvar)			\
-	for ((var) = SLIST_FIRST((head));				\
-	    (var) != SLIST_END(head) &&					\
-	    ((tvar) = SLIST_NEXT((var), field), 1);			\
+#تعریف_کړه	SLIST_FOREACH_خوندي(var, سر_2, ډګر, tvar)			\
+	لكل ((var) = SLIST_لومړی((سر_2));				\
+	    (var) != SLIST_پای_ټکی(سر_2) &&					\
+	    ((tvar) = SLIST_بل((var), ډګر), 1);			\
 	    (var) = (tvar))
 
 /*
  * Singly-linked List functions.
  */
-#define	SLIST_INIT(head) do {						\
-	(head)->slh_first = SLIST_END(head);				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SLIST_INIT(سر_2) افعل {						\
+	(سر_2)->slh_لومړی = SLIST_پای_ټکی(سر_2);				\
+} طالما (/*CONSTCOND*/0)
 
-#define	SLIST_INSERT_AFTER(slistelm, elm, field) do {			\
-	(elm)->field.sle_next = (slistelm)->field.sle_next;		\
-	(slistelm)->field.sle_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SLIST_ورننباسه_AFTER(slistelm, elm, ډګر) افعل {			\
+	(elm)->ډګر.sle_بل = (slistelm)->ډګر.sle_بل;		\
+	(slistelm)->ډګر.sle_بل = (elm);				\
+} طالما (/*CONSTCOND*/0)
 
-#define	SLIST_INSERT_HEAD(head, elm, field) do {			\
-	(elm)->field.sle_next = (head)->slh_first;			\
-	(head)->slh_first = (elm);					\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SLIST_ورننباسه_سر(سر_2, elm, ډګر) افعل {			\
+	(elm)->ډګر.sle_بل = (سر_2)->slh_لومړی;			\
+	(سر_2)->slh_لومړی = (elm);					\
+} طالما (/*CONSTCOND*/0)
 
-#define	SLIST_REMOVE_AFTER(slistelm, field) do {			\
-	(slistelm)->field.sle_next =					\
-	    SLIST_NEXT(SLIST_NEXT((slistelm), field), field);		\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SLIST_REMOVE_AFTER(slistelm, ډګر) افعل {			\
+	(slistelm)->ډګر.sle_بل =					\
+	    SLIST_بل(SLIST_بل((slistelm), ډګر), ډګر);		\
+} طالما (/*CONSTCOND*/0)
 
-#define	SLIST_REMOVE_HEAD(head, field) do {				\
-	(head)->slh_first = (head)->slh_first->field.sle_next;		\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SLIST_REMOVE_سر(سر_2, ډګر) افعل {				\
+	(سر_2)->slh_لومړی = (سر_2)->slh_لومړی->ډګر.sle_بل;		\
+} طالما (/*CONSTCOND*/0)
 
-#define	SLIST_REMOVE(head, elm, type, field) do {			\
-	if ((head)->slh_first == (elm)) {				\
-		SLIST_REMOVE_HEAD((head), field);			\
+#تعریف_کړه	SLIST_REMOVE(سر_2, elm, type, ډګر) افعل {			\
+	إذا ((سر_2)->slh_لومړی == (elm)) {				\
+		SLIST_REMOVE_سر((سر_2), ډګر);			\
 	}								\
-	else {								\
-		struct type *curelm = (head)->slh_first;		\
-		while(curelm->field.sle_next != (elm))			\
-			curelm = curelm->field.sle_next;		\
-		curelm->field.sle_next =				\
-		    curelm->field.sle_next->field.sle_next;		\
+	وإلا {								\
+		بنية type *curelm = (سر_2)->slh_لومړی;		\
+		طالما(curelm->ډګر.sle_بل != (elm))			\
+			curelm = curelm->ډګر.sle_بل;		\
+		curelm->ډګر.sle_بل =				\
+		    curelm->ډګر.sle_بل->ډګر.sle_بل;		\
 	}								\
-} while (/*CONSTCOND*/0)
+} طالما (/*CONSTCOND*/0)
 
 
 /*
  * List definitions.
  */
-#define	LIST_HEAD(name, type)						\
-struct name {								\
-	struct type *lh_first;	/* first element */			\
+#تعریف_کړه	LIST_سر(name, type)						\
+بنية name {								\
+	بنية type *lh_لومړی;	/* first element */			\
 }
 
-#define	LIST_HEAD_INITIALIZER(head)					\
-	{ NULL }
+#تعریف_کړه	LIST_سر_INITIALIZER(سر_2)					\
+	{ عدم }
 
-#define	LIST_ENTRY(type)						\
-struct {								\
-	struct type *le_next;	/* next element */			\
-	struct type **le_prev;	/* address of previous next element */	\
+#تعریف_کړه	LIST_ثبت(type)						\
+بنية {								\
+	بنية type *le_بل;	/* next element */			\
+	بنية type **le_prev;	/* address of previous next element */	\
 }
 
 /*
  * List access methods.
  */
-#define	LIST_FIRST(head)		((head)->lh_first)
-#define	LIST_END(head)			NULL
-#define	LIST_EMPTY(head)		((head)->lh_first == LIST_END(head))
-#define	LIST_NEXT(elm, field)		((elm)->field.le_next)
+#تعریف_کړه	LIST_لومړی(سر_2)		((سر_2)->lh_لومړی)
+#تعریف_کړه	LIST_پای_ټکی(سر_2)			عدم
+#تعریف_کړه	LIST_تشه(سر_2)		((سر_2)->lh_لومړی == LIST_پای_ټکی(سر_2))
+#تعریف_کړه	LIST_بل(elm, ډګر)		((elm)->ډګر.le_بل)
 
-#define	LIST_FOREACH(var, head, field)					\
-	for ((var) = ((head)->lh_first);				\
-	    (var) != LIST_END(head);					\
-	    (var) = ((var)->field.le_next))
+#تعریف_کړه	LIST_FOREACH(var, سر_2, ډګر)					\
+	لكل ((var) = ((سر_2)->lh_لومړی);				\
+	    (var) != LIST_پای_ټکی(سر_2);					\
+	    (var) = ((var)->ډګر.le_بل))
 
-#define	LIST_FOREACH_SAFE(var, head, field, tvar)			\
-	for ((var) = LIST_FIRST((head));				\
-	    (var) != LIST_END(head) &&					\
-	    ((tvar) = LIST_NEXT((var), field), 1);			\
+#تعریف_کړه	LIST_FOREACH_خوندي(var, سر_2, ډګر, tvar)			\
+	لكل ((var) = LIST_لومړی((سر_2));				\
+	    (var) != LIST_پای_ټکی(سر_2) &&					\
+	    ((tvar) = LIST_بل((var), ډګر), 1);			\
 	    (var) = (tvar))
 
-#define	LIST_MOVE(head1, head2) do {					\
+#تعریف_کړه	LIST_MOVE(head1, head2) افعل {					\
 	LIST_INIT((head2));						\
-	if (!LIST_EMPTY((head1))) {					\
-		(head2)->lh_first = (head1)->lh_first;			\
+	إذا (!LIST_تشه((head1))) {					\
+		(head2)->lh_لومړی = (head1)->lh_لومړی;			\
 		LIST_INIT((head1));					\
 	}								\
-} while (/*CONSTCOND*/0)
+} طالما (/*CONSTCOND*/0)
 
 /*
  * List functions.
  */
-#if defined(QUEUEDEBUG)
-#define	QUEUEDEBUG_LIST_INSERT_HEAD(head, elm, field)			\
-	if ((head)->lh_first &&						\
-	    (head)->lh_first->field.le_prev != &(head)->lh_first)	\
-		QUEUEDEBUG_ABORT("LIST_INSERT_HEAD %p %s:%d", (head),	\
+#إذا defined(QUEUEDEBUG)
+#تعریف_کړه	QUEUEDEBUG_LIST_ورننباسه_سر(سر_2, elm, ډګر)			\
+	إذا ((سر_2)->lh_لومړی &&						\
+	    (سر_2)->lh_لومړی->ډګر.le_prev != &(سر_2)->lh_لومړی)	\
+		QUEUEDEBUG_ABORT("LIST_INSERT_HEAD %p %s:%d", (سر_2),	\
 		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_LIST_OP(elm, field)					\
-	if ((elm)->field.le_next &&					\
-	    (elm)->field.le_next->field.le_prev !=			\
-	    &(elm)->field.le_next)					\
+#تعریف_کړه	QUEUEDEBUG_LIST_OP(elm, ډګر)					\
+	إذا ((elm)->ډګر.le_بل &&					\
+	    (elm)->ډګر.le_بل->ډګر.le_prev !=			\
+	    &(elm)->ډګر.le_بل)					\
 		QUEUEDEBUG_ABORT("LIST_* forw %p %s:%d", (elm),		\
 		    __FILE__, __LINE__);				\
-	if (*(elm)->field.le_prev != (elm))				\
+	إذا (*(elm)->ډګر.le_prev != (elm))				\
 		QUEUEDEBUG_ABORT("LIST_* back %p %s:%d", (elm),		\
 		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_LIST_POSTREMOVE(elm, field)				\
-	(elm)->field.le_next = (void *)1L;				\
-	(elm)->field.le_prev = (void *)1L;
-#else
-#define	QUEUEDEBUG_LIST_INSERT_HEAD(head, elm, field)
-#define	QUEUEDEBUG_LIST_OP(elm, field)
-#define	QUEUEDEBUG_LIST_POSTREMOVE(elm, field)
-#endif
+#تعریف_کړه	QUEUEDEBUG_LIST_POSTREMOVE(elm, ډګر)				\
+	(elm)->ډګر.le_بل = (فراغ *)1L;				\
+	(elm)->ډګر.le_prev = (فراغ *)1L;
+#وإلا
+#تعریف_کړه	QUEUEDEBUG_LIST_ورننباسه_سر(سر_2, elm, ډګر)
+#تعریف_کړه	QUEUEDEBUG_LIST_OP(elm, ډګر)
+#تعریف_کړه	QUEUEDEBUG_LIST_POSTREMOVE(elm, ډګر)
+#د_که_پای
 
-#define	LIST_INIT(head) do {						\
-	(head)->lh_first = LIST_END(head);				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	LIST_INIT(سر_2) افعل {						\
+	(سر_2)->lh_لومړی = LIST_پای_ټکی(سر_2);				\
+} طالما (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_AFTER(listelm, elm, field) do {			\
-	QUEUEDEBUG_LIST_OP((listelm), field)				\
-	if (((elm)->field.le_next = (listelm)->field.le_next) != 	\
-	    LIST_END(head))						\
-		(listelm)->field.le_next->field.le_prev =		\
-		    &(elm)->field.le_next;				\
-	(listelm)->field.le_next = (elm);				\
-	(elm)->field.le_prev = &(listelm)->field.le_next;		\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	LIST_ورننباسه_AFTER(listelm, elm, ډګر) افعل {			\
+	QUEUEDEBUG_LIST_OP((listelm), ډګر)				\
+	إذا (((elm)->ډګر.le_بل = (listelm)->ډګر.le_بل) != 	\
+	    LIST_پای_ټکی(سر_2))						\
+		(listelm)->ډګر.le_بل->ډګر.le_prev =		\
+		    &(elm)->ډګر.le_بل;				\
+	(listelm)->ډګر.le_بل = (elm);				\
+	(elm)->ډګر.le_prev = &(listelm)->ډګر.le_بل;		\
+} طالما (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_BEFORE(listelm, elm, field) do {			\
-	QUEUEDEBUG_LIST_OP((listelm), field)				\
-	(elm)->field.le_prev = (listelm)->field.le_prev;		\
-	(elm)->field.le_next = (listelm);				\
-	*(listelm)->field.le_prev = (elm);				\
-	(listelm)->field.le_prev = &(elm)->field.le_next;		\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	LIST_ورننباسه_BEFORE(listelm, elm, ډګر) افعل {			\
+	QUEUEDEBUG_LIST_OP((listelm), ډګر)				\
+	(elm)->ډګر.le_prev = (listelm)->ډګر.le_prev;		\
+	(elm)->ډګر.le_بل = (listelm);				\
+	*(listelm)->ډګر.le_prev = (elm);				\
+	(listelm)->ډګر.le_prev = &(elm)->ډګر.le_بل;		\
+} طالما (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_HEAD(head, elm, field) do {				\
-	QUEUEDEBUG_LIST_INSERT_HEAD((head), (elm), field)		\
-	if (((elm)->field.le_next = (head)->lh_first) != LIST_END(head))\
-		(head)->lh_first->field.le_prev = &(elm)->field.le_next;\
-	(head)->lh_first = (elm);					\
-	(elm)->field.le_prev = &(head)->lh_first;			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	LIST_ورننباسه_سر(سر_2, elm, ډګر) افعل {				\
+	QUEUEDEBUG_LIST_ورننباسه_سر((سر_2), (elm), ډګر)		\
+	إذا (((elm)->ډګر.le_بل = (سر_2)->lh_لومړی) != LIST_پای_ټکی(سر_2))\
+		(سر_2)->lh_لومړی->ډګر.le_prev = &(elm)->ډګر.le_بل;\
+	(سر_2)->lh_لومړی = (elm);					\
+	(elm)->ډګر.le_prev = &(سر_2)->lh_لومړی;			\
+} طالما (/*CONSTCOND*/0)
 
-#define	LIST_REMOVE(elm, field) do {					\
-	QUEUEDEBUG_LIST_OP((elm), field)				\
-	if ((elm)->field.le_next != NULL)				\
-		(elm)->field.le_next->field.le_prev = 			\
-		    (elm)->field.le_prev;				\
-	*(elm)->field.le_prev = (elm)->field.le_next;			\
-	QUEUEDEBUG_LIST_POSTREMOVE((elm), field)			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	LIST_REMOVE(elm, ډګر) افعل {					\
+	QUEUEDEBUG_LIST_OP((elm), ډګر)				\
+	إذا ((elm)->ډګر.le_بل != عدم)				\
+		(elm)->ډګر.le_بل->ډګر.le_prev = 			\
+		    (elm)->ډګر.le_prev;				\
+	*(elm)->ډګر.le_prev = (elm)->ډګر.le_بل;			\
+	QUEUEDEBUG_LIST_POSTREMOVE((elm), ډګر)			\
+} طالما (/*CONSTCOND*/0)
 
-#define LIST_REPLACE(elm, elm2, field) do {				\
-	if (((elm2)->field.le_next = (elm)->field.le_next) != NULL)	\
-		(elm2)->field.le_next->field.le_prev =			\
-		    &(elm2)->field.le_next;				\
-	(elm2)->field.le_prev = (elm)->field.le_prev;			\
-	*(elm2)->field.le_prev = (elm2);				\
-	QUEUEDEBUG_LIST_POSTREMOVE((elm), field)			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه LIST_REPLACE(elm, elm2, ډګر) افعل {				\
+	إذا (((elm2)->ډګر.le_بل = (elm)->ډګر.le_بل) != عدم)	\
+		(elm2)->ډګر.le_بل->ډګر.le_prev =			\
+		    &(elm2)->ډګر.le_بل;				\
+	(elm2)->ډګر.le_prev = (elm)->ډګر.le_prev;			\
+	*(elm2)->ډګر.le_prev = (elm2);				\
+	QUEUEDEBUG_LIST_POSTREMOVE((elm), ډګر)			\
+} طالما (/*CONSTCOND*/0)
 
 /*
  * Simple queue definitions.
  */
-#define	SIMPLEQ_HEAD(name, type)					\
-struct name {								\
-	struct type *sqh_first;	/* first element */			\
-	struct type **sqh_last;	/* addr of last next element */		\
+#تعریف_کړه	SIMPLEQ_سر(name, type)					\
+بنية name {								\
+	بنية type *sqh_لومړی;	/* first element */			\
+	بنية type **sqh_وروستی;	/* addr of last next element */		\
 }
 
-#define	SIMPLEQ_HEAD_INITIALIZER(head)					\
-	{ NULL, &(head).sqh_first }
+#تعریف_کړه	SIMPLEQ_سر_INITIALIZER(سر_2)					\
+	{ عدم, &(سر_2).sqh_لومړی }
 
-#define	SIMPLEQ_ENTRY(type)						\
-struct {								\
-	struct type *sqe_next;	/* next element */			\
+#تعریف_کړه	SIMPLEQ_ثبت(type)						\
+بنية {								\
+	بنية type *sqe_بل;	/* next element */			\
 }
 
 /*
  * Simple queue access methods.
  */
-#define	SIMPLEQ_FIRST(head)		((head)->sqh_first)
-#define	SIMPLEQ_END(head)		NULL
-#define	SIMPLEQ_EMPTY(head)		((head)->sqh_first == SIMPLEQ_END(head))
-#define	SIMPLEQ_NEXT(elm, field)	((elm)->field.sqe_next)
+#تعریف_کړه	SIMPLEQ_لومړی(سر_2)		((سر_2)->sqh_لومړی)
+#تعریف_کړه	SIMPLEQ_پای_ټکی(سر_2)		عدم
+#تعریف_کړه	SIMPLEQ_تشه(سر_2)		((سر_2)->sqh_لومړی == SIMPLEQ_پای_ټکی(سر_2))
+#تعریف_کړه	SIMPLEQ_بل(elm, ډګر)	((elm)->ډګر.sqe_بل)
 
-#define	SIMPLEQ_FOREACH(var, head, field)				\
-	for ((var) = ((head)->sqh_first);				\
-	    (var) != SIMPLEQ_END(head);					\
-	    (var) = ((var)->field.sqe_next))
+#تعریف_کړه	SIMPLEQ_FOREACH(var, سر_2, ډګر)				\
+	لكل ((var) = ((سر_2)->sqh_لومړی);				\
+	    (var) != SIMPLEQ_پای_ټکی(سر_2);					\
+	    (var) = ((var)->ډګر.sqe_بل))
 
-#define	SIMPLEQ_FOREACH_SAFE(var, head, field, next)			\
-	for ((var) = ((head)->sqh_first);				\
-	    (var) != SIMPLEQ_END(head) &&				\
-	    ((next = ((var)->field.sqe_next)), 1);			\
-	    (var) = (next))
+#تعریف_کړه	SIMPLEQ_FOREACH_خوندي(var, سر_2, ډګر, بل)			\
+	لكل ((var) = ((سر_2)->sqh_لومړی);				\
+	    (var) != SIMPLEQ_پای_ټکی(سر_2) &&				\
+	    ((بل = ((var)->ډګر.sqe_بل)), 1);			\
+	    (var) = (بل))
 
 /*
  * Simple queue functions.
  */
-#define	SIMPLEQ_INIT(head) do {						\
-	(head)->sqh_first = NULL;					\
-	(head)->sqh_last = &(head)->sqh_first;				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SIMPLEQ_INIT(سر_2) افعل {						\
+	(سر_2)->sqh_لومړی = عدم;					\
+	(سر_2)->sqh_وروستی = &(سر_2)->sqh_لومړی;				\
+} طالما (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_HEAD(head, elm, field) do {			\
-	if (((elm)->field.sqe_next = (head)->sqh_first) == NULL)	\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-	(head)->sqh_first = (elm);					\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SIMPLEQ_ورننباسه_سر(سر_2, elm, ډګر) افعل {			\
+	إذا (((elm)->ډګر.sqe_بل = (سر_2)->sqh_لومړی) == عدم)	\
+		(سر_2)->sqh_وروستی = &(elm)->ډګر.sqe_بل;		\
+	(سر_2)->sqh_لومړی = (elm);					\
+} طالما (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_TAIL(head, elm, field) do {			\
-	(elm)->field.sqe_next = NULL;					\
-	*(head)->sqh_last = (elm);					\
-	(head)->sqh_last = &(elm)->field.sqe_next;			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SIMPLEQ_ورننباسه_لکۍ(سر_2, elm, ډګر) افعل {			\
+	(elm)->ډګر.sqe_بل = عدم;					\
+	*(سر_2)->sqh_وروستی = (elm);					\
+	(سر_2)->sqh_وروستی = &(elm)->ډګر.sqe_بل;			\
+} طالما (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	if (((elm)->field.sqe_next = (listelm)->field.sqe_next) == NULL)\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-	(listelm)->field.sqe_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SIMPLEQ_ورننباسه_AFTER(سر_2, listelm, elm, ډګر) افعل {		\
+	إذا (((elm)->ډګر.sqe_بل = (listelm)->ډګر.sqe_بل) == عدم)\
+		(سر_2)->sqh_وروستی = &(elm)->ډګر.sqe_بل;		\
+	(listelm)->ډګر.sqe_بل = (elm);				\
+} طالما (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_REMOVE_HEAD(head, field) do {				\
-	if (((head)->sqh_first = (head)->sqh_first->field.sqe_next) == NULL) \
-		(head)->sqh_last = &(head)->sqh_first;			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	SIMPLEQ_REMOVE_سر(سر_2, ډګر) افعل {				\
+	إذا (((سر_2)->sqh_لومړی = (سر_2)->sqh_لومړی->ډګر.sqe_بل) == عدم) \
+		(سر_2)->sqh_وروستی = &(سر_2)->sqh_لومړی;			\
+} طالما (/*CONSTCOND*/0)
 
-#define SIMPLEQ_REMOVE_AFTER(head, elm, field) do {			\
-	if (((elm)->field.sqe_next = (elm)->field.sqe_next->field.sqe_next) \
-	    == NULL)							\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه SIMPLEQ_REMOVE_AFTER(سر_2, elm, ډګر) افعل {			\
+	إذا (((elm)->ډګر.sqe_بل = (elm)->ډګر.sqe_بل->ډګر.sqe_بل) \
+	    == عدم)							\
+		(سر_2)->sqh_وروستی = &(elm)->ډګر.sqe_بل;		\
+} طالما (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_REMOVE(head, elm, type, field) do {			\
-	if ((head)->sqh_first == (elm)) {				\
-		SIMPLEQ_REMOVE_HEAD((head), field);			\
-	} else {							\
-		struct type *curelm = (head)->sqh_first;		\
-		while (curelm->field.sqe_next != (elm))			\
-			curelm = curelm->field.sqe_next;		\
-		if ((curelm->field.sqe_next =				\
-			curelm->field.sqe_next->field.sqe_next) == NULL) \
-			    (head)->sqh_last = &(curelm)->field.sqe_next; \
+#تعریف_کړه	SIMPLEQ_REMOVE(سر_2, elm, type, ډګر) افعل {			\
+	إذا ((سر_2)->sqh_لومړی == (elm)) {				\
+		SIMPLEQ_REMOVE_سر((سر_2), ډګر);			\
+	} وإلا {							\
+		بنية type *curelm = (سر_2)->sqh_لومړی;		\
+		طالما (curelm->ډګر.sqe_بل != (elm))			\
+			curelm = curelm->ډګر.sqe_بل;		\
+		إذا ((curelm->ډګر.sqe_بل =				\
+			curelm->ډګر.sqe_بل->ډګر.sqe_بل) == عدم) \
+			    (سر_2)->sqh_وروستی = &(curelm)->ډګر.sqe_بل; \
 	}								\
-} while (/*CONSTCOND*/0)
+} طالما (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_CONCAT(head1, head2) do {				\
-	if (!SIMPLEQ_EMPTY((head2))) {					\
-		*(head1)->sqh_last = (head2)->sqh_first;		\
-		(head1)->sqh_last = (head2)->sqh_last;		\
+#تعریف_کړه	SIMPLEQ_CONCAT(head1, head2) افعل {				\
+	إذا (!SIMPLEQ_تشه((head2))) {					\
+		*(head1)->sqh_وروستی = (head2)->sqh_لومړی;		\
+		(head1)->sqh_وروستی = (head2)->sqh_وروستی;		\
 		SIMPLEQ_INIT((head2));					\
 	}								\
-} while (/*CONSTCOND*/0)
+} طالما (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_LAST(head, type, field)					\
-	(SIMPLEQ_EMPTY((head)) ?						\
-		NULL :							\
-	        ((struct type *)(void *)				\
-		((char *)((head)->sqh_last) - offsetof(struct type, field))))
+#تعریف_کړه	SIMPLEQ_وروستی(سر_2, type, ډګر)					\
+	(SIMPLEQ_تشه((سر_2)) ?						\
+		عدم :							\
+	        ((بنية type *)(فراغ *)				\
+		((حرف *)((سر_2)->sqh_وروستی) - offsetof(بنية type, ډګر))))
 
 /*
  * Tail queue definitions.
  */
-#define	_TAILQ_HEAD(name, type, qual)					\
-struct name {								\
-	qual type *tqh_first;		/* first element */		\
-	qual type *qual *tqh_last;	/* addr of last next element */	\
+#تعریف_کړه	TAILQ_سر_2(name, type, qual)					\
+بنية name {								\
+	qual type *tqh_لومړی;		/* first element */		\
+	qual type *qual *tqh_وروستی;	/* addr of last next element */	\
 }
-#define TAILQ_HEAD(name, type)	_TAILQ_HEAD(name, struct type,)
+#تعریف_کړه TAILQ_سر(name, type)	TAILQ_سر_2(name, بنية type,)
 
-#define	TAILQ_HEAD_INITIALIZER(head)					\
-	{ TAILQ_END(head), &(head).tqh_first }
+#تعریف_کړه	TAILQ_سر_INITIALIZER(سر_2)					\
+	{ TAILQ_پای_ټکی(سر_2), &(سر_2).tqh_لومړی }
 
-#define	_TAILQ_ENTRY(type, qual)					\
-struct {								\
-	qual type *tqe_next;		/* next element */		\
+#تعریف_کړه	TAILQ_ثبت_2(type, qual)					\
+بنية {								\
+	qual type *tqe_بل;		/* next element */		\
 	qual type *qual *tqe_prev;	/* address of previous next element */\
 }
-#define TAILQ_ENTRY(type)	_TAILQ_ENTRY(struct type,)
+#تعریف_کړه TAILQ_ثبت(type)	TAILQ_ثبت_2(بنية type,)
 
 /*
  * Tail queue access methods.
  */
-#define	TAILQ_FIRST(head)		((head)->tqh_first)
-#define	TAILQ_END(head)			(NULL)
-#define	TAILQ_NEXT(elm, field)		((elm)->field.tqe_next)
-#define	TAILQ_LAST(head, headname) \
-	(*(((struct headname *)((head)->tqh_last))->tqh_last))
-#define	TAILQ_PREV(elm, headname, field) \
-	(*(((struct headname *)((elm)->field.tqe_prev))->tqh_last))
-#define	TAILQ_EMPTY(head)		(TAILQ_FIRST(head) == TAILQ_END(head))
+#تعریف_کړه	TAILQ_لومړی(سر_2)		((سر_2)->tqh_لومړی)
+#تعریف_کړه	TAILQ_پای_ټکی(سر_2)			(عدم)
+#تعریف_کړه	TAILQ_بل(elm, ډګر)		((elm)->ډګر.tqe_بل)
+#تعریف_کړه	TAILQ_وروستی(سر_2, headname) \
+	(*(((بنية headname *)((سر_2)->tqh_وروستی))->tqh_وروستی))
+#تعریف_کړه	TAILQ_PREV(elm, headname, ډګر) \
+	(*(((بنية headname *)((elm)->ډګر.tqe_prev))->tqh_وروستی))
+#تعریف_کړه	TAILQ_تشه(سر_2)		(TAILQ_لومړی(سر_2) == TAILQ_پای_ټکی(سر_2))
 
 
-#define	TAILQ_FOREACH(var, head, field)					\
-	for ((var) = ((head)->tqh_first);				\
-	    (var) != TAILQ_END(head);					\
-	    (var) = ((var)->field.tqe_next))
+#تعریف_کړه	TAILQ_FOREACH(var, سر_2, ډګر)					\
+	لكل ((var) = ((سر_2)->tqh_لومړی);				\
+	    (var) != TAILQ_پای_ټکی(سر_2);					\
+	    (var) = ((var)->ډګر.tqe_بل))
 
-#define	TAILQ_FOREACH_SAFE(var, head, field, next)			\
-	for ((var) = ((head)->tqh_first);				\
-	    (var) != TAILQ_END(head) &&					\
-	    ((next) = TAILQ_NEXT(var, field), 1); (var) = (next))
+#تعریف_کړه	TAILQ_FOREACH_خوندي(var, سر_2, ډګر, بل)			\
+	لكل ((var) = ((سر_2)->tqh_لومړی);				\
+	    (var) != TAILQ_پای_ټکی(سر_2) &&					\
+	    ((بل) = TAILQ_بل(var, ډګر), 1); (var) = (بل))
 
-#define	TAILQ_FOREACH_REVERSE(var, head, headname, field)		\
-	for ((var) = (*(((struct headname *)((head)->tqh_last))->tqh_last));\
-	    (var) != TAILQ_END(head);					\
-	    (var) = (*(((struct headname *)((var)->field.tqe_prev))->tqh_last)))
+#تعریف_کړه	TAILQ_FOREACH_سرچپه(var, سر_2, headname, ډګر)		\
+	لكل ((var) = (*(((بنية headname *)((سر_2)->tqh_وروستی))->tqh_وروستی));\
+	    (var) != TAILQ_پای_ټکی(سر_2);					\
+	    (var) = (*(((بنية headname *)((var)->ډګر.tqe_prev))->tqh_وروستی)))
 
-#define	TAILQ_FOREACH_REVERSE_SAFE(var, head, headname, field, prev)	\
-	for ((var) = TAILQ_LAST((head), headname);			\
-	    (var) != TAILQ_END(head) && 				\
-	    ((prev) = TAILQ_PREV((var), headname, field), 1); (var) = (prev))
+#تعریف_کړه	TAILQ_FOREACH_سرچپه_خوندي(var, سر_2, headname, ډګر, prev)	\
+	لكل ((var) = TAILQ_وروستی((سر_2), headname);			\
+	    (var) != TAILQ_پای_ټکی(سر_2) && 				\
+	    ((prev) = TAILQ_PREV((var), headname, ډګر), 1); (var) = (prev))
 
 /*
  * Tail queue functions.
  */
-#if defined(QUEUEDEBUG)
-#define	QUEUEDEBUG_TAILQ_INSERT_HEAD(head, elm, field)			\
-	if ((head)->tqh_first &&					\
-	    (head)->tqh_first->field.tqe_prev != &(head)->tqh_first)	\
-		QUEUEDEBUG_ABORT("TAILQ_INSERT_HEAD %p %s:%d", (head),	\
+#إذا defined(QUEUEDEBUG)
+#تعریف_کړه	QUEUEDEBUG_TAILQ_ورننباسه_سر(سر_2, elm, ډګر)			\
+	إذا ((سر_2)->tqh_لومړی &&					\
+	    (سر_2)->tqh_لومړی->ډګر.tqe_prev != &(سر_2)->tqh_لومړی)	\
+		QUEUEDEBUG_ABORT("TAILQ_INSERT_HEAD %p %s:%d", (سر_2),	\
 		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_INSERT_TAIL(head, elm, field)			\
-	if (*(head)->tqh_last != NULL)					\
-		QUEUEDEBUG_ABORT("TAILQ_INSERT_TAIL %p %s:%d", (head),	\
+#تعریف_کړه	QUEUEDEBUG_TAILQ_ورننباسه_لکۍ(سر_2, elm, ډګر)			\
+	إذا (*(سر_2)->tqh_وروستی != عدم)					\
+		QUEUEDEBUG_ABORT("TAILQ_INSERT_TAIL %p %s:%d", (سر_2),	\
 		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_OP(elm, field)					\
-	if ((elm)->field.tqe_next &&					\
-	    (elm)->field.tqe_next->field.tqe_prev !=			\
-	    &(elm)->field.tqe_next)					\
+#تعریف_کړه	QUEUEDEBUG_TAILQ_OP(elm, ډګر)					\
+	إذا ((elm)->ډګر.tqe_بل &&					\
+	    (elm)->ډګر.tqe_بل->ډګر.tqe_prev !=			\
+	    &(elm)->ډګر.tqe_بل)					\
 		QUEUEDEBUG_ABORT("TAILQ_* forw %p %s:%d", (elm),	\
 		    __FILE__, __LINE__);				\
-	if (*(elm)->field.tqe_prev != (elm))				\
+	إذا (*(elm)->ډګر.tqe_prev != (elm))				\
 		QUEUEDEBUG_ABORT("TAILQ_* back %p %s:%d", (elm),	\
 		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_PREREMOVE(head, elm, field)			\
-	if ((elm)->field.tqe_next == NULL &&				\
-	    (head)->tqh_last != &(elm)->field.tqe_next)			\
+#تعریف_کړه	QUEUEDEBUG_TAILQ_PREREMOVE(سر_2, elm, ډګر)			\
+	إذا ((elm)->ډګر.tqe_بل == عدم &&				\
+	    (سر_2)->tqh_وروستی != &(elm)->ډګر.tqe_بل)			\
 		QUEUEDEBUG_ABORT("TAILQ_PREREMOVE head %p elm %p %s:%d",\
-		    (head), (elm), __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, field)				\
-	(elm)->field.tqe_next = (void *)1L;				\
-	(elm)->field.tqe_prev = (void *)1L;
-#else
-#define	QUEUEDEBUG_TAILQ_INSERT_HEAD(head, elm, field)
-#define	QUEUEDEBUG_TAILQ_INSERT_TAIL(head, elm, field)
-#define	QUEUEDEBUG_TAILQ_OP(elm, field)
-#define	QUEUEDEBUG_TAILQ_PREREMOVE(head, elm, field)
-#define	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, field)
-#endif
+		    (سر_2), (elm), __FILE__, __LINE__);
+#تعریف_کړه	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, ډګر)				\
+	(elm)->ډګر.tqe_بل = (فراغ *)1L;				\
+	(elm)->ډګر.tqe_prev = (فراغ *)1L;
+#وإلا
+#تعریف_کړه	QUEUEDEBUG_TAILQ_ورننباسه_سر(سر_2, elm, ډګر)
+#تعریف_کړه	QUEUEDEBUG_TAILQ_ورننباسه_لکۍ(سر_2, elm, ډګر)
+#تعریف_کړه	QUEUEDEBUG_TAILQ_OP(elm, ډګر)
+#تعریف_کړه	QUEUEDEBUG_TAILQ_PREREMOVE(سر_2, elm, ډګر)
+#تعریف_کړه	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, ډګر)
+#د_که_پای
 
-#define	TAILQ_INIT(head) do {						\
-	(head)->tqh_first = TAILQ_END(head);				\
-	(head)->tqh_last = &(head)->tqh_first;				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	TAILQ_INIT(سر_2) افعل {						\
+	(سر_2)->tqh_لومړی = TAILQ_پای_ټکی(سر_2);				\
+	(سر_2)->tqh_وروستی = &(سر_2)->tqh_لومړی;				\
+} طالما (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_HEAD(head, elm, field) do {			\
-	QUEUEDEBUG_TAILQ_INSERT_HEAD((head), (elm), field)		\
-	if (((elm)->field.tqe_next = (head)->tqh_first) != TAILQ_END(head))\
-		(head)->tqh_first->field.tqe_prev =			\
-		    &(elm)->field.tqe_next;				\
-	else								\
-		(head)->tqh_last = &(elm)->field.tqe_next;		\
-	(head)->tqh_first = (elm);					\
-	(elm)->field.tqe_prev = &(head)->tqh_first;			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	TAILQ_ورننباسه_سر(سر_2, elm, ډګر) افعل {			\
+	QUEUEDEBUG_TAILQ_ورننباسه_سر((سر_2), (elm), ډګر)		\
+	إذا (((elm)->ډګر.tqe_بل = (سر_2)->tqh_لومړی) != TAILQ_پای_ټکی(سر_2))\
+		(سر_2)->tqh_لومړی->ډګر.tqe_prev =			\
+		    &(elm)->ډګر.tqe_بل;				\
+	وإلا								\
+		(سر_2)->tqh_وروستی = &(elm)->ډګر.tqe_بل;		\
+	(سر_2)->tqh_لومړی = (elm);					\
+	(elm)->ډګر.tqe_prev = &(سر_2)->tqh_لومړی;			\
+} طالما (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_TAIL(head, elm, field) do {			\
-	QUEUEDEBUG_TAILQ_INSERT_TAIL((head), (elm), field)		\
-	(elm)->field.tqe_next = TAILQ_END(head);			\
-	(elm)->field.tqe_prev = (head)->tqh_last;			\
-	*(head)->tqh_last = (elm);					\
-	(head)->tqh_last = &(elm)->field.tqe_next;			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	TAILQ_ورننباسه_لکۍ(سر_2, elm, ډګر) افعل {			\
+	QUEUEDEBUG_TAILQ_ورننباسه_لکۍ((سر_2), (elm), ډګر)		\
+	(elm)->ډګر.tqe_بل = TAILQ_پای_ټکی(سر_2);			\
+	(elm)->ډګر.tqe_prev = (سر_2)->tqh_وروستی;			\
+	*(سر_2)->tqh_وروستی = (elm);					\
+	(سر_2)->tqh_وروستی = &(elm)->ډګر.tqe_بل;			\
+} طالما (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	QUEUEDEBUG_TAILQ_OP((listelm), field)				\
-	if (((elm)->field.tqe_next = (listelm)->field.tqe_next) != 	\
-	    TAILQ_END(head))						\
-		(elm)->field.tqe_next->field.tqe_prev = 		\
-		    &(elm)->field.tqe_next;				\
-	else								\
-		(head)->tqh_last = &(elm)->field.tqe_next;		\
-	(listelm)->field.tqe_next = (elm);				\
-	(elm)->field.tqe_prev = &(listelm)->field.tqe_next;		\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	TAILQ_ورننباسه_AFTER(سر_2, listelm, elm, ډګر) افعل {		\
+	QUEUEDEBUG_TAILQ_OP((listelm), ډګر)				\
+	إذا (((elm)->ډګر.tqe_بل = (listelm)->ډګر.tqe_بل) != 	\
+	    TAILQ_پای_ټکی(سر_2))						\
+		(elm)->ډګر.tqe_بل->ډګر.tqe_prev = 		\
+		    &(elm)->ډګر.tqe_بل;				\
+	وإلا								\
+		(سر_2)->tqh_وروستی = &(elm)->ډګر.tqe_بل;		\
+	(listelm)->ډګر.tqe_بل = (elm);				\
+	(elm)->ډګر.tqe_prev = &(listelm)->ډګر.tqe_بل;		\
+} طالما (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_BEFORE(listelm, elm, field) do {			\
-	QUEUEDEBUG_TAILQ_OP((listelm), field)				\
-	(elm)->field.tqe_prev = (listelm)->field.tqe_prev;		\
-	(elm)->field.tqe_next = (listelm);				\
-	*(listelm)->field.tqe_prev = (elm);				\
-	(listelm)->field.tqe_prev = &(elm)->field.tqe_next;		\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	TAILQ_ورننباسه_BEFORE(listelm, elm, ډګر) افعل {			\
+	QUEUEDEBUG_TAILQ_OP((listelm), ډګر)				\
+	(elm)->ډګر.tqe_prev = (listelm)->ډګر.tqe_prev;		\
+	(elm)->ډګر.tqe_بل = (listelm);				\
+	*(listelm)->ډګر.tqe_prev = (elm);				\
+	(listelm)->ډګر.tqe_prev = &(elm)->ډګر.tqe_بل;		\
+} طالما (/*CONSTCOND*/0)
 
-#define	TAILQ_REMOVE(head, elm, field) do {				\
-	QUEUEDEBUG_TAILQ_PREREMOVE((head), (elm), field)		\
-	QUEUEDEBUG_TAILQ_OP((elm), field)				\
-	if (((elm)->field.tqe_next) != TAILQ_END(head))			\
-		(elm)->field.tqe_next->field.tqe_prev = 		\
-		    (elm)->field.tqe_prev;				\
-	else								\
-		(head)->tqh_last = (elm)->field.tqe_prev;		\
-	*(elm)->field.tqe_prev = (elm)->field.tqe_next;			\
-	QUEUEDEBUG_TAILQ_POSTREMOVE((elm), field);			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	TAILQ_REMOVE(سر_2, elm, ډګر) افعل {				\
+	QUEUEDEBUG_TAILQ_PREREMOVE((سر_2), (elm), ډګر)		\
+	QUEUEDEBUG_TAILQ_OP((elm), ډګر)				\
+	إذا (((elm)->ډګر.tqe_بل) != TAILQ_پای_ټکی(سر_2))			\
+		(elm)->ډګر.tqe_بل->ډګر.tqe_prev = 		\
+		    (elm)->ډګر.tqe_prev;				\
+	وإلا								\
+		(سر_2)->tqh_وروستی = (elm)->ډګر.tqe_prev;		\
+	*(elm)->ډګر.tqe_prev = (elm)->ډګر.tqe_بل;			\
+	QUEUEDEBUG_TAILQ_POSTREMOVE((elm), ډګر);			\
+} طالما (/*CONSTCOND*/0)
 
-#define TAILQ_REPLACE(head, elm, elm2, field) do {                      \
-        if (((elm2)->field.tqe_next = (elm)->field.tqe_next) != 	\
-	    TAILQ_END(head))   						\
-                (elm2)->field.tqe_next->field.tqe_prev =                \
-                    &(elm2)->field.tqe_next;                            \
-        else                                                            \
-                (head)->tqh_last = &(elm2)->field.tqe_next;             \
-        (elm2)->field.tqe_prev = (elm)->field.tqe_prev;                 \
-        *(elm2)->field.tqe_prev = (elm2);                               \
-	QUEUEDEBUG_TAILQ_POSTREMOVE((elm), field);			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه TAILQ_REPLACE(سر_2, elm, elm2, ډګر) افعل {                      \
+        إذا (((elm2)->ډګر.tqe_بل = (elm)->ډګر.tqe_بل) != 	\
+	    TAILQ_پای_ټکی(سر_2))   						\
+                (elm2)->ډګر.tqe_بل->ډګر.tqe_prev =                \
+                    &(elm2)->ډګر.tqe_بل;                            \
+        وإلا                                                            \
+                (سر_2)->tqh_وروستی = &(elm2)->ډګر.tqe_بل;             \
+        (elm2)->ډګر.tqe_prev = (elm)->ډګر.tqe_prev;                 \
+        *(elm2)->ډګر.tqe_prev = (elm2);                               \
+	QUEUEDEBUG_TAILQ_POSTREMOVE((elm), ډګر);			\
+} طالما (/*CONSTCOND*/0)
 
-#define	TAILQ_CONCAT(head1, head2, field) do {				\
-	if (!TAILQ_EMPTY(head2)) {					\
-		*(head1)->tqh_last = (head2)->tqh_first;		\
-		(head2)->tqh_first->field.tqe_prev = (head1)->tqh_last;	\
-		(head1)->tqh_last = (head2)->tqh_last;			\
+#تعریف_کړه	TAILQ_CONCAT(head1, head2, ډګر) افعل {				\
+	إذا (!TAILQ_تشه(head2)) {					\
+		*(head1)->tqh_وروستی = (head2)->tqh_لومړی;		\
+		(head2)->tqh_لومړی->ډګر.tqe_prev = (head1)->tqh_وروستی;	\
+		(head1)->tqh_وروستی = (head2)->tqh_وروستی;			\
 		TAILQ_INIT((head2));					\
 	}								\
-} while (/*CONSTCOND*/0)
+} طالما (/*CONSTCOND*/0)
 
 /*
  * Singly-linked Tail queue declarations.
  */
-#define	STAILQ_HEAD(name, type)						\
-struct name {								\
-	struct type *stqh_first;	/* first element */		\
-	struct type **stqh_last;	/* addr of last next element */	\
+#تعریف_کړه	STAILQ_سر(name, type)						\
+بنية name {								\
+	بنية type *stqh_لومړی;	/* first element */		\
+	بنية type **stqh_وروستی;	/* addr of last next element */	\
 }
 
-#define	STAILQ_HEAD_INITIALIZER(head)					\
-	{ NULL, &(head).stqh_first }
+#تعریف_کړه	STAILQ_سر_INITIALIZER(سر_2)					\
+	{ عدم, &(سر_2).stqh_لومړی }
 
-#define	STAILQ_ENTRY(type)						\
-struct {								\
-	struct type *stqe_next;	/* next element */			\
+#تعریف_کړه	STAILQ_ثبت(type)						\
+بنية {								\
+	بنية type *stqe_بل;	/* next element */			\
 }
 
 /*
  * Singly-linked Tail queue access methods.
  */
-#define	STAILQ_FIRST(head)	((head)->stqh_first)
-#define	STAILQ_END(head)	NULL
-#define	STAILQ_NEXT(elm, field)	((elm)->field.stqe_next)
-#define	STAILQ_EMPTY(head)	(STAILQ_FIRST(head) == STAILQ_END(head))
+#تعریف_کړه	STAILQ_لومړی(سر_2)	((سر_2)->stqh_لومړی)
+#تعریف_کړه	STAILQ_پای_ټکی(سر_2)	عدم
+#تعریف_کړه	STAILQ_بل(elm, ډګر)	((elm)->ډګر.stqe_بل)
+#تعریف_کړه	STAILQ_تشه(سر_2)	(STAILQ_لومړی(سر_2) == STAILQ_پای_ټکی(سر_2))
 
 /*
  * Singly-linked Tail queue functions.
  */
-#define	STAILQ_INIT(head) do {						\
-	(head)->stqh_first = NULL;					\
-	(head)->stqh_last = &(head)->stqh_first;				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	STAILQ_INIT(سر_2) افعل {						\
+	(سر_2)->stqh_لومړی = عدم;					\
+	(سر_2)->stqh_وروستی = &(سر_2)->stqh_لومړی;				\
+} طالما (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_HEAD(head, elm, field) do {			\
-	if (((elm)->field.stqe_next = (head)->stqh_first) == NULL)	\
-		(head)->stqh_last = &(elm)->field.stqe_next;		\
-	(head)->stqh_first = (elm);					\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	STAILQ_ورننباسه_سر(سر_2, elm, ډګر) افعل {			\
+	إذا (((elm)->ډګر.stqe_بل = (سر_2)->stqh_لومړی) == عدم)	\
+		(سر_2)->stqh_وروستی = &(elm)->ډګر.stqe_بل;		\
+	(سر_2)->stqh_لومړی = (elm);					\
+} طالما (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_TAIL(head, elm, field) do {			\
-	(elm)->field.stqe_next = NULL;					\
-	*(head)->stqh_last = (elm);					\
-	(head)->stqh_last = &(elm)->field.stqe_next;			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	STAILQ_ورننباسه_لکۍ(سر_2, elm, ډګر) افعل {			\
+	(elm)->ډګر.stqe_بل = عدم;					\
+	*(سر_2)->stqh_وروستی = (elm);					\
+	(سر_2)->stqh_وروستی = &(elm)->ډګر.stqe_بل;			\
+} طالما (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	if (((elm)->field.stqe_next = (listelm)->field.stqe_next) == NULL)\
-		(head)->stqh_last = &(elm)->field.stqe_next;		\
-	(listelm)->field.stqe_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	STAILQ_ورننباسه_AFTER(سر_2, listelm, elm, ډګر) افعل {		\
+	إذا (((elm)->ډګر.stqe_بل = (listelm)->ډګر.stqe_بل) == عدم)\
+		(سر_2)->stqh_وروستی = &(elm)->ډګر.stqe_بل;		\
+	(listelm)->ډګر.stqe_بل = (elm);				\
+} طالما (/*CONSTCOND*/0)
 
-#define	STAILQ_REMOVE_HEAD(head, field) do {				\
-	if (((head)->stqh_first = (head)->stqh_first->field.stqe_next) == NULL) \
-		(head)->stqh_last = &(head)->stqh_first;			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	STAILQ_REMOVE_سر(سر_2, ډګر) افعل {				\
+	إذا (((سر_2)->stqh_لومړی = (سر_2)->stqh_لومړی->ډګر.stqe_بل) == عدم) \
+		(سر_2)->stqh_وروستی = &(سر_2)->stqh_لومړی;			\
+} طالما (/*CONSTCOND*/0)
 
-#define	STAILQ_REMOVE(head, elm, type, field) do {			\
-	if ((head)->stqh_first == (elm)) {				\
-		STAILQ_REMOVE_HEAD((head), field);			\
-	} else {							\
-		struct type *curelm = (head)->stqh_first;		\
-		while (curelm->field.stqe_next != (elm))			\
-			curelm = curelm->field.stqe_next;		\
-		if ((curelm->field.stqe_next =				\
-			curelm->field.stqe_next->field.stqe_next) == NULL) \
-			    (head)->stqh_last = &(curelm)->field.stqe_next; \
+#تعریف_کړه	STAILQ_REMOVE(سر_2, elm, type, ډګر) افعل {			\
+	إذا ((سر_2)->stqh_لومړی == (elm)) {				\
+		STAILQ_REMOVE_سر((سر_2), ډګر);			\
+	} وإلا {							\
+		بنية type *curelm = (سر_2)->stqh_لومړی;		\
+		طالما (curelm->ډګر.stqe_بل != (elm))			\
+			curelm = curelm->ډګر.stqe_بل;		\
+		إذا ((curelm->ډګر.stqe_بل =				\
+			curelm->ډګر.stqe_بل->ډګر.stqe_بل) == عدم) \
+			    (سر_2)->stqh_وروستی = &(curelm)->ډګر.stqe_بل; \
 	}								\
-} while (/*CONSTCOND*/0)
+} طالما (/*CONSTCOND*/0)
 
-#define	STAILQ_FOREACH(var, head, field)				\
-	for ((var) = ((head)->stqh_first);				\
+#تعریف_کړه	STAILQ_FOREACH(var, سر_2, ډګر)				\
+	لكل ((var) = ((سر_2)->stqh_لومړی);				\
 		(var);							\
-		(var) = ((var)->field.stqe_next))
+		(var) = ((var)->ډګر.stqe_بل))
 
-#define	STAILQ_FOREACH_SAFE(var, head, field, tvar)			\
-	for ((var) = STAILQ_FIRST((head));				\
-	    (var) && ((tvar) = STAILQ_NEXT((var), field), 1);		\
+#تعریف_کړه	STAILQ_FOREACH_خوندي(var, سر_2, ډګر, tvar)			\
+	لكل ((var) = STAILQ_لومړی((سر_2));				\
+	    (var) && ((tvar) = STAILQ_بل((var), ډګر), 1);		\
 	    (var) = (tvar))
 
-#define	STAILQ_CONCAT(head1, head2) do {				\
-	if (!STAILQ_EMPTY((head2))) {					\
-		*(head1)->stqh_last = (head2)->stqh_first;		\
-		(head1)->stqh_last = (head2)->stqh_last;		\
+#تعریف_کړه	STAILQ_CONCAT(head1, head2) افعل {				\
+	إذا (!STAILQ_تشه((head2))) {					\
+		*(head1)->stqh_وروستی = (head2)->stqh_لومړی;		\
+		(head1)->stqh_وروستی = (head2)->stqh_وروستی;		\
 		STAILQ_INIT((head2));					\
 	}								\
-} while (/*CONSTCOND*/0)
+} طالما (/*CONSTCOND*/0)
 
-#define	STAILQ_LAST(head, type, field)					\
-	(STAILQ_EMPTY((head)) ?						\
-		NULL :							\
-	        ((struct type *)(void *)				\
-		((char *)((head)->stqh_last) - offsetof(struct type, field))))
+#تعریف_کړه	STAILQ_وروستی(سر_2, type, ډګر)					\
+	(STAILQ_تشه((سر_2)) ?						\
+		عدم :							\
+	        ((بنية type *)(فراغ *)				\
+		((حرف *)((سر_2)->stqh_وروستی) - offsetof(بنية type, ډګر))))
 
 
-#ifndef _KERNEL
+#که_نه_تعریف_شوی _KERNEL
 /*
  * Circular queue definitions. Do not use. We still keep the macros
  * for compatibility but because of pointer aliasing issues their use
@@ -678,169 +678,169 @@ struct {								\
  * this by changing the head/tail sentinel values, but see the note above
  * this one.
  */
-static __inline const void * __launder_type(const void *);
-static __inline const void *
-__launder_type(const void *__x)
+ساكن __inline ثابت فراغ * __launder_type(ثابت فراغ *);
+ساكن __inline ثابت فراغ *
+__launder_type(ثابت فراغ *__x)
 {
 	__asm __volatile("" : "+r" (__x));
-	return __x;
+	أرجع __x;
 }
 
-#if defined(QUEUEDEBUG)
-#define QUEUEDEBUG_CIRCLEQ_HEAD(head, field)				\
-	if ((head)->cqh_first != CIRCLEQ_ENDC(head) &&			\
-	    (head)->cqh_first->field.cqe_prev != CIRCLEQ_ENDC(head))	\
-		QUEUEDEBUG_ABORT("CIRCLEQ head forw %p %s:%d", (head),	\
+#إذا defined(QUEUEDEBUG)
+#تعریف_کړه QUEUEDEBUG_CIRCLEQ_سر(سر_2, ډګر)				\
+	إذا ((سر_2)->cqh_لومړی != CIRCLEQ_ENDC(سر_2) &&			\
+	    (سر_2)->cqh_لومړی->ډګر.cqe_prev != CIRCLEQ_ENDC(سر_2))	\
+		QUEUEDEBUG_ABORT("CIRCLEQ head forw %p %s:%d", (سر_2),	\
 		      __FILE__, __LINE__);				\
-	if ((head)->cqh_last != CIRCLEQ_ENDC(head) &&			\
-	    (head)->cqh_last->field.cqe_next != CIRCLEQ_ENDC(head))	\
-		QUEUEDEBUG_ABORT("CIRCLEQ head back %p %s:%d", (head),	\
+	إذا ((سر_2)->cqh_وروستی != CIRCLEQ_ENDC(سر_2) &&			\
+	    (سر_2)->cqh_وروستی->ډګر.cqe_بل != CIRCLEQ_ENDC(سر_2))	\
+		QUEUEDEBUG_ABORT("CIRCLEQ head back %p %s:%d", (سر_2),	\
 		      __FILE__, __LINE__);
-#define QUEUEDEBUG_CIRCLEQ_ELM(head, elm, field)			\
-	if ((elm)->field.cqe_next == CIRCLEQ_ENDC(head)) {		\
-		if ((head)->cqh_last != (elm))				\
+#تعریف_کړه QUEUEDEBUG_CIRCLEQ_ELM(سر_2, elm, ډګر)			\
+	إذا ((elm)->ډګر.cqe_بل == CIRCLEQ_ENDC(سر_2)) {		\
+		إذا ((سر_2)->cqh_وروستی != (elm))				\
 			QUEUEDEBUG_ABORT("CIRCLEQ elm last %p %s:%d",	\
 			    (elm), __FILE__, __LINE__);			\
-	} else {							\
-		if ((elm)->field.cqe_next->field.cqe_prev != (elm))	\
+	} وإلا {							\
+		إذا ((elm)->ډګر.cqe_بل->ډګر.cqe_prev != (elm))	\
 			QUEUEDEBUG_ABORT("CIRCLEQ elm forw %p %s:%d",	\
 			    (elm), __FILE__, __LINE__);			\
 	}								\
-	if ((elm)->field.cqe_prev == CIRCLEQ_ENDC(head)) {		\
-		if ((head)->cqh_first != (elm))				\
+	إذا ((elm)->ډګر.cqe_prev == CIRCLEQ_ENDC(سر_2)) {		\
+		إذا ((سر_2)->cqh_لومړی != (elm))				\
 			QUEUEDEBUG_ABORT("CIRCLEQ elm first %p %s:%d",	\
 			    (elm), __FILE__, __LINE__);			\
-	} else {							\
-		if ((elm)->field.cqe_prev->field.cqe_next != (elm))	\
+	} وإلا {							\
+		إذا ((elm)->ډګر.cqe_prev->ډګر.cqe_بل != (elm))	\
 			QUEUEDEBUG_ABORT("CIRCLEQ elm prev %p %s:%d",	\
 			    (elm), __FILE__, __LINE__);			\
 	}
-#define QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, field)			\
-	(elm)->field.cqe_next = (void *)1L;				\
-	(elm)->field.cqe_prev = (void *)1L;
-#else
-#define QUEUEDEBUG_CIRCLEQ_HEAD(head, field)
-#define QUEUEDEBUG_CIRCLEQ_ELM(head, elm, field)
-#define QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, field)
-#endif
+#تعریف_کړه QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, ډګر)			\
+	(elm)->ډګر.cqe_بل = (فراغ *)1L;				\
+	(elm)->ډګر.cqe_prev = (فراغ *)1L;
+#وإلا
+#تعریف_کړه QUEUEDEBUG_CIRCLEQ_سر(سر_2, ډګر)
+#تعریف_کړه QUEUEDEBUG_CIRCLEQ_ELM(سر_2, elm, ډګر)
+#تعریف_کړه QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, ډګر)
+#د_که_پای
 
-#define	CIRCLEQ_HEAD(name, type)					\
-struct name {								\
-	struct type *cqh_first;		/* first element */		\
-	struct type *cqh_last;		/* last element */		\
+#تعریف_کړه	CIRCLEQ_سر(name, type)					\
+بنية name {								\
+	بنية type *cqh_لومړی;		/* first element */		\
+	بنية type *cqh_وروستی;		/* last element */		\
 }
 
-#define	CIRCLEQ_HEAD_INITIALIZER(head)					\
-	{ CIRCLEQ_END(&head), CIRCLEQ_END(&head) }
+#تعریف_کړه	CIRCLEQ_سر_INITIALIZER(سر_2)					\
+	{ CIRCLEQ_پای_ټکی(&سر_2), CIRCLEQ_پای_ټکی(&سر_2) }
 
-#define	CIRCLEQ_ENTRY(type)						\
-struct {								\
-	struct type *cqe_next;		/* next element */		\
-	struct type *cqe_prev;		/* previous element */		\
+#تعریف_کړه	CIRCLEQ_ثبت(type)						\
+بنية {								\
+	بنية type *cqe_بل;		/* next element */		\
+	بنية type *cqe_prev;		/* previous element */		\
 }
 
 /*
  * Circular queue functions.
  */
-#define	CIRCLEQ_INIT(head) do {						\
-	(head)->cqh_first = CIRCLEQ_END(head);				\
-	(head)->cqh_last = CIRCLEQ_END(head);				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	CIRCLEQ_INIT(سر_2) افعل {						\
+	(سر_2)->cqh_لومړی = CIRCLEQ_پای_ټکی(سر_2);				\
+	(سر_2)->cqh_وروستی = CIRCLEQ_پای_ټکی(سر_2);				\
+} طالما (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (listelm), field)		\
-	(elm)->field.cqe_next = (listelm)->field.cqe_next;		\
-	(elm)->field.cqe_prev = (listelm);				\
-	if ((listelm)->field.cqe_next == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_last = (elm);				\
-	else								\
-		(listelm)->field.cqe_next->field.cqe_prev = (elm);	\
-	(listelm)->field.cqe_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	CIRCLEQ_ورننباسه_AFTER(سر_2, listelm, elm, ډګر) افعل {		\
+	QUEUEDEBUG_CIRCLEQ_سر((سر_2), ډګر)				\
+	QUEUEDEBUG_CIRCLEQ_ELM((سر_2), (listelm), ډګر)		\
+	(elm)->ډګر.cqe_بل = (listelm)->ډګر.cqe_بل;		\
+	(elm)->ډګر.cqe_prev = (listelm);				\
+	إذا ((listelm)->ډګر.cqe_بل == CIRCLEQ_ENDC(سر_2))		\
+		(سر_2)->cqh_وروستی = (elm);				\
+	وإلا								\
+		(listelm)->ډګر.cqe_بل->ډګر.cqe_prev = (elm);	\
+	(listelm)->ډګر.cqe_بل = (elm);				\
+} طالما (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_BEFORE(head, listelm, elm, field) do {		\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (listelm), field)		\
-	(elm)->field.cqe_next = (listelm);				\
-	(elm)->field.cqe_prev = (listelm)->field.cqe_prev;		\
-	if ((listelm)->field.cqe_prev == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_first = (elm);				\
-	else								\
-		(listelm)->field.cqe_prev->field.cqe_next = (elm);	\
-	(listelm)->field.cqe_prev = (elm);				\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	CIRCLEQ_ورننباسه_BEFORE(سر_2, listelm, elm, ډګر) افعل {		\
+	QUEUEDEBUG_CIRCLEQ_سر((سر_2), ډګر)				\
+	QUEUEDEBUG_CIRCLEQ_ELM((سر_2), (listelm), ډګر)		\
+	(elm)->ډګر.cqe_بل = (listelm);				\
+	(elm)->ډګر.cqe_prev = (listelm)->ډګر.cqe_prev;		\
+	إذا ((listelm)->ډګر.cqe_prev == CIRCLEQ_ENDC(سر_2))		\
+		(سر_2)->cqh_لومړی = (elm);				\
+	وإلا								\
+		(listelm)->ډګر.cqe_prev->ډګر.cqe_بل = (elm);	\
+	(listelm)->ډګر.cqe_prev = (elm);				\
+} طالما (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_HEAD(head, elm, field) do {			\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	(elm)->field.cqe_next = (head)->cqh_first;			\
-	(elm)->field.cqe_prev = CIRCLEQ_END(head);			\
-	if ((head)->cqh_last == CIRCLEQ_ENDC(head))			\
-		(head)->cqh_last = (elm);				\
-	else								\
-		(head)->cqh_first->field.cqe_prev = (elm);		\
-	(head)->cqh_first = (elm);					\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	CIRCLEQ_ورننباسه_سر(سر_2, elm, ډګر) افعل {			\
+	QUEUEDEBUG_CIRCLEQ_سر((سر_2), ډګر)				\
+	(elm)->ډګر.cqe_بل = (سر_2)->cqh_لومړی;			\
+	(elm)->ډګر.cqe_prev = CIRCLEQ_پای_ټکی(سر_2);			\
+	إذا ((سر_2)->cqh_وروستی == CIRCLEQ_ENDC(سر_2))			\
+		(سر_2)->cqh_وروستی = (elm);				\
+	وإلا								\
+		(سر_2)->cqh_لومړی->ډګر.cqe_prev = (elm);		\
+	(سر_2)->cqh_لومړی = (elm);					\
+} طالما (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_TAIL(head, elm, field) do {			\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	(elm)->field.cqe_next = CIRCLEQ_END(head);			\
-	(elm)->field.cqe_prev = (head)->cqh_last;			\
-	if ((head)->cqh_first == CIRCLEQ_ENDC(head))			\
-		(head)->cqh_first = (elm);				\
-	else								\
-		(head)->cqh_last->field.cqe_next = (elm);		\
-	(head)->cqh_last = (elm);					\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	CIRCLEQ_ورننباسه_لکۍ(سر_2, elm, ډګر) افعل {			\
+	QUEUEDEBUG_CIRCLEQ_سر((سر_2), ډګر)				\
+	(elm)->ډګر.cqe_بل = CIRCLEQ_پای_ټکی(سر_2);			\
+	(elm)->ډګر.cqe_prev = (سر_2)->cqh_وروستی;			\
+	إذا ((سر_2)->cqh_لومړی == CIRCLEQ_ENDC(سر_2))			\
+		(سر_2)->cqh_لومړی = (elm);				\
+	وإلا								\
+		(سر_2)->cqh_وروستی->ډګر.cqe_بل = (elm);		\
+	(سر_2)->cqh_وروستی = (elm);					\
+} طالما (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_REMOVE(head, elm, field) do {				\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (elm), field)			\
-	if ((elm)->field.cqe_next == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_last = (elm)->field.cqe_prev;		\
-	else								\
-		(elm)->field.cqe_next->field.cqe_prev =			\
-		    (elm)->field.cqe_prev;				\
-	if ((elm)->field.cqe_prev == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_first = (elm)->field.cqe_next;		\
-	else								\
-		(elm)->field.cqe_prev->field.cqe_next =			\
-		    (elm)->field.cqe_next;				\
-	QUEUEDEBUG_CIRCLEQ_POSTREMOVE((elm), field)			\
-} while (/*CONSTCOND*/0)
+#تعریف_کړه	CIRCLEQ_REMOVE(سر_2, elm, ډګر) افعل {				\
+	QUEUEDEBUG_CIRCLEQ_سر((سر_2), ډګر)				\
+	QUEUEDEBUG_CIRCLEQ_ELM((سر_2), (elm), ډګر)			\
+	إذا ((elm)->ډګر.cqe_بل == CIRCLEQ_ENDC(سر_2))		\
+		(سر_2)->cqh_وروستی = (elm)->ډګر.cqe_prev;		\
+	وإلا								\
+		(elm)->ډګر.cqe_بل->ډګر.cqe_prev =			\
+		    (elm)->ډګر.cqe_prev;				\
+	إذا ((elm)->ډګر.cqe_prev == CIRCLEQ_ENDC(سر_2))		\
+		(سر_2)->cqh_لومړی = (elm)->ډګر.cqe_بل;		\
+	وإلا								\
+		(elm)->ډګر.cqe_prev->ډګر.cqe_بل =			\
+		    (elm)->ډګر.cqe_بل;				\
+	QUEUEDEBUG_CIRCLEQ_POSTREMOVE((elm), ډګر)			\
+} طالما (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_FOREACH(var, head, field)				\
-	for ((var) = ((head)->cqh_first);				\
-		(var) != CIRCLEQ_ENDC(head);				\
-		(var) = ((var)->field.cqe_next))
+#تعریف_کړه	CIRCLEQ_FOREACH(var, سر_2, ډګر)				\
+	لكل ((var) = ((سر_2)->cqh_لومړی);				\
+		(var) != CIRCLEQ_ENDC(سر_2);				\
+		(var) = ((var)->ډګر.cqe_بل))
 
-#define	CIRCLEQ_FOREACH_REVERSE(var, head, field)			\
-	for ((var) = ((head)->cqh_last);				\
-		(var) != CIRCLEQ_ENDC(head);				\
-		(var) = ((var)->field.cqe_prev))
+#تعریف_کړه	CIRCLEQ_FOREACH_سرچپه(var, سر_2, ډګر)			\
+	لكل ((var) = ((سر_2)->cqh_وروستی);				\
+		(var) != CIRCLEQ_ENDC(سر_2);				\
+		(var) = ((var)->ډګر.cqe_prev))
 
 /*
  * Circular queue access methods.
  */
-#define	CIRCLEQ_FIRST(head)		((head)->cqh_first)
-#define	CIRCLEQ_LAST(head)		((head)->cqh_last)
+#تعریف_کړه	CIRCLEQ_لومړی(سر_2)		((سر_2)->cqh_لومړی)
+#تعریف_کړه	CIRCLEQ_وروستی(سر_2)		((سر_2)->cqh_وروستی)
 /* For comparisons */
-#define	CIRCLEQ_ENDC(head)		(__launder_type(head))
+#تعریف_کړه	CIRCLEQ_ENDC(سر_2)		(__launder_type(سر_2))
 /* For assignments */
-#define	CIRCLEQ_END(head)		((void *)(head))
-#define	CIRCLEQ_NEXT(elm, field)	((elm)->field.cqe_next)
-#define	CIRCLEQ_PREV(elm, field)	((elm)->field.cqe_prev)
-#define	CIRCLEQ_EMPTY(head)						\
-    (CIRCLEQ_FIRST(head) == CIRCLEQ_ENDC(head))
+#تعریف_کړه	CIRCLEQ_پای_ټکی(سر_2)		((فراغ *)(سر_2))
+#تعریف_کړه	CIRCLEQ_بل(elm, ډګر)	((elm)->ډګر.cqe_بل)
+#تعریف_کړه	CIRCLEQ_PREV(elm, ډګر)	((elm)->ډګر.cqe_prev)
+#تعریف_کړه	CIRCLEQ_تشه(سر_2)						\
+    (CIRCLEQ_لومړی(سر_2) == CIRCLEQ_ENDC(سر_2))
 
-#define CIRCLEQ_LOOP_NEXT(head, elm, field)				\
-	(((elm)->field.cqe_next == CIRCLEQ_ENDC(head))			\
-	    ? ((head)->cqh_first)					\
-	    : (elm->field.cqe_next))
-#define CIRCLEQ_LOOP_PREV(head, elm, field)				\
-	(((elm)->field.cqe_prev == CIRCLEQ_ENDC(head))			\
-	    ? ((head)->cqh_last)					\
-	    : (elm->field.cqe_prev))
-#endif /* !_KERNEL */
+#تعریف_کړه CIRCLEQ_LOOP_بل(سر_2, elm, ډګر)				\
+	(((elm)->ډګر.cqe_بل == CIRCLEQ_ENDC(سر_2))			\
+	    ? ((سر_2)->cqh_لومړی)					\
+	    : (elm->ډګر.cqe_بل))
+#تعریف_کړه CIRCLEQ_LOOP_PREV(سر_2, elm, ډګر)				\
+	(((elm)->ډګر.cqe_prev == CIRCLEQ_ENDC(سر_2))			\
+	    ? ((سر_2)->cqh_وروستی)					\
+	    : (elm->ډګر.cqe_prev))
+#د_که_پای /* !_KERNEL */
 
-#endif	/* !_SYS_QUEUE_H_ */
+#د_که_پای	/* !_SYS_QUEUE_H_ */

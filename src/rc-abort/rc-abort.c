@@ -10,25 +10,25 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
+#ضمن <errno.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <signal.h>
+#ضمن <string.h>
 
-#include "einfo.h"
+#ضمن "einfo.h"
 
-int main(void)
+صحيح اصلي(فراغ)
 {
-	const char *p = getenv("RC_PID");
-	int pid;
+	ثابت حرف *p = getenv("RC_PID");
+	صحيح pid;
 
-	if (p && sscanf(p, "%d", &pid) == 1) {
-		if (kill(pid, SIGUSR1) != 0)
+	إذا (p && له_مزي_ولوله(p, "%d", &pid) == 1) {
+		إذا (kill(pid, SIGUSR1) != 0)
 			eerrorx("rc-abort: failed to signal parent %d: %s",
 			    pid, strerror(errno));
-		return EXIT_SUCCESS;
+		أرجع EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	أرجع EXIT_FAILURE;
 }
