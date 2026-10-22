@@ -1,112 +1,112 @@
-#include <sys/types.h>
-#include <sys/stat.h>
+#ضمن <sys/types.h>
+#ضمن <sys/stat.h>
 
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdbool.h>
-#include <syslog.h>
+#ضمن <errno.h>
+#ضمن <fcntl.h>
+#ضمن <unistd.h>
+#ضمن <string.h>
+#ضمن <stdbool.h>
+#ضمن <syslog.h>
 
-#include <rc.h>
+#ضمن <rc.h>
 
-#include "initreq.h"
-#include "helpers.h"
+#ضمن "initreq.h"
+#ضمن "helpers.h"
 
-static bool init_halt = false;
+ساكن bool init_halt = false;
 
-static void sysvinit_runlevel(int runlevel)
+ساكن فراغ sysvinit_runlevel(صحيح runlevel)
 {
-	const char *cmd;
-	int fifo;
+	ثابت حرف *cmd;
+	صحيح fifo;
 
-	switch (runlevel) {
-	case '0':
+	بدل (runlevel) {
+	حالة '0':
 		cmd = init_halt ? "halt" : "poweroff";
-		break;
-	case '1':
-	case 'S':
-	case 's':
+		اكسر;
+	حالة '1':
+	حالة 'S':
+	حالة 's':
 		cmd = "single";
-		break;
-	case '2':
-	case '3':
-	case '4':
-	case '5':
+		اكسر;
+	حالة '2':
+	حالة '3':
+	حالة '4':
+	حالة '5':
 		/* TODO: switch to default runlevel? */
-		return;
-	case '6':
+		أرجع;
+	حالة '6':
 		/* RB_KEXEC: Gentoo inittab calls /sbin/reboot -k */
 		cmd = "kexec";
-		break;
-	case 'Q':
-	case 'q':
-		return;
-	case 'U':
-	case 'u':
+		اكسر;
+	حالة 'Q':
+	حالة 'q':
+		أرجع;
+	حالة 'U':
+	حالة 'u':
 		cmd = "reexec";
-		break;
+		اكسر;
 	}
 
-	if ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
+	إذا ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
 		syslog(LOG_ERR, "open: %s", strerror(errno));
-		return;
+		أرجع;
 	}
 
-	if (write(fifo, cmd, strlen(cmd) + 1) == -1)
+	إذا (اكتب(fifo, cmd, strlen(cmd) + 1) == -1)
 		syslog(LOG_ERR, "write: %s", strerror(errno));
 	close(fifo);
 }
 
-static void sysvinit_setenv(char *data, size_t size)
+ساكن فراغ sysvinit_setenv(حرف *data, size_t size)
 {
 	data[size - 1] = '\0';
-	for (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
+	لكل (حرف *end = data + size; data < end && *data; data += strlen(data) + 1) {
 		/* We only care about the INIT_HALT variable */
-		if (!strcmp(data, "INIT_HALT=HALT"))
+		إذا (!strcmp(data, "INIT_HALT=HALT"))
 			init_halt = true;
-		else if (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
+		وإلا إذا (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
 			init_halt = false;
 	}
 }
 
-int main(void) {
-	int fifo;
+صحيح main(فراغ) {
+	صحيح fifo;
 
 	openlog("sysv-initctl", 0, LOG_DAEMON);
 	symlink("/run/initctl", "/dev/initctl");
-	if ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
+	إذا ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
 		syslog(LOG_ERR, "open_rwfifo: %s", strerror(errno));
-		return 1;
+		أرجع 1;
 	}
 
-	for (;;) {
-		struct init_request req;
-		ssize_t count = read(fifo, &req, sizeof(req));
+	لكل (;;) {
+		بنية init_request req;
+		ssize_t ژماردن = اقرأ(fifo, &req, حجم(req));
 
-		if (count == -1) {
+		إذا (ژماردن == -1) {
 			syslog(LOG_ERR, "read: %s", strerror(errno));
-			continue;
+			استمر;
 		}
 
-		if (count != sizeof(req)) {
+		إذا (ژماردن != حجم(req)) {
 			syslog(LOG_ERR, "read: short count");
-			continue;
+			استمر;
 		}
 
-		if (req.magic != INIT_MAGIC) {
+		إذا (req.magic != INIT_MAGIC) {
 			syslog(LOG_ERR, "invalid magic bytes");
-			continue;
+			استمر;
 		}
 
-		switch (req.cmd) {
-		case INIT_CMD_RUNLVL:
+		بدل (req.cmd) {
+		حالة INIT_CMD_RUNLVL:
 			sysvinit_runlevel(req.runlevel);
-			break;
-		case INIT_CMD_SETENV:
-		case INIT_CMD_UNSETENV:
-			sysvinit_setenv(req.i.data, sizeof(req.i.data));
-			break;
+			اكسر;
+		حالة INIT_CMD_SETENV:
+		حالة INIT_CMD_UNSETENV:
+			sysvinit_setenv(req.i.data, حجم(req.i.data));
+			اكسر;
 		}
 	}
 }
