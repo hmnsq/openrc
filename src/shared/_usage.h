@@ -35,7 +35,7 @@
 
 #define case_RC_COMMON_getopt_case_C  setenv ("EINFO_COLOR", "NO", 1);
 #define case_RC_COMMON_getopt_case_h  usage (EXIT_SUCCESS);
-#define case_RC_COMMON_getopt_case_V  if (argc == 2) show_version();
+#define case_RC_COMMON_getopt_case_V  якщо (argc == 2) show_version();
 #define case_RC_COMMON_getopt_case_v  setenv ("EINFO_VERBOSE", "YES", 1);
 #define case_RC_COMMON_getopt_case_q  set_quiet_options();
 #define case_RC_COMMON_getopt_case_U  rc_set_user();
@@ -59,4 +59,4 @@ extern const char *usagestring;
 
 void set_quiet_options(void);
 void show_version(void);
-void usage(int exit_status);
+void usage(ціле exit_status);

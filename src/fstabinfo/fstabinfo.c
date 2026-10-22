@@ -42,7 +42,7 @@
 #  define ENT_TYPE(_ent) (_ent)->mnt_type
 #  define ENT_OPTS(_ent) (_ent)->mnt_opts
 #  define ENT_PASS(_ent) (_ent)->mnt_passno
-#else
+#інакше
 #  define HAVE_GETFSENT
 #  include <fstab.h>
 
@@ -99,41 +99,41 @@ getmntfile(const char *file)
 	FILE *fp;
 
 	START_ENT;
-	while ((ent = getmntent(fp)))
-		if (strcmp(file, ent->mnt_dir) == 0)
+	поки ((ent = getmntent(fp)))
+		якщо (strcmp(file, ent->mnt_dir) == 0)
 			break;
 	END_ENT;
 
-	return ent;
+	повернути ent;
 }
 #endif
 
 extern const char *applet;
 
-static int
+static ціле
 do_mount(struct ENT *ent, bool remount)
 {
 	char *argv[10];
 	pid_t pid;
-	int status, err;
+	ціле status, err;
 
 	argv[0] = UNCONST("mount");
 	argv[1] = UNCONST("-o");
 	argv[2] = ENT_OPTS(ent);
 	argv[3] = UNCONST("-t");
 	argv[4] = ENT_TYPE(ent);
-	if (!remount) {
+	якщо (!remount) {
 		argv[5] = ENT_BLOCKDEVICE(ent);
 		argv[6] = ENT_FILE(ent);
 		argv[7] = NULL;
-	} else {
+	} інакше {
 #ifdef __linux__
 		argv[5] = UNCONST("-o");
 		argv[6] = UNCONST("remount");
 		argv[7] = ENT_BLOCKDEVICE(ent);
 		argv[8] = ENT_FILE(ent);
 		argv[9] = NULL;
-#else
+#інакше
 		argv[5] = UNCONST("-u");
 		argv[6] = ENT_BLOCKDEVICE(ent);
 		argv[7] = ENT_FILE(ent);
@@ -141,13 +141,13 @@ do_mount(struct ENT *ent, bool remount)
 #endif
 	}
 	err = posix_spawnp(&pid, argv[0], NULL, NULL, argv, environ);
-	if (err)
+	якщо (err)
 		eerrorx("%s: posix_spawnp: %s", applet, strerror(err));
-	while (waitpid(pid, &status, 0) < 0 && errno == EINTR);
-	if (WIFEXITED(status))
-		return WEXITSTATUS(status);
-	else
-		return -1;
+	поки (waitpid(pid, &status, 0) < 0 && errno == EINTR);
+	якщо (WIFEXITED(status))
+		повернути WEXITSTATUS(status);
+	інакше
+		повернути -1;
 }
 
 #define OUTPUT_FILE      (1 << 1)
@@ -158,14 +158,14 @@ do_mount(struct ENT *ent, bool remount)
 #define OUTPUT_MOUNT     (1 << 6)
 #define OUTPUT_REMOUNT   (1 << 7)
 
-int main(int argc, char **argv)
+ціле main(ціле argc, char **argv)
 {
 	struct ENT *ent;
-	int result = EXIT_SUCCESS;
+	ціле result = EXIT_SUCCESS;
 	char *token;
-	int i, p;
-	int opt;
-	int output = OUTPUT_FILE;
+	ціле i, p;
+	ціле opt;
+	ціле output = OUTPUT_FILE;
 	RC_STRINGLIST *files = rc_stringlist_new();
 	RC_STRING *file, *file_np;
 	bool filtered = false;
@@ -175,14 +175,14 @@ int main(int argc, char **argv)
 #endif
 
 	/* fail if there is no /etc/fstab */
-	if (access("/etc/fstab", F_OK) != 0)
+	якщо (access("/etc/fstab", F_OK) != 0)
 		eerrorx("/etc/fstab does not exist");
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	поки ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (ціле *) 0)) != -1)
 	{
 		switch (opt) {
 		case 'M':
@@ -206,18 +206,18 @@ int main(int argc, char **argv)
 			case '=':
 			case '<':
 			case '>':
-				if (sscanf(optarg + 1, "%d", &i) != 1)
+				якщо (sscanf(optarg + 1, "%d", &i) != 1)
 					eerrorx("%s: invalid passno %s",
 					    argv[0], optarg + 1);
 
 				filtered = true;
 				opt = optarg[0];
 				START_ENT;
-				while ((ent = GET_ENT)) {
-					if (strcmp(ENT_FILE(ent), "none") == 0)
+				поки ((ent = GET_ENT)) {
+					якщо (strcmp(ENT_FILE(ent), "none") == 0)
 						continue;
 					p = ENT_PASS(ent);
-					if ((opt == '=' && i == p) ||
+					якщо ((opt == '=' && i == p) ||
 					    (opt == '<' && i > p && p != 0) ||
 					    (opt == '>' && i < p && p != 0))
 						rc_stringlist_add(files,
@@ -235,10 +235,10 @@ int main(int argc, char **argv)
 
 		case 't':
 			filtered = true;
-			while ((token = strsep(&optarg, ","))) {
+			поки ((token = strsep(&optarg, ","))) {
 				START_ENT;
-				while ((ent = GET_ENT))
-					if (strcmp(token, ENT_TYPE(ent)) == 0)
+				поки ((ent = GET_ENT))
+					якщо (strcmp(token, ENT_TYPE(ent)) == 0)
 						rc_stringlist_add(files,
 						    ENT_FILE(ent));
 				END_ENT;
@@ -249,39 +249,39 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (optind < argc) {
-		if (TAILQ_FIRST(files)) {
+	якщо (optind < argc) {
+		якщо (TAILQ_FIRST(files)) {
 			TAILQ_FOREACH_SAFE(file, files, entries, file_np) {
-				for (i = optind; i < argc; i++)
-					if (strcmp(argv[i], file->value) == 0)
+				для (i = optind; i < argc; i++)
+					якщо (strcmp(argv[i], file->value) == 0)
 						break;
-				if (i >= argc)
+				якщо (i >= argc)
 					rc_stringlist_delete(files,
 					    file->value);
 			}
-		} else {
-			while (optind < argc)
+		} інакше {
+			поки (optind < argc)
 				rc_stringlist_add(files, argv[optind++]);
 		}
-	} else if (!filtered) {
+	} інакше якщо (!filtered) {
 		START_ENT;
-		while ((ent = GET_ENT))
+		поки ((ent = GET_ENT))
 			rc_stringlist_add(files, ENT_FILE(ent));
 		END_ENT;
 
-		if (!TAILQ_FIRST(files))
+		якщо (!TAILQ_FIRST(files))
 			eerrorx("%s: empty fstab", argv[0]);
 	}
 
-	if (!TAILQ_FIRST(files)) {
+	якщо (!TAILQ_FIRST(files)) {
 		rc_stringlist_free(files);
-		return (EXIT_FAILURE);
+		повернути (EXIT_FAILURE);
 	}
 
 	/* Ensure we always display something */
 	START_ENT;
 	TAILQ_FOREACH(file, files, entries) {
-		if (!(ent = GET_ENT_FILE(file->value))) {
+		якщо (!(ent = GET_ENT_FILE(file->value))) {
 			result = EXIT_FAILURE;
 			continue;
 		}
@@ -298,7 +298,7 @@ int main(int argc, char **argv)
 		}
 
 		/* No point in outputting if quiet */
-		if (rc_yesno(getenv("EINFO_QUIET")))
+		якщо (rc_yesno(getenv("EINFO_QUIET")))
 			continue;
 
 		switch (output) {

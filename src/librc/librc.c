@@ -46,45 +46,45 @@
 
 /* File stream used for plugins to write environ vars to */
 FILE *rc_environ_fd = NULL;
-static int dirfds[RC_DIR_MAX];
+static ціле dirfds[RC_DIR_MAX];
 
-int rc_dirfd(enum rc_dir dir) {
-	int flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
-	int dirfd;
+ціле rc_dirfd(enum rc_dir dir) {
+	ціле flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
+	ціле dirfd;
 
-	if (dir < 0 || dir >= RC_DIR_MAX)
-		return -1;
-	if (dirfds[dir] <= 0) {
+	якщо (dir < 0 || dir >= RC_DIR_MAX)
+		повернути -1;
+	якщо (dirfds[dir] <= 0) {
 		switch (dir) {
 		case RC_DIR_SYSCONF:
-			return dirfds[dir] = open(rc_sysconfdir(), flags);
+			повернути dirfds[dir] = open(rc_sysconfdir(), flags);
 		case RC_DIR_USRCONF:
-			return dirfds[dir] = open(rc_usrconfdir(), flags);
+			повернути dirfds[dir] = open(rc_usrconfdir(), flags);
 		case RC_DIR_RUNLEVEL:
-			return dirfds[dir] = open(rc_runleveldir(), flags);
+			повернути dirfds[dir] = open(rc_runleveldir(), flags);
 		case RC_DIR_SVCDIR:
-			if (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
-				return -1;
-			return dirfds[dir] = open(rc_svcdir(), flags);
+			якщо (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
+				повернути -1;
+			повернути dirfds[dir] = open(rc_svcdir(), flags);
 		default:
 			assert(dirnames[dir]);
 			dirfd = rc_dirfd(RC_DIR_SVCDIR);
-			if ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
-				if (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
-					return -1;
+			якщо ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
+				якщо (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
+					повернути -1;
 				dirfds[dir] = openat(dirfd, dirnames[dir], flags);
 			}
 			break;
 		}
 	}
-	return dirfds[dir];
+	повернути dirfds[dir];
 }
 
 void clear_dirfds(void) {
-	for (size_t i = 0; i < RC_DIR_MAX; i++) {
+	для (size_t i = 0; i < RC_DIR_MAX; i++) {
 		/* dirfd is zero-initialized, though zero is a valid
 		 * FD, dirfd should never contain FDs which are <= 2. */
-		if (dirfds[i] <= 0)
+		якщо (dirfds[i] <= 0)
 			continue;
 
 		close(dirfds[i]);
@@ -95,7 +95,7 @@ void clear_dirfds(void) {
 #define LS_INITD	0x01
 #define LS_DIR		0x02
 static RC_STRINGLIST *
-ls_dir(int targetfd, const char *dir, int options)
+ls_dir(ціле targetfd, const char *dir, ціле options)
 {
 	DIR *dp;
 	struct dirent *d;
@@ -105,61 +105,61 @@ ls_dir(int targetfd, const char *dir, int options)
 
 	list = rc_stringlist_new();
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return list;
+	якщо (!(dp = do_opendirat(targetfd, dir)))
+		повернути list;
 
-	while (((d = readdir(dp)) != NULL)) {
-		if (d->d_name[0] == '.')
+	поки (((d = readdir(dp)) != NULL)) {
+		якщо (d->d_name[0] == '.')
 			continue;
-		if (options & LS_INITD) {
+		якщо (options & LS_INITD) {
 			/* Check that our file really exists.
 			 * This is important as a service maybe in a
 			 * runlevel, but could have been removed. */
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
+			якщо (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
 				continue;
 
 			/* .sh files are not init scripts */
 			l = strlen(d->d_name);
-			if (l > 2 && d->d_name[l - 3] == '.' &&
+			якщо (l > 2 && d->d_name[l - 3] == '.' &&
 					d->d_name[l - 2] == 's' &&
 					d->d_name[l - 1] == 'h')
 				continue;
 		}
-		if (options & LS_DIR) {
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
+		якщо (options & LS_DIR) {
+			якщо (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
 				continue;
 		}
 		rc_stringlist_add(list, d->d_name);
 	}
 	closedir(dp);
-	return list;
+	повернути list;
 }
 
 static bool
-rm_dir(int targetfd, const char *pathname, bool top)
+rm_dir(ціле targetfd, const char *pathname, bool top)
 {
 	bool retval = true;
 	struct dirent *d;
 	struct stat s;
 	DIR *dp;
 
-	if (!(dp = do_opendirat(targetfd, pathname)))
-		return false;
+	якщо (!(dp = do_opendirat(targetfd, pathname)))
+		повернути false;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+	поки ((d = readdir(dp))) {
+		якщо (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
 			continue;
-		if (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
+		якщо (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
 			retval = false;
 			break;
 		}
-		if (S_ISDIR(s.st_mode)) {
-			if (!rm_dir(dirfd(dp), d->d_name, true)) {
+		якщо (S_ISDIR(s.st_mode)) {
+			якщо (!rm_dir(dirfd(dp), d->d_name, true)) {
 				retval = false;
 				break;
 			}
-		} else {
-			if (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
+		} інакше {
+			якщо (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
 				retval = false;
 				break;
 			}
@@ -167,13 +167,13 @@ rm_dir(int targetfd, const char *pathname, bool top)
 	}
 	closedir(dp);
 
-	if (!retval)
-		return false;
+	якщо (!retval)
+		повернути false;
 
-	if (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
-		return false;
+	якщо (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
+		повернути false;
 
-	return true;
+	повернути true;
 }
 
 /* Other systems may need this at some point, but for now it's Linux only */
@@ -187,32 +187,32 @@ file_regex(const char *file, const char *regex)
 	ssize_t len = 0;
 	regex_t re;
 	bool retval = true;
-	int result;
+	ціле result;
 
-	if (!(fp = fopen(file, "r")))
-		return false;
+	якщо (!(fp = fopen(file, "r")))
+		повернути false;
 
-	if ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
+	якщо ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
 		char buf[BUFSIZ];
 		fclose(fp);
 		regerror(result, &re, buf, sizeof(buf));
 		fprintf(stderr, "file_regex: %s", buf);
-		return false;
+		повернути false;
 	}
 
-	while ((len = xgetline(&line, &size, fp)) != -1) {
+	поки ((len = xgetline(&line, &size, fp)) != -1) {
 		char *str = line;
 		/* some /proc files have \0 separated content so we have to
 		   loop through the 'line' */
 		do {
-			if (regexec(&re, str, 0, NULL, 0) == 0)
+			якщо (regexec(&re, str, 0, NULL, 0) == 0)
 				goto found;
 			str += strlen(str) + 1;
 			/* len is the size of allocated buffer and we don't
 			   want call regexec BUFSIZE times. find next str */
-			while (str < line + len && *str == '\0')
+			поки (str < line + len && *str == '\0')
 				str++;
-		} while (str < line + len);
+		} поки (str < line + len);
 	}
 	retval = false;
 found:
@@ -220,7 +220,7 @@ found:
 	free(line);
 	regfree(&re);
 
-	return retval;
+	повернути retval;
 }
 #endif
 
@@ -229,134 +229,134 @@ static const char *
 get_systype(void)
 {
 	char *systype = rc_conf_value("rc_sys");
-	if (systype) {
+	якщо (systype) {
 		char *s = systype;
 		/* Convert to uppercase */
-		while (s && *s) {
-			if (islower((unsigned char) *s))
+		поки (s && *s) {
+			якщо (islower((unsigned char) *s))
 				*s = toupper((unsigned char) *s);
 			s++;
 		}
 	}
-	return systype;
+	повернути systype;
 }
 
 static const char *
 detect_container(const char *systype RC_UNUSED)
 {
 #ifdef __FreeBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-		       return NULL;
-		if (strcmp(systype, RC_SYS_JAIL) == 0)
-			return RC_SYS_JAIL;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
+	якщо (systype) {
+		якщо (strcmp(systype, RC_SYS_NONE) == 0)
+		       повернути NULL;
+		якщо (strcmp(systype, RC_SYS_JAIL) == 0)
+			повернути RC_SYS_JAIL;
+		якщо (strcmp(systype, RC_SYS_PODMAN) == 0)
+			повернути RC_SYS_PODMAN;
 	}
 
-	int jailed = 0;
+	ціле jailed = 0;
 	size_t len = sizeof(jailed);
 
-	if (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
-		if (jailed == 1)
-			return RC_SYS_JAIL;
+	якщо (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
+		якщо (jailed == 1)
+			повернути RC_SYS_JAIL;
 
-	if (access("/var/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
+	якщо (access("/var/run/.containerenv", F_OK) == 0)
+		повернути RC_SYS_PODMAN;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_UML) == 0)
-			return RC_SYS_UML;
-		if (strcmp(systype, RC_SYS_VSERVER) == 0)
-			return RC_SYS_VSERVER;
-		if (strcmp(systype, RC_SYS_OPENVZ) == 0)
-			return RC_SYS_OPENVZ;
-		if (strcmp(systype, RC_SYS_LXC) == 0)
-			return RC_SYS_LXC;
-		if (strcmp(systype, RC_SYS_RKT) == 0)
-				return RC_SYS_RKT;
-		if (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
-				return RC_SYS_SYSTEMD_NSPAWN;
-		if (strcmp(systype, RC_SYS_DOCKER) == 0)
-				return RC_SYS_DOCKER;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
-		if (strcmp(systype, RC_SYS_WSL) == 0)
-			return RC_SYS_WSL;
+	якщо (systype) {
+		якщо (strcmp(systype, RC_SYS_NONE) == 0)
+			повернути NULL;
+		якщо (strcmp(systype, RC_SYS_UML) == 0)
+			повернути RC_SYS_UML;
+		якщо (strcmp(systype, RC_SYS_VSERVER) == 0)
+			повернути RC_SYS_VSERVER;
+		якщо (strcmp(systype, RC_SYS_OPENVZ) == 0)
+			повернути RC_SYS_OPENVZ;
+		якщо (strcmp(systype, RC_SYS_LXC) == 0)
+			повернути RC_SYS_LXC;
+		якщо (strcmp(systype, RC_SYS_RKT) == 0)
+				повернути RC_SYS_RKT;
+		якщо (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
+				повернути RC_SYS_SYSTEMD_NSPAWN;
+		якщо (strcmp(systype, RC_SYS_DOCKER) == 0)
+				повернути RC_SYS_DOCKER;
+		якщо (strcmp(systype, RC_SYS_PODMAN) == 0)
+			повернути RC_SYS_PODMAN;
+		якщо (strcmp(systype, RC_SYS_WSL) == 0)
+			повернути RC_SYS_WSL;
 	}
-	if (file_regex("/proc/cpuinfo", "UML"))
-		return RC_SYS_UML;
-	else if (file_regex("/proc/self/status",
+	якщо (file_regex("/proc/cpuinfo", "UML"))
+		повернути RC_SYS_UML;
+	інакше якщо (file_regex("/proc/self/status",
 		"(s_context|VxID):[[:space:]]*[1-9]"))
-		return RC_SYS_VSERVER;
-	else if (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
-		return RC_SYS_OPENVZ;
-	else if (file_regex("/proc/self/status",
+		повернути RC_SYS_VSERVER;
+	інакше якщо (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
+		повернути RC_SYS_OPENVZ;
+	інакше якщо (file_regex("/proc/self/status",
 		"envID:[[:space:]]*[1-9]"))
-		return RC_SYS_OPENVZ; /* old test */
-	else if (file_regex("/proc/1/environ", "container=lxc"))
-		return RC_SYS_LXC;
-	else if (file_regex("/proc/1/environ", "container=rkt"))
-		return RC_SYS_RKT;
-	else if (file_regex("/proc/1/environ", "container=systemd-nspawn"))
-		return RC_SYS_SYSTEMD_NSPAWN;
-	else if (access("/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
-	else if (access("/.dockerenv", F_OK) == 0)
-		return RC_SYS_DOCKER;
+		повернути RC_SYS_OPENVZ; /* old test */
+	інакше якщо (file_regex("/proc/1/environ", "container=lxc"))
+		повернути RC_SYS_LXC;
+	інакше якщо (file_regex("/proc/1/environ", "container=rkt"))
+		повернути RC_SYS_RKT;
+	інакше якщо (file_regex("/proc/1/environ", "container=systemd-nspawn"))
+		повернути RC_SYS_SYSTEMD_NSPAWN;
+	інакше якщо (access("/run/.containerenv", F_OK) == 0)
+		повернути RC_SYS_PODMAN;
+	інакше якщо (access("/.dockerenv", F_OK) == 0)
+		повернути RC_SYS_DOCKER;
 	/* old test, I'm not sure when this was valid. */
-	else if (file_regex("/proc/1/environ", "container=docker"))
-		return RC_SYS_DOCKER;
-	else if (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
-		return RC_SYS_WSL;
-	else if (getenv("WSL_DISTRO_NAME"))
-		return RC_SYS_WSL;
-	else if (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
-		return RC_SYS_WSL;
+	інакше якщо (file_regex("/proc/1/environ", "container=docker"))
+		повернути RC_SYS_DOCKER;
+	інакше якщо (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
+		повернути RC_SYS_WSL;
+	інакше якщо (getenv("WSL_DISTRO_NAME"))
+		повернути RC_SYS_WSL;
+	інакше якщо (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
+		повернути RC_SYS_WSL;
 #endif
 
-	return NULL;
+	повернути NULL;
 }
 
 static const char *
 detect_vm(const char *systype RC_UNUSED)
 {
 #ifdef __NetBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	якщо (systype) {
+		якщо (strcmp(systype, RC_SYS_NONE) == 0)
+			повернути NULL;
+		якщо (strcmp(systype, RC_SYS_XEN0) == 0)
+			повернути RC_SYS_XEN0;
+		якщо (strcmp(systype, RC_SYS_XENU) == 0)
+			повернути RC_SYS_XENU;
 	}
-	if (access("/kern/xen/privcmd", F_OK) == 0)
-		return RC_SYS_XEN0;
-	if (access("/kern/xen", F_OK) == 0)
-		return RC_SYS_XENU;
+	якщо (access("/kern/xen/privcmd", F_OK) == 0)
+		повернути RC_SYS_XEN0;
+	якщо (access("/kern/xen", F_OK) == 0)
+		повернути RC_SYS_XENU;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	якщо (systype) {
+		якщо (strcmp(systype, RC_SYS_NONE) == 0)
+			повернути NULL;
+		якщо (strcmp(systype, RC_SYS_XEN0) == 0)
+			повернути RC_SYS_XEN0;
+		якщо (strcmp(systype, RC_SYS_XENU) == 0)
+			повернути RC_SYS_XENU;
 	}
-	if (access("/proc/xen", F_OK) == 0) {
-		if (file_regex("/proc/xen/capabilities", "control_d"))
-			return RC_SYS_XEN0;
-		return RC_SYS_XENU;
+	якщо (access("/proc/xen", F_OK) == 0) {
+		якщо (file_regex("/proc/xen/capabilities", "control_d"))
+			повернути RC_SYS_XEN0;
+		повернути RC_SYS_XENU;
 	}
 #endif
 
-	return NULL;
+	повернути NULL;
 }
 
 const char *
@@ -367,32 +367,32 @@ rc_sys(void)
 
 	systype = get_systype();
 	sys = detect_container(systype);
-	if (!sys) {
+	якщо (!sys) {
 		sys = detect_vm(systype);
 	}
 
-	return sys;
+	повернути sys;
 }
 
 static const char *
 rc_parse_service_state(RC_SERVICE state)
 {
-	int i;
+	ціле i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].name;
+	для (i = 0; rc_service_state_names[i].name; i++) {
+		якщо (rc_service_state_names[i].state == state)
+			повернути rc_service_state_names[i].name;
 	}
-	return NULL;
+	повернути NULL;
 }
 
-static int
+static ціле
 rc_parse_service_state_dirfd(RC_SERVICE state)
 {
-	for (size_t i = 0; rc_service_state_names[i].name; i++)
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].dir;
-	return -1;
+	для (size_t i = 0; rc_service_state_names[i].name; i++)
+		якщо (rc_service_state_names[i].state == state)
+			повернути rc_service_state_names[i].dir;
+	повернути -1;
 }
 
 /* Returns a list of all the chained runlevels used by the
@@ -409,15 +409,15 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 	 * If we haven't been passed a runlevel or a level list, or
 	 * if the passed runlevel doesn't exist then we're done already!
 	 */
-	if (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
-		return;
+	якщо (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
+		повернути;
 
 	/*
 	 * We want to add this runlevel to the list but if
 	 * it is already in the list it needs to go at the
 	 * end again.
 	 */
-	if (rc_stringlist_find(level_list, runlevel))
+	якщо (rc_stringlist_find(level_list, runlevel))
 		rc_stringlist_delete(level_list, runlevel);
 	rc_stringlist_add(level_list, runlevel);
 
@@ -430,7 +430,7 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 		nextlevel = d->value;
 
 		/* Check for loop */
-		if (rc_stringlist_find(ancestor_list, nextlevel)) {
+		якщо (rc_stringlist_find(ancestor_list, nextlevel)) {
 			fprintf(stderr, "Loop detected in stacked runlevels attempting to enter runlevel %s!\n",
 			    nextlevel);
 			fprintf(stderr, "Ancestors:\n");
@@ -452,18 +452,18 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 bool
 rc_runlevel_starting(void)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
+	повернути faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
 }
 
 bool
 rc_runlevel_stopping(void)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
+	повернути faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
 }
 
 RC_STRINGLIST *rc_runlevel_list(void)
 {
-	return ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
+	повернути ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
 }
 
 char *
@@ -473,23 +473,23 @@ rc_runlevel_get(void)
 	char *runlevel = NULL;
 	size_t i;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
+	якщо ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
 		runlevel = xmalloc(sizeof(char) * PATH_MAX);
-		if (fgets(runlevel, PATH_MAX, fp)) {
+		якщо (fgets(runlevel, PATH_MAX, fp)) {
 			i = strlen(runlevel);
-			if (i && runlevel[i - 1] == '\n')
+			якщо (i && runlevel[i - 1] == '\n')
 				runlevel[i - 1] = 0;
-		} else
+		} інакше
 			*runlevel = '\0';
 		fclose(fp);
 	}
 
-	if (!runlevel || !*runlevel) {
+	якщо (!runlevel || !*runlevel) {
 		free(runlevel);
 		runlevel = NULL;
 	}
 
-	return runlevel;
+	повернути runlevel;
 }
 
 bool
@@ -497,12 +497,12 @@ rc_runlevel_set(const char *runlevel)
 {
 	FILE *fp;
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	якщо (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
+		повернути false;
 
 	fputs(runlevel, fp);
 	fclose(fp);
-	return true;
+	повернути true;
 }
 
 bool
@@ -510,39 +510,39 @@ rc_runlevel_exists(const char *runlevel)
 {
 	struct stat buf;
 
-	if (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
-		return false;
-	if (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
-		return true;
-	return false;
+	якщо (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
+		повернути false;
+	якщо (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
+		повернути true;
+	повернути false;
 }
 
 bool
 rc_runlevel_stack(const char *dst, const char *src)
 {
 	char *d, *s;
-	int r;
+	ціле r;
 
-	if (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
-		return false;
+	якщо (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
+		повернути false;
 	xasprintf(&s, "../%s", src);
 	xasprintf(&d, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = symlink(s, d);
 	free(d);
 	free(s);
-	return (r == 0);
+	повернути (r == 0);
 }
 
 bool
 rc_runlevel_unstack(const char *dst, const char *src)
 {
 	char *path;
-	int r;
+	ціле r;
 
 	xasprintf(&path, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = unlink(path);
 	free(path);
-	return (r == 0);
+	повернути (r == 0);
 }
 
 RC_STRINGLIST *
@@ -554,7 +554,7 @@ rc_runlevel_stacks(const char *runlevel)
 	rc_stringlist_add(ancestor_list, runlevel);
 	get_runlevel_chain(runlevel, stack, ancestor_list);
 	rc_stringlist_free(ancestor_list);
-	return stack;
+	повернути stack;
 }
 
 static const char *config_path[] = { _RC_PATH, NULL };
@@ -567,7 +567,7 @@ static struct {
 static struct {
 	char *buffer;
 	size_t count;
-	int *fds;
+	ціле *fds;
 	const char **entries, **allocd;
 } rc_path;
 
@@ -606,17 +606,17 @@ strnsep(const char **str, size_t *size, const char sep)
 {
 	const char *ret = *str;
 
-	if (!ret)
-		return NULL;
+	якщо (!ret)
+		повернути NULL;
 
 	*str = strchrnul(ret, sep);
 	*size = *str - ret;
-	if (!**str)
+	якщо (!**str)
 		*str = NULL;
-	else
+	інакше
 		*str += 1;
 
-	return ret;
+	повернути ret;
 }
 
 static const char *
@@ -625,17 +625,17 @@ strnullsep(const char **str, size_t *size)
 	const char *ret = *str;
 	size_t len;
 
-	if (!ret)
-		return NULL;
+	якщо (!ret)
+		повернути NULL;
 
 	len = strnlen(ret, *size - 1) + 1;
 
-	if ((*size -= len))
+	якщо ((*size -= len))
 		*str += len;
-	else
+	інакше
 		*str = NULL;
 
-	return ret;
+	повернути ret;
 }
 
 static void
@@ -645,12 +645,12 @@ append_user_path(FILE *fp)
 	size_t size;
 
 	append_path(fp, "%s", rc_dirs.confdir);
-	if (!(xdg = getenv("XDG_CONFIG_DIRS")))
+	якщо (!(xdg = getenv("XDG_CONFIG_DIRS")))
 		append_path(fp, "/etc/xdg/rc");
-	else while ((entry = strnsep(&xdg, &size, ':')))
-		if (size) append_path(fp, "%.*s/rc", (int) size, entry);
+	інакше поки ((entry = strnsep(&xdg, &size, ':')))
+		якщо (size) append_path(fp, "%.*s/rc", (ціле) size, entry);
 
-	for (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
+	для (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
 		append_path(fp, "%s/user", config_path[i]);
 	append_path(fp, "%s", rc_dirs.svcdir);
 }
@@ -662,12 +662,12 @@ append_rc_path(FILE *fp, const char *path, bool user)
 	const char *entry;
 	size_t size;
 
-	while ((entry = strnsep(&path, &size, ':'))) {
-		if (size)
-			append_path(fp, "%.*s%s", (int)size, entry, user ? "/user" : "");
-		else if (user && !has_user)
+	поки ((entry = strnsep(&path, &size, ':'))) {
+		якщо (size)
+			append_path(fp, "%.*s%s", (ціле)size, entry, user ? "/user" : "");
+		інакше якщо (user && !has_user)
 			append_user_path(fp), has_user = true;
-		else if (!user) while (*rc_path.entries)
+		інакше якщо (!user) поки (*rc_path.entries)
 			append_path(fp, "%s", *rc_path.entries++);
 	}
 }
@@ -679,7 +679,7 @@ load_dynamic_path(bool user)
 	size_t size, count = 0;
 	FILE *fp;
 
-	if (!rc_dirs.set) {
+	якщо (!rc_dirs.set) {
 		atexit(free_rc_dirs);
 		rc_dirs.set = true;
 	}
@@ -687,14 +687,14 @@ load_dynamic_path(bool user)
 	rc_path.entries = config_path;
 	rc_path.count = ARRAY_SIZE(config_path) - 1;
 
-	if (!(path = getenv("RC_PATH")) && !user)
-		return;
+	якщо (!(path = getenv("RC_PATH")) && !user)
+		повернути;
 
 	rc_path.count = 0;
 	fp = xopen_memstream(&rc_path.buffer, &size);
-	if (path)
+	якщо (path)
 		append_rc_path(fp, path, user);
-	else
+	інакше
 		append_user_path(fp);
 	xclose_memstream(fp);
 
@@ -702,7 +702,7 @@ load_dynamic_path(bool user)
 
 	path = rc_path.buffer;
 
-	while ((entry = strnullsep(&path, &size)) && count < rc_path.count)
+	поки ((entry = strnullsep(&path, &size)) && count < rc_path.count)
 		rc_path.entries[count++] = entry;
 	rc_path.entries[rc_path.count] = NULL;
 }
@@ -712,15 +712,15 @@ static bool is_user = false;
 bool
 rc_is_user(void)
 {
-	int _is_user = -1;
+	ціле _is_user = -1;
 
-	if (_is_user == -1) {
+	якщо (_is_user == -1) {
 		char *env = getenv("RC_USER_SERVICES");
 
 		_is_user = env ? rc_yesno(env) : is_user;
 	}
 
-	return _is_user;
+	повернути _is_user;
 }
 
 void
@@ -728,30 +728,30 @@ rc_set_user(void)
 {
 	char *env;
 
-	if (is_user)
-		return;
+	якщо (is_user)
+		повернути;
 
-	if (!rc_dirs.set)
+	якщо (!rc_dirs.set)
 		atexit(free_rc_dirs);
-	else
+	інакше
 		free_rc_dirs();
 
 	is_user = true;
 	rc_dirs.set = true;
 	setenv("RC_USER_SERVICES", "yes", true);
 
-	if ((env = getenv("XDG_CONFIG_HOME"))) {
+	якщо ((env = getenv("XDG_CONFIG_HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/rc", env);
-	} else if ((env = getenv("HOME"))) {
+	} інакше якщо ((env = getenv("HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/.config/rc", env);
-	} else {
+	} інакше {
 		fprintf(stderr, "XDG_CONFIG_HOME and HOME unset.\n");
 		exit(EXIT_FAILURE);
 	}
 
 	xasprintf(&rc_dirs.runleveldir, "%s/runlevels", rc_dirs.confdir);
 
-	if (!(env = getenv("XDG_RUNTIME_DIR"))) {
+	якщо (!(env = getenv("XDG_RUNTIME_DIR"))) {
 		/* FIXME: fallback to something else? */
 		fprintf(stderr, "XDG_RUNTIME_DIR unset.\n");
 		exit(EXIT_FAILURE);
@@ -767,25 +767,25 @@ rc_set_user(void)
 const char * const *
 rc_scriptdirs(void)
 {
-	if (!rc_path.entries)
+	якщо (!rc_path.entries)
 		load_dynamic_path(false);
-	return rc_path.entries;
+	повернути rc_path.entries;
 }
 
 size_t
-rc_scriptdirfds(const int **fds)
+rc_scriptdirfds(const ціле **fds)
 {
 	static size_t len = 0;
 
-	if (len == 0) {
-		if (!rc_path.entries)
+	якщо (len == 0) {
+		якщо (!rc_path.entries)
 			load_dynamic_path(false);
 
 		rc_path.fds = xmalloc(rc_path.count * sizeof(*rc_path.fds));
-		for (size_t i = 0; i < rc_path.count; i++) {
-			int fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+		для (size_t i = 0; i < rc_path.count; i++) {
+			ціле fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 
-			if (fd == -1)
+			якщо (fd == -1)
 				continue;
 
 			rc_path.fds[len++] = fd;
@@ -793,25 +793,25 @@ rc_scriptdirfds(const int **fds)
 	}
 
 	*fds = rc_path.fds;
-	return len;
+	повернути len;
 }
 
 const char *
 rc_sysconfdir(void)
 {
-	return RC_SYSCONFDIR;
+	повернути RC_SYSCONFDIR;
 }
 
 const char *
 rc_usrconfdir(void)
 {
-	return rc_dirs.confdir ? rc_dirs.confdir : NULL;
+	повернути rc_dirs.confdir ? rc_dirs.confdir : NULL;
 }
 
 const char *
 rc_runleveldir(void)
 {
-	return rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
+	повернути rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
 }
 
 const char *
@@ -819,32 +819,32 @@ rc_svcdir(void)
 {
 	static const char *svcdir;
 
-	if (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
+	якщо (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
 		svcdir = RC_SVCDIR;
-	return rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
+	повернути rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
 }
 
 static ssize_t
-safe_readlink(int targetfd, const char *path, char **buf, size_t bufsiz)
+safe_readlink(ціле targetfd, const char *path, char **buf, size_t bufsiz)
 {
 	char *buffer;
 	ssize_t r;
 
-	for (;; bufsiz += PATH_MAX) {
+	для (;; bufsiz += PATH_MAX) {
 		buffer = xmalloc(bufsiz);
 		r = readlinkat(targetfd, path, buffer, bufsiz);
-		if (r < 0) {
+		якщо (r < 0) {
 			free(buffer);
-			return -errno;
+			повернути -errno;
 		}
-		if ((size_t)r < bufsiz) {
+		якщо ((size_t)r < bufsiz) {
 			buffer[r] = '\0';
 			*buf = buffer;
-			return r;
+			повернути r;
 		}
 		free(buffer);
-		if (bufsiz >= SSIZE_MAX - PATH_MAX)
-			return -ENOMEM;
+		якщо (bufsiz >= SSIZE_MAX - PATH_MAX)
+			повернути -ENOMEM;
 	}
 }
 
@@ -855,29 +855,29 @@ rc_service_resolve(const char *service)
 	char *buffer;
 	struct stat buf;
 
-	if (!service)
-		return NULL;
+	якщо (!service)
+		повернути NULL;
 
-	if (service[0] == '/')
-		return xstrdup(service);
+	якщо (service[0] == '/')
+		повернути xstrdup(service);
 
 	/* First check started services */
-	if (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
-	if (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
+	якщо (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		якщо (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
+			повернути buffer;
+	якщо (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		якщо (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
+			повернути buffer;
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
+	для (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
 		char *file = NULL;
 		xasprintf(&file, "%s/init.d/%s", *dirs, service);
-		if (stat(file, &buf) == 0)
-			return file;
+		якщо (stat(file, &buf) == 0)
+			повернути file;
 		free(file);
 	}
 
-	return NULL;
+	повернути NULL;
 }
 
 bool
@@ -888,34 +888,34 @@ rc_service_exists(const char *service)
 	size_t len;
 	struct stat buf;
 
-	if (!service) {
+	якщо (!service) {
 		errno = EINVAL;
-		return false;
+		повернути false;
 	}
 
 	len = strlen(service);
 
 	/* .sh files are not init scripts */
-	if (len > 2 && service[len - 3] == '.' &&
+	якщо (len > 2 && service[len - 3] == '.' &&
 			service[len - 2] == 's' &&
 			service[len - 1] == 'h') {
 		errno = EINVAL;
-		return false;
+		повернути false;
 	}
 
-	if (!(file = rc_service_resolve(service))) {
+	якщо (!(file = rc_service_resolve(service))) {
 		errno = ENOENT;
-		return false;
+		повернути false;
 	}
 
-	if (stat(file, &buf) == 0) {
-		if (buf.st_mode & S_IXUGO)
+	якщо (stat(file, &buf) == 0) {
+		якщо (buf.st_mode & S_IXUGO)
 			retval = true;
-		else
+		інакше
 			errno = ENOEXEC;
 	}
 	free(file);
-	return retval;
+	повернути retval;
 }
 
 #define OPTSTR \
@@ -933,30 +933,30 @@ rc_service_extra_commands(const char *service)
 	char *p;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	якщо (!(svc = rc_service_resolve(service)))
+		повернути NULL;
 
 	xasprintf(&cmd, OPTSTR, svc);
 	free(svc);
 
-	if (!(fp = popen(cmd, "r"))) {
+	якщо (!(fp = popen(cmd, "r"))) {
 		free(cmd);
-		return NULL;
+		повернути NULL;
 	}
 
-	if (xgetline(&buffer, &len, fp) != -1) {
+	якщо (xgetline(&buffer, &len, fp) != -1) {
 		p = buffer;
 		commands = rc_stringlist_new();
 
-		while ((token = strsep(&p, " ")))
-			if (token[0] != '\0')
+		поки ((token = strsep(&p, " ")))
+			якщо (token[0] != '\0')
 				rc_stringlist_add(commands, token);
 	}
 
 	pclose(fp);
 	free(buffer);
 	free(cmd);
-	return commands;
+	повернути commands;
 }
 
 #define DESCSTR ". '%s'; echo \"${description%s%s}\""
@@ -969,23 +969,23 @@ rc_service_description(const char *service, const char *option)
 	size_t size = 0;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	якщо (!(svc = rc_service_resolve(service)))
+		повернути NULL;
 
-	if (!option)
+	якщо (!option)
 		option = "";
 
 	xasprintf(&cmd, DESCSTR, svc, *option ? "_" : "", option);
 	free(svc);
-	if ((fp = popen(cmd, "r"))) {
-		if (xgetline(&desc, &size, fp) == -1) {
+	якщо ((fp = popen(cmd, "r"))) {
+		якщо (xgetline(&desc, &size, fp) == -1) {
 			free(desc);
 			desc = NULL;
 		}
 		pclose(fp);
 	}
 	free(cmd);
-	return desc;
+	повернути desc;
 }
 
 bool
@@ -997,47 +997,47 @@ rc_service_in_runlevel(const char *service, const char *runlevel)
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	r = access(file, F_OK) == 0;
 	free(file);
-	return r;
+	повернути r;
 }
 
 bool
 rc_service_mark(const char *service, const RC_SERVICE state)
 {
-	int i = 0;
+	ціле i = 0;
 	const char *base;
 	char *init = rc_service_resolve(service);
 	bool skip_wasinactive = false;
-	int serrno;
+	ціле serrno;
 
-	if (!init)
-		return false;
+	якщо (!init)
+		повернути false;
 
 	base = basename_c(service);
-	if (state != RC_SERVICE_STOPPED) {
-		int state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
-		if (access(init, F_OK) != 0) {
+	якщо (state != RC_SERVICE_STOPPED) {
+		ціле state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
+		якщо (access(init, F_OK) != 0) {
 			free(init);
-			return false;
+			повернути false;
 		}
 
 		unlinkat(state_dirfd, base, 0);
-		if ((symlinkat(init, state_dirfd, base)) != 0) {
+		якщо ((symlinkat(init, state_dirfd, base)) != 0) {
 			free(init);
-			return false;
+			повернути false;
 		}
 	}
 
-	if (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
+	якщо (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
 		free(init);
-		return true;
+		повернути true;
 	}
 
 	/* Remove any old states now */
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		int state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
+	для (i = 0; rc_service_state_names[i].name; i++) {
+		ціле state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
 		RC_SERVICE s = rc_service_state_names[i].state;
 
-		if (s == state)
+		якщо (s == state)
 			continue;
 
 		switch (s) {
@@ -1046,32 +1046,32 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 		case RC_SERVICE_SCHEDULED:
 			continue;
 		case RC_SERVICE_WASINACTIVE:
-			if (skip_wasinactive)
+			якщо (skip_wasinactive)
 				continue;
 			/* fall-through */
 		default:
-			if (faccessat(state_dirfd, base, F_OK, 0) != 0)
+			якщо (faccessat(state_dirfd, base, F_OK, 0) != 0)
 				continue;
-			if ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
-				if (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
+			якщо ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
+				якщо (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
 					free(init);
-					return false;
+					повернути false;
 				}
 				skip_wasinactive = true;
 			}
-			if (unlinkat(state_dirfd, base, 0) == -1) {
+			якщо (unlinkat(state_dirfd, base, 0) == -1) {
 				free(init);
-				return false;
+				повернути false;
 			}
 		}
 	}
 
 	/* Remove the exclusive state if we're inactive */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
+	якщо (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
 		unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), base, 0);
 
 	/* Remove any options and daemons the service may have stored */
-	if (state == RC_SERVICE_STOPPED) {
+	якщо (state == RC_SERVICE_STOPPED) {
 		rm_dir(rc_dirfd(RC_DIR_OPTIONS), base, true);
 		rm_dir(rc_dirfd(RC_DIR_DAEMONS), base, true);
 		unlinkat(rc_dirfd(RC_DIR_ENVIRON), base, 0);
@@ -1079,11 +1079,11 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 	}
 
 	/* These are final states, so remove us from scheduled */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
+	якщо (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
+		якщо (dp) {
 			struct dirent *d;
-			while ((d = readdir(dp))) {
+			поки ((d = readdir(dp))) {
 				char *was;
 
 				xasprintf(&was, "%s/%s", d->d_name, base);
@@ -1099,35 +1099,35 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 		}
 	}
 	free(init);
-	return true;
+	повернути true;
 }
 
 RC_SERVICE
 rc_service_state(const char *service)
 {
 	const char *base = basename_c(service);
-	int state = RC_SERVICE_STOPPED;
-	int i;
+	ціле state = RC_SERVICE_STOPPED;
+	ціле i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
-			if (rc_service_state_names[i].state <= 0x10)
+	для (i = 0; rc_service_state_names[i].name; i++) {
+		якщо (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
+			якщо (rc_service_state_names[i].state <= 0x10)
 				state = rc_service_state_names[i].state;
-			else
+			інакше
 				state |= rc_service_state_names[i].state;
 		}
 	}
 
-	if (state & RC_SERVICE_STARTED)
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+	якщо (state & RC_SERVICE_STARTED)
+		якщо (rc_service_daemons_crashed(service) && errno != EACCES)
 			state |= RC_SERVICE_CRASHED;
 
-	if (state & RC_SERVICE_STOPPED) {
+	якщо (state & RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
+		якщо (dp) {
 			struct dirent *d;
-			while ((d = readdir(dp))) {
-				if (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
+			поки ((d = readdir(dp))) {
+				якщо (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
 					state |= RC_SERVICE_SCHEDULED;
 					break;
 				}
@@ -1137,7 +1137,7 @@ rc_service_state(const char *service)
 		}
 	}
 
-	return state;
+	повернути state;
 }
 
 char *
@@ -1151,33 +1151,33 @@ rc_service_value_get(const char *service, const char *option)
 	rc_getfile(file, &buffer, &len);
 	free(file);
 
-	return buffer;
+	повернути buffer;
 }
 
 bool
 rc_service_value_set(const char *service, const char *option, const char *value)
 {
 	bool ret = true;
-	int optdirfd;
+	ціле optdirfd;
 	FILE *fp;
 
-	if (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
-		return false;
+	якщо (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
+		повернути false;
 
-	if ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
-		return false;
+	якщо ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
+		повернути false;
 
-	if (!value) {
+	якщо (!value) {
 		unlinkat(optdirfd, option, 0);
-	} else if ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
+	} інакше якщо ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
 		fprintf(fp, "%s", value);
 		fclose(fp);
-	} else {
+	} інакше {
 		ret = false;
 	}
 
 	close(optdirfd);
-	return ret;
+	повернути ret;
 }
 
 bool
@@ -1186,18 +1186,18 @@ rc_service_schedule_start(const char *service, const char *service_to_start)
 	const char *base_to_start = basename_c(service_to_start);
 	const char *base = basename_c(service);
 	bool retval;
-	int schedfd;
+	ціле schedfd;
 	char *init;
 
 	/* service may be a provided service, like net */
-	if (!service || !rc_service_exists(service_to_start))
-		return false;
+	якщо (!service || !rc_service_exists(service_to_start))
+		повернути false;
 
-	if (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
-		return false;
+	якщо (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
+		повернути false;
 
-	if ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
-		return false;
+	якщо ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
+		повернути false;
 
 	init = rc_service_resolve(service_to_start);
 
@@ -1205,13 +1205,13 @@ rc_service_schedule_start(const char *service, const char *service_to_start)
 
 	close(schedfd);
 	free(init);
-	return retval;
+	повернути retval;
 }
 
 bool
 rc_service_schedule_clear(const char *service)
 {
-	return !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
+	повернути !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
 }
 
 RC_STRINGLIST *
@@ -1219,24 +1219,24 @@ rc_services_in_runlevel(const char *runlevel)
 {
 	RC_STRINGLIST *list = NULL;
 
-	if (!runlevel) {
-		const int *scriptdirfds;
+	якщо (!runlevel) {
+		const ціле *scriptdirfds;
 		list = rc_stringlist_new();
-		for (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
+		для (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
 			RC_STRINGLIST *svcs;
 
 			svcs = ls_dir(scriptdirfds[i], "init.d", LS_INITD);
 			TAILQ_CONCAT(list, svcs, entries);
 			rc_stringlist_free(svcs);
 		}
-		return list;
+		повернути list;
 	}
 
 	/* These special levels never contain any services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
-		return rc_stringlist_new();
+	якщо (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
+		повернути rc_stringlist_new();
 
-	return ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
+	повернути ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
 }
 
 RC_STRINGLIST *
@@ -1253,7 +1253,7 @@ rc_services_in_runlevel_stacked(const char *runlevel)
 		rc_stringlist_free(sl);
 	}
 	rc_stringlist_free(stacks);
-	return list;
+	повернути list;
 }
 
 RC_STRINGLIST *
@@ -1264,22 +1264,22 @@ rc_services_in_state(RC_SERVICE state)
 	struct dirent *d;
 	DIR *dp;
 
-	if (state != RC_SERVICE_SCHEDULED)
-		return ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
+	якщо (state != RC_SERVICE_SCHEDULED)
+		повернути ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
 
 	list = rc_stringlist_new();
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
-		return list;
+	якщо (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
+		повернути list;
 
-	while ((d = readdir(dp))) {
-		if (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
+	поки ((d = readdir(dp))) {
+		якщо (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
 			continue;
 		TAILQ_CONCAT(list, services, entries);
 		rc_stringlist_free(services);
 	}
 	closedir(dp);
 
-	return list;
+	повернути list;
 }
 
 bool
@@ -1292,39 +1292,39 @@ rc_service_add(const char *runlevel, const char *service)
 	char *binit = NULL;
 	char *i;
 
-	if (!rc_runlevel_exists(runlevel)) {
+	якщо (!rc_runlevel_exists(runlevel)) {
 		errno = ENOENT;
-		return false;
+		повернути false;
 	}
 
-	if (rc_service_in_runlevel(service, runlevel)) {
+	якщо (rc_service_in_runlevel(service, runlevel)) {
 		errno = EEXIST;
-		return false;
+		повернути false;
 	}
 
 	i = init = rc_service_resolve(service);
 
 	/* We need to ensure that only things in /etc/init.d are added
 	 * to the boot runlevel -- not applicable for user services. */
-	if (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
+	якщо (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
 		path = realpath(dirname(init), NULL);
-		if (path == NULL) {
+		якщо (path == NULL) {
 			free(init);
-			return false;
+			повернути false;
 		}
 		retval = (strcmp(path, RC_INITDIR) == 0);
 		free(path);
-		if (!retval) {
+		якщо (!retval) {
 			free(init);
 			errno = EPERM;
-			return false;
+			повернути false;
 		}
 		xasprintf(&binit, "%s/%s", RC_INITDIR, service);
 		i = binit;
 	}
 
 	/* We shouldn't add any temporary script to a runlevel */
-	if (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
+	якщо (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
 		errno = ENOENT;
 		retval = false;
 		goto out;
@@ -1337,20 +1337,20 @@ rc_service_add(const char *runlevel, const char *service)
 out:
 	free(binit);
 	free(init);
-	return retval;
+	повернути retval;
 }
 
 bool
 rc_service_delete(const char *runlevel, const char *service)
 {
 	char *file;
-	int r;
+	ціле r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel,
 		basename_c(service));
 	r = unlink(file);
 	free(file);
-	return (r == 0);
+	повернути (r == 0);
 }
 
 RC_STRINGLIST *
@@ -1360,24 +1360,24 @@ rc_services_scheduled_by(const char *service)
 	struct dirent *d;
 	DIR *dp;
 
-	if (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
-		return list;
+	якщо (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
+		повернути list;
 
-	while ((d = readdir(dp))) {
+	поки ((d = readdir(dp))) {
 		char *file;
 		xasprintf(&file, "%s/%s", d->d_name, service);
-		if (faccessat(dirfd(dp), file, F_OK, 0) == 0)
+		якщо (faccessat(dirfd(dp), file, F_OK, 0) == 0)
 			rc_stringlist_add(list, d->d_name);
 		free(file);
 	}
 
-	return list;
+	повернути list;
 }
 
 RC_STRINGLIST *
 rc_services_scheduled(const char *service)
 {
-	return ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
+	повернути ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
 }
 
 bool
@@ -1385,72 +1385,72 @@ rc_service_putenv(const char *service, const char *env)
 {
 	size_t name_len = strcspn(env, "=");
 	char var[strlen(service) + sizeof("/") + name_len];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	ціле dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	if (env[name_len] != '=')
-		return errno = EINVAL, false;
+	якщо (env[name_len] != '=')
+		повернути errno = EINVAL, false;
 
-	snprintf(var, sizeof(var), "%s/%.*s", service, (int) name_len, env);
+	snprintf(var, sizeof(var), "%s/%.*s", service, (ціле) name_len, env);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	якщо (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		повернути false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	якщо (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		повернути false;
 
 	fputs(&env[name_len + 1], fp);
 
-	return fclose(fp) == 0;
+	повернути fclose(fp) == 0;
 }
 
 bool
 rc_service_setenv(const char *service, const char *name, const char *value)
 {
 	char var[strlen(service) + sizeof("/") + strlen(name)];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	ціле dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
 	snprintf(var, sizeof(var), "%s/%s", service, name);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	якщо (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		повернути false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	якщо (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		повернути false;
 
 	fputs(value, fp);
 
-	return fclose(fp) == 0;
+	повернути fclose(fp) == 0;
 }
 
 ssize_t
 rc_service_getenv(const char *service, const char *name, char **buf)
 {
 	char var[strlen(service) + sizeof("/") + strlen(name)], *value;
-	int dfd = rc_dirfd(RC_DIR_ENVIRON);
+	ціле dfd = rc_dirfd(RC_DIR_ENVIRON);
 	struct stat stat;
 	size_t count;
 	FILE *fp;
 
 	snprintf(var, sizeof(var), "%s/%s", service, name);
 
-	if (fstatat(dfd, var, &stat, 0) == -1)
-		return -1;
+	якщо (fstatat(dfd, var, &stat, 0) == -1)
+		повернути -1;
 
-	if (!buf)
-		return stat.st_size;
+	якщо (!buf)
+		повернути stat.st_size;
 
-	if (!(value = xrealloc(*buf, stat.st_size + 1)))
-		return -1;
+	якщо (!(value = xrealloc(*buf, stat.st_size + 1)))
+		повернути -1;
 
-	if (!(fp = do_fopenat(dfd, var, O_RDONLY)))
-		return -1;
+	якщо (!(fp = do_fopenat(dfd, var, O_RDONLY)))
+		повернути -1;
 
 	count = fread(value, 1, stat.st_size, fp);
 	value[count] = '\0';
 
 	fclose(fp);
 	*buf = value;
-	return count;
+	повернути count;
 }

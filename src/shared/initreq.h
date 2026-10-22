@@ -42,8 +42,8 @@ struct init_request_bsd {
 	char	tty_id[16];		/* Tty name minus /dev/tty      */
 	char	host[64];	/* Hostname                     */
 	char	term_type[16];		/* Terminal type                */
-	int	signal;			/* Signal to send               */
-	int	pid;			/* Process to send to           */
+	ціле	signal;			/* Signal to send               */
+	ціле	pid;			/* Process to send to           */
 	char	exec_name[128];	        /* Program to execute           */
 	char	reserved[128];		/* For future expansion.        */
 };
@@ -56,10 +56,10 @@ struct init_request_bsd {
  *	struct to be 384 bytes.
  */
 struct init_request {
-	int	magic;			/* Magic number                 */
-	int	cmd;			/* What kind of request         */
-	int	runlevel;		/* Runlevel to change to        */
-	int	sleeptime;		/* Time between TERM and KILL   */
+	ціле	magic;			/* Magic number                 */
+	ціле	cmd;			/* What kind of request         */
+	ціле	runlevel;		/* Runlevel to change to        */
+	ціле	sleeptime;		/* Time between TERM and KILL   */
 	union {
 		struct init_request_bsd	bsd;
 		char			data[368];

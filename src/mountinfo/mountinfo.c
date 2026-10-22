@@ -15,7 +15,7 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#if defined(__DragonFly__) || defined(__FreeBSD__)
+#якщо defined(__DragonFly__) || defined(__FreeBSD__)
 #  include <sys/ucred.h>
 #  include <sys/mount.h>
 
@@ -102,8 +102,8 @@ struct run_queue {
 	int64_t fuser_exec_time;
 	pid_t pid;
 	pid_t fuser_pid;
-	int try_count;
-	int fuser_stdoutfd;
+	ціле try_count;
+	ціле fuser_stdoutfd;
 };
 
 typedef enum {
@@ -120,8 +120,8 @@ typedef enum {
 } net_opts;
 
 struct args;
-typedef int process_func_t(RC_STRINGLIST *, struct args *,
-    char *, char *, char *, char *, int);
+typedef ціле process_func_t(RC_STRINGLIST *, struct args *,
+    char *, char *, char *, char *, ціле);
 
 struct args {
 	process_func_t *process;
@@ -137,10 +137,10 @@ struct args {
 	const char *check_mntpath;
 };
 
-static int
+static ціле
 process_mount(RC_STRINGLIST *list, struct args *args,
     char *from, char *to, char *fstype, char *options,
-    int netdev)
+    ціле netdev)
 {
 	char *p;
 	RC_STRING *s;
@@ -149,49 +149,49 @@ process_mount(RC_STRINGLIST *list, struct args *args,
 
 #ifdef __linux__
 	/* Skip the really silly rootfs */
-	if (strcmp(fstype, "rootfs") == 0)
-		return -1;
+	якщо (strcmp(fstype, "rootfs") == 0)
+		повернути -1;
 #endif
 
-	if (args->netdev == net_yes &&
+	якщо (args->netdev == net_yes &&
 	    (netdev != -1 || TAILQ_FIRST(args->mounts)))
 	{
-		if (netdev != 0)
-			return 1;
-	} else if (args->netdev == net_no &&
+		якщо (netdev != 0)
+			повернути 1;
+	} інакше якщо (args->netdev == net_no &&
 	    (netdev != -1 || TAILQ_FIRST(args->mounts)))
 	{
-		if (netdev != 1)
-			return 1;
-	} else {
-		if (args->node_regex &&
+		якщо (netdev != 1)
+			повернути 1;
+	} інакше {
+		якщо (args->node_regex &&
 		    regexec(args->node_regex, from, 0, NULL, 0) != 0)
-			return 1;
-		if (args->skip_node_regex &&
+			повернути 1;
+		якщо (args->skip_node_regex &&
 		    regexec(args->skip_node_regex, from, 0, NULL, 0) == 0)
-			return 1;
+			повернути 1;
 
-		if (args->fstype_regex &&
+		якщо (args->fstype_regex &&
 		    regexec(args->fstype_regex, fstype, 0, NULL, 0) != 0)
-			return -1;
-		if (args->skip_fstype_regex &&
+			повернути -1;
+		якщо (args->skip_fstype_regex &&
 		    regexec(args->skip_fstype_regex, fstype, 0, NULL, 0) == 0)
-			return -1;
+			повернути -1;
 
-		if (args->options_regex &&
+		якщо (args->options_regex &&
 		    regexec(args->options_regex, options, 0, NULL, 0) != 0)
-			return -1;
-		if (args->skip_options_regex &&
+			повернути -1;
+		якщо (args->skip_options_regex &&
 		    regexec(args->skip_options_regex, options, 0, NULL, 0) == 0)
-			return -1;
+			повернути -1;
 	}
 
-	if (TAILQ_FIRST(args->mounts)) {
+	якщо (TAILQ_FIRST(args->mounts)) {
 		TAILQ_FOREACH(s, args->mounts, entries)
-		    if (strcmp(s->value, to) == 0)
+		    якщо (strcmp(s->value, to) == 0)
 			    break;
-		if (!s)
-			return -1;
+		якщо (!s)
+			повернути -1;
 	}
 
 	switch (args->mount_type) {
@@ -213,21 +213,21 @@ process_mount(RC_STRINGLIST *list, struct args *args,
 		break;
 	}
 
-	if (p) {
+	якщо (p) {
 		errno = 0;
 		rc_stringlist_add(list, p);
-		return 0;
+		повернути 0;
 	}
 
-	return -1;
+	повернути -1;
 }
 
-#if defined(BSD) && !defined(__GNU__)
+#якщо defined(BSD) && !defined(__GNU__)
 
 /* Translate the mounted options to english
  * This is taken directly from FreeBSD mount.c */
 static struct opt {
-	int o_opt;
+	ціле o_opt;
 	const char *o_name;
 } optnames[] = {
 	{ MNT_ASYNC,        "asynchronous" },
@@ -269,29 +269,29 @@ static RC_STRINGLIST *
 find_mounts(struct args *args, size_t *num_mounts)
 {
 	struct statfs *mnts;
-	int nmnts;
-	int i;
+	ціле nmnts;
+	ціле i;
 	RC_STRINGLIST *list;
 	char *options = NULL;
 	uint64_t flags;
 	struct opt *o;
-	int netdev;
+	ціле netdev;
 	char *tmp;
 
-	if ((nmnts = getmntinfo(&mnts, MNT_NOWAIT)) == 0)
+	якщо ((nmnts = getmntinfo(&mnts, MNT_NOWAIT)) == 0)
 		eerrorx("getmntinfo: %s", strerror (errno));
 
 	list = rc_stringlist_new();
-	for (i = 0; i < nmnts; i++) {
+	для (i = 0; i < nmnts; i++) {
 		netdev = 0;
 		flags = mnts[i].F_FLAGS & MNT_VISFLAGMASK;
-		for (o = optnames; flags && o->o_opt; o++) {
-			if (flags & o->o_opt) {
-				if (o->o_opt == MNT_LOCAL)
+		для (o = optnames; flags && o->o_opt; o++) {
+			якщо (flags & o->o_opt) {
+				якщо (o->o_opt == MNT_LOCAL)
 					netdev = 1;
-				if (!options)
+				якщо (!options)
 					options = xstrdup(o->o_name);
-				else {
+				інакше {
 					xasprintf(&tmp, "%s,%s", options, o->o_name);
 					free(options);
 					options = tmp;
@@ -311,7 +311,7 @@ find_mounts(struct args *args, size_t *num_mounts)
 		options = NULL;
 	}
 
-	return list;
+	повернути list;
 }
 
 #elif defined(__linux__) || (defined(__FreeBSD_kernel__) && \
@@ -322,14 +322,14 @@ getmntfile(const char *file)
 	struct mntent *ent = NULL;
 	FILE *fp;
 
-	if (!(fp = setmntent("/etc/fstab", "r")))
-		return NULL;
-	while ((ent = getmntent(fp)))
-		if (strcmp(file, ent->mnt_dir) == 0)
+	якщо (!(fp = setmntent("/etc/fstab", "r")))
+		повернути NULL;
+	поки ((ent = getmntent(fp)))
+		якщо (strcmp(file, ent->mnt_dir) == 0)
 			break;
 	endmntent(fp);
 
-	return ent;
+	повернути ent;
 }
 
 static RC_STRINGLIST *
@@ -344,16 +344,16 @@ find_mounts(struct args *args, size_t *num_mounts)
 	char *fst;
 	char *opts;
 	struct mntent *ent;
-	int netdev;
+	ціле netdev;
 	RC_STRINGLIST *list;
 
-	if ((fp = fopen(procmounts, "r")) == NULL)
+	якщо ((fp = fopen(procmounts, "r")) == NULL)
 		eerrorx("getmntinfo: %s", strerror(errno));
 
 	list = rc_stringlist_new();
 
 	buffer = NULL;
-	while (xgetline(&buffer, &size, fp) != -1) {
+	поки (xgetline(&buffer, &size, fp) != -1) {
 		netdev = -1;
 		p = buffer;
 		from = strsep(&p, " ");
@@ -361,10 +361,10 @@ find_mounts(struct args *args, size_t *num_mounts)
 		fst = strsep(&p, " ");
 		opts = strsep(&p, " ");
 
-		if ((ent = getmntfile(to))) {
-			if (strstr(ent->mnt_opts, "_netdev"))
+		якщо ((ent = getmntfile(to))) {
+			якщо (strstr(ent->mnt_opts, "_netdev"))
 				netdev = 0;
-			else
+			інакше
 				netdev = 1;
 		}
 
@@ -377,74 +377,74 @@ find_mounts(struct args *args, size_t *num_mounts)
 	free(buffer);
 	fclose(fp);
 
-	return list;
+	повернути list;
 }
 
-#else
+#інакше
 #  error "Operating system not supported!"
 #endif
 
-static int is_prefix(const char *needle, const char *hay)
+static ціле is_prefix(const char *needle, const char *hay)
 {
 	size_t nlen = strlen(needle);
-	if (strncmp(needle, hay, nlen) == 0 && hay[nlen] == '/')
-		return true;
-	return false;
+	якщо (strncmp(needle, hay, nlen) == 0 && hay[nlen] == '/')
+		повернути true;
+	повернути false;
 }
 
 static char *unescape_octal(char *beg)
 {
-	int n, i;
+	ціле n, i;
 	char *w = beg, *r = beg;
-	while (*r) {
-		if (*r != '\\' || *++r == '\\') {
+	поки (*r) {
+		якщо (*r != '\\' || *++r == '\\') {
 			*w++ = *r++;
-		} else {
+		} інакше {
 			/* octal. should have at least 3 bytes,
 			 * but don't choke on malformed input
 			 */
-			for (i = n = 0; i < 3; ++i) {
-				if (*r >= '0' && *r <= '7') {
+			для (i = n = 0; i < 3; ++i) {
+				якщо (*r >= '0' && *r <= '7') {
 					n <<= 3;
 					n |= *r++ - '0';
-				} else {
+				} інакше {
 					break;
 				}
 			}
-			if (n)
+			якщо (n)
 				*w++ = n;
 		}
 	}
 	*w = '\0';
-	return beg;
+	повернути beg;
 }
 
-static int check_is_mounted(RC_STRINGLIST *list RC_UNUSED, struct args *args,
+static ціле check_is_mounted(RC_STRINGLIST *list RC_UNUSED, struct args *args,
     char *from RC_UNUSED, char *to, char *fstype RC_UNUSED,
-    char *options RC_UNUSED, int netdev RC_UNUSED)
+    char *options RC_UNUSED, ціле netdev RC_UNUSED)
 {
-	return strcmp(args->check_mntpath, unescape_octal(to)) == 0 ? 0 : -1;
+	повернути strcmp(args->check_mntpath, unescape_octal(to)) == 0 ? 0 : -1;
 }
 
-static int is_mounted(const char *mntpath)
+static ціле is_mounted(const char *mntpath)
 {
 	size_t num_mounts = 0;
 	struct args args = { .process = check_is_mounted, .check_mntpath = mntpath };
 	RC_STRINGLIST *l = find_mounts(&args, &num_mounts);
 	rc_stringlist_free(l);
-	return num_mounts > 0;
+	повернути num_mounts > 0;
 }
 
 static pid_t run_umount(const char *mntpath,
-	const char **umount_args, int umount_args_num)
+	const char **umount_args, ціле umount_args_num)
 {
 	struct exec_args args;
 	struct exec_result res;
 	const char *argv[UMOUNT_ARGS_MAX + 3];
-	int k, i = 0;
+	ціле k, i = 0;
 
 	argv[i++] = "umount";
-	for (k = 0; k < umount_args_num; ++k)
+	для (k = 0; k < umount_args_num; ++k)
 		argv[i++] = umount_args[k];
 	argv[i++] = mntpath;
 	argv[i++] = NULL;
@@ -452,80 +452,80 @@ static pid_t run_umount(const char *mntpath,
 	args = exec_init(argv);
 	args.redirect_stdout = args.redirect_stderr = EXEC_DEVNULL;
 	res = do_exec(&args);
-	if (res.pid < 0)
+	якщо (res.pid < 0)
 		eerrorx("%s: failed to run umount: %s", applet, strerror(errno));
-	return res.pid;
+	повернути res.pid;
 }
 
 static void fuser_run(struct run_queue *rp, const char *fuser_opt)
 {
-	static int fuser_exec_failed = 0;
+	static ціле fuser_exec_failed = 0;
 	const char *argv[] = { "fuser", fuser_opt, rp->mntpath, NULL };
 	struct exec_result res;
 	struct exec_args args;
 
 	/* if exec failed, fuser likely doesn't exist. so don't retry */
-	if (fuser_exec_failed)
-		return;
+	якщо (fuser_exec_failed)
+		повернути;
 
 	args = exec_init(argv);
 	args.redirect_stdout = EXEC_MKPIPE;
 	args.redirect_stderr = EXEC_DEVNULL;
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	якщо (res.pid < 0) {
 		fuser_exec_failed = 1;
-	} else {
+	} інакше {
 		rp->fuser_pid = res.pid;
 		rp->fuser_stdoutfd = res.proc_stdout;
 		rp->fuser_exec_time = tm_now();
 	}
 }
 
-static int fuser_decide(struct run_queue *rp,
+static ціле fuser_decide(struct run_queue *rp,
 	const char *fuser_opt, const char *fuser_kill_prefix)
 {
 	static bool has_rc_pid = false;
 	static char *rc_pid;
 	char buf[1<<12];
 	char selfpid[64];
-	int read_maybe_truncated;
+	ціле read_maybe_truncated;
 	ssize_t n;
 
-	if (rp->fuser_stdoutfd < 0)
-		return 0;
+	якщо (rp->fuser_stdoutfd < 0)
+		повернути 0;
 
 	buf[0] = ' ';
 	n = read(rp->fuser_stdoutfd, buf + 1, sizeof buf - 3);
 	close(rp->fuser_stdoutfd);
 	rp->fuser_stdoutfd = -1;
 	read_maybe_truncated = (n == sizeof buf - 3);
-	if (n < 0 || read_maybe_truncated)
-		return 0;
-	while (n > 0 && buf[n] == '\n')
+	якщо (n < 0 || read_maybe_truncated)
+		повернути 0;
+	поки (n > 0 && buf[n] == '\n')
 		--n;
 	buf[n+1] = ' ';
 	buf[n+2] = '\0';
 	snprintf(selfpid, sizeof selfpid, " %lld ", (long long)getpid());
 
-	if (!has_rc_pid) {
+	якщо (!has_rc_pid) {
 		rc_pid = getenv("RC_PID");
 		has_rc_pid = true;
 	}
 
-	if (strstr(buf, selfpid) || (rc_pid && strstr(buf, rc_pid))) {
+	якщо (strstr(buf, selfpid) || (rc_pid && strstr(buf, rc_pid))) {
 		/* lets not kill ourselves */
 		eerror("Unmounting %s failed because we are using it", rp->mntpath);
-		return -1;
-	} else if (strcmp(buf, "  ") == 0) {
-		if (rp->try_count >= TRY_MAX) {
+		повернути -1;
+	} інакше якщо (strcmp(buf, "  ") == 0) {
+		якщо (rp->try_count >= TRY_MAX) {
 			eerror("Unmounting %s failed but fuser finds no one using it", rp->mntpath);
-			return -1;
+			повернути -1;
 		}
 		/* it's possible that whatever was using the mount stopped
 		 * using it now, so allow 1 more retry */
 		rp->try_count = TRY_MAX;
-		return 0;
-	} else {
+		повернути 0;
+	} інакше {
 		char sig[32];
 		const char *argv[] = {
 			"fuser", sig, "-k", fuser_opt, rp->mntpath, NULL
@@ -536,9 +536,9 @@ static int fuser_decide(struct run_queue *rp,
 		snprintf(sig, sizeof sig, "%s%s", fuser_kill_prefix,
 			rp->try_count == TRY_MAX ? "KILL" : "TERM");
 		res = do_exec(&args);
-		if (res.pid > 0)
+		якщо (res.pid > 0)
 			rc_waitpid(res.pid);
-		return 0;
+		повернути 0;
 	}
 }
 
@@ -546,19 +546,19 @@ static regex_t *
 get_regex(const char *string)
 {
 	regex_t *reg = xmalloc(sizeof (*reg));
-	int result;
+	ціле result;
 	char buffer[256];
 
-	if ((result = regcomp(reg, string, REG_EXTENDED | REG_NOSUB)) != 0)
+	якщо ((result = regcomp(reg, string, REG_EXTENDED | REG_NOSUB)) != 0)
 	{
 		regerror(result, reg, buffer, sizeof(buffer));
 		eerrorx("%s: invalid regex `%s'", applet, buffer);
 	}
 
-	return reg;
+	повернути reg;
 }
 
-int main(int argc, char **argv)
+ціле main(ціле argc, char **argv)
 {
 	struct args args;
 	regex_t *point_regex = NULL;
@@ -566,20 +566,20 @@ int main(int argc, char **argv)
 	RC_STRINGLIST *nodes;
 	RC_STRING *s;
 	char *real_path = NULL;
-	int opt;
-	int result;
+	ціле opt;
+	ціле result;
 	char *this_path, *argv0;
 	const char *tmps;
 	const char *fuser_opt, *fuser_kill_prefix;
 	size_t num_mounts = 0;
 	size_t unmount_index;
-	int doing_unmount = 0;
+	ціле doing_unmount = 0;
 	pid_t pid;
-	int status, flags;
+	ціле status, flags;
 	int64_t tmp, next_retry, now;
 	int64_t rc_fuser_timeout = -1;
 	const char *umount_args[UMOUNT_ARGS_MAX];
-	int umount_args_num = 0;
+	ціле umount_args_num = 0;
 	const char **mounts = NULL;
 	struct run_queue running[RUN_MAX] = {0};
 	struct run_queue *rp;
@@ -587,10 +587,10 @@ int main(int argc, char **argv)
 	enum { STATE_RUN, STATE_REAP, STATE_RETRY, STATE_END } state;
 
 #define DO_REG(_var)							      \
-	if (_var) free(_var);						      \
+	якщо (_var) free(_var);						      \
 	_var = get_regex(optarg);
 #define REG_FREE(_var)							      \
-	if (_var) { regfree(_var); free(_var); }
+	якщо (_var) { regfree(_var); free(_var); }
 
 	argv0 = argv[0];
 	applet = basename_c(argv[0]);
@@ -600,41 +600,41 @@ int main(int argc, char **argv)
 	args.mounts = rc_stringlist_new();
 	args.process = process_mount;
 
-	if (strcmp(applet, "do_unmount") == 0) {
+	якщо (strcmp(applet, "do_unmount") == 0) {
 		doing_unmount = 1;
-		while (argv[1]) {
+		поки (argv[1]) {
 			/* shift over */
 			tmps = argv[1];
 			argv[1] = argv0;
 			++argv;
 			--argc;
 
-			if (strcmp(tmps, "--") == 0)
+			якщо (strcmp(tmps, "--") == 0)
 				break;
-			if (umount_args_num >= (int)ARRAY_SIZE(umount_args))
+			якщо (umount_args_num >= (ціле)ARRAY_SIZE(umount_args))
 				eerrorx("%s: Too many umount arguments", applet);
 			umount_args[umount_args_num++] = tmps;
 		}
 
 		tmps = rc_conf_value("rc_fuser_timeout");
-		if (tmps && (rc_fuser_timeout = parse_duration(tmps)) < 0)
+		якщо (tmps && (rc_fuser_timeout = parse_duration(tmps)) < 0)
 			ewarn("%s: Invalid rc_fuser_timeout value: `%s`. "
 				"Defaulting to 20", applet, tmps);
-		if (rc_fuser_timeout < 0)
+		якщо (rc_fuser_timeout < 0)
 			rc_fuser_timeout = 20 * 1000;
 
 		tmps = getenv("RC_UNAME");
-		if (!tmps || strcmp(tmps, "Linux") == 0) {
+		якщо (!tmps || strcmp(tmps, "Linux") == 0) {
 			fuser_opt = "-m";
 			fuser_kill_prefix = "-";
-		} else {
+		} інакше {
 			fuser_opt = "-cm";
 			fuser_kill_prefix = "-s";
 		}
 	}
 
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	поки ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (ціле *) 0)) != -1)
 	{
 		switch (opt) {
 		case 'e':
@@ -681,13 +681,13 @@ int main(int argc, char **argv)
 		}
 	}
 
-	while (optind < argc) {
-		if (argv[optind][0] != '/')
+	поки (optind < argc) {
+		якщо (argv[optind][0] != '/')
 			eerrorx("%s: `%s' is not a mount point",
 			    argv[0], argv[optind]);
 		this_path = argv[optind++];
 		real_path = realpath(this_path, NULL);
-		if (real_path)
+		якщо (real_path)
 			this_path = real_path;
 		rc_stringlist_add(args.mounts, this_path);
 		free(real_path);
@@ -696,25 +696,25 @@ int main(int argc, char **argv)
 	nodes = find_mounts(&args, &num_mounts);
 	rc_stringlist_free(args.mounts);
 
-	if (doing_unmount)
+	якщо (doing_unmount)
 		mounts = xmalloc(num_mounts * sizeof(*mounts));
 	num_mounts = 0;
 	result = EXIT_FAILURE;
 	/* We should report the mounts in reverse order to ease unmounting */
 	TAILQ_FOREACH_REVERSE(s, nodes, rc_stringlist, entries) {
-		if (point_regex &&
+		якщо (point_regex &&
 		    regexec(point_regex, s->value, 0, NULL, 0) != 0)
 			continue;
-		if (skip_point_regex &&
+		якщо (skip_point_regex &&
 		    regexec(skip_point_regex, s->value, 0, NULL, 0) == 0)
 			continue;
-		if (doing_unmount)
+		якщо (doing_unmount)
 			mounts[num_mounts++] = unescape_octal(s->value);
-		else if (!rc_yesno(getenv("EINFO_QUIET")))
+		інакше якщо (!rc_yesno(getenv("EINFO_QUIET")))
 			printf("%s\n", s->value);
 		result = EXIT_SUCCESS;
 	}
-	if (!doing_unmount)
+	якщо (!doing_unmount)
 		goto exit;
 
 	/* STATE_RUN:
@@ -740,25 +740,25 @@ int main(int argc, char **argv)
 	 */
 	result = EXIT_SUCCESS;
 	state = STATE_RUN;
-	while (state != STATE_END) switch (state) {
+	поки (state != STATE_END) switch (state) {
 	case STATE_RUN:
-		for (unmount_index = 0; unmount_index < num_mounts; ++unmount_index) {
+		для (unmount_index = 0; unmount_index < num_mounts; ++unmount_index) {
 			const char *candidate = mounts[unmount_index];
-			int safe_to_unmount = 1;
-			for (size_t k = 0; safe_to_unmount && k < num_running; ++k)
+			ціле safe_to_unmount = 1;
+			для (size_t k = 0; safe_to_unmount && k < num_running; ++k)
 				safe_to_unmount = !is_prefix(candidate, running[k].mntpath);
-			for (size_t k = 0; safe_to_unmount && k < num_mounts; ++k)
+			для (size_t k = 0; safe_to_unmount && k < num_mounts; ++k)
 				safe_to_unmount = !is_prefix(candidate, mounts[k]);
-			if (!safe_to_unmount)
+			якщо (!safe_to_unmount)
 				continue;
-			if (!is_mounted(candidate)) {
+			якщо (!is_mounted(candidate)) {
 				/* probably a shared mount and got unmounted, remove */
 				mounts[unmount_index--] = mounts[--num_mounts];
-			} else {
+			} інакше {
 				break;
 			}
 		}
-		if (num_running == RUN_MAX || unmount_index >= num_mounts) {
+		якщо (num_running == RUN_MAX || unmount_index >= num_mounts) {
 			state = STATE_REAP;
 			break;
 		}
@@ -776,74 +776,74 @@ int main(int argc, char **argv)
 		flags = (num_waiting > 0) ? WNOHANG : 0;
 		pid = waitpid(-1, &status, flags);
 		rp = NULL;
-		for (size_t i = 0; i < num_running; ++i) {
+		для (size_t i = 0; i < num_running; ++i) {
 			rp = running + i;
-			if (rp->fuser_pid == pid)
+			якщо (rp->fuser_pid == pid)
 				rp->fuser_pid = -1;
-			if (rp->pid == pid && pid > 0)
+			якщо (rp->pid == pid && pid > 0)
 				break;
 			rp = NULL;
 		}
-		if (rp) {
-			if ((WIFEXITED(status) && WEXITSTATUS(status) == 0) ||
+		якщо (rp) {
+			якщо ((WIFEXITED(status) && WEXITSTATUS(status) == 0) ||
 			    !is_mounted(rp->mntpath)) {
 				einfo("Unmounted %s", rp->mntpath);
 				*rp = running[--num_running];
 				state = STATE_RUN;
-			} else if (rp->try_count >= TRY_MAX) {
+			} інакше якщо (rp->try_count >= TRY_MAX) {
 				eerror("Failed to unmount %s", rp->mntpath);
 				*rp = running[--num_running];
 				result = EXIT_FAILURE;
-			} else { /* put into waiting queue */
+			} інакше { /* put into waiting queue */
 				rp->pid = -1;
 				rp->try_count += 1;
 				num_waiting += 1;
 				fuser_run(rp, fuser_opt);
 			}
-		} else {
+		} інакше {
 			state = STATE_RETRY;
 		}
 		break;
 	case STATE_RETRY:
 		rp = NULL;
 		next_retry = INT64_MAX;
-		for (size_t i = 0; i < num_running; ++i) {
-			if (running[i].pid > 0)
+		для (size_t i = 0; i < num_running; ++i) {
+			якщо (running[i].pid > 0)
 				continue;
-			if (running[i].fuser_pid > 0)
+			якщо (running[i].fuser_pid > 0)
 				tmp = running[i].fuser_exec_time + rc_fuser_timeout;
-			else
+			інакше
 				tmp = running[i].last_exec_time + TRY_DELAY_MS;
-			if (tmp < next_retry) {
+			якщо (tmp < next_retry) {
 				rp = running + i;
 				next_retry = tmp;
 			}
 		}
-		if (!rp) {
+		якщо (!rp) {
 			state = (num_mounts > 0) ? STATE_RUN : STATE_END;
 			break;
 		}
 		now = tm_now();
-		if ((rp->pid > 0 || rp->fuser_pid > 0) && next_retry > now) {
+		якщо ((rp->pid > 0 || rp->fuser_pid > 0) && next_retry > now) {
 			int64_t sleep_for = next_retry - now;
 			/* a child may become available for reaping *before* we
 			 * enter sleep. cap the timeout to stay responsive. */
-			if (sleep_for > 500)
+			якщо (sleep_for > 500)
 				sleep_for = 500;
 			tm_sleep(sleep_for, 0);
 			state = STATE_REAP;
 			now = tm_now();
 		}
-		if ((rp->pid == -1 && rp->fuser_pid == -1) || next_retry <= now) {
-			if (rp->fuser_pid > 0) {
+		якщо ((rp->pid == -1 && rp->fuser_pid == -1) || next_retry <= now) {
+			якщо (rp->fuser_pid > 0) {
 				kill(rp->fuser_pid, SIGKILL);
 				waitpid(rp->fuser_pid, NULL, 0);
 				rp->fuser_pid = -1;
 			}
-			if (fuser_decide(rp, fuser_opt, fuser_kill_prefix) < 0) { /* abort */
+			якщо (fuser_decide(rp, fuser_opt, fuser_kill_prefix) < 0) { /* abort */
 				*rp = running[--num_running];
 				result = EXIT_FAILURE;
-			} else { /* retry */
+			} інакше { /* retry */
 				rp->last_exec_time = tm_now();
 				rp->pid = run_umount(rp->mntpath,
 					umount_args, umount_args_num);
@@ -867,5 +867,5 @@ exit:
 	REG_FREE(point_regex);
 	REG_FREE(skip_point_regex);
 
-	return result;
+	повернути result;
 }

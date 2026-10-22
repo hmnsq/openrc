@@ -24,47 +24,47 @@
 const char *applet = NULL;
 extern char **environ;
 
-int main(int argc, char **argv)
+ціле main(ціле argc, char **argv)
 {
 	char *service = getenv("RC_SVCNAME");
 	enum { GET, SET, EXPORT } action;
 	char *option = NULL;
 
 	applet = basename_c(argv[0]);
-	if (service == NULL)
+	якщо (service == NULL)
 		eerrorx("%s: no service specified", applet);
 
-	if (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
+	якщо (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
 		action = GET;
-	else if (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
+	інакше якщо (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
 		action = SET;
-	else if (strcmp(applet, "service_export") == 0)
+	інакше якщо (strcmp(applet, "service_export") == 0)
 		action = EXPORT;
-	else
+	інакше
 		eerrorx("%s: unknown applet", applet);
 
-	if (argc < 2 || !argv[1] || *argv[1] == '\0')
+	якщо (argc < 2 || !argv[1] || *argv[1] == '\0')
 		eerrorx("%s: no %s specified", applet, action == EXPORT ? "variable" : "option");
 
 	switch (action) {
 	case GET:
-		if (!(option = rc_service_value_get(service, argv[1])))
-			return EXIT_FAILURE;
+		якщо (!(option = rc_service_value_get(service, argv[1])))
+			повернути EXIT_FAILURE;
 		printf("%s", option);
 		free(option);
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 	case SET:
-		return rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
+		повернути rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
 	case EXPORT:
-		for (int i = 1; i < argc; i++) {
+		для (ціле i = 1; i < argc; i++) {
 			char *var;
-			if (rc_service_getenv(service, argv[i], NULL) > 0)
+			якщо (rc_service_getenv(service, argv[i], NULL) > 0)
 				continue;
-			else if ((var = getenv(argv[i])))
+			інакше якщо ((var = getenv(argv[i])))
 				rc_service_setenv(service, argv[i], var);
-			else
+			інакше
 				ewarn("%s: Missing reexport variable '%s'", service, argv[i]);
 		}
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 	}
 }

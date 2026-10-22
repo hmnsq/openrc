@@ -45,7 +45,7 @@ typedef struct scheduleitem {
 		SC_GOTO,
 		SC_FOREVER,
 	} type;
-	int value;
+	ціле value;
 	struct scheduleitem *gotoitem;
 	TAILQ_ENTRY(scheduleitem) entries;
 } SCHEDULEITEM;
@@ -57,7 +57,7 @@ void free_schedulelist(void)
 	SCHEDULEITEM *s1 = TAILQ_FIRST(&schedule);
 	SCHEDULEITEM *s2;
 
-	while (s1) {
+	поки (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
 		free(s1);
 		s1 = s2;
@@ -65,12 +65,12 @@ void free_schedulelist(void)
 	TAILQ_INIT(&schedule);
 }
 
-int parse_signal(const char *applet, const char *sig)
+ціле parse_signal(const char *applet, const char *sig)
 {
 	typedef struct signalpair
 	{
 		const char *name;
-		int signal;
+		ціле signal;
 	} SIGNALPAIR;
 
 #define signalpair_item(name) { #name, SIG##name },
@@ -115,27 +115,27 @@ int parse_signal(const char *applet, const char *sig)
 		{ "NULL",	0 },
 	};
 
-	unsigned int i = 0;
+	unsigned ціле i = 0;
 	const char *s;
 
-	if (!sig || *sig == '\0')
-		return -1;
+	якщо (!sig || *sig == '\0')
+		повернути -1;
 
-	if (sscanf(sig, "%u", &i) == 1) {
-		if (i < NSIG)
-			return i;
+	якщо (sscanf(sig, "%u", &i) == 1) {
+		якщо (i < NSIG)
+			повернути i;
 		eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	}
 
-	if (strncmp(sig, "SIG", 3) == 0)
+	якщо (strncmp(sig, "SIG", 3) == 0)
 		s = sig + 3;
-	else
+	інакше
 		s = NULL;
 
-	for (i = 0; i < ARRAY_SIZE(signallist); ++i)
-		if (strcmp(sig, signallist[i].name) == 0 ||
+	для (i = 0; i < ARRAY_SIZE(signallist); ++i)
+		якщо (strcmp(sig, signallist[i].name) == 0 ||
 		    (s && strcmp(s, signallist[i].name) == 0))
-			return signallist[i].signal;
+			повернути signallist[i].signal;
 
 	eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	/* NOTREACHED */
@@ -144,48 +144,48 @@ int parse_signal(const char *applet, const char *sig)
 static SCHEDULEITEM *parse_schedule_item(const char *applet, const char *string)
 {
 	const char *after_hyph;
-	int sig;
+	ціле sig;
 	SCHEDULEITEM *item = xmalloc(sizeof(*item));
 
 	item->value = 0;
 	item->gotoitem = NULL;
-	if (strcmp(string,"forever") == 0)
+	якщо (strcmp(string,"forever") == 0)
 		item->type = SC_FOREVER;
-	else if (isdigit((unsigned char)string[0])) {
+	інакше якщо (isdigit((unsigned char)string[0])) {
 		item->type = SC_TIMEOUT;
 		errno = 0;
-		if (sscanf(string, "%d", &item->value) != 1)
+		якщо (sscanf(string, "%d", &item->value) != 1)
 			eerrorx("%s: invalid timeout value in schedule '%s'",
 			    applet, string);
-	} else if ((after_hyph = string + (string[0] == '-')) &&
+	} інакше якщо ((after_hyph = string + (string[0] == '-')) &&
 	    ((sig = parse_signal(applet, after_hyph)) != -1))
 	{
 		item->type = SC_SIGNAL;
-		item->value = (int)sig;
-	} else
+		item->value = (ціле)sig;
+	} інакше
 		eerrorx("%s: invalid schedule item `%s'", applet, string);
 
-	return item;
+	повернути item;
 }
 
-void parse_schedule(const char *applet, const char *string, int timeout)
+void parse_schedule(const char *applet, const char *string, ціле timeout)
 {
 	char buffer[20];
 	const char *slash;
-	int count = 0;
+	ціле count = 0;
 	SCHEDULEITEM *repeatat = NULL;
 	size_t len;
 	SCHEDULEITEM *item;
 
 	TAILQ_INIT(&schedule);
-	if (string)
-		for (slash = string; *slash; slash++)
-			if (*slash == '/')
+	якщо (string)
+		для (slash = string; *slash; slash++)
+			якщо (*slash == '/')
 				count++;
 
 	free_schedulelist();
 
-	if (count == 0) {
+	якщо (count == 0) {
 		item = xmalloc(sizeof(*item));
 		item->type = SC_SIGNAL;
 		item->value = timeout;
@@ -196,23 +196,23 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 		item->type = SC_TIMEOUT;
 		item->gotoitem = NULL;
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (string) {
-			if (sscanf(string, "%d", &item->value) != 1)
+		якщо (string) {
+			якщо (sscanf(string, "%d", &item->value) != 1)
 				eerrorx("%s: invalid timeout value in schedule '%s'",
 					applet, string);
-		} else
+		} інакше
 			item->value = 5;
 
-		return;
+		повернути;
 	}
 
-	while (string != NULL) {
-		if ((slash = strchr(string, '/')))
+	поки (string != NULL) {
+		якщо ((slash = strchr(string, '/')))
 			len = slash - string;
-		else
+		інакше
 			len = strlen(string);
 
-		if (len >= (ptrdiff_t)sizeof(buffer))
+		якщо (len >= (ptrdiff_t)sizeof(buffer))
 			eerrorx("%s: invalid schedule item, far too long",
 			    applet);
 
@@ -222,8 +222,8 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 
 		item = parse_schedule_item(applet, buffer);
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (item->type == SC_FOREVER) {
-			if (repeatat)
+		якщо (item->type == SC_FOREVER) {
+			якщо (repeatat)
 				eerrorx("%s: invalid schedule, `forever' "
 				    "appears more than once", applet);
 
@@ -232,7 +232,7 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 		}
 	}
 
-	if (repeatat) {
+	якщо (repeatat) {
 		item = xmalloc(sizeof(*item));
 		item->type = SC_GOTO;
 		item->value = 0;
@@ -240,59 +240,59 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
 	}
 
-	return;
+	повернути;
 }
 
 /* return number of processes killed, -1 on error */
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-    pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet)
+ціле do_stop(const char *applet, const char *exec, const char *const *argv,
+    pid_t pid, uid_t uid, ціле sig, bool group, bool test, bool quiet)
 {
 	const char *kind = "PID";
 	RC_PIDLIST *pids;
 	RC_PID *pi;
 	RC_PID *np;
 	bool killed;
-	int nkilled = 0;
+	ціле nkilled = 0;
 	uid_t target;
-	if (group)
+	якщо (group)
 		kind = "GID";
 
-	if (pid > 0)
+	якщо (pid > 0)
 		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
+	інакше
 		pids = rc_find_pids(exec, argv, uid, 0);
 
-	if (!pids)
-		return 0;
+	якщо (!pids)
+		повернути 0;
 
 	LIST_FOREACH_SAFE(pi, pids, entries, np) {
-		if (test) {
+		якщо (test) {
 			einfo("Would send signal %d to %s %d", sig, kind, pi->pid);
 			nkilled++;
-		} else {
-			if (sig) {
+		} інакше {
+			якщо (sig) {
 				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, kind, pi->pid);
-				if (!quiet)
+				якщо (!quiet)
 					ebeginv("Sending signal %d to %s %d", sig, kind, pi->pid);
 			}
 			errno = 0;
-			if (group)
+			якщо (group)
 				target = -pi->pid;
-			else
+			інакше
 				target = pi->pid;
 			killed = (kill(target, sig) == 0 ||
 			    errno == ESRCH ? true : false);
-			if (!quiet)
+			якщо (!quiet)
 				eendv(killed ? 0 : 1,
 				"%s: failed to send signal %d to %s %d: %s",
 				applet, sig, kind, pi->pid, strerror(errno));
-			else if (!killed)
+			інакше якщо (!killed)
 				syslog(LOG_ERR, "Failed to send signal %d to %s %d: %s",
 						sig, kind, pi->pid, strerror(errno));
-			if (!killed) {
+			якщо (!killed) {
 				nkilled = -1;
-			} else {
-				if (nkilled != -1)
+			} інакше {
+				якщо (nkilled != -1)
 					nkilled++;
 			}
 		}
@@ -300,48 +300,48 @@ int do_stop(const char *applet, const char *exec, const char *const *argv,
 	}
 
 	free(pids);
-	return nkilled;
+	повернути nkilled;
 }
 
-int run_stop_schedule(const char *applet,
+ціле run_stop_schedule(const char *applet,
 		const char *exec, const char *const *argv,
 		pid_t pid, uid_t uid, bool group,
     bool test, bool progress, bool quiet)
 {
 	SCHEDULEITEM *item = TAILQ_FIRST(&schedule);
-	int nkilled = 0;
-	int tkilled = 0;
-	int nrunning = 0;
+	ціле nkilled = 0;
+	ціле tkilled = 0;
+	ціле nrunning = 0;
 	long nloops, nsecs;
 	struct timespec ts;
 	const char *const *p;
 	bool progressed = false;
 
-	if (!(pid > 0 || exec || uid || (argv && *argv)))
-		return 0;
+	якщо (!(pid > 0 || exec || uid || (argv && *argv)))
+		повернути 0;
 
-	if (exec) {
+	якщо (exec) {
 		einfov("Will stop %s", exec);
 		syslog(LOG_DEBUG, "Will stop %s", exec);
 	}
-	if (pid > 0) {
-		if (!group) {
+	якщо (pid > 0) {
+		якщо (!group) {
 			einfov("Will stop PID %d", pid);
 			syslog(LOG_DEBUG, "Will stop PID %d", pid);
-		} else {
+		} інакше {
 			einfov("Will stop GID %d", pid);
 			syslog(LOG_DEBUG, "Will stop GID %d", pid);
 		}
 	}
-	if (uid) {
+	якщо (uid) {
 		einfov("Will stop processes owned by UID %d", uid);
 		syslog(LOG_DEBUG, "Will stop processes owned by UID %d", uid);
 	}
-	if (argv && *argv) {
+	якщо (argv && *argv) {
 		einfovn("Will stop processes of `");
-		if (rc_yesno(getenv("EINFO_VERBOSE"))) {
-			for (p = argv; p && *p; p++) {
-				if (p != argv)
+		якщо (rc_yesno(getenv("EINFO_VERBOSE"))) {
+			для (p = argv; p && *p; p++) {
+				якщо (p != argv)
 					printf(" ");
 				printf("%s", *p);
 			}
@@ -349,7 +349,7 @@ int run_stop_schedule(const char *applet,
 		}
 	}
 
-	while (item) {
+	поки (item) {
 		switch (item->type) {
 		case SC_GOTO:
 			item = item->gotoitem;
@@ -359,22 +359,22 @@ int run_stop_schedule(const char *applet,
 			nrunning = 0;
 			nkilled = do_stop(applet, exec, argv, pid, uid, item->value, group,
 					test, quiet);
-			if (nkilled == 0) {
-				if (tkilled == 0) {
-					if (progressed)
+			якщо (nkilled == 0) {
+				якщо (tkilled == 0) {
+					якщо (progressed)
 						printf("\n");
 					eerror("%s: no matching processes found", applet);
 				}
-				return tkilled;
+				повернути tkilled;
 			}
-			else if (nkilled == -1)
-				return 0;
+			інакше якщо (nkilled == -1)
+				повернути 0;
 
 			tkilled += nkilled;
 			break;
 		case SC_FOREVER:
 		case SC_TIMEOUT:
-			if (item->type == SC_TIMEOUT && item->value < 1) {
+			якщо (item->type == SC_TIMEOUT && item->value < 1) {
 				item = NULL;
 				break;
 			}
@@ -382,29 +382,29 @@ int run_stop_schedule(const char *applet,
 			ts.tv_sec = 0;
 			ts.tv_nsec = POLL_INTERVAL;
 
-			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
-				for (nloops = 0;
+			для (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
+				для (nloops = 0;
 				     nloops < ONE_SECOND / POLL_INTERVAL;
 				     nloops++)
 				{
-					if ((nrunning = do_stop(applet, exec, argv,
+					якщо ((nrunning = do_stop(applet, exec, argv,
 						    pid, uid, 0, group, test, quiet)) == 0)
-						return 0;
+						повернути 0;
 
 
-					if (nanosleep(&ts, NULL) == -1) {
-						if (progressed) {
+					якщо (nanosleep(&ts, NULL) == -1) {
+						якщо (progressed) {
 							printf("\n");
 							progressed = false;
 						}
-						if (errno != EINTR) {
+						якщо (errno != EINTR) {
 							eerror("%s: nanosleep: %s",
 							    applet, strerror(errno));
-							return 0;
+							повернути 0;
 						}
 					}
 				}
-				if (progress) {
+				якщо (progress) {
 					printf(".");
 					fflush(stdout);
 					progressed = true;
@@ -412,30 +412,30 @@ int run_stop_schedule(const char *applet,
 			}
 			break;
 		default:
-			if (progressed) {
+			якщо (progressed) {
 				printf("\n");
 				progressed = false;
 			}
 			eerror("%s: invalid schedule item `%d'",
 			    applet, item->type);
-			return 0;
+			повернути 0;
 		}
 
-		if (item)
+		якщо (item)
 			item = TAILQ_NEXT(item, entries);
 	}
 
-	if (test || (tkilled > 0 && nrunning == 0))
-		return nkilled;
+	якщо (test || (tkilled > 0 && nrunning == 0))
+		повернути nkilled;
 
-	if (progressed)
+	якщо (progressed)
 		printf("\n");
-	if (!quiet) {
-		if (nrunning == 1)
+	якщо (!quiet) {
+		якщо (nrunning == 1)
 			eerror("%s: %d process refused to stop", applet, nrunning);
-		else
+		інакше
 			eerror("%s: %d process(es) refused to stop", applet, nrunning);
 	}
 
-	return -nrunning;
+	повернути -nrunning;
 }

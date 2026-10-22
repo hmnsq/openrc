@@ -32,38 +32,38 @@
 
 const char *applet = NULL;
 
-static int syslog_decode(char *name, const CODE *codetab)
+static ціле syslog_decode(char *name, const CODE *codetab)
 {
 	const CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	якщо (isdigit((unsigned char)*name))
+		повернути atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	для (c = codetab; c->c_name; c++)
+		якщо (!strcasecmp(name, c->c_name))
+			повернути c->c_val;
 
-	return -1;
+	повернути -1;
 }
 
-int main(int argc, char **argv)
+ціле main(ціле argc, char **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	ціле retval = EXIT_SUCCESS;
+	ціле i;
 	size_t l = 0;
 	char *message = NULL;
 	char *p;
-	int level = 0;
+	ціле level = 0;
 	struct timespec ts;
 	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	ціле (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
+	ціле (*ee) (ціле, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
+	якщо (strcmp(applet, "eval_ecolors") == 0) {
 		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
@@ -74,31 +74,31 @@ int main(int argc, char **argv)
 		exit(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	якщо (argc > 0) {
+		якщо (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (ціле)strtoimax(argv[0], &p, 0);
+			якщо (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			якщо (errno)
 				retval = EXIT_FAILURE;
-			else {
+			інакше {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} інакше якщо (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			якщо (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			якщо (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,10 +109,10 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	якщо (strcmp(applet, "ewaitfile") == 0) {
+		якщо (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		якщо (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
 		gettimeofday(&stop, NULL);
@@ -120,99 +120,99 @@ int main(int argc, char **argv)
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		для (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
+			для (;;) {
+				якщо (access(argv[i], F_OK) == 0)
 					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
+				якщо (nanosleep(&ts, NULL) == -1)
+					повернути EXIT_FAILURE;
 				gettimeofday(&now, NULL);
-				if (retval <= 0)
+				якщо (retval <= 0)
 					continue;
-				if (timercmp(&now, &stop, <))
+				якщо (timercmp(&now, &stop, <))
 					continue;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				повернути EXIT_FAILURE;
 			}
 			eendv(EXIT_SUCCESS, NULL);
 		}
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
+	якщо (argc > 0) {
 		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+		для (i = 0; i < argc; i++) {
+			якщо (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	якщо (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	інакше якщо (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	інакше якщо (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	інакше якщо (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	інакше якщо (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} інакше якщо (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} інакше якщо (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	інакше якщо (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	інакше якщо (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
+	інакше якщо (strcmp(applet, "esyslog") == 0) {
 		elog(retval, "%s", message);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} інакше якщо (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	інакше якщо (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	інакше якщо (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	інакше якщо (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	інакше якщо (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	інакше якщо (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	інакше якщо (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	інакше якщо (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	інакше якщо (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	інакше якщо (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	інакше якщо (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	інакше {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
+	якщо (message) {
+		якщо (e)
 			e("%s", message);
-		else if (ee)
+		інакше якщо (ee)
 			ee(retval, "%s", message);
-	} else {
-		if (e)
+	} інакше {
+		якщо (e)
 			e(NULL);
-		else if (ee)
+		інакше якщо (ee)
 			ee(retval, NULL);
 	}
 
 	free(message);
-	return retval;
+	повернути retval;
 }
