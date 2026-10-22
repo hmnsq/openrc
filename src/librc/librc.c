@@ -46,45 +46,45 @@
 
 /* File stream used for plugins to write environ vars to */
 FILE *rc_environ_fd = NULL;
-static int dirfds[RC_DIR_MAX];
+static จำนวนเต็ม dirfds[RC_DIR_MAX];
 
-int rc_dirfd(enum rc_dir dir) {
-	int flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
-	int dirfd;
+จำนวนเต็ม rc_dirfd(ga_nanaa rc_dir dir) {
+	จำนวนเต็ม flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
+	จำนวนเต็ม dirfd;
 
-	if (dir < 0 || dir >= RC_DIR_MAX)
-		return -1;
-	if (dirfds[dir] <= 0) {
+	ถ้า (dir < 0 || dir >= RC_DIR_MAX)
+		คืน -1;
+	ถ้า (dirfds[dir] <= 0) {
 		switch (dir) {
-		case RC_DIR_SYSCONF:
-			return dirfds[dir] = open(rc_sysconfdir(), flags);
-		case RC_DIR_USRCONF:
-			return dirfds[dir] = open(rc_usrconfdir(), flags);
-		case RC_DIR_RUNLEVEL:
-			return dirfds[dir] = open(rc_runleveldir(), flags);
-		case RC_DIR_SVCDIR:
-			if (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
-				return -1;
-			return dirfds[dir] = open(rc_svcdir(), flags);
+		pak_sa RC_DIR_SYSCONF:
+			คืน dirfds[dir] = open(rc_sysconfdir(), flags);
+		pak_sa RC_DIR_USRCONF:
+			คืน dirfds[dir] = open(rc_usrconfdir(), flags);
+		pak_sa RC_DIR_RUNLEVEL:
+			คืน dirfds[dir] = open(rc_runleveldir(), flags);
+		pak_sa RC_DIR_SVCDIR:
+			ถ้า (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
+				คืน -1;
+			คืน dirfds[dir] = open(rc_svcdir(), flags);
 		default:
 			assert(dirnames[dir]);
 			dirfd = rc_dirfd(RC_DIR_SVCDIR);
-			if ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
-				if (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
-					return -1;
+			ถ้า ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
+				ถ้า (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
+					คืน -1;
 				dirfds[dir] = openat(dirfd, dirnames[dir], flags);
 			}
-			break;
+			bha_nga;
 		}
 	}
-	return dirfds[dir];
+	คืน dirfds[dir];
 }
 
 void clear_dirfds(void) {
-	for (size_t i = 0; i < RC_DIR_MAX; i++) {
+	สำหรับ (size_t i = 0; i < RC_DIR_MAX; i++) {
 		/* dirfd is zero-initialized, though zero is a valid
 		 * FD, dirfd should never contain FDs which are <= 2. */
-		if (dirfds[i] <= 0)
+		ถ้า (dirfds[i] <= 0)
 			continue;
 
 		close(dirfds[i]);
@@ -95,124 +95,124 @@ void clear_dirfds(void) {
 #define LS_INITD	0x01
 #define LS_DIR		0x02
 static RC_STRINGLIST *
-ls_dir(int targetfd, const char *dir, int options)
+ls_dir(จำนวนเต็ม targetfd, const var_na *dir, จำนวนเต็ม options)
 {
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	RC_STRINGLIST *list = NULL;
-	struct stat buf;
+	sa_nracanaa stat buf;
 	size_t l;
 
 	list = rc_stringlist_new();
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return list;
+	ถ้า (!(dp = do_opendirat(targetfd, dir)))
+		คืน list;
 
-	while (((d = readdir(dp)) != NULL)) {
-		if (d->d_name[0] == '.')
+	ขณะ (((d = readdir(dp)) != NULL)) {
+		ถ้า (d->d_name[0] == '.')
 			continue;
-		if (options & LS_INITD) {
+		ถ้า (options & LS_INITD) {
 			/* Check that our file really exists.
 			 * This is important as a service maybe in a
 			 * runlevel, but could have been removed. */
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
+			ถ้า (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
 				continue;
 
 			/* .sh files are not init scripts */
 			l = strlen(d->d_name);
-			if (l > 2 && d->d_name[l - 3] == '.' &&
+			ถ้า (l > 2 && d->d_name[l - 3] == '.' &&
 					d->d_name[l - 2] == 's' &&
 					d->d_name[l - 1] == 'h')
 				continue;
 		}
-		if (options & LS_DIR) {
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
+		ถ้า (options & LS_DIR) {
+			ถ้า (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
 				continue;
 		}
 		rc_stringlist_add(list, d->d_name);
 	}
 	closedir(dp);
-	return list;
+	คืน list;
 }
 
 static bool
-rm_dir(int targetfd, const char *pathname, bool top)
+rm_dir(จำนวนเต็ม targetfd, const var_na *pathname, bool top)
 {
 	bool retval = true;
-	struct dirent *d;
-	struct stat s;
+	sa_nracanaa dirent *d;
+	sa_nracanaa stat s;
 	DIR *dp;
 
-	if (!(dp = do_opendirat(targetfd, pathname)))
-		return false;
+	ถ้า (!(dp = do_opendirat(targetfd, pathname)))
+		คืน false;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+	ขณะ ((d = readdir(dp))) {
+		ถ้า (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
 			continue;
-		if (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
+		ถ้า (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
 			retval = false;
-			break;
+			bha_nga;
 		}
-		if (S_ISDIR(s.st_mode)) {
-			if (!rm_dir(dirfd(dp), d->d_name, true)) {
+		ถ้า (S_ISDIR(s.st_mode)) {
+			ถ้า (!rm_dir(dirfd(dp), d->d_name, true)) {
 				retval = false;
-				break;
+				bha_nga;
 			}
-		} else {
-			if (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
+		} มิฉะนั้น {
+			ถ้า (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
 				retval = false;
-				break;
+				bha_nga;
 			}
 		}
 	}
 	closedir(dp);
 
-	if (!retval)
-		return false;
+	ถ้า (!retval)
+		คืน false;
 
-	if (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
-		return false;
+	ถ้า (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
+		คืน false;
 
-	return true;
+	คืน true;
 }
 
 /* Other systems may need this at some point, but for now it's Linux only */
 #ifdef __linux__
 static bool
-file_regex(const char *file, const char *regex)
+file_regex(const var_na *file, const var_na *regex)
 {
 	FILE *fp;
-	char *line = NULL;
+	var_na *line = NULL;
 	size_t size = 0;
 	ssize_t len = 0;
 	regex_t re;
 	bool retval = true;
-	int result;
+	จำนวนเต็ม result;
 
-	if (!(fp = fopen(file, "r")))
-		return false;
+	ถ้า (!(fp = fopen(file, "r")))
+		คืน false;
 
-	if ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
-		char buf[BUFSIZ];
+	ถ้า ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
+		var_na buf[BUFSIZ];
 		fclose(fp);
-		regerror(result, &re, buf, sizeof(buf));
+		regerror(result, &re, buf, parimaa_na(buf));
 		fprintf(stderr, "file_regex: %s", buf);
-		return false;
+		คืน false;
 	}
 
-	while ((len = xgetline(&line, &size, fp)) != -1) {
-		char *str = line;
+	ขณะ ((len = xgetline(&line, &size, fp)) != -1) {
+		var_na *str = line;
 		/* some /proc files have \0 separated content so we have to
 		   loop through the 'line' */
 		do {
-			if (regexec(&re, str, 0, NULL, 0) == 0)
+			ถ้า (regexec(&re, str, 0, NULL, 0) == 0)
 				goto found;
 			str += strlen(str) + 1;
 			/* len is the size of allocated buffer and we don't
 			   want call regexec BUFSIZE times. find next str */
-			while (str < line + len && *str == '\0')
+			ขณะ (str < line + len && *str == '\0')
 				str++;
-		} while (str < line + len);
+		} ขณะ (str < line + len);
 	}
 	retval = false;
 found:
@@ -220,204 +220,204 @@ found:
 	free(line);
 	regfree(&re);
 
-	return retval;
+	คืน retval;
 }
 #endif
 
 
-static const char *
+static const var_na *
 get_systype(void)
 {
-	char *systype = rc_conf_value("rc_sys");
-	if (systype) {
-		char *s = systype;
+	var_na *systype = rc_conf_value("rc_sys");
+	ถ้า (systype) {
+		var_na *s = systype;
 		/* Convert to uppercase */
-		while (s && *s) {
-			if (islower((unsigned char) *s))
-				*s = toupper((unsigned char) *s);
+		ขณะ (s && *s) {
+			ถ้า (islower((unsigned var_na) *s))
+				*s = toupper((unsigned var_na) *s);
 			s++;
 		}
 	}
-	return systype;
+	คืน systype;
 }
 
-static const char *
-detect_container(const char *systype RC_UNUSED)
+static const var_na *
+detect_container(const var_na *systype RC_UNUSED)
 {
 #ifdef __FreeBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-		       return NULL;
-		if (strcmp(systype, RC_SYS_JAIL) == 0)
-			return RC_SYS_JAIL;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
+	ถ้า (systype) {
+		ถ้า (strcmp(systype, RC_SYS_NONE) == 0)
+		       คืน NULL;
+		ถ้า (strcmp(systype, RC_SYS_JAIL) == 0)
+			คืน RC_SYS_JAIL;
+		ถ้า (strcmp(systype, RC_SYS_PODMAN) == 0)
+			คืน RC_SYS_PODMAN;
 	}
 
-	int jailed = 0;
-	size_t len = sizeof(jailed);
+	จำนวนเต็ม jailed = 0;
+	size_t len = parimaa_na(jailed);
 
-	if (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
-		if (jailed == 1)
-			return RC_SYS_JAIL;
+	ถ้า (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
+		ถ้า (jailed == 1)
+			คืน RC_SYS_JAIL;
 
-	if (access("/var/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
+	ถ้า (access("/var/run/.containerenv", F_OK) == 0)
+		คืน RC_SYS_PODMAN;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_UML) == 0)
-			return RC_SYS_UML;
-		if (strcmp(systype, RC_SYS_VSERVER) == 0)
-			return RC_SYS_VSERVER;
-		if (strcmp(systype, RC_SYS_OPENVZ) == 0)
-			return RC_SYS_OPENVZ;
-		if (strcmp(systype, RC_SYS_LXC) == 0)
-			return RC_SYS_LXC;
-		if (strcmp(systype, RC_SYS_RKT) == 0)
-				return RC_SYS_RKT;
-		if (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
-				return RC_SYS_SYSTEMD_NSPAWN;
-		if (strcmp(systype, RC_SYS_DOCKER) == 0)
-				return RC_SYS_DOCKER;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
-		if (strcmp(systype, RC_SYS_WSL) == 0)
-			return RC_SYS_WSL;
+	ถ้า (systype) {
+		ถ้า (strcmp(systype, RC_SYS_NONE) == 0)
+			คืน NULL;
+		ถ้า (strcmp(systype, RC_SYS_UML) == 0)
+			คืน RC_SYS_UML;
+		ถ้า (strcmp(systype, RC_SYS_VSERVER) == 0)
+			คืน RC_SYS_VSERVER;
+		ถ้า (strcmp(systype, RC_SYS_OPENVZ) == 0)
+			คืน RC_SYS_OPENVZ;
+		ถ้า (strcmp(systype, RC_SYS_LXC) == 0)
+			คืน RC_SYS_LXC;
+		ถ้า (strcmp(systype, RC_SYS_RKT) == 0)
+				คืน RC_SYS_RKT;
+		ถ้า (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
+				คืน RC_SYS_SYSTEMD_NSPAWN;
+		ถ้า (strcmp(systype, RC_SYS_DOCKER) == 0)
+				คืน RC_SYS_DOCKER;
+		ถ้า (strcmp(systype, RC_SYS_PODMAN) == 0)
+			คืน RC_SYS_PODMAN;
+		ถ้า (strcmp(systype, RC_SYS_WSL) == 0)
+			คืน RC_SYS_WSL;
 	}
-	if (file_regex("/proc/cpuinfo", "UML"))
-		return RC_SYS_UML;
-	else if (file_regex("/proc/self/status",
+	ถ้า (file_regex("/proc/cpuinfo", "UML"))
+		คืน RC_SYS_UML;
+	มิฉะนั้น ถ้า (file_regex("/proc/self/status",
 		"(s_context|VxID):[[:space:]]*[1-9]"))
-		return RC_SYS_VSERVER;
-	else if (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
-		return RC_SYS_OPENVZ;
-	else if (file_regex("/proc/self/status",
+		คืน RC_SYS_VSERVER;
+	มิฉะนั้น ถ้า (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
+		คืน RC_SYS_OPENVZ;
+	มิฉะนั้น ถ้า (file_regex("/proc/self/status",
 		"envID:[[:space:]]*[1-9]"))
-		return RC_SYS_OPENVZ; /* old test */
-	else if (file_regex("/proc/1/environ", "container=lxc"))
-		return RC_SYS_LXC;
-	else if (file_regex("/proc/1/environ", "container=rkt"))
-		return RC_SYS_RKT;
-	else if (file_regex("/proc/1/environ", "container=systemd-nspawn"))
-		return RC_SYS_SYSTEMD_NSPAWN;
-	else if (access("/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
-	else if (access("/.dockerenv", F_OK) == 0)
-		return RC_SYS_DOCKER;
+		คืน RC_SYS_OPENVZ; /* old test */
+	มิฉะนั้น ถ้า (file_regex("/proc/1/environ", "container=lxc"))
+		คืน RC_SYS_LXC;
+	มิฉะนั้น ถ้า (file_regex("/proc/1/environ", "container=rkt"))
+		คืน RC_SYS_RKT;
+	มิฉะนั้น ถ้า (file_regex("/proc/1/environ", "container=systemd-nspawn"))
+		คืน RC_SYS_SYSTEMD_NSPAWN;
+	มิฉะนั้น ถ้า (access("/run/.containerenv", F_OK) == 0)
+		คืน RC_SYS_PODMAN;
+	มิฉะนั้น ถ้า (access("/.dockerenv", F_OK) == 0)
+		คืน RC_SYS_DOCKER;
 	/* old test, I'm not sure when this was valid. */
-	else if (file_regex("/proc/1/environ", "container=docker"))
-		return RC_SYS_DOCKER;
-	else if (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
-		return RC_SYS_WSL;
-	else if (getenv("WSL_DISTRO_NAME"))
-		return RC_SYS_WSL;
-	else if (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
-		return RC_SYS_WSL;
+	มิฉะนั้น ถ้า (file_regex("/proc/1/environ", "container=docker"))
+		คืน RC_SYS_DOCKER;
+	มิฉะนั้น ถ้า (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
+		คืน RC_SYS_WSL;
+	มิฉะนั้น ถ้า (getenv("WSL_DISTRO_NAME"))
+		คืน RC_SYS_WSL;
+	มิฉะนั้น ถ้า (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
+		คืน RC_SYS_WSL;
 #endif
 
-	return NULL;
+	คืน NULL;
 }
 
-static const char *
-detect_vm(const char *systype RC_UNUSED)
+static const var_na *
+detect_vm(const var_na *systype RC_UNUSED)
 {
 #ifdef __NetBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	ถ้า (systype) {
+		ถ้า (strcmp(systype, RC_SYS_NONE) == 0)
+			คืน NULL;
+		ถ้า (strcmp(systype, RC_SYS_XEN0) == 0)
+			คืน RC_SYS_XEN0;
+		ถ้า (strcmp(systype, RC_SYS_XENU) == 0)
+			คืน RC_SYS_XENU;
 	}
-	if (access("/kern/xen/privcmd", F_OK) == 0)
-		return RC_SYS_XEN0;
-	if (access("/kern/xen", F_OK) == 0)
-		return RC_SYS_XENU;
+	ถ้า (access("/kern/xen/privcmd", F_OK) == 0)
+		คืน RC_SYS_XEN0;
+	ถ้า (access("/kern/xen", F_OK) == 0)
+		คืน RC_SYS_XENU;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	ถ้า (systype) {
+		ถ้า (strcmp(systype, RC_SYS_NONE) == 0)
+			คืน NULL;
+		ถ้า (strcmp(systype, RC_SYS_XEN0) == 0)
+			คืน RC_SYS_XEN0;
+		ถ้า (strcmp(systype, RC_SYS_XENU) == 0)
+			คืน RC_SYS_XENU;
 	}
-	if (access("/proc/xen", F_OK) == 0) {
-		if (file_regex("/proc/xen/capabilities", "control_d"))
-			return RC_SYS_XEN0;
-		return RC_SYS_XENU;
+	ถ้า (access("/proc/xen", F_OK) == 0) {
+		ถ้า (file_regex("/proc/xen/capabilities", "control_d"))
+			คืน RC_SYS_XEN0;
+		คืน RC_SYS_XENU;
 	}
 #endif
 
-	return NULL;
+	คืน NULL;
 }
 
-const char *
+const var_na *
 rc_sys(void)
 {
-	const char *systype;
-	const char *sys;
+	const var_na *systype;
+	const var_na *sys;
 
 	systype = get_systype();
 	sys = detect_container(systype);
-	if (!sys) {
+	ถ้า (!sys) {
 		sys = detect_vm(systype);
 	}
 
-	return sys;
+	คืน sys;
 }
 
-static const char *
+static const var_na *
 rc_parse_service_state(RC_SERVICE state)
 {
-	int i;
+	จำนวนเต็ม i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].name;
+	สำหรับ (i = 0; rc_service_state_names[i].name; i++) {
+		ถ้า (rc_service_state_names[i].state == state)
+			คืน rc_service_state_names[i].name;
 	}
-	return NULL;
+	คืน NULL;
 }
 
-static int
+static จำนวนเต็ม
 rc_parse_service_state_dirfd(RC_SERVICE state)
 {
-	for (size_t i = 0; rc_service_state_names[i].name; i++)
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].dir;
-	return -1;
+	สำหรับ (size_t i = 0; rc_service_state_names[i].name; i++)
+		ถ้า (rc_service_state_names[i].state == state)
+			คืน rc_service_state_names[i].dir;
+	คืน -1;
 }
 
 /* Returns a list of all the chained runlevels used by the
  * specified runlevel in dependency order, including the
  * specified runlevel. */
 static void
-get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
+get_runlevel_chain(const var_na *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
 {
 	RC_STRINGLIST *dirs;
 	RC_STRING *d, *parent;
-	const char *nextlevel;
+	const var_na *nextlevel;
 
 	/*
 	 * If we haven't been passed a runlevel or a level list, or
 	 * if the passed runlevel doesn't exist then we're done already!
 	 */
-	if (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
-		return;
+	ถ้า (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
+		คืน;
 
 	/*
 	 * We want to add this runlevel to the list but if
 	 * it is already in the list it needs to go at the
 	 * end again.
 	 */
-	if (rc_stringlist_find(level_list, runlevel))
+	ถ้า (rc_stringlist_find(level_list, runlevel))
 		rc_stringlist_delete(level_list, runlevel);
 	rc_stringlist_add(level_list, runlevel);
 
@@ -430,7 +430,7 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 		nextlevel = d->value;
 
 		/* Check for loop */
-		if (rc_stringlist_find(ancestor_list, nextlevel)) {
+		ถ้า (rc_stringlist_find(ancestor_list, nextlevel)) {
 			fprintf(stderr, "Loop detected in stacked runlevels attempting to enter runlevel %s!\n",
 			    nextlevel);
 			fprintf(stderr, "Ancestors:\n");
@@ -452,101 +452,101 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 bool
 rc_runlevel_starting(void)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
+	คืน faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
 }
 
 bool
 rc_runlevel_stopping(void)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
+	คืน faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
 }
 
 RC_STRINGLIST *rc_runlevel_list(void)
 {
-	return ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
+	คืน ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
 }
 
-char *
+var_na *
 rc_runlevel_get(void)
 {
 	FILE *fp;
-	char *runlevel = NULL;
+	var_na *runlevel = NULL;
 	size_t i;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
-		runlevel = xmalloc(sizeof(char) * PATH_MAX);
-		if (fgets(runlevel, PATH_MAX, fp)) {
+	ถ้า ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
+		runlevel = xmalloc(parimaa_na(var_na) * PATH_MAX);
+		ถ้า (fgets(runlevel, PATH_MAX, fp)) {
 			i = strlen(runlevel);
-			if (i && runlevel[i - 1] == '\n')
+			ถ้า (i && runlevel[i - 1] == '\n')
 				runlevel[i - 1] = 0;
-		} else
+		} มิฉะนั้น
 			*runlevel = '\0';
 		fclose(fp);
 	}
 
-	if (!runlevel || !*runlevel) {
+	ถ้า (!runlevel || !*runlevel) {
 		free(runlevel);
 		runlevel = NULL;
 	}
 
-	return runlevel;
+	คืน runlevel;
 }
 
 bool
-rc_runlevel_set(const char *runlevel)
+rc_runlevel_set(const var_na *runlevel)
 {
 	FILE *fp;
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ถ้า (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
+		คืน false;
 
 	fputs(runlevel, fp);
 	fclose(fp);
-	return true;
+	คืน true;
 }
 
 bool
-rc_runlevel_exists(const char *runlevel)
+rc_runlevel_exists(const var_na *runlevel)
 {
-	struct stat buf;
+	sa_nracanaa stat buf;
 
-	if (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
-		return false;
-	if (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
-		return true;
-	return false;
+	ถ้า (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
+		คืน false;
+	ถ้า (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
+		คืน true;
+	คืน false;
 }
 
 bool
-rc_runlevel_stack(const char *dst, const char *src)
+rc_runlevel_stack(const var_na *dst, const var_na *src)
 {
-	char *d, *s;
-	int r;
+	var_na *d, *s;
+	จำนวนเต็ม r;
 
-	if (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
-		return false;
+	ถ้า (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
+		คืน false;
 	xasprintf(&s, "../%s", src);
 	xasprintf(&d, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = symlink(s, d);
 	free(d);
 	free(s);
-	return (r == 0);
+	คืน (r == 0);
 }
 
 bool
-rc_runlevel_unstack(const char *dst, const char *src)
+rc_runlevel_unstack(const var_na *dst, const var_na *src)
 {
-	char *path;
-	int r;
+	var_na *path;
+	จำนวนเต็ม r;
 
 	xasprintf(&path, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = unlink(path);
 	free(path);
-	return (r == 0);
+	คืน (r == 0);
 }
 
 RC_STRINGLIST *
-rc_runlevel_stacks(const char *runlevel)
+rc_runlevel_stacks(const var_na *runlevel)
 {
 	RC_STRINGLIST *stack, *ancestor_list;
 	stack = rc_stringlist_new();
@@ -554,21 +554,21 @@ rc_runlevel_stacks(const char *runlevel)
 	rc_stringlist_add(ancestor_list, runlevel);
 	get_runlevel_chain(runlevel, stack, ancestor_list);
 	rc_stringlist_free(ancestor_list);
-	return stack;
+	คืน stack;
 }
 
-static const char *config_path[] = { _RC_PATH, NULL };
+static const var_na *config_path[] = { _RC_PATH, NULL };
 
-static struct {
+static sa_nracanaa {
 	bool set;
-	char *svcdir, *confdir, *runleveldir;
+	var_na *svcdir, *confdir, *runleveldir;
 } rc_dirs;
 
-static struct {
-	char *buffer;
+static sa_nracanaa {
+	var_na *buffer;
 	size_t count;
-	int *fds;
-	const char **entries, **allocd;
+	จำนวนเต็ม *fds;
+	const var_na **entries, **allocd;
 } rc_path;
 
 static void
@@ -589,7 +589,7 @@ free_rc_dirs(void)
 
 __attribute__((__format__(__printf__, 2, 3)))
 static void
-append_path(FILE *fp, const char *fmt, ...)
+append_path(FILE *fp, const var_na *fmt, ...)
 {
 	va_list va;
 
@@ -601,73 +601,73 @@ append_path(FILE *fp, const char *fmt, ...)
 	rc_path.count++;
 }
 
-static const char *
-strnsep(const char **str, size_t *size, const char sep)
+static const var_na *
+strnsep(const var_na **str, size_t *size, const var_na sep)
 {
-	const char *ret = *str;
+	const var_na *ret = *str;
 
-	if (!ret)
-		return NULL;
+	ถ้า (!ret)
+		คืน NULL;
 
 	*str = strchrnul(ret, sep);
 	*size = *str - ret;
-	if (!**str)
+	ถ้า (!**str)
 		*str = NULL;
-	else
+	มิฉะนั้น
 		*str += 1;
 
-	return ret;
+	คืน ret;
 }
 
-static const char *
-strnullsep(const char **str, size_t *size)
+static const var_na *
+strnullsep(const var_na **str, size_t *size)
 {
-	const char *ret = *str;
+	const var_na *ret = *str;
 	size_t len;
 
-	if (!ret)
-		return NULL;
+	ถ้า (!ret)
+		คืน NULL;
 
 	len = strnlen(ret, *size - 1) + 1;
 
-	if ((*size -= len))
+	ถ้า ((*size -= len))
 		*str += len;
-	else
+	มิฉะนั้น
 		*str = NULL;
 
-	return ret;
+	คืน ret;
 }
 
 static void
 append_user_path(FILE *fp)
 {
-	const char *xdg, *entry;
+	const var_na *xdg, *entry;
 	size_t size;
 
 	append_path(fp, "%s", rc_dirs.confdir);
-	if (!(xdg = getenv("XDG_CONFIG_DIRS")))
+	ถ้า (!(xdg = getenv("XDG_CONFIG_DIRS")))
 		append_path(fp, "/etc/xdg/rc");
-	else while ((entry = strnsep(&xdg, &size, ':')))
-		if (size) append_path(fp, "%.*s/rc", (int) size, entry);
+	มิฉะนั้น ขณะ ((entry = strnsep(&xdg, &size, ':')))
+		ถ้า (size) append_path(fp, "%.*s/rc", (จำนวนเต็ม) size, entry);
 
-	for (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
+	สำหรับ (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
 		append_path(fp, "%s/user", config_path[i]);
 	append_path(fp, "%s", rc_dirs.svcdir);
 }
 
 static void
-append_rc_path(FILE *fp, const char *path, bool user)
+append_rc_path(FILE *fp, const var_na *path, bool user)
 {
 	bool has_user = false;
-	const char *entry;
+	const var_na *entry;
 	size_t size;
 
-	while ((entry = strnsep(&path, &size, ':'))) {
-		if (size)
-			append_path(fp, "%.*s%s", (int)size, entry, user ? "/user" : "");
-		else if (user && !has_user)
+	ขณะ ((entry = strnsep(&path, &size, ':'))) {
+		ถ้า (size)
+			append_path(fp, "%.*s%s", (จำนวนเต็ม)size, entry, user ? "/user" : "");
+		มิฉะนั้น ถ้า (user && !has_user)
 			append_user_path(fp), has_user = true;
-		else if (!user) while (*rc_path.entries)
+		มิฉะนั้น ถ้า (!user) ขณะ (*rc_path.entries)
 			append_path(fp, "%s", *rc_path.entries++);
 	}
 }
@@ -675,11 +675,11 @@ append_rc_path(FILE *fp, const char *path, bool user)
 static void
 load_dynamic_path(bool user)
 {
-	const char *path, *entry;
+	const var_na *path, *entry;
 	size_t size, count = 0;
 	FILE *fp;
 
-	if (!rc_dirs.set) {
+	ถ้า (!rc_dirs.set) {
 		atexit(free_rc_dirs);
 		rc_dirs.set = true;
 	}
@@ -687,22 +687,22 @@ load_dynamic_path(bool user)
 	rc_path.entries = config_path;
 	rc_path.count = ARRAY_SIZE(config_path) - 1;
 
-	if (!(path = getenv("RC_PATH")) && !user)
-		return;
+	ถ้า (!(path = getenv("RC_PATH")) && !user)
+		คืน;
 
 	rc_path.count = 0;
 	fp = xopen_memstream(&rc_path.buffer, &size);
-	if (path)
+	ถ้า (path)
 		append_rc_path(fp, path, user);
-	else
+	มิฉะนั้น
 		append_user_path(fp);
 	xclose_memstream(fp);
 
-	rc_path.allocd = rc_path.entries = calloc(rc_path.count + 1, sizeof(*rc_path.entries));
+	rc_path.allocd = rc_path.entries = calloc(rc_path.count + 1, parimaa_na(*rc_path.entries));
 
 	path = rc_path.buffer;
 
-	while ((entry = strnullsep(&path, &size)) && count < rc_path.count)
+	ขณะ ((entry = strnullsep(&path, &size)) && count < rc_path.count)
 		rc_path.entries[count++] = entry;
 	rc_path.entries[rc_path.count] = NULL;
 }
@@ -712,46 +712,46 @@ static bool is_user = false;
 bool
 rc_is_user(void)
 {
-	int _is_user = -1;
+	จำนวนเต็ม _is_user = -1;
 
-	if (_is_user == -1) {
-		char *env = getenv("RC_USER_SERVICES");
+	ถ้า (_is_user == -1) {
+		var_na *env = getenv("RC_USER_SERVICES");
 
 		_is_user = env ? rc_yesno(env) : is_user;
 	}
 
-	return _is_user;
+	คืน _is_user;
 }
 
 void
 rc_set_user(void)
 {
-	char *env;
+	var_na *env;
 
-	if (is_user)
-		return;
+	ถ้า (is_user)
+		คืน;
 
-	if (!rc_dirs.set)
+	ถ้า (!rc_dirs.set)
 		atexit(free_rc_dirs);
-	else
+	มิฉะนั้น
 		free_rc_dirs();
 
 	is_user = true;
 	rc_dirs.set = true;
 	setenv("RC_USER_SERVICES", "yes", true);
 
-	if ((env = getenv("XDG_CONFIG_HOME"))) {
+	ถ้า ((env = getenv("XDG_CONFIG_HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/rc", env);
-	} else if ((env = getenv("HOME"))) {
+	} มิฉะนั้น ถ้า ((env = getenv("HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/.config/rc", env);
-	} else {
+	} มิฉะนั้น {
 		fprintf(stderr, "XDG_CONFIG_HOME and HOME unset.\n");
 		exit(EXIT_FAILURE);
 	}
 
 	xasprintf(&rc_dirs.runleveldir, "%s/runlevels", rc_dirs.confdir);
 
-	if (!(env = getenv("XDG_RUNTIME_DIR"))) {
+	ถ้า (!(env = getenv("XDG_RUNTIME_DIR"))) {
 		/* FIXME: fallback to something else? */
 		fprintf(stderr, "XDG_RUNTIME_DIR unset.\n");
 		exit(EXIT_FAILURE);
@@ -764,28 +764,28 @@ rc_set_user(void)
 	clear_dirfds();
 }
 
-const char * const *
+const var_na * const *
 rc_scriptdirs(void)
 {
-	if (!rc_path.entries)
+	ถ้า (!rc_path.entries)
 		load_dynamic_path(false);
-	return rc_path.entries;
+	คืน rc_path.entries;
 }
 
 size_t
-rc_scriptdirfds(const int **fds)
+rc_scriptdirfds(const จำนวนเต็ม **fds)
 {
 	static size_t len = 0;
 
-	if (len == 0) {
-		if (!rc_path.entries)
+	ถ้า (len == 0) {
+		ถ้า (!rc_path.entries)
 			load_dynamic_path(false);
 
-		rc_path.fds = xmalloc(rc_path.count * sizeof(*rc_path.fds));
-		for (size_t i = 0; i < rc_path.count; i++) {
-			int fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+		rc_path.fds = xmalloc(rc_path.count * parimaa_na(*rc_path.fds));
+		สำหรับ (size_t i = 0; i < rc_path.count; i++) {
+			จำนวนเต็ม fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 
-			if (fd == -1)
+			ถ้า (fd == -1)
 				continue;
 
 			rc_path.fds[len++] = fd;
@@ -793,285 +793,285 @@ rc_scriptdirfds(const int **fds)
 	}
 
 	*fds = rc_path.fds;
-	return len;
+	คืน len;
 }
 
-const char *
+const var_na *
 rc_sysconfdir(void)
 {
-	return RC_SYSCONFDIR;
+	คืน RC_SYSCONFDIR;
 }
 
-const char *
+const var_na *
 rc_usrconfdir(void)
 {
-	return rc_dirs.confdir ? rc_dirs.confdir : NULL;
+	คืน rc_dirs.confdir ? rc_dirs.confdir : NULL;
 }
 
-const char *
+const var_na *
 rc_runleveldir(void)
 {
-	return rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
+	คืน rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
 }
 
-const char *
+const var_na *
 rc_svcdir(void)
 {
-	static const char *svcdir;
+	static const var_na *svcdir;
 
-	if (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
+	ถ้า (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
 		svcdir = RC_SVCDIR;
-	return rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
+	คืน rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
 }
 
 static ssize_t
-safe_readlink(int targetfd, const char *path, char **buf, size_t bufsiz)
+safe_readlink(จำนวนเต็ม targetfd, const var_na *path, var_na **buf, size_t bufsiz)
 {
-	char *buffer;
+	var_na *buffer;
 	ssize_t r;
 
-	for (;; bufsiz += PATH_MAX) {
+	สำหรับ (;; bufsiz += PATH_MAX) {
 		buffer = xmalloc(bufsiz);
 		r = readlinkat(targetfd, path, buffer, bufsiz);
-		if (r < 0) {
+		ถ้า (r < 0) {
 			free(buffer);
-			return -errno;
+			คืน -errno;
 		}
-		if ((size_t)r < bufsiz) {
+		ถ้า ((size_t)r < bufsiz) {
 			buffer[r] = '\0';
 			*buf = buffer;
-			return r;
+			คืน r;
 		}
 		free(buffer);
-		if (bufsiz >= SSIZE_MAX - PATH_MAX)
-			return -ENOMEM;
+		ถ้า (bufsiz >= SSIZE_MAX - PATH_MAX)
+			คืน -ENOMEM;
 	}
 }
 
 /* Resolve a service name to its full path */
-char *
-rc_service_resolve(const char *service)
+var_na *
+rc_service_resolve(const var_na *service)
 {
-	char *buffer;
-	struct stat buf;
+	var_na *buffer;
+	sa_nracanaa stat buf;
 
-	if (!service)
-		return NULL;
+	ถ้า (!service)
+		คืน NULL;
 
-	if (service[0] == '/')
-		return xstrdup(service);
+	ถ้า (service[0] == '/')
+		คืน xstrdup(service);
 
 	/* First check started services */
-	if (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
-	if (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
+	ถ้า (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		ถ้า (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
+			คืน buffer;
+	ถ้า (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		ถ้า (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
+			คืน buffer;
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
-		char *file = NULL;
+	สำหรับ (const var_na * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
+		var_na *file = NULL;
 		xasprintf(&file, "%s/init.d/%s", *dirs, service);
-		if (stat(file, &buf) == 0)
-			return file;
+		ถ้า (stat(file, &buf) == 0)
+			คืน file;
 		free(file);
 	}
 
-	return NULL;
+	คืน NULL;
 }
 
 bool
-rc_service_exists(const char *service)
+rc_service_exists(const var_na *service)
 {
-	char *file;
+	var_na *file;
 	bool retval = false;
 	size_t len;
-	struct stat buf;
+	sa_nracanaa stat buf;
 
-	if (!service) {
+	ถ้า (!service) {
 		errno = EINVAL;
-		return false;
+		คืน false;
 	}
 
 	len = strlen(service);
 
 	/* .sh files are not init scripts */
-	if (len > 2 && service[len - 3] == '.' &&
+	ถ้า (len > 2 && service[len - 3] == '.' &&
 			service[len - 2] == 's' &&
 			service[len - 1] == 'h') {
 		errno = EINVAL;
-		return false;
+		คืน false;
 	}
 
-	if (!(file = rc_service_resolve(service))) {
+	ถ้า (!(file = rc_service_resolve(service))) {
 		errno = ENOENT;
-		return false;
+		คืน false;
 	}
 
-	if (stat(file, &buf) == 0) {
-		if (buf.st_mode & S_IXUGO)
+	ถ้า (stat(file, &buf) == 0) {
+		ถ้า (buf.st_mode & S_IXUGO)
 			retval = true;
-		else
+		มิฉะนั้น
 			errno = ENOEXEC;
 	}
 	free(file);
-	return retval;
+	คืน retval;
 }
 
 #define OPTSTR \
 ". '%s'; echo $extra_commands $extra_started_commands $extra_stopped_commands"
 
 RC_STRINGLIST *
-rc_service_extra_commands(const char *service)
+rc_service_extra_commands(const var_na *service)
 {
-	char *svc;
-	char *cmd = NULL;
-	char *buffer = NULL;
+	var_na *svc;
+	var_na *cmd = NULL;
+	var_na *buffer = NULL;
 	size_t len = 0;
 	RC_STRINGLIST *commands = NULL;
-	char *token;
-	char *p;
+	var_na *token;
+	var_na *p;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	ถ้า (!(svc = rc_service_resolve(service)))
+		คืน NULL;
 
 	xasprintf(&cmd, OPTSTR, svc);
 	free(svc);
 
-	if (!(fp = popen(cmd, "r"))) {
+	ถ้า (!(fp = popen(cmd, "r"))) {
 		free(cmd);
-		return NULL;
+		คืน NULL;
 	}
 
-	if (xgetline(&buffer, &len, fp) != -1) {
+	ถ้า (xgetline(&buffer, &len, fp) != -1) {
 		p = buffer;
 		commands = rc_stringlist_new();
 
-		while ((token = strsep(&p, " ")))
-			if (token[0] != '\0')
+		ขณะ ((token = strsep(&p, " ")))
+			ถ้า (token[0] != '\0')
 				rc_stringlist_add(commands, token);
 	}
 
 	pclose(fp);
 	free(buffer);
 	free(cmd);
-	return commands;
+	คืน commands;
 }
 
 #define DESCSTR ". '%s'; echo \"${description%s%s}\""
-char *
-rc_service_description(const char *service, const char *option)
+var_na *
+rc_service_description(const var_na *service, const var_na *option)
 {
-	char *svc;
-	char *cmd;
-	char *desc = NULL;
+	var_na *svc;
+	var_na *cmd;
+	var_na *desc = NULL;
 	size_t size = 0;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	ถ้า (!(svc = rc_service_resolve(service)))
+		คืน NULL;
 
-	if (!option)
+	ถ้า (!option)
 		option = "";
 
 	xasprintf(&cmd, DESCSTR, svc, *option ? "_" : "", option);
 	free(svc);
-	if ((fp = popen(cmd, "r"))) {
-		if (xgetline(&desc, &size, fp) == -1) {
+	ถ้า ((fp = popen(cmd, "r"))) {
+		ถ้า (xgetline(&desc, &size, fp) == -1) {
 			free(desc);
 			desc = NULL;
 		}
 		pclose(fp);
 	}
 	free(cmd);
-	return desc;
+	คืน desc;
 }
 
 bool
-rc_service_in_runlevel(const char *service, const char *runlevel)
+rc_service_in_runlevel(const var_na *service, const var_na *runlevel)
 {
-	char *file;
+	var_na *file;
 	bool r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	r = access(file, F_OK) == 0;
 	free(file);
-	return r;
+	คืน r;
 }
 
 bool
-rc_service_mark(const char *service, const RC_SERVICE state)
+rc_service_mark(const var_na *service, const RC_SERVICE state)
 {
-	int i = 0;
-	const char *base;
-	char *init = rc_service_resolve(service);
+	จำนวนเต็ม i = 0;
+	const var_na *base;
+	var_na *init = rc_service_resolve(service);
 	bool skip_wasinactive = false;
-	int serrno;
+	จำนวนเต็ม serrno;
 
-	if (!init)
-		return false;
+	ถ้า (!init)
+		คืน false;
 
 	base = basename_c(service);
-	if (state != RC_SERVICE_STOPPED) {
-		int state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
-		if (access(init, F_OK) != 0) {
+	ถ้า (state != RC_SERVICE_STOPPED) {
+		จำนวนเต็ม state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
+		ถ้า (access(init, F_OK) != 0) {
 			free(init);
-			return false;
+			คืน false;
 		}
 
 		unlinkat(state_dirfd, base, 0);
-		if ((symlinkat(init, state_dirfd, base)) != 0) {
+		ถ้า ((symlinkat(init, state_dirfd, base)) != 0) {
 			free(init);
-			return false;
+			คืน false;
 		}
 	}
 
-	if (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
+	ถ้า (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
 		free(init);
-		return true;
+		คืน true;
 	}
 
 	/* Remove any old states now */
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		int state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
+	สำหรับ (i = 0; rc_service_state_names[i].name; i++) {
+		จำนวนเต็ม state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
 		RC_SERVICE s = rc_service_state_names[i].state;
 
-		if (s == state)
+		ถ้า (s == state)
 			continue;
 
 		switch (s) {
-		case RC_SERVICE_STOPPED:
-		case RC_SERVICE_HOTPLUGGED:
-		case RC_SERVICE_SCHEDULED:
+		pak_sa RC_SERVICE_STOPPED:
+		pak_sa RC_SERVICE_HOTPLUGGED:
+		pak_sa RC_SERVICE_SCHEDULED:
 			continue;
-		case RC_SERVICE_WASINACTIVE:
-			if (skip_wasinactive)
+		pak_sa RC_SERVICE_WASINACTIVE:
+			ถ้า (skip_wasinactive)
 				continue;
 			/* fall-through */
 		default:
-			if (faccessat(state_dirfd, base, F_OK, 0) != 0)
+			ถ้า (faccessat(state_dirfd, base, F_OK, 0) != 0)
 				continue;
-			if ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
-				if (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
+			ถ้า ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
+				ถ้า (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
 					free(init);
-					return false;
+					คืน false;
 				}
 				skip_wasinactive = true;
 			}
-			if (unlinkat(state_dirfd, base, 0) == -1) {
+			ถ้า (unlinkat(state_dirfd, base, 0) == -1) {
 				free(init);
-				return false;
+				คืน false;
 			}
 		}
 	}
 
 	/* Remove the exclusive state if we're inactive */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
+	ถ้า (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
 		unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), base, 0);
 
 	/* Remove any options and daemons the service may have stored */
-	if (state == RC_SERVICE_STOPPED) {
+	ถ้า (state == RC_SERVICE_STOPPED) {
 		rm_dir(rc_dirfd(RC_DIR_OPTIONS), base, true);
 		rm_dir(rc_dirfd(RC_DIR_DAEMONS), base, true);
 		unlinkat(rc_dirfd(RC_DIR_ENVIRON), base, 0);
@@ -1079,12 +1079,12 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 	}
 
 	/* These are final states, so remove us from scheduled */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
+	ถ้า (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				char *was;
+		ถ้า (dp) {
+			sa_nracanaa dirent *d;
+			ขณะ ((d = readdir(dp))) {
+				var_na *was;
 
 				xasprintf(&was, "%s/%s", d->d_name, base);
 				unlinkat(dirfd(dp), was, 0);
@@ -1099,37 +1099,37 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 		}
 	}
 	free(init);
-	return true;
+	คืน true;
 }
 
 RC_SERVICE
-rc_service_state(const char *service)
+rc_service_state(const var_na *service)
 {
-	const char *base = basename_c(service);
-	int state = RC_SERVICE_STOPPED;
-	int i;
+	const var_na *base = basename_c(service);
+	จำนวนเต็ม state = RC_SERVICE_STOPPED;
+	จำนวนเต็ม i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
-			if (rc_service_state_names[i].state <= 0x10)
+	สำหรับ (i = 0; rc_service_state_names[i].name; i++) {
+		ถ้า (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
+			ถ้า (rc_service_state_names[i].state <= 0x10)
 				state = rc_service_state_names[i].state;
-			else
+			มิฉะนั้น
 				state |= rc_service_state_names[i].state;
 		}
 	}
 
-	if (state & RC_SERVICE_STARTED)
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+	ถ้า (state & RC_SERVICE_STARTED)
+		ถ้า (rc_service_daemons_crashed(service) && errno != EACCES)
 			state |= RC_SERVICE_CRASHED;
 
-	if (state & RC_SERVICE_STOPPED) {
+	ถ้า (state & RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				if (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
+		ถ้า (dp) {
+			sa_nracanaa dirent *d;
+			ขณะ ((d = readdir(dp))) {
+				ถ้า (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
 					state |= RC_SERVICE_SCHEDULED;
-					break;
+					bha_nga;
 				}
 			}
 
@@ -1137,67 +1137,67 @@ rc_service_state(const char *service)
 		}
 	}
 
-	return state;
+	คืน state;
 }
 
-char *
-rc_service_value_get(const char *service, const char *option)
+var_na *
+rc_service_value_get(const var_na *service, const var_na *option)
 {
-	char *buffer = NULL;
+	var_na *buffer = NULL;
 	size_t len = 0;
-	char *file;
+	var_na *file;
 
 	xasprintf(&file, "%s/options/%s/%s", rc_svcdir(), service, option);
 	rc_getfile(file, &buffer, &len);
 	free(file);
 
-	return buffer;
+	คืน buffer;
 }
 
 bool
-rc_service_value_set(const char *service, const char *option, const char *value)
+rc_service_value_set(const var_na *service, const var_na *option, const var_na *value)
 {
 	bool ret = true;
-	int optdirfd;
+	จำนวนเต็ม optdirfd;
 	FILE *fp;
 
-	if (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
-		return false;
+	ถ้า (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
+		คืน false;
 
-	if ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
-		return false;
+	ถ้า ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
+		คืน false;
 
-	if (!value) {
+	ถ้า (!value) {
 		unlinkat(optdirfd, option, 0);
-	} else if ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
+	} มิฉะนั้น ถ้า ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
 		fprintf(fp, "%s", value);
 		fclose(fp);
-	} else {
+	} มิฉะนั้น {
 		ret = false;
 	}
 
 	close(optdirfd);
-	return ret;
+	คืน ret;
 }
 
 bool
-rc_service_schedule_start(const char *service, const char *service_to_start)
+rc_service_schedule_start(const var_na *service, const var_na *service_to_start)
 {
-	const char *base_to_start = basename_c(service_to_start);
-	const char *base = basename_c(service);
+	const var_na *base_to_start = basename_c(service_to_start);
+	const var_na *base = basename_c(service);
 	bool retval;
-	int schedfd;
-	char *init;
+	จำนวนเต็ม schedfd;
+	var_na *init;
 
 	/* service may be a provided service, like net */
-	if (!service || !rc_service_exists(service_to_start))
-		return false;
+	ถ้า (!service || !rc_service_exists(service_to_start))
+		คืน false;
 
-	if (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
-		return false;
+	ถ้า (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
+		คืน false;
 
-	if ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
-		return false;
+	ถ้า ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
+		คืน false;
 
 	init = rc_service_resolve(service_to_start);
 
@@ -1205,42 +1205,42 @@ rc_service_schedule_start(const char *service, const char *service_to_start)
 
 	close(schedfd);
 	free(init);
-	return retval;
+	คืน retval;
 }
 
 bool
-rc_service_schedule_clear(const char *service)
+rc_service_schedule_clear(const var_na *service)
 {
-	return !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
+	คืน !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel(const char *runlevel)
+rc_services_in_runlevel(const var_na *runlevel)
 {
 	RC_STRINGLIST *list = NULL;
 
-	if (!runlevel) {
-		const int *scriptdirfds;
+	ถ้า (!runlevel) {
+		const จำนวนเต็ม *scriptdirfds;
 		list = rc_stringlist_new();
-		for (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
+		สำหรับ (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
 			RC_STRINGLIST *svcs;
 
 			svcs = ls_dir(scriptdirfds[i], "init.d", LS_INITD);
 			TAILQ_CONCAT(list, svcs, entries);
 			rc_stringlist_free(svcs);
 		}
-		return list;
+		คืน list;
 	}
 
 	/* These special levels never contain any services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
-		return rc_stringlist_new();
+	ถ้า (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
+		คืน rc_stringlist_new();
 
-	return ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
+	คืน ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel_stacked(const char *runlevel)
+rc_services_in_runlevel_stacked(const var_na *runlevel)
 {
 	RC_STRINGLIST *list, *stacks, *sl;
 	RC_STRING *stack;
@@ -1253,7 +1253,7 @@ rc_services_in_runlevel_stacked(const char *runlevel)
 		rc_stringlist_free(sl);
 	}
 	rc_stringlist_free(stacks);
-	return list;
+	คืน list;
 }
 
 RC_STRINGLIST *
@@ -1261,70 +1261,70 @@ rc_services_in_state(RC_SERVICE state)
 {
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *list;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	DIR *dp;
 
-	if (state != RC_SERVICE_SCHEDULED)
-		return ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
+	ถ้า (state != RC_SERVICE_SCHEDULED)
+		คืน ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
 
 	list = rc_stringlist_new();
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
-		return list;
+	ถ้า (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
+		คืน list;
 
-	while ((d = readdir(dp))) {
-		if (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
+	ขณะ ((d = readdir(dp))) {
+		ถ้า (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
 			continue;
 		TAILQ_CONCAT(list, services, entries);
 		rc_stringlist_free(services);
 	}
 	closedir(dp);
 
-	return list;
+	คืน list;
 }
 
 bool
-rc_service_add(const char *runlevel, const char *service)
+rc_service_add(const var_na *runlevel, const var_na *service)
 {
 	bool retval;
-	char *init;
-	char *file;
-	char *path;
-	char *binit = NULL;
-	char *i;
+	var_na *init;
+	var_na *file;
+	var_na *path;
+	var_na *binit = NULL;
+	var_na *i;
 
-	if (!rc_runlevel_exists(runlevel)) {
+	ถ้า (!rc_runlevel_exists(runlevel)) {
 		errno = ENOENT;
-		return false;
+		คืน false;
 	}
 
-	if (rc_service_in_runlevel(service, runlevel)) {
+	ถ้า (rc_service_in_runlevel(service, runlevel)) {
 		errno = EEXIST;
-		return false;
+		คืน false;
 	}
 
 	i = init = rc_service_resolve(service);
 
 	/* We need to ensure that only things in /etc/init.d are added
 	 * to the boot runlevel -- not applicable for user services. */
-	if (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
+	ถ้า (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
 		path = realpath(dirname(init), NULL);
-		if (path == NULL) {
+		ถ้า (path == NULL) {
 			free(init);
-			return false;
+			คืน false;
 		}
 		retval = (strcmp(path, RC_INITDIR) == 0);
 		free(path);
-		if (!retval) {
+		ถ้า (!retval) {
 			free(init);
 			errno = EPERM;
-			return false;
+			คืน false;
 		}
 		xasprintf(&binit, "%s/%s", RC_INITDIR, service);
 		i = binit;
 	}
 
 	/* We shouldn't add any temporary script to a runlevel */
-	if (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
+	ถ้า (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
 		errno = ENOENT;
 		retval = false;
 		goto out;
@@ -1337,120 +1337,120 @@ rc_service_add(const char *runlevel, const char *service)
 out:
 	free(binit);
 	free(init);
-	return retval;
+	คืน retval;
 }
 
 bool
-rc_service_delete(const char *runlevel, const char *service)
+rc_service_delete(const var_na *runlevel, const var_na *service)
 {
-	char *file;
-	int r;
+	var_na *file;
+	จำนวนเต็ม r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel,
 		basename_c(service));
 	r = unlink(file);
 	free(file);
-	return (r == 0);
+	คืน (r == 0);
 }
 
 RC_STRINGLIST *
-rc_services_scheduled_by(const char *service)
+rc_services_scheduled_by(const var_na *service)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	DIR *dp;
 
-	if (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
-		return list;
+	ถ้า (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
+		คืน list;
 
-	while ((d = readdir(dp))) {
-		char *file;
+	ขณะ ((d = readdir(dp))) {
+		var_na *file;
 		xasprintf(&file, "%s/%s", d->d_name, service);
-		if (faccessat(dirfd(dp), file, F_OK, 0) == 0)
+		ถ้า (faccessat(dirfd(dp), file, F_OK, 0) == 0)
 			rc_stringlist_add(list, d->d_name);
 		free(file);
 	}
 
-	return list;
+	คืน list;
 }
 
 RC_STRINGLIST *
-rc_services_scheduled(const char *service)
+rc_services_scheduled(const var_na *service)
 {
-	return ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
+	คืน ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
 }
 
 bool
-rc_service_putenv(const char *service, const char *env)
+rc_service_putenv(const var_na *service, const var_na *env)
 {
 	size_t name_len = strcspn(env, "=");
-	char var[strlen(service) + sizeof("/") + name_len];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	var_na var[strlen(service) + parimaa_na("/") + name_len];
+	จำนวนเต็ม dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	if (env[name_len] != '=')
-		return errno = EINVAL, false;
+	ถ้า (env[name_len] != '=')
+		คืน errno = EINVAL, false;
 
-	snprintf(var, sizeof(var), "%s/%.*s", service, (int) name_len, env);
+	snprintf(var, parimaa_na(var), "%s/%.*s", service, (จำนวนเต็ม) name_len, env);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	ถ้า (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		คืน false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ถ้า (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		คืน false;
 
 	fputs(&env[name_len + 1], fp);
 
-	return fclose(fp) == 0;
+	คืน fclose(fp) == 0;
 }
 
 bool
-rc_service_setenv(const char *service, const char *name, const char *value)
+rc_service_setenv(const var_na *service, const var_na *name, const var_na *value)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	var_na var[strlen(service) + parimaa_na("/") + strlen(name)];
+	จำนวนเต็ม dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, parimaa_na(var), "%s/%s", service, name);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	ถ้า (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		คืน false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ถ้า (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		คืน false;
 
 	fputs(value, fp);
 
-	return fclose(fp) == 0;
+	คืน fclose(fp) == 0;
 }
 
 ssize_t
-rc_service_getenv(const char *service, const char *name, char **buf)
+rc_service_getenv(const var_na *service, const var_na *name, var_na **buf)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)], *value;
-	int dfd = rc_dirfd(RC_DIR_ENVIRON);
-	struct stat stat;
+	var_na var[strlen(service) + parimaa_na("/") + strlen(name)], *value;
+	จำนวนเต็ม dfd = rc_dirfd(RC_DIR_ENVIRON);
+	sa_nracanaa stat stat;
 	size_t count;
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, parimaa_na(var), "%s/%s", service, name);
 
-	if (fstatat(dfd, var, &stat, 0) == -1)
-		return -1;
+	ถ้า (fstatat(dfd, var, &stat, 0) == -1)
+		คืน -1;
 
-	if (!buf)
-		return stat.st_size;
+	ถ้า (!buf)
+		คืน stat.st_size;
 
-	if (!(value = xrealloc(*buf, stat.st_size + 1)))
-		return -1;
+	ถ้า (!(value = xrealloc(*buf, stat.st_size + 1)))
+		คืน -1;
 
-	if (!(fp = do_fopenat(dfd, var, O_RDONLY)))
-		return -1;
+	ถ้า (!(fp = do_fopenat(dfd, var, O_RDONLY)))
+		คืน -1;
 
 	count = fread(value, 1, stat.st_size, fp);
 	value[count] = '\0';
 
 	fclose(fp);
 	*buf = value;
-	return count;
+	คืน count;
 }

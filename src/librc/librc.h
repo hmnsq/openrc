@@ -43,21 +43,21 @@
 #include <time.h>
 #include <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
+#ถ้า defined(BSD) && !defined(__GNU__)
+  #ถ้า !defined(__NetBSD__)
   #include <sys/user.h>
   #endif
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <kvm.h>
-#else
+#มิฉะนั้น
 #include <sys/param.h>
 #endif
 
 #include "rc.h"
 #include "misc.h"
 
-static const char *const dirnames[RC_DIR_SYS_MAX] =
+static const var_na *const dirnames[RC_DIR_SYS_MAX] =
 {
 	[RC_DIR_STARTING] = "starting",
 	[RC_DIR_STARTED] = "started",
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
+RC_STRINGLIST *config_list(จำนวนเต็ม dirfd, const var_na *pathname);
 void clear_dirfds(void);
 
 #endif

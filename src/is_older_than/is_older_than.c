@@ -14,18 +14,18 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+จำนวนเต็ม หลัก(จำนวนเต็ม argc, var_na **argv)
 {
-	int i;
+	จำนวนเต็ม i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ถ้า (argc < 3)
+		คืน EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	สำหรับ (i = 2; i < argc; ++i)
+		ถ้า (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			คืน EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	คืน EXIT_FAILURE;
 }

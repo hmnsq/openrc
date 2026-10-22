@@ -31,89 +31,89 @@
 #include "librc.h"
 #include "helpers.h"
 
-#if defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#ถ้า defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 static bool
-pid_is_exec(pid_t pid, const char *exec)
+pid_is_exec(pid_t pid, const var_na *exec)
 {
-	char *buffer = NULL;
+	var_na *buffer = NULL;
 	FILE *fp;
-	int c;
+	จำนวนเต็ม c;
 	bool retval = false;
 
 	exec = basename_c(exec);
 	xasprintf(&buffer, "/proc/%d/stat", pid);
-	if ((fp = fopen(buffer, "r"))) {
-		while ((c = getc(fp)) != EOF && c != '(')
+	ถ้า ((fp = fopen(buffer, "r"))) {
+		ขณะ ((c = getc(fp)) != EOF && c != '(')
 			;
-		if (c == '(') {
-			while ((c = getc(fp)) != EOF && c == *exec)
+		ถ้า (c == '(') {
+			ขณะ ((c = getc(fp)) != EOF && c == *exec)
 				exec++;
-			if (c == ')' && *exec == '\0')
+			ถ้า (c == ')' && *exec == '\0')
 				retval = true;
 		}
 		fclose(fp);
 	}
 	free(buffer);
-	return retval;
+	คืน retval;
 }
 
 static bool
-pid_is_argv(pid_t pid, const char *const *argv)
+pid_is_argv(pid_t pid, const var_na *const *argv)
 {
-	char *cmdline = NULL;
-	int fd;
-	char buffer[PATH_MAX];
-	char *p;
+	var_na *cmdline = NULL;
+	จำนวนเต็ม fd;
+	var_na buffer[PATH_MAX];
+	var_na *p;
 	ssize_t bytes;
 
 	xasprintf(&cmdline, "/proc/%u/cmdline", pid);
-	if ((fd = open(cmdline, O_RDONLY)) < 0) {
+	ถ้า ((fd = open(cmdline, O_RDONLY)) < 0) {
 		free(cmdline);
-		return false;
+		คืน false;
 	}
-	bytes = read(fd, buffer, sizeof(buffer) - 1);
+	bytes = read(fd, buffer, parimaa_na(buffer) - 1);
 	close(fd);
 	free(cmdline);
-	if (bytes == -1)
-		return false;
+	ถ้า (bytes == -1)
+		คืน false;
 
 	buffer[bytes] = '\0';
 	p = buffer;
-	while (*argv) {
-		if ((unsigned)(p - buffer) >= sizeof(buffer))
-			return false;
-		if (strcmp(*argv, p) != 0)
-			return false;
+	ขณะ (*argv) {
+		ถ้า ((unsigned)(p - buffer) >= parimaa_na(buffer))
+			คืน false;
+		ถ้า (strcmp(*argv, p) != 0)
+			คืน false;
 		argv++;
 		p += strlen(p) + 1;
 	}
-	return true;
+	คืน true;
 }
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(const var_na *exec, const var_na *const *argv, uid_t uid, pid_t pid)
 {
 	DIR *procdir;
-	struct dirent *entry;
+	sa_nracanaa dirent *entry;
 	FILE *fp;
-	int rc;
+	จำนวนเต็ม rc;
 	bool container_pid = false;
 	bool openvz_host = false;
-	char *line = NULL;
-	char my_ns[30] = {0};
-	char proc_ns[30] = {0};
+	var_na *line = NULL;
+	var_na my_ns[30] = {0};
+	var_na proc_ns[30] = {0};
 	size_t len = 0;
 	pid_t p;
-	char *buffer = NULL;
-	struct stat sb;
+	var_na *buffer = NULL;
+	sa_nracanaa stat sb;
 	pid_t openrc_pid = 0;
-	char *pp;
+	var_na *pp;
 	RC_PIDLIST *pids = NULL;
 	RC_PID *pi;
 
-	if ((procdir = opendir("/proc")) == NULL)
-		return NULL;
+	ถ้า ((procdir = opendir("/proc")) == NULL)
+		คืน NULL;
 
 	/*
 	  We never match RC_OPENRC_PID if present so we avoid the below
@@ -126,8 +126,8 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	  nasty
 	*/
 
-	if ((pp = getenv("RC_OPENRC_PID"))) {
-		if (sscanf(pp, "%d", &openrc_pid) != 1)
+	ถ้า ((pp = getenv("RC_OPENRC_PID"))) {
+		ถ้า (sscanf(pp, "%d", &openrc_pid) != 1)
 			openrc_pid = 0;
 	}
 
@@ -137,79 +137,79 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	from our list of pids.
 	*/
 
-	if ((fp = fopen("/proc/self/status", "r"))) {
-		while (xgetline(&line, &len, fp) != -1) {
-			if (strncmp(line, "envID:\t0", 8) == 0) {
+	ถ้า ((fp = fopen("/proc/self/status", "r"))) {
+		ขณะ (xgetline(&line, &len, fp) != -1) {
+			ถ้า (strncmp(line, "envID:\t0", 8) == 0) {
 				openvz_host = true;
-				break;
+				bha_nga;
 			}
 		}
 		fclose(fp);
 	}
 
-	if ((rc = readlink("/proc/self/ns/pid", my_ns, sizeof(my_ns)-1)) <= 0)
+	ถ้า ((rc = readlink("/proc/self/ns/pid", my_ns, parimaa_na(my_ns)-1)) <= 0)
 		my_ns[0] = '\0';
 
-	while ((entry = readdir(procdir)) != NULL) {
-		if (sscanf(entry->d_name, "%d", &p) != 1)
+	ขณะ ((entry = readdir(procdir)) != NULL) {
+		ถ้า (sscanf(entry->d_name, "%d", &p) != 1)
 			continue;
-		if (openrc_pid != 0 && openrc_pid == p)
+		ถ้า (openrc_pid != 0 && openrc_pid == p)
 			continue;
-		if (pid != 0 && pid != p)
+		ถ้า (pid != 0 && pid != p)
 			continue;
 		xasprintf(&buffer, "/proc/%d/ns/pid", p);
-		if ((rc = readlink(buffer, proc_ns, sizeof(proc_ns)-1)) <= 0)
+		ถ้า ((rc = readlink(buffer, proc_ns, parimaa_na(proc_ns)-1)) <= 0)
 			proc_ns[0] = '\0';
 		free(buffer);
-		if (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
+		ถ้า (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
 			continue;
-		if (uid) {
+		ถ้า (uid) {
 			xasprintf(&buffer, "/proc/%d", p);
-			if (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
+			ถ้า (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
 				free(buffer);
 				continue;
 			}
 			free(buffer);
 		}
-		if (exec && !pid_is_exec(p, exec))
+		ถ้า (exec && !pid_is_exec(p, exec))
 			continue;
-		if (argv &&
-		    !pid_is_argv(p, (const char *const *)argv))
+		ถ้า (argv &&
+		    !pid_is_argv(p, (const var_na *const *)argv))
 			continue;
 		/* If this is an OpenVZ host, filter out container processes */
-		if (openvz_host) {
+		ถ้า (openvz_host) {
 			xasprintf(&buffer, "/proc/%d/status", p);
 			fp = fopen(buffer, "r");
 			free(buffer);
-			if (!fp)
+			ถ้า (!fp)
 				continue;
-			while (xgetline(&line, &len, fp) != -1) {
-				if (strncmp(line, "envID:", 6) == 0) {
+			ขณะ (xgetline(&line, &len, fp) != -1) {
+				ถ้า (strncmp(line, "envID:", 6) == 0) {
 					container_pid = !(strncmp(line, "envID:\t0", 8) == 0);
-					break;
+					bha_nga;
 				}
 			}
 			fclose(fp);
 		}
-		if (container_pid)
+		ถ้า (container_pid)
 			continue;
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		ถ้า (!pids) {
+			pids = xmalloc(parimaa_na(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(parimaa_na(*pi));
 		pi->pid = p;
 		LIST_INSERT_HEAD(pids, pi, entries);
 	}
-	if (line != NULL)
+	ถ้า (line != NULL)
 		free(line);
 	closedir(procdir);
-	return pids;
+	คืน pids;
 }
 
 #elif BSD
 
-# if defined(__NetBSD__) || defined(__OpenBSD__)
+# ถ้า defined(__NetBSD__) || defined(__OpenBSD__)
 #  define _KVM_GETPROC2
 #  define _KINFO_PROC kinfo_proc2
 #  define _KVM_GETARGV kvm_getargv2
@@ -218,17 +218,17 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 #  define _GET_KINFO_PID(kp) (kp.p_pid)
 #  define _KVM_PATH NULL
 #  define _KVM_FLAGS KVM_NO_FILES
-# else
+# มิฉะนั้น
 #  ifndef KERN_PROC_PROC
 #    define KERN_PROC_PROC KERN_PROC_ALL
 #  endif
 #  define _KINFO_PROC kinfo_proc
 #  define _KVM_GETARGV kvm_getargv
-#  if defined(__DragonFly__)
+#  ถ้า defined(__DragonFly__)
 #    define _GET_KINFO_UID(kp) (kp.kp_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.kp_comm)
 #    define _GET_KINFO_PID(kp) (kp.kp_pid)
-#  else
+#  มิฉะนั้น
 #    define _GET_KINFO_UID(kp) (kp.ki_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.ki_comm)
 #    define _GET_KINFO_PID(kp) (kp.ki_pid)
@@ -238,189 +238,189 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 # endif
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(const var_na *exec, const var_na *const *argv, uid_t uid, pid_t pid)
 {
 	static kvm_t *kd = NULL;
-	char errbuf[_POSIX2_LINE_MAX];
-	struct _KINFO_PROC *kp;
-	int i;
-	int processes = 0;
-	int pargc = 0;
-	char **pargv;
+	var_na errbuf[_POSIX2_LINE_MAX];
+	sa_nracanaa _KINFO_PROC *kp;
+	จำนวนเต็ม i;
+	จำนวนเต็ม processes = 0;
+	จำนวนเต็ม pargc = 0;
+	var_na **pargv;
 	RC_PIDLIST *pids = NULL;
 	RC_PID *pi;
 	pid_t p;
-	const char *const *arg;
-	int match;
+	const var_na *const *arg;
+	จำนวนเต็ม match;
 
-	if ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
+	ถ้า ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
 		    NULL, _KVM_FLAGS, errbuf)) == NULL)
 	{
 		fprintf(stderr, "kvm_open: %s\n", errbuf);
-		return NULL;
+		คืน NULL;
 	}
 
 #ifdef _KVM_GETPROC2
-	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(*kp), &processes);
-#else
+	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, parimaa_na(*kp), &processes);
+#มิฉะนั้น
 	kp = kvm_getprocs(kd, KERN_PROC_PROC, 0, &processes);
 #endif
-	if ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
+	ถ้า ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
 		fprintf(stderr, "kvm_getprocs: %s\n", kvm_geterr(kd));
 		kvm_close(kd);
-		return NULL;
+		คืน NULL;
 	}
 
-	if (exec)
+	ถ้า (exec)
 		exec = basename_c(exec);
-	for (i = 0; i < processes; i++) {
+	สำหรับ (i = 0; i < processes; i++) {
 		p = _GET_KINFO_PID(kp[i]);
-		if (pid != 0 && pid != p)
+		ถ้า (pid != 0 && pid != p)
 			continue;
-		if (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
+		ถ้า (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
 			continue;
-		if (exec) {
-			if (!_GET_KINFO_COMM(kp[i]) ||
+		ถ้า (exec) {
+			ถ้า (!_GET_KINFO_COMM(kp[i]) ||
 			    strcmp(exec, _GET_KINFO_COMM(kp[i])) != 0)
 				continue;
 		}
-		if (argv && *argv) {
+		ถ้า (argv && *argv) {
 			pargv = _KVM_GETARGV(kd, &kp[i], pargc);
-			if (!pargv || !*pargv)
+			ถ้า (!pargv || !*pargv)
 				continue;
 			arg = argv;
 			match = 1;
-			while (*arg && *pargv)
-				if (strcmp(*arg++, *pargv++) != 0) {
+			ขณะ (*arg && *pargv)
+				ถ้า (strcmp(*arg++, *pargv++) != 0) {
 					match = 0;
-					break;
+					bha_nga;
 				}
-			if (!match)
+			ถ้า (!match)
 				continue;
 		}
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		ถ้า (!pids) {
+			pids = xmalloc(parimaa_na(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(parimaa_na(*pi));
 		pi->pid = p;
 		LIST_INSERT_HEAD(pids, pi, entries);
 	}
 	kvm_close(kd);
 
-	return pids;
+	คืน pids;
 }
 
-#else
+#มิฉะนั้น
 #  error "Platform not supported!"
 #endif
 
 static bool
-_match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
+_match_daemon(const var_na *svcname, const var_na *instance, RC_STRINGLIST *match)
 {
-	char *line = NULL;
+	var_na *line = NULL;
 	size_t len = 0;
 	FILE *fp;
 	RC_STRING *m;
-	char *daemon;
+	var_na *daemon;
 
 	xasprintf(&daemon, "%s/%s", svcname, instance);
 	fp = do_fopenat(rc_dirfd(RC_DIR_DAEMONS), daemon, O_RDONLY);
 	free(daemon);
 
-	if (!fp)
-		return false;
+	ถ้า (!fp)
+		คืน false;
 
-	while (xgetline(&line, &len, fp) != -1) {
+	ขณะ (xgetline(&line, &len, fp) != -1) {
 		TAILQ_FOREACH(m, match, entries)
-		    if (strcmp(line, m->value) == 0) {
+		    ถ้า (strcmp(line, m->value) == 0) {
 			    TAILQ_REMOVE(match, m, entries);
-			    break;
+			    bha_nga;
 		    }
-		if (!TAILQ_FIRST(match))
-			break;
+		ถ้า (!TAILQ_FIRST(match))
+			bha_nga;
 	}
 	fclose(fp);
 	free(line);
-	if (TAILQ_FIRST(match))
-		return false;
-	return true;
+	ถ้า (TAILQ_FIRST(match))
+		คืน false;
+	คืน true;
 }
 
 static RC_STRINGLIST *
-_match_list(const char *exec, const char *const *argv, const char *pidfile)
+_match_list(const var_na *exec, const var_na *const *argv, const var_na *pidfile)
 {
 	RC_STRINGLIST *match = rc_stringlist_new();
-	int i = 0;
-	char *m;
+	จำนวนเต็ม i = 0;
+	var_na *m;
 
-	if (exec) {
+	ถ้า (exec) {
 		xasprintf(&m, "exec=%s", exec);
 		rc_stringlist_add(match, m);
 		free(m);
 	}
 
-	while (argv && argv[i]) {
+	ขณะ (argv && argv[i]) {
 		xasprintf(&m, "argv_0=%s", argv[i++]);
 		rc_stringlist_add(match, m);
 		free(m);
 	}
 
-	if (pidfile) {
+	ถ้า (pidfile) {
 		xasprintf(&m, "pidfile=%s", pidfile);
 		rc_stringlist_add(match, m);
 		free(m);
 	}
 
-	return match;
+	คืน match;
 }
 
 bool
-rc_service_daemon_set(const char *service, const char *exec,
-    const char *const *argv,
-    const char *pidfile, bool started)
+rc_service_daemon_set(const var_na *service, const var_na *exec,
+    const var_na *const *argv,
+    const var_na *pidfile, bool started)
 {
-	char *file = NULL;
-	int nfiles = 0;
-	char oldfile[PATH_MAX] = { '\0' };
+	var_na *file = NULL;
+	จำนวนเต็ม nfiles = 0;
+	var_na oldfile[PATH_MAX] = { '\0' };
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	RC_STRINGLIST *match, *renamelist;
-	int i = 0;
+	จำนวนเต็ม i = 0;
 	FILE *fp;
-	const char *base = basename_c(service);
+	const var_na *base = basename_c(service);
 
-	if (!exec && !pidfile) {
+	ถ้า (!exec && !pidfile) {
 		errno = EINVAL;
-		return false;
+		คืน false;
 	}
 
 	/* Regardless, erase any existing daemon info */
-	if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+	ถ้า ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
 		match = _match_list(exec, argv, pidfile);
 		renamelist = rc_stringlist_new();
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
+		ขณะ ((d = readdir(dp))) {
+			ถ้า (d->d_name[0] == '.')
 				continue;
 
 			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), base, d->d_name);
-			if (rc_stringlist_find(renamelist, file)) {
+			ถ้า (rc_stringlist_find(renamelist, file)) {
 				free(file);
 				continue;
 			}
 
 			nfiles++;
 
-			if (!*oldfile) {
-				if (_match_daemon(base, d->d_name, match)) {
+			ถ้า (!*oldfile) {
+				ถ้า (_match_daemon(base, d->d_name, match)) {
 					unlink(file);
-					strlcpy(oldfile, file, sizeof(oldfile));
+					strlcpy(oldfile, file, parimaa_na(oldfile));
 					nfiles--;
 				}
-			} else {
+			} มิฉะนั้น {
 				rename(file, oldfile);
-				strlcpy(oldfile, file, sizeof(oldfile));
+				strlcpy(oldfile, file, parimaa_na(oldfile));
 				/* Add renamed file to renamelist, as this new file name could
 				 * be read again from readdir() */
 				rc_stringlist_add(renamelist, oldfile);
@@ -433,21 +433,21 @@ rc_service_daemon_set(const char *service, const char *exec,
 	}
 
 	/* Now store our daemon info */
-	if (!started)
-		return true;
+	ถ้า (!started)
+		คืน true;
 
-	if (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
+	ถ้า (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
 		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), base, nfiles + 1);
-		if ((fp = fopen(file, "w"))) {
+		ถ้า ((fp = fopen(file, "w"))) {
 			fprintf(fp, "exec=");
-			if (exec)
+			ถ้า (exec)
 				fprintf(fp, "%s", exec);
-			while (argv && argv[i]) {
+			ขณะ (argv && argv[i]) {
 				fprintf(fp, "\nargv_%d=%s", i, argv[i]);
 				i++;
 			}
 			fprintf(fp, "\npidfile=");
-			if (pidfile)
+			ถ้า (pidfile)
 				fprintf(fp, "%s", pidfile);
 			fprintf(fp, "\n");
 			fclose(fp);
@@ -456,118 +456,118 @@ rc_service_daemon_set(const char *service, const char *exec,
 		free(file);
 	}
 
-	return retval;
+	คืน retval;
 }
 
 bool
-rc_service_started_daemon(const char *service,
-    const char *exec, const char *const *argv, int indx)
+rc_service_started_daemon(const var_na *service,
+    const var_na *exec, const var_na *const *argv, จำนวนเต็ม indx)
 {
-	const char *base = basename_c(service);
-	char *file = NULL;
+	const var_na *base = basename_c(service);
+	var_na *file = NULL;
 	RC_STRINGLIST *match;
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 
-	if (!service || !exec)
-		return false;
+	ถ้า (!service || !exec)
+		คืน false;
 
 	match = _match_list(exec, argv, NULL);
 
-	if (indx > 0) {
+	ถ้า (indx > 0) {
 		xasprintf(&file, "%03d", indx);
 		retval = _match_daemon(base, file, match);
 		free(file);
-	} else if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
+	} มิฉะนั้น ถ้า ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+		ขณะ ((d = readdir(dp))) {
+			ถ้า (d->d_name[0] == '.')
 				continue;
-			if ((retval = _match_daemon(base, d->d_name, match)))
-				break;
+			ถ้า ((retval = _match_daemon(base, d->d_name, match)))
+				bha_nga;
 		}
 		closedir(dp);
 	}
 
 	rc_stringlist_free(match);
-	return retval;
+	คืน retval;
 }
 
 bool
-rc_service_daemons_crashed(const char *service)
+rc_service_daemons_crashed(const var_na *service)
 {
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	FILE *fp;
-	char *line = NULL;
+	var_na *line = NULL;
 	size_t len = 0;
-	char **argv = NULL;
-	char *exec = NULL;
-	char *name = NULL;
-	char *pidfile = NULL;
+	var_na **argv = NULL;
+	var_na *exec = NULL;
+	var_na *name = NULL;
+	var_na *pidfile = NULL;
 	pid_t pid = 0;
 	RC_PIDLIST *pids;
 	RC_PID *p1;
 	RC_PID *p2;
-	char *p;
-	char *token;
+	var_na *p;
+	var_na *token;
 	bool retval = false;
 	RC_STRINGLIST *list = NULL;
 	RC_STRING *s;
 	size_t i;
-	char *ch_root;
-	char *spidfile;
+	var_na *ch_root;
+	var_na *spidfile;
 
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
-		return false;
+	ถ้า (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
+		คืน false;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
+	ขณะ ((d = readdir(dp))) {
+		ถ้า (d->d_name[0] == '.')
 			continue;
 
-		if (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
-			break;
+		ถ้า (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
+			bha_nga;
 
-		while (xgetline(&line, &len, fp) != -1) {
+		ขณะ (xgetline(&line, &len, fp) != -1) {
 			p = line;
-			if ((token = strsep(&p, "=")) == NULL || !p)
+			ถ้า ((token = strsep(&p, "=")) == NULL || !p)
 				continue;
 
-			if (!*p)
+			ถ้า (!*p)
 				continue;
 
-			if (strcmp(token, "exec") == 0) {
-				if (exec)
+			ถ้า (strcmp(token, "exec") == 0) {
+				ถ้า (exec)
 					free(exec);
 				exec = xstrdup(p);
-			} else if (strncmp(token, "argv_", 5) == 0) {
-				if (!list)
+			} มิฉะนั้น ถ้า (strncmp(token, "argv_", 5) == 0) {
+				ถ้า (!list)
 					list = rc_stringlist_new();
 				rc_stringlist_add(list, p);
-			} else if (strcmp(token, "name") == 0) {
-				if (name)
+			} มิฉะนั้น ถ้า (strcmp(token, "name") == 0) {
+				ถ้า (name)
 					free(name);
 				name = xstrdup(p);
-			} else if (strcmp(token, "pidfile") == 0) {
+			} มิฉะนั้น ถ้า (strcmp(token, "pidfile") == 0) {
 				pidfile = xstrdup(p);
-				break;
+				bha_nga;
 			}
 		}
 		fclose(fp);
 
 		ch_root = rc_service_value_get(basename_c(service), "chroot");
 		spidfile = pidfile;
-		if (ch_root && pidfile) {
+		ถ้า (ch_root && pidfile) {
 			xasprintf(&spidfile, "%s%s", ch_root, pidfile);
 			free(pidfile);
 			pidfile = spidfile;
 		}
 
 		pid = 0;
-		if (pidfile) {
+		ถ้า (pidfile) {
 			retval = true;
-			if ((fp = fopen(pidfile, "r"))) {
-				if (fscanf(fp, "%d", &pid) == 1)
+			ถ้า ((fp = fopen(pidfile, "r"))) {
+				ถ้า (fscanf(fp, "%d", &pid) == 1)
 					retval = false;
 				fclose(fp);
 			}
@@ -580,24 +580,24 @@ rc_service_daemons_crashed(const char *service)
 			exec = NULL;
 			free(name);
 			name = NULL;
-		} else {
-			if (exec) {
-				if (!list)
+		} มิฉะนั้น {
+			ถ้า (exec) {
+				ถ้า (!list)
 					list = rc_stringlist_new();
-				if (!TAILQ_FIRST(list))
+				ถ้า (!TAILQ_FIRST(list))
 					rc_stringlist_add(list, exec);
 
 				free(exec);
 				exec = NULL;
 			}
 
-			if (list) {
+			ถ้า (list) {
 				/* We need to flatten our linked list
 				   into an array */
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    i++;
-				argv = xmalloc(sizeof(char *) * (i + 1));
+				argv = xmalloc(parimaa_na(var_na *) * (i + 1));
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    argv[i++] = s->value;
@@ -605,22 +605,22 @@ rc_service_daemons_crashed(const char *service)
 			}
 		}
 
-		if (!retval) {
-			if (pid != 0) {
-				if (kill(pid, 0) == -1 && errno == ESRCH)
+		ถ้า (!retval) {
+			ถ้า (pid != 0) {
+				ถ้า (kill(pid, 0) == -1 && errno == ESRCH)
 					retval = true;
-			} else if ((pids = rc_find_pids(exec,
-				    (const char *const *)argv,
+			} มิฉะนั้น ถ้า ((pids = rc_find_pids(exec,
+				    (const var_na *const *)argv,
 				    0, pid)))
 			{
 				p1 = LIST_FIRST(pids);
-				while (p1) {
+				ขณะ (p1) {
 					p2 = LIST_NEXT(p1, entries);
 					free(p1);
 					p1 = p2;
 				}
 				free(pids);
-			} else
+			} มิฉะนั้น
 				retval = true;
 		}
 		rc_stringlist_free(list);
@@ -631,11 +631,11 @@ rc_service_daemons_crashed(const char *service)
 		exec = NULL;
 		free(name);
 		name = NULL;
-		if (retval)
-			break;
+		ถ้า (retval)
+			bha_nga;
 	}
 	closedir(dp);
 	free(line);
 
-	return retval;
+	คืน retval;
 }

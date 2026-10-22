@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+จำนวนเต็ม หลัก(จำนวนเต็ม argc, var_na **argv)
 {
-	int i;
-	char *p;
-	int c;
+	จำนวนเต็ม i;
+	var_na *p;
+	จำนวนเต็ม c;
 
-	for (i = 1; i < argc; i++) {
+	สำหรับ (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		ถ้า (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ขณะ (*p) {
+			c = (unsigned var_na)*p++;
+			ถ้า (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	คืน EXIT_SUCCESS;
 }
