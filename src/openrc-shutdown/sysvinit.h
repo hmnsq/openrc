@@ -14,10 +14,10 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef _RC_SYSVINIT_H
-#define _RC_SYSVINIT_H
+#यदि_अपरिभाषितम् _RC_SYSVINIT_H
+#परिभाषय _RC_SYSVINIT_H
 
-void sysvinit_runlevel(char rl);
-void sysvinit_setenv(const char *name, const char *value);
+शून्य sysvinit_runlevel(वर्ण rl);
+शून्य sysvinit_setenv(ध्रुव वर्ण *name, ध्रुव वर्ण *मानम्);
 
-#endif
+#यदि_अन्तः

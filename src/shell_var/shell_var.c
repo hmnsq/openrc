@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
 
-int main(int argc, char **argv)
+पूर्णाङ्क मुख्यम्(पूर्णाङ्क argc, वर्ण **argv)
 {
-	int i;
-	char *p;
-	int c;
+	पूर्णाङ्क i;
+	वर्ण *p;
+	पूर्णाङ्क c;
 
-	for (i = 1; i < argc; i++) {
+	प्रति (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
-			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		यदि (i != 1)
+			अक्षरं_लिख(' ');
+		यावत् (*p) {
+			c = (अचिह्नित वर्ण)*p++;
+			यदि (!अक्षरम्_अङ्कः_वा(c))
 				c = '_';
-			putchar(c);
+			अक्षरं_लिख(c);
 		}
 	}
-	putchar('\n');
-	return EXIT_SUCCESS;
+	अक्षरं_लिख('\n');
+	प्रत्यागम EXIT_SUCCESS;
 }

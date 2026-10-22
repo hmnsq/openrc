@@ -15,49 +15,49 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef _LIBRC_H_
-#define _LIBRC_H_
+#यदि_अपरिभाषितम् _LIBRC_H_
+#परिभाषय _LIBRC_H_
 
-#define _IN_LIBRC
+#परिभाषय अन्तर्_LIBRC
 
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <paths.h>
-#include <regex.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <time.h>
-#include <unistd.h>
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <sys/param.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <sys/time.h>
+#अन्तर्भाव <sys/wait.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <dirent.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <fcntl.h>
+#अन्तर्भाव <libgen.h>
+#अन्तर्भाव <limits.h>
+#अन्तर्भाव <paths.h>
+#अन्तर्भाव <regex.h>
+#अन्तर्भाव <signal.h>
+#अन्तर्भाव <stdarg.h>
+#अन्तर्भाव <stdbool.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <strings.h>
+#अन्तर्भाव <time.h>
+#अन्तर्भाव <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
-  #include <sys/user.h>
-  #endif
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#else
-#include <sys/param.h>
-#endif
+#यदि defined(BSD) && !defined(__GNU__)
+  #यदि !defined(__NetBSD__)
+  #अन्तर्भाव <sys/user.h>
+  #यदि_अन्तः
+#अन्तर्भाव <sys/param.h>
+#अन्तर्भाव <sys/sysctl.h>
+#अन्तर्भाव <kvm.h>
+#अन्यथा
+#अन्तर्भाव <sys/param.h>
+#यदि_अन्तः
 
-#include "rc.h"
-#include "misc.h"
+#अन्तर्भाव "rc.h"
+#अन्तर्भाव "misc.h"
 
-static const char *const dirnames[RC_DIR_SYS_MAX] =
+स्थिर ध्रुव वर्ण *ध्रुव dirnames[RC_DIR_SYS_MAX] =
 {
 	[RC_DIR_STARTING] = "starting",
 	[RC_DIR_STARTED] = "started",
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
-void clear_dirfds(void);
+RC_STRINGLIST *config_list(पूर्णाङ्क dirfd, ध्रुव वर्ण *pathname);
+शून्य clear_dirfds(शून्य);
 
-#endif
+#यदि_अन्तः

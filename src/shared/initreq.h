@@ -14,8 +14,8 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef _INITREQ_H
-#define _INITREQ_H
+#यदि_अपरिभाषितम् _INITREQ_H
+#परिभाषय _INITREQ_H
 
 /*
  * The #defines and structures below are taken from initreq.h in
@@ -23,29 +23,29 @@
  * it.
  */
 
-#define INIT_MAGIC 0x03091969
-#define INIT_CMD_START		0
-#define INIT_CMD_RUNLVL		1
-#define INIT_CMD_POWERFAIL	2
-#define INIT_CMD_POWERFAILNOW	3
-#define INIT_CMD_POWEROK	4
-#define INIT_CMD_BSD		5
-#define INIT_CMD_SETENV		6
-#define INIT_CMD_UNSETENV	7
+#परिभाषय INIT_MAGIC 0x03091969
+#परिभाषय INIT_CMD_START		0
+#परिभाषय INIT_CMD_RUNLVL		1
+#परिभाषय INIT_CMD_POWERFAIL	2
+#परिभाषय INIT_CMD_POWERFAILNOW	3
+#परिभाषय INIT_CMD_POWEROK	4
+#परिभाषय INIT_CMD_BSD		5
+#परिभाषय INIT_CMD_SETENV		6
+#परिभाषय INIT_CMD_UNSETENV	7
 
 /*
  *	This is what BSD 4.4 uses when talking to init.
  *	Linux doesn't use this right now.
  */
-struct init_request_bsd {
-	char	gen_id[8];		/* Beats me.. telnetd uses "fe" */
-	char	tty_id[16];		/* Tty name minus /dev/tty      */
-	char	host[64];	/* Hostname                     */
-	char	term_type[16];		/* Terminal type                */
-	int	signal;			/* Signal to send               */
-	int	pid;			/* Process to send to           */
-	char	exec_name[128];	        /* Program to execute           */
-	char	reserved[128];		/* For future expansion.        */
+संरचना init_request_bsd {
+	वर्ण	gen_id[8];		/* Beats me.. telnetd uses "fe" */
+	वर्ण	tty_id[16];		/* Tty name minus /dev/tty      */
+	वर्ण	host[64];	/* Hostname                     */
+	वर्ण	पदांशः_type[16];		/* Terminal type                */
+	पूर्णाङ्क	सङ्केत;			/* Signal to send               */
+	पूर्णाङ्क	pid;			/* Process to send to           */
+	वर्ण	exec_name[128];	        /* Program to execute           */
+	वर्ण	reserved[128];		/* For future expansion.        */
 };
 
 /*
@@ -55,15 +55,15 @@ struct init_request_bsd {
  *	The weird sizes are because init expects the whole
  *	struct to be 384 bytes.
  */
-struct init_request {
-	int	magic;			/* Magic number                 */
-	int	cmd;			/* What kind of request         */
-	int	runlevel;		/* Runlevel to change to        */
-	int	sleeptime;		/* Time between TERM and KILL   */
-	union {
-		struct init_request_bsd	bsd;
-		char			data[368];
+संरचना init_request {
+	पूर्णाङ्क	magic;			/* Magic number                 */
+	पूर्णाङ्क	cmd;			/* What kind of request         */
+	पूर्णाङ्क	runlevel;		/* Runlevel to change to        */
+	पूर्णाङ्क	sleeptime;		/* Time between TERM and KILL   */
+	सङ्घ {
+		संरचना init_request_bsd	bsd;
+		वर्ण			दत्त[368];
 	} i;
 };
 
-#endif
+#यदि_अन्तः

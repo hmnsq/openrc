@@ -15,135 +15,135 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <stdbool.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#अन्तर्भाव "queue.h"
+#अन्तर्भाव "librc.h"
+#अन्तर्भाव "helpers.h"
 
 RC_STRINGLIST *
-rc_stringlist_new(void)
+rc_stringlist_new(शून्य)
 {
-	RC_STRINGLIST *l = xmalloc(sizeof(*l));
+	RC_STRINGLIST *l = xmalloc(परिमाण(*l));
 	TAILQ_INIT(l);
-	return l;
+	प्रत्यागम l;
 }
 
 RC_STRING *
-rc_stringlist_add(RC_STRINGLIST *list, const char *value)
+rc_stringlist_सङ्कलय(RC_STRINGLIST *list, ध्रुव वर्ण *मानम्)
 {
-	RC_STRING *s = xmalloc(sizeof(*s));
+	RC_STRING *s = xmalloc(परिमाण(*s));
 
-	s->value = xstrdup(value);
-	TAILQ_INSERT_TAIL(list, s, entries);
-	return s;
+	s->मानम् = xstrdup(मानम्);
+	TAILQ_निवेशय_पुच्छ(list, s, entries);
+	प्रत्यागम s;
 }
 
 RC_STRING *
-rc_stringlist_addu(RC_STRINGLIST *list, const char *value)
+rc_stringlist_addu(RC_STRINGLIST *list, ध्रुव वर्ण *मानम्)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    यदि (वाक्यं_तुलय(s->मानम्, मानम्) == 0) {
 		    errno = EEXIST;
-		    return NULL;
+		    प्रत्यागम रिक्त;
 	    }
 
-	return rc_stringlist_add(list, value);
+	प्रत्यागम rc_stringlist_सङ्कलय(list, मानम्);
 }
 
 bool
-rc_stringlist_delete(RC_STRINGLIST *list, const char *value)
+rc_stringlist_delete(RC_STRINGLIST *list, ध्रुव वर्ण *मानम्)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    यदि (वाक्यं_तुलय(s->मानम्, मानम्) == 0) {
 		    TAILQ_REMOVE(list, s, entries);
-		    free(s->value);
-		    free(s);
-		    return true;
+		    मुक्त(s->मानम्);
+		    मुक्त(s);
+		    प्रत्यागम true;
 	    }
 
 	errno = EEXIST;
-	return false;
+	प्रत्यागम false;
 }
 
 RC_STRING *
-rc_stringlist_find(RC_STRINGLIST *list, const char *value)
+rc_stringlist_find(RC_STRINGLIST *list, ध्रुव वर्ण *मानम्)
 {
 	RC_STRING *s;
 
-	if (list) {
+	यदि (list) {
 		TAILQ_FOREACH(s, list, entries)
-		    if (strcmp(s->value, value) == 0)
-			    return s;
+		    यदि (वाक्यं_तुलय(s->मानम्, मानम्) == 0)
+			    प्रत्यागम s;
 	}
-	return NULL;
+	प्रत्यागम रिक्त;
 }
 
 RC_STRINGLIST *
-rc_stringlist_split(const char *value, const char *sep)
+rc_stringlist_विभज(ध्रुव वर्ण *मानम्, ध्रुव वर्ण *sep)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	char *d = xstrdup(value);
-	char *p = d, *token;
+	वर्ण *d = xstrdup(मानम्);
+	वर्ण *p = d, *token;
 
-	while ((token = strsep(&p, sep)))
-		rc_stringlist_add(list, token);
-	free(d);
+	यावत् ((token = strsep(&p, sep)))
+		rc_stringlist_सङ्कलय(list, token);
+	मुक्त(d);
 
-	return list;
+	प्रत्यागम list;
 }
 
-void
-rc_stringlist_sort(RC_STRINGLIST **list)
+शून्य
+rc_stringlist_क्रमय(RC_STRINGLIST **list)
 {
 	RC_STRINGLIST *l = *list;
 	RC_STRINGLIST *new = rc_stringlist_new();
 	RC_STRING *s;
 	RC_STRING *sn;
 	RC_STRING *n;
-	RC_STRING *last;
+	RC_STRING *चरमः;
 
 	TAILQ_FOREACH_SAFE(s, l, entries, sn) {
 		TAILQ_REMOVE(l, s, entries);
-		last = NULL;
+		चरमः = रिक्त;
 		TAILQ_FOREACH(n, new, entries) {
-			if (strcmp(s->value, n->value) < 0)
-				break;
-			last = n;
+			यदि (वाक्यं_तुलय(s->मानम्, n->मानम्) < 0)
+				भङ्ग;
+			चरमः = n;
 		}
-		if (last)
-			TAILQ_INSERT_AFTER(new, last, s, entries);
-		else
-			TAILQ_INSERT_HEAD(new, s, entries);
+		यदि (चरमः)
+			TAILQ_निवेशय_AFTER(new, चरमः, s, entries);
+		अन्यथा
+			TAILQ_निवेशय_शीर्ष(new, s, entries);
 	}
 
 	/* Now we've sorted the list, copy across the new head */
-	free(l);
+	मुक्त(l);
 	*list = new;
 }
 
-void
+शून्य
 rc_stringlist_free(RC_STRINGLIST *list)
 {
 	RC_STRING *s1;
 	RC_STRING *s2;
 
-	if (!list)
-		return;
+	यदि (!list)
+		प्रत्यागम;
 
 	s1 = TAILQ_FIRST(list);
-	while (s1) {
-		s2 = TAILQ_NEXT(s1, entries);
-		free(s1->value);
-		free(s1);
+	यावत् (s1) {
+		s2 = TAILQ_अग्र(s1, entries);
+		मुक्त(s1->मानम्);
+		मुक्त(s1);
 		s1 = s2;
 	}
-	free(list);
+	मुक्त(list);
 }
