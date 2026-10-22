@@ -15,27 +15,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <assert.h>
-#include <helpers.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <regex.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#شامل <assert.h>
+#شامل <helpers.h>
+#شامل <ctype.h>
+#شامل <dirent.h>
+#شامل <errno.h>
+#شامل <fcntl.h>
+#شامل <libgen.h>
+#شامل <limits.h>
+#شامل <regex.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <sys/param.h>
+#شامل <sys/stat.h>
+#شامل <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "misc.h"
-#include "rc.h"
+#شامل "queue.h"
+#شامل "librc.h"
+#شامل "misc.h"
+#شامل "rc.h"
 #ifdef __FreeBSD__
 #  include <sys/sysctl.h>
 #endif
@@ -45,47 +45,47 @@
 #endif
 
 /* File stream used for plugins to write environ vars to */
-FILE *rc_environ_fd = NULL;
-static int dirfds[RC_DIR_MAX];
+FILE *rc_environ_fd = پوچ;
+ایستا صحیح dirfds[RC_DIR_MAX];
 
-int rc_dirfd(enum rc_dir dir) {
-	int flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
-	int dirfd;
+صحیح rc_dirfd(شمارش rc_dir dir) {
+	صحیح flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
+	صحیح dirfd;
 
-	if (dir < 0 || dir >= RC_DIR_MAX)
-		return -1;
-	if (dirfds[dir] <= 0) {
-		switch (dir) {
-		case RC_DIR_SYSCONF:
-			return dirfds[dir] = open(rc_sysconfdir(), flags);
-		case RC_DIR_USRCONF:
-			return dirfds[dir] = open(rc_usrconfdir(), flags);
-		case RC_DIR_RUNLEVEL:
-			return dirfds[dir] = open(rc_runleveldir(), flags);
-		case RC_DIR_SVCDIR:
-			if (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
-				return -1;
-			return dirfds[dir] = open(rc_svcdir(), flags);
-		default:
-			assert(dirnames[dir]);
+	اگر (dir < 0 || dir >= RC_DIR_MAX)
+		بازگشت -1;
+	اگر (dirfds[dir] <= 0) {
+		انتخاب (dir) {
+		حالت RC_DIR_SYSCONF:
+			بازگشت dirfds[dir] = open(rc_sysconfdir(), flags);
+		حالت RC_DIR_USRCONF:
+			بازگشت dirfds[dir] = open(rc_usrconfdir(), flags);
+		حالت RC_DIR_RUNLEVEL:
+			بازگشت dirfds[dir] = open(rc_runleveldir(), flags);
+		حالت RC_DIR_SVCDIR:
+			اگر (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
+				بازگشت -1;
+			بازگشت dirfds[dir] = open(rc_svcdir(), flags);
+		پیشفرض:
+			أكد(dirnames[dir]);
 			dirfd = rc_dirfd(RC_DIR_SVCDIR);
-			if ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
-				if (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
-					return -1;
+			اگر ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
+				اگر (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
+					بازگشت -1;
 				dirfds[dir] = openat(dirfd, dirnames[dir], flags);
 			}
-			break;
+			بشکن;
 		}
 	}
-	return dirfds[dir];
+	بازگشت dirfds[dir];
 }
 
-void clear_dirfds(void) {
-	for (size_t i = 0; i < RC_DIR_MAX; i++) {
+تهی clear_dirfds(تهی) {
+	برای (size_t i = 0; i < RC_DIR_MAX; i++) {
 		/* dirfd is zero-initialized, though zero is a valid
 		 * FD, dirfd should never contain FDs which are <= 2. */
-		if (dirfds[i] <= 0)
-			continue;
+		اگر (dirfds[i] <= 0)
+			ادامه;
 
 		close(dirfds[i]);
 		dirfds[i] = -1;
@@ -94,330 +94,330 @@ void clear_dirfds(void) {
 
 #define LS_INITD	0x01
 #define LS_DIR		0x02
-static RC_STRINGLIST *
-ls_dir(int targetfd, const char *dir, int options)
+ایستا RC_STRINGLIST *
+ls_dir(صحیح targetfd, ثابت نویسه *dir, صحیح options)
 {
 	DIR *dp;
-	struct dirent *d;
-	RC_STRINGLIST *list = NULL;
-	struct stat buf;
+	ساختار dirent *d;
+	RC_STRINGLIST *list = پوچ;
+	ساختار stat buf;
 	size_t l;
 
 	list = rc_stringlist_new();
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return list;
+	اگر (!(dp = do_opendirat(targetfd, dir)))
+		بازگشت list;
 
-	while (((d = readdir(dp)) != NULL)) {
-		if (d->d_name[0] == '.')
-			continue;
-		if (options & LS_INITD) {
+	وقتی (((d = readdir(dp)) != پوچ)) {
+		اگر (d->d_name[0] == '.')
+			ادامه;
+		اگر (options & LS_INITD) {
 			/* Check that our file really exists.
 			 * This is important as a service maybe in a
 			 * runlevel, but could have been removed. */
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
-				continue;
+			اگر (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
+				ادامه;
 
 			/* .sh files are not init scripts */
 			l = strlen(d->d_name);
-			if (l > 2 && d->d_name[l - 3] == '.' &&
+			اگر (l > 2 && d->d_name[l - 3] == '.' &&
 					d->d_name[l - 2] == 's' &&
 					d->d_name[l - 1] == 'h')
-				continue;
+				ادامه;
 		}
-		if (options & LS_DIR) {
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
-				continue;
+		اگر (options & LS_DIR) {
+			اگر (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
+				ادامه;
 		}
 		rc_stringlist_add(list, d->d_name);
 	}
 	closedir(dp);
-	return list;
+	بازگشت list;
 }
 
-static bool
-rm_dir(int targetfd, const char *pathname, bool top)
+ایستا bool
+rm_dir(صحیح targetfd, ثابت نویسه *pathname, bool بالاترین)
 {
 	bool retval = true;
-	struct dirent *d;
-	struct stat s;
+	ساختار dirent *d;
+	ساختار stat s;
 	DIR *dp;
 
-	if (!(dp = do_opendirat(targetfd, pathname)))
-		return false;
+	اگر (!(dp = do_opendirat(targetfd, pathname)))
+		بازگشت false;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
-			continue;
-		if (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
+	وقتی ((d = readdir(dp))) {
+		اگر (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+			ادامه;
+		اگر (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
 			retval = false;
-			break;
+			بشکن;
 		}
-		if (S_ISDIR(s.st_mode)) {
-			if (!rm_dir(dirfd(dp), d->d_name, true)) {
+		اگر (S_ISDIR(s.st_mode)) {
+			اگر (!rm_dir(dirfd(dp), d->d_name, true)) {
 				retval = false;
-				break;
+				بشکن;
 			}
-		} else {
-			if (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
+		} وگرنه {
+			اگر (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
 				retval = false;
-				break;
+				بشکن;
 			}
 		}
 	}
 	closedir(dp);
 
-	if (!retval)
-		return false;
+	اگر (!retval)
+		بازگشت false;
 
-	if (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
-		return false;
+	اگر (بالاترین && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
+		بازگشت false;
 
-	return true;
+	بازگشت true;
 }
 
 /* Other systems may need this at some point, but for now it's Linux only */
 #ifdef __linux__
-static bool
-file_regex(const char *file, const char *regex)
+ایستا bool
+file_regex(ثابت نویسه *file, ثابت نویسه *regex)
 {
 	FILE *fp;
-	char *line = NULL;
+	نویسه *سطر = پوچ;
 	size_t size = 0;
 	ssize_t len = 0;
 	regex_t re;
 	bool retval = true;
-	int result;
+	صحیح result;
 
-	if (!(fp = fopen(file, "r")))
-		return false;
+	اگر (!(fp = fopen(file, "r")))
+		بازگشت false;
 
-	if ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
-		char buf[BUFSIZ];
+	اگر ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
+		نویسه buf[BUFSIZ];
 		fclose(fp);
-		regerror(result, &re, buf, sizeof(buf));
+		regerror(result, &re, buf, اندازه(buf));
 		fprintf(stderr, "file_regex: %s", buf);
-		return false;
+		بازگشت false;
 	}
 
-	while ((len = xgetline(&line, &size, fp)) != -1) {
-		char *str = line;
+	وقتی ((len = xgetline(&سطر, &size, fp)) != -1) {
+		نویسه *str = سطر;
 		/* some /proc files have \0 separated content so we have to
 		   loop through the 'line' */
-		do {
-			if (regexec(&re, str, 0, NULL, 0) == 0)
-				goto found;
+		انجامبده {
+			اگر (regexec(&re, str, 0, پوچ, 0) == 0)
+				برو found;
 			str += strlen(str) + 1;
 			/* len is the size of allocated buffer and we don't
 			   want call regexec BUFSIZE times. find next str */
-			while (str < line + len && *str == '\0')
+			وقتی (str < سطر + len && *str == '\0')
 				str++;
-		} while (str < line + len);
+		} وقتی (str < سطر + len);
 	}
 	retval = false;
 found:
 	fclose(fp);
-	free(line);
+	آزاد(سطر);
 	regfree(&re);
 
-	return retval;
+	بازگشت retval;
 }
 #endif
 
 
-static const char *
-get_systype(void)
+ایستا ثابت نویسه *
+get_systype(تهی)
 {
-	char *systype = rc_conf_value("rc_sys");
-	if (systype) {
-		char *s = systype;
+	نویسه *systype = rc_conf_مقدار("rc_sys");
+	اگر (systype) {
+		نویسه *s = systype;
 		/* Convert to uppercase */
-		while (s && *s) {
-			if (islower((unsigned char) *s))
-				*s = toupper((unsigned char) *s);
+		وقتی (s && *s) {
+			اگر (islower((unsigned نویسه) *s))
+				*s = toupper((unsigned نویسه) *s);
 			s++;
 		}
 	}
-	return systype;
+	بازگشت systype;
 }
 
-static const char *
-detect_container(const char *systype RC_UNUSED)
+ایستا ثابت نویسه *
+detect_container(ثابت نویسه *systype RC_UNUSED)
 {
 #ifdef __FreeBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-		       return NULL;
-		if (strcmp(systype, RC_SYS_JAIL) == 0)
-			return RC_SYS_JAIL;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
+	اگر (systype) {
+		اگر (strcmp(systype, RC_SYS_NONE) == 0)
+		       بازگشت پوچ;
+		اگر (strcmp(systype, RC_SYS_JAIL) == 0)
+			بازگشت RC_SYS_JAIL;
+		اگر (strcmp(systype, RC_SYS_PODMAN) == 0)
+			بازگشت RC_SYS_PODMAN;
 	}
 
-	int jailed = 0;
-	size_t len = sizeof(jailed);
+	صحیح jailed = 0;
+	size_t len = اندازه(jailed);
 
-	if (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
-		if (jailed == 1)
-			return RC_SYS_JAIL;
+	اگر (sysctlbyname("security.jail.jailed", &jailed, &len, پوچ, 0) == 0)
+		اگر (jailed == 1)
+			بازگشت RC_SYS_JAIL;
 
-	if (access("/var/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
+	اگر (access("/var/run/.containerenv", F_OK) == 0)
+		بازگشت RC_SYS_PODMAN;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_UML) == 0)
-			return RC_SYS_UML;
-		if (strcmp(systype, RC_SYS_VSERVER) == 0)
-			return RC_SYS_VSERVER;
-		if (strcmp(systype, RC_SYS_OPENVZ) == 0)
-			return RC_SYS_OPENVZ;
-		if (strcmp(systype, RC_SYS_LXC) == 0)
-			return RC_SYS_LXC;
-		if (strcmp(systype, RC_SYS_RKT) == 0)
-				return RC_SYS_RKT;
-		if (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
-				return RC_SYS_SYSTEMD_NSPAWN;
-		if (strcmp(systype, RC_SYS_DOCKER) == 0)
-				return RC_SYS_DOCKER;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
-		if (strcmp(systype, RC_SYS_WSL) == 0)
-			return RC_SYS_WSL;
+	اگر (systype) {
+		اگر (strcmp(systype, RC_SYS_NONE) == 0)
+			بازگشت پوچ;
+		اگر (strcmp(systype, RC_SYS_UML) == 0)
+			بازگشت RC_SYS_UML;
+		اگر (strcmp(systype, RC_SYS_VSERVER) == 0)
+			بازگشت RC_SYS_VSERVER;
+		اگر (strcmp(systype, RC_SYS_OPENVZ) == 0)
+			بازگشت RC_SYS_OPENVZ;
+		اگر (strcmp(systype, RC_SYS_LXC) == 0)
+			بازگشت RC_SYS_LXC;
+		اگر (strcmp(systype, RC_SYS_RKT) == 0)
+				بازگشت RC_SYS_RKT;
+		اگر (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
+				بازگشت RC_SYS_SYSTEMD_NSPAWN;
+		اگر (strcmp(systype, RC_SYS_DOCKER) == 0)
+				بازگشت RC_SYS_DOCKER;
+		اگر (strcmp(systype, RC_SYS_PODMAN) == 0)
+			بازگشت RC_SYS_PODMAN;
+		اگر (strcmp(systype, RC_SYS_WSL) == 0)
+			بازگشت RC_SYS_WSL;
 	}
-	if (file_regex("/proc/cpuinfo", "UML"))
-		return RC_SYS_UML;
-	else if (file_regex("/proc/self/status",
+	اگر (file_regex("/proc/cpuinfo", "UML"))
+		بازگشت RC_SYS_UML;
+	وگرنه اگر (file_regex("/proc/self/status",
 		"(s_context|VxID):[[:space:]]*[1-9]"))
-		return RC_SYS_VSERVER;
-	else if (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
-		return RC_SYS_OPENVZ;
-	else if (file_regex("/proc/self/status",
+		بازگشت RC_SYS_VSERVER;
+	وگرنه اگر (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
+		بازگشت RC_SYS_OPENVZ;
+	وگرنه اگر (file_regex("/proc/self/status",
 		"envID:[[:space:]]*[1-9]"))
-		return RC_SYS_OPENVZ; /* old test */
-	else if (file_regex("/proc/1/environ", "container=lxc"))
-		return RC_SYS_LXC;
-	else if (file_regex("/proc/1/environ", "container=rkt"))
-		return RC_SYS_RKT;
-	else if (file_regex("/proc/1/environ", "container=systemd-nspawn"))
-		return RC_SYS_SYSTEMD_NSPAWN;
-	else if (access("/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
-	else if (access("/.dockerenv", F_OK) == 0)
-		return RC_SYS_DOCKER;
+		بازگشت RC_SYS_OPENVZ; /* old test */
+	وگرنه اگر (file_regex("/proc/1/environ", "container=lxc"))
+		بازگشت RC_SYS_LXC;
+	وگرنه اگر (file_regex("/proc/1/environ", "container=rkt"))
+		بازگشت RC_SYS_RKT;
+	وگرنه اگر (file_regex("/proc/1/environ", "container=systemd-nspawn"))
+		بازگشت RC_SYS_SYSTEMD_NSPAWN;
+	وگرنه اگر (access("/run/.containerenv", F_OK) == 0)
+		بازگشت RC_SYS_PODMAN;
+	وگرنه اگر (access("/.dockerenv", F_OK) == 0)
+		بازگشت RC_SYS_DOCKER;
 	/* old test, I'm not sure when this was valid. */
-	else if (file_regex("/proc/1/environ", "container=docker"))
-		return RC_SYS_DOCKER;
-	else if (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
-		return RC_SYS_WSL;
-	else if (getenv("WSL_DISTRO_NAME"))
-		return RC_SYS_WSL;
-	else if (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
-		return RC_SYS_WSL;
+	وگرنه اگر (file_regex("/proc/1/environ", "container=docker"))
+		بازگشت RC_SYS_DOCKER;
+	وگرنه اگر (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
+		بازگشت RC_SYS_WSL;
+	وگرنه اگر (getenv("WSL_DISTRO_NAME"))
+		بازگشت RC_SYS_WSL;
+	وگرنه اگر (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
+		بازگشت RC_SYS_WSL;
 #endif
 
-	return NULL;
+	بازگشت پوچ;
 }
 
-static const char *
-detect_vm(const char *systype RC_UNUSED)
+ایستا ثابت نویسه *
+detect_vm(ثابت نویسه *systype RC_UNUSED)
 {
 #ifdef __NetBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	اگر (systype) {
+		اگر (strcmp(systype, RC_SYS_NONE) == 0)
+			بازگشت پوچ;
+		اگر (strcmp(systype, RC_SYS_XEN0) == 0)
+			بازگشت RC_SYS_XEN0;
+		اگر (strcmp(systype, RC_SYS_XENU) == 0)
+			بازگشت RC_SYS_XENU;
 	}
-	if (access("/kern/xen/privcmd", F_OK) == 0)
-		return RC_SYS_XEN0;
-	if (access("/kern/xen", F_OK) == 0)
-		return RC_SYS_XENU;
+	اگر (access("/kern/xen/privcmd", F_OK) == 0)
+		بازگشت RC_SYS_XEN0;
+	اگر (access("/kern/xen", F_OK) == 0)
+		بازگشت RC_SYS_XENU;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	اگر (systype) {
+		اگر (strcmp(systype, RC_SYS_NONE) == 0)
+			بازگشت پوچ;
+		اگر (strcmp(systype, RC_SYS_XEN0) == 0)
+			بازگشت RC_SYS_XEN0;
+		اگر (strcmp(systype, RC_SYS_XENU) == 0)
+			بازگشت RC_SYS_XENU;
 	}
-	if (access("/proc/xen", F_OK) == 0) {
-		if (file_regex("/proc/xen/capabilities", "control_d"))
-			return RC_SYS_XEN0;
-		return RC_SYS_XENU;
+	اگر (access("/proc/xen", F_OK) == 0) {
+		اگر (file_regex("/proc/xen/capabilities", "control_d"))
+			بازگشت RC_SYS_XEN0;
+		بازگشت RC_SYS_XENU;
 	}
 #endif
 
-	return NULL;
+	بازگشت پوچ;
 }
 
-const char *
-rc_sys(void)
+ثابت نویسه *
+rc_sys(تهی)
 {
-	const char *systype;
-	const char *sys;
+	ثابت نویسه *systype;
+	ثابت نویسه *sys;
 
 	systype = get_systype();
 	sys = detect_container(systype);
-	if (!sys) {
+	اگر (!sys) {
 		sys = detect_vm(systype);
 	}
 
-	return sys;
+	بازگشت sys;
 }
 
-static const char *
+ایستا ثابت نویسه *
 rc_parse_service_state(RC_SERVICE state)
 {
-	int i;
+	صحیح i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].name;
+	برای (i = 0; rc_service_state_names[i].name; i++) {
+		اگر (rc_service_state_names[i].state == state)
+			بازگشت rc_service_state_names[i].name;
 	}
-	return NULL;
+	بازگشت پوچ;
 }
 
-static int
+ایستا صحیح
 rc_parse_service_state_dirfd(RC_SERVICE state)
 {
-	for (size_t i = 0; rc_service_state_names[i].name; i++)
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].dir;
-	return -1;
+	برای (size_t i = 0; rc_service_state_names[i].name; i++)
+		اگر (rc_service_state_names[i].state == state)
+			بازگشت rc_service_state_names[i].dir;
+	بازگشت -1;
 }
 
 /* Returns a list of all the chained runlevels used by the
  * specified runlevel in dependency order, including the
  * specified runlevel. */
-static void
-get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
+ایستا تهی
+get_runlevel_chain(ثابت نویسه *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
 {
 	RC_STRINGLIST *dirs;
 	RC_STRING *d, *parent;
-	const char *nextlevel;
+	ثابت نویسه *nextlevel;
 
 	/*
 	 * If we haven't been passed a runlevel or a level list, or
 	 * if the passed runlevel doesn't exist then we're done already!
 	 */
-	if (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
-		return;
+	اگر (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
+		بازگشت;
 
 	/*
 	 * We want to add this runlevel to the list but if
 	 * it is already in the list it needs to go at the
 	 * end again.
 	 */
-	if (rc_stringlist_find(level_list, runlevel))
+	اگر (rc_stringlist_find(level_list, runlevel))
 		rc_stringlist_delete(level_list, runlevel);
 	rc_stringlist_add(level_list, runlevel);
 
@@ -427,15 +427,15 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 	 */
 	dirs = ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_DIR);
 	TAILQ_FOREACH(d, dirs, entries) {
-		nextlevel = d->value;
+		nextlevel = d->مقدار;
 
 		/* Check for loop */
-		if (rc_stringlist_find(ancestor_list, nextlevel)) {
+		اگر (rc_stringlist_find(ancestor_list, nextlevel)) {
 			fprintf(stderr, "Loop detected in stacked runlevels attempting to enter runlevel %s!\n",
 			    nextlevel);
 			fprintf(stderr, "Ancestors:\n");
 			TAILQ_FOREACH(parent, ancestor_list, entries)
-				fprintf(stderr, "\t%s\n", parent->value);
+				fprintf(stderr, "\t%s\n", parent->مقدار);
 			exit(1);
 		}
 
@@ -450,146 +450,146 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 }
 
 bool
-rc_runlevel_starting(void)
+rc_runlevel_starting(تهی)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
+	بازگشت faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
 }
 
 bool
-rc_runlevel_stopping(void)
+rc_runlevel_stopping(تهی)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
+	بازگشت faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
 }
 
-RC_STRINGLIST *rc_runlevel_list(void)
+RC_STRINGLIST *rc_runlevel_list(تهی)
 {
-	return ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
+	بازگشت ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
 }
 
-char *
-rc_runlevel_get(void)
+نویسه *
+rc_runlevel_get(تهی)
 {
 	FILE *fp;
-	char *runlevel = NULL;
+	نویسه *runlevel = پوچ;
 	size_t i;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
-		runlevel = xmalloc(sizeof(char) * PATH_MAX);
-		if (fgets(runlevel, PATH_MAX, fp)) {
+	اگر ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
+		runlevel = xmalloc(اندازه(نویسه) * PATH_MAX);
+		اگر (fgets(runlevel, PATH_MAX, fp)) {
 			i = strlen(runlevel);
-			if (i && runlevel[i - 1] == '\n')
+			اگر (i && runlevel[i - 1] == '\n')
 				runlevel[i - 1] = 0;
-		} else
+		} وگرنه
 			*runlevel = '\0';
 		fclose(fp);
 	}
 
-	if (!runlevel || !*runlevel) {
-		free(runlevel);
-		runlevel = NULL;
+	اگر (!runlevel || !*runlevel) {
+		آزاد(runlevel);
+		runlevel = پوچ;
 	}
 
-	return runlevel;
+	بازگشت runlevel;
 }
 
 bool
-rc_runlevel_set(const char *runlevel)
+rc_runlevel_set(ثابت نویسه *runlevel)
 {
 	FILE *fp;
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	اگر (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
+		بازگشت false;
 
 	fputs(runlevel, fp);
 	fclose(fp);
-	return true;
+	بازگشت true;
 }
 
 bool
-rc_runlevel_exists(const char *runlevel)
+rc_runlevel_exists(ثابت نویسه *runlevel)
 {
-	struct stat buf;
+	ساختار stat buf;
 
-	if (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
-		return false;
-	if (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
-		return true;
-	return false;
+	اگر (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
+		بازگشت false;
+	اگر (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
+		بازگشت true;
+	بازگشت false;
 }
 
 bool
-rc_runlevel_stack(const char *dst, const char *src)
+rc_runlevel_پشته(ثابت نویسه *dst, ثابت نویسه *src)
 {
-	char *d, *s;
-	int r;
+	نویسه *d, *s;
+	صحیح r;
 
-	if (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
-		return false;
+	اگر (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
+		بازگشت false;
 	xasprintf(&s, "../%s", src);
 	xasprintf(&d, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = symlink(s, d);
-	free(d);
-	free(s);
-	return (r == 0);
+	آزاد(d);
+	آزاد(s);
+	بازگشت (r == 0);
 }
 
 bool
-rc_runlevel_unstack(const char *dst, const char *src)
+rc_runlevel_unstack(ثابت نویسه *dst, ثابت نویسه *src)
 {
-	char *path;
-	int r;
+	نویسه *path;
+	صحیح r;
 
 	xasprintf(&path, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = unlink(path);
-	free(path);
-	return (r == 0);
+	آزاد(path);
+	بازگشت (r == 0);
 }
 
 RC_STRINGLIST *
-rc_runlevel_stacks(const char *runlevel)
+rc_runlevel_stacks(ثابت نویسه *runlevel)
 {
-	RC_STRINGLIST *stack, *ancestor_list;
-	stack = rc_stringlist_new();
+	RC_STRINGLIST *پشته, *ancestor_list;
+	پشته = rc_stringlist_new();
 	ancestor_list = rc_stringlist_new();
 	rc_stringlist_add(ancestor_list, runlevel);
-	get_runlevel_chain(runlevel, stack, ancestor_list);
+	get_runlevel_chain(runlevel, پشته, ancestor_list);
 	rc_stringlist_free(ancestor_list);
-	return stack;
+	بازگشت پشته;
 }
 
-static const char *config_path[] = { _RC_PATH, NULL };
+ایستا ثابت نویسه *config_path[] = { _RC_PATH, پوچ };
 
-static struct {
+ایستا ساختار {
 	bool set;
-	char *svcdir, *confdir, *runleveldir;
+	نویسه *svcdir, *confdir, *runleveldir;
 } rc_dirs;
 
-static struct {
-	char *buffer;
-	size_t count;
-	int *fds;
-	const char **entries, **allocd;
+ایستا ساختار {
+	نویسه *buffer;
+	size_t شمار;
+	صحیح *fds;
+	ثابت نویسه **entries, **allocd;
 } rc_path;
 
-static void
-free_rc_dirs(void)
+ایستا تهی
+free_rc_dirs(تهی)
 {
-#define X(ptr) ptr = (free(ptr), NULL)
+#define X(ptr) ptr = (آزاد(ptr), پوچ)
 	X(rc_dirs.svcdir);
 	X(rc_dirs.confdir);
 	X(rc_dirs.runleveldir);
 	X(rc_path.allocd);
 	/* entries alias freed allocation */
-	rc_path.entries = NULL;
+	rc_path.entries = پوچ;
 	X(rc_path.buffer);
 	X(rc_path.fds);
-	rc_path.count = 0;
+	rc_path.شمار = 0;
 #undef X
 }
 
 __attribute__((__format__(__printf__, 2, 3)))
-static void
-append_path(FILE *fp, const char *fmt, ...)
+ایستا تهی
+append_path(FILE *fp, ثابت نویسه *fmt, ...)
 {
 	va_list va;
 
@@ -598,160 +598,160 @@ append_path(FILE *fp, const char *fmt, ...)
 	fputc('\0', fp);
 	va_end(va);
 
-	rc_path.count++;
+	rc_path.شمار++;
 }
 
-static const char *
-strnsep(const char **str, size_t *size, const char sep)
+ایستا ثابت نویسه *
+strnsep(ثابت نویسه **str, size_t *size, ثابت نویسه sep)
 {
-	const char *ret = *str;
+	ثابت نویسه *ret = *str;
 
-	if (!ret)
-		return NULL;
+	اگر (!ret)
+		بازگشت پوچ;
 
 	*str = strchrnul(ret, sep);
 	*size = *str - ret;
-	if (!**str)
-		*str = NULL;
-	else
+	اگر (!**str)
+		*str = پوچ;
+	وگرنه
 		*str += 1;
 
-	return ret;
+	بازگشت ret;
 }
 
-static const char *
-strnullsep(const char **str, size_t *size)
+ایستا ثابت نویسه *
+strnullsep(ثابت نویسه **str, size_t *size)
 {
-	const char *ret = *str;
+	ثابت نویسه *ret = *str;
 	size_t len;
 
-	if (!ret)
-		return NULL;
+	اگر (!ret)
+		بازگشت پوچ;
 
 	len = strnlen(ret, *size - 1) + 1;
 
-	if ((*size -= len))
+	اگر ((*size -= len))
 		*str += len;
-	else
-		*str = NULL;
+	وگرنه
+		*str = پوچ;
 
-	return ret;
+	بازگشت ret;
 }
 
-static void
+ایستا تهی
 append_user_path(FILE *fp)
 {
-	const char *xdg, *entry;
+	ثابت نویسه *xdg, *entry;
 	size_t size;
 
 	append_path(fp, "%s", rc_dirs.confdir);
-	if (!(xdg = getenv("XDG_CONFIG_DIRS")))
+	اگر (!(xdg = getenv("XDG_CONFIG_DIRS")))
 		append_path(fp, "/etc/xdg/rc");
-	else while ((entry = strnsep(&xdg, &size, ':')))
-		if (size) append_path(fp, "%.*s/rc", (int) size, entry);
+	وگرنه وقتی ((entry = strnsep(&xdg, &size, ':')))
+		اگر (size) append_path(fp, "%.*s/rc", (صحیح) size, entry);
 
-	for (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
+	برای (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
 		append_path(fp, "%s/user", config_path[i]);
 	append_path(fp, "%s", rc_dirs.svcdir);
 }
 
-static void
-append_rc_path(FILE *fp, const char *path, bool user)
+ایستا تهی
+append_rc_path(FILE *fp, ثابت نویسه *path, bool user)
 {
 	bool has_user = false;
-	const char *entry;
+	ثابت نویسه *entry;
 	size_t size;
 
-	while ((entry = strnsep(&path, &size, ':'))) {
-		if (size)
-			append_path(fp, "%.*s%s", (int)size, entry, user ? "/user" : "");
-		else if (user && !has_user)
+	وقتی ((entry = strnsep(&path, &size, ':'))) {
+		اگر (size)
+			append_path(fp, "%.*s%s", (صحیح)size, entry, user ? "/user" : "");
+		وگرنه اگر (user && !has_user)
 			append_user_path(fp), has_user = true;
-		else if (!user) while (*rc_path.entries)
+		وگرنه اگر (!user) وقتی (*rc_path.entries)
 			append_path(fp, "%s", *rc_path.entries++);
 	}
 }
 
-static void
+ایستا تهی
 load_dynamic_path(bool user)
 {
-	const char *path, *entry;
-	size_t size, count = 0;
+	ثابت نویسه *path, *entry;
+	size_t size, شمار = 0;
 	FILE *fp;
 
-	if (!rc_dirs.set) {
+	اگر (!rc_dirs.set) {
 		atexit(free_rc_dirs);
 		rc_dirs.set = true;
 	}
 
 	rc_path.entries = config_path;
-	rc_path.count = ARRAY_SIZE(config_path) - 1;
+	rc_path.شمار = ARRAY_SIZE(config_path) - 1;
 
-	if (!(path = getenv("RC_PATH")) && !user)
-		return;
+	اگر (!(path = getenv("RC_PATH")) && !user)
+		بازگشت;
 
-	rc_path.count = 0;
+	rc_path.شمار = 0;
 	fp = xopen_memstream(&rc_path.buffer, &size);
-	if (path)
+	اگر (path)
 		append_rc_path(fp, path, user);
-	else
+	وگرنه
 		append_user_path(fp);
 	xclose_memstream(fp);
 
-	rc_path.allocd = rc_path.entries = calloc(rc_path.count + 1, sizeof(*rc_path.entries));
+	rc_path.allocd = rc_path.entries = calloc(rc_path.شمار + 1, اندازه(*rc_path.entries));
 
 	path = rc_path.buffer;
 
-	while ((entry = strnullsep(&path, &size)) && count < rc_path.count)
-		rc_path.entries[count++] = entry;
-	rc_path.entries[rc_path.count] = NULL;
+	وقتی ((entry = strnullsep(&path, &size)) && شمار < rc_path.شمار)
+		rc_path.entries[شمار++] = entry;
+	rc_path.entries[rc_path.شمار] = پوچ;
 }
 
-static bool is_user = false;
+ایستا bool is_user = false;
 
 bool
-rc_is_user(void)
+rc_is_user(تهی)
 {
-	int _is_user = -1;
+	صحیح _is_user = -1;
 
-	if (_is_user == -1) {
-		char *env = getenv("RC_USER_SERVICES");
+	اگر (_is_user == -1) {
+		نویسه *env = getenv("RC_USER_SERVICES");
 
 		_is_user = env ? rc_yesno(env) : is_user;
 	}
 
-	return _is_user;
+	بازگشت _is_user;
 }
 
-void
-rc_set_user(void)
+تهی
+rc_set_user(تهی)
 {
-	char *env;
+	نویسه *env;
 
-	if (is_user)
-		return;
+	اگر (is_user)
+		بازگشت;
 
-	if (!rc_dirs.set)
+	اگر (!rc_dirs.set)
 		atexit(free_rc_dirs);
-	else
+	وگرنه
 		free_rc_dirs();
 
 	is_user = true;
 	rc_dirs.set = true;
 	setenv("RC_USER_SERVICES", "yes", true);
 
-	if ((env = getenv("XDG_CONFIG_HOME"))) {
+	اگر ((env = getenv("XDG_CONFIG_HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/rc", env);
-	} else if ((env = getenv("HOME"))) {
+	} وگرنه اگر ((env = getenv("HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/.config/rc", env);
-	} else {
+	} وگرنه {
 		fprintf(stderr, "XDG_CONFIG_HOME and HOME unset.\n");
 		exit(EXIT_FAILURE);
 	}
 
 	xasprintf(&rc_dirs.runleveldir, "%s/runlevels", rc_dirs.confdir);
 
-	if (!(env = getenv("XDG_RUNTIME_DIR"))) {
+	اگر (!(env = getenv("XDG_RUNTIME_DIR"))) {
 		/* FIXME: fallback to something else? */
 		fprintf(stderr, "XDG_RUNTIME_DIR unset.\n");
 		exit(EXIT_FAILURE);
@@ -764,314 +764,314 @@ rc_set_user(void)
 	clear_dirfds();
 }
 
-const char * const *
-rc_scriptdirs(void)
+ثابت نویسه * ثابت *
+rc_scriptdirs(تهی)
 {
-	if (!rc_path.entries)
+	اگر (!rc_path.entries)
 		load_dynamic_path(false);
-	return rc_path.entries;
+	بازگشت rc_path.entries;
 }
 
 size_t
-rc_scriptdirfds(const int **fds)
+rc_scriptdirfds(ثابت صحیح **fds)
 {
-	static size_t len = 0;
+	ایستا size_t len = 0;
 
-	if (len == 0) {
-		if (!rc_path.entries)
+	اگر (len == 0) {
+		اگر (!rc_path.entries)
 			load_dynamic_path(false);
 
-		rc_path.fds = xmalloc(rc_path.count * sizeof(*rc_path.fds));
-		for (size_t i = 0; i < rc_path.count; i++) {
-			int fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+		rc_path.fds = xmalloc(rc_path.شمار * اندازه(*rc_path.fds));
+		برای (size_t i = 0; i < rc_path.شمار; i++) {
+			صحیح fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 
-			if (fd == -1)
-				continue;
+			اگر (fd == -1)
+				ادامه;
 
 			rc_path.fds[len++] = fd;
 		}
 	}
 
 	*fds = rc_path.fds;
-	return len;
+	بازگشت len;
 }
 
-const char *
-rc_sysconfdir(void)
+ثابت نویسه *
+rc_sysconfdir(تهی)
 {
-	return RC_SYSCONFDIR;
+	بازگشت RC_SYSCONFDIR;
 }
 
-const char *
-rc_usrconfdir(void)
+ثابت نویسه *
+rc_usrconfdir(تهی)
 {
-	return rc_dirs.confdir ? rc_dirs.confdir : NULL;
+	بازگشت rc_dirs.confdir ? rc_dirs.confdir : پوچ;
 }
 
-const char *
-rc_runleveldir(void)
+ثابت نویسه *
+rc_runleveldir(تهی)
 {
-	return rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
+	بازگشت rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
 }
 
-const char *
-rc_svcdir(void)
+ثابت نویسه *
+rc_svcdir(تهی)
 {
-	static const char *svcdir;
+	ایستا ثابت نویسه *svcdir;
 
-	if (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
+	اگر (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
 		svcdir = RC_SVCDIR;
-	return rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
+	بازگشت rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
 }
 
-static ssize_t
-safe_readlink(int targetfd, const char *path, char **buf, size_t bufsiz)
+ایستا ssize_t
+safe_readlink(صحیح targetfd, ثابت نویسه *path, نویسه **buf, size_t bufsiz)
 {
-	char *buffer;
+	نویسه *buffer;
 	ssize_t r;
 
-	for (;; bufsiz += PATH_MAX) {
+	برای (;; bufsiz += PATH_MAX) {
 		buffer = xmalloc(bufsiz);
 		r = readlinkat(targetfd, path, buffer, bufsiz);
-		if (r < 0) {
-			free(buffer);
-			return -errno;
+		اگر (r < 0) {
+			آزاد(buffer);
+			بازگشت -errno;
 		}
-		if ((size_t)r < bufsiz) {
+		اگر ((size_t)r < bufsiz) {
 			buffer[r] = '\0';
 			*buf = buffer;
-			return r;
+			بازگشت r;
 		}
-		free(buffer);
-		if (bufsiz >= SSIZE_MAX - PATH_MAX)
-			return -ENOMEM;
+		آزاد(buffer);
+		اگر (bufsiz >= SSIZE_MAX - PATH_MAX)
+			بازگشت -ENOMEM;
 	}
 }
 
 /* Resolve a service name to its full path */
-char *
-rc_service_resolve(const char *service)
+نویسه *
+rc_service_resolve(ثابت نویسه *service)
 {
-	char *buffer;
-	struct stat buf;
+	نویسه *buffer;
+	ساختار stat buf;
 
-	if (!service)
-		return NULL;
+	اگر (!service)
+		بازگشت پوچ;
 
-	if (service[0] == '/')
-		return xstrdup(service);
+	اگر (service[0] == '/')
+		بازگشت xstrdup(service);
 
 	/* First check started services */
-	if (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
-	if (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
+	اگر (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		اگر (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
+			بازگشت buffer;
+	اگر (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		اگر (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
+			بازگشت buffer;
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
-		char *file = NULL;
+	برای (ثابت نویسه * ثابت *dirs = rc_scriptdirs(); *dirs; dirs++) {
+		نویسه *file = پوچ;
 		xasprintf(&file, "%s/init.d/%s", *dirs, service);
-		if (stat(file, &buf) == 0)
-			return file;
-		free(file);
+		اگر (stat(file, &buf) == 0)
+			بازگشت file;
+		آزاد(file);
 	}
 
-	return NULL;
+	بازگشت پوچ;
 }
 
 bool
-rc_service_exists(const char *service)
+rc_service_exists(ثابت نویسه *service)
 {
-	char *file;
+	نویسه *file;
 	bool retval = false;
 	size_t len;
-	struct stat buf;
+	ساختار stat buf;
 
-	if (!service) {
+	اگر (!service) {
 		errno = EINVAL;
-		return false;
+		بازگشت false;
 	}
 
 	len = strlen(service);
 
 	/* .sh files are not init scripts */
-	if (len > 2 && service[len - 3] == '.' &&
+	اگر (len > 2 && service[len - 3] == '.' &&
 			service[len - 2] == 's' &&
 			service[len - 1] == 'h') {
 		errno = EINVAL;
-		return false;
+		بازگشت false;
 	}
 
-	if (!(file = rc_service_resolve(service))) {
+	اگر (!(file = rc_service_resolve(service))) {
 		errno = ENOENT;
-		return false;
+		بازگشت false;
 	}
 
-	if (stat(file, &buf) == 0) {
-		if (buf.st_mode & S_IXUGO)
+	اگر (stat(file, &buf) == 0) {
+		اگر (buf.st_mode & S_IXUGO)
 			retval = true;
-		else
+		وگرنه
 			errno = ENOEXEC;
 	}
-	free(file);
-	return retval;
+	آزاد(file);
+	بازگشت retval;
 }
 
 #define OPTSTR \
 ". '%s'; echo $extra_commands $extra_started_commands $extra_stopped_commands"
 
 RC_STRINGLIST *
-rc_service_extra_commands(const char *service)
+rc_service_extra_commands(ثابت نویسه *service)
 {
-	char *svc;
-	char *cmd = NULL;
-	char *buffer = NULL;
+	نویسه *svc;
+	نویسه *cmd = پوچ;
+	نویسه *buffer = پوچ;
 	size_t len = 0;
-	RC_STRINGLIST *commands = NULL;
-	char *token;
-	char *p;
+	RC_STRINGLIST *commands = پوچ;
+	نویسه *token;
+	نویسه *p;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	اگر (!(svc = rc_service_resolve(service)))
+		بازگشت پوچ;
 
 	xasprintf(&cmd, OPTSTR, svc);
-	free(svc);
+	آزاد(svc);
 
-	if (!(fp = popen(cmd, "r"))) {
-		free(cmd);
-		return NULL;
+	اگر (!(fp = popen(cmd, "r"))) {
+		آزاد(cmd);
+		بازگشت پوچ;
 	}
 
-	if (xgetline(&buffer, &len, fp) != -1) {
+	اگر (xgetline(&buffer, &len, fp) != -1) {
 		p = buffer;
 		commands = rc_stringlist_new();
 
-		while ((token = strsep(&p, " ")))
-			if (token[0] != '\0')
+		وقتی ((token = strsep(&p, " ")))
+			اگر (token[0] != '\0')
 				rc_stringlist_add(commands, token);
 	}
 
 	pclose(fp);
-	free(buffer);
-	free(cmd);
-	return commands;
+	آزاد(buffer);
+	آزاد(cmd);
+	بازگشت commands;
 }
 
 #define DESCSTR ". '%s'; echo \"${description%s%s}\""
-char *
-rc_service_description(const char *service, const char *option)
+نویسه *
+rc_service_description(ثابت نویسه *service, ثابت نویسه *option)
 {
-	char *svc;
-	char *cmd;
-	char *desc = NULL;
+	نویسه *svc;
+	نویسه *cmd;
+	نویسه *desc = پوچ;
 	size_t size = 0;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	اگر (!(svc = rc_service_resolve(service)))
+		بازگشت پوچ;
 
-	if (!option)
+	اگر (!option)
 		option = "";
 
 	xasprintf(&cmd, DESCSTR, svc, *option ? "_" : "", option);
-	free(svc);
-	if ((fp = popen(cmd, "r"))) {
-		if (xgetline(&desc, &size, fp) == -1) {
-			free(desc);
-			desc = NULL;
+	آزاد(svc);
+	اگر ((fp = popen(cmd, "r"))) {
+		اگر (xgetline(&desc, &size, fp) == -1) {
+			آزاد(desc);
+			desc = پوچ;
 		}
 		pclose(fp);
 	}
-	free(cmd);
-	return desc;
+	آزاد(cmd);
+	بازگشت desc;
 }
 
 bool
-rc_service_in_runlevel(const char *service, const char *runlevel)
+rc_service_in_runlevel(ثابت نویسه *service, ثابت نویسه *runlevel)
 {
-	char *file;
+	نویسه *file;
 	bool r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	r = access(file, F_OK) == 0;
-	free(file);
-	return r;
+	آزاد(file);
+	بازگشت r;
 }
 
 bool
-rc_service_mark(const char *service, const RC_SERVICE state)
+rc_service_mark(ثابت نویسه *service, ثابت RC_SERVICE state)
 {
-	int i = 0;
-	const char *base;
-	char *init = rc_service_resolve(service);
+	صحیح i = 0;
+	ثابت نویسه *base;
+	نویسه *init = rc_service_resolve(service);
 	bool skip_wasinactive = false;
-	int serrno;
+	صحیح serrno;
 
-	if (!init)
-		return false;
+	اگر (!init)
+		بازگشت false;
 
 	base = basename_c(service);
-	if (state != RC_SERVICE_STOPPED) {
-		int state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
-		if (access(init, F_OK) != 0) {
-			free(init);
-			return false;
+	اگر (state != RC_SERVICE_STOPPED) {
+		صحیح state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
+		اگر (access(init, F_OK) != 0) {
+			آزاد(init);
+			بازگشت false;
 		}
 
 		unlinkat(state_dirfd, base, 0);
-		if ((symlinkat(init, state_dirfd, base)) != 0) {
-			free(init);
-			return false;
+		اگر ((symlinkat(init, state_dirfd, base)) != 0) {
+			آزاد(init);
+			بازگشت false;
 		}
 	}
 
-	if (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
-		free(init);
-		return true;
+	اگر (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
+		آزاد(init);
+		بازگشت true;
 	}
 
 	/* Remove any old states now */
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		int state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
+	برای (i = 0; rc_service_state_names[i].name; i++) {
+		صحیح state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
 		RC_SERVICE s = rc_service_state_names[i].state;
 
-		if (s == state)
-			continue;
+		اگر (s == state)
+			ادامه;
 
-		switch (s) {
-		case RC_SERVICE_STOPPED:
-		case RC_SERVICE_HOTPLUGGED:
-		case RC_SERVICE_SCHEDULED:
-			continue;
-		case RC_SERVICE_WASINACTIVE:
-			if (skip_wasinactive)
-				continue;
+		انتخاب (s) {
+		حالت RC_SERVICE_STOPPED:
+		حالت RC_SERVICE_HOTPLUGGED:
+		حالت RC_SERVICE_SCHEDULED:
+			ادامه;
+		حالت RC_SERVICE_WASINACTIVE:
+			اگر (skip_wasinactive)
+				ادامه;
 			/* fall-through */
-		default:
-			if (faccessat(state_dirfd, base, F_OK, 0) != 0)
-				continue;
-			if ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
-				if (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
-					free(init);
-					return false;
+		پیشفرض:
+			اگر (faccessat(state_dirfd, base, F_OK, 0) != 0)
+				ادامه;
+			اگر ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
+				اگر (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
+					آزاد(init);
+					بازگشت false;
 				}
 				skip_wasinactive = true;
 			}
-			if (unlinkat(state_dirfd, base, 0) == -1) {
-				free(init);
-				return false;
+			اگر (unlinkat(state_dirfd, base, 0) == -1) {
+				آزاد(init);
+				بازگشت false;
 			}
 		}
 	}
 
 	/* Remove the exclusive state if we're inactive */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
+	اگر (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
 		unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), base, 0);
 
 	/* Remove any options and daemons the service may have stored */
-	if (state == RC_SERVICE_STOPPED) {
+	اگر (state == RC_SERVICE_STOPPED) {
 		rm_dir(rc_dirfd(RC_DIR_OPTIONS), base, true);
 		rm_dir(rc_dirfd(RC_DIR_DAEMONS), base, true);
 		unlinkat(rc_dirfd(RC_DIR_ENVIRON), base, 0);
@@ -1079,16 +1079,16 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 	}
 
 	/* These are final states, so remove us from scheduled */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
+	اگر (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				char *was;
+		اگر (dp) {
+			ساختار dirent *d;
+			وقتی ((d = readdir(dp))) {
+				نویسه *was;
 
 				xasprintf(&was, "%s/%s", d->d_name, base);
 				unlinkat(dirfd(dp), was, 0);
-				free(was);
+				آزاد(was);
 
 				serrno = errno;
 				unlinkat(dirfd(dp), d->d_name, AT_REMOVEDIR);
@@ -1098,38 +1098,38 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 			closedir(dp);
 		}
 	}
-	free(init);
-	return true;
+	آزاد(init);
+	بازگشت true;
 }
 
 RC_SERVICE
-rc_service_state(const char *service)
+rc_service_state(ثابت نویسه *service)
 {
-	const char *base = basename_c(service);
-	int state = RC_SERVICE_STOPPED;
-	int i;
+	ثابت نویسه *base = basename_c(service);
+	صحیح state = RC_SERVICE_STOPPED;
+	صحیح i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
-			if (rc_service_state_names[i].state <= 0x10)
+	برای (i = 0; rc_service_state_names[i].name; i++) {
+		اگر (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
+			اگر (rc_service_state_names[i].state <= 0x10)
 				state = rc_service_state_names[i].state;
-			else
+			وگرنه
 				state |= rc_service_state_names[i].state;
 		}
 	}
 
-	if (state & RC_SERVICE_STARTED)
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+	اگر (state & RC_SERVICE_STARTED)
+		اگر (rc_service_daemons_crashed(service) && errno != EACCES)
 			state |= RC_SERVICE_CRASHED;
 
-	if (state & RC_SERVICE_STOPPED) {
+	اگر (state & RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				if (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
+		اگر (dp) {
+			ساختار dirent *d;
+			وقتی ((d = readdir(dp))) {
+				اگر (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
 					state |= RC_SERVICE_SCHEDULED;
-					break;
+					بشکن;
 				}
 			}
 
@@ -1137,123 +1137,123 @@ rc_service_state(const char *service)
 		}
 	}
 
-	return state;
+	بازگشت state;
 }
 
-char *
-rc_service_value_get(const char *service, const char *option)
+نویسه *
+rc_service_مقدار_get(ثابت نویسه *service, ثابت نویسه *option)
 {
-	char *buffer = NULL;
+	نویسه *buffer = پوچ;
 	size_t len = 0;
-	char *file;
+	نویسه *file;
 
 	xasprintf(&file, "%s/options/%s/%s", rc_svcdir(), service, option);
 	rc_getfile(file, &buffer, &len);
-	free(file);
+	آزاد(file);
 
-	return buffer;
+	بازگشت buffer;
 }
 
 bool
-rc_service_value_set(const char *service, const char *option, const char *value)
+rc_service_مقدار_set(ثابت نویسه *service, ثابت نویسه *option, ثابت نویسه *مقدار)
 {
 	bool ret = true;
-	int optdirfd;
+	صحیح optdirfd;
 	FILE *fp;
 
-	if (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
-		return false;
+	اگر (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
+		بازگشت false;
 
-	if ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
-		return false;
+	اگر ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
+		بازگشت false;
 
-	if (!value) {
+	اگر (!مقدار) {
 		unlinkat(optdirfd, option, 0);
-	} else if ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
-		fprintf(fp, "%s", value);
+	} وگرنه اگر ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
+		fprintf(fp, "%s", مقدار);
 		fclose(fp);
-	} else {
+	} وگرنه {
 		ret = false;
 	}
 
 	close(optdirfd);
-	return ret;
+	بازگشت ret;
 }
 
 bool
-rc_service_schedule_start(const char *service, const char *service_to_start)
+rc_service_schedule_start(ثابت نویسه *service, ثابت نویسه *service_to_start)
 {
-	const char *base_to_start = basename_c(service_to_start);
-	const char *base = basename_c(service);
+	ثابت نویسه *base_to_start = basename_c(service_to_start);
+	ثابت نویسه *base = basename_c(service);
 	bool retval;
-	int schedfd;
-	char *init;
+	صحیح schedfd;
+	نویسه *init;
 
 	/* service may be a provided service, like net */
-	if (!service || !rc_service_exists(service_to_start))
-		return false;
+	اگر (!service || !rc_service_exists(service_to_start))
+		بازگشت false;
 
-	if (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
-		return false;
+	اگر (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
+		بازگشت false;
 
-	if ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
-		return false;
+	اگر ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
+		بازگشت false;
 
 	init = rc_service_resolve(service_to_start);
 
 	retval = (faccessat(schedfd, base_to_start, F_OK, 0) == 0) || (symlinkat(init, schedfd, base_to_start) == 0);
 
 	close(schedfd);
-	free(init);
-	return retval;
+	آزاد(init);
+	بازگشت retval;
 }
 
 bool
-rc_service_schedule_clear(const char *service)
+rc_service_schedule_clear(ثابت نویسه *service)
 {
-	return !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
+	بازگشت !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel(const char *runlevel)
+rc_services_in_runlevel(ثابت نویسه *runlevel)
 {
-	RC_STRINGLIST *list = NULL;
+	RC_STRINGLIST *list = پوچ;
 
-	if (!runlevel) {
-		const int *scriptdirfds;
+	اگر (!runlevel) {
+		ثابت صحیح *scriptdirfds;
 		list = rc_stringlist_new();
-		for (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
+		برای (size_t i = 0, شمار = rc_scriptdirfds(&scriptdirfds); i < شمار; i++) {
 			RC_STRINGLIST *svcs;
 
 			svcs = ls_dir(scriptdirfds[i], "init.d", LS_INITD);
 			TAILQ_CONCAT(list, svcs, entries);
 			rc_stringlist_free(svcs);
 		}
-		return list;
+		بازگشت list;
 	}
 
 	/* These special levels never contain any services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
-		return rc_stringlist_new();
+	اگر (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
+		بازگشت rc_stringlist_new();
 
-	return ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
+	بازگشت ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel_stacked(const char *runlevel)
+rc_services_in_runlevel_stacked(ثابت نویسه *runlevel)
 {
 	RC_STRINGLIST *list, *stacks, *sl;
-	RC_STRING *stack;
+	RC_STRING *پشته;
 
 	list = rc_services_in_runlevel(runlevel);
 	stacks = rc_runlevel_stacks(runlevel);
-	TAILQ_FOREACH(stack, stacks, entries) {
-		sl = rc_services_in_runlevel(stack->value);
+	TAILQ_FOREACH(پشته, stacks, entries) {
+		sl = rc_services_in_runlevel(پشته->مقدار);
 		TAILQ_CONCAT(list, sl, entries);
 		rc_stringlist_free(sl);
 	}
 	rc_stringlist_free(stacks);
-	return list;
+	بازگشت list;
 }
 
 RC_STRINGLIST *
@@ -1261,196 +1261,196 @@ rc_services_in_state(RC_SERVICE state)
 {
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *list;
-	struct dirent *d;
+	ساختار dirent *d;
 	DIR *dp;
 
-	if (state != RC_SERVICE_SCHEDULED)
-		return ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
+	اگر (state != RC_SERVICE_SCHEDULED)
+		بازگشت ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
 
 	list = rc_stringlist_new();
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
-		return list;
+	اگر (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
+		بازگشت list;
 
-	while ((d = readdir(dp))) {
-		if (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
-			continue;
+	وقتی ((d = readdir(dp))) {
+		اگر (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
+			ادامه;
 		TAILQ_CONCAT(list, services, entries);
 		rc_stringlist_free(services);
 	}
 	closedir(dp);
 
-	return list;
+	بازگشت list;
 }
 
 bool
-rc_service_add(const char *runlevel, const char *service)
+rc_service_add(ثابت نویسه *runlevel, ثابت نویسه *service)
 {
 	bool retval;
-	char *init;
-	char *file;
-	char *path;
-	char *binit = NULL;
-	char *i;
+	نویسه *init;
+	نویسه *file;
+	نویسه *path;
+	نویسه *binit = پوچ;
+	نویسه *i;
 
-	if (!rc_runlevel_exists(runlevel)) {
+	اگر (!rc_runlevel_exists(runlevel)) {
 		errno = ENOENT;
-		return false;
+		بازگشت false;
 	}
 
-	if (rc_service_in_runlevel(service, runlevel)) {
+	اگر (rc_service_in_runlevel(service, runlevel)) {
 		errno = EEXIST;
-		return false;
+		بازگشت false;
 	}
 
 	i = init = rc_service_resolve(service);
 
 	/* We need to ensure that only things in /etc/init.d are added
 	 * to the boot runlevel -- not applicable for user services. */
-	if (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
-		path = realpath(dirname(init), NULL);
-		if (path == NULL) {
-			free(init);
-			return false;
+	اگر (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
+		path = realpath(dirname(init), پوچ);
+		اگر (path == پوچ) {
+			آزاد(init);
+			بازگشت false;
 		}
 		retval = (strcmp(path, RC_INITDIR) == 0);
-		free(path);
-		if (!retval) {
-			free(init);
+		آزاد(path);
+		اگر (!retval) {
+			آزاد(init);
 			errno = EPERM;
-			return false;
+			بازگشت false;
 		}
 		xasprintf(&binit, "%s/%s", RC_INITDIR, service);
 		i = binit;
 	}
 
 	/* We shouldn't add any temporary script to a runlevel */
-	if (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
+	اگر (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
 		errno = ENOENT;
 		retval = false;
-		goto out;
+		برو out;
 	}
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	retval = (symlink(i, file) == 0);
-	free(file);
+	آزاد(file);
 
 out:
-	free(binit);
-	free(init);
-	return retval;
+	آزاد(binit);
+	آزاد(init);
+	بازگشت retval;
 }
 
 bool
-rc_service_delete(const char *runlevel, const char *service)
+rc_service_delete(ثابت نویسه *runlevel, ثابت نویسه *service)
 {
-	char *file;
-	int r;
+	نویسه *file;
+	صحیح r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel,
 		basename_c(service));
 	r = unlink(file);
-	free(file);
-	return (r == 0);
+	آزاد(file);
+	بازگشت (r == 0);
 }
 
 RC_STRINGLIST *
-rc_services_scheduled_by(const char *service)
+rc_services_scheduled_by(ثابت نویسه *service)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	struct dirent *d;
+	ساختار dirent *d;
 	DIR *dp;
 
-	if (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
-		return list;
+	اگر (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
+		بازگشت list;
 
-	while ((d = readdir(dp))) {
-		char *file;
+	وقتی ((d = readdir(dp))) {
+		نویسه *file;
 		xasprintf(&file, "%s/%s", d->d_name, service);
-		if (faccessat(dirfd(dp), file, F_OK, 0) == 0)
+		اگر (faccessat(dirfd(dp), file, F_OK, 0) == 0)
 			rc_stringlist_add(list, d->d_name);
-		free(file);
+		آزاد(file);
 	}
 
-	return list;
+	بازگشت list;
 }
 
 RC_STRINGLIST *
-rc_services_scheduled(const char *service)
+rc_services_scheduled(ثابت نویسه *service)
 {
-	return ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
+	بازگشت ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
 }
 
 bool
-rc_service_putenv(const char *service, const char *env)
+rc_service_putenv(ثابت نویسه *service, ثابت نویسه *env)
 {
 	size_t name_len = strcspn(env, "=");
-	char var[strlen(service) + sizeof("/") + name_len];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	نویسه var[strlen(service) + اندازه("/") + name_len];
+	صحیح dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	if (env[name_len] != '=')
-		return errno = EINVAL, false;
+	اگر (env[name_len] != '=')
+		بازگشت errno = EINVAL, false;
 
-	snprintf(var, sizeof(var), "%s/%.*s", service, (int) name_len, env);
+	snprintf(var, اندازه(var), "%s/%.*s", service, (صحیح) name_len, env);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	اگر (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		بازگشت false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	اگر (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		بازگشت false;
 
 	fputs(&env[name_len + 1], fp);
 
-	return fclose(fp) == 0;
+	بازگشت fclose(fp) == 0;
 }
 
 bool
-rc_service_setenv(const char *service, const char *name, const char *value)
+rc_service_setenv(ثابت نویسه *service, ثابت نویسه *name, ثابت نویسه *مقدار)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	نویسه var[strlen(service) + اندازه("/") + strlen(name)];
+	صحیح dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, اندازه(var), "%s/%s", service, name);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	اگر (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		بازگشت false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	اگر (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		بازگشت false;
 
-	fputs(value, fp);
+	fputs(مقدار, fp);
 
-	return fclose(fp) == 0;
+	بازگشت fclose(fp) == 0;
 }
 
 ssize_t
-rc_service_getenv(const char *service, const char *name, char **buf)
+rc_service_getenv(ثابت نویسه *service, ثابت نویسه *name, نویسه **buf)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)], *value;
-	int dfd = rc_dirfd(RC_DIR_ENVIRON);
-	struct stat stat;
-	size_t count;
+	نویسه var[strlen(service) + اندازه("/") + strlen(name)], *مقدار;
+	صحیح dfd = rc_dirfd(RC_DIR_ENVIRON);
+	ساختار stat stat;
+	size_t شمار;
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, اندازه(var), "%s/%s", service, name);
 
-	if (fstatat(dfd, var, &stat, 0) == -1)
-		return -1;
+	اگر (fstatat(dfd, var, &stat, 0) == -1)
+		بازگشت -1;
 
-	if (!buf)
-		return stat.st_size;
+	اگر (!buf)
+		بازگشت stat.st_size;
 
-	if (!(value = xrealloc(*buf, stat.st_size + 1)))
-		return -1;
+	اگر (!(مقدار = xrealloc(*buf, stat.st_size + 1)))
+		بازگشت -1;
 
-	if (!(fp = do_fopenat(dfd, var, O_RDONLY)))
-		return -1;
+	اگر (!(fp = do_fopenat(dfd, var, O_RDONLY)))
+		بازگشت -1;
 
-	count = fread(value, 1, stat.st_size, fp);
-	value[count] = '\0';
+	شمار = fread(مقدار, 1, stat.st_size, fp);
+	مقدار[شمار] = '\0';
 
 	fclose(fp);
-	*buf = value;
-	return count;
+	*buf = مقدار;
+	بازگشت شمار;
 }

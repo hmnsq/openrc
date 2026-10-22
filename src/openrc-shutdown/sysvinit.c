@@ -15,88 +15,88 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#شامل <errno.h>
+#شامل <fcntl.h>
+#شامل <stddef.h>
+#شامل <string.h>
+#شامل <sys/stat.h>
+#شامل <unistd.h>
 
-#include "einfo.h"
-#include "initreq.h"
-#include "sysvinit.h"
+#شامل "einfo.h"
+#شامل "initreq.h"
+#شامل "sysvinit.h"
 
-static void sysvinit_send_cmd(struct init_request *request)
+ایستا تهی sysvinit_send_cmd(ساختار init_request *request)
 {
-	int fd;
-	char *p;
+	صحیح fd;
+	نویسه *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	اگر (fd < 0) {
+		اگر (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		بازگشت;
 	}
-	p = (char *) request;
-	bytes = sizeof(*request);
-	do {
-		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
-				continue;
+	p = (نویسه *) request;
+	bytes = اندازه(*request);
+	انجامبده {
+		r = اكتب(fd, p, bytes);
+		اگر (r < 0) {
+			اگر ((errno == EAGAIN) || (errno == EINTR))
+				ادامه;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			بازگشت;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} وقتی (bytes > 0);
 }
 
-void sysvinit_runlevel(char rl)
+تهی sysvinit_runlevel(نویسه rl)
 {
-	struct init_request request;
+	ساختار init_request request;
 
-	if (!rl)
-		return;
+	اگر (!rl)
+		بازگشت;
 
-	request = (struct init_request) {
+	request = (ساختار init_request) {
 		.magic = INIT_MAGIC,
 		.sleeptime = 0,
 		.cmd = INIT_CMD_RUNLVL,
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		بازگشت;
 }
 
 /*
  *	Set environment variables in the init process.
  */
-void sysvinit_setenv(const char *name, const char *value)
+تهی sysvinit_setenv(ثابت نویسه *name, ثابت نویسه *مقدار)
 {
-	struct init_request	request;
+	ساختار init_request	request;
 	size_t nl;
 	size_t vl;
 
-	memset(&request, 0, sizeof(request));
+	memset(&request, 0, اندازه(request));
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
-		vl = strlen(value);
-else
+	اگر (مقدار)
+		vl = strlen(مقدار);
+وگرنه
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	اگر (nl + vl + 3 >= (صحیح)اندازه(request.i.data))
+		بازگشت;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	اگر (مقدار) {
 		request.i.data[nl] = '=';
-		memcpy(request.i.data + nl + 1, value, vl);
+		memcpy(request.i.data + nl + 1, مقدار, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	بازگشت;
 }

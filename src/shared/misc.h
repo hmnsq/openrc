@@ -18,42 +18,42 @@
 #ifndef __RC_MISC_H__
 #define __RC_MISC_H__
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+#شامل <sys/stat.h>
+#شامل <sys/types.h>
+#شامل <errno.h>
+#شامل <stdbool.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <time.h>
+#شامل <unistd.h>
 
-#include "helpers.h"
-#include "rc.h"
+#شامل "helpers.h"
+#شامل "rc.h"
 
 #define RC_LEVEL_BOOT           "boot"
 #define RC_LEVEL_DEFAULT        "default"
 
 #define RC_KRUNLEVEL            RC_SVCDIR "/krunlevel"
 
-char *rc_conf_value(const char *var);
-bool rc_conf_yesno(const char *var);
-char *default_runlevel(void);
-void env_filter(void);
-void env_config(void);
-int signal_setup(int sig, void (*handler)(int));
-int svc_lock(const char *, bool);
-int svc_unlock(const char *, int);
-pid_t exec_service(const char *, const char *);
+نویسه *rc_conf_مقدار(ثابت نویسه *var);
+bool rc_conf_yesno(ثابت نویسه *var);
+نویسه *default_runlevel(تهی);
+تهی env_filter(تهی);
+تهی env_config(تهی);
+صحیح signal_setup(صحیح sig, تهی (*handler)(صحیح));
+صحیح svc_lock(ثابت نویسه *, bool);
+صحیح svc_unlock(ثابت نویسه *, صحیح);
+pid_t exec_service(ثابت نویسه *, ثابت نویسه *);
 
-typedef struct rc_service_state_name {
+تعریفنوع ساختار rc_service_state_name {
 	RC_SERVICE state;
-	enum rc_dir dir;
-	const char *const name;
+	شمارش rc_dir dir;
+	ثابت نویسه *ثابت name;
 } rc_service_state_name_t;
 
 /* We MUST list the states below 0x10 first
  * The rest can be in any order */
-static const rc_service_state_name_t rc_service_state_names[] = {
+ایستا ثابت rc_service_state_name_t rc_service_state_names[] = {
 	{ RC_SERVICE_STARTED,     RC_DIR_STARTED,     "started" },
 	{ RC_SERVICE_STOPPED,     RC_DIR_INVALID,     "stopped" },
 	{ RC_SERVICE_STARTING,    RC_DIR_STARTING,    "starting" },
@@ -64,37 +64,37 @@ static const rc_service_state_name_t rc_service_state_names[] = {
 	{ RC_SERVICE_FAILED,      RC_DIR_FAILED,      "failed" },
 	{ RC_SERVICE_SCHEDULED,   RC_DIR_SCHEDULED,   "scheduled"},
 	{ RC_SERVICE_CRASHED,     RC_DIR_INVALID,     "crashed"},
-	{ 0, -1, NULL}
+	{ 0, -1, پوچ}
 };
 
 #define service_start(service) exec_service(service, "start")
 #define service_stop(service)  exec_service(service, "stop")
 
-int parse_mode(mode_t *, char *);
+صحیح parse_mode(mode_t *, نویسه *);
 
 /* Handy function so we can wrap einfo around our deptree */
-RC_DEPTREE *_rc_deptree_load (int, int *);
+RC_DEPTREE *_rc_deptree_load (صحیح, صحیح *);
 
-RC_SERVICE lookup_service_state(const char *service);
-void from_time_t(char *time_string, time_t tv);
-time_t to_time_t(char *timestring);
-pid_t get_pid(const char *applet, const char *pidfile);
+RC_SERVICE lookup_service_state(ثابت نویسه *service);
+تهی from_time_t(نویسه *time_string, time_t tv);
+time_t to_time_t(نویسه *timestring);
+pid_t get_pid(ثابت نویسه *applet, ثابت نویسه *pidfile);
 
-void cloexec_fds_from(int);
+تهی cloexec_fds_from(صحیح);
 
-struct notify {
-	enum {
+ساختار notify {
+	شمارش {
 		NOTIFY_NONE = 0,
 		NOTIFY_FD,
 		NOTIFY_SOCKET
 	} type;
 
-	char *path;
-	int pipe[2];
-	int fd;
+	نویسه *path;
+	صحیح pipe[2];
+	صحیح fd;
 };
 
-struct notify notify_parse(const char *applet, const char *ready_string);
-bool notify_wait(const char *applet, struct notify ready);
+ساختار notify notify_parse(ثابت نویسه *applet, ثابت نویسه *ready_string);
+bool notify_wait(ثابت نویسه *applet, ساختار notify ready);
 
 #endif

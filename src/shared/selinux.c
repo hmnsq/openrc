@@ -15,34 +15,34 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stddef.h>
-#include <errno.h>
-#include <dlfcn.h>
-#include <ctype.h>
-#include <limits.h>
-#include <pwd.h>
-#include <unistd.h>
+#شامل <stddef.h>
+#شامل <errno.h>
+#شامل <dlfcn.h>
+#شامل <ctype.h>
+#شامل <limits.h>
+#شامل <pwd.h>
+#شامل <unistd.h>
 
-#include <selinux/selinux.h>
-#include <selinux/label.h>
-#include <selinux/get_default_type.h>
-#include <selinux/context.h>
+#شامل <selinux/selinux.h>
+#شامل <selinux/label.h>
+#شامل <selinux/get_default_type.h>
+#شامل <selinux/context.h>
 
-#include <sys/stat.h>
-#include <sys/types.h>
+#شامل <sys/stat.h>
+#شامل <sys/types.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "plugin.h"
-#include "selinux.h"
+#شامل "einfo.h"
+#شامل "queue.h"
+#شامل "rc.h"
+#شامل "misc.h"
+#شامل "plugin.h"
+#شامل "selinux.h"
 
 /* the context files for selinux */
 #define INITRC_FILE "initrc_context"
 
 #ifdef HAVE_AUDIT
-#include <libaudit.h>
+#شامل <libaudit.h>
 #endif
 
 /* PAM or shadow for authentication */
@@ -50,7 +50,7 @@
 #    define PAM_SERVICE_NAME "run_init" /* the name of this program for PAM */
 #    include <security/pam_appl.h>
 #    include <security/pam_misc.h>
-#else
+#وگرنه
 #    define PASSWORD_PROMPT "Password:"
 #    include <crypt.h>
 #    include <shadow.h>
@@ -59,88 +59,88 @@
 
 
 /* The handle for the fcontext lookups */
-static struct selabel_handle *hnd = NULL;
+ایستا ساختار selabel_handle *hnd = پوچ;
 
-int selinux_util_label(const char *path)
+صحیح selinux_util_label(ثابت نویسه *path)
 {
-	int retval = 0;
-	int enforce;
-	struct stat st;
-	char *con;
+	صحیح retval = 0;
+	صحیح enforce;
+	ساختار stat st;
+	نویسه *con;
 
 	enforce = security_getenforce();
-	if (retval < 0)
-		return retval;
+	اگر (retval < 0)
+		بازگشت retval;
 
-	if (!hnd)
-		return (enforce) ? -1 : 0;
+	اگر (!hnd)
+		بازگشت (enforce) ? -1 : 0;
 
 	retval = lstat(path, &st);
-	if (retval < 0) {
-		if (errno == ENOENT)
-			return 0;
-		return (enforce) ? -1 : 0;
+	اگر (retval < 0) {
+		اگر (errno == ENOENT)
+			بازگشت 0;
+		بازگشت (enforce) ? -1 : 0;
 	}
 
 	/* lookup the context */
 	retval = selabel_lookup_raw(hnd, &con, path, st.st_mode);
-	if (retval < 0) {
-		if (errno == ENOENT)
-			return 0;
-		return (enforce) ? -1 : 0;
+	اگر (retval < 0) {
+		اگر (errno == ENOENT)
+			بازگشت 0;
+		بازگشت (enforce) ? -1 : 0;
 	}
 
 	/* apply the context */
 	retval = lsetfilecon(path, con);
 	freecon(con);
-	if (retval < 0) {
-		if (errno == ENOENT)
-			return 0;
-		if (errno == ENOTSUP)
-			return 0;
-		return (enforce) ? -1 : 0;
+	اگر (retval < 0) {
+		اگر (errno == ENOENT)
+			بازگشت 0;
+		اگر (errno == ENOTSUP)
+			بازگشت 0;
+		بازگشت (enforce) ? -1 : 0;
 	}
 
-	return 0;
+	بازگشت 0;
 }
 
 /*
  * Open the label handle
  * returns 1 on success, 0 if no selinux, negative on error
  */
-int selinux_util_open(void)
+صحیح selinux_util_open(تهی)
 {
-	int retval = 0;
+	صحیح retval = 0;
 
 	retval = is_selinux_enabled();
-	if (retval <= 0)
-		return retval;
+	اگر (retval <= 0)
+		بازگشت retval;
 
-	hnd = selabel_open(SELABEL_CTX_FILE, NULL, 0);
-	if (!hnd)
-		return -2;
+	hnd = selabel_open(SELABEL_CTX_FILE, پوچ, 0);
+	اگر (!hnd)
+		بازگشت -2;
 
-	return 1;
+	بازگشت 1;
 }
 
 /*
  * Close the label handle
  * returns 1 on success, 0 if no selinux, negative on error
  */
-int selinux_util_close(void)
+صحیح selinux_util_close(تهی)
 {
-	int retval = 0;
+	صحیح retval = 0;
 
 	retval = is_selinux_enabled();
-	if (retval <= 0)
-		return retval;
+	اگر (retval <= 0)
+		بازگشت retval;
 
-	if (hnd) {
+	اگر (hnd) {
 		selabel_close(hnd);
-		hnd = NULL;
+		hnd = پوچ;
 	}
 
-	return 0;
+	بازگشت 0;
 }
 
 /*
@@ -149,203 +149,203 @@ int selinux_util_close(void)
  * We ask for the password to make sure it is intended vs run by malicious software.
  * Actual authorization is covered by the policy itself.
  */
-static int check_password(char *username)
+ایستا صحیح check_password(نویسه *username)
 {
-	int ret = 1;
+	صحیح ret = 1;
 #ifdef HAVE_PAM
 	pam_handle_t *pamh;
-	int pam_err = 0;
-	const struct pam_conv pconv = {
+	صحیح pam_err = 0;
+	ثابت ساختار pam_conv pconv = {
 		misc_conv,
-		NULL
+		پوچ
 	};
 
 	pam_err = pam_start(PAM_SERVICE_NAME, username, &pconv, &pamh);
-	if (pam_err != PAM_SUCCESS) {
+	اگر (pam_err != PAM_SUCCESS) {
 		ret = -1;
-		goto outpam;
+		برو outpam;
 	}
 
 	pam_err = pam_authenticate(pamh, PAM_DISALLOW_NULL_AUTHTOK);
-	if (pam_err != PAM_SUCCESS) {
+	اگر (pam_err != PAM_SUCCESS) {
 		ret = -1;
-		goto outpam;
+		برو outpam;
 	}
 
 	ret = 0;
 outpam:
 	pam_end(pamh, pam_err);
-	pamh = NULL;
+	pamh = پوچ;
 
-#else /* authenticating via /etc/shadow instead */
-	struct spwd *spw;
-	char *password;
-	char *attempt;
+#وگرنه /* authenticating via /etc/shadow instead */
+	ساختار spwd *spw;
+	نویسه *password;
+	نویسه *attempt;
 
 	spw = getspnam(username);
-	if (!spw) {
+	اگر (!spw) {
 		eerror("Failed to read shadow entry");
 		ret = -1;
-		goto outshadow;
+		برو outshadow;
 	}
 
 	attempt = getpass(PASSWORD_PROMPT);
-	if (!attempt) {
+	اگر (!attempt) {
 		ret = -1;
-		goto outshadow;
+		برو outshadow;
 	}
 
-	if (*spw->sp_pwdp == '\0' && *attempt == '\0') {
+	اگر (*spw->sp_pwdp == '\0' && *attempt == '\0') {
 		ret = -1;
-		goto outshadow;
+		برو outshadow;
 	}
 
 	/* salt must be at least two characters long */
-	if (!(spw->sp_pwdp[0] && spw->sp_pwdp[1])) {
+	اگر (!(spw->sp_pwdp[0] && spw->sp_pwdp[1])) {
 		ret = -1;
-		goto outshadow;
+		برو outshadow;
 	}
 
 	/* encrypt the password attempt */
 	password = crypt(attempt, spw->sp_pwdp);
 
-	if (password && strcmp(password, spw->sp_pwdp) == 0)
+	اگر (password && strcmp(password, spw->sp_pwdp) == 0)
 		ret = 0;
-	else
+	وگرنه
 		ret = -1;
 outshadow:
 #endif
-	return ret;
+	بازگشت ret;
 }
 
 /* Authenticates the user, returns 0 on success, 1 on fail */
-static int check_auth()
+ایستا صحیح check_auth()
 {
-	struct passwd *pw;
+	ساختار passwd *pw;
 	uid_t uid;
 
 #ifdef HAVE_AUDIT
 	uid = audit_getloginuid();
-	if (uid == (uid_t) -1)
+	اگر (uid == (uid_t) -1)
 		uid = getuid();
-#else
+#وگرنه
 	uid = getuid();
 #endif
 
 	pw = getpwuid(uid);
-	if (!pw) {
+	اگر (!pw) {
 		eerror("cannot find your entry in the passwd file.");
-		return (-1);
+		بازگشت (-1);
 	}
 
 	printf("Authenticating %s.\n", pw->pw_name);
 
 	/* do the actual check */
-	if (check_password(pw->pw_name) == 0) {
-		return 0;
+	اگر (check_password(pw->pw_name) == 0) {
+		بازگشت 0;
 	}
 
 	eerrorx("Authentication failed for %s", pw->pw_name);
-	return 1;
+	بازگشت 1;
 }
 
 /*
  * Read the context from the given context file. context must be free'd by the user.
  */
-static int read_context_file(const char *filename, char **context)
+ایستا صحیح read_context_file(ثابت نویسه *filename, نویسه **context)
 {
-	int ret = -1;
+	صحیح ret = -1;
 	FILE *fp;
-	char *filepath = NULL;
-	char *line = NULL;
-	char *p;
-	char *p2;
+	نویسه *filepath = پوچ;
+	نویسه *سطر = پوچ;
+	نویسه *p;
+	نویسه *p2;
 	size_t len = 0;
 
 	xasprintf(&filepath, "%s/%s", selinux_contexts_path(), filename);
 
 	fp = fopen(filepath, "r");
-	if (fp == NULL) {
+	اگر (fp == پوچ) {
 		eerror("Failed to open context file: %s", filename);
-		free(filepath);
-		return -1;
+		آزاد(filepath);
+		بازگشت -1;
 	}
 
-	while (xgetline(&line, &len, fp) != -1) {
+	وقتی (xgetline(&سطر, &len, fp) != -1) {
 		/* cut off spaces before the string */
-		p = line;
-		while (isspace(*p) && *p != '\0')
+		p = سطر;
+		وقتی (isspace(*p) && *p != '\0')
 			p++;
 
 		/* empty string, skip */
-		if (*p == '\0')
-			continue;
+		اگر (*p == '\0')
+			ادامه;
 
 		/* cut off spaces after the string */
 		p2 = p;
-		while (!isspace(*p2) && *p2 != '\0')
+		وقتی (!isspace(*p2) && *p2 != '\0')
 			p2++;
 		*p2 = '\0';
 
 		*context = xstrdup(p);
 		ret = 0;
-		break;
+		بشکن;
 	}
 
-	free(line);
-	free(filepath);
+	آزاد(سطر);
+	آزاد(filepath);
 	fclose(fp);
-	return ret;
+	بازگشت ret;
 }
 
-static int read_run_init_context(char **context)
+ایستا صحیح read_run_init_context(نویسه **context)
 {
-	int ret = -1;
+	صحیح ret = -1;
 	RC_STRINGLIST *list;
-	char *value = NULL;
+	نویسه *مقدار = پوچ;
 
 	list = rc_config_list(selinux_openrc_contexts_path());
-	if (list == NULL)
-		return ret;
+	اگر (list == پوچ)
+		بازگشت ret;
 
-	value = rc_config_value(list, "run_init");
-	if (value != NULL && strlen(value) > 0) {
-		*context = xstrdup(value);
+	مقدار = rc_config_مقدار(list, "run_init");
+	اگر (مقدار != پوچ && strlen(مقدار) > 0) {
+		*context = xstrdup(مقدار);
 		ret = 0;
 	}
 
 	rc_stringlist_free(list);
-	return ret;
+	بازگشت ret;
 }
 
-void selinux_setup(char **argv)
+تهی selinux_setup(نویسه **argv)
 {
-	char *new_context = NULL;
-	char *curr_context = NULL;
+	نویسه *new_context = پوچ;
+	نویسه *curr_context = پوچ;
 	context_t curr_con;
-	char *curr_t = NULL;
-	char *run_init_t = NULL;
+	نویسه *curr_t = پوچ;
+	نویسه *run_init_t = پوچ;
 
 	/* Return, if selinux is disabled. */
-	if (is_selinux_enabled() < 1) {
-		return;
+	اگر (is_selinux_enabled() < 1) {
+		بازگشت;
 	}
 
-	if (read_run_init_context(&run_init_t) != 0) {
+	اگر (read_run_init_context(&run_init_t) != 0) {
 		/* assume a reasonable default, rather than bailing out */
 		run_init_t = xstrdup("run_init_t");
 		ewarn("Assuming SELinux run_init type is %s", run_init_t);
 	}
 
 	/* Get our current context. */
-	if (getcon(&curr_context) < 0) {
-		if (errno == ENOENT) {
+	اگر (getcon(&curr_context) < 0) {
+		اگر (errno == ENOENT) {
 			/* should only hit this if proc is not mounted.  this
 			 * happens on Gentoo right after init starts, when
 			 * the init script processing starts.
 			 */
-			goto out;
-		} else {
+			برو out;
+		} وگرنه {
 			perror("getcon");
 			exit(1);
 		}
@@ -353,64 +353,64 @@ void selinux_setup(char **argv)
 
 	/* extract the type from the context */
 	curr_con = context_new(curr_context);
-	if (!curr_con) {
-		free(curr_context);
-		goto out;
+	اگر (!curr_con) {
+		آزاد(curr_context);
+		برو out;
 	}
 
 	curr_t = xstrdup(context_type_get(curr_con));
-	if (!curr_t) {
+	اگر (!curr_t) {
 		context_free(curr_con);
-		free(curr_context);
-		goto out;
+		آزاد(curr_context);
+		برو out;
 	}
 
 	/* dont need them anymore so free() now */
 	context_free(curr_con);
-	free(curr_context);
+	آزاد(curr_context);
 
 	/* if we are not in the run_init domain, we should not do anything */
-	if (strncmp(run_init_t, curr_t, strlen(run_init_t)) != 0) {
-		goto out;
+	اگر (strncmp(run_init_t, curr_t, strlen(run_init_t)) != 0) {
+		برو out;
 	}
 
-	free(curr_t);
-	free(run_init_t);
+	آزاد(curr_t);
+	آزاد(run_init_t);
 
-	if (check_auth() != 0) {
+	اگر (check_auth() != 0) {
 		eerrorx("Authentication failed.");
 	}
 
 	/* Get the context for the script to be run in. */
-	if (read_context_file(INITRC_FILE, &new_context) != 0) {
+	اگر (read_context_file(INITRC_FILE, &new_context) != 0) {
 		/* assume a reasonable default, rather than bailing out */
 		new_context = xstrdup("system_u:system_r:initrc_t");
 		ewarn("Assuming SELinux initrc context is %s", new_context);
 	}
 
 	/* Set the new context */
-	if (setexeccon(new_context) < 0) {
+	اگر (setexeccon(new_context) < 0) {
 		eerrorx("Could not set SELinux exec context to %s.", new_context);
 	}
 
-	free(new_context);
+	آزاد(new_context);
 
 	/*
 	 * exec will recycle ptys so try and use open_init_pty if it exists
 	 * which will open the pty with initrc_devpts_t, if it doesn't exist,
 	 * fall back to plain exec
 	 */
-	if (access("/usr/sbin/open_init_pty", X_OK) == 0) {
-		if (execvp("/usr/sbin/open_init_pty", argv)) {
+	اگر (access("/usr/sbin/open_init_pty", X_OK) == 0) {
+		اگر (execvp("/usr/sbin/open_init_pty", argv)) {
 			perror("execvp");
 			exit(-1);
 		}
-	} else if (execvp(argv[1], argv + 1)) {
+	} وگرنه اگر (execvp(argv[1], argv + 1)) {
 		perror("execvp");
 		exit(-1);
 	}
 
 out:
-	free(run_init_t);
-	free(curr_t);
+	آزاد(run_init_t);
+	آزاد(curr_t);
 }

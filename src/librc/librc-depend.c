@@ -15,53 +15,53 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/utsname.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
+#شامل <sys/utsname.h>
+#شامل <ctype.h>
+#شامل <dirent.h>
+#شامل <errno.h>
+#شامل <limits.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <sys/stat.h>
+#شامل <time.h>
+#شامل <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
-#include "misc.h"
+#شامل "queue.h"
+#شامل "librc.h"
+#شامل "helpers.h"
+#شامل "misc.h"
 
 #define GENDEP          RC_LIBEXECDIR "/sh/gendepends.sh"
 
-static const char *bootlevel = NULL;
+ایستا ثابت نویسه *bootlevel = پوچ;
 
-static char *
-get_shell_value(char *string)
+ایستا نویسه *
+get_shell_مقدار(نویسه *string)
 {
-	char *p = string;
-	char *e;
+	نویسه *p = string;
+	نویسه *e;
 
-	if (!string)
-		return NULL;
+	اگر (!string)
+		بازگشت پوچ;
 
-	if (*p == '\'')
+	اگر (*p == '\'')
 		p++;
 
 	e = p + strlen(p) - 1;
-	if (*e == '\n')
+	اگر (*e == '\n')
 		*e-- = 0;
-	if (*e == '\'')
+	اگر (*e == '\'')
 		*e-- = 0;
 
-	if (*p != 0)
-		return p;
+	اگر (*p != 0)
+		بازگشت p;
 
-	return NULL;
+	بازگشت پوچ;
 }
 
-void
+تهی
 rc_deptree_free(RC_DEPTREE *deptree)
 {
 	RC_DEPINFO *di;
@@ -69,227 +69,227 @@ rc_deptree_free(RC_DEPTREE *deptree)
 	RC_DEPTYPE *dt;
 	RC_DEPTYPE *dt_save;
 
-	if (!deptree)
-		return;
+	اگر (!deptree)
+		بازگشت;
 
 	TAILQ_FOREACH_SAFE(di, deptree, entries, di_save) {
 		TAILQ_FOREACH_SAFE(dt, &di->depends, entries, dt_save) {
 			TAILQ_REMOVE(&di->depends, dt, entries);
 			rc_stringlist_free(dt->services);
-			free(dt->type);
-			free(dt);
+			آزاد(dt->type);
+			آزاد(dt);
 		}
 		TAILQ_REMOVE(deptree, di, entries);
-		free(di->service);
-		free(di);
+		آزاد(di->service);
+		آزاد(di);
 	}
 
 	/* Use free() here since rc_deptree_free should not call itself */
-	free(deptree);
+	آزاد(deptree);
 }
 
-static RC_DEPINFO *
-get_depinfo(const RC_DEPTREE *deptree, const char *service)
+ایستا RC_DEPINFO *
+get_depinfo(ثابت RC_DEPTREE *deptree, ثابت نویسه *service)
 {
 	RC_DEPINFO *di;
-	if (deptree) {
+	اگر (deptree) {
 		TAILQ_FOREACH(di, deptree, entries)
-			if (strcmp(di->service, service) == 0)
-				return di;
+			اگر (strcmp(di->service, service) == 0)
+				بازگشت di;
 	}
-	return NULL;
+	بازگشت پوچ;
 }
 
-static RC_DEPINFO *
-make_depinfo(RC_DEPTREE *deptree, const char *service)
+ایستا RC_DEPINFO *
+make_depinfo(RC_DEPTREE *deptree, ثابت نویسه *service)
 {
-	RC_DEPINFO *depinfo = xmalloc(sizeof(*depinfo));
+	RC_DEPINFO *depinfo = xmalloc(اندازه(*depinfo));
 	TAILQ_INIT(&depinfo->depends);
 	depinfo->service = xstrdup(service);
-	TAILQ_INSERT_TAIL(deptree, depinfo, entries);
+	TAILQ_درج_TAIL(deptree, depinfo, entries);
 
-	return depinfo;
+	بازگشت depinfo;
 }
 
-static RC_DEPTYPE *
-get_deptype(const RC_DEPINFO *depinfo, const char *type)
+ایستا RC_DEPTYPE *
+get_deptype(ثابت RC_DEPINFO *depinfo, ثابت نویسه *type)
 {
 	RC_DEPTYPE *dt;
 
-	if (depinfo) {
+	اگر (depinfo) {
 		TAILQ_FOREACH(dt, &depinfo->depends, entries)
-			if (strcmp(dt->type, type) == 0)
-				return dt;
+			اگر (strcmp(dt->type, type) == 0)
+				بازگشت dt;
 	}
-	return NULL;
+	بازگشت پوچ;
 }
 
-static RC_DEPTYPE *
-make_deptype(RC_DEPINFO *depinfo, const char *type)
+ایستا RC_DEPTYPE *
+make_deptype(RC_DEPINFO *depinfo, ثابت نویسه *type)
 {
-	RC_DEPTYPE *deptype = xmalloc(sizeof(*deptype));
+	RC_DEPTYPE *deptype = xmalloc(اندازه(*deptype));
 	deptype->type = xstrdup(type);
 	deptype->services = rc_stringlist_new();
-	TAILQ_INSERT_TAIL(&depinfo->depends, deptype, entries);
+	TAILQ_درج_TAIL(&depinfo->depends, deptype, entries);
 
-	return deptype;
+	بازگشت deptype;
 }
 
 #ifdef HAVE_MALLOC_EXTENDED_ATTRIBUTE
 __attribute__ ((malloc (rc_deptree_free, 1)))
 #endif
-static RC_DEPTREE *
-make_deptree(void) {
-	RC_DEPTREE *deptree = xmalloc(sizeof(*deptree));
+ایستا RC_DEPTREE *
+make_deptree(تهی) {
+	RC_DEPTREE *deptree = xmalloc(اندازه(*deptree));
 	TAILQ_INIT(deptree);
-	return deptree;
+	بازگشت deptree;
 }
 
-static RC_DEPTREE *
-deptree_load_file(int dirfd, const char *pathname)
+ایستا RC_DEPTREE *
+deptree_load_file(صحیح dirfd, ثابت نویسه *pathname)
 {
 	RC_DEPTREE *deptree;
-	RC_DEPINFO *depinfo = NULL;
-	RC_DEPTYPE *deptype = NULL;
-	char *line = NULL;
+	RC_DEPINFO *depinfo = پوچ;
+	RC_DEPTYPE *deptype = پوچ;
+	نویسه *سطر = پوچ;
 	size_t size;
-	char *type;
-	char *p;
-	char *e;
-	int i;
+	نویسه *type;
+	نویسه *p;
+	نویسه *e;
+	صحیح i;
 	FILE *fp;
 
-	if (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
-		return NULL;
+	اگر (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
+		بازگشت پوچ;
 
 	deptree = make_deptree();
-	while (xgetline(&line, &size, fp) != -1) {
-		p = line;
+	وقتی (xgetline(&سطر, &size, fp) != -1) {
+		p = سطر;
 		e = strsep(&p, "_");
-		if (!e || strcmp(e, "depinfo") != 0)
-			continue;
+		اگر (!e || strcmp(e, "depinfo") != 0)
+			ادامه;
 		e = strsep(&p, "_");
-		if (!e || sscanf(e, "%d", &i) != 1)
-			continue;
-		if (!(type = strsep(&p, "_=")))
-			continue;
-		if (strcmp(type, "service") == 0) {
+		اگر (!e || sscanf(e, "%d", &i) != 1)
+			ادامه;
+		اگر (!(type = strsep(&p, "_=")))
+			ادامه;
+		اگر (strcmp(type, "service") == 0) {
 			/* Sanity */
-			e = get_shell_value(p);
-			if (!e || *e == '\0')
-				continue;
+			e = get_shell_مقدار(p);
+			اگر (!e || *e == '\0')
+				ادامه;
 			depinfo = make_depinfo(deptree, e);
-			deptype = NULL;
-			continue;
+			deptype = پوچ;
+			ادامه;
 		}
 		e = strsep(&p, "=");
-		if (!e || sscanf(e, "%d", &i) != 1)
-			continue;
+		اگر (!e || sscanf(e, "%d", &i) != 1)
+			ادامه;
 		/* Sanity */
-		e = get_shell_value(p);
-		if (!e || *e == '\0')
-			continue;
-		if (!depinfo)
-			continue;
-		if (!deptype || strcmp(deptype->type, type) != 0)
+		e = get_shell_مقدار(p);
+		اگر (!e || *e == '\0')
+			ادامه;
+		اگر (!depinfo)
+			ادامه;
+		اگر (!deptype || strcmp(deptype->type, type) != 0)
 			deptype = make_deptype(depinfo, type);
 		rc_stringlist_add(deptype->services, e);
 	}
-	free(line);
+	آزاد(سطر);
 	fclose(fp);
 
-	return deptree;
+	بازگشت deptree;
 }
 
 RC_DEPTREE *
-rc_deptree_load(void)
+rc_deptree_load(تهی)
 {
-	return deptree_load_file(rc_dirfd(RC_DIR_SVCDIR), "deptree");
+	بازگشت deptree_load_file(rc_dirfd(RC_DIR_SVCDIR), "deptree");
 }
 
 RC_DEPTREE *
-rc_deptree_load_file(const char *deptree_file)
+rc_deptree_load_file(ثابت نویسه *deptree_file)
 {
-	return deptree_load_file(AT_FDCWD, deptree_file);
+	بازگشت deptree_load_file(AT_FDCWD, deptree_file);
 }
 
-static bool
-valid_service(const char *runlevel, const char *service, const char *type)
+ایستا bool
+valid_service(ثابت نویسه *runlevel, ثابت نویسه *service, ثابت نویسه *type)
 {
 	RC_SERVICE state;
 
-	if (!runlevel ||
+	اگر (!runlevel ||
 	    strcmp(type, "ineed") == 0 ||
 	    strcmp(type, "needsme") == 0  ||
 	    strcmp(type, "iwant") == 0 ||
 	    strcmp(type, "wantsme") == 0)
-		return true;
+		بازگشت true;
 
-	if (rc_service_in_runlevel(service, runlevel))
-		return true;
-	if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
-		    return false;
-	if (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 &&
+	اگر (rc_service_in_runlevel(service, runlevel))
+		بازگشت true;
+	اگر (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
+		    بازگشت false;
+	اگر (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 &&
 	    strcmp(type, "iafter") == 0)
-		    return false;
-	if (strcmp(runlevel, bootlevel) != 0) {
-		if (rc_service_in_runlevel(service, bootlevel))
-			return true;
+		    بازگشت false;
+	اگر (strcmp(runlevel, bootlevel) != 0) {
+		اگر (rc_service_in_runlevel(service, bootlevel))
+			بازگشت true;
 	}
 
 	state = rc_service_state(service);
-	if (state & RC_SERVICE_HOTPLUGGED ||
+	اگر (state & RC_SERVICE_HOTPLUGGED ||
 	    state & RC_SERVICE_STARTED)
-		return true;
+		بازگشت true;
 
-	return false;
+	بازگشت false;
 }
 
-static bool
-get_provided1(const char *runlevel, RC_STRINGLIST *providers,
-	      RC_DEPTYPE *deptype, const char *level,
+ایستا bool
+get_provided1(ثابت نویسه *runlevel, RC_STRINGLIST *providers,
+	      RC_DEPTYPE *deptype, ثابت نویسه *level,
 	      bool hotplugged, RC_SERVICE state)
 {
 	RC_STRING *service;
 	RC_SERVICE st;
 	bool retval = false;
 	bool ok;
-	const char *svc;
+	ثابت نویسه *svc;
 
 	TAILQ_FOREACH(service, deptype->services, entries) {
 		ok = true;
-		svc = service->value;
+		svc = service->مقدار;
 		st = rc_service_state(svc);
 
-		if (level)
+		اگر (level)
 			ok = rc_service_in_runlevel(svc, level);
-		else if (hotplugged)
+		وگرنه اگر (hotplugged)
 			ok = (st & RC_SERVICE_HOTPLUGGED &&
 			      !rc_service_in_runlevel(svc, runlevel) &&
 			      !rc_service_in_runlevel(svc, bootlevel));
-		if (!ok)
-			continue;
-		switch (state) {
-			case RC_SERVICE_STARTED:
+		اگر (!ok)
+			ادامه;
+		انتخاب (state) {
+			حالت RC_SERVICE_STARTED:
 				ok = (st & RC_SERVICE_STARTED);
-				break;
-			case RC_SERVICE_INACTIVE:
-			case RC_SERVICE_STARTING:
-			case RC_SERVICE_STOPPING:
+				بشکن;
+			حالت RC_SERVICE_INACTIVE:
+			حالت RC_SERVICE_STARTING:
+			حالت RC_SERVICE_STOPPING:
 				ok = (st & RC_SERVICE_STARTING ||
 				      st & RC_SERVICE_STOPPING ||
 				      st & RC_SERVICE_INACTIVE);
-				break;
-			default:
-				break;
+				بشکن;
+			پیشفرض:
+				بشکن;
 		}
-		if (!ok)
-			continue;
+		اگر (!ok)
+			ادامه;
 		retval = true;
 		rc_stringlist_add(providers, svc);
 	}
 
-	return retval;
+	بازگشت retval;
 }
 
 /* Work out if a service is provided by another service.
@@ -301,37 +301,37 @@ get_provided1(const char *runlevel, RC_STRINGLIST *providers,
    If there are any bugs in rc-depend, they will probably be here as
    provided dependency can change depending on runlevel state.
    */
-static RC_STRINGLIST *
-get_provided(const RC_DEPINFO *depinfo, const char *runlevel, int options)
+ایستا RC_STRINGLIST *
+get_provided(ثابت RC_DEPINFO *depinfo, ثابت نویسه *runlevel, صحیح options)
 {
 	RC_DEPTYPE *dt;
 	RC_STRINGLIST *providers = rc_stringlist_new();
 	RC_STRING *service;
 
 	dt = get_deptype(depinfo, "providedby");
-	if (!dt)
-		return providers;
+	اگر (!dt)
+		بازگشت providers;
 
 	/* If we are stopping then all depends are true, regardless of state.
 	   This is especially true for net services as they could force a restart
 	   of the local dns resolver which may depend on net. */
-	if (options & RC_DEP_STOP) {
+	اگر (options & RC_DEP_STOP) {
 		TAILQ_FOREACH(service, dt->services, entries)
-			rc_stringlist_add(providers, service->value);
-		return providers;
+			rc_stringlist_add(providers, service->مقدار);
+		بازگشت providers;
 	}
 
 	/* If we're strict or starting, then only use what we have in our
 	 * runlevel and bootlevel. If we starting then check hotplugged too. */
-	if (options & RC_DEP_STRICT || options & RC_DEP_START) {
+	اگر (options & RC_DEP_STRICT || options & RC_DEP_START) {
 		TAILQ_FOREACH(service, dt->services, entries)
-			if (rc_service_in_runlevel(service->value, runlevel) ||
-			    rc_service_in_runlevel(service->value, bootlevel) ||
+			اگر (rc_service_in_runlevel(service->مقدار, runlevel) ||
+			    rc_service_in_runlevel(service->مقدار, bootlevel) ||
 			    (options & RC_DEP_START &&
-			     rc_service_state(service->value) & RC_SERVICE_HOTPLUGGED))
-				rc_stringlist_add(providers, service->value);
-		if (TAILQ_FIRST(providers))
-			return providers;
+			     rc_service_state(service->مقدار) & RC_SERVICE_HOTPLUGGED))
+				rc_stringlist_add(providers, service->مقدار);
+		اگر (TAILQ_FIRST(providers))
+			بازگشت providers;
 	}
 
 	/* OK, we're not strict or there were no services in our runlevel.
@@ -345,60 +345,60 @@ get_provided(const RC_DEPINFO *depinfo, const char *runlevel, int options)
 	 *     runlevel, hotplugged, bootlevel, any
 	 */
 #define DO \
-	if (TAILQ_FIRST(providers)) { \
-		if (TAILQ_NEXT(TAILQ_FIRST(providers), entries)) { \
+	اگر (TAILQ_FIRST(providers)) { \
+		اگر (TAILQ_NEXT(TAILQ_FIRST(providers), entries)) { \
 			rc_stringlist_free(providers); \
 			providers = rc_stringlist_new(); \
 		} \
-		return providers; \
+		بازگشت providers; \
 	}
 
 	/* Anything running has to come first */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTED))
+	اگر (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTED))
 	{ DO }
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STARTED))
+	اگر (get_provided1(runlevel, providers, dt, پوچ, true, RC_SERVICE_STARTED))
 	{ DO }
-	if (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
+	اگر (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STARTED))
 	{ DO }
-	if (get_provided1(runlevel, providers, dt, NULL, false, RC_SERVICE_STARTED))
+	اگر (get_provided1(runlevel, providers, dt, پوچ, false, RC_SERVICE_STARTED))
 	{ DO }
 
 	/* Check starting services */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTING))
-		return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STARTING))
-		return providers;
-	if (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
+	اگر (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTING))
+		بازگشت providers;
+	اگر (get_provided1(runlevel, providers, dt, پوچ, true, RC_SERVICE_STARTING))
+		بازگشت providers;
+	اگر (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STARTING))
-	    return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, false, RC_SERVICE_STARTING))
-		return providers;
+	    بازگشت providers;
+	اگر (get_provided1(runlevel, providers, dt, پوچ, false, RC_SERVICE_STARTING))
+		بازگشت providers;
 
 	/* Nothing started then. OK, lets get the stopped services */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STOPPED))
-		return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STOPPED))
+	اگر (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STOPPED))
+		بازگشت providers;
+	اگر (get_provided1(runlevel, providers, dt, پوچ, true, RC_SERVICE_STOPPED))
 	{ DO }
-	if (bootlevel && (strcmp(runlevel, bootlevel) != 0) &&
+	اگر (bootlevel && (strcmp(runlevel, bootlevel) != 0) &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STOPPED))
-		return providers;
+		بازگشت providers;
 
 	/* Still nothing? OK, list our first provided service. */
 	service = TAILQ_FIRST(dt->services);
-	if (service != NULL)
-		rc_stringlist_add(providers, service->value);
+	اگر (service != پوچ)
+		rc_stringlist_add(providers, service->مقدار);
 
-	return providers;
+	بازگشت providers;
 }
 
-static void
-visit_service(const RC_DEPTREE *deptree,
-	      const RC_STRINGLIST *types,
+ایستا تهی
+visit_service(ثابت RC_DEPTREE *deptree,
+	      ثابت RC_STRINGLIST *types,
 	      RC_STRINGLIST *sorted,
 	      RC_STRINGLIST *visited,
-	      const RC_DEPINFO *depinfo,
-	      const char *runlevel, int options)
+	      ثابت RC_DEPINFO *depinfo,
+	      ثابت نویسه *runlevel, صحیح options)
 {
 	RC_STRING *type;
 	RC_STRING *service;
@@ -406,41 +406,41 @@ visit_service(const RC_DEPTREE *deptree,
 	RC_DEPINFO *di;
 	RC_STRINGLIST *provided;
 	RC_STRING *p;
-	const char *svcname;
+	ثابت نویسه *svcname;
 
 	/* Check if we have already visited this service or not */
 	TAILQ_FOREACH(type, visited, entries)
-		if (strcmp(type->value, depinfo->service) == 0)
-			return;
+		اگر (strcmp(type->مقدار, depinfo->service) == 0)
+			بازگشت;
 	/* Add ourselves as a visited service */
 	rc_stringlist_add(visited, depinfo->service);
 
 	TAILQ_FOREACH(type, types, entries)
 	{
-		if (!(dt = get_deptype(depinfo, type->value)))
-			continue;
+		اگر (!(dt = get_deptype(depinfo, type->مقدار)))
+			ادامه;
 
 		TAILQ_FOREACH(service, dt->services, entries) {
-			if (!(options & RC_DEP_TRACE) ||
-			    strcmp(type->value, "iprovide") == 0)
+			اگر (!(options & RC_DEP_TRACE) ||
+			    strcmp(type->مقدار, "iprovide") == 0)
 			{
-				rc_stringlist_add(sorted, service->value);
-				continue;
+				rc_stringlist_add(sorted, service->مقدار);
+				ادامه;
 			}
 
-			if (!(di = get_depinfo(deptree, service->value)))
-				continue;
+			اگر (!(di = get_depinfo(deptree, service->مقدار)))
+				ادامه;
 			provided = get_provided(di, runlevel, options);
 
-			if (TAILQ_FIRST(provided)) {
+			اگر (TAILQ_FIRST(provided)) {
 				TAILQ_FOREACH(p, provided, entries) {
-					di = get_depinfo(deptree, p->value);
-					if (di && valid_service(runlevel, di->service, type->value))
+					di = get_depinfo(deptree, p->مقدار);
+					اگر (di && valid_service(runlevel, di->service, type->مقدار))
 						visit_service(deptree, types, sorted, visited, di,
 							      runlevel, options | RC_DEP_TRACE);
 				}
 			}
-			else if (di && valid_service(runlevel, service->value, type->value))
+			وگرنه اگر (di && valid_service(runlevel, service->مقدار, type->مقدار))
 				visit_service(deptree, types, sorted, visited, di,
 					      runlevel, options | RC_DEP_TRACE);
 
@@ -449,18 +449,18 @@ visit_service(const RC_DEPTREE *deptree,
 	}
 
 	/* Now visit the stuff we provide for */
-	if (options & RC_DEP_TRACE &&
+	اگر (options & RC_DEP_TRACE &&
 	    (dt = get_deptype(depinfo, "iprovide")))
 	{
 		TAILQ_FOREACH(service, dt->services, entries) {
-			if (!(di = get_depinfo(deptree, service->value)))
-				continue;
+			اگر (!(di = get_depinfo(deptree, service->مقدار)))
+				ادامه;
 			provided = get_provided(di, runlevel, options);
 			TAILQ_FOREACH(p, provided, entries)
-				if (strcmp(p->value, depinfo->service) == 0) {
+				اگر (strcmp(p->مقدار, depinfo->service) == 0) {
 					visit_service(deptree, types, sorted, visited, di,
 						       runlevel, options | RC_DEP_TRACE);
-					break;
+					بشکن;
 				}
 			rc_stringlist_free(provided);
 		}
@@ -469,15 +469,15 @@ visit_service(const RC_DEPTREE *deptree,
 	/* We've visited everything we need, so add ourselves unless we
 	   are also the service calling us or we are provided by something */
 	svcname = getenv("RC_SVCNAME");
-	if (!svcname || strcmp(svcname, depinfo->service) != 0) {
-		if (!get_deptype(depinfo, "providedby"))
+	اگر (!svcname || strcmp(svcname, depinfo->service) != 0) {
+		اگر (!get_deptype(depinfo, "providedby"))
 			rc_stringlist_add(sorted, depinfo->service);
 	}
 }
 
 RC_STRINGLIST *
-rc_deptree_depend(const RC_DEPTREE *deptree,
-		  const char *service, const char *type)
+rc_deptree_depend(ثابت RC_DEPTREE *deptree,
+		  ثابت نویسه *service, ثابت نویسه *type)
 {
 	RC_DEPINFO *di;
 	RC_DEPTYPE *dt;
@@ -485,48 +485,48 @@ rc_deptree_depend(const RC_DEPTREE *deptree,
 	RC_STRING *svc;
 
 	svcs = rc_stringlist_new();
-	if (!(di = get_depinfo(deptree, service)) ||
+	اگر (!(di = get_depinfo(deptree, service)) ||
 	    !(dt = get_deptype(di, type)))
 	{
 		errno = ENOENT;
-		return svcs;
+		بازگشت svcs;
 	}
 
 	/* For consistency, we copy the array */
 	TAILQ_FOREACH(svc, dt->services, entries)
-		rc_stringlist_add(svcs, svc->value);
-	return svcs;
+		rc_stringlist_add(svcs, svc->مقدار);
+	بازگشت svcs;
 }
 
 RC_STRINGLIST *
-rc_deptree_depends(const RC_DEPTREE *deptree,
-		   const RC_STRINGLIST *types,
-		   const RC_STRINGLIST *services,
-		   const char *runlevel, int options)
+rc_deptree_depends(ثابت RC_DEPTREE *deptree,
+		   ثابت RC_STRINGLIST *types,
+		   ثابت RC_STRINGLIST *services,
+		   ثابت نویسه *runlevel, صحیح options)
 {
 	RC_STRINGLIST *sorted = rc_stringlist_new();
 	RC_STRINGLIST *visited = rc_stringlist_new();
 	RC_DEPINFO *di;
-	const RC_STRING *service;
+	ثابت RC_STRING *service;
 
 	bootlevel = getenv("RC_BOOTLEVEL");
-	if (!bootlevel)
+	اگر (!bootlevel)
 		bootlevel = RC_LEVEL_BOOT;
 	TAILQ_FOREACH(service, services, entries) {
-		if (!(di = get_depinfo(deptree, service->value))) {
+		اگر (!(di = get_depinfo(deptree, service->مقدار))) {
 			errno = ENOENT;
-			continue;
+			ادامه;
 		}
-		if (types)
+		اگر (types)
 			visit_service(deptree, types, sorted, visited,
 				      di, runlevel, options);
 	}
 	rc_stringlist_free(visited);
-	return sorted;
+	بازگشت sorted;
 }
 
 RC_STRINGLIST *
-rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
+rc_deptree_order(ثابت RC_DEPTREE *deptree, ثابت نویسه *runlevel, صحیح options)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *list2;
@@ -534,34 +534,34 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
 	RC_STRINGLIST *services;
 
 	bootlevel = getenv("RC_BOOTLEVEL");
-	if (!bootlevel)
+	اگر (!bootlevel)
 		bootlevel = RC_LEVEL_BOOT;
 
 	/* When shutting down, list all running services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
+	اگر (strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
 	{
 		list = rc_services_in_state(RC_SERVICE_STARTED);
 		list2 = rc_services_in_state(RC_SERVICE_INACTIVE);
 		TAILQ_CONCAT(list, list2, entries);
-		free(list2);
+		آزاد(list2);
 		list2 = rc_services_in_state(RC_SERVICE_STARTING);
 		TAILQ_CONCAT(list, list2, entries);
-		free(list2);
-	} else {
+		آزاد(list2);
+	} وگرنه {
 		list = rc_services_in_runlevel(RC_LEVEL_SYSINIT);
-		if (strcmp(runlevel, RC_LEVEL_SYSINIT) != 0) {
+		اگر (strcmp(runlevel, RC_LEVEL_SYSINIT) != 0) {
 			list2 = rc_services_in_runlevel(runlevel);
 			TAILQ_CONCAT(list, list2, entries);
-			free(list2);
+			آزاد(list2);
 			list2 = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
 			TAILQ_CONCAT(list, list2, entries);
-			free(list2);
+			آزاد(list2);
 			/* If we're not the boot runlevel then add that too */
-			if (strcmp(runlevel, bootlevel) != 0) {
+			اگر (strcmp(runlevel, bootlevel) != 0) {
 				list2 = rc_services_in_runlevel(bootlevel);
 				TAILQ_CONCAT(list, list2, entries);
-				free(list2);
+				آزاد(list2);
 			}
 		}
 	}
@@ -577,7 +577,7 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
 				      RC_DEP_STRICT | RC_DEP_TRACE | options);
 	rc_stringlist_free(list);
 	rc_stringlist_free(types);
-	return services;
+	بازگشت services;
 }
 
 
@@ -585,140 +585,140 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
    any older (or newer) files.   If false, sets the time to the
    oldest (or newest) found.
 */
-static bool
-deep_mtime_check(int target_dir, const char *target, bool newer, time_t *rel, char *file)
+ایستا bool
+deep_mtime_check(صحیح target_dir, ثابت نویسه *target, bool newer, time_t *rel, نویسه *file)
 {
-	struct stat buf;
+	ساختار stat buf;
 	bool retval = true;
 	DIR *dp;
-	struct dirent *d;
+	ساختار dirent *d;
 
 	/* If target does not exist, return true to mimic shell test */
-	if (fstatat(target_dir, target, &buf, 0) != 0)
-		return true;
+	اگر (fstatat(target_dir, target, &buf, 0) != 0)
+		بازگشت true;
 
-	if (newer) {
-		if (*rel < buf.st_mtime) {
+	اگر (newer) {
+		اگر (*rel < buf.st_mtime) {
 			retval = false;
 
-			if (file)
+			اگر (file)
 				strlcpy(file, target, PATH_MAX);
 			*rel = buf.st_mtime;
 		}
-	} else {
-		if (*rel > buf.st_mtime) {
+	} وگرنه {
+		اگر (*rel > buf.st_mtime) {
 			retval = false;
 
-			if (file)
+			اگر (file)
 				strlcpy(file, target, PATH_MAX);
 			*rel = buf.st_mtime;
 		}
 	}
 
-	if (!S_ISDIR(buf.st_mode) || !(dp = do_opendirat(target_dir, target)))
-		return retval;
+	اگر (!S_ISDIR(buf.st_mode) || !(dp = do_opendirat(target_dir, target)))
+		بازگشت retval;
 
 	/* Check all the entries in the dir */
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
-		if (!deep_mtime_check(dirfd(dp), d->d_name, newer, rel, file)) {
+	وقتی ((d = readdir(dp))) {
+		اگر (d->d_name[0] == '.')
+			ادامه;
+		اگر (!deep_mtime_check(dirfd(dp), d->d_name, newer, rel, file)) {
 			retval = false;
 		}
 	}
 
 	closedir(dp);
-	return retval;
+	بازگشت retval;
 }
 
 /* Recursively check if target is older/newer than source.
  * If false, return the filename and most different time (if
  * the return value arguments are non-null).
  */
-static bool
-mtime_check(int dirfd, const char *source, const char *target, bool newer, time_t *rel, char *file)
+ایستا bool
+mtime_check(صحیح dirfd, ثابت نویسه *source, ثابت نویسه *target, bool newer, time_t *rel, نویسه *file)
 {
-	struct stat buf;
+	ساختار stat buf;
 	time_t mtime;
 	bool retval = true;
 
 	/* We have to exist */
-	if (stat(source, &buf) != 0)
-		return false;
+	اگر (stat(source, &buf) != 0)
+		بازگشت false;
 	mtime = buf.st_mtime;
 
 	retval = deep_mtime_check(dirfd, target,newer,&mtime,file);
-	if (rel) {
+	اگر (rel) {
 		*rel = mtime;
 	}
-	return retval;
+	بازگشت retval;
 }
 
 bool
-rc_newer_than(const char *source, const char *target, time_t *newest, char *file)
+rc_newer_than(ثابت نویسه *source, ثابت نویسه *target, time_t *newest, نویسه *file)
 {
 
-	return mtime_check(AT_FDCWD, source, target, true, newest, file);
+	بازگشت mtime_check(AT_FDCWD, source, target, true, newest, file);
 }
 
 bool
-rc_older_than(const char *source, const char *target, time_t *oldest, char *file)
+rc_older_than(ثابت نویسه *source, ثابت نویسه *target, time_t *oldest, نویسه *file)
 {
-	return mtime_check(AT_FDCWD, source, target, false, oldest, file);
+	بازگشت mtime_check(AT_FDCWD, source, target, false, oldest, file);
 }
 
-typedef struct deppair
+تعریفنوع ساختار deppair
 {
-	const char *depend;
-	const char *addto;
+	ثابت نویسه *depend;
+	ثابت نویسه *addto;
 } DEPPAIR;
 
-static const DEPPAIR deppairs[] = {
+ایستا ثابت DEPPAIR deppairs[] = {
 	{ "ineed",	"needsme" },
 	{ "iuse",	"usesme" },
 	{ "iwant",	"wantsme" },
 	{ "iafter",	"ibefore" },
 	{ "ibefore",	"iafter" },
 	{ "iprovide",	"providedby" },
-	{ NULL, NULL }
+	{ پوچ, پوچ }
 };
 
 bool
-rc_deptree_update_needed(time_t *newest, char *file)
+rc_deptree_update_needed(time_t *newest, نویسه *file)
 {
 	bool newer = false;
-	const int *dirfds;
+	ثابت صحیح *dirfds;
 	RC_STRINGLIST *config;
 	RC_STRING *s;
-	struct stat buf;
+	ساختار stat buf;
 	time_t mtime;
 
 	/* Quick test to see if anything we use has changed and we have
 	 * data in our deptree. */
-	if (mkdir(rc_svcdir(), 0755) != 0 && errno != EEXIST)
+	اگر (mkdir(rc_svcdir(), 0755) != 0 && errno != EEXIST)
 		fprintf(stderr, "mkdir '%s': %s\n", rc_svcdir(), strerror(errno));
 
 	clear_dirfds(); /* clear our cached dirfds as a sanity check */
 
-	if (fstatat(rc_dirfd(RC_DIR_SVCDIR), "deptree", &buf, 0) == 0) {
+	اگر (fstatat(rc_dirfd(RC_DIR_SVCDIR), "deptree", &buf, 0) == 0) {
 		mtime = buf.st_mtime;
-	} else {
+	} وگرنه {
 		/* No previous cache found.
 		 * We still run the scan, in case of clock skew; we still need to return
 		 * the newest time.
 		 */
 		newer = true;
-		mtime = time(NULL);
+		mtime = time(پوچ);
 	}
 
-	for (size_t i = 0, count = rc_scriptdirfds(&dirfds); i < count; i++) {
+	برای (size_t i = 0, شمار = rc_scriptdirfds(&dirfds); i < شمار; i++) {
 		newer |= !deep_mtime_check(dirfds[i], "init.d", true, &mtime, file);
 		newer |= !deep_mtime_check(dirfds[i], "conf.d", true, &mtime, file);
 	}
 
 	newer |= !deep_mtime_check(rc_dirfd(RC_DIR_SYSCONF), "rc.conf", true, &mtime, file);
 	newer |= !deep_mtime_check(rc_dirfd(RC_DIR_SYSCONF), "rc.conf.d", true, &mtime, file);
-	if (rc_is_user()) {
+	اگر (rc_is_user()) {
 		newer |= !deep_mtime_check(rc_dirfd(RC_DIR_USRCONF), "rc.conf", true, &mtime, file);
 		newer |= !deep_mtime_check(rc_dirfd(RC_DIR_USRCONF), "rc.conf.d", true, &mtime, file);
 	}
@@ -727,41 +727,41 @@ rc_deptree_update_needed(time_t *newest, char *file)
 	 * outside of baselayout, like syslog-ng, so we check those too. */
 	config = config_list(rc_dirfd(RC_DIR_SVCDIR), "depconfig");
 	TAILQ_FOREACH(s, config, entries)
-		newer |= !deep_mtime_check(AT_FDCWD, s->value, true, &mtime, file);
+		newer |= !deep_mtime_check(AT_FDCWD, s->مقدار, true, &mtime, file);
 	rc_stringlist_free(config);
 
 	/* Return newest file time, if requested */
-	if ((newer) && (newest != NULL)) {
+	اگر ((newer) && (newest != پوچ)) {
 	    *newest = mtime;
 	}
 
-	return newer;
+	بازگشت newer;
 }
 
-static void
-setup_environment(void)
+ایستا تهی
+setup_environment(تهی)
 {
-	struct utsname uts;
+	ساختار utsname uts;
 	size_t env_size;
-	char *env;
+	نویسه *env;
 	FILE *mem = xopen_memstream(&env, &env_size);
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
+	برای (ثابت نویسه * ثابت *dirs = rc_scriptdirs(); *dirs; dirs++) {
 		fputs(*dirs, mem);
-		if (dirs[1])
+		اگر (dirs[1])
 			fputc(' ', mem);
 	}
 	xclose_memstream(mem);
 
 	setenv("RC_SCRIPTDIRS", env, 1);
-	free(env);
+	آزاد(env);
 
 	/* Some init scripts need RC_LIBEXECDIR to source stuff
 	   Ideally we should be setting our full env instead */
-	if (!getenv("RC_LIBEXECDIR"))
+	اگر (!getenv("RC_LIBEXECDIR"))
 		setenv("RC_LIBEXECDIR", RC_LIBEXECDIR, 0);
 
-	if (uname(&uts) == 0)
+	اگر (uname(&uts) == 0)
 		setenv("RC_UNAME", uts.sysname, 1);
 }
 
@@ -777,85 +777,85 @@ setup_environment(void)
    Phase 7 saves the depinfo object to disk
    */
 bool
-rc_deptree_update(void)
+rc_deptree_update(تهی)
 {
 
 	FILE *fp;
 	RC_DEPTREE *deptree, *providers;
-	RC_DEPINFO *depinfo = NULL, *depinfo_np, *di;
-	RC_DEPTYPE *deptype = NULL, *dt_np, *dt, *provide;
+	RC_DEPINFO *depinfo = پوچ, *depinfo_np, *di;
+	RC_DEPTYPE *deptype = پوچ, *dt_np, *dt, *provide;
 	RC_STRINGLIST *config, *dupes, *types, *sorted, *visited;
 	RC_STRING *s, *s2, *s2_np, *s3, *s4;
-	char *line = NULL;
+	نویسه *سطر = پوچ;
 	size_t size;
-	char *depend, *depends, *service, *type;
+	نویسه *depend, *depends, *service, *type;
 	size_t i, l;
 	bool retval = true;
-	const char *sys = rc_sys();
-	int serrno;
+	ثابت نویسه *sys = rc_sys();
+	صحیح serrno;
 
 	/* Phase 1 - source all init scripts and print dependencies */
 	setup_environment();
-	if (!(fp = popen(GENDEP, "r")))
-		return false;
+	اگر (!(fp = popen(GENDEP, "r")))
+		بازگشت false;
 
 	config = rc_stringlist_new();
 
 	deptree = make_deptree();
-	while (xgetline(&line, &size, fp) != -1) {
-		depends = line;
+	وقتی (xgetline(&سطر, &size, fp) != -1) {
+		depends = سطر;
 		service = strsep(&depends, " ");
-		if (!service || !*service)
-			continue;
+		اگر (!service || !*service)
+			ادامه;
 
 		type = strsep(&depends, " ");
-		if (!depinfo || strcmp(depinfo->service, service) != 0) {
-			deptype = NULL;
+		اگر (!depinfo || strcmp(depinfo->service, service) != 0) {
+			deptype = پوچ;
 			depinfo = get_depinfo(deptree, service);
-			if (!depinfo)
+			اگر (!depinfo)
 				depinfo = make_depinfo(deptree, service);
 		}
 
 		/* We may not have any depends */
-		if (!type || !depends)
-			continue;
+		اگر (!type || !depends)
+			ادامه;
 
 		/* Get the type */
-		if (strcmp(type, "config") != 0) {
-			if (!deptype || strcmp(deptype->type, type) != 0) {
+		اگر (strcmp(type, "config") != 0) {
+			اگر (!deptype || strcmp(deptype->type, type) != 0) {
 				deptype = get_deptype(depinfo, type);
-				if (!deptype)
+				اگر (!deptype)
 					deptype = make_deptype(depinfo, type);
 			}
 		}
 
 		/* Now add each depend to our type.
 		   We do this individually so we handle multiple spaces gracefully */
-		while ((depend = strsep(&depends, " "))) {
-			if (depend[0] == 0)
-				continue;
+		وقتی ((depend = strsep(&depends, " "))) {
+			اگر (depend[0] == 0)
+				ادامه;
 
-			if (strcmp(type, "config") == 0) {
+			اگر (strcmp(type, "config") == 0) {
 				rc_stringlist_addu(config, depend);
-				continue;
+				ادامه;
 			}
 
 			/* Don't depend on ourself */
-			if (strcmp(depend, service) == 0)
-				continue;
+			اگر (strcmp(depend, service) == 0)
+				ادامه;
 
 			/* .sh files are not init scripts */
 			l = strlen(depend);
-			if (l > 2 &&
+			اگر (l > 2 &&
 			    depend[l - 3] == '.' &&
 			    depend[l - 2] == 's' &&
 			    depend[l - 1] == 'h')
-				continue;
+				ادامه;
 
 			/* Remove our dependency if instructed */
-			if (depend[0] == '!') {
+			اگر (depend[0] == '!') {
 				rc_stringlist_delete(deptype->services, depend + 1);
-				continue;
+				ادامه;
 			}
 
 			rc_stringlist_add(deptype->services, depend);
@@ -863,107 +863,107 @@ rc_deptree_update(void)
 			/* We need to allow `after *; before local;` to work.
 			 * Conversely, we need to allow 'before *; after modules' also */
 			/* If we're before something, remove us from the after list */
-			if (strcmp(type, "ibefore") == 0) {
-				if ((dt = get_deptype(depinfo, "iafter")))
+			اگر (strcmp(type, "ibefore") == 0) {
+				اگر ((dt = get_deptype(depinfo, "iafter")))
 					rc_stringlist_delete(dt->services, depend);
 			}
 			/* If we're after something, remove us from the before list */
-			if (strcmp(type, "iafter") == 0 ||
+			اگر (strcmp(type, "iafter") == 0 ||
 			    strcmp(type, "ineed") == 0 ||
 			    strcmp(type, "iwant") == 0 ||
 			    strcmp(type, "iuse") == 0) {
-				if ((dt = get_deptype(depinfo, "ibefore")))
+				اگر ((dt = get_deptype(depinfo, "ibefore")))
 					rc_stringlist_delete(dt->services, depend);
 			}
 		}
 	}
-	free(line);
+	آزاد(سطر);
 	pclose(fp);
 
 	/* Phase 2 - if we're a special system, remove services that don't
 	 * work for them. This doesn't stop them from being run directly. */
-	if (sys) {
-		char *nosys, *onosys;
+	اگر (sys) {
+		نویسه *nosys, *onosys;
 		size_t len = strlen(sys);
 
 		nosys = xmalloc(len + 2);
 		nosys[0] = '-';
-		for (i = 0; i < len; i++)
-			nosys[i + 1] = (char)tolower((unsigned char)sys[i]);
+		برای (i = 0; i < len; i++)
+			nosys[i + 1] = (نویسه)tolower((unsigned نویسه)sys[i]);
 		nosys[i + 1] = '\0';
 
 		onosys = xmalloc(len + 3);
 		onosys[0] = 'n';
 		onosys[1] = 'o';
-		for (i = 0; i < len; i++)
-			onosys[i + 2] = (char)tolower((unsigned char)sys[i]);
+		برای (i = 0; i < len; i++)
+			onosys[i + 2] = (نویسه)tolower((unsigned نویسه)sys[i]);
 		onosys[i + 2] = '\0';
 
 		TAILQ_FOREACH_SAFE(depinfo, deptree, entries, depinfo_np) {
-			if (!(deptype = get_deptype(depinfo, "keyword")))
-				continue;
+			اگر (!(deptype = get_deptype(depinfo, "keyword")))
+				ادامه;
 			TAILQ_FOREACH(s, deptype->services, entries) {
-				if (strcmp(s->value, nosys) != 0 && strcmp(s->value, onosys) != 0)
-					continue;
+				اگر (strcmp(s->مقدار, nosys) != 0 && strcmp(s->مقدار, onosys) != 0)
+					ادامه;
 				provide = get_deptype(depinfo, "iprovide");
 				TAILQ_REMOVE(deptree, depinfo, entries);
 				TAILQ_FOREACH(di, deptree, entries) {
 					TAILQ_FOREACH_SAFE(dt, &di->depends, entries, dt_np) {
 						rc_stringlist_delete(dt->services, depinfo->service);
-						if (provide)
+						اگر (provide)
 							TAILQ_FOREACH(s2, provide->services, entries)
-								rc_stringlist_delete(dt->services, s2->value);
-						if (!TAILQ_FIRST(dt->services)) {
+								rc_stringlist_delete(dt->services, s2->مقدار);
+						اگر (!TAILQ_FIRST(dt->services)) {
 							TAILQ_REMOVE(&di->depends, dt, entries);
-							free(dt->type);
-							free(dt->services);
-							free(dt);
+							آزاد(dt->type);
+							آزاد(dt->services);
+							آزاد(dt);
 						}
 					}
 				}
 			}
 		}
-		free(nosys);
-		free(onosys);
+		آزاد(nosys);
+		آزاد(onosys);
 	}
 
 	/* Phase 3 - add our providers to the tree */
-	providers = xmalloc(sizeof(*providers));
+	providers = xmalloc(اندازه(*providers));
 	TAILQ_INIT(providers);
 	TAILQ_FOREACH(depinfo, deptree, entries) {
-		if (!(deptype = get_deptype(depinfo, "iprovide")))
-			continue;
+		اگر (!(deptype = get_deptype(depinfo, "iprovide")))
+			ادامه;
 		TAILQ_FOREACH(s, deptype->services, entries) {
-			di = get_depinfo(providers, s->value);
-			if (!di)
-				di = make_depinfo(providers, s->value);
+			di = get_depinfo(providers, s->مقدار);
+			اگر (!di)
+				di = make_depinfo(providers, s->مقدار);
 		}
 	}
 	TAILQ_CONCAT(deptree, providers, entries);
-	free(providers);
+	آزاد(providers);
 
 	/* Phase 4 - backreference our depends */
 	TAILQ_FOREACH(depinfo, deptree, entries) {
-		for (i = 0; deppairs[i].depend; i++) {
+		برای (i = 0; deppairs[i].depend; i++) {
 			deptype = get_deptype(depinfo, deppairs[i].depend);
-			if (!deptype)
-				continue;
+			اگر (!deptype)
+				ادامه;
 			TAILQ_FOREACH(s, deptype->services, entries) {
-				di = get_depinfo(deptree, s->value);
-				if (!di) {
-					if (strcmp(deptype->type, "ineed") == 0) {
+				di = get_depinfo(deptree, s->مقدار);
+				اگر (!di) {
+					اگر (strcmp(deptype->type, "ineed") == 0) {
 						fprintf(stderr, "Service '%s' needs non existent service '%s'\n",
-							 depinfo->service, s->value);
+							 depinfo->service, s->مقدار);
 						dt = get_deptype(depinfo, "broken");
-						if (!dt)
+						اگر (!dt)
 							dt = make_deptype(depinfo, "broken");
-						rc_stringlist_addu(dt->services, s->value);
+						rc_stringlist_addu(dt->services, s->مقدار);
 					}
-					continue;
+					ادامه;
 				}
 
 				dt = get_deptype(di, deppairs[i].addto);
-				if (!dt)
+				اگر (!dt)
 					dt = make_deptype(di, deppairs[i].addto);
 				rc_stringlist_addu(dt->services, depinfo->service);
 			}
@@ -978,43 +978,43 @@ rc_deptree_update(void)
 	rc_stringlist_add(types, "iafter");
 	TAILQ_FOREACH(depinfo, deptree, entries) {
 		deptype = get_deptype(depinfo, "ibefore");
-		if (!deptype)
-			continue;
+		اگر (!deptype)
+			ادامه;
 		sorted = rc_stringlist_new();
 		visited = rc_stringlist_new();
 		visit_service(deptree, types, sorted, visited, depinfo,
-			      NULL, 0);
+			      پوچ, 0);
 		rc_stringlist_free(visited);
 		TAILQ_FOREACH_SAFE(s2, deptype->services, entries, s2_np) {
 			TAILQ_FOREACH(s3, sorted, entries) {
-				di = get_depinfo(deptree, s3->value);
-				if (!di)
-					continue;
-				if (strcmp(s2->value, s3->value) == 0) {
+				di = get_depinfo(deptree, s3->مقدار);
+				اگر (!di)
+					ادامه;
+				اگر (strcmp(s2->مقدار, s3->مقدار) == 0) {
 					dt = get_deptype(di, "iafter");
-					if (dt)
+					اگر (dt)
 						rc_stringlist_delete(dt->services, depinfo->service);
-					break;
+					بشکن;
 				}
 				dt = get_deptype(di, "iprovide");
-				if (!dt)
-					continue;
+				اگر (!dt)
+					ادامه;
 				TAILQ_FOREACH(s4, dt->services, entries) {
-					if (strcmp(s4->value, s2->value) == 0)
-						break;
+					اگر (strcmp(s4->مقدار, s2->مقدار) == 0)
+						بشکن;
 				}
-				if (s4) {
-					di = get_depinfo(deptree, s4->value);
-					if (di) {
+				اگر (s4) {
+					di = get_depinfo(deptree, s4->مقدار);
+					اگر (di) {
 						dt = get_deptype(di, "iafter");
-						if (dt)
+						اگر (dt)
 							rc_stringlist_delete(dt->services, depinfo->service);
 					}
-					break;
+					بشکن;
 				}
 			}
-			if (s3)
-				rc_stringlist_delete(deptype->services, s2->value);
+			اگر (s3)
+				rc_stringlist_delete(deptype->services, s2->مقدار);
 		}
 		rc_stringlist_free(sorted);
 	}
@@ -1026,7 +1026,7 @@ rc_deptree_update(void)
 		serrno = errno;
 		errno = 0;
 		rc_stringlist_addu(dupes,depinfo->service);
-		if (errno == EEXIST) {
+		اگر (errno == EEXIST) {
 			fprintf(stderr,
 					"Error: %s is the name of a real and virtual service.\n",
 					depinfo->service);
@@ -1041,7 +1041,7 @@ rc_deptree_update(void)
 	   This works and should be entirely shell parseable provided that depend
 	   names don't have any non shell variable characters in
 	   */
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "deptree", O_WRONLY | O_CREAT | O_TRUNC))) {
+	اگر ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "deptree", O_WRONLY | O_CREAT | O_TRUNC))) {
 		i = 0;
 		TAILQ_FOREACH(depinfo, deptree, entries) {
 			fprintf(fp, "depinfo_%zu_service='%s'\n", i, depinfo->service);
@@ -1049,32 +1049,32 @@ rc_deptree_update(void)
 				size_t k = 0;
 				TAILQ_FOREACH(s, deptype->services, entries) {
 					fprintf(fp, "depinfo_%zu_%s_%zu='%s'\n",
-							i, deptype->type, k++, s->value);
+							i, deptype->type, k++, s->مقدار);
 				}
 			}
 			i++;
 		}
 		fclose(fp);
-	} else {
+	} وگرنه {
 		fprintf(stderr, "fopen '%s/deptree': %s\n", rc_svcdir(), strerror(errno));
 		retval = false;
 	}
 
 	/* Save our external config files to disk */
-	if (TAILQ_FIRST(config)) {
-		if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", O_WRONLY | O_CREAT | O_TRUNC))) {
+	اگر (TAILQ_FIRST(config)) {
+		اگر ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", O_WRONLY | O_CREAT | O_TRUNC))) {
 			TAILQ_FOREACH(s, config, entries)
-				fprintf(fp, "%s\n", s->value);
+				fprintf(fp, "%s\n", s->مقدار);
 			fclose(fp);
-		} else {
+		} وگرنه {
 			fprintf(stderr, "fopen '%s/depconfig': %s\n", rc_svcdir(), strerror(errno));
 			retval = false;
 		}
-	} else {
+	} وگرنه {
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", 0);
 	}
 
 	rc_stringlist_free(config);
 	rc_deptree_free(deptree);
-	return retval;
+	بازگشت retval;
 }

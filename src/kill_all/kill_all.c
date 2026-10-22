@@ -16,127 +16,127 @@
  */
 
 
-#include <dirent.h>
-#include <errno.h>
-#include <getopt.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdbool.h>
+#شامل <dirent.h>
+#شامل <errno.h>
+#شامل <getopt.h>
+#شامل <signal.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <syslog.h>
+#شامل <unistd.h>
+#شامل <sys/types.h>
+#شامل <sys/wait.h>
+#شامل <stdbool.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "_usage.h"
-#include "helpers.h"
+#شامل "einfo.h"
+#شامل "rc.h"
+#شامل "rc_exec.h"
+#شامل "_usage.h"
+#شامل "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = "[signal number]";
-const char getoptstring[] = "do:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "dry-run",        0, NULL, 'd' },
-	{ "omit",        1, NULL, 'o' },
+ثابت نویسه *applet = پوچ;
+ثابت نویسه *extraopts = "[signal number]";
+ثابت نویسه getoptstring[] = "do:" getoptstring_COMMON;
+ثابت ساختار option longopts[] = {
+	{ "dry-run",        0, پوچ, 'd' },
+	{ "omit",        1, پوچ, 'o' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت نویسه * ثابت longopts_help[] = {
 	"print what would be done",
 	"omit this pid (can be repeated)",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ثابت نویسه *usagestring = پوچ;
 
-static int mount_proc(void)
+ایستا صحیح mount_proc(تهی)
 {
 	pid_t rc;
-	int status;
-	const char *argv[] = { "mount", "-t", "proc", "proc", "/proc", NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	صحیح status;
+	ثابت نویسه *argv[] = { "mount", "-t", "proc", "proc", "/proc", پوچ };
+	ساختار exec_result res;
+	ساختار exec_args args = exec_init(argv);
 
-	if (access("/proc/version", F_OK) == 0)
-		return 0;
+	اگر (access("/proc/version", F_OK) == 0)
+		بازگشت 0;
 
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	اگر (res.pid < 0) {
 		syslog(LOG_ERR, "Failed to execute mount");
-		return -1;
+		بازگشت -1;
 	}
-	while ((rc = wait(&status)) != res.pid)
-		if (rc < 0 && errno == ECHILD)
-			break;
-	if (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	وقتی ((rc = wait(&status)) != res.pid)
+		اگر (rc < 0 && errno == ECHILD)
+			بشکن;
+	اگر (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
 		syslog(LOG_ERR, "mount returned non-zero exit status");
 
-	if (access("/proc/version", F_OK) != 0) {
+	اگر (access("/proc/version", F_OK) != 0) {
 		syslog(LOG_ERR, "Could not mount /proc");
-		return -1;
+		بازگشت -1;
 	}
-	return 0;
+	بازگشت 0;
 }
 
-static bool is_user_process(pid_t pid)
+ایستا bool is_user_process(pid_t pid)
 {
-	char *buf = NULL;
+	نویسه *buf = پوچ;
 	FILE *fp;
-	char *path = NULL;
+	نویسه *path = پوچ;
 	pid_t temp_pid;
 	size_t size;
 	bool user_process = true;
 
-	while (pid >0 && user_process) {
-		if (pid == 2) {
+	وقتی (pid >0 && user_process) {
+		اگر (pid == 2) {
 			user_process = false;
-			continue;
+			ادامه;
 		}
 		xasprintf(&path, "/proc/%d/status", pid);
 		fp = fopen(path, "r");
-		free(path);
+		آزاد(path);
 		/*
 		 * if we could not open the file, the process disappeared, which
 		 * leaves us no way to determine for sure whether it was a user
 		 * process or kernel thread, so we say it is a kernel thread to
 		 * avoid accidentally killing it.
 		 */
-		if (!fp) {
+		اگر (!fp) {
 			user_process = false;
-			continue;
+			ادامه;
 		}
 		temp_pid = -1;
-		while (!feof(fp)) {
-			buf = NULL;
-			if (xgetline(&buf, &size, fp) != -1) {
+		وقتی (!feof(fp)) {
+			buf = پوچ;
+			اگر (xgetline(&buf, &size, fp) != -1) {
 				sscanf(buf, "PPid: %d", &temp_pid);
-				free(buf);
-			} else {
-				free(buf);
-				break;
+				آزاد(buf);
+			} وگرنه {
+				آزاد(buf);
+				بشکن;
 			}
 		}
 		fclose(fp);
-		if (temp_pid == -1) {
+		اگر (temp_pid == -1) {
 			syslog(LOG_ERR, "Unable to read pid from /proc/%d/status", pid);
 			user_process = false;
-			continue;
+			ادامه;
 		}
 		pid = temp_pid;
 	}
-	return user_process;
+	بازگشت user_process;
 }
 
-static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
+ایستا صحیح signal_processes(صحیح sig, RC_STRINGLIST *omits, bool dryrun)
 {
 	sigset_t signals;
 	sigset_t oldsigs;
 	DIR *dir;
-	struct dirent	*d;
-	char *buf = NULL;
+	ساختار dirent	*d;
+	نویسه *buf = پوچ;
 	pid_t pid;
-	int sendcount = 0;
+	صحیح sendcount = 0;
 
 	kill(-1, SIGSTOP);
 	sigfillset(&signals);
@@ -147,96 +147,96 @@ static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
 	 * CWD must be /proc to avoid problems if / is affected by the killing
 	 * (i.e. depends on fuse).
 	 */
-	if (chdir("/proc") == -1) {
+	اگر (chdir("/proc") == -1) {
 		syslog(LOG_ERR, "chdir /proc failed");
-		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+		sigprocmask(SIG_SETMASK, &oldsigs, پوچ);
 		kill(-1, SIGCONT);
-		return -1;
+		بازگشت -1;
 	}
 	dir = opendir(".");
-	if (!dir) {
+	اگر (!dir) {
 		syslog(LOG_ERR, "cannot opendir(/proc)");
-		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+		sigprocmask(SIG_SETMASK, &oldsigs, پوچ);
 		kill(-1, SIGCONT);
-		return -1;
+		بازگشت -1;
 	}
 
 	/* Walk through the directory. */
-	while ((d = readdir(dir)) != NULL) {
+	وقتی ((d = readdir(dir)) != پوچ) {
 		/* Is this a process? */
 		pid = (pid_t) atoi(d->d_name);
-		if (pid == 0)
-			continue;
+		اگر (pid == 0)
+			ادامه;
 
 		/* Is this a process we have been requested to omit? */
-		if (buf) {
-			free(buf);
-			buf = NULL;
+		اگر (buf) {
+			آزاد(buf);
+			buf = پوچ;
 		}
 		xasprintf(&buf, "%d", pid);
-		if (rc_stringlist_find(omits, buf))
-			continue;
+		اگر (rc_stringlist_find(omits, buf))
+			ادامه;
 
 		/* Is this process in our session? */
-		if (getsid(getpid()) == getsid(pid))
-			continue;
+		اگر (getsid(getpid()) == getsid(pid))
+			ادامه;
 
 		/* Is this a kernel thread? */
-		if (!is_user_process(pid))
-			continue;
+		اگر (!is_user_process(pid))
+			ادامه;
 
-		if (dryrun)
+		اگر (dryrun)
 			einfo("Would send signal %d to process %d", sig, pid);
-		else if (kill(pid, sig) == 0)
+		وگرنه اگر (kill(pid, sig) == 0)
 			sendcount++;
 	}
 	closedir(dir);
-	sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+	sigprocmask(SIG_SETMASK, &oldsigs, پوچ);
 	kill(-1, SIGCONT);
-	return sendcount;
+	بازگشت sendcount;
 }
 
-int main(int argc, char **argv)
+صحیح اصلی(صحیح argc, نویسه **argv)
 {
-	char *arg = NULL;
-	int opt;
+	نویسه *arg = پوچ;
+	صحیح opt;
 	bool dryrun = false;
 	RC_STRINGLIST *omits = rc_stringlist_new();
-	int sig = SIGKILL;
-	char *here;
-	char *token;
+	صحیح sig = SIGKILL;
+	نویسه *here;
+	نویسه *token;
 
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
 	rc_stringlist_addu(omits, "1");
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	وقتی ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (صحیح *) 0)) != -1)
 	{
-		switch (opt) {
-			case 'd':
+		انتخاب (opt) {
+			حالت 'd':
 				dryrun = true;
-				break;
-			case 'o':
+				بشکن;
+			حالت 'o':
 				here = optarg;
-				while ((token = strsep(&here, ",;:"))) {
-					if ((pid_t) atoi(token) > 0)
+				وقتی ((token = strsep(&here, ",;:"))) {
+					اگر ((pid_t) atoi(token) > 0)
 						rc_stringlist_addu(omits, token);
-					else {
+					وگرنه {
 						eerror("Invalid omit pid value %s", token);
 						usage(EXIT_FAILURE);
 					}
 				}
-				break;
+				بشکن;
 			case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (argc > optind) {
+	اگر (argc > optind) {
 	arg = argv[optind];
 	sig = atoi(arg);
-	if (sig <= 0 || sig > 31) {
+	اگر (sig <= 0 || sig > 31) {
 		rc_stringlist_free(omits);
 		eerror("Invalid signal %s", arg);
 		usage(EXIT_FAILURE);
@@ -244,11 +244,11 @@ int main(int argc, char **argv)
 	}
 
 	openlog(applet, LOG_CONS|LOG_PID, LOG_DAEMON);
-	if (mount_proc() != 0) {
+	اگر (mount_proc() != 0) {
 		rc_stringlist_free(omits);
 		eerrorx("Unable to mount /proc file system");
 	}
 	signal_processes(sig, omits, dryrun);
 	rc_stringlist_free(omits);
-	return 0;
+	بازگشت 0;
 }

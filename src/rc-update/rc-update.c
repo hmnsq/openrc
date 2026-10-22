@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#شامل <errno.h>
+#شامل <getopt.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "_usage.h"
-#include "helpers.h"
+#شامل "einfo.h"
+#شامل "queue.h"
+#شامل "rc.h"
+#شامل "misc.h"
+#شامل "_usage.h"
+#شامل "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char *usagestring = ""
+ثابت نویسه *applet = پوچ;
+ثابت نویسه *extraopts = پوچ;
+ثابت نویسه *usagestring = ""
 	"Usage: rc-update [options] add <service> [<runlevel>...]\n"
 	"   or: rc-update [options] del <service> [<runlevel>...]\n"
 	"   or: rc-update [options] [show [<runlevel>...]]";
-const char getoptstring[] = "asu" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "all",             0, NULL, 'a' },
-	{ "stack",           0, NULL, 's' },
-	{ "update",          0, NULL, 'u' },
+ثابت نویسه getoptstring[] = "asu" getoptstring_COMMON;
+ثابت ساختار option longopts[] = {
+	{ "all",             0, پوچ, 'a' },
+	{ "stack",           0, پوچ, 's' },
+	{ "update",          0, پوچ, 'u' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت نویسه * ثابت longopts_help[] = {
 	"Process all runlevels",
 	"Stack a runlevel instead of a service",
 	"Force an update of the dependency tree",
@@ -55,118 +55,118 @@ const char * const longopts_help[] = {
  *   0 = no changes (nothing to do)
  *  1+ = number of runlevels updated
  */
-static int
-add(const char *runlevel, const char *service)
+ایستا صحیح
+add(ثابت نویسه *runlevel, ثابت نویسه *service)
 {
-	int retval = -1;
+	صحیح retval = -1;
 
-	if (!rc_service_exists(service)) {
-		if (errno == ENOEXEC)
+	اگر (!rc_service_exists(service)) {
+		اگر (errno == ENOEXEC)
 			eerror("%s: service `%s' is not executable",
 			    applet, service);
-		else
+		وگرنه
 			eerror("%s: service `%s' does not exist",
 			    applet, service);
-	} else if (rc_service_in_runlevel(service, runlevel)) {
+	} وگرنه اگر (rc_service_in_runlevel(service, runlevel)) {
 		einfo("%s: %s already installed in runlevel `%s'; skipping",
 		    applet, service, runlevel);
 		retval = 0;
-	} else if (rc_service_add(runlevel, service)) {
+	} وگرنه اگر (rc_service_add(runlevel, service)) {
 		einfo("service %s added to runlevel %s", service, runlevel);
 		retval = 1;
-	} else
+	} وگرنه
 		eerror("%s: failed to add service `%s' to runlevel `%s': %s",
 		    applet, service, runlevel, strerror (errno));
 
-	return retval;
+	بازگشت retval;
 }
 
-static int
-delete(const char *runlevel, const char *service)
+ایستا صحیح
+delete(ثابت نویسه *runlevel, ثابت نویسه *service)
 {
-	int retval = -1;
+	صحیح retval = -1;
 
 	errno = 0;
-	if (rc_service_delete(runlevel, service)) {
+	اگر (rc_service_delete(runlevel, service)) {
 		einfo("service %s deleted from runlevel %s",
 		    service, runlevel);
-		return 1;
+		بازگشت 1;
 	}
 
-	if (errno == ENOENT)
+	اگر (errno == ENOENT)
 		eerror("%s: service `%s' is not in the runlevel `%s'",
 		    applet, service, runlevel);
-	else
+	وگرنه
 		eerror("%s: failed to delete service `%s' from runlevel `%s': %s",
 		    applet, service, runlevel, strerror (errno));
 
-	return retval;
+	بازگشت retval;
 }
 
-static int
-addstack(const char *runlevel, const char *stack)
+ایستا صحیح
+addstack(ثابت نویسه *runlevel, ثابت نویسه *پشته)
 {
-	if (!rc_runlevel_exists(runlevel)) {
+	اگر (!rc_runlevel_exists(runlevel)) {
 		eerror("%s: runlevel `%s' does not exist", applet, runlevel);
-		return -1;
+		بازگشت -1;
 	}
-	if (!rc_runlevel_exists(stack)) {
-		eerror("%s: runlevel `%s' does not exist", applet, stack);
-		return -1;
+	اگر (!rc_runlevel_exists(پشته)) {
+		eerror("%s: runlevel `%s' does not exist", applet, پشته);
+		بازگشت -1;
 	}
-	if (strcmp(runlevel, stack) == 0) {
-		eerror("%s: cannot stack `%s' onto itself", applet, stack);
-		return -1;
+	اگر (strcmp(runlevel, پشته) == 0) {
+		eerror("%s: cannot stack `%s' onto itself", applet, پشته);
+		بازگشت -1;
 	}
-	if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
-	    strcmp(stack, RC_LEVEL_SYSINIT) == 0 ||
+	اگر (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
+	    strcmp(پشته, RC_LEVEL_SYSINIT) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_BOOT) == 0 ||
-	    strcmp(stack, RC_LEVEL_BOOT) == 0 ||
+	    strcmp(پشته, RC_LEVEL_BOOT) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
-	    strcmp(stack, RC_LEVEL_SINGLE) == 0 ||
+	    strcmp(پشته, RC_LEVEL_SINGLE) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 ||
-	    strcmp(stack, RC_LEVEL_SHUTDOWN) == 0)
+	    strcmp(پشته, RC_LEVEL_SHUTDOWN) == 0)
 	{
 		eerror("%s: cannot stack the %s runlevel",
 		    applet, RC_LEVEL_SYSINIT);
-		return -1;
+		بازگشت -1;
 	}
-	if (!rc_runlevel_stack(runlevel, stack)) {
+	اگر (!rc_runlevel_پشته(runlevel, پشته)) {
 		eerror("%s: failed to stack `%s' to `%s': %s",
-		    applet, stack, runlevel, strerror(errno));
-		return -1;
+		    applet, پشته, runlevel, strerror(errno));
+		بازگشت -1;
 	}
-	einfo("runlevel %s added to runlevel %s", stack, runlevel);
-	return 1;
+	einfo("runlevel %s added to runlevel %s", پشته, runlevel);
+	بازگشت 1;
 }
 
-static int
-delstack(const char *runlevel, const char *stack)
+ایستا صحیح
+delstack(ثابت نویسه *runlevel, ثابت نویسه *پشته)
 {
-	if (rc_runlevel_unstack(runlevel, stack)) {
-		einfo("runlevel %s deleted from runlevel %s", stack, runlevel);
-		return 1;
+	اگر (rc_runlevel_unstack(runlevel, پشته)) {
+		einfo("runlevel %s deleted from runlevel %s", پشته, runlevel);
+		بازگشت 1;
 	}
 
-	if (errno == ENOENT)
+	اگر (errno == ENOENT)
 		eerror("%s: runlevel `%s' is not in the runlevel `%s'",
-		    applet, stack, runlevel);
-	else
+		    applet, پشته, runlevel);
+	وگرنه
 		eerror("%s: failed to delete runlevel `%s' from runlevel `%s': %s",
-		    applet, stack, runlevel, strerror (errno));
+		    applet, پشته, runlevel, strerror (errno));
 
-	return -1;
+	بازگشت -1;
 }
 
-static void
+ایستا تهی
 show(RC_STRINGLIST *runlevels, bool verbose)
 {
-	RC_STRINGLIST *services = rc_services_in_runlevel(NULL);
+	RC_STRINGLIST *services = rc_services_in_runlevel(پوچ);
 	RC_STRING *service;
 	RC_STRING *runlevel;
 	RC_STRINGLIST *in;
 	bool inone;
-	char *buffer = NULL;
+	نویسه *buffer = پوچ;
 	size_t l;
 
 	rc_stringlist_sort(&services);
@@ -175,27 +175,27 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 		inone = false;
 
 		TAILQ_FOREACH(runlevel, runlevels, entries) {
-			if (rc_service_in_runlevel(service->value,
-				runlevel->value))
+			اگر (rc_service_in_runlevel(service->مقدار,
+				runlevel->مقدار))
 			{
-				rc_stringlist_add(in, runlevel->value);
+				rc_stringlist_add(in, runlevel->مقدار);
 				inone = true;
-			} else {
-				l = strlen(runlevel->value);
+			} وگرنه {
+				l = strlen(runlevel->مقدار);
 				buffer = xmalloc(l+1);
 				memset(buffer, ' ', l);
 				buffer[l] = 0;
 				rc_stringlist_add(in, buffer);
-				free(buffer);
+				آزاد(buffer);
 			}
 		}
 
-		if (inone || verbose) {
+		اگر (inone || verbose) {
 			/* For more information on why padding is 26, see issue 937: */
 			/* https://github.com/OpenRC/openrc/issues/937 */
-			printf(" %26s |", service->value);
+			printf(" %26s |", service->مقدار);
 			TAILQ_FOREACH(runlevel, in, entries)
-			    printf (" %s", runlevel->value);
+			    printf (" %s", runlevel->مقدار);
 			printf("\n");
 		}
 		rc_stringlist_free(in);
@@ -208,77 +208,77 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 #define DODELETE (1 << 2)
 #define DOSHOW   (1 << 3)
 
-int main(int argc, char **argv)
+صحیح اصلی(صحیح argc, نویسه **argv)
 {
 	RC_DEPTREE *deptree;
 	RC_STRINGLIST *runlevels;
 	RC_STRING *runlevel;
-	char *service = NULL;
-	char *p;
-	int action = 0;
-	bool verbose = false, stack = false, all_runlevels = false;
-	int opt;
-	int retval = EXIT_FAILURE;
-	int num_updated = 0;
-	int (*actfunc)(const char *, const char *);
-	int ret;
+	نویسه *service = پوچ;
+	نویسه *p;
+	صحیح action = 0;
+	bool verbose = false, پشته = false, all_runlevels = false;
+	صحیح opt;
+	صحیح retval = EXIT_FAILURE;
+	صحیح رقم_updated = 0;
+	صحیح (*actfunc)(ثابت نویسه *, ثابت نویسه *);
+	صحیح ret;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *)0)) != -1)
-		switch (opt) {
-		case 'a':
+	وقتی ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (صحیح *)0)) != -1)
+		انتخاب (opt) {
+		حالت 'a':
 		    all_runlevels = true;
-		break;
-		case 's':
-		    stack = true;
-		break;
-		case 'u':
+		بشکن;
+		حالت 's':
+		    پشته = true;
+		بشکن;
+		حالت 'u':
 			deptree = _rc_deptree_load(-1, &ret);
-			if (deptree)
+			اگر (deptree)
 				rc_deptree_free(deptree);
-			return ret;
+			بازگشت ret;
 		case_RC_COMMON_GETOPT
 		}
 
 	verbose = rc_yesno(getenv ("EINFO_VERBOSE"));
 
-	if ((action & DOSHOW   && action != DOSHOW) ||
+	اگر ((action & DOSHOW   && action != DOSHOW) ||
 	    (action & DOADD    && action != DOADD) ||
 	    (action & DODELETE && action != DODELETE))
 		eerrorx("%s: cannot mix commands", applet);
 
 	/* We need to be backwards compatible */
-	if (optind < argc) {
-		if (strcmp(argv[optind], "add") == 0)
+	اگر (optind < argc) {
+		اگر (strcmp(argv[optind], "add") == 0)
 			action = DOADD;
-		else if (strcmp(argv[optind], "delete") == 0 ||
+		وگرنه اگر (strcmp(argv[optind], "delete") == 0 ||
 		    strcmp(argv[optind], "del") == 0)
 			action = DODELETE;
-		else if (strcmp(argv[optind], "show") == 0)
+		وگرنه اگر (strcmp(argv[optind], "show") == 0)
 			action = DOSHOW;
-		if (action)
+		اگر (action)
 			optind++;
-		else
+		وگرنه
 			eerrorx("%s: invalid command `%s'",
 			    applet, argv[optind]);
 	}
-	if (!action)
+	اگر (!action)
 		action = DOSHOW;
 
 	runlevels = rc_stringlist_new();
 
-	if (optind >= argc) {
-		if (!(action & DOSHOW))
+	اگر (optind >= argc) {
+		اگر (!(action & DOSHOW))
 			eerrorx("%s: no service specified", applet);
-	} else {
+	} وگرنه {
 		service = argv[optind];
 		optind++;
 
-		while (optind < argc)
-			if (rc_runlevel_exists(argv[optind]))
+		وقتی (optind < argc)
+			اگر (rc_runlevel_exists(argv[optind]))
 				rc_stringlist_add(runlevels, argv[optind++]);
-			else {
+			وگرنه {
 				rc_stringlist_free(runlevels);
 				eerrorx ("%s: `%s' is not a valid runlevel",
 				    applet, argv[optind]);
@@ -286,65 +286,65 @@ int main(int argc, char **argv)
 	}
 
 	retval = EXIT_SUCCESS;
-	if (action & DOSHOW) {
-		if (service)
+	اگر (action & DOSHOW) {
+		اگر (service)
 			rc_stringlist_add(runlevels, service);
-		if (!TAILQ_FIRST(runlevels)) {
+		اگر (!TAILQ_FIRST(runlevels)) {
 			rc_stringlist_free(runlevels);
 			runlevels = rc_runlevel_list();
 		}
 
 		rc_stringlist_sort(&runlevels);
 		show (runlevels, verbose);
-	} else {
-		if (!service)
+	} وگرنه {
+		اگر (!service)
 			eerror ("%s: no service specified", applet);
-		else {
-			if (action & DOADD) {
-				if (all_runlevels) {
+		وگرنه {
+			اگر (action & DOADD) {
+				اگر (all_runlevels) {
 					rc_stringlist_free(runlevels);
 					eerrorx("%s: the -a option is invalid with add", applet);
 				}
-				actfunc = stack ? addstack : add;
-			} else if (action & DODELETE) {
-				actfunc = stack ? delstack : delete;
-			} else {
+				actfunc = پشته ? addstack : add;
+			} وگرنه اگر (action & DODELETE) {
+				actfunc = پشته ? delstack : delete;
+			} وگرنه {
 				rc_stringlist_free(runlevels);
 				eerrorx("%s: invalid action", applet);
 			}
 
-			if (!TAILQ_FIRST(runlevels)) {
-				if (all_runlevels) {
-					free(runlevels);
+			اگر (!TAILQ_FIRST(runlevels)) {
+				اگر (all_runlevels) {
+					آزاد(runlevels);
 					runlevels = rc_runlevel_list();
-				} else {
+				} وگرنه {
 					p = rc_runlevel_get();
 					rc_stringlist_add(runlevels,
 					    p ? p : default_runlevel());
-					free(p);
+					آزاد(p);
 				}
 			}
 
-			if (!TAILQ_FIRST(runlevels)) {
-				free(runlevels);
+			اگر (!TAILQ_FIRST(runlevels)) {
+				آزاد(runlevels);
 				eerrorx("%s: no runlevels found", applet);
 			}
 
 			TAILQ_FOREACH(runlevel, runlevels, entries) {
-				if (!rc_runlevel_exists(runlevel->value)) {
+				اگر (!rc_runlevel_exists(runlevel->مقدار)) {
 					eerror ("%s: runlevel `%s' does not exist",
-					    applet, runlevel->value);
-					continue;
+					    applet, runlevel->مقدار);
+					ادامه;
 				}
 
-				ret = actfunc(runlevel->value, service);
-				if (ret < 0)
+				ret = actfunc(runlevel->مقدار, service);
+				اگر (ret < 0)
 					retval = EXIT_FAILURE;
-				num_updated += ret;
+				رقم_updated += ret;
 			}
 
-			if (retval == EXIT_SUCCESS &&
-			    num_updated == 0 && action & DODELETE)
+			اگر (retval == EXIT_SUCCESS &&
+			    رقم_updated == 0 && action & DODELETE)
 				ewarnx("%s: service `%s' not found in any"
 				    " of the specified runlevels",
 				    applet, service);
@@ -352,5 +352,5 @@ int main(int argc, char **argv)
 	}
 
 	rc_stringlist_free(runlevels);
-	return retval;
+	بازگشت retval;
 }

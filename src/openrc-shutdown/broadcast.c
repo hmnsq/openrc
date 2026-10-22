@@ -14,52 +14,52 @@
  */
 
 
-#include <fcntl.h>
-#include <paths.h>
-#include <pwd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/sysmacros.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <time.h>
-#include <unistd.h>
-#include <utmpx.h>
+#شامل <fcntl.h>
+#شامل <paths.h>
+#شامل <pwd.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <sys/stat.h>
+#شامل <sys/sysmacros.h>
+#شامل <sys/types.h>
+#شامل <sys/utsname.h>
+#شامل <time.h>
+#شامل <unistd.h>
+#شامل <utmpx.h>
 
-#include "broadcast.h"
-#include "helpers.h"
+#شامل "broadcast.h"
+#شامل "helpers.h"
 
 #ifndef _PATH_DEV
 # define _PATH_DEV	"/dev/"
 #endif
 
 
-static void getuidtty(char **userp, char **ttyp)
+ایستا تهی getuidtty(نویسه **userp, نویسه **ttyp)
 {
-	struct passwd 		*pwd;
+	ساختار passwd 		*pwd;
 	uid_t			uid;
-	char			*tty;
-	static char		uidbuf[32];
-	char		*ttynm = NULL;
+	نویسه			*tty;
+	ایستا نویسه		uidbuf[32];
+	نویسه		*ttynm = پوچ;
 
 	uid = getuid();
-	if ((pwd = getpwuid(uid)) != NULL) {
+	اگر ((pwd = getpwuid(uid)) != پوچ) {
 		uidbuf[0] = 0;
-		strncat(uidbuf, pwd->pw_name, sizeof(uidbuf) - 1);
-	} else {
-		if (uid)
-			sprintf(uidbuf, "uid %d", (int) uid);
-		else
+		strncat(uidbuf, pwd->pw_name, اندازه(uidbuf) - 1);
+	} وگرنه {
+		اگر (uid)
+			sprintf(uidbuf, "uid %d", (صحیح) uid);
+		وگرنه
 			sprintf(uidbuf, "root");
 	}
 
-	if ((tty = ttyname(0)) != NULL) {
-		const size_t plen = strlen(_PATH_DEV);
-		if (strncmp(tty, _PATH_DEV, plen) == 0) {
+	اگر ((tty = ttyname(0)) != پوچ) {
+		ثابت size_t plen = strlen(_PATH_DEV);
+		اگر (strncmp(tty, _PATH_DEV, plen) == 0) {
 			tty += plen;
-			if (tty[0] == '/')
+			اگر (tty[0] == '/')
 				tty++;
 		}
 		xasprintf(&ttynm, "(%s) ", tty);
@@ -72,16 +72,16 @@ static void getuidtty(char **userp, char **ttyp)
 /*
  *	Check whether the given filename looks like a tty device.
  */
-static int file_isatty(const char *fname)
+ایستا صحیح file_isatty(ثابت نویسه *fname)
 {
-	struct stat		st;
-	int			major;
+	ساختار stat		st;
+	صحیح			major;
 
-	if (stat(fname, &st) < 0)
-		return 0;
+	اگر (stat(fname, &st) < 0)
+		بازگشت 0;
 
-	if (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
-		return 0;
+	اگر (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
+		بازگشت 0;
 
 	/*
 	 *	It would be an impossible task to list all major/minors
@@ -90,12 +90,12 @@ static int file_isatty(const char *fname)
 	 *	printers and tapes.
 	 */
 	major = major(st.st_dev);
-	if (major == 1 || major == 2 || major == 6 || major == 9 ||
+	اگر (major == 1 || major == 2 || major == 6 || major == 9 ||
 	    major == 12 || major == 16 || major == 21 || major == 27 ||
 	    major == 37 || major == 96 || major == 97 || major == 206 ||
 	    major == 230)
-		return 0;
-	return 1;
+		بازگشت 0;
+	بازگشت 1;
 }
 
 /*
@@ -103,19 +103,19 @@ static int file_isatty(const char *fname)
  *
  *	NB: Not multithread safe.
  */
-void broadcast(char *text)
+تهی broadcast(نویسه *text)
 {
-	char *tty;
-	char *user;
-	struct utsname name;
+	نویسه *tty;
+	نویسه *user;
+	ساختار utsname name;
 	time_t t;
-	char *date;
-	char *p;
-	char *line = NULL;
-	int len;
-	int fd;
-	char *term = NULL;
-	struct utmpx *utmp;
+	نویسه *date;
+	نویسه *p;
+	نویسه *سطر = پوچ;
+	صحیح len;
+	صحیح fd;
+	نویسه *term = پوچ;
+	ساختار utmpx *utmp;
 
 	getuidtty(&user, &tty);
 
@@ -129,42 +129,42 @@ void broadcast(char *text)
 	time(&t);
 	date = ctime(&t);
 	p = strchr(date, '\n');
-	if (p)
+	اگر (p)
 		*p = 0;
 
-	len = xasprintf(&line, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
+	len = xasprintf(&سطر, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
 			user, name.nodename, tty, date, text);
-	free(tty);
+	آزاد(tty);
 
 	/*
 	 *	Fork to avoid hanging in a write()
 	 */
-	if (fork() != 0)
-		return;
+	اگر (fork() != 0)
+		بازگشت;
 
 	setutxent();
 
-	while ((utmp = getutxent()) != NULL) {
-		if (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
-			continue;
-		if (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
+	وقتی ((utmp = getutxent()) != پوچ) {
+		اگر (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
+			ادامه;
+		اگر (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
 			xasprintf(&term, "%s", utmp->ut_line);
-		else
+		وگرنه
 			xasprintf(&term, "%s%s", _PATH_DEV, utmp->ut_line);
-		if (strstr(term, "/../")) {
-			free(term);
-			continue;
+		اگر (strstr(term, "/../")) {
+			آزاد(term);
+			ادامه;
 		}
 
 		/* Open it non-delay */
-		if (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
-			if (isatty(fd))
-				write(fd, line, len);
+		اگر (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
+			اگر (isatty(fd))
+				اكتب(fd, سطر, len);
 			close(fd);
 		}
-		free(term);
+		آزاد(term);
 	}
 	endutxent();
-	free(line);
+	آزاد(سطر);
 	exit(0);
 }

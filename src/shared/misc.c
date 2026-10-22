@@ -15,114 +15,114 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <fnmatch.h>
-#include <limits.h>
+#شامل <ctype.h>
+#شامل <errno.h>
+#شامل <fcntl.h>
+#شامل <fnmatch.h>
+#شامل <limits.h>
 #ifdef HAVE_LINUX_CLOSE_RANGE_H
 #  include <linux/close_range.h>
 #endif
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <spawn.h>
-#include <sys/file.h>
-#include <sys/time.h>
+#شامل <signal.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <spawn.h>
+#شامل <sys/file.h>
+#شامل <sys/time.h>
 #ifdef __linux__
 #  include <sys/syscall.h> /* for close_range */
 #  include <sys/sysinfo.h>
 #endif
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <sys/un.h>
-#include <sys/socket.h>
-#include <time.h>
-#include <unistd.h>
-#include <utime.h>
+#شامل <sys/types.h>
+#شامل <sys/utsname.h>
+#شامل <sys/un.h>
+#شامل <sys/socket.h>
+#شامل <time.h>
+#شامل <unistd.h>
+#شامل <utime.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "version.h"
-#include "helpers.h"
+#شامل "einfo.h"
+#شامل "queue.h"
+#شامل "rc.h"
+#شامل "misc.h"
+#شامل "version.h"
+#شامل "helpers.h"
 
-extern char **environ;
+بیرونی نویسه **environ;
 
 bool
-rc_conf_yesno(const char *setting)
+rc_conf_yesno(ثابت نویسه *setting)
 {
-	return rc_yesno(rc_conf_value (setting));
+	بازگشت rc_yesno(rc_conf_مقدار (setting));
 }
 
-static const char *const env_allowlist[] = {
+ایستا ثابت نویسه *ثابت env_allowlist[] = {
 	"EERROR_QUIET", "EINFO_QUIET",
 	"IN_BACKGROUND", "IN_DRYRUN", "IN_HOTPLUG",
 	"RC_DEBUG", "RC_NODEPS", "RC_USER_SERVICES",
 	"RC_SVCDIR", "RC_PATH", "LANG", "LC_MESSAGES",
 	"TERM", "EINFO_COLOR", "EINFO_VERBOSE",
 	"HOSTNAME", "CHARSET", "LC_*",
-	NULL
+	پوچ
 };
 
-static const char *const usrenv_allowlist[] = {
+ایستا ثابت نویسه *ثابت usrenv_allowlist[] = {
 	"USER", "LOGNAME", "HOME", "SHELL",
 	"XDG_*", "DIFFTOOL", "LESS", "PAGER",
-	"EDITOR", "VISUAL", NULL
+	"EDITOR", "VISUAL", پوچ
 };
 
-static bool
-env_allowed(const char *const list[], const char *value)
+ایستا bool
+env_allowed(ثابت نویسه *ثابت list[], ثابت نویسه *مقدار)
 {
-	for (size_t i = 0; list[i]; i++)
-		if (fnmatch(list[i], value, FNM_NOESCAPE | FNM_PERIOD) == 0)
-			return true;
-	return false;
+	برای (size_t i = 0; list[i]; i++)
+		اگر (fnmatch(list[i], مقدار, FNM_NOESCAPE | FNM_PERIOD) == 0)
+			بازگشت true;
+	بازگشت false;
 }
 
-void
-env_filter(void)
+تهی
+env_filter(تهی)
 {
 	RC_STRINGLIST *env_allow;
 	RC_STRINGLIST *profile;
 	RC_STRINGLIST *env_list;
-	char *profile_path;
+	نویسه *profile_path;
 	RC_STRING *env;
-	char *e;
+	نویسه *e;
 	size_t i = 0;
 
 	/* Add the user defined list of vars */
-	env_allow = rc_stringlist_split(rc_conf_value("rc_env_allow"), " ");
+	env_allow = rc_stringlist_split(rc_conf_مقدار("rc_env_allow"), " ");
 	/*
 	 * If '*' is an entry in rc_env_allow, do nothing as we are to pass
 	 * through all environment variables.
 	 */
-	if (rc_stringlist_find(env_allow, "*")) {
+	اگر (rc_stringlist_find(env_allow, "*")) {
 		rc_stringlist_free(env_allow);
-		return;
+		بازگشت;
 	}
 
 	xasprintf(&profile_path, "%s/profile.env", rc_sysconfdir());
 	profile = rc_config_load(profile_path);
-	free(profile_path);
+	آزاد(profile_path);
 
-	if (rc_is_user()) {
+	اگر (rc_is_user()) {
 		RC_STRINGLIST *usrprofile;
 		xasprintf(&profile_path, "%s/profile.env", rc_usrconfdir());
 		usrprofile = rc_config_load(profile_path);
-		free(profile_path);
+		آزاد(profile_path);
 		TAILQ_CONCAT(profile, usrprofile, entries);
 		rc_stringlist_free(usrprofile);
 	}
 
 	/* Copy the env and work from this so we can manipulate it safely */
 	env_list = rc_stringlist_new();
-	while (environ && environ[i]) {
+	وقتی (environ && environ[i]) {
 		env = rc_stringlist_add(env_list, environ[i++]);
-		e = strchr(env->value, '=');
-		if (e)
+		e = strchr(env->مقدار, '=');
+		اگر (e)
 			*e = '\0';
 	}
 
@@ -130,27 +130,27 @@ env_filter(void)
 		RC_STRING *var;
 
 		/* Check the whitelist */
-		if (env_allowed(env_allowlist, env->value))
-			continue;
-		if (rc_is_user() && env_allowed(usrenv_allowlist, env->value))
-			continue;
+		اگر (env_allowed(env_allowlist, env->مقدار))
+			ادامه;
+		اگر (rc_is_user() && env_allowed(usrenv_allowlist, env->مقدار))
+			ادامه;
 
 		/* Check our user defined list */
 		TAILQ_FOREACH(var, env_allow, entries)
-			if (fnmatch(var->value, env->value, FNM_NOESCAPE | FNM_PERIOD) == 0)
-				goto next;
+			اگر (fnmatch(var->مقدار, env->مقدار, FNM_NOESCAPE | FNM_PERIOD) == 0)
+				برو next;
 
 		/* OK, not allowed! */
-		unsetenv(env->value);
+		unsetenv(env->مقدار);
 next:;
 	}
 
 	/* Now add anything missing from the profile */
 	TAILQ_FOREACH(env, profile, entries) {
-		e = strchr(env->value, '=');
+		e = strchr(env->مقدار, '=');
 		*e = '\0';
-		if (!getenv(env->value))
-			setenv(env->value, e + 1, 1);
+		اگر (!getenv(env->مقدار))
+			setenv(env->مقدار, e + 1, 1);
 	}
 
 	rc_stringlist_free(env_list);
@@ -158,84 +158,84 @@ next:;
 	rc_stringlist_free(profile);
 }
 
-char *
-default_runlevel(void)
+نویسه *
+default_runlevel(تهی)
 {
-	char *runlevel = rc_runlevel_get();
+	نویسه *runlevel = rc_runlevel_get();
 
-	if (!runlevel)
-		runlevel = xstrdup(rc_conf_value("rc_default_runlevel"));
-	if (!runlevel || !*runlevel) {
-		free(runlevel);
+	اگر (!runlevel)
+		runlevel = xstrdup(rc_conf_مقدار("rc_default_runlevel"));
+	اگر (!runlevel || !*runlevel) {
+		آزاد(runlevel);
 		runlevel = xstrdup(RC_LEVEL_DEFAULT);
 	}
 
-	return runlevel;
+	بازگشت runlevel;
 }
 
-void
-env_config(void)
+تهی
+env_config(تهی)
 {
 	size_t pplen = strlen(RC_PATH_PREFIX);
-	char *path;
-	char *p;
-	char *e;
+	نویسه *path;
+	نویسه *p;
+	نویسه *e;
 	size_t l;
-	struct utsname uts;
+	ساختار utsname uts;
 	FILE *fp;
-	char *token;
-	char *np;
-	char *npp;
-	char *tok;
-	const char *sys = rc_sys();
-	const char *svcdir = rc_svcdir();
-	const char *const *init_path = rc_scriptdirs();
-	char *buffer = NULL;
-	char *tmpdir;
+	نویسه *token;
+	نویسه *np;
+	نویسه *npp;
+	نویسه *tok;
+	ثابت نویسه *sys = rc_sys();
+	ثابت نویسه *svcdir = rc_svcdir();
+	ثابت نویسه *ثابت *init_path = rc_scriptdirs();
+	نویسه *buffer = پوچ;
+	نویسه *tmpdir;
 	size_t size = 0;
 
 	/* Ensure our PATH is prefixed with the system locations first
 	   for a little extra security */
 	path = getenv("PATH");
-	if (!path)
+	اگر (!path)
 		setenv("PATH", RC_PATH_PREFIX, 1);
-	else if (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
+	وگرنه اگر (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
 		l = strlen(path) + pplen + 3;
-		e = p = xmalloc(sizeof(char) * l);
+		e = p = xmalloc(اندازه(نویسه) * l);
 		p += snprintf(p, l, "%s", RC_PATH_PREFIX);
 
 		/* Now go through the env var and only add bits not in our
 		 * PREFIX */
-		while ((token = strsep(&path, ":"))) {
+		وقتی ((token = strsep(&path, ":"))) {
 			np = npp = xstrdup(RC_PATH_PREFIX);
-			while ((tok = strsep(&npp, ":")))
-				if (strcmp(tok, token) == 0)
-					break;
-			if (!tok)
+			وقتی ((tok = strsep(&npp, ":")))
+				اگر (strcmp(tok, token) == 0)
+					بشکن;
+			اگر (!tok)
 				p += snprintf(p, l - (p - e), ":%s", token);
-			free (np);
+			آزاد (np);
 		}
 		*p++ = '\0';
 		unsetenv("PATH");
 		setenv("PATH", e, 1);
-		free(e);
+		آزاد(e);
 	}
 
-	if (!rc_is_user()) {
+	اگر (!rc_is_user()) {
 		setenv("RC_CACHEDIR", "/var/cache/rc", 1);
-	} else {
-		const char *cache_home = getenv("XDG_CACHE_HOME");
-		char *cachedir = NULL;
+	} وگرنه {
+		ثابت نویسه *cache_home = getenv("XDG_CACHE_HOME");
+		نویسه *cachedir = پوچ;
 
-		if (cache_home)
+		اگر (cache_home)
 			xasprintf(&cachedir, "%s/rc", cache_home);
-		else if ((cache_home = getenv("HOME")))
+		وگرنه اگر ((cache_home = getenv("HOME")))
 			xasprintf(&cachedir, "%s/.cache/rc", cache_home);
 
-		if (cachedir)
+		اگر (cachedir)
 			setenv("RC_CACHEDIR", cachedir, 1);
 
-		free(cachedir);
+		آزاد(cachedir);
 	}
 
 	xasprintf(&tmpdir, "%s/tmp", svcdir);
@@ -250,72 +250,72 @@ env_config(void)
 
 	fp = xopen_memstream(&path, &size);
 	fputs("RC_PATH=", fp);
-	for (bool first = true; *init_path; init_path++, first = false) {
-		if (!first)
+	برای (bool first = true; *init_path; init_path++, first = false) {
+		اگر (!first)
 			fputc(':', fp);
 		fputs(*init_path, fp);
 	}
 	xclose_memstream(fp);
 	putenv(path);
 
-	free(e);
-	free(tmpdir);
+	آزاد(e);
+	آزاد(tmpdir);
 
 	/* krunlevel is a system-wide override; it never applies to
 	 * user sessions. */
-	if (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
-		if (xgetline(&buffer, &size, fp) != -1)
+	اگر (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
+		اگر (xgetline(&buffer, &size, fp) != -1)
 			setenv("RC_DEFAULTLEVEL", buffer, 1);
-		else
+		وگرنه
 			setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
-		free(buffer);
+		آزاد(buffer);
 		fclose(fp);
-	} else {
+	} وگرنه {
 		setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
 	}
 
-	if (sys)
+	اگر (sys)
 		setenv("RC_SYS", sys, 1);
 
 	/* Some scripts may need to take a different code path if
 	   Linux/FreeBSD, etc
 	   To save on calling uname, we store it in an environment variable */
-	if (uname(&uts) == 0)
+	اگر (uname(&uts) == 0)
 		setenv("RC_UNAME", uts.sysname, 1);
 
 	/* Be quiet or verbose as necessary */
-	if (rc_conf_yesno("rc_quiet"))
+	اگر (rc_conf_yesno("rc_quiet"))
 		setenv("EINFO_QUIET", "YES", 1);
-	if (rc_conf_yesno("rc_verbose"))
+	اگر (rc_conf_yesno("rc_verbose"))
 		setenv("EINFO_VERBOSE", "YES", 1);
 
 	errno = 0;
-	if ((!rc_conf_yesno("rc_color") && errno == 0) ||
+	اگر ((!rc_conf_yesno("rc_color") && errno == 0) ||
 	    rc_conf_yesno("rc_nocolor"))
 		setenv("EINFO_COLOR", "NO", 1);
 }
 
-int
-signal_setup(int sig, void (*handler)(int))
+صحیح
+signal_setup(صحیح sig, تهی (*handler)(صحیح))
 {
-	struct sigaction sa;
+	ساختار sigaction sa;
 
-	memset(&sa, 0, sizeof (sa));
+	memset(&sa, 0, اندازه (sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = handler;
-	return sigaction(sig, &sa, NULL);
+	بازگشت sigaction(sig, &sa, پوچ);
 }
 
-int
-svc_lock(const char *applet, bool ignore_lock_failure)
+صحیح
+svc_lock(ثابت نویسه *applet, bool ignore_lock_failure)
 {
-	int fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
+	صحیح fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
 
-	if (fd == -1)
-		return -1;
-	if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
-		int saved_errno = errno;
-		if (ignore_lock_failure) {
+	اگر (fd == -1)
+		بازگشت -1;
+	اگر (flock(fd, LOCK_EX | LOCK_NB) == -1) {
+		صحیح saved_errno = errno;
+		اگر (ignore_lock_failure) {
 			/* Two services with a need b, and b's start()
 			 * calling restart --no-deps on a would cause
 			 * harmless errors: just ignore them.
@@ -326,38 +326,38 @@ svc_lock(const char *applet, bool ignore_lock_failure)
 		eerror("Call to flock failed: %s", strerror(errno));
 		close(fd);
 		errno = saved_errno;
-		return -1;
+		بازگشت -1;
 	}
-	return fd;
+	بازگشت fd;
 }
 
-int
-svc_unlock(const char *applet, int fd)
+صحیح
+svc_unlock(ثابت نویسه *applet, صحیح fd)
 {
 	unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, 0);
 	close(fd);
-	return -1;
+	بازگشت -1;
 }
 
 pid_t
-exec_service(const char *service, const char *arg)
+exec_service(ثابت نویسه *service, ثابت نویسه *arg)
 {
-	char *file, sfd[32];
-	const char *argv[] = { service, "--lockfd", sfd, arg, NULL };
-	int fd = svc_lock(basename_c(service), false);
+	نویسه *file, sfd[32];
+	ثابت نویسه *argv[] = { service, "--lockfd", sfd, arg, پوچ };
+	صحیح fd = svc_lock(basename_c(service), false);
 	posix_spawnattr_t chldmask;
 	sigset_t empty;
 	pid_t pid = 0;
 
-	if (fd == -1)
-		return -1;
-	snprintf(sfd, sizeof(sfd), "%d", fd);
+	اگر (fd == -1)
+		بازگشت -1;
+	snprintf(sfd, اندازه(sfd), "%d", fd);
 
 	file = rc_service_resolve(service);
-	if (access(file, F_OK) != 0) {
+	اگر (access(file, F_OK) != 0) {
 		rc_service_mark(service, RC_SERVICE_STOPPED);
 		svc_unlock(basename_c(service), fd);
-		goto out;
+		برو out;
 	}
 
 	/* Unmask all signals.
@@ -369,7 +369,7 @@ exec_service(const char *service, const char *arg)
 	posix_spawnattr_setflags(&chldmask, POSIX_SPAWN_SETSIGMASK);
 	posix_spawnattr_setsigmask(&chldmask, &empty);
 
-	if ((errno = posix_spawn(&pid, file, NULL, &chldmask, UNCONST(argv), environ))) {
+	اگر ((errno = posix_spawn(&pid, file, پوچ, &chldmask, UNCONST(argv), environ))) {
 		fprintf(stderr, "posix_spawn: %s\n", strerror(errno));
 		svc_unlock(basename_c(service), fd);
 	}
@@ -378,92 +378,92 @@ exec_service(const char *service, const char *arg)
 	close(fd);
 
 out:
-	free(file);
-	return pid;
+	آزاد(file);
+	بازگشت pid;
 }
 
-int
-parse_mode(mode_t *mode, char *text)
+صحیح
+parse_mode(mode_t *mode, نویسه *text)
 {
-	char *p;
+	نویسه *p;
 	unsigned long l;
 
 	/* Check for a numeric mode */
-	if ((*text - '0') < 8) {
+	اگر ((*text - '0') < 8) {
 		l = strtoul(text, &p, 8);
-		if (*p || l > 07777U) {
+		اگر (*p || l > 07777U) {
 			errno = EINVAL;
-			return -1;
+			بازگشت -1;
 		}
 		*mode = (mode_t) l;
-		return 0;
+		بازگشت 0;
 	}
 
 	/* We currently don't check g+w type stuff */
 	errno = EINVAL;
-	return -1;
+	بازگشت -1;
 }
 
-RC_DEPTREE * _rc_deptree_load(int force, int *regen)
+RC_DEPTREE * _rc_deptree_load(صحیح force, صحیح *regen)
 {
-	int fd;
-	int retval;
-	int serrno = errno;
-	int merrno;
+	صحیح fd;
+	صحیح retval;
+	صحیح serrno = errno;
+	صحیح merrno;
 	time_t t;
-	char file[PATH_MAX];
-	struct stat st;
+	نویسه file[PATH_MAX];
+	ساختار stat st;
 	FILE *fp;
 
 	t = 0;
-	if (rc_deptree_update_needed(&t, file) || force != 0) {
-		int svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
+	اگر (rc_deptree_update_needed(&t, file) || force != 0) {
+		صحیح svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
 
 		/* Test if we have permission to update the deptree */
 		fd = openat(svcdirfd, "deptree", O_WRONLY);
 		merrno = errno;
 		errno = serrno;
-		if (fd == -1 && merrno == EACCES)
-			return rc_deptree_load();
+		اگر (fd == -1 && merrno == EACCES)
+			بازگشت rc_deptree_load();
 		close(fd);
 
-		if (regen)
+		اگر (regen)
 			*regen = 1;
 		ebegin("Caching service dependencies");
 		retval = rc_deptree_update() ? 0 : -1;
 		eend(retval, "Failed to update the dependency tree");
 
-		if (retval == 0) {
-			if (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
+		اگر (retval == 0) {
+			اگر (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
 				eerror("stat(%s): %s/deptree", rc_svcdir(), strerror(errno));
-				return NULL;
+				بازگشت پوچ;
 			}
 
-			if (st.st_mtime >= t) {
+			اگر (st.st_mtime >= t) {
 				unlinkat(svcdirfd, "clock-skewed", 0);
-				goto out;
+				برو out;
 			}
 
 			eerror("Clock skew detected with '%s'", file);
 			eerrorn("Adjusting mtime of '%s/deptree' to %s", rc_svcdir(), ctime(&t));
-			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (struct timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
+			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (ساختار timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
 
-			if ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
+			اگر ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
 				fprintf(fp, "%s\n", file);
 				fclose(fp);
 			}
 		}
 
 out:
-		if (force == -1 && regen != NULL)
+		اگر (force == -1 && regen != پوچ)
 			*regen = retval;
 	}
 
-	return rc_deptree_load();
+	بازگشت rc_deptree_load();
 }
 
-static const struct {
-	const char * const name;
+ایستا ثابت ساختار {
+	ثابت نویسه * ثابت name;
 	RC_SERVICE bit;
 } service_bits[] = {
 	{ "service_started",     RC_SERVICE_STARTED,     },
@@ -477,35 +477,35 @@ static const struct {
 	{ "service_crashed",     RC_SERVICE_CRASHED,     },
 };
 
-RC_SERVICE lookup_service_state(const char *service)
+RC_SERVICE lookup_service_state(ثابت نویسه *service)
 {
 	size_t i;
-	for (i = 0; i < ARRAY_SIZE(service_bits); ++i)
-		if (!strcmp(service, service_bits[i].name))
-			return service_bits[i].bit;
-	return 0;
+	برای (i = 0; i < ARRAY_SIZE(service_bits); ++i)
+		اگر (!strcmp(service, service_bits[i].name))
+			بازگشت service_bits[i].bit;
+	بازگشت 0;
 }
 
-void from_time_t(char *time_string, time_t tv)
+تهی from_time_t(نویسه *time_string, time_t tv)
 {
 	strftime(time_string, 20, "%Y-%m-%d %H:%M:%S", localtime(&tv));
 }
 
-time_t to_time_t(char *timestring)
+time_t to_time_t(نویسه *timestring)
 {
-	int check = 0;
-	int year = 0;
-	int month = 0;
-	int day = 0;
-	int hour = 0;
-	int min = 0;
-	int sec = 0;
-	struct tm breakdown = {0};
+	صحیح check = 0;
+	صحیح year = 0;
+	صحیح month = 0;
+	صحیح day = 0;
+	صحیح hour = 0;
+	صحیح min = 0;
+	صحیح sec = 0;
+	ساختار tm breakdown = {0};
 	time_t result = -1;
 
 	check = sscanf(timestring, "%4d-%2d-%2d %2d:%2d:%2d",
 			&year, &month, &day, &hour, &min, &sec);
-	if (check == 6) {
+	اگر (check == 6) {
 		breakdown.tm_year = year - 1900; /* years since 1900 */
 		breakdown.tm_mon = month - 1;
 		breakdown.tm_mday = day;
@@ -515,130 +515,130 @@ time_t to_time_t(char *timestring)
 		breakdown.tm_isdst = -1;
 		result = mktime(&breakdown);
 	}
-	return result;
+	بازگشت result;
 }
 
-pid_t get_pid(const char *applet,const char *pidfile)
+pid_t get_pid(ثابت نویسه *applet,ثابت نویسه *pidfile)
 {
 	FILE *fp;
 	pid_t pid;
 
-	if (!pidfile)
-		return -1;
+	اگر (!pidfile)
+		بازگشت -1;
 
-	if ((fp = fopen(pidfile, "r")) == NULL) {
+	اگر ((fp = fopen(pidfile, "r")) == پوچ) {
 		ewarnv("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
-		return -1;
+		بازگشت -1;
 	}
 
-	if (fscanf(fp, "%d", &pid) != 1) {
+	اگر (fscanf(fp, "%d", &pid) != 1) {
 		ewarnv("%s: no pid found in `%s'", applet, pidfile);
 		fclose(fp);
-		return -1;
+		بازگشت -1;
 	}
 
 	fclose(fp);
 
-	return pid;
+	بازگشت pid;
 }
 
-struct notify notify_parse(const char *applet, const char *notify_string)
+ساختار notify notify_parse(ثابت نویسه *applet, ثابت نویسه *notify_string)
 {
-	struct notify notify = {0};
-	if (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
+	ساختار notify notify = {0};
+	اگر (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
 		notify.type = NOTIFY_FD;
-		if (pipe(notify.pipe) == -1)
+		اگر (pipe(notify.pipe) == -1)
 			eerrorx("%s: pipe: %s", applet, strerror(errno));
-	} else if (strncmp(notify_string, "socket", sizeof("socket") - 1) == 0) {
-		union {
-			struct sockaddr header;
-			struct sockaddr_un unix;
+	} وگرنه اگر (strncmp(notify_string, "socket", اندازه("socket") - 1) == 0) {
+		اجتماع {
+			ساختار sockaddr header;
+			ساختار sockaddr_un unix;
 		} addr = { .unix = { .sun_family = AF_UNIX } };
-		int written;
-		const char *opts = strchr(notify_string, ':');
+		صحیح written;
+		ثابت نویسه *opts = strchr(notify_string, ':');
 
-		if (!opts || opts[1] == '\0')
-			return notify;
-		if (strcmp(opts + 1, "ready") != 0)
-			return notify;
+		اگر (!opts || opts[1] == '\0')
+			بازگشت notify;
+		اگر (strcmp(opts + 1, "ready") != 0)
+			بازگشت notify;
 
-		written = snprintf(addr.unix.sun_path, sizeof(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
-		if (written >= (int)sizeof(addr.unix.sun_path))
+		written = snprintf(addr.unix.sun_path, اندازه(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
+		اگر (written >= (صحیح)اندازه(addr.unix.sun_path))
 			eerrorx("%s: socket path '%s/supervise-%s.sock' too long.", applet, rc_svcdir(), applet);
 		setenv("NOTIFY_SOCKET", addr.unix.sun_path, true);
 
 		notify.type = NOTIFY_SOCKET;
-		if ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
+		اگر ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
 			eerrorx("%s: socket: %s", applet, strerror(errno));
-		if (bind(notify.fd, &addr.header, sizeof(addr.unix)) == -1)
+		اگر (bind(notify.fd, &addr.header, اندازه(addr.unix)) == -1)
 			eerrorx("%s: bind: %s", applet, strerror(errno));
-	} else {
+	} وگرنه {
 		eerrorx("%s: invalid ready '%s'.", applet, optarg);
 	}
 
-	return notify;
+	بازگشت notify;
 }
 
-bool notify_wait(const char *applet, struct notify notify)
+bool notify_wait(ثابت نویسه *applet, ساختار notify notify)
 {
-	switch (notify.type) {
-	case NOTIFY_NONE:
-		return true;
-	case NOTIFY_FD:
+	انتخاب (notify.type) {
+	حالت NOTIFY_NONE:
+		بازگشت true;
+	حالت NOTIFY_FD:
 		close(notify.pipe[1]);
 		notify.fd = notify.pipe[0];
-		break;
-	case NOTIFY_SOCKET:
-		break;
+		بشکن;
+	حالت NOTIFY_SOCKET:
+		بشکن;
 	}
 
-	for (;;) {
-		char buf[BUFSIZ];
-		ssize_t bytes = read(notify.fd, buf, BUFSIZ);
+	برای (;;) {
+		نویسه buf[BUFSIZ];
+		ssize_t bytes = اقرأ(notify.fd, buf, BUFSIZ);
 
-		if (bytes == 0)
-			return false;
-		if (bytes == -1) {
-			if (errno != EINTR) {
+		اگر (bytes == 0)
+			بازگشت false;
+		اگر (bytes == -1) {
+			اگر (errno != EINTR) {
 				eerror("%s: read failed '%s'\n", applet, strerror(errno));
-				return false;
+				بازگشت false;
 			}
-			continue;
+			ادامه;
 		}
 
-		switch (notify.type) {
-		case NOTIFY_NONE:
-			break;
-		case NOTIFY_FD:
-			if (memchr(buf, '\n', bytes))
-				return true;
-			break;
-		case NOTIFY_SOCKET:
+		انتخاب (notify.type) {
+		حالت NOTIFY_NONE:
+			بشکن;
+		حالت NOTIFY_FD:
+			اگر (memchr(buf, '\n', bytes))
+				بازگشت true;
+			بشکن;
+		حالت NOTIFY_SOCKET:
 			buf[bytes] = '\0';
-			if (strstr(buf, "READY=1")) {
-				char *path;
+			اگر (strstr(buf, "READY=1")) {
+				نویسه *path;
 				xasprintf(&path, "%s/supervise-%s.sock", rc_svcdir(), applet);
 				unlink(path);
-				free(path);
-				return true;
+				آزاد(path);
+				بازگشت true;
 			}
-			break;
+			بشکن;
 		}
 	}
 
-	return true;
+	بازگشت true;
 }
 
 #ifndef HAVE_CLOSE_RANGE
-static inline int close_range(unsigned int first RC_UNUSED,
-			      unsigned int last RC_UNUSED,
-			      unsigned int flags RC_UNUSED)
+ایستا درونخطی صحیح close_range(unsigned صحیح first RC_UNUSED,
+			      unsigned صحیح last RC_UNUSED,
+			      unsigned صحیح flags RC_UNUSED)
 {
 #ifdef SYS_close_range
-	return syscall(SYS_close_range, first, last, flags);
-#else
+	بازگشت syscall(SYS_close_range, first, last, flags);
+#وگرنه
 	errno = ENOSYS;
-	return -1;
+	بازگشت -1;
 #endif
 }
 #endif
@@ -646,12 +646,12 @@ static inline int close_range(unsigned int first RC_UNUSED,
 # define CLOSE_RANGE_CLOEXEC	(1U << 2)
 #endif
 
-void
-cloexec_fds_from(int first)
+تهی
+cloexec_fds_from(صحیح first)
 {
-	int i;
-	if (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
-		for (i = getdtablesize() - 1; i >= first; --i)
+	صحیح i;
+	اگر (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
+		برای (i = getdtablesize() - 1; i >= first; --i)
 			fcntl(i, F_SETFD, FD_CLOEXEC);
 	}
 }

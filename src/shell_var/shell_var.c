@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#شامل <ctype.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
 
-int main(int argc, char **argv)
+صحیح اصلی(صحیح argc, نویسه **argv)
 {
-	int i;
-	char *p;
-	int c;
+	صحیح i;
+	نویسه *p;
+	صحیح c;
 
-	for (i = 1; i < argc; i++) {
+	برای (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		اگر (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		وقتی (*p) {
+			c = (unsigned نویسه)*p++;
+			اگر (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	بازگشت EXIT_SUCCESS;
 }

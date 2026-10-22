@@ -21,61 +21,61 @@
 #define ONE_SECOND    1000000000
 #define ONE_MS           1000000
 
-#include <ctype.h>
-#include <errno.h>
-#include <signal.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <sys/types.h>
+#شامل <ctype.h>
+#شامل <errno.h>
+#شامل <signal.h>
+#شامل <stddef.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <syslog.h>
+#شامل <time.h>
+#شامل <sys/types.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "schedules.h"
-#include "helpers.h"
+#شامل "einfo.h"
+#شامل "queue.h"
+#شامل "rc.h"
+#شامل "schedules.h"
+#شامل "helpers.h"
 
-typedef struct scheduleitem {
-	enum {
+تعریفنوع ساختار scheduleitem {
+	شمارش {
 		SC_TIMEOUT,
 		SC_SIGNAL,
 		SC_GOTO,
 		SC_FOREVER,
 	} type;
-	int value;
-	struct scheduleitem *gotoitem;
+	صحیح مقدار;
+	ساختار scheduleitem *gotoitem;
 	TAILQ_ENTRY(scheduleitem) entries;
 } SCHEDULEITEM;
 
-static TAILQ_HEAD(, scheduleitem) schedule;
+ایستا TAILQ_HEAD(, scheduleitem) schedule;
 
-void free_schedulelist(void)
+تهی free_schedulelist(تهی)
 {
 	SCHEDULEITEM *s1 = TAILQ_FIRST(&schedule);
 	SCHEDULEITEM *s2;
 
-	while (s1) {
+	وقتی (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
-		free(s1);
+		آزاد(s1);
 		s1 = s2;
 	}
 	TAILQ_INIT(&schedule);
 }
 
-int parse_signal(const char *applet, const char *sig)
+صحیح parse_signal(ثابت نویسه *applet, ثابت نویسه *sig)
 {
-	typedef struct signalpair
+	تعریفنوع ساختار signalpair
 	{
-		const char *name;
-		int signal;
+		ثابت نویسه *name;
+		صحیح سیگنال;
 	} SIGNALPAIR;
 
 #define signalpair_item(name) { #name, SIG##name },
 
-	static const SIGNALPAIR signallist[] = {
+	ایستا ثابت SIGNALPAIR signallist[] = {
 		signalpair_item(HUP)
 		signalpair_item(INT)
 		signalpair_item(QUIT)
@@ -115,233 +115,233 @@ int parse_signal(const char *applet, const char *sig)
 		{ "NULL",	0 },
 	};
 
-	unsigned int i = 0;
-	const char *s;
+	unsigned صحیح i = 0;
+	ثابت نویسه *s;
 
-	if (!sig || *sig == '\0')
-		return -1;
+	اگر (!sig || *sig == '\0')
+		بازگشت -1;
 
-	if (sscanf(sig, "%u", &i) == 1) {
-		if (i < NSIG)
-			return i;
+	اگر (sscanf(sig, "%u", &i) == 1) {
+		اگر (i < NSIG)
+			بازگشت i;
 		eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	}
 
-	if (strncmp(sig, "SIG", 3) == 0)
+	اگر (strncmp(sig, "SIG", 3) == 0)
 		s = sig + 3;
-	else
-		s = NULL;
+	وگرنه
+		s = پوچ;
 
-	for (i = 0; i < ARRAY_SIZE(signallist); ++i)
-		if (strcmp(sig, signallist[i].name) == 0 ||
+	برای (i = 0; i < ARRAY_SIZE(signallist); ++i)
+		اگر (strcmp(sig, signallist[i].name) == 0 ||
 		    (s && strcmp(s, signallist[i].name) == 0))
-			return signallist[i].signal;
+			بازگشت signallist[i].سیگنال;
 
 	eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	/* NOTREACHED */
 }
 
-static SCHEDULEITEM *parse_schedule_item(const char *applet, const char *string)
+ایستا SCHEDULEITEM *parse_schedule_item(ثابت نویسه *applet, ثابت نویسه *string)
 {
-	const char *after_hyph;
-	int sig;
-	SCHEDULEITEM *item = xmalloc(sizeof(*item));
+	ثابت نویسه *after_hyph;
+	صحیح sig;
+	SCHEDULEITEM *item = xmalloc(اندازه(*item));
 
-	item->value = 0;
-	item->gotoitem = NULL;
-	if (strcmp(string,"forever") == 0)
+	item->مقدار = 0;
+	item->gotoitem = پوچ;
+	اگر (strcmp(string,"forever") == 0)
 		item->type = SC_FOREVER;
-	else if (isdigit((unsigned char)string[0])) {
+	وگرنه اگر (isdigit((unsigned نویسه)string[0])) {
 		item->type = SC_TIMEOUT;
 		errno = 0;
-		if (sscanf(string, "%d", &item->value) != 1)
+		اگر (sscanf(string, "%d", &item->مقدار) != 1)
 			eerrorx("%s: invalid timeout value in schedule '%s'",
 			    applet, string);
-	} else if ((after_hyph = string + (string[0] == '-')) &&
+	} وگرنه اگر ((after_hyph = string + (string[0] == '-')) &&
 	    ((sig = parse_signal(applet, after_hyph)) != -1))
 	{
 		item->type = SC_SIGNAL;
-		item->value = (int)sig;
-	} else
+		item->مقدار = (صحیح)sig;
+	} وگرنه
 		eerrorx("%s: invalid schedule item `%s'", applet, string);
 
-	return item;
+	بازگشت item;
 }
 
-void parse_schedule(const char *applet, const char *string, int timeout)
+تهی parse_schedule(ثابت نویسه *applet, ثابت نویسه *string, صحیح timeout)
 {
-	char buffer[20];
-	const char *slash;
-	int count = 0;
-	SCHEDULEITEM *repeatat = NULL;
+	نویسه buffer[20];
+	ثابت نویسه *slash;
+	صحیح شمار = 0;
+	SCHEDULEITEM *repeatat = پوچ;
 	size_t len;
 	SCHEDULEITEM *item;
 
 	TAILQ_INIT(&schedule);
-	if (string)
-		for (slash = string; *slash; slash++)
-			if (*slash == '/')
-				count++;
+	اگر (string)
+		برای (slash = string; *slash; slash++)
+			اگر (*slash == '/')
+				شمار++;
 
 	free_schedulelist();
 
-	if (count == 0) {
-		item = xmalloc(sizeof(*item));
+	اگر (شمار == 0) {
+		item = xmalloc(اندازه(*item));
 		item->type = SC_SIGNAL;
-		item->value = timeout;
-		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+		item->مقدار = timeout;
+		item->gotoitem = پوچ;
+		TAILQ_درج_TAIL(&schedule, item, entries);
 
-		item = xmalloc(sizeof(*item));
+		item = xmalloc(اندازه(*item));
 		item->type = SC_TIMEOUT;
-		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (string) {
-			if (sscanf(string, "%d", &item->value) != 1)
+		item->gotoitem = پوچ;
+		TAILQ_درج_TAIL(&schedule, item, entries);
+		اگر (string) {
+			اگر (sscanf(string, "%d", &item->مقدار) != 1)
 				eerrorx("%s: invalid timeout value in schedule '%s'",
 					applet, string);
-		} else
-			item->value = 5;
+		} وگرنه
+			item->مقدار = 5;
 
-		return;
+		بازگشت;
 	}
 
-	while (string != NULL) {
-		if ((slash = strchr(string, '/')))
+	وقتی (string != پوچ) {
+		اگر ((slash = strchr(string, '/')))
 			len = slash - string;
-		else
+		وگرنه
 			len = strlen(string);
 
-		if (len >= (ptrdiff_t)sizeof(buffer))
+		اگر (len >= (ptrdiff_t)اندازه(buffer))
 			eerrorx("%s: invalid schedule item, far too long",
 			    applet);
 
 		memcpy(buffer, string, len);
 		buffer[len] = 0;
-		string = slash ? slash + 1 : NULL;
+		string = slash ? slash + 1 : پوچ;
 
 		item = parse_schedule_item(applet, buffer);
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (item->type == SC_FOREVER) {
-			if (repeatat)
+		TAILQ_درج_TAIL(&schedule, item, entries);
+		اگر (item->type == SC_FOREVER) {
+			اگر (repeatat)
 				eerrorx("%s: invalid schedule, `forever' "
 				    "appears more than once", applet);
 
 			repeatat = item;
-			continue;
+			ادامه;
 		}
 	}
 
-	if (repeatat) {
-		item = xmalloc(sizeof(*item));
+	اگر (repeatat) {
+		item = xmalloc(اندازه(*item));
 		item->type = SC_GOTO;
-		item->value = 0;
+		item->مقدار = 0;
 		item->gotoitem = repeatat;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+		TAILQ_درج_TAIL(&schedule, item, entries);
 	}
 
-	return;
+	بازگشت;
 }
 
 /* return number of processes killed, -1 on error */
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-    pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet)
+صحیح do_stop(ثابت نویسه *applet, ثابت نویسه *exec, ثابت نویسه *ثابت *argv,
+    pid_t pid, uid_t uid, صحیح sig, bool group, bool test, bool quiet)
 {
-	const char *kind = "PID";
+	ثابت نویسه *kind = "PID";
 	RC_PIDLIST *pids;
 	RC_PID *pi;
 	RC_PID *np;
 	bool killed;
-	int nkilled = 0;
+	صحیح nkilled = 0;
 	uid_t target;
-	if (group)
+	اگر (group)
 		kind = "GID";
 
-	if (pid > 0)
-		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
+	اگر (pid > 0)
+		pids = rc_find_pids(پوچ, پوچ, 0, pid);
+	وگرنه
 		pids = rc_find_pids(exec, argv, uid, 0);
 
-	if (!pids)
-		return 0;
+	اگر (!pids)
+		بازگشت 0;
 
 	LIST_FOREACH_SAFE(pi, pids, entries, np) {
-		if (test) {
+		اگر (test) {
 			einfo("Would send signal %d to %s %d", sig, kind, pi->pid);
 			nkilled++;
-		} else {
-			if (sig) {
+		} وگرنه {
+			اگر (sig) {
 				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, kind, pi->pid);
-				if (!quiet)
+				اگر (!quiet)
 					ebeginv("Sending signal %d to %s %d", sig, kind, pi->pid);
 			}
 			errno = 0;
-			if (group)
+			اگر (group)
 				target = -pi->pid;
-			else
+			وگرنه
 				target = pi->pid;
 			killed = (kill(target, sig) == 0 ||
 			    errno == ESRCH ? true : false);
-			if (!quiet)
+			اگر (!quiet)
 				eendv(killed ? 0 : 1,
 				"%s: failed to send signal %d to %s %d: %s",
 				applet, sig, kind, pi->pid, strerror(errno));
-			else if (!killed)
+			وگرنه اگر (!killed)
 				syslog(LOG_ERR, "Failed to send signal %d to %s %d: %s",
 						sig, kind, pi->pid, strerror(errno));
-			if (!killed) {
+			اگر (!killed) {
 				nkilled = -1;
-			} else {
-				if (nkilled != -1)
+			} وگرنه {
+				اگر (nkilled != -1)
 					nkilled++;
 			}
 		}
-		free(pi);
+		آزاد(pi);
 	}
 
-	free(pids);
-	return nkilled;
+	آزاد(pids);
+	بازگشت nkilled;
 }
 
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+صحیح run_stop_schedule(ثابت نویسه *applet,
+		ثابت نویسه *exec, ثابت نویسه *ثابت *argv,
 		pid_t pid, uid_t uid, bool group,
     bool test, bool progress, bool quiet)
 {
 	SCHEDULEITEM *item = TAILQ_FIRST(&schedule);
-	int nkilled = 0;
-	int tkilled = 0;
-	int nrunning = 0;
+	صحیح nkilled = 0;
+	صحیح tkilled = 0;
+	صحیح nrunning = 0;
 	long nloops, nsecs;
-	struct timespec ts;
-	const char *const *p;
+	ساختار timespec ts;
+	ثابت نویسه *ثابت *p;
 	bool progressed = false;
 
-	if (!(pid > 0 || exec || uid || (argv && *argv)))
-		return 0;
+	اگر (!(pid > 0 || exec || uid || (argv && *argv)))
+		بازگشت 0;
 
-	if (exec) {
+	اگر (exec) {
 		einfov("Will stop %s", exec);
 		syslog(LOG_DEBUG, "Will stop %s", exec);
 	}
-	if (pid > 0) {
-		if (!group) {
+	اگر (pid > 0) {
+		اگر (!group) {
 			einfov("Will stop PID %d", pid);
 			syslog(LOG_DEBUG, "Will stop PID %d", pid);
-		} else {
+		} وگرنه {
 			einfov("Will stop GID %d", pid);
 			syslog(LOG_DEBUG, "Will stop GID %d", pid);
 		}
 	}
-	if (uid) {
+	اگر (uid) {
 		einfov("Will stop processes owned by UID %d", uid);
 		syslog(LOG_DEBUG, "Will stop processes owned by UID %d", uid);
 	}
-	if (argv && *argv) {
+	اگر (argv && *argv) {
 		einfovn("Will stop processes of `");
-		if (rc_yesno(getenv("EINFO_VERBOSE"))) {
-			for (p = argv; p && *p; p++) {
-				if (p != argv)
+		اگر (rc_yesno(getenv("EINFO_VERBOSE"))) {
+			برای (p = argv; p && *p; p++) {
+				اگر (p != argv)
 					printf(" ");
 				printf("%s", *p);
 			}
@@ -349,93 +349,93 @@ int run_stop_schedule(const char *applet,
 		}
 	}
 
-	while (item) {
-		switch (item->type) {
-		case SC_GOTO:
+	وقتی (item) {
+		انتخاب (item->type) {
+		حالت SC_GOTO:
 			item = item->gotoitem;
-			continue;
+			ادامه;
 
-		case SC_SIGNAL:
+		حالت SC_SIGNAL:
 			nrunning = 0;
-			nkilled = do_stop(applet, exec, argv, pid, uid, item->value, group,
+			nkilled = do_stop(applet, exec, argv, pid, uid, item->مقدار, group,
 					test, quiet);
-			if (nkilled == 0) {
-				if (tkilled == 0) {
-					if (progressed)
+			اگر (nkilled == 0) {
+				اگر (tkilled == 0) {
+					اگر (progressed)
 						printf("\n");
 					eerror("%s: no matching processes found", applet);
 				}
-				return tkilled;
+				بازگشت tkilled;
 			}
-			else if (nkilled == -1)
-				return 0;
+			وگرنه اگر (nkilled == -1)
+				بازگشت 0;
 
 			tkilled += nkilled;
-			break;
-		case SC_FOREVER:
-		case SC_TIMEOUT:
-			if (item->type == SC_TIMEOUT && item->value < 1) {
-				item = NULL;
-				break;
+			بشکن;
+		حالت SC_FOREVER:
+		حالت SC_TIMEOUT:
+			اگر (item->type == SC_TIMEOUT && item->مقدار < 1) {
+				item = پوچ;
+				بشکن;
 			}
 
 			ts.tv_sec = 0;
 			ts.tv_nsec = POLL_INTERVAL;
 
-			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
-				for (nloops = 0;
+			برای (nsecs = 0; item->type == SC_FOREVER || nsecs < item->مقدار; nsecs++) {
+				برای (nloops = 0;
 				     nloops < ONE_SECOND / POLL_INTERVAL;
 				     nloops++)
 				{
-					if ((nrunning = do_stop(applet, exec, argv,
+					اگر ((nrunning = do_stop(applet, exec, argv,
 						    pid, uid, 0, group, test, quiet)) == 0)
-						return 0;
+						بازگشت 0;
 
 
-					if (nanosleep(&ts, NULL) == -1) {
-						if (progressed) {
+					اگر (nanosleep(&ts, پوچ) == -1) {
+						اگر (progressed) {
 							printf("\n");
 							progressed = false;
 						}
-						if (errno != EINTR) {
+						اگر (errno != EINTR) {
 							eerror("%s: nanosleep: %s",
 							    applet, strerror(errno));
-							return 0;
+							بازگشت 0;
 						}
 					}
 				}
-				if (progress) {
+				اگر (progress) {
 					printf(".");
 					fflush(stdout);
 					progressed = true;
 				}
 			}
-			break;
-		default:
-			if (progressed) {
+			بشکن;
+		پیشفرض:
+			اگر (progressed) {
 				printf("\n");
 				progressed = false;
 			}
 			eerror("%s: invalid schedule item `%d'",
 			    applet, item->type);
-			return 0;
+			بازگشت 0;
 		}
 
-		if (item)
+		اگر (item)
 			item = TAILQ_NEXT(item, entries);
 	}
 
-	if (test || (tkilled > 0 && nrunning == 0))
-		return nkilled;
+	اگر (test || (tkilled > 0 && nrunning == 0))
+		بازگشت nkilled;
 
-	if (progressed)
+	اگر (progressed)
 		printf("\n");
-	if (!quiet) {
-		if (nrunning == 1)
+	اگر (!quiet) {
+		اگر (nrunning == 1)
 			eerror("%s: %d process refused to stop", applet, nrunning);
-		else
+		وگرنه
 			eerror("%s: %d process(es) refused to stop", applet, nrunning);
 	}
 
-	return -nrunning;
+	بازگشت -nrunning;
 }

@@ -1,27 +1,27 @@
-#include <einfo.h>
-#include <errno.h>
-#include <getopt.h>
-#include <rc.h>
-#include <queue.h>
-#include <string.h>
+#شامل <einfo.h>
+#شامل <errno.h>
+#شامل <getopt.h>
+#شامل <rc.h>
+#شامل <queue.h>
+#شامل <string.h>
 
-#include "_usage.h"
-#include "helpers.h"
+#شامل "_usage.h"
+#شامل "helpers.h"
 
-const char *applet;
-const char *extraopts;
-const char *usagestring = "rc-environ [-s <service> ...] [-r <runlevel> ...] [-en0]\n";
-const char getoptstring[] = "ens:r:0" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "export",          no_argument, NULL, 'e' },
-	{ "no-escape",       no_argument, NULL, 'n' },
-	{ "null",            no_argument, NULL, '0' },
-	{ "service",   required_argument, NULL, 's' },
-	{ "runlevel",  required_argument, NULL, 'r' },
+ثابت نویسه *applet;
+ثابت نویسه *extraopts;
+ثابت نویسه *usagestring = "rc-environ [-s <service> ...] [-r <runlevel> ...] [-en0]\n";
+ثابت نویسه getoptstring[] = "ens:r:0" getoptstring_COMMON;
+ثابت ساختار option longopts[] = {
+	{ "export",          no_argument, پوچ, 'e' },
+	{ "no-escape",       no_argument, پوچ, 'n' },
+	{ "null",            no_argument, پوچ, '0' },
+	{ "service",   required_argument, پوچ, 's' },
+	{ "runlevel",  required_argument, پوچ, 'r' },
 	longopts_COMMON
 };
 
-const char *const longopts_help[] = {
+ثابت نویسه *ثابت longopts_help[] = {
 	"Prepend \"export\" to printed variables",
 	"Do not perform shell sensitive escape on variable values",
 	"End each output line with NUL, not newline",
@@ -30,133 +30,133 @@ const char *const longopts_help[] = {
 	longopts_help_COMMON
 };
 
-static int
-set_environment(const char *service, char *vars[])
+ایستا صحیح
+set_environment(ثابت نویسه *service, نویسه *vars[])
 {
-	RC_DEPTREE *deptree = _rc_deptree_load(0, NULL);
+	RC_DEPTREE *deptree = _rc_deptree_load(0, پوچ);
 	RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service, "reexport");
 	RC_STRING *reexport;
 
-	if (!(rc_service_state(service) & RC_SERVICE_STARTING)) {
+	اگر (!(rc_service_state(service) & RC_SERVICE_STARTING)) {
 		eerror("service %s is not in the starting state", service);
-		return 1;
+		بازگشت 1;
 	}
 
-	for (const char *var; (var = *vars); vars++) {
+	برای (ثابت نویسه *var; (var = *vars); vars++) {
 		size_t name_len = strcspn(var, "=");
 
 		TAILQ_FOREACH(reexport, reexports, entries) {
-			if (strncmp(reexport->value, var, name_len) != 0)
-				continue;
-			if (var[name_len] == '=')
+			اگر (strncmp(reexport->مقدار, var, name_len) != 0)
+				ادامه;
+			اگر (var[name_len] == '=')
 				rc_service_putenv(service, var);
-			else
+			وگرنه
 				rc_service_setenv(service, var, getenv(var));
-			goto next;
+			برو next;
 		}
 
-		ewarn("service %s does not reexport %.*s, skipping", service, (int)name_len, var);
+		ewarn("service %s does not reexport %.*s, skipping", service, (صحیح)name_len, var);
 next:;
 	}
 
 	rc_stringlist_free(reexports);
 	rc_deptree_free(deptree);
-	return 0;
+	بازگشت 0;
 }
 
-static void escape_variable(const char *value) {
-	char ch;
+ایستا تهی escape_variable(ثابت نویسه *مقدار) {
+	نویسه ch;
 
 	printf("$'");
-	for (const char *p = value; *p; p++) {
-		switch ((ch = *p)) {
-		case '\a': ch = 'a'; break;
-		case '\b': ch = 'b'; break;
-		case '\f': ch = 'f'; break;
-		case '\n': ch = 'n'; break;
-		case '\r': ch = 'r'; break;
-		case '\t': ch = 't'; break;
-		case '\v': ch = 'v'; break;
+	برای (ثابت نویسه *p = مقدار; *p; p++) {
+		انتخاب ((ch = *p)) {
+		حالت '\a': ch = 'a'; بشکن;
+		حالت '\b': ch = 'b'; بشکن;
+		حالت '\f': ch = 'f'; بشکن;
+		حالت '\n': ch = 'n'; بشکن;
+		حالت '\r': ch = 'r'; بشکن;
+		حالت '\t': ch = 't'; بشکن;
+		حالت '\v': ch = 'v'; بشکن;
 		/* \e is non-standard. */
-		case 0x1b: ch = 'e'; break;
-		case '"':
-		case '\'':
-		case '\\':
-			break;
-		default:
+		حالت 0x1b: ch = 'e'; بشکن;
+		حالت '"':
+		حالت '\'':
+		حالت '\\':
+			بشکن;
+		پیشفرض:
 			putchar(ch);
-			continue;
+			ادامه;
 		}
 		printf("\\%c", ch);
 	}
 	printf("\'");
 }
 
-static int
-print_environment(RC_STRINGLIST *services, bool escape, bool export, char sep)
+ایستا صحیح
+print_environment(RC_STRINGLIST *services, bool escape, bool export, نویسه sep)
 {
 	/* from POSIX.2024 Shell Command Language 2.2, excluding `=` */
-	static const char special_chars[] = "|&;<>()$`\\\"' \t\n*?[]^-!#~%{},";
-	RC_DEPTREE *deptree = _rc_deptree_load(0, NULL);
+	ایستا ثابت نویسه special_chars[] = "|&;<>()$`\\\"' \t\n*?[]^-!#~%{},";
+	RC_DEPTREE *deptree = _rc_deptree_load(0, پوچ);
 	RC_STRING *service;
-	char *value = NULL;
-	int ret = 0;
+	نویسه *مقدار = پوچ;
+	صحیح ret = 0;
 
-	if (!services)
+	اگر (!services)
 		services = rc_services_in_state(RC_SERVICE_STARTED);
 
 	TAILQ_FOREACH(service, services, entries) {
-		RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service->value, "reexport");
+		RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service->مقدار, "reexport");
 		RC_STRING *reexport;
 
 		TAILQ_FOREACH(reexport, reexports, entries) {
-			if (rc_service_getenv(service->value, reexport->value, &value) == -1) {
+			اگر (rc_service_getenv(service->مقدار, reexport->مقدار, &مقدار) == -1) {
 				ewarn("%s: failed to read variable '%s' for '%s': %s",
-					applet, reexport->value, service->value, strerror(errno));
+					applet, reexport->مقدار, service->مقدار, strerror(errno));
 				ret = 1;
-				continue;
+				ادامه;
 			}
 
-			if (export)
+			اگر (export)
 				fputs("export ", stdout);
-			printf("%s=", reexport->value);
-			if (escape && strpbrk(value, special_chars))
-				escape_variable(value);
-			else
-				fputs(value, stdout);
+			printf("%s=", reexport->مقدار);
+			اگر (escape && strpbrk(مقدار, special_chars))
+				escape_variable(مقدار);
+			وگرنه
+				fputs(مقدار, stdout);
 			fputc(sep, stdout);
 		}
 
 		rc_stringlist_free(reexports);
 	}
 
-	free(value);
+	آزاد(مقدار);
 	rc_deptree_free(deptree);
-	return ret;
+	بازگشت ret;
 }
 
-int main(int argc, char **argv) {
-	RC_STRINGLIST *services = NULL, *in_runlevel;
+صحیح اصلی(صحیح argc, نویسه **argv) {
+	RC_STRINGLIST *services = پوچ, *in_runlevel;
 	bool export = false, escape = true;
-	char sep = '\n';
+	نویسه sep = '\n';
 
-	for (int opt; (opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1;) {
-		switch (opt) {
-		case 'e': export = true; break;
-		case 'n': escape = false; break;
-		case '0': sep = '\0'; break;
-		case 'r':
-			if (!services)
+	برای (صحیح opt; (opt = getopt_long(argc, argv, getoptstring, longopts, پوچ)) != -1;) {
+		انتخاب (opt) {
+		حالت 'e': export = true; بشکن;
+		حالت 'n': escape = false; بشکن;
+		حالت '0': sep = '\0'; بشکن;
+		حالت 'r':
+			اگر (!services)
 				services = rc_stringlist_new();
 			in_runlevel = rc_services_in_runlevel(optarg);
 			TAILQ_CONCAT(services, in_runlevel, entries);
 			rc_stringlist_free(in_runlevel);
-			break;
-		case 's':
-			if (!services)
+			بشکن;
+		حالت 's':
+			اگر (!services)
 				services = rc_stringlist_new();
 			rc_stringlist_addu(services, optarg);
-			break;
+			بشکن;
 		case_RC_COMMON_GETOPT
 		}
 	}
@@ -164,8 +164,8 @@ int main(int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
-	if (!argc)
-		return print_environment(services, escape, export, sep);
+	اگر (!argc)
+		بازگشت print_environment(services, escape, export, sep);
 
-	return set_environment(argv[0], &argv[1]);
+	بازگشت set_environment(argv[0], &argv[1]);
 }

@@ -10,38 +10,38 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#شامل <ctype.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#شامل "rc.h"
+#شامل "_usage.h"
+#شامل "version.h"
+#شامل "helpers.h"
 
 
-void set_quiet_options(void)
+تهی set_quiet_options(تهی)
 {
-	static int qcount = 0;
+	ایستا صحیح qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	انتخاب (qcount) {
+	حالت 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		بشکن;
+	حالت 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		بشکن;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN تهی show_version(تهی)
 {
-	const char *systype = NULL;
+	ثابت نویسه *systype = پوچ;
 
 	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
+	اگر ((systype = rc_sys()))
 		printf(" [%s]", systype);
 	printf(") %s", VERSION);
 #ifdef BRANDING
@@ -51,39 +51,39 @@ RC_NORETURN void show_version(void)
 	exit(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN تهی usage(صحیح exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	ثابت نویسه * ثابت has_arg[] = { "", "<arg>", "[arg]" };
+	صحیح i;
+	صحیح len;
+	نویسه *lo;
+	نویسه *p;
+	نویسه *token;
+	نویسه val[4] = "-?,";
 
-	if (usagestring)
+	اگر (usagestring)
 		printf("%s", usagestring);
-	else
+	وگرنه
 		printf("Usage: %s [options] ", applet);
 
-	if (extraopts)
+	اگر (extraopts)
 		printf("%s", extraopts);
 
 	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	برای (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
 		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		وقتی ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
+			اگر (len > 0)
 				printf("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		آزاد(lo);
 	}
 	exit(exit_status);
 }

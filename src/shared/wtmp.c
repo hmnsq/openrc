@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <utmp.h>
+#شامل <stdio.h>
+#شامل <string.h>
+#شامل <sys/time.h>
+#شامل <sys/types.h>
+#شامل <sys/utsname.h>
+#شامل <utmp.h>
 
-#include "wtmp.h"
+#شامل "wtmp.h"
 
-void log_wtmp(const char *user, const char *id, pid_t pid, int type,
-		const char *line)
+تهی log_wtmp(ثابت نویسه *user, ثابت نویسه *id, pid_t pid, صحیح type,
+		ثابت نویسه *سطر)
 {
-	struct timeval tv;
-	struct utmp utmp;
-	struct utsname uname_buf;
+	ساختار timeval tv;
+	ساختار utmp utmp;
+	ساختار utsname uname_buf;
 
-	memset(&utmp, 0, sizeof(utmp));
-	gettimeofday(&tv, NULL);
+	memset(&utmp, 0, اندازه(utmp));
+	gettimeofday(&tv, پوچ);
 	utmp.ut_tv.tv_sec = tv.tv_sec;
 	utmp.ut_tv.tv_usec = tv.tv_usec;
 	utmp.ut_pid  = pid;
 	utmp.ut_type = type;
-	strncpy(utmp.ut_name, user, sizeof(utmp.ut_name));
-	strncpy(utmp.ut_id  , id  , sizeof(utmp.ut_id  ));
-	strncpy(utmp.ut_line, line, sizeof(utmp.ut_line));
+	strncpy(utmp.ut_name, user, اندازه(utmp.ut_name));
+	strncpy(utmp.ut_id  , id  , اندازه(utmp.ut_id  ));
+	strncpy(utmp.ut_line, سطر, اندازه(utmp.ut_line));
 
 	/* Put the OS version in place of the hostname */
-	if (uname(&uname_buf) == 0)
-		strncpy(utmp.ut_host, uname_buf.release, sizeof(utmp.ut_host));
+	اگر (uname(&uname_buf) == 0)
+		strncpy(utmp.ut_host, uname_buf.release, اندازه(utmp.ut_host));
 
 	updwtmp(WTMP_FILE, &utmp);
 }

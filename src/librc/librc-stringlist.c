@@ -15,92 +15,92 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#شامل <errno.h>
+#شامل <stdbool.h>
+#شامل <stdlib.h>
+#شامل <string.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#شامل "queue.h"
+#شامل "librc.h"
+#شامل "helpers.h"
 
 RC_STRINGLIST *
-rc_stringlist_new(void)
+rc_stringlist_new(تهی)
 {
-	RC_STRINGLIST *l = xmalloc(sizeof(*l));
+	RC_STRINGLIST *l = xmalloc(اندازه(*l));
 	TAILQ_INIT(l);
-	return l;
+	بازگشت l;
 }
 
 RC_STRING *
-rc_stringlist_add(RC_STRINGLIST *list, const char *value)
+rc_stringlist_add(RC_STRINGLIST *list, ثابت نویسه *مقدار)
 {
-	RC_STRING *s = xmalloc(sizeof(*s));
+	RC_STRING *s = xmalloc(اندازه(*s));
 
-	s->value = xstrdup(value);
-	TAILQ_INSERT_TAIL(list, s, entries);
-	return s;
+	s->مقدار = xstrdup(مقدار);
+	TAILQ_درج_TAIL(list, s, entries);
+	بازگشت s;
 }
 
 RC_STRING *
-rc_stringlist_addu(RC_STRINGLIST *list, const char *value)
+rc_stringlist_addu(RC_STRINGLIST *list, ثابت نویسه *مقدار)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    اگر (strcmp(s->مقدار, مقدار) == 0) {
 		    errno = EEXIST;
-		    return NULL;
+		    بازگشت پوچ;
 	    }
 
-	return rc_stringlist_add(list, value);
+	بازگشت rc_stringlist_add(list, مقدار);
 }
 
 bool
-rc_stringlist_delete(RC_STRINGLIST *list, const char *value)
+rc_stringlist_delete(RC_STRINGLIST *list, ثابت نویسه *مقدار)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    اگر (strcmp(s->مقدار, مقدار) == 0) {
 		    TAILQ_REMOVE(list, s, entries);
-		    free(s->value);
-		    free(s);
-		    return true;
+		    آزاد(s->مقدار);
+		    آزاد(s);
+		    بازگشت true;
 	    }
 
 	errno = EEXIST;
-	return false;
+	بازگشت false;
 }
 
 RC_STRING *
-rc_stringlist_find(RC_STRINGLIST *list, const char *value)
+rc_stringlist_find(RC_STRINGLIST *list, ثابت نویسه *مقدار)
 {
 	RC_STRING *s;
 
-	if (list) {
+	اگر (list) {
 		TAILQ_FOREACH(s, list, entries)
-		    if (strcmp(s->value, value) == 0)
-			    return s;
+		    اگر (strcmp(s->مقدار, مقدار) == 0)
+			    بازگشت s;
 	}
-	return NULL;
+	بازگشت پوچ;
 }
 
 RC_STRINGLIST *
-rc_stringlist_split(const char *value, const char *sep)
+rc_stringlist_split(ثابت نویسه *مقدار, ثابت نویسه *sep)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	char *d = xstrdup(value);
-	char *p = d, *token;
+	نویسه *d = xstrdup(مقدار);
+	نویسه *p = d, *token;
 
-	while ((token = strsep(&p, sep)))
+	وقتی ((token = strsep(&p, sep)))
 		rc_stringlist_add(list, token);
-	free(d);
+	آزاد(d);
 
-	return list;
+	بازگشت list;
 }
 
-void
+تهی
 rc_stringlist_sort(RC_STRINGLIST **list)
 {
 	RC_STRINGLIST *l = *list;
@@ -112,38 +112,38 @@ rc_stringlist_sort(RC_STRINGLIST **list)
 
 	TAILQ_FOREACH_SAFE(s, l, entries, sn) {
 		TAILQ_REMOVE(l, s, entries);
-		last = NULL;
+		last = پوچ;
 		TAILQ_FOREACH(n, new, entries) {
-			if (strcmp(s->value, n->value) < 0)
-				break;
+			اگر (strcmp(s->مقدار, n->مقدار) < 0)
+				بشکن;
 			last = n;
 		}
-		if (last)
-			TAILQ_INSERT_AFTER(new, last, s, entries);
-		else
-			TAILQ_INSERT_HEAD(new, s, entries);
+		اگر (last)
+			TAILQ_درج_AFTER(new, last, s, entries);
+		وگرنه
+			TAILQ_درج_HEAD(new, s, entries);
 	}
 
 	/* Now we've sorted the list, copy across the new head */
-	free(l);
+	آزاد(l);
 	*list = new;
 }
 
-void
+تهی
 rc_stringlist_free(RC_STRINGLIST *list)
 {
 	RC_STRING *s1;
 	RC_STRING *s2;
 
-	if (!list)
-		return;
+	اگر (!list)
+		بازگشت;
 
 	s1 = TAILQ_FIRST(list);
-	while (s1) {
+	وقتی (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
-		free(s1->value);
-		free(s1);
+		آزاد(s1->مقدار);
+		آزاد(s1);
 		s1 = s2;
 	}
-	free(list);
+	آزاد(list);
 }

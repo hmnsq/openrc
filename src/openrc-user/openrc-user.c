@@ -1,57 +1,57 @@
-#include <einfo.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <syslog.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <spawn.h>
+#شامل <einfo.h>
+#شامل <errno.h>
+#شامل <fcntl.h>
+#شامل <grp.h>
+#شامل <pwd.h>
+#شامل <stdlib.h>
+#شامل <sys/types.h>
+#شامل <sys/wait.h>
+#شامل <syslog.h>
+#شامل <string.h>
+#شامل <unistd.h>
+#شامل <signal.h>
+#شامل <spawn.h>
 
 #ifdef HAVE_PAM
-#include <security/pam_appl.h>
+#شامل <security/pam_appl.h>
 #endif
 
 #define USER_SH RC_LIBEXECDIR "/sh/openrc-user.sh "
 
-#include "helpers.h"
-#include "rc.h"
-#include "rc_exec.h"
+#شامل "helpers.h"
+#شامل "rc.h"
+#شامل "rc_exec.h"
 
-static bool valid_shell(const char *shell) {
+ایستا bool valid_shell(ثابت نویسه *shell) {
 	FILE *fp = fopen(RC_SYSCONFDIR "/shells", "r");
 	bool ret = false;
-	char *line = NULL;
+	نویسه *سطر = پوچ;
 	size_t size;
 
-	if (!fp)
-		return true;
+	اگر (!fp)
+		بازگشت true;
 
-	while (xgetline(&line, &size, fp) != -1) {
-		if (line[0] == '#')
-			continue;
-		if (strcmp(line, shell) == 0) {
+	وقتی (xgetline(&سطر, &size, fp) != -1) {
+		اگر (سطر[0] == '#')
+			ادامه;
+		اگر (strcmp(سطر, shell) == 0) {
 			ret = true;
-			break;
+			بشکن;
 		}
 	}
 
-	free(line);
-	return ret;
+	آزاد(سطر);
+	بازگشت ret;
 }
 
-static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
-	char *argv0;
-	const char *argv[] = {
-		NULL /* replaced below */, "-c",
-		start ? USER_SH "start" : USER_SH "stop", NULL
+ایستا bool spawn_openrc(uid_t uid, gid_t gid, ثابت نویسه *shell, bool start) {
+	نویسه *argv0;
+	ثابت نویسه *argv[] = {
+		پوچ /* replaced below */, "-c",
+		start ? USER_SH "start" : USER_SH "stop", پوچ
 	};
-	struct exec_result res;
-	struct exec_args args;
+	ساختار exec_result res;
+	ساختار exec_args args;
 
 	/* shell might be a multicall binary, e.g busybox.
 	 * so setting argv[0] to "-" might not work */
@@ -63,39 +63,39 @@ static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
 	args.gid = gid;
 	args.redirect_stdout = 3;
 	res = do_exec(&args);
-	free(argv0);
-	if (res.pid < 0) {
+	آزاد(argv0);
+	اگر (res.pid < 0) {
 		elog(LOG_ERR, "do_exec: %s", strerror(errno));
-		return false;
+		بازگشت false;
 	}
-	return rc_waitpid(res.pid) == 0;
+	بازگشت rc_waitpid(res.pid) == 0;
 }
 
-int main(int argc, char **argv) {
-	const struct passwd *user;
-	char *log, *shell;
+صحیح اصلی(صحیح argc, نویسه **argv) {
+	ثابت ساختار passwd *user;
+	نویسه *log, *shell;
 	sigset_t sigmask;
-	int sig, ret = 0;
+	صحیح sig, ret = 0;
 	uid_t uid;
 	gid_t gid;
 #ifdef HAVE_PAM
-	struct pam_conv conv = { NULL, NULL };
-	pam_handle_t *pamh = NULL;
+	ساختار pam_conv conv = { پوچ, پوچ };
+	pam_handle_t *pamh = پوچ;
 	bool pam_session = false;
-	int rc;
+	صحیح rc;
 #endif
 
 	setenv("EINFO_LOG", "openrc-user", true);
 
-	if (argc != 2) {
+	اگر (argc != 2) {
 		elog(LOG_ERR, "Invalid usage. %s <username>", argv[0]);
-		return -1;
+		بازگشت -1;
 	}
 	/* We can't rely on the supervisor to drop perms since
 	 * pam modules might need root perms. */
-	if (!(user = getpwnam(argv[1]))) {
+	اگر (!(user = getpwnam(argv[1]))) {
 		elog(LOG_ERR, "Invalid username %s.", argv[1]);
-		return -1;
+		بازگشت -1;
 	}
 
 	/* sssd's pam module wrongly calls getpwnam, meaning
@@ -114,54 +114,54 @@ int main(int argc, char **argv) {
 
 	xasprintf(&log, "openrc-user.%s", user->pw_name);
 	setenv("EINFO_LOG", log, true);
-	free(log);
+	آزاد(log);
 
 #ifdef HAVE_PAM
-	if ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
+	اگر ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to start pam: %s", pam_strerror(pamh, rc));
-	else if ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	وگرنه اگر ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to open session: %s", pam_strerror(pamh, rc));
-	else
+	وگرنه
 		pam_session = true;
 
-	for (char **env = pam_getenvlist(pamh); env && *env; env++) {
-		if (strchr(*env, '='))
+	برای (نویسه **env = pam_getenvlist(pamh); env && *env; env++) {
+		اگر (strchr(*env, '='))
 			putenv(xstrdup(*env));
-		else
+		وگرنه
 			unsetenv(*env);
 	}
 
-	if (!pam_session && pamh) {
+	اگر (!pam_session && pamh) {
 		pam_end(pamh, rc);
-		pamh = NULL;
+		pamh = پوچ;
 	}
 #endif
 
-	if (!spawn_openrc(uid, gid, shell, true)) {
+	اگر (!spawn_openrc(uid, gid, shell, true)) {
 		ret = -1;
-		goto out;
+		برو out;
 	}
 
 	sigfillset(&sigmask);
-	sigprocmask(SIG_SETMASK, &sigmask, NULL);
+	sigprocmask(SIG_SETMASK, &sigmask, پوچ);
 
 	sigemptyset(&sigmask);
 	sigaddset(&sigmask, SIGTERM);
 
 	sigwait(&sigmask, &sig);
 
-	if (!spawn_openrc(uid, gid, shell, false))
+	اگر (!spawn_openrc(uid, gid, shell, false))
 		ret = -1;
 
 out:
 #ifdef HAVE_PAM
-	if (pamh) {
-		if ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	اگر (pamh) {
+		اگر ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 			elog(LOG_ERR, "Failed to close session: %s", pam_strerror(pamh, rc));
 		pam_end(pamh, rc);
 	}
 #endif
 
-	free(shell);
-	return ret;
+	آزاد(shell);
+	بازگشت ret;
 }
