@@ -20,107 +20,107 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <dirent.h>
-#include <getopt.h>
-#include <libgen.h>
-#include <pwd.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <unistd.h>
+#شامل <errno.h>
+#شامل <dirent.h>
+#شامل <getopt.h>
+#شامل <libgen.h>
+#شامل <pwd.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <signal.h>
+#شامل <string.h>
+#شامل <sys/ioctl.h>
+#شامل <sys/stat.h>
+#شامل <sys/types.h>
+#شامل <sys/utsname.h>
+#شامل <sys/wait.h>
+#شامل <termios.h>
+#شامل <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "rc-logger.h"
-#include "misc.h"
-#include "plugin.h"
-#include "version.h"
-#include "_usage.h"
-#include "helpers.h"
+#شامل "einfo.h"
+#شامل "queue.h"
+#شامل "rc.h"
+#شامل "rc_exec.h"
+#شامل "rc-logger.h"
+#شامل "misc.h"
+#شامل "plugin.h"
+#شامل "version.h"
+#شامل "_usage.h"
+#شامل "helpers.h"
 
-const char *extraopts = NULL;
-const char getoptstring[] = "a:no:s:S" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "no-stop", 0, NULL, 'n' },
-	{ "override",    1, NULL, 'o' },
-	{ "service",     1, NULL, 's' },
-	{ "sys",         0, NULL, 'S' },
+ثابت حرف *extraopts = تہی;
+ثابت حرف getoptstring[] = "a:no:s:S" getoptstring_COMMON;
+ثابت ساخت option longopts[] = {
+	{ "no-stop", 0, تہی, 'n' },
+	{ "override",    1, تہی, 'o' },
+	{ "service",     1, تہی, 's' },
+	{ "sys",         0, تہی, 'S' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت حرف * ثابت longopts_help[] = {
 	"do not stop any services",
 	"override the next runlevel to change into\nwhen leaving single user or boot runlevels",
 	"runs the service specified with the rest\nof the arguments",
 	"output the RC system type, if any",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+ثابت حرف *usagestring = ""
 	"Usage: openrc [options] [<runlevel>]";
 
-#define INITSH                  RC_LIBEXECDIR "/sh/init.sh"
-#define INITEARLYSH             RC_LIBEXECDIR "/sh/init-early.sh"
+#تعریف_کرو INITSH                  RC_LIBEXECDIR "/sh/init.sh"
+#تعریف_کرو INITEARLYSH             RC_LIBEXECDIR "/sh/init-early.sh"
 
-#define DEVBOOT			"/dev/.rcboot"
+#تعریف_کرو DEVBOOT			"/dev/.rcboot"
 
-const char *applet = NULL;
-static RC_STRINGLIST *main_hotplugged_services;
-static RC_STRINGLIST *main_stop_services;
-static RC_STRINGLIST *main_start_services;
-static RC_STRINGLIST *main_types_nw;
-static RC_STRINGLIST *main_types_nwua;
-static RC_DEPTREE *main_deptree;
-static char *runlevel;
+ثابت حرف *applet = تہی;
+ساکن RC_STRINGLIST *main_hotplugged_services;
+ساکن RC_STRINGLIST *main_stop_services;
+ساکن RC_STRINGLIST *main_آغاز_services;
+ساکن RC_STRINGLIST *main_types_nw;
+ساکن RC_STRINGLIST *main_types_nwua;
+ساکن RC_DEPTREE *main_deptree;
+ساکن حرف *runlevel;
 
-struct termios *termios_orig = NULL;
+ساخت termios *termios_orig = تہی;
 
 RC_PIDLIST service_pids;
 RC_PIDLIST free_these_pids;
 
-static void
-clean_failed(void)
+ساکن خالی
+clean_failed(خالی)
 {
 	DIR *dp;
-	struct dirent *d;
+	ساخت dirent *d;
 
 	/* Clean the failed services state dir now */
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "failed")))
-		return;
+	اگر (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "failed")))
+		واپس;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
-			continue;
+	جب ((d = readdir(dp))) {
+		اگر (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+			جاری;
 
-		if (unlinkat(dirfd(dp), d->d_name, 0) == -1)
+		اگر (unlinkat(dirfd(dp), d->d_name, 0) == -1)
 			eerror("%s: unlink '%s/failed/%s': %s", applet, rc_svcdir(), d->d_name, strerror(errno));
 	}
 	closedir(dp);
 }
 
-static void
-cleanup(void)
+ساکن خالی
+cleanup(خالی)
 {
-	int svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
+	صحیح svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
 	RC_PID *p, *tmp;
 
-	if (!rc_in_logger && !rc_in_plugin &&
+	اگر (!rc_اندر_logger && !rc_اندر_plugin &&
 	    applet && (strcmp(applet, "rc") == 0 || strcmp(applet, "openrc") == 0))
 	{
 		rc_plugin_unload();
 
-		if (termios_orig) {
+		اگر (termios_orig) {
 			tcsetattr(STDIN_FILENO, TCSANOW, termios_orig);
-			free(termios_orig);
+			آزاد(termios_orig);
 		}
 
 		/* Clean runlevel start, stop markers */
@@ -131,225 +131,225 @@ cleanup(void)
 		rc_logger_close();
 	}
 
-	LIST_FOREACH_SAFE(p, &service_pids, entries, tmp) {
+	LIST_FOREACH_محفوظ(p, &service_pids, entries, tmp) {
 		LIST_REMOVE(p, entries);
-		free(p);
+		آزاد(p);
 	}
-	LIST_FOREACH_SAFE(p, &free_these_pids, entries, tmp) {
+	LIST_FOREACH_محفوظ(p, &free_these_pids, entries, tmp) {
 		LIST_REMOVE(p, entries);
-		free(p);
+		آزاد(p);
 	}
 
 	rc_stringlist_free(main_hotplugged_services);
 	rc_stringlist_free(main_stop_services);
-	rc_stringlist_free(main_start_services);
+	rc_stringlist_free(main_آغاز_services);
 	rc_stringlist_free(main_types_nw);
 	rc_stringlist_free(main_types_nwua);
 	rc_deptree_free(main_deptree);
-	free(runlevel);
+	آزاد(runlevel);
 }
 
-static char
-read_key(bool block)
+ساکن حرف
+read_کلید(bool بلاک)
 {
-	struct termios termios;
-	char c = 0;
-	int fd = STDIN_FILENO;
+	ساخت termios termios;
+	حرف c = 0;
+	صحیح fd = STDIN_FILENO;
 
-	if (!isatty(fd))
-		return false;
+	اگر (!isatty(fd))
+		واپس false;
 
 	/* Now save our terminal settings. We need to restore them at exit as
 	   we will be changing it for non-blocking reads for Interactive */
-	if (!termios_orig) {
-		termios_orig = xmalloc(sizeof(*termios_orig));
+	اگر (!termios_orig) {
+		termios_orig = xmalloc(حجم(*termios_orig));
 		tcgetattr(fd, termios_orig);
 	}
 
 	tcgetattr(fd, &termios);
 	termios.c_lflag &= ~(ICANON | ECHO);
-	if (block)
+	اگر (بلاک)
 		termios.c_cc[VMIN] = 1;
-	else {
+	ورنہ {
 		termios.c_cc[VMIN] = 0;
 		termios.c_cc[VTIME] = 0;
 	}
 	tcsetattr(fd, TCSANOW, &termios);
-	if (read(fd, &c, 1) == -1)
+	اگر (اقرأ(fd, &c, 1) == -1)
 		eerror("read: %s", strerror(errno));
 	tcsetattr(fd, TCSANOW, termios_orig);
-	return c;
+	واپس c;
 }
 
-static bool
-want_interactive(void)
+ساکن bool
+want_interactive(خالی)
 {
-	char c;
-	static bool gotinteractive;
-	static bool interactive;
+	حرف c;
+	ساکن bool gotinteractive;
+	ساکن bool interactive;
 
-	if (rc_yesno(getenv("EINFO_QUIET")))
-		return false;
-	if (!gotinteractive) {
+	اگر (rc_yesno(getenv("EINFO_QUIET")))
+		واپس false;
+	اگر (!gotinteractive) {
 		gotinteractive = true;
 		interactive = rc_conf_yesno("rc_interactive");
 	}
-	if (!interactive)
-		return false;
-	c = read_key(false);
-	return (c == 'I' || c == 'i') ? true : false;
+	اگر (!interactive)
+		واپس false;
+	c = read_کلید(false);
+	واپس (c == 'I' || c == 'i') ? true : false;
 }
 
-static void
-mark_interactive(void)
+ساکن خالی
+mark_interactive(خالی)
 {
 	FILE *fp;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "interactive", O_WRONLY | O_CREAT | O_TRUNC)))
+	اگر ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "interactive", O_WRONLY | O_CREAT | O_TRUNC)))
 		fclose(fp);
 }
 
-static void
-run_program(const char *prog)
+ساکن خالی
+تسلسل_پروگرام(ثابت حرف *prog)
 {
-	struct sigaction sa;
-	sigset_t full;
+	ساخت sigaction sa;
+	sigset_t بھرا;
 	sigset_t old;
 	pid_t pid;
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, حجم(sa));
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
-	sigfillset(&full);
-	sigprocmask(SIG_SETMASK, &full, &old);
+	sigfillset(&بھرا);
+	sigprocmask(SIG_SETMASK, &بھرا, &old);
 	pid = fork();
 
-	if (pid == -1) {
-		rc_plugin_run(RC_HOOK_RUNLEVEL_START_OUT, runlevel);
+	اگر (pid == -1) {
+		rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_آغاز_برآمد, runlevel);
 		eerrorx("%s: fork: %s", applet, strerror(errno));
 	}
-	if (pid == 0) {
+	اگر (pid == 0) {
 		/* Restore default handlers */
-		sigaction(SIGCHLD, &sa, NULL);
-		sigaction(SIGHUP, &sa, NULL);
-		sigaction(SIGINT, &sa, NULL);
-		sigaction(SIGQUIT, &sa, NULL);
-		sigaction(SIGTERM, &sa, NULL);
-		sigaction(SIGUSR1, &sa, NULL);
-		sigaction(SIGWINCH, &sa, NULL);
+		sigaction(SIGCHLD, &sa, تہی);
+		sigaction(SIGHUP, &sa, تہی);
+		sigaction(SIGINT, &sa, تہی);
+		sigaction(SIGQUIT, &sa, تہی);
+		sigaction(SIGTERM, &sa, تہی);
+		sigaction(SIGUSR1, &sa, تہی);
+		sigaction(SIGWINCH, &sa, تہی);
 
 		/* Unmask signals */
-		sigprocmask(SIG_SETMASK, &old, NULL);
+		sigprocmask(SIG_SETMASK, &old, تہی);
 
-		if (termios_orig)
+		اگر (termios_orig)
 			tcsetattr(STDIN_FILENO, TCSANOW, termios_orig);
 
-		execl(prog, prog, (char *)NULL);
+		execl(prog, prog, (حرف *)تہی);
 		eerror("%s: unable to exec `%s': %s", applet, prog,
 		    strerror(errno));
 		_exit(EXIT_FAILURE);
 	}
 
 	/* Unmask signals and wait for child */
-	sigprocmask(SIG_SETMASK, &old, NULL);
-	if (rc_waitpid(pid) == -1) {
-		rc_plugin_run(RC_HOOK_RUNLEVEL_START_OUT, runlevel);
+	sigprocmask(SIG_SETMASK, &old, تہی);
+	اگر (rc_waitpid(pid) == -1) {
+		rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_آغاز_برآمد, runlevel);
 		eerrorx("%s: failed to exec `%s'", applet, prog);
 	}
 }
 
-static void
-open_shell(void)
+ساکن خالی
+open_shell(خالی)
 {
-	const char *shell;
-	struct passwd *pw;
+	ثابت حرف *shell;
+	ساخت passwd *pw;
 
-#ifdef __linux__
-	const char *sys = rc_sys();
+#اگر_تعریف_شدہ __linux__
+	ثابت حرف *sys = rc_sys();
 
 	/* VSERVER systems cannot really drop to shells */
-	if (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
+	اگر (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
 	{
-		execlp("halt", "halt", "-f", (char *) NULL);
+		execlp("halt", "halt", "-f", (حرف *) تہی);
 		eerrorx("%s: unable to exec `halt -f': %s",
 		    applet, strerror(errno));
 	}
-#endif
+#اگر_ختم
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_قدر("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
-	if (shell == NULL) {
+	اگر (shell == تہی) {
 		shell = getenv("SHELL");
-		if (shell == NULL) {
+		اگر (shell == تہی) {
 			pw = getpwuid(getuid());
-			if (pw)
+			اگر (pw)
 				shell = pw->pw_shell;
-			if (shell == NULL)
+			اگر (shell == تہی)
 				shell = "/bin/sh";
 		}
 	}
-	run_program(shell);
+	تسلسل_پروگرام(shell);
 }
 
-static bool
-set_krunlevel(const char *level)
+ساکن bool
+سیٹ_krunlevel(ثابت حرف *level)
 {
 	FILE *fp;
 
-	if (rc_is_user())
-		return true;
+	اگر (rc_is_user())
+		واپس true;
 
-	if (!level ||
+	اگر (!level ||
 	    strcmp(level, getenv ("RC_BOOTLEVEL")) == 0 ||
 	    strcmp(level, RC_LEVEL_SINGLE) == 0 ||
 	    strcmp(level, RC_LEVEL_SYSINIT) == 0)
 	{
-		if (access(RC_KRUNLEVEL, F_OK) == 0 && unlink(RC_KRUNLEVEL) != 0)
+		اگر (access(RC_KRUNLEVEL, F_OK) == 0 && unlink(RC_KRUNLEVEL) != 0)
 			eerror("unlink `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return false;
+		واپس false;
 	}
 
-	if (!(fp = fopen(RC_KRUNLEVEL, "w"))) {
+	اگر (!(fp = fopen(RC_KRUNLEVEL, "w"))) {
 		eerror("fopen `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return false;
+		واپس false;
 	}
 
 	fprintf(fp, "%s", level);
 	fclose(fp);
-	return true;
+	واپس true;
 }
 
-static char *get_krunlevel(void)
+ساکن حرف *get_krunlevel(خالی)
 {
-	char *buffer = NULL;
+	حرف *بفر = تہی;
 	FILE *fp;
 	size_t i = 0;
 
-	if (rc_is_user())
-		return NULL;
+	اگر (rc_is_user())
+		واپس تہی;
 
-	if (access(RC_KRUNLEVEL, F_OK) != 0)
-		return NULL;
-	if (!(fp = fopen(RC_KRUNLEVEL, "r"))) {
+	اگر (access(RC_KRUNLEVEL, F_OK) != 0)
+		واپس تہی;
+	اگر (!(fp = fopen(RC_KRUNLEVEL, "r"))) {
 		eerror("fopen `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return NULL;
+		واپس تہی;
 	}
 
-	if (xgetline(&buffer, &i, fp) == -1) {
-		free(buffer);
-		buffer = NULL;
+	اگر (xgetline(&بفر, &i, fp) == -1) {
+		آزاد(بفر);
+		بفر = تہی;
 	}
 
 	fclose(fp);
-	return buffer;
+	واپس بفر;
 }
 
-static void
-add_pid(pid_t pid)
+ساکن خالی
+جوڑو_pid(pid_t pid)
 {
 	sigset_t sset, old;
-	RC_PID *p = xmalloc(sizeof(*p));
+	RC_PID *p = xmalloc(حجم(*p));
 	p->pid = pid;
 
 	/* this list will be accessed inside the SIGCHLD signal handler.
@@ -359,11 +359,11 @@ add_pid(pid_t pid)
 	sigemptyset(&sset);
 	sigaddset(&sset, SIGCHLD);
 	sigprocmask(SIG_SETMASK, &sset, &old);
-	LIST_INSERT_HEAD(&service_pids, p, entries);
-	sigprocmask(SIG_SETMASK, &old, NULL);
+	LIST_داخل_کرو_سر(&service_pids, p, entries);
+	sigprocmask(SIG_SETMASK, &old, تہی);
 }
 
-static void
+ساکن خالی
 remove_pid(pid_t pid, bool inside_signal)
 {
 	sigset_t sset, old;
@@ -374,99 +374,99 @@ remove_pid(pid_t pid, bool inside_signal)
 	sigaddset(&sset, SIGCHLD);
 	sigprocmask(SIG_SETMASK, &sset, &old);
 	LIST_FOREACH(p, &service_pids, entries) {
-		if (p->pid == pid) {
+		اگر (p->pid == pid) {
 			LIST_REMOVE(p, entries);
-			LIST_INSERT_HEAD(&free_these_pids, p, entries);
-			break;
+			LIST_داخل_کرو_سر(&free_these_pids, p, entries);
+			توڑو;
 		}
 	}
 	/* only call free if we're not inside a signal handler */
-	if (!inside_signal) {
-		LIST_FOREACH_SAFE(p, &free_these_pids, entries, tmp) {
+	اگر (!inside_signal) {
+		LIST_FOREACH_محفوظ(p, &free_these_pids, entries, tmp) {
 			LIST_REMOVE(p, entries);
-			free(p);
+			آزاد(p);
 		}
 	}
-	sigprocmask(SIG_SETMASK, &old, NULL);
+	sigprocmask(SIG_SETMASK, &old, تہی);
 }
 
-static void
-wait_for_services(void)
+ساکن خالی
+wait_for_services(خالی)
 {
-	for (;;) {
-		while (waitpid(0, 0, 0) != -1)
+	برائے (;;) {
+		جب (waitpid(0, 0, 0) != -1)
 			;
-		if (errno != EINTR)
-			break;
+		اگر (errno != EINTR)
+			توڑو;
 	}
 }
 
-static void
-handle_signal(int sig)
+ساکن خالی
+handle_signal(صحیح sig)
 {
-	int serrno = errno;
-	const char *signame = NULL;
+	صحیح serrno = errno;
+	ثابت حرف *signame = تہی;
 	pid_t pid;
 	RC_PID *pi;
-	int status = 0;
-	struct winsize ws;
+	صحیح حالت_2 = 0;
+	ساخت winsize ws;
 	sigset_t sset;
 
-	switch (sig) {
-	case SIGCHLD:
-		do {
-			pid = waitpid(-1, &status, WNOHANG);
-			if (pid < 0) {
-				if (errno != ECHILD)
+	انتخاب (sig) {
+	حالت SIGCHLD:
+		کرو {
+			pid = waitpid(-1, &حالت_2, WNOHANG);
+			اگر (pid < 0) {
+				اگر (errno != ECHILD)
 					eerror("waitpid: %s", strerror(errno));
-				return;
+				واپس;
 			}
-		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+		} جب (!WIFEXITED(حالت_2) && !WIFSIGNALED(حالت_2));
 
 		/* Remove that pid from our list */
-		if (pid > 0)
+		اگر (pid > 0)
 			remove_pid(pid, true);
-		break;
+		توڑو;
 
-	case SIGWINCH:
-		if (rc_logger_tty >= 0) {
+	حالت SIGWINCH:
+		اگر (rc_logger_tty >= 0) {
 			ioctl(STDIN_FILENO, TIOCGWINSZ, &ws);
 			ioctl(rc_logger_tty, TIOCSWINSZ, &ws);
 		}
-		break;
+		توڑو;
 
-	case SIGINT:
-		if (!signame)
+	حالت SIGINT:
+		اگر (!signame)
 			signame = "SIGINT";
 		/* FALLTHROUGH */
-	case SIGTERM:
-		if (!signame)
+	حالت SIGTERM:
+		اگر (!signame)
 			signame = "SIGTERM";
 		/* FALLTHROUGH */
-	case SIGQUIT:
-		if (!signame)
+	حالت SIGQUIT:
+		اگر (!signame)
 			signame = "SIGQUIT";
 		eerrorx("%s: caught %s, aborting", applet, signame);
 		/* NOTREACHED */
-	case SIGUSR1:
+	حالت SIGUSR1:
 		eerror("rc: Aborting!");
 
 		/* Block child signals */
 		sigemptyset(&sset);
 		sigaddset(&sset, SIGCHLD);
-		sigprocmask(SIG_BLOCK, &sset, NULL);
+		sigprocmask(SIG_BLOCK, &sset, تہی);
 
 		/* Kill any running services we have started */
 		LIST_FOREACH(pi, &service_pids, entries)
 		    kill(pi->pid, SIGTERM);
 
 		/* Notify plugins we are aborting */
-		rc_plugin_run(RC_HOOK_ABORT, NULL);
+		rc_plugin_تسلسل(RC_HOOK_ABORT, تہی);
 
-		exit(EXIT_FAILURE);
+		باہر_نکلو(EXIT_FAILURE);
 		/* NOTREACHED */
 
-	default:
+	طےشدہ:
 		eerror("%s: caught unknown signal %d", applet, sig);
 	}
 
@@ -474,181 +474,181 @@ handle_signal(int sig)
 	errno = serrno;
 }
 
-static void
-do_sysinit(void)
+ساکن خالی
+do_sysinit(خالی)
 {
-	struct utsname uts;
-	const char *sys;
+	ساخت utsname uts;
+	ثابت حرف *sys;
 
 	/* exec init-early.sh if it exists
 	 * This should just setup the console to use the correct
 	 * font. Maybe it should setup the keyboard too? */
-	if (access(INITEARLYSH, F_OK) == 0)
-		run_program(INITEARLYSH);
+	اگر (access(INITEARLYSH, F_OK) == 0)
+		تسلسل_پروگرام(INITEARLYSH);
 
 	uname(&uts);
-	if (!rc_yesno(getenv("EINFO_QUIET"))) {
-		printf("\n   %sOpenRC %s" VERSION "%s is starting up %s",
+	اگر (!rc_yesno(getenv("EINFO_QUIET"))) {
+		لکھو("\n   %sOpenRC %s" نسخہ "%s is starting up %s",
 		    ecolor(ECOLOR_GOOD), ecolor(ECOLOR_HILITE),
-		    ecolor(ECOLOR_NORMAL), ecolor(ECOLOR_BRACKET));
-#ifdef BRANDING
-		printf(BRANDING " (%s)", uts.machine);
-#else
-		printf("%s %s (%s)",
+		    ecolor(ECOLOR_معمول), ecolor(ECOLOR_BRACKET));
+#اگر_تعریف_شدہ BRANDING
+		لکھو(BRANDING " (%s)", uts.machine);
+#ورنہ
+		لکھو("%s %s (%s)",
 		    uts.sysname,
 		    uts.release,
 		    uts.machine);
-#endif
+#اگر_ختم
 	}
 
-	if ((sys = rc_sys()))
-		printf(" [%s]", sys);
+	اگر ((sys = rc_sys()))
+		لکھو(" [%s]", sys);
 
-	printf("%s\n\n", ecolor(ECOLOR_NORMAL));
+	لکھو("%s\n\n", ecolor(ECOLOR_معمول));
 
-	if (!rc_yesno(getenv ("EINFO_QUIET")) &&
+	اگر (!rc_yesno(getenv ("EINFO_QUIET")) &&
 	    rc_conf_yesno("rc_interactive"))
-		printf("Press %sI%s to enter interactive boot mode\n\n",
-		    ecolor(ECOLOR_GOOD), ecolor(ECOLOR_NORMAL));
+		لکھو("Press %sI%s to enter interactive boot mode\n\n",
+		    ecolor(ECOLOR_GOOD), ecolor(ECOLOR_معمول));
 
 	setenv("RC_RUNLEVEL", RC_LEVEL_SYSINIT, 1);
-	run_program(INITSH);
+	تسلسل_پروگرام(INITSH);
 
 	/* init may have mounted /proc so we can now detect or real
 	 * sys */
-	if ((sys = rc_sys()))
+	اگر ((sys = rc_sys()))
 		setenv("RC_SYS", sys, 1);
-	if ((main_deptree = _rc_deptree_load(false, NULL)) == NULL)
+	اگر ((main_deptree = rc_deptree_بھرو_2(false, تہی)) == تہی)
 		eerrorx("failed to load deptree");
 }
 
-static bool
-runlevel_config(const char *service, const char *level)
+ساکن bool
+runlevel_config(ثابت حرف *service, ثابت حرف *level)
 {
-	char *init = rc_service_resolve(service);
-	char *conf, *dir;
+	حرف *init = rc_service_resolve(service);
+	حرف *conf, *dir;
 	bool retval;
 
 	dir = dirname(dirname(init));
 	xasprintf(&conf, "%s/conf.d/%s.%s", dir, service, level);
 	retval = access(conf, F_OK) == 0;
-	free(conf);
-	free(init);
-	return retval;
+	آزاد(conf);
+	آزاد(init);
+	واپس retval;
 }
 
-static void
-do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
-				 const RC_STRINGLIST *stop_services, const RC_DEPTREE *deptree,
-				 const char *newlevel, bool parallel, bool going_down)
+ساکن خالی
+do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *آغاز_services,
+				 ثابت RC_STRINGLIST *stop_services, ثابت RC_DEPTREE *deptree,
+				 ثابت حرف *newlevel, bool parallel, bool going_نیچے_کو)
 {
 	pid_t pid;
 	RC_STRING *service, *svc1, *svc2;
 	RC_STRINGLIST *deporder, *tmplist, *kwords;
-	RC_STRINGLIST *types_nw_save = NULL;
+	RC_STRINGLIST *types_nw_save = تہی;
 	RC_SERVICE state;
 	RC_STRINGLIST *nostop;
 	bool crashed, nstop;
 
-	if (!types_nw) {
+	اگر (!types_nw) {
 		types_nw = types_nw_save = rc_stringlist_new();
-		rc_stringlist_add(types_nw, "needsme");
-		rc_stringlist_add(types_nw, "wantsme");
+		rc_stringlist_جوڑو(types_nw, "needsme");
+		rc_stringlist_جوڑو(types_nw, "wantsme");
 	}
 
 	crashed = rc_conf_yesno("rc_crashed_stop");
 
-	nostop = rc_stringlist_split(rc_conf_value("rc_nostop"), " ");
-	TAILQ_FOREACH_REVERSE(service, stop_services, rc_stringlist, entries)
+	nostop = rc_stringlist_بانٹو(rc_conf_قدر("rc_nostop"), " ");
+	TAILQ_FOREACH_الٹ(service, stop_services, rc_stringlist, entries)
 	{
-		state = rc_service_state(service->value);
-		if (state & RC_SERVICE_STOPPED || state & RC_SERVICE_FAILED)
-			continue;
+		state = rc_service_state(service->قدر);
+		اگر (state & RC_SERVICE_STOPPED || state & RC_SERVICE_FAILED)
+			جاری;
 
 		/* Sometimes we don't ever want to stop a service. */
-		if (rc_stringlist_find(nostop, service->value)) {
-			rc_service_mark(service->value, RC_SERVICE_FAILED);
-			continue;
+		اگر (rc_stringlist_ڈھونڈو(nostop, service->قدر)) {
+			rc_service_mark(service->قدر, RC_SERVICE_FAILED);
+			جاری;
 		}
-		kwords = rc_deptree_depend(deptree, service->value, "keyword");
-		if (rc_stringlist_find(kwords, "-stop") ||
-		    rc_stringlist_find(kwords, "nostop") ||
-		    (going_down &&
-			(rc_stringlist_find(kwords, "-shutdown") ||
-			    rc_stringlist_find(kwords, "noshutdown"))))
+		kwords = rc_deptree_depend(deptree, service->قدر, "keyword");
+		اگر (rc_stringlist_ڈھونڈو(kwords, "-stop") ||
+		    rc_stringlist_ڈھونڈو(kwords, "nostop") ||
+		    (going_نیچے_کو &&
+			(rc_stringlist_ڈھونڈو(kwords, "-shutdown") ||
+			    rc_stringlist_ڈھونڈو(kwords, "noshutdown"))))
 			nstop = true;
-		else
+		ورنہ
 			nstop = false;
 		rc_stringlist_free(kwords);
-		if (nstop) {
-			rc_service_mark(service->value, RC_SERVICE_FAILED);
-			continue;
+		اگر (nstop) {
+			rc_service_mark(service->قدر, RC_SERVICE_FAILED);
+			جاری;
 		}
 
 		/* If the service has crashed, skip further checks and just stop
 		   it */
-		if (crashed &&
-		    rc_service_daemons_crashed(service->value))
-			goto stop;
+		اگر (crashed &&
+		    rc_service_daemons_crashed(service->قدر))
+			جاؤ stop;
 
 		/* If we're in the start list then don't bother stopping us */
-		svc1 = rc_stringlist_find(start_services, service->value);
-		if (svc1) {
-			if (newlevel && strcmp(runlevel, newlevel) != 0) {
+		svc1 = rc_stringlist_ڈھونڈو(آغاز_services, service->قدر);
+		اگر (svc1) {
+			اگر (newlevel && strcmp(runlevel, newlevel) != 0) {
 				/* So we're in the start list. But we should
 				 * be stopped if we have a runlevel
 				 * configuration file for either the current
 				 * or next so we use the correct one. */
-				if (!runlevel_config(service->value,runlevel) &&
-				    !runlevel_config(service->value,newlevel))
-					continue;
+				اگر (!runlevel_config(service->قدر,runlevel) &&
+				    !runlevel_config(service->قدر,newlevel))
+					جاری;
 			}
-			else
-				continue;
+			ورنہ
+				جاری;
 		}
 
 		/* We got this far. Last check is to see if any service
 		 * that going to be started depends on us */
-		if (!svc1) {
+		اگر (!svc1) {
 			tmplist = rc_stringlist_new();
-			rc_stringlist_add(tmplist, service->value);
+			rc_stringlist_جوڑو(tmplist, service->قدر);
 			deporder = rc_deptree_depends(deptree, types_nw,
 			    tmplist, newlevel ? newlevel : runlevel,
 			    RC_DEP_STRICT | RC_DEP_TRACE);
 			rc_stringlist_free(tmplist);
-			svc2 = NULL;
+			svc2 = تہی;
 			TAILQ_FOREACH(svc1, deporder, entries) {
-				svc2 = rc_stringlist_find(start_services,
-				    svc1->value);
-				if (svc2)
-					break;
+				svc2 = rc_stringlist_ڈھونڈو(آغاز_services,
+				    svc1->قدر);
+				اگر (svc2)
+					توڑو;
 			}
 			rc_stringlist_free(deporder);
 
-			if (svc2)
-				continue;
+			اگر (svc2)
+				جاری;
 		}
 
 stop:
 		/* After all that we can finally stop the blighter! */
-		pid = service_stop(service->value);
-		if (pid > 0) {
-			add_pid(pid);
-			if (!parallel) {
+		pid = service_stop(service->قدر);
+		اگر (pid > 0) {
+			جوڑو_pid(pid);
+			اگر (!parallel) {
 				rc_waitpid(pid);
 				remove_pid(pid, false);
 			}
 		}
 	}
 
-	if (types_nw_save)
+	اگر (types_nw_save)
 		rc_stringlist_free(types_nw_save);
 
 	rc_stringlist_free(nostop);
 }
 
-static void
-do_start_services(const RC_STRINGLIST *start_services, bool parallel)
+ساکن خالی
+do_آغاز_services(ثابت RC_STRINGLIST *آغاز_services, bool parallel)
 {
 	RC_STRING *service;
 	pid_t pid;
@@ -656,54 +656,54 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 	RC_SERVICE state;
 	bool crashed = false;
 
-	if (!rc_yesno(getenv("EINFO_QUIET")))
+	اگر (!rc_yesno(getenv("EINFO_QUIET")))
 		interactive = faccessat(rc_dirfd(RC_DIR_SVCDIR), "interactive", F_OK, 0) == 0;
 	errno = 0;
 	crashed = rc_conf_yesno("rc_crashed_start");
-	if (errno == ENOENT)
+	اگر (errno == ENOENT)
 		crashed = true;
 
-	TAILQ_FOREACH(service, start_services, entries) {
-		state = rc_service_state(service->value);
-		if (state & RC_SERVICE_FAILED)
-			continue;
-		if (!(state & RC_SERVICE_STOPPED)) {
-			if (crashed &&
-			    rc_service_daemons_crashed(service->value))
-				rc_service_mark(service->value,
+	TAILQ_FOREACH(service, آغاز_services, entries) {
+		state = rc_service_state(service->قدر);
+		اگر (state & RC_SERVICE_FAILED)
+			جاری;
+		اگر (!(state & RC_SERVICE_STOPPED)) {
+			اگر (crashed &&
+			    rc_service_daemons_crashed(service->قدر))
+				rc_service_mark(service->قدر,
 				    RC_SERVICE_STOPPED);
-			else
-			    continue;
+			ورنہ
+			    جاری;
 		}
-		if (!interactive)
+		اگر (!interactive)
 			interactive = want_interactive();
 
-		if (interactive) {
+		اگر (interactive) {
 	interactive_retry:
-			printf("\n");
+			لکھو("\n");
 			einfo("About to start the service %s",
-			    service->value);
+			    service->قدر);
 			eindent();
 			einfo("1) Start the service\t\t2) Skip the service");
 			einfo("3) Continue boot process\t\t4) Exit to shell");
 			eoutdent();
 	interactive_option:
-			switch (read_key(true)) {
-			case '1': break;
-			case '2': continue;
-			case '3': interactive = false; break;
-			case '4': open_shell(); goto interactive_retry;
-			default: goto interactive_option;
+			انتخاب (read_کلید(true)) {
+			حالت '1': توڑو;
+			حالت '2': جاری;
+			حالت '3': interactive = false; توڑو;
+			حالت '4': open_shell(); جاؤ interactive_retry;
+			طےشدہ: جاؤ interactive_option;
 			}
 		}
 
-		pid = service_start(service->value);
-		if (pid == -1)
-			break;
+		pid = service_آغاز(service->قدر);
+		اگر (pid == -1)
+			توڑو;
 		/* Remember the pid if we're running in parallel */
-		if (pid > 0) {
-			add_pid(pid);
-			if (!parallel) {
+		اگر (pid > 0) {
+			جوڑو_pid(pid);
+			اگر (!parallel) {
 				rc_waitpid(pid);
 				remove_pid(pid, false);
 			}
@@ -711,110 +711,110 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 	}
 
 	/* Store our interactive status for boot */
-	if (interactive &&
+	اگر (interactive &&
 			(strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
 			 strcmp(runlevel, getenv("RC_BOOTLEVEL")) == 0))
 		mark_interactive();
-	else
+	ورنہ
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "interactive", 0);
 }
 
-#ifdef RC_DEBUG
-RC_NORETURN static void
-handle_bad_signal(int sig)
+#اگر_تعریف_شدہ RC_DEBUG
+RC_NORETURN ساکن خالی
+handle_bad_signal(صحیح sig)
 {
-	char pid[10];
-	int status;
+	حرف pid[10];
+	صحیح حالت_2;
 	pid_t crashed_pid = getpid();
 
-	switch (fork()) {
-	case -1:
+	انتخاب (fork()) {
+	حالت -1:
 		_exit(sig);
 		/* NOTREACHED */
-	case 0:
+	حالت 0:
 		sprintf(pid, "%i", crashed_pid);
-		printf("\nAuto launching gdb!\n\n");
+		لکھو("\nAuto launching gdb!\n\n");
 		_exit(execlp("gdb", "gdb", "--quiet", "--pid", pid,
-			"-ex", "bt full", NULL));
+			"-ex", "bt full", تہی));
 		/* NOTREACHED */
-	default:
-		wait(&status);
+	طےشدہ:
+		wait(&حالت_2);
 	}
 	_exit(1);
 	/* NOTREACHED */
 }
-#endif
+#اگر_ختم
 
-int main(int argc, char **argv)
+صحیح مین(صحیح argc, حرف **argv)
 {
-	const char *bootlevel = NULL;
-	char *newlevel = NULL;
-	const char *systype = NULL;
-	RC_STRINGLIST *deporder = NULL;
+	ثابت حرف *bootlevel = تہی;
+	حرف *newlevel = تہی;
+	ثابت حرف *systype = تہی;
+	RC_STRINGLIST *deporder = تہی;
 	RC_STRINGLIST *tmplist;
 	RC_STRING *service;
-	bool going_down = false;
-	int depoptions = RC_DEP_STRICT | RC_DEP_TRACE;
-	char *krunlevel = NULL;
-	const char *workingdir = "/";
-	char *pidstr = NULL;
-	int opt;
+	bool going_نیچے_کو = false;
+	صحیح depoptions = RC_DEP_STRICT | RC_DEP_TRACE;
+	حرف *krunlevel = تہی;
+	ثابت حرف *workingdir = "/";
+	حرف *pidstr = تہی;
+	صحیح opt;
 	bool parallel;
-	int regen = 0;
+	صحیح regen = 0;
 	bool nostop = false;
-#ifdef __linux__
-	char *proc;
-	char *p;
-	char *token;
-#endif
+#اگر_تعریف_شدہ __linux__
+	حرف *proc;
+	حرف *p;
+	حرف *token;
+#اگر_ختم
 
-#ifdef RC_DEBUG
-	signal_setup(SIGBUS, handle_bad_signal);
-	signal_setup(SIGILL, handle_bad_signal);
-	signal_setup(SIGSEGV, handle_bad_signal);
-#endif
+#اگر_تعریف_شدہ RC_DEBUG
+	signal_تیاری(SIGBUS, handle_bad_signal);
+	signal_تیاری(SIGILL, handle_bad_signal);
+	signal_تیاری(SIGSEGV, handle_bad_signal);
+#اگر_ختم
 
 	applet = basename_c(argv[0]);
 	LIST_INIT(&service_pids);
 	LIST_INIT(&free_these_pids);
-	if (!applet)
+	اگر (!applet)
 		eerrorx("arguments required");
 
 	argc--;
 	argv++;
 
 	/* complain about old configuration settings if they exist */
-	if (access(RC_CONF_OLD, F_OK) == 0) {
+	اگر (access(RC_CONF_OLD, F_OK) == 0) {
 		ewarn("%s still exists on your system and should be removed.", RC_CONF_OLD);
 		ewarn("Please migrate to the appropriate settings in %s", RC_CONF);
 	}
 
 	argc++;
 	argv--;
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	جب ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (صحیح *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'n':
+		انتخاب (opt) {
+		حالت 'n':
 			nostop = true;
-			break;
-		case 'o':
-			if (*optarg == '\0')
-				optarg = NULL;
-			if (!rc_runlevel_exists(optarg)) {
+			توڑو;
+		حالت 'o':
+			اگر (*optarg == '\0')
+				optarg = تہی;
+			اگر (!rc_runlevel_exists(optarg)) {
 				eerror("runlevel `%s' does not exist", optarg);
-				exit(EXIT_FAILURE);
+				باہر_نکلو(EXIT_FAILURE);
 			}
-			if (rc_is_user())
+			اگر (rc_is_user())
 				eerrorx("user services do not currently support --override");
-			if (!set_krunlevel(optarg))
-				exit(EXIT_FAILURE);
+			اگر (!سیٹ_krunlevel(optarg))
+				باہر_نکلو(EXIT_FAILURE);
 			einfo("Overriding next runlevel to %s", optarg);
-			exit(EXIT_SUCCESS);
+			باہر_نکلو(EXIT_SUCCESS);
 			/* NOTREACHED */
-		case 's':
+		حالت 's':
 			newlevel = rc_service_resolve(optarg);
-			if (!newlevel)
+			اگر (!newlevel)
 				eerrorx("%s: service `%s' does not exist",
 				    applet, optarg);
 			argv += optind - 1;
@@ -822,11 +822,11 @@ int main(int argc, char **argv)
 			execv(*argv, argv);
 			eerrorx("%s: %s", applet, strerror(errno));
 			/* NOTREACHED */
-		case 'S':
+		حالت 'S':
 			systype = rc_sys();
-			if (systype)
-				printf("%s\n", systype);
-			exit(EXIT_SUCCESS);
+			اگر (systype)
+				لکھو("%s\n", systype);
+			باہر_نکلو(EXIT_SUCCESS);
 			/* NOTREACHED */
 		case_RC_COMMON_GETOPT
 		}
@@ -834,10 +834,10 @@ int main(int argc, char **argv)
 
 	/* Change dir to / to ensure all init scripts don't use stuff in pwd
 	 * For user services, change to the user's HOME instead. */
-	if (rc_is_user() && !(workingdir = getenv("HOME")))
+	اگر (rc_is_user() && !(workingdir = getenv("HOME")))
 		eerrorx("HOME is unset.");
 
-	if (chdir(workingdir) == -1)
+	اگر (chdir(workingdir) == -1)
 		eerror("chdir: %s", strerror(errno));
 
 	/* Ensure our environment is pure
@@ -849,11 +849,11 @@ int main(int argc, char **argv)
 	/* To make life easier, we only have the shutdown runlevel as
 	 * nothing really needs to know that we're rebooting.
 	 * But for those that do, you can test against RC_REBOOT. */
-	if (newlevel) {
-		if (rc_is_user() && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0)
+	اگر (newlevel) {
+		اگر (rc_is_user() && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0)
 			eerrorx("%s: the sysinit runlevel can't be used for user services.", applet);
 
-		if (strcmp(newlevel, "reboot") == 0) {
+		اگر (strcmp(newlevel, "reboot") == 0) {
 			newlevel = UNCONST(RC_LEVEL_SHUTDOWN);
 			setenv("RC_REBOOT", "YES", 1);
 		}
@@ -867,7 +867,7 @@ int main(int argc, char **argv)
 	/* Export our PID */
 	xasprintf(&pidstr, "%d", getpid());
 	setenv("RC_PID", pidstr, 1);
-	free(pidstr);
+	آزاد(pidstr);
 
 	/* Create a list of all services which should be started for the new or
 	* current runlevel including those in boot, sysinit and hotplugged
@@ -880,103 +880,103 @@ int main(int argc, char **argv)
 	rc_logger_open(newlevel ? newlevel : runlevel);
 
 	/* Setup a signal handler */
-	signal_setup(SIGINT, handle_signal);
-	signal_setup(SIGQUIT, handle_signal);
-	signal_setup(SIGTERM, handle_signal);
-	signal_setup(SIGUSR1, handle_signal);
-	signal_setup(SIGWINCH, handle_signal);
+	signal_تیاری(SIGINT, handle_signal);
+	signal_تیاری(SIGQUIT, handle_signal);
+	signal_تیاری(SIGTERM, handle_signal);
+	signal_تیاری(SIGUSR1, handle_signal);
+	signal_تیاری(SIGWINCH, handle_signal);
 
 	/* Run any special sysinit foo */
-	if (newlevel && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
+	اگر (newlevel && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
 		do_sysinit();
-		free(runlevel);
+		آزاد(runlevel);
 		runlevel = default_runlevel();
 	}
 
-	rc_plugin_load();
+	rc_plugin_بھرو();
 
 	/* Now we start handling our children */
-	signal_setup(SIGCHLD, handle_signal);
+	signal_تیاری(SIGCHLD, handle_signal);
 
-	if (newlevel &&
+	اگر (newlevel &&
 	    (strcmp(newlevel, RC_LEVEL_SHUTDOWN) == 0 ||
 		strcmp(newlevel, RC_LEVEL_SINGLE) == 0))
 	{
-		going_down = true;
-		if (access(RC_KRUNLEVEL, F_OK) != 0)
-			set_krunlevel(runlevel);
-		rc_runlevel_set(newlevel);
+		going_نیچے_کو = true;
+		اگر (access(RC_KRUNLEVEL, F_OK) != 0)
+			سیٹ_krunlevel(runlevel);
+		rc_runlevel_سیٹ(newlevel);
 		setenv("RC_RUNLEVEL", newlevel, 1);
 		setenv("RC_GOINGDOWN", "YES", 1);
-	} else {
+	} ورنہ {
 		/* We should not use krunlevel in sysinit or boot runlevels */
-		if (!newlevel ||
+		اگر (!newlevel ||
 		    (strcmp(newlevel, RC_LEVEL_SYSINIT) != 0 &&
 			strcmp(newlevel, getenv("RC_BOOTLEVEL")) != 0))
 		{
 			krunlevel = get_krunlevel();
-			if (krunlevel) {
+			اگر (krunlevel) {
 				newlevel = krunlevel;
-				set_krunlevel(NULL);
+				سیٹ_krunlevel(تہی);
 			}
 		}
 
-		if (newlevel) {
-			if (strcmp(runlevel, newlevel) != 0 &&
+		اگر (newlevel) {
+			اگر (strcmp(runlevel, newlevel) != 0 &&
 			    !rc_runlevel_exists(newlevel))
 				eerrorx("%s: not a valid runlevel", newlevel);
 
-#ifdef __linux__
-			if (strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
+#اگر_تعریف_شدہ __linux__
+			اگر (strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
 				/* If we requested a runlevel, save it now */
 				p = rc_proc_getent("rc_runlevel");
-				if (p == NULL)
+				اگر (p == تہی)
 					p = rc_proc_getent("softlevel");
-				if (p != NULL) {
-					set_krunlevel(p);
-					free(p);
+				اگر (p != تہی) {
+					سیٹ_krunlevel(p);
+					آزاد(p);
 				}
 			}
-#endif
+#اگر_ختم
 		}
 	}
 
-	if (going_down) {
-#ifdef __FreeBSD__
+	اگر (going_نیچے_کو) {
+#اگر_تعریف_شدہ __FreeBSD__
 		/* FIXME: we shouldn't have todo this */
 		/* For some reason, wait_for_services waits for the logger
 		 * process to finish as well, but only on FreeBSD.
 		 * We cannot allow this so we stop logging now. */
 		rc_logger_close();
-#endif
+#اگر_ختم
 
-		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_IN, newlevel);
-	} else {
-		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_IN, runlevel);
+		rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_STOP_اندر, newlevel);
+	} ورنہ {
+		rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_STOP_اندر, runlevel);
 	}
 
 	/* Check if runlevel is valid if we're changing */
-	if (newlevel && strcmp(runlevel, newlevel) != 0 && !going_down) {
-		if (!rc_runlevel_exists(newlevel)) {
-			rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
+	اگر (newlevel && strcmp(runlevel, newlevel) != 0 && !going_نیچے_کو) {
+		اگر (!rc_runlevel_exists(newlevel)) {
+			rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_STOP_برآمد, runlevel);
 			eerrorx("%s: is not a valid runlevel", newlevel);
 		}
 	}
 
 	/* Load our deptree */
-	if ((main_deptree = _rc_deptree_load(0, &regen)) == NULL) {
-		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
+	اگر ((main_deptree = rc_deptree_بھرو_2(0, &regen)) == تہی) {
+		rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_STOP_برآمد, runlevel);
 		eerrorx("failed to load deptree");
 	}
 
-	if (faccessat(rc_dirfd(RC_DIR_SVCDIR), "clock-skewed", F_OK, 0) == 0)
+	اگر (faccessat(rc_dirfd(RC_DIR_SVCDIR), "clock-skewed", F_OK, 0) == 0)
 		ewarn("WARNING: clock skew detected!");
 
 	/* Clean the failed services state dir */
 	clean_failed();
 
-	if (mkdirat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", 0755) != 0) {
-		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
+	اگر (mkdirat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", 0755) != 0) {
+		rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_STOP_برآمد, runlevel);
 		eerrorx("%s: failed to create stopping dir '%s/rc.stopping': %s", applet, rc_svcdir(), strerror(errno));
 	}
 
@@ -987,23 +987,23 @@ int main(int argc, char **argv)
 	* in the new or current runlevel so we won't actually be stopping
 	* them all.
 	*/
-	main_stop_services = rc_services_in_state(RC_SERVICE_STARTED);
-	tmplist = rc_services_in_state(RC_SERVICE_INACTIVE);
+	main_stop_services = rc_services_اندر_state(RC_SERVICE_STARTED);
+	tmplist = rc_services_اندر_state(RC_SERVICE_INACTIVE);
 	TAILQ_CONCAT(main_stop_services, tmplist, entries);
-	free(tmplist);
-	tmplist = rc_services_in_state(RC_SERVICE_STARTING);
+	آزاد(tmplist);
+	tmplist = rc_services_اندر_state(RC_SERVICE_STARTING);
 	TAILQ_CONCAT(main_stop_services, tmplist, entries);
-	free(tmplist);
-	if (main_stop_services)
-		rc_stringlist_sort(&main_stop_services);
+	آزاد(tmplist);
+	اگر (main_stop_services)
+		rc_stringlist_ترتیب_دو(&main_stop_services);
 
 	main_types_nwua = rc_stringlist_new();
-	rc_stringlist_add(main_types_nwua, "ineed");
-	rc_stringlist_add(main_types_nwua, "iwant");
-	rc_stringlist_add(main_types_nwua, "iuse");
-	rc_stringlist_add(main_types_nwua, "iafter");
+	rc_stringlist_جوڑو(main_types_nwua, "ineed");
+	rc_stringlist_جوڑو(main_types_nwua, "iwant");
+	rc_stringlist_جوڑو(main_types_nwua, "iuse");
+	rc_stringlist_جوڑو(main_types_nwua, "iafter");
 
-	if (main_stop_services) {
+	اگر (main_stop_services) {
 		tmplist = rc_deptree_depends(main_deptree, main_types_nwua, main_stop_services,
 		    runlevel, depoptions | RC_DEP_STOP);
 		rc_stringlist_free(main_stop_services);
@@ -1015,32 +1015,32 @@ int main(int argc, char **argv)
 	 * runlevels.  Clearly, some of these will already be started so we
 	 * won't actually be starting them all.
 	 */
-	main_hotplugged_services = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
-	main_start_services = rc_services_in_runlevel_stacked(newlevel ?
+	main_hotplugged_services = rc_services_اندر_state(RC_SERVICE_HOTPLUGGED);
+	main_آغاز_services = rc_services_اندر_runlevel_stacked(newlevel ?
 	    newlevel : runlevel);
-	if (strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SHUTDOWN) != 0 &&
+	اگر (strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SHUTDOWN) != 0 &&
 	    strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SYSINIT) != 0)
 	{
-		tmplist = rc_services_in_runlevel(RC_LEVEL_SYSINIT);
-		TAILQ_CONCAT(main_start_services, tmplist, entries);
-		free(tmplist);
+		tmplist = rc_services_اندر_runlevel(RC_LEVEL_SYSINIT);
+		TAILQ_CONCAT(main_آغاز_services, tmplist, entries);
+		آزاد(tmplist);
 		/* If we are NOT headed for the single-user runlevel... */
-		if (strcmp(newlevel ? newlevel : runlevel,
+		اگر (strcmp(newlevel ? newlevel : runlevel,
 			RC_LEVEL_SINGLE) != 0)
 		{
 			/* If we are NOT headed for the boot runlevel... */
-			if (strcmp(newlevel ? newlevel : runlevel,
+			اگر (strcmp(newlevel ? newlevel : runlevel,
 				bootlevel) != 0)
 			{
-				tmplist = rc_services_in_runlevel(bootlevel);
-				TAILQ_CONCAT(main_start_services, tmplist, entries);
-				free(tmplist);
+				tmplist = rc_services_اندر_runlevel(bootlevel);
+				TAILQ_CONCAT(main_آغاز_services, tmplist, entries);
+				آزاد(tmplist);
 			}
-			if (main_hotplugged_services) {
+			اگر (main_hotplugged_services) {
 				TAILQ_FOREACH(service, main_hotplugged_services,
 				    entries)
-				    rc_stringlist_addu(main_start_services,
-					service->value);
+				    rc_stringlist_addu(main_آغاز_services,
+					service->قدر);
 			}
 		}
 	}
@@ -1048,103 +1048,103 @@ int main(int argc, char **argv)
 	parallel = rc_conf_yesno("rc_parallel");
 
 	/* Now stop the services that shouldn't be running */
-	if (main_stop_services && !nostop)
-		do_stop_services(main_types_nw, main_start_services, main_stop_services, main_deptree, newlevel, parallel, going_down);
+	اگر (main_stop_services && !nostop)
+		do_stop_services(main_types_nw, main_آغاز_services, main_stop_services, main_deptree, newlevel, parallel, going_نیچے_کو);
 
 	/* Wait for our services to finish */
 	wait_for_services();
 
 	/* Notify the plugins we have finished */
-	rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT,
-	    going_down ? newlevel : runlevel);
+	rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_STOP_برآمد,
+	    going_نیچے_کو ? newlevel : runlevel);
 
 	unlinkat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", AT_REMOVEDIR);
 
 	/* Store the new runlevel */
-	if (newlevel) {
-		rc_runlevel_set(newlevel);
-		free(runlevel);
+	اگر (newlevel) {
+		rc_runlevel_سیٹ(newlevel);
+		آزاد(runlevel);
 		runlevel = xstrdup(newlevel);
 		setenv("RC_RUNLEVEL", runlevel, 1);
 	}
 
-#ifdef __linux__
+#اگر_تعریف_شدہ __linux__
 	/* We can't log beyond this point as the shutdown runlevel
 	 * will mount / readonly. */
-	if (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
+	اگر (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
 		rc_logger_close();
-#endif
+#اگر_ختم
 
 	mkdirat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", 0755);
 
-	rc_plugin_run(RC_HOOK_RUNLEVEL_START_IN, runlevel);
+	rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_آغاز_اندر, runlevel);
 
 	/* Re-add our hotplugged services if they stopped */
-	if (main_hotplugged_services)
+	اگر (main_hotplugged_services)
 		TAILQ_FOREACH(service, main_hotplugged_services, entries)
-		    rc_service_mark(service->value, RC_SERVICE_HOTPLUGGED);
+		    rc_service_mark(service->قدر, RC_SERVICE_HOTPLUGGED);
 
-#ifdef __linux__
+#اگر_تعریف_شدہ __linux__
 	/* If the "noinit" parameter was passed on the kernel command line then
 	 * mark the specified services as started so they will not be started
 	 * by us. */
 	proc = p = rc_proc_getent("noinit");
-	if (proc) {
-		while ((token = strsep(&p, ",")))
+	اگر (proc) {
+		جب ((token = strsep(&p, ",")))
 			rc_service_mark(token, RC_SERVICE_STARTED);
-		free(proc);
+		آزاد(proc);
 	}
-#endif
+#اگر_ختم
 
 	/* If we have a list of services to start then... */
-	if (main_start_services) {
+	اگر (main_آغاز_services) {
 		/* Get a list of the chained runlevels which compose the target runlevel */
 		RC_STRINGLIST *runlevel_chain = rc_runlevel_stacks(runlevel);
 
 		/* Loop through them in reverse order. */
 		RC_STRING *rlevel;
-		TAILQ_FOREACH_REVERSE(rlevel, runlevel_chain, rc_stringlist, entries)
+		TAILQ_FOREACH_الٹ(rlevel, runlevel_chain, rc_stringlist, entries)
 		{
 			/* Get a list of all the services in that runlevel */
-			RC_STRINGLIST *run_services = rc_services_in_runlevel(rlevel->value);
+			RC_STRINGLIST *تسلسل_services = rc_services_اندر_runlevel(rlevel->قدر);
 
 			/* Start those services. */
-			rc_stringlist_sort(&run_services);
-			deporder = rc_deptree_depends(main_deptree, main_types_nwua, run_services, rlevel->value, depoptions | RC_DEP_START);
-			rc_stringlist_free(run_services);
-			run_services = deporder;
-			do_start_services(run_services, parallel);
+			rc_stringlist_ترتیب_دو(&تسلسل_services);
+			deporder = rc_deptree_depends(main_deptree, main_types_nwua, تسلسل_services, rlevel->قدر, depoptions | RC_DEP_آغاز);
+			rc_stringlist_free(تسلسل_services);
+			تسلسل_services = deporder;
+			do_آغاز_services(تسلسل_services, parallel);
 
 			/* Wait for our services to finish */
 			wait_for_services();
 
 			/* Free the list of services, we're done with it. */
-			rc_stringlist_free(run_services);
+			rc_stringlist_free(تسلسل_services);
 		}
 		rc_stringlist_free(runlevel_chain);
 	}
 
-#ifdef __linux__
+#اگر_تعریف_شدہ __linux__
 	/* If the "noinit" parameter was passed on the kernel command line then
 	 * mark the specified services as stopped so that our records reflect
 	 * reality.	 */
 	proc = p = rc_proc_getent("noinit");
-	if (proc) {
-		while ((token = strsep(&p, ",")))
+	اگر (proc) {
+		جب ((token = strsep(&p, ",")))
 			rc_service_mark(token, RC_SERVICE_STOPPED);
-		free(proc);
+		آزاد(proc);
 	}
 
-#endif
+#اگر_ختم
 
-	rc_plugin_run(RC_HOOK_RUNLEVEL_START_OUT, runlevel);
+	rc_plugin_تسلسل(RC_HOOK_RUNLEVEL_آغاز_برآمد, runlevel);
 
 	/* If we're in the boot runlevel and we regenerated our dependencies
 	 * we need to delete them so that they are regenerated again in the
 	 * default runlevel as they may depend on things that are now
 	 * available */
-	if (regen && strcmp(runlevel, bootlevel) == 0)
+	اگر (regen && strcmp(runlevel, bootlevel) == 0)
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "deptree", 0);
 
-	return EXIT_SUCCESS;
+	واپس EXIT_SUCCESS;
 }

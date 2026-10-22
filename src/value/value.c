@@ -10,61 +10,61 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#define SYSLOG_NAMES
+#تعریف_کرو SYSLOG_نام
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "helpers.h"
+#شامل "einfo.h"
+#شامل "rc.h"
+#شامل "helpers.h"
 
-const char *applet = NULL;
-extern char **environ;
+ثابت حرف *applet = تہی;
+خارجی حرف **environ;
 
-int main(int argc, char **argv)
+صحیح مین(صحیح argc, حرف **argv)
 {
-	char *service = getenv("RC_SVCNAME");
-	enum { GET, SET, EXPORT } action;
-	char *option = NULL;
+	حرف *service = getenv("RC_SVCNAME");
+	شمار { GET, سیٹ_2, EXPORT } action;
+	حرف *option = تہی;
 
 	applet = basename_c(argv[0]);
-	if (service == NULL)
+	اگر (service == تہی)
 		eerrorx("%s: no service specified", applet);
 
-	if (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
+	اگر (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
 		action = GET;
-	else if (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
-		action = SET;
-	else if (strcmp(applet, "service_export") == 0)
+	ورنہ اگر (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
+		action = سیٹ_2;
+	ورنہ اگر (strcmp(applet, "service_export") == 0)
 		action = EXPORT;
-	else
+	ورنہ
 		eerrorx("%s: unknown applet", applet);
 
-	if (argc < 2 || !argv[1] || *argv[1] == '\0')
+	اگر (argc < 2 || !argv[1] || *argv[1] == '\0')
 		eerrorx("%s: no %s specified", applet, action == EXPORT ? "variable" : "option");
 
-	switch (action) {
-	case GET:
-		if (!(option = rc_service_value_get(service, argv[1])))
-			return EXIT_FAILURE;
-		printf("%s", option);
-		free(option);
-		return EXIT_SUCCESS;
-	case SET:
-		return rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
-	case EXPORT:
-		for (int i = 1; i < argc; i++) {
-			char *var;
-			if (rc_service_getenv(service, argv[i], NULL) > 0)
-				continue;
-			else if ((var = getenv(argv[i])))
+	انتخاب (action) {
+	حالت GET:
+		اگر (!(option = rc_service_قدر_get(service, argv[1])))
+			واپس EXIT_FAILURE;
+		لکھو("%s", option);
+		آزاد(option);
+		واپس EXIT_SUCCESS;
+	حالت سیٹ_2:
+		واپس rc_service_قدر_سیٹ(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
+	حالت EXPORT:
+		برائے (صحیح i = 1; i < argc; i++) {
+			حرف *var;
+			اگر (rc_service_getenv(service, argv[i], تہی) > 0)
+				جاری;
+			ورنہ اگر ((var = getenv(argv[i])))
 				rc_service_setenv(service, argv[i], var);
-			else
+			ورنہ
 				ewarn("%s: Missing reexport variable '%s'", service, argv[i]);
 		}
-		return EXIT_SUCCESS;
+		واپس EXIT_SUCCESS;
 	}
 }

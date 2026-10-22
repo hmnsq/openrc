@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef RC_SELINUX_UTIL_H
-#define RC_SELINUX_UTIL_H
+#اگر_غیر_تعریف_شدہ RC_SELINUX_UTIL_H
+#تعریف_کرو RC_SELINUX_UTIL_H
 
-#ifdef HAVE_SELINUX
+#اگر_تعریف_شدہ HAVE_SELINUX
 
-int selinux_util_open(void);
-int selinux_util_label(const char *path);
-int selinux_util_close(void);
+صحیح selinux_util_open(خالی);
+صحیح selinux_util_label(ثابت حرف *راستہ);
+صحیح selinux_util_close(خالی);
 
-void selinux_setup(char **argv);
+خالی selinux_تیاری(حرف **argv);
 
-#else
+#ورنہ
 
 /* always return false for selinux_util_open() */
-#define selinux_util_open() (0)
-#define selinux_util_label(x) do { } while (0)
-#define selinux_util_close() do { } while (0)
+#تعریف_کرو selinux_util_open() (0)
+#تعریف_کرو selinux_util_label(x) کرو { } جب (0)
+#تعریف_کرو selinux_util_close() کرو { } جب (0)
 
-#define selinux_setup(x) do { } while (0)
+#تعریف_کرو selinux_تیاری(x) کرو { } جب (0)
 
-#endif
+#اگر_ختم
 
 
-#endif
+#اگر_ختم

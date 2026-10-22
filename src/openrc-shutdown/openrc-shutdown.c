@@ -19,46 +19,46 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <sys/types.h>
-#include <strings.h>
-#include <unistd.h>
-#include <time.h>
-#include <utmp.h>
+#شامل <errno.h>
+#شامل <getopt.h>
+#شامل <signal.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <syslog.h>
+#شامل <sys/types.h>
+#شامل <strings.h>
+#شامل <unistd.h>
+#شامل <time.h>
+#شامل <utmp.h>
 
-#include "broadcast.h"
-#include "einfo.h"
-#include "rc.h"
-#include "helpers.h"
-#include "misc.h"
-#include "sysvinit.h"
-#include "wtmp.h"
-#include "_usage.h"
+#شامل "broadcast.h"
+#شامل "einfo.h"
+#شامل "rc.h"
+#شامل "helpers.h"
+#شامل "misc.h"
+#شامل "sysvinit.h"
+#شامل "wtmp.h"
+#شامل "_usage.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "cdDfFHKpRrsw" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "cancel",        no_argument, NULL, 'c'},
-	{ "no-write",        no_argument, NULL, 'd'},
-	{ "dry-run",        no_argument, NULL, 'D'},
-	{ "halt",        no_argument, NULL, 'H'},
-	{ "kexec",        no_argument, NULL, 'K'},
-	{ "poweroff",        no_argument, NULL, 'p'},
-	{ "reexec",        no_argument, NULL, 'R'},
-	{ "reboot",        no_argument, NULL, 'r'},
-	{ "single",        no_argument, NULL, 's'},
-	{ "write-only",        no_argument, NULL, 'w'},
+ثابت حرف *applet = تہی;
+ثابت حرف *extraopts = تہی;
+ثابت حرف getoptstring[] = "cdDfFHKpRrsw" getoptstring_COMMON;
+ثابت ساخت option longopts[] = {
+	{ "cancel",        no_argument, تہی, 'c'},
+	{ "no-write",        no_argument, تہی, 'd'},
+	{ "dry-run",        no_argument, تہی, 'D'},
+	{ "halt",        no_argument, تہی, 'H'},
+	{ "kexec",        no_argument, تہی, 'K'},
+	{ "poweroff",        no_argument, تہی, 'p'},
+	{ "reexec",        no_argument, تہی, 'R'},
+	{ "reboot",        no_argument, تہی, 'r'},
+	{ "single",        no_argument, تہی, 's'},
+	{ "write-only",        no_argument, تہی, 'w'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت حرف * ثابت longopts_help[] = {
 	"cancel a pending shutdown",
 	"do not write wtmp record",
 	"print actions instead of executing them",
@@ -71,7 +71,7 @@ const char * const longopts_help[] = {
 	"write wtmp boot record and exit",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+ثابت حرف *usagestring = ""
 	"Usage: openrc-shutdown -c | --cancel\n"
 	"   or: openrc-shutdown -R | --reexec\n"
 	"   or: openrc-shutdown -w | --write-only\n"
@@ -80,41 +80,41 @@ const char *usagestring = ""
 	"   or: openrc-shutdown -p | --poweroff time\n"
 	"   or: openrc-shutdown -r | --reboot time\n"
 	"   or: openrc-shutdown -s | --single time";
-const char *exclusive = "Select one of "
+ثابت حرف *exclusive = "Select one of "
 	"--cancel, --halt, --kexec, --poweroff, --reexec, --reboot, --single or \n"
 	"--write-only";
-const char *nologin_file = RC_SYSCONFDIR"/nologin";
-const char *shutdown_pid = "/run/openrc-shutdown.pid";
+ثابت حرف *nologin_file = RC_SYSCONFDIR"/nologin";
+ثابت حرف *shutdown_pid = "/run/openrc-shutdown.pid";
 
-static bool do_cancel = false;
-static bool do_dryrun = false;
-static bool do_halt = false;
-static bool do_kexec = false;
-static bool do_poweroff = false;
-static bool do_reboot = false;
-static bool do_reexec = false;
-static bool do_single = false;
-static bool do_wtmp = true;
-static bool do_wtmp_only = false;
+ساکن bool do_cancel = false;
+ساکن bool do_dryrun = false;
+ساکن bool do_halt = false;
+ساکن bool do_kexec = false;
+ساکن bool do_poweroff = false;
+ساکن bool do_reboot = false;
+ساکن bool do_reexec = false;
+ساکن bool do_single = false;
+ساکن bool do_wtmp = true;
+ساکن bool do_wtmp_only = false;
 
-static void cancel_shutdown(void)
+ساکن خالی cancel_shutdown(خالی)
 {
 	pid_t pid;
 
 	pid = get_pid(applet, shutdown_pid);
-	if (pid <= 0)
+	اگر (pid <= 0)
 		eerrorx("%s: Unable to cancel shutdown", applet);
 
-	if (kill(pid, SIGTERM) != -1)
+	اگر (kill(pid, SIGTERM) != -1)
 		einfo("%s: shutdown canceled", applet);
-	else
+	ورنہ
 		eerrorx("%s: Unable to cancel shutdown", applet);
 }
 
 /*
  *	Create the nologin file.
  */
-static void create_nologin(int mins)
+ساکن خالی create_nologin(صحیح mins)
 {
 	FILE *fp;
 	time_t t;
@@ -122,7 +122,7 @@ static void create_nologin(int mins)
 	time(&t);
 	t += 60 * mins;
 
-	if ((fp = fopen(nologin_file, "w")) != NULL) {
+	اگر ((fp = fopen(nologin_file, "w")) != تہی) {
 		fprintf(fp, "\rThe system is going down on %s\r\n", ctime(&t));
 		fclose(fp);
 	}
@@ -131,26 +131,26 @@ static void create_nologin(int mins)
 /*
  * Send a command to our init
  */
-static void send_cmd(const char *cmd)
+ساکن خالی send_cmd(ثابت حرف *cmd)
 {
 	FILE *fifo;
 	size_t ignored;
 
-	if (do_dryrun) {
+	اگر (do_dryrun) {
 		einfo("Would send %s to init", cmd);
-		return;
+		واپس;
 	}
-	if (do_wtmp && (do_halt || do_kexec || do_reboot || do_poweroff))
+	اگر (do_wtmp && (do_halt || do_kexec || do_reboot || do_poweroff))
 		log_wtmp("shutdown", "~~", 0, RUN_LVL, "~~");
 	fifo = fopen(RC_INIT_FIFO, "w");
-	if (!fifo) {
+	اگر (!fifo) {
 		perror("fopen");
-		return;
+		واپس;
 	}
 
-	ignored = fwrite(cmd, 1, strlen(cmd), fifo);
-	if (ignored != strlen(cmd))
-		printf("Error writing to init fifo\n");
+	ignored = fwrite(cmd, 1, لڑی_لمبائی(cmd), fifo);
+	اگر (ignored != لڑی_لمبائی(cmd))
+		لکھو("Error writing to init fifo\n");
 	fclose(fifo);
 }
 
@@ -158,204 +158,204 @@ static void send_cmd(const char *cmd)
  * sleep without being interrupted.
  * The idea for this code came from sysvinit.
  */
-static void sleep_no_interrupt(int seconds)
+ساکن خالی sleep_no_مداخلت(صحیح seconds)
 {
-	struct timespec duration;
-	struct timespec remaining;
+	ساخت timespec duration;
+	ساخت timespec بقایا;
 
 	duration.tv_sec = seconds;
 	duration.tv_nsec = 0;
 
-	while (nanosleep(&duration, &remaining) < 0 && errno == EINTR)
-		duration = remaining;
+	جب (nanosleep(&duration, &بقایا) < 0 && errno == EINTR)
+		duration = بقایا;
 }
 
-RC_NORETURN static void stop_shutdown(int sig)
+RC_NORETURN ساکن خالی stop_shutdown(صحیح sig)
 {
-	(void) sig;
+	(خالی) sig;
 	unlink(nologin_file);
 	unlink(shutdown_pid);
 	einfo("Shutdown cancelled");
-	exit(0);
+	باہر_نکلو(0);
 }
 
-int main(int argc, char **argv)
+صحیح مین(صحیح argc, حرف **argv)
 {
-	char *ch = NULL;
-	int opt;
-	int cmd_count = 0;
-	int hour = 0;
-	int min = 0;
-	int shutdown_delay = 0;
-	struct sigaction sa;
-	struct tm *lt;
+	حرف *ch = تہی;
+	صحیح opt;
+	صحیح cmd_گنتی = 0;
+	صحیح hour = 0;
+	صحیح min = 0;
+	صحیح shutdown_delay = 0;
+	ساخت sigaction sa;
+	ساخت tm *lt;
 	time_t tv;
 	bool need_warning = false;
-	char *msg = NULL;
-	char *state = NULL;
-	char *time_arg = NULL;
+	حرف *پیغام_2 = تہی;
+	حرف *state = تہی;
+	حرف *وقت_arg = تہی;
 	FILE *fp;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	جب ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (صحیح *) 0)) != -1)
 	{
-		switch (opt) {
-			case 'c':
+		انتخاب (opt) {
+			حالت 'c':
 				do_cancel = true;
-			cmd_count++;
-				break;
-			case 'd':
+			cmd_گنتی++;
+				توڑو;
+			حالت 'd':
 				do_wtmp = false;
-				break;
-		case 'D':
+				توڑو;
+		حالت 'D':
 			do_dryrun = true;
-			break;
-		case 'H':
+			توڑو;
+		حالت 'H':
 			do_halt = true;
 			xasprintf(&state, "%s", "halt");
-			cmd_count++;
-			break;
-		case 'K':
+			cmd_گنتی++;
+			توڑو;
+		حالت 'K':
 			do_kexec = true;
 			xasprintf(&state, "%s", "reboot");
-			cmd_count++;
-			break;
-		case 'p':
+			cmd_گنتی++;
+			توڑو;
+		حالت 'p':
 			do_poweroff = true;
 			xasprintf(&state, "%s", "power off");
-			cmd_count++;
-			break;
-		case 'R':
+			cmd_گنتی++;
+			توڑو;
+		حالت 'R':
 			do_reexec = true;
-			cmd_count++;
-			break;
-		case 'r':
+			cmd_گنتی++;
+			توڑو;
+		حالت 'r':
 			do_reboot = true;
 			xasprintf(&state, "%s", "reboot");
-			cmd_count++;
-			break;
-		case 's':
+			cmd_گنتی++;
+			توڑو;
+		حالت 's':
 			do_single = true;
 			xasprintf(&state, "%s", "go down for maintenance");
-			cmd_count++;
-			break;
-		case 'w':
+			cmd_گنتی++;
+			توڑو;
+		حالت 'w':
 			do_wtmp_only = true;
-			cmd_count++;
-			break;
+			cmd_گنتی++;
+			توڑو;
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (geteuid() != 0)
+	اگر (geteuid() != 0)
 		eerrorx("%s: you must be root\n", applet);
-	if (cmd_count != 1) {
+	اگر (cmd_گنتی != 1) {
 		eerror("%s: %s\n", applet, exclusive);
 		usage(EXIT_FAILURE);
 	}
 
-	if (do_cancel) {
+	اگر (do_cancel) {
 		cancel_shutdown();
-		exit(EXIT_SUCCESS);
-	} else if (do_reexec) {
+		باہر_نکلو(EXIT_SUCCESS);
+	} ورنہ اگر (do_reexec) {
 		send_cmd("reexec");
-		exit(EXIT_SUCCESS);
-	} else if (do_wtmp_only) {
+		باہر_نکلو(EXIT_SUCCESS);
+	} ورنہ اگر (do_wtmp_only) {
 		log_wtmp("shutdown", "~~", 0, RUN_LVL, "~~");
-		exit(EXIT_SUCCESS);
+		باہر_نکلو(EXIT_SUCCESS);
 	}
 
-	if (optind >= argc) {
+	اگر (optind >= argc) {
 		eerror("%s: No shutdown time specified", applet);
 		usage(EXIT_FAILURE);
 	}
-	time_arg = argv[optind];
-	if (*time_arg == '+')
-		time_arg++;
-	if (strcasecmp(time_arg, "now") == 0)
-		strcpy(time_arg, "0");
-	for (ch=time_arg; *ch; ch++)
-		if ((*ch < '0' || *ch > '9') && *ch != ':') {
-			eerror("%s: invalid time %s", applet, time_arg);
+	وقت_arg = argv[optind];
+	اگر (*وقت_arg == '+')
+		وقت_arg++;
+	اگر (strcasecmp(وقت_arg, "now") == 0)
+		strcpy(وقت_arg, "0");
+	برائے (ch=وقت_arg; *ch; ch++)
+		اگر ((*ch < '0' || *ch > '9') && *ch != ':') {
+			eerror("%s: invalid time %s", applet, وقت_arg);
 			usage(EXIT_FAILURE);
 		}
-	if (strchr(time_arg, ':')) {
-		if ((sscanf(time_arg, "%2d:%2d", &hour, &min) != 2) ||
+	اگر (strchr(وقت_arg, ':')) {
+		اگر ((لڑی_سے_پڑھو(وقت_arg, "%2d:%2d", &hour, &min) != 2) ||
 				(hour > 23) || (min > 59)) {
-			eerror("%s: invalid time %s", applet, time_arg);
+			eerror("%s: invalid time %s", applet, وقت_arg);
 			usage(EXIT_FAILURE);
 		}
 		time(&tv);
 		lt = localtime(&tv);
 		shutdown_delay = (hour * 60 + min) - (lt->tm_hour * 60 + lt->tm_min);
-		if (shutdown_delay < 0)
+		اگر (shutdown_delay < 0)
 			shutdown_delay += 1440;
-	} else {
-		shutdown_delay = atoi(time_arg);
+	} ورنہ {
+		shutdown_delay = atoi(وقت_arg);
 	}
 
 	fp = fopen(shutdown_pid, "w");
-	if (!fp)
+	اگر (!fp)
 		eerrorx("%s: fopen `%s': %s", applet, shutdown_pid, strerror(errno));
 	fprintf(fp, "%d\n", getpid());
 	fclose(fp);
 
 	openlog(applet, LOG_PID, LOG_DAEMON);
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, حجم(sa));
 	sa.sa_handler = stop_shutdown;
 	sigemptyset(&sa.sa_mask);
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-	while (shutdown_delay > 0) {
-		if (shutdown_delay > 180)
+	sigaction(SIGINT, &sa, تہی);
+	sigaction(SIGTERM, &sa, تہی);
+	جب (shutdown_delay > 0) {
+		اگر (shutdown_delay > 180)
 			need_warning = (shutdown_delay % 60 == 0);
-		else if (shutdown_delay > 60)
+		ورنہ اگر (shutdown_delay > 60)
 			need_warning = (shutdown_delay % 30 == 0);
-		else if	(shutdown_delay > 10)
+		ورنہ اگر	(shutdown_delay > 10)
 			need_warning = (shutdown_delay % 15 == 0);
-		else
+		ورنہ
 			need_warning = true;
 
-		if (shutdown_delay <= 5)
+		اگر (shutdown_delay <= 5)
 			create_nologin(shutdown_delay);
-		if (need_warning) {
-			xasprintf(&msg, "\rThe system will %s in %d minutes\r\n",
+		اگر (need_warning) {
+			xasprintf(&پیغام_2, "\rThe system will %s in %d minutes\r\n",
 			          state, shutdown_delay);
-			broadcast(msg);
-			free(msg);
+			نشر(پیغام_2);
+			آزاد(پیغام_2);
 		}
-		sleep_no_interrupt(60);
+		sleep_no_مداخلت(60);
 		shutdown_delay--;
 	}
-	xasprintf(&msg, "\rThe system will %s now\r\n", state);
-	broadcast(msg);
+	xasprintf(&پیغام_2, "\rThe system will %s now\r\n", state);
+	نشر(پیغام_2);
 	syslog(LOG_NOTICE, "The system will %s now", state);
 	unlink(nologin_file);
 	unlink(shutdown_pid);
-	if (do_halt) {
-		if (access("/run/initctl", F_OK) == 0) {
+	اگر (do_halt) {
+		اگر (access("/run/initctl", F_OK) == 0) {
 			sysvinit_setenv("INIT_HALT", "HALT");
 			sysvinit_runlevel('0');
-		} else
+		} ورنہ
 			send_cmd("halt");
-	} else if (do_kexec)
+	} ورنہ اگر (do_kexec)
 		send_cmd("kexec");
-	else if (do_poweroff) {
-		if (access("/run/initctl", F_OK) == 0) {
+	ورنہ اگر (do_poweroff) {
+		اگر (access("/run/initctl", F_OK) == 0) {
 			sysvinit_setenv("INIT_HALT", "POWEROFF");
 			sysvinit_runlevel('0');
-		} else
+		} ورنہ
 			send_cmd("poweroff");
-	} else if (do_reboot) {
-		if (access("/run/initctl", F_OK) == 0)
+	} ورنہ اگر (do_reboot) {
+		اگر (access("/run/initctl", F_OK) == 0)
 			sysvinit_runlevel('6');
-		else
+		ورنہ
 			send_cmd("reboot");
-	} else if (do_single) {
-		if (access("/run/initctl", F_OK) == 0)
+	} ورنہ اگر (do_single) {
+		اگر (access("/run/initctl", F_OK) == 0)
 			sysvinit_runlevel('S');
-		else
+		ورنہ
 			send_cmd("single");
 	}
-	return 0;
+	واپس 0;
 }

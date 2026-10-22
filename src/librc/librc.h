@@ -15,49 +15,49 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef _LIBRC_H_
-#define _LIBRC_H_
+#اگر_غیر_تعریف_شدہ _LIBRC_H_
+#تعریف_کرو _LIBRC_H_
 
-#define _IN_LIBRC
+#تعریف_کرو اندر_LIBRC
 
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <paths.h>
-#include <regex.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <time.h>
-#include <unistd.h>
+#شامل <sys/types.h>
+#شامل <sys/param.h>
+#شامل <sys/stat.h>
+#شامل <sys/time.h>
+#شامل <sys/wait.h>
+#شامل <ctype.h>
+#شامل <dirent.h>
+#شامل <errno.h>
+#شامل <fcntl.h>
+#شامل <libgen.h>
+#شامل <limits.h>
+#شامل <paths.h>
+#شامل <regex.h>
+#شامل <signal.h>
+#شامل <stdarg.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <strings.h>
+#شامل <time.h>
+#شامل <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
-  #include <sys/user.h>
-  #endif
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#else
-#include <sys/param.h>
-#endif
+#اگر defined(BSD) && !defined(__GNU__)
+  #اگر !defined(__NetBSD__)
+  #شامل <sys/user.h>
+  #اگر_ختم
+#شامل <sys/param.h>
+#شامل <sys/sysctl.h>
+#شامل <kvm.h>
+#ورنہ
+#شامل <sys/param.h>
+#اگر_ختم
 
-#include "rc.h"
-#include "misc.h"
+#شامل "rc.h"
+#شامل "misc.h"
 
-static const char *const dirnames[RC_DIR_SYS_MAX] =
+ساکن ثابت حرف *ثابت dirnames[RC_DIR_SYS_MAX] =
 {
 	[RC_DIR_STARTING] = "starting",
 	[RC_DIR_STARTED] = "started",
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
-void clear_dirfds(void);
+RC_STRINGLIST *config_list(صحیح dirfd, ثابت حرف *pathname);
+خالی clear_dirfds(خالی);
 
-#endif
+#اگر_ختم

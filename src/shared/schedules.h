@@ -10,20 +10,20 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __RC_SCHEDULES_H
-#define __RC_SCHEDULES_H
+#اگر_غیر_تعریف_شدہ __RC_SCHEDULES_H
+#تعریف_کرو __RC_SCHEDULES_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#شامل <stdbool.h>
+#شامل <sys/types.h>
 
-void free_schedulelist(void);
-int parse_signal(const char *applet, const char *sig);
-void parse_schedule(const char *applet, const char *string, int timeout);
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-		pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet);
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+خالی free_schedulelist(خالی);
+صحیح parse_signal(ثابت حرف *applet, ثابت حرف *sig);
+خالی parse_جدول_وقت(ثابت حرف *applet, ثابت حرف *string, صحیح timeout);
+صحیح do_stop(ثابت حرف *applet, ثابت حرف *exec, ثابت حرف *ثابت *argv,
+		pid_t pid, uid_t uid, صحیح sig, bool group, bool test, bool quiet);
+صحیح تسلسل_stop_جدول_وقت(ثابت حرف *applet,
+		ثابت حرف *exec, ثابت حرف *ثابت *argv,
 		pid_t pid, uid_t uid, bool group,
-		bool test, bool progress, bool quiet);
+		bool test, bool پیش_رفت, bool quiet);
 
-#endif
+#اگر_ختم

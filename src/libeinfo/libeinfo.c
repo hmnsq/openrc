@@ -15,87 +15,87 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <syslog.h>
-#include <unistd.h>
+#شامل <sys/ioctl.h>
+#شامل <errno.h>
+#شامل <inttypes.h>
+#شامل <stdarg.h>
+#شامل <stdbool.h>
+#شامل <stddef.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <strings.h>
+#شامل <syslog.h>
+#شامل <unistd.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#شامل "einfo.h"
+#شامل "helpers.h"
 
 /* In case we cannot work out how many columns from ioctl, supply a default */
-#define DEFAULT_COLS		 80
+#تعریف_کرو DEFAULT_ستون_تعداد		 80
 
-#define OK			"ok"
-#define NOT_OK			"!!"
+#تعریف_کرو OK			"ok"
+#تعریف_کرو NOT_OK			"!!"
 
 /* Number of spaces for an indent */
-#define INDENT_WIDTH		2
+#تعریف_کرو INDENT_چوڑائی		2
 
 /* How wide can the indent go? */
-#define INDENT_MAX		40
+#تعریف_کرو INDENT_MAX		40
 
 /* Default colours */
-#define GOOD                    2
-#define WARN                    3
-#define BAD                     1
-#define HILITE                  6
-#define BRACKET                 4
+#تعریف_کرو GOOD                    2
+#تعریف_کرو WARN                    3
+#تعریف_کرو BAD                     1
+#تعریف_کرو HILITE                  6
+#تعریف_کرو BRACKET                 4
 
 /* ANSI escape codes which mimic termcap */
-#define AF "\033[3%dm"
-#define CE "\033[K"
-#define CH "\033[%dC"
-#define MD "\033[1m"
-#define ME "\033[m"
-#define UP "\033[A"
+#تعریف_کرو AF "\033[3%dm"
+#تعریف_کرو CE "\033[K"
+#تعریف_کرو CH "\033[%dC"
+#تعریف_کرو MD "\033[1m"
+#تعریف_کرو ME "\033[m"
+#تعریف_کرو اوپر "\033[A"
 
-#define _GET_CAP(_d, _c) strlcpy(_d, tgoto(_c, 0, 0), sizeof(_d));
-#define _ASSIGN_CAP(_v) do {						      \
+#تعریف_کرو _GET_CAP(_d, _c) strlcpy(_d, tgoto(_c, 0, 0), حجم(_d));
+#تعریف_کرو تفویض_CAP(_v) کرو {						      \
 		_v = p;							      \
-		p += strlcpy(p, tmp, sizeof(ebuffer) - (p - ebuffer)) + 1;    \
-	} while (0)
+		p += strlcpy(p, tmp, حجم(ebuffer) - (p - ebuffer)) + 1;    \
+	} جب (0)
 
 /* A pointer to a string to prefix to einfo/ewarn/eerror messages */
-static const char *_eprefix = NULL;
+ساکن ثابت حرف *_eprefix = تہی;
 
 /* Buffers and structures to hold the final colours */
-static char ebuffer[100];
-struct ecolor {
+ساکن حرف ebuffer[100];
+ساخت ecolor {
 	ECOLOR color;
-	int def;
-	const char *name;
+	صحیح def;
+	ثابت حرف *name;
 };
-static char nullstr = '\0';
+ساکن حرف nullstr = '\0';
 
-static const struct ecolor ecolors[] = {
+ساکن ثابت ساخت ecolor ecolors[] = {
 	{ ECOLOR_GOOD,    GOOD,    "good"    },
 	{ ECOLOR_WARN,    WARN,    "warn"    },
 	{ ECOLOR_BAD,     BAD,     "bad"     },
 	{ ECOLOR_HILITE,  HILITE,  "hilite"  },
 	{ ECOLOR_BRACKET, BRACKET, "bracket" },
-	{ ECOLOR_NORMAL,  0,       NULL      },
+	{ ECOLOR_معمول,  0,       تہی      },
 };
-static const char *ecolors_str[ARRAY_SIZE(ecolors)];
+ساکن ثابت حرف *ecolors_str[ARRAY_سائز(ecolors)];
 
-static char *flush = NULL;
-static char *up = NULL;
-static char *goto_column = NULL;
+ساکن حرف *flush = تہی;
+ساکن حرف *اوپر_2 = تہی;
+ساکن حرف *goto_عمود = تہی;
 
-static const char *term = NULL;
-static bool term_is_cons25 = false;
+ساکن ثابت حرف *رکن = تہی;
+ساکن bool رکن_is_cons25 = false;
 
 /* Hardcoded list of colour capable terms
  * Only terminals without "color" in the name need to be explicitly listed */
-static const char *const color_terms[] = {
+ساکن ثابت حرف *ثابت color_terms[] = {
 	"Eterm",
 	"alacritty",
 	"ansi",
@@ -136,28 +136,28 @@ static const char *const color_terms[] = {
 	"xterm-debian",
 	"xterm-kitty",
     "xterm-ghostty",
-	NULL
+	تہی
 };
 
-#ifndef HAVE_STRLCPY
-static size_t
-strlcat(char *dst, const char *src, size_t size)
+#اگر_غیر_تعریف_شدہ HAVE_STRLCPY
+ساکن size_t
+strlcat(حرف *dst, ثابت حرف *src, size_t سائز)
 {
-	char *d = dst;
-	const char *s = src;
-	size_t src_n = size;
+	حرف *d = dst;
+	ثابت حرف *s = src;
+	size_t src_n = سائز;
 	size_t dst_n;
 
-	while (src_n-- != 0 && *d != '\0')
+	جب (src_n-- != 0 && *d != '\0')
 		d++;
 	dst_n = d - dst;
-	src_n = size - dst_n;
+	src_n = سائز - dst_n;
 
-	if (src_n == 0)
-		return dst_n + strlen(src);
+	اگر (src_n == 0)
+		واپس dst_n + لڑی_لمبائی(src);
 
-	while (*s != '\0') {
-		if (src_n != 1) {
+	جب (*s != '\0') {
+		اگر (src_n != 1) {
 			*d++ = *s;
 			src_n--;
 		}
@@ -165,278 +165,278 @@ strlcat(char *dst, const char *src, size_t size)
 	}
 	*d = '\0';
 
-	return dst_n + (s - src);
+	واپس dst_n + (s - src);
 }
-#endif
+#اگر_ختم
 
-static bool
-yesno(const char *value)
+ساکن bool
+yesno(ثابت حرف *قدر)
 {
-	if (!value) {
+	اگر (!قدر) {
 		errno = ENOENT;
-		return false;
+		واپس false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "on") == 0 ||
-	    strcasecmp(value, "1") == 0)
-		return true;
+	اگر (strcasecmp(قدر, "yes") == 0 ||
+	    strcasecmp(قدر, "y") == 0 ||
+	    strcasecmp(قدر, "true") == 0 ||
+	    strcasecmp(قدر, "on") == 0 ||
+	    strcasecmp(قدر, "1") == 0)
+		واپس true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "off") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	اگر (strcasecmp(قدر, "no") != 0 &&
+	    strcasecmp(قدر, "n") != 0 &&
+	    strcasecmp(قدر, "false") != 0 &&
+	    strcasecmp(قدر, "off") != 0 &&
+	    strcasecmp(قدر, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	واپس false;
 }
 
-static bool
-noyes(const char *value)
+ساکن bool
+noyes(ثابت حرف *قدر)
 {
-	int serrno = errno;
+	صحیح serrno = errno;
 	bool retval;
 
 	errno = 0;
-	retval = yesno(value);
-	if (errno == 0) {
+	retval = yesno(قدر);
+	اگر (errno == 0) {
 		retval = !retval;
 		errno = serrno;
 	}
 
-	return retval;
+	واپس retval;
 }
 
-static bool
-is_quiet(void)
+ساکن bool
+is_quiet(خالی)
 {
-	return yesno(getenv("EINFO_QUIET"));
+	واپس yesno(getenv("EINFO_QUIET"));
 }
 
-static bool
-is_really_quiet(void)
+ساکن bool
+is_really_quiet(خالی)
 {
-	return yesno(getenv("EERROR_QUIET"));
+	واپس yesno(getenv("EERROR_QUIET"));
 }
 
-static bool
-is_verbose(void)
+ساکن bool
+is_verbose(خالی)
 {
-	return yesno(getenv ("EINFO_VERBOSE"));
+	واپس yesno(getenv ("EINFO_VERBOSE"));
 }
 
 /* Fake tgoto call - very crapy, but works for our needs */
-static char *
-tgoto(const char *cap, int col, int line)
+ساکن حرف *
+tgoto(ثابت حرف *cap, صحیح ستون, صحیح سطر)
 {
-	static char buf[20];
-	char *p, *e, c, dbuf[6];
-	int oncol = 0, which = line, i;
+	ساکن حرف buf[20];
+	حرف *p, *e, c, dbuf[6];
+	صحیح oncol = 0, which = سطر, i;
 
 	p = buf;
-	e = p + sizeof(buf);
-	while ((c = *cap++)) {
-		if (c != '%' || ((c = *cap++) == '%')) {
+	e = p + حجم(buf);
+	جب ((c = *cap++)) {
+		اگر (c != '%' || ((c = *cap++) == '%')) {
 			*p++ = c;
-			if (p >= e) {
+			اگر (p >= e) {
 				errno = E2BIG;
-				return NULL;
+				واپس تہی;
 			}
-			continue;
+			جاری;
 		}
-		switch (c) {
-		case '3':
-		case '2':
-		case 'd':
+		انتخاب (c) {
+		حالت '3':
+		حالت '2':
+		حالت 'd':
 			i = 0;
-			do
+			کرو
 				dbuf[i++] = which % 10 | '0';
-			while ((which /= 10));
-			if (c != 'd') {
+			جب ((which /= 10));
+			اگر (c != 'd') {
 				c -= '0';
-				if (i > c) {
+				اگر (i > c) {
 					errno = EINVAL;
-					return NULL;
+					واپس تہی;
 				}
-				while (i < c)
+				جب (i < c)
 					dbuf[i++] = '0';
 			}
-			if (p + i >= e) {
+			اگر (p + i >= e) {
 				errno = E2BIG;
-				return NULL;
+				واپس تہی;
 			}
-			do
+			کرو
 				*p++ = dbuf[--i];
-			while (i);
-			break;
-		case 'r':
+			جب (i);
+			توڑو;
+		حالت 'r':
 			oncol = 0;
-			break;
-		case 'i':
-			col++;
-			line++;
+			توڑو;
+		حالت 'i':
+			ستون++;
+			سطر++;
 			which++;
-			continue;
-		default:
+			جاری;
+		طےشدہ:
 			errno = EINVAL;
-			return NULL;
+			واپس تہی;
 		}
 
 		oncol = 1 - oncol;
-		which = oncol ? col : line;
+		which = oncol ? ستون : سطر;
 	}
 	*p = '\0';
-	return buf;
+	واپس buf;
 }
 
-static bool
-colour_terminal(FILE * EINFO_RESTRICT f)
+ساکن bool
+رنگ_terminal(FILE * EINFO_RESTRICT f)
 {
-	static int in_colour = -1;
-	char *e, *ee, *end, *d, *p;
-	int c;
-	const char *_af = NULL, *_ce = NULL, *_ch = NULL;
-	const char *_md = NULL, *_me = NULL, *_up = NULL;
-	const char *bold;
-	char tmp[100];
-	unsigned int i = 0;
+	ساکن صحیح اندر_رنگ = -1;
+	حرف *e, *ee, *انتہا, *d, *p;
+	صحیح c;
+	ثابت حرف *_af = تہی, *_ce = تہی, *_ch = تہی;
+	ثابت حرف *_md = تہی, *_me = تہی, *اوپر_3 = تہی;
+	ثابت حرف *bold;
+	حرف tmp[100];
+	غیرعلامتی صحیح i = 0;
 
-	if (f && !isatty(fileno(f)))
-		return false;
+	اگر (f && !isatty(fileno(f)))
+		واپس false;
 
-	if (noyes(getenv("EINFO_COLOR")))
-		return false;
+	اگر (noyes(getenv("EINFO_COLOR")))
+		واپس false;
 
-	if (in_colour == 0)
-		return false;
-	if (in_colour == 1)
-		return true;
+	اگر (اندر_رنگ == 0)
+		واپس false;
+	اگر (اندر_رنگ == 1)
+		واپس true;
 
-	term_is_cons25 = false;
-	if (!term) {
-		term = getenv("TERM");
-		if (!term)
-			return false;
+	رکن_is_cons25 = false;
+	اگر (!رکن) {
+		رکن = getenv("TERM");
+		اگر (!رکن)
+			واپس false;
 	}
-	if (strcmp(term, "cons25") == 0)
-		term_is_cons25 = true;
+	اگر (strcmp(رکن, "cons25") == 0)
+		رکن_is_cons25 = true;
 
-	if (strstr(term, "color"))
-		in_colour = 1;
+	اگر (لڑی_تلاش(رکن, "color"))
+		اندر_رنگ = 1;
 
-	while (color_terms[i] && in_colour != 1) {
-		if (strcmp(color_terms[i], term) == 0) {
-			in_colour = 1;
+	جب (color_terms[i] && اندر_رنگ != 1) {
+		اگر (strcmp(color_terms[i], رکن) == 0) {
+			اندر_رنگ = 1;
 		}
 		i++;
 	}
 
-	if (in_colour != 1) {
-		in_colour = 0;
-		return false;
+	اگر (اندر_رنگ != 1) {
+		اندر_رنگ = 0;
+		واپس false;
 	}
 
-	if (!_af)
+	اگر (!_af)
 		_af = AF;
-	if (!_ce)
+	اگر (!_ce)
 		_ce = CE;
-	if (!_ch)
+	اگر (!_ch)
 		_ch = CH;
-	if (!_md)
+	اگر (!_md)
 		_md = MD;
-	if (!_me)
+	اگر (!_me)
 		_me = ME;
-	if (!_up)
-		_up = UP;
+	اگر (!اوپر_3)
+		اوپر_3 = اوپر;
 
 	/* Now setup our colours */
 	p = ebuffer;
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i) {
+	برائے (i = 0; i < ARRAY_سائز(ecolors); ++i) {
 		tmp[0] = '\0';
-		if (ecolors[i].name) {
+		اگر (ecolors[i].name) {
 			bold = _md;
 			c = ecolors[i].def;
 
 			/* See if the user wants to override the colour
 			 * We use a :col;bold: format like 2;1: for bold green
 			 * and 1;0: for a normal red */
-			if ((e = getenv("EINFO_COLOR"))) {
-				ee = strstr(e, ecolors[i].name);
-				if (ee)
-					ee += strlen(ecolors[i].name);
+			اگر ((e = getenv("EINFO_COLOR"))) {
+				ee = لڑی_تلاش(e, ecolors[i].name);
+				اگر (ee)
+					ee += لڑی_لمبائی(ecolors[i].name);
 
-				if (ee && *ee == '=') {
+				اگر (ee && *ee == '=') {
 					d = strdup(ee + 1);
-					if (d) {
-						end = strchr(d, ':');
-						if (end)
-							*end = '\0';
+					اگر (d) {
+						انتہا = strchr(d, ':');
+						اگر (انتہا)
+							*انتہا = '\0';
 						c = atoi(d);
-						end = strchr(d, ';');
-						if (end && *++end == '0')
+						انتہا = strchr(d, ';');
+						اگر (انتہا && *++انتہا == '0')
 							bold = _me;
-						free(d);
+						آزاد(d);
 					}
 				}
 			}
-			strlcpy(tmp, tgoto(bold, 0, 0), sizeof(tmp));
-			strlcat(tmp, tgoto(_af, 0, c & 0x07), sizeof(tmp));
-		} else
+			strlcpy(tmp, tgoto(bold, 0, 0), حجم(tmp));
+			strlcat(tmp, tgoto(_af, 0, c & 0x07), حجم(tmp));
+		} ورنہ
 			_GET_CAP(tmp, _me);
 
-		if (tmp[0])
-			_ASSIGN_CAP(ecolors_str[i]);
-		else
+		اگر (tmp[0])
+			تفویض_CAP(ecolors_str[i]);
+		ورنہ
 			ecolors_str[i] = &nullstr;
 	}
 
 	_GET_CAP(tmp, _ce);
-	_ASSIGN_CAP(flush);
-	_GET_CAP(tmp, _up);
-	_ASSIGN_CAP(up);
-	strlcpy(tmp, _ch, sizeof(tmp));
-	_ASSIGN_CAP(goto_column);
+	تفویض_CAP(flush);
+	_GET_CAP(tmp, اوپر_3);
+	تفویض_CAP(اوپر_2);
+	strlcpy(tmp, _ch, حجم(tmp));
+	تفویض_CAP(goto_عمود);
 
-	in_colour = 1;
-	return true;
+	اندر_رنگ = 1;
+	واپس true;
 }
 
-static int
-get_term_columns(FILE * EINFO_RESTRICT stream)
+ساکن صحیح
+get_رکن_columns(FILE * EINFO_RESTRICT دھارا)
 {
-	struct winsize ws;
-	char *env = getenv("COLUMNS");
-	char *p;
-	int i;
+	ساخت winsize ws;
+	حرف *env = getenv("COLUMNS");
+	حرف *p;
+	صحیح i;
 
-	if (env) {
+	اگر (env) {
 		i = strtoimax(env, &p, 10);
-		if (!*p)
-			return i;
+		اگر (!*p)
+			واپس i;
 	}
 
-	if (ioctl(fileno(stream), TIOCGWINSZ, &ws) == 0)
-		return ws.ws_col;
+	اگر (ioctl(fileno(دھارا), TIOCGWINSZ, &ws) == 0)
+		واپس ws.ws_col;
 
-	return DEFAULT_COLS;
+	واپس DEFAULT_ستون_تعداد;
 }
 
-void
-eprefix(const char *EINFO_RESTRICT prefix)
+خالی
+eprefix(ثابت حرف *EINFO_RESTRICT سابقہ)
 {
-	_eprefix = prefix;
+	_eprefix = سابقہ;
 }
 
-static void EINFO_PRINTF(2, 0)
-elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
+ساکن خالی EINFO_PRINTF(2, 0)
+elogv(صحیح level, ثابت حرف *EINFO_RESTRICT fmt, va_list ap)
 {
-	char *e = getenv("EINFO_LOG");
+	حرف *e = getenv("EINFO_LOG");
 	va_list apc;
 
-	if (fmt && e) {
+	اگر (fmt && e) {
 		closelog();
 		openlog(e, LOG_PID, LOG_DAEMON);
 		va_copy(apc, ap);
@@ -446,8 +446,8 @@ elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
 	}
 }
 
-void
-elog(int level, const char *EINFO_RESTRICT fmt, ...)
+خالی
+elog(صحیح level, ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
@@ -456,489 +456,489 @@ elog(int level, const char *EINFO_RESTRICT fmt, ...)
 	va_end(ap);
 }
 
-static int
-_eindent(FILE * EINFO_RESTRICT stream)
+ساکن صحیح
+_eindent(FILE * EINFO_RESTRICT دھارا)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	حرف *env = getenv("EINFO_INDENT");
+	صحیح amount = 0;
 
-	if (env) {
+	اگر (env) {
 		errno = 0;
-		amount = strtoimax(env, NULL, 0);
-		if (errno != 0 || amount < 0)
+		amount = strtoimax(env, تہی, 0);
+		اگر (errno != 0 || amount < 0)
 			amount = 0;
-		else if (amount > INDENT_MAX)
+		ورنہ اگر (amount > INDENT_MAX)
 			amount = INDENT_MAX;
 	}
 
-	return fprintf(stream, "%*s", amount, "");
+	واپس fprintf(دھارا, "%*s", amount, "");
 }
 
-static const char *
+ساکن ثابت حرف *
 _ecolor(FILE * EINFO_RESTRICT f, ECOLOR color)
 {
-	unsigned int i;
+	غیرعلامتی صحیح i;
 
-	if (!colour_terminal(f))
-		return "";
+	اگر (!رنگ_terminal(f))
+		واپس "";
 
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i)
-		if (ecolors[i].color == color)
-			return ecolors_str[i];
-	return "";
+	برائے (i = 0; i < ARRAY_سائز(ecolors); ++i)
+		اگر (ecolors[i].color == color)
+			واپس ecolors_str[i];
+	واپس "";
 }
 
-const char *
+ثابت حرف *
 ecolor(ECOLOR color)
 {
 	FILE *f = stdout;
 
 	/* Try and guess a valid tty */
-	if (!isatty(fileno(f))) {
+	اگر (!isatty(fileno(f))) {
 		f = stderr;
-		if (!isatty(fileno(f))) {
+		اگر (!isatty(fileno(f))) {
 			f = stdin;
-			if (!isatty(fileno(f)))
-				f = NULL;
+			اگر (!isatty(fileno(f)))
+				f = تہی;
 		}
 	}
 
-	return _ecolor(f, color);
+	واپس _ecolor(f, color);
 }
 
-#define LASTCMD(_cmd) {							      \
+#تعریف_کرو LASTCMD(_cmd) {							      \
 		unsetenv("EINFO_LASTCMD");				      \
 		setenv("EINFO_LASTCMD", _cmd, 1);			      \
 	}
 
-static int EINFO_PRINTF(3, 0)
-	_einfo(FILE *f, ECOLOR color, const char *EINFO_RESTRICT fmt, va_list va)
+ساکن صحیح EINFO_PRINTF(3, 0)
+	_einfo(FILE *f, ECOLOR color, ثابت حرف *EINFO_RESTRICT fmt, va_list va)
 {
-	int retval = 0;
-	char *last = getenv("EINFO_LASTCMD");
+	صحیح retval = 0;
+	حرف *آخری = getenv("EINFO_LASTCMD");
 	va_list ap;
 
-	if (last &&
-	    *last &&
-	    !colour_terminal(f) &&
-	    strcmp(last, "ewarn") != 0 &&
-	    last[strlen(last) - 1] == 'n')
+	اگر (آخری &&
+	    *آخری &&
+	    !رنگ_terminal(f) &&
+	    strcmp(آخری, "ewarn") != 0 &&
+	    آخری[لڑی_لمبائی(آخری) - 1] == 'n')
 		fprintf(f, "\n");
-	if (_eprefix)
-		fprintf(f, "%s%s%s|", _ecolor(f, color), _eprefix, _ecolor(f, ECOLOR_NORMAL));
-	fprintf(f, " %s*%s ", _ecolor(f, color), _ecolor(f, ECOLOR_NORMAL));
+	اگر (_eprefix)
+		fprintf(f, "%s%s%s|", _ecolor(f, color), _eprefix, _ecolor(f, ECOLOR_معمول));
+	fprintf(f, " %s*%s ", _ecolor(f, color), _ecolor(f, ECOLOR_معمول));
 	retval += _eindent(f);
 	va_copy(ap, va);
 	retval += vfprintf(f, fmt, ap) + 3;
 	va_end(ap); \
-	if (colour_terminal(f))
+	اگر (رنگ_terminal(f))
 		fprintf(f, "%s", flush);
-	return retval;
+	واپس retval;
 }
 
-#define _einfovn(fmt, ap) _einfo(stdout, ECOLOR_GOOD, fmt, ap)
-#define _ewarnvn(fmt, ap) _einfo(stderr, ECOLOR_WARN, fmt, ap)
-#define _eerrorvn(fmt, ap) _einfo(stderr, ECOLOR_BAD, fmt, ap)
+#تعریف_کرو _einfovn(fmt, ap) _einfo(stdout, ECOLOR_GOOD, fmt, ap)
+#تعریف_کرو _ewarnvn(fmt, ap) _einfo(stderr, ECOLOR_WARN, fmt, ap)
+#تعریف_کرو _eerrorvn(fmt, ap) _einfo(stderr, ECOLOR_BAD, fmt, ap)
 
-int
-einfon(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+einfon(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	اگر (!fmt || is_quiet())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfon");
-	return retval;
+	واپس retval;
 }
 
-int
-ewarnn(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+ewarnn(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	اگر (!fmt || is_quiet())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnn");
-	return retval;
+	واپس retval;
 }
 
-int
-eerrorn(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+eerrorn(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	اگر (!fmt || is_really_quiet())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("errorn");
-	return retval;
+	واپس retval;
 }
 
-int
-einfo(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+einfo(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	اگر (!fmt || is_quiet())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
-	retval += printf("\n");
+	retval += لکھو("\n");
 	va_end(ap);
 	LASTCMD("einfo");
-	return retval;
+	واپس retval;
 }
 
-int
-ewarn(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+ewarn(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	اگر (!fmt || is_quiet())
+		واپس 0;
 	va_start(ap, fmt);
 	elogv(LOG_WARNING, fmt, ap);
 	retval = _ewarnvn(fmt, ap);
 	retval += fprintf(stderr, "\n");
 	va_end(ap);
 	LASTCMD("ewarn");
-	return retval;
+	واپس retval;
 }
 
-void
-ewarnx(const char *EINFO_RESTRICT fmt, ...)
+خالی
+ewarnx(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_quiet()) {
+	اگر (fmt && !is_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_WARNING, fmt, ap);
 		_ewarnvn(fmt, ap);
 		va_end(ap);
 		fprintf(stderr, "\n");
 	}
-	exit(EXIT_FAILURE);
+	باہر_نکلو(EXIT_FAILURE);
 }
 
-int
-eerror(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+eerror(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	اگر (!fmt || is_really_quiet())
+		واپس 0;
 	va_start(ap, fmt);
 	elogv(LOG_ERR, fmt, ap);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	retval += fprintf(stderr, "\n");
 	LASTCMD("eerror");
-	return retval;
+	واپس retval;
 }
 
-void
-eerrorx(const char *EINFO_RESTRICT fmt, ...)
+خالی
+eerrorx(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_really_quiet()) {
+	اگر (fmt && !is_really_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_ERR, fmt, ap);
 		_eerrorvn(fmt, ap);
 		va_end(ap);
 		fprintf(stderr, "\n");
 	}
-	exit(EXIT_FAILURE);
+	باہر_نکلو(EXIT_FAILURE);
 }
 
-int
-ebegin(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+ebegin(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	اگر (!fmt || is_quiet())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
-	retval += printf(" ...");
-	if (colour_terminal(stdout))
-		retval += printf("\n");
+	retval += لکھو(" ...");
+	اگر (رنگ_terminal(stdout))
+		retval += لکھو("\n");
 	LASTCMD("ebegin");
-	return retval;
+	واپس retval;
 }
 
-static void
-_eend(FILE * EINFO_RESTRICT fp, int col, ECOLOR color, const char *msg)
+ساکن خالی
+_eend(FILE * EINFO_RESTRICT fp, صحیح ستون, ECOLOR color, ثابت حرف *پیغام_2)
 {
-	int i;
-	int cols;
+	صحیح i;
+	صحیح ستون_تعداد;
 
-	if (!msg)
-		return;
+	اگر (!پیغام_2)
+		واپس;
 
-	cols = get_term_columns(fp) - (strlen(msg) + 5);
+	ستون_تعداد = get_رکن_columns(fp) - (لڑی_لمبائی(پیغام_2) + 5);
 
 	/* cons25 is special - we need to remove one char, otherwise things
 	 * do not align properly at all. */
-	if (!term) {
-		term = getenv("TERM");
-		if (term && strcmp(term, "cons25") == 0)
-			term_is_cons25 = true;
-		else
-			term_is_cons25 = false;
+	اگر (!رکن) {
+		رکن = getenv("TERM");
+		اگر (رکن && strcmp(رکن, "cons25") == 0)
+			رکن_is_cons25 = true;
+		ورنہ
+			رکن_is_cons25 = false;
 	}
-	if (term_is_cons25)
-		cols--;
+	اگر (رکن_is_cons25)
+		ستون_تعداد--;
 
-	if (cols > 0 && colour_terminal(fp)) {
-		fprintf(fp, "%s%s %s[%s %s %s]%s\n", up, tgoto(goto_column, 0, cols),
-		    ecolor(ECOLOR_BRACKET), ecolor(color), msg,
-		    ecolor(ECOLOR_BRACKET), ecolor(ECOLOR_NORMAL));
-	} else {
-		if (col > 0)
-			for (i = 0; i < cols - col; i++)
+	اگر (ستون_تعداد > 0 && رنگ_terminal(fp)) {
+		fprintf(fp, "%s%s %s[%s %s %s]%s\n", اوپر_2, tgoto(goto_عمود, 0, ستون_تعداد),
+		    ecolor(ECOLOR_BRACKET), ecolor(color), پیغام_2,
+		    ecolor(ECOLOR_BRACKET), ecolor(ECOLOR_معمول));
+	} ورنہ {
+		اگر (ستون > 0)
+			برائے (i = 0; i < ستون_تعداد - ستون; i++)
 				fprintf(fp, " ");
-		fprintf(fp, " [ %s ]\n", msg);
+		fprintf(fp, " [ %s ]\n", پیغام_2);
 	}
 }
 
-static int EINFO_PRINTF(3, 0)
-_do_eend(const char *cmd, int retval,
-    const char *EINFO_RESTRICT fmt, va_list ap)
+ساکن صحیح EINFO_PRINTF(3, 0)
+_do_eend(ثابت حرف *cmd, صحیح retval,
+    ثابت حرف *EINFO_RESTRICT fmt, va_list ap)
 {
-	int col = 0;
+	صحیح ستون = 0;
 	FILE *fp = stdout;
 	va_list apc;
 
-	if (fmt && *fmt != '\0' && retval != 0) {
+	اگر (fmt && *fmt != '\0' && retval != 0) {
 		fp = stderr;
 		va_copy(apc, ap);
-		if (strcmp(cmd, "ewend") == 0)
-			col = _ewarnvn(fmt, apc);
-		else
-			col = _eerrorvn(fmt, apc);
-		col += fprintf(fp, "\n");
+		اگر (strcmp(cmd, "ewend") == 0)
+			ستون = _ewarnvn(fmt, apc);
+		ورنہ
+			ستون = _eerrorvn(fmt, apc);
+		ستون += fprintf(fp, "\n");
 		va_end(apc);
 	}
-	_eend(fp, col,
+	_eend(fp, ستون,
 	    retval == 0 ? ECOLOR_GOOD : ECOLOR_BAD,
 	    retval == 0 ? OK : NOT_OK);
-	return retval;
+	واپس retval;
 }
 
-int
-eend(int retval, const char *EINFO_RESTRICT fmt, ...)
+صحیح
+eend(صحیح retval, ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	اگر (is_quiet())
+		واپس retval;
 	va_start(ap, fmt);
 	_do_eend("eend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eend");
-	return retval;
+	واپس retval;
 }
 
-int
-ewend(int retval, const char *EINFO_RESTRICT fmt, ...)
+صحیح
+ewend(صحیح retval, ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	اگر (is_quiet())
+		واپس retval;
 	va_start(ap, fmt);
 	_do_eend("ewend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewend");
-	return retval;
+	واپس retval;
 }
 
-void
-ebracket(int col, ECOLOR color, const char *msg)
+خالی
+ebracket(صحیح ستون, ECOLOR color, ثابت حرف *پیغام_2)
 {
-	_eend(stdout, col, color, msg);
+	_eend(stdout, ستون, color, پیغام_2);
 }
 
-void
-eindent(void)
+خالی
+eindent(خالی)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
-	char *num;
+	حرف *env = getenv("EINFO_INDENT");
+	صحیح amount = 0;
+	حرف *عدد;
 
-	if (env) {
+	اگر (env) {
 		errno = 0;
-		amount = strtoimax(env, NULL, 0);
-		if (errno != 0)
+		amount = strtoimax(env, تہی, 0);
+		اگر (errno != 0)
 			amount = 0;
 	}
-	amount += INDENT_WIDTH;
-	xasprintf(&num, "%08d", amount);
-	setenv("EINFO_INDENT", num, 1);
-	free(num);
+	amount += INDENT_چوڑائی;
+	xasprintf(&عدد, "%08d", amount);
+	setenv("EINFO_INDENT", عدد, 1);
+	آزاد(عدد);
 }
 
-void eoutdent(void)
+خالی eoutdent(خالی)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
-	char *num = NULL;
-	int serrno = errno;
+	حرف *env = getenv("EINFO_INDENT");
+	صحیح amount = 0;
+	حرف *عدد = تہی;
+	صحیح serrno = errno;
 
-	if (!env)
-		return;
+	اگر (!env)
+		واپس;
 	errno = 0;
-	amount = strtoimax(env, NULL, 0);
-	if (errno != 0)
+	amount = strtoimax(env, تہی, 0);
+	اگر (errno != 0)
 		amount = 0;
-	else
-		amount -= INDENT_WIDTH;
-	if (amount <= 0)
+	ورنہ
+		amount -= INDENT_چوڑائی;
+	اگر (amount <= 0)
 		unsetenv("EINFO_INDENT");
-	else {
-		xasprintf(&num, "%08d", amount);
-		setenv("EINFO_INDENT", num, 1);
-		free(num);
+	ورنہ {
+		xasprintf(&عدد, "%08d", amount);
+		setenv("EINFO_INDENT", عدد, 1);
+		آزاد(عدد);
 	}
 	errno = serrno;
 }
 
-int
-einfovn(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+einfovn(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	اگر (!fmt || !is_verbose())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfovn");
-	return retval;
+	واپس retval;
 }
 
-int
-ewarnvn(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+ewarnvn(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	اگر (!fmt || !is_verbose())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnvn");
-	return retval;
+	واپس retval;
 }
 
-int
-einfov(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+einfov(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	اگر (!fmt || !is_verbose())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
-	retval += printf("\n");
+	retval += لکھو("\n");
 	va_end(ap);
 	LASTCMD("einfov");
-	return retval;
+	واپس retval;
 }
 
-int
-ewarnv(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+ewarnv(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	اگر (!fmt || !is_verbose())
+		واپس 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
-	retval += printf("\n");
+	retval += لکھو("\n");
 	va_end(ap);
 	LASTCMD("ewarnv");
-	return retval;
+	واپس retval;
 }
 
-int
-ebeginv(const char *EINFO_RESTRICT fmt, ...)
+صحیح
+ebeginv(ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	صحیح retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	اگر (!fmt || !is_verbose())
+		واپس 0;
 
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
-	retval += printf(" ...");
-	if (colour_terminal(stdout))
-		retval += printf("\n");
+	retval += لکھو(" ...");
+	اگر (رنگ_terminal(stdout))
+		retval += لکھو("\n");
 	va_end(ap);
 	LASTCMD("ebeginv");
-	return retval;
+	واپس retval;
 }
 
-int
-eendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+صحیح
+eendv(صحیح retval, ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	اگر (!is_verbose())
+		واپس 0;
 	va_start(ap, fmt);
 	_do_eend("eendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eendv");
-	return retval;
+	واپس retval;
 }
 
-int
-ewendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+صحیح
+ewendv(صحیح retval, ثابت حرف *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	اگر (!is_verbose())
+		واپس 0;
 	va_start(ap, fmt);
 	_do_eend("ewendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewendv");
-	return retval;
+	واپس retval;
 }
 
-void
-eindentv(void)
+خالی
+eindentv(خالی)
 {
-	if (is_verbose())
+	اگر (is_verbose())
 		eindent();
 }
 
-void
-eoutdentv(void)
+خالی
+eoutdentv(خالی)
 {
-	if (is_verbose())
+	اگر (is_verbose())
 		eoutdent();
 }

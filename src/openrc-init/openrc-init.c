@@ -18,76 +18,76 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <pwd.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/reboot.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <poll.h>
-#include <utmp.h>
+#شامل <errno.h>
+#شامل <pwd.h>
+#شامل <signal.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <time.h>
+#شامل <fcntl.h>
+#شامل <unistd.h>
+#شامل <sys/stat.h>
+#شامل <sys/reboot.h>
+#شامل <sys/types.h>
+#شامل <sys/wait.h>
+#شامل <poll.h>
+#شامل <utmp.h>
 
-#ifdef HAVE_SELINUX
+#اگر_تعریف_شدہ HAVE_SELINUX
 #  include <selinux/selinux.h>
-#endif
+#اگر_ختم
 
-#include "rc.h"
-#include "rc_exec.h"
-#include "wtmp.h"
-#include "helpers.h"
-#include "version.h"
+#شامل "rc.h"
+#شامل "rc_exec.h"
+#شامل "wtmp.h"
+#شامل "helpers.h"
+#شامل "version.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#اگر defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
-#endif
+#اگر_ختم
 
-static const char *path_default = "/sbin:/usr/sbin:/bin:/usr/bin";
-static const char *rc_default_runlevel = "default";
-static int sigpipe[2] = { -1, -1 };
-static bool quiet = false;
-static const char *progname;
+ساکن ثابت حرف *راستہ_default = "/sbin:/usr/sbin:/bin:/usr/bin";
+ساکن ثابت حرف *rc_default_runlevel = "default";
+ساکن صحیح sigpipe[2] = { -1, -1 };
+ساکن bool quiet = false;
+ساکن ثابت حرف *progname;
 
-static void do_openrc(const char *runlevel)
+ساکن خالی do_openrc(ثابت حرف *runlevel)
 {
-	const char *argv[] = { "openrc", runlevel, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
-	args.setsid = 1;
+	ثابت حرف *argv[] = { "openrc", runlevel, تہی };
+	ساخت exec_نتیجہ res;
+	ساخت exec_دلائل دلائل = exec_init(argv);
+	دلائل.setsid = 1;
 
-	if (!quiet)
-		printf("Starting %s runlevel\n", runlevel);
-	res = do_exec(&args);
-	if (res.pid < 0) {
+	اگر (!quiet)
+		لکھو("Starting %s runlevel\n", runlevel);
+	res = do_exec(&دلائل);
+	اگر (res.pid < 0) {
 		perror("do_exec");
-		exit(1);
+		باہر_نکلو(1);
 	}
-	while (waitpid(res.pid, NULL, 0) != res.pid)
-		if (errno == ECHILD)
-			break;
+	جب (waitpid(res.pid, تہی, 0) != res.pid)
+		اگر (errno == ECHILD)
+			توڑو;
 }
 
-static void init(const char *default_runlevel)
+ساکن خالی init(ثابت حرف *default_runlevel)
 {
-	const char *runlevel = NULL;
+	ثابت حرف *runlevel = تہی;
 	do_openrc("sysinit");
 	do_openrc("boot");
-	if (default_runlevel)
+	اگر (default_runlevel)
 		runlevel = default_runlevel;
-	else
-		runlevel = rc_conf_value("rc_default_runlevel");
-	if (!runlevel)
+	ورنہ
+		runlevel = rc_conf_قدر("rc_default_runlevel");
+	اگر (!runlevel)
 		runlevel = rc_default_runlevel;
-	if (!rc_runlevel_exists(runlevel)) {
+	اگر (!rc_runlevel_exists(runlevel)) {
 		fprintf(stderr, "%s is an invalid runlevel\n", runlevel);
 		runlevel = rc_default_runlevel;
 	}
@@ -95,218 +95,218 @@ static void init(const char *default_runlevel)
 	log_wtmp("reboot", "~~", 0, RUN_LVL, "~~");
 }
 
-static void handle_reexec(void)
+ساکن خالی handle_reexec(خالی)
 {
-	execlp(progname, progname, "reexec", NULL);
-	return;
+	execlp(progname, progname, "reexec", تہی);
+	واپس;
 }
 
-static void handle_shutdown(const char *runlevel, int cmd)
+ساکن خالی handle_shutdown(ثابت حرف *runlevel, صحیح cmd)
 {
-	const long ms_to_ns = 1000000L;
-	struct timespec start, now, tmp, remain;
+	ثابت طویل ms_مقصد_ns = 1000000L;
+	ساخت timespec آغاز, now, tmp, remain;
 
 	do_openrc(runlevel);
-	if (!quiet)
-		printf("Sending the final TERM signal\n");
+	اگر (!quiet)
+		لکھو("Sending the final TERM signal\n");
 	kill(-1, SIGTERM);
-	clock_gettime(CLOCK_MONOTONIC, &start);
+	clock_gettime(CLOCK_MONOTONIC, &آغاز);
 
 	/* ensure *at least* half a second of grace time before KILL */
 	tmp.tv_sec = 0;
-	tmp.tv_nsec = 500 * ms_to_ns;
-	while (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
+	tmp.tv_nsec = 500 * ms_مقصد_ns;
+	جب (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
 		tmp = remain;
 
-	for (;;) {
-		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == -1 && errno == ECHILD) {
+	برائے (;;) {
+		pid_t pid = waitpid(-1, تہی, WNOHANG);
+		اگر (pid == -1 && errno == ECHILD) {
 			/* all children reaped, safe to exit */
-			break;
+			توڑو;
 		}
 
 		clock_gettime(CLOCK_MONOTONIC, &now);
-		timespecsub(&now, &start, &tmp);
-		if (tmp.tv_sec >= 3) {
+		timespecsub(&now, &آغاز, &tmp);
+		اگر (tmp.tv_sec >= 3) {
 			/* it's been 3 seconds already, go for the KILL hammer */
-			break;
+			توڑو;
 		}
 
 		tmp.tv_sec = 0;
-		tmp.tv_nsec = 100 * ms_to_ns;
-		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, NULL);
+		tmp.tv_nsec = 100 * ms_مقصد_ns;
+		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, تہی);
 	}
 
-	if (!quiet)
-		printf("Sending the final KILL signal\n");
+	اگر (!quiet)
+		لکھو("Sending the final KILL signal\n");
 	kill(-1, SIGKILL);
 	sync();
 	reboot(cmd);
 	/* reboot normally if kexec fails */
-	if (cmd == RB_KEXEC)
+	اگر (cmd == RB_KEXEC)
 		reboot(RB_AUTOBOOT);
 }
 
-static void run_program(const char *prog)
+ساکن خالی تسلسل_پروگرام(ثابت حرف *prog)
 {
-	const char *argv[] = { prog, NULL };
-	struct exec_args args = exec_init(argv);
-	struct exec_result res = do_exec(&args);
-	if (res.pid < 0 || rc_waitpid(res.pid) == -1)
+	ثابت حرف *argv[] = { prog, تہی };
+	ساخت exec_دلائل دلائل = exec_init(argv);
+	ساخت exec_نتیجہ res = do_exec(&دلائل);
+	اگر (res.pid < 0 || rc_waitpid(res.pid) == -1)
 		perror("init");
 }
 
-static void open_shell(void)
+ساکن خالی open_shell(خالی)
 {
-	const char *shell;
-	struct passwd *pw;
+	ثابت حرف *shell;
+	ساخت passwd *pw;
 
-#ifdef __linux__
-	const char *sys = rc_sys();
+#اگر_تعریف_شدہ __linux__
+	ثابت حرف *sys = rc_sys();
 
 	/* VSERVER systems cannot really drop to shells */
-	if (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
+	اگر (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
 	{
-		execlp("halt", "halt", "-f", (char *) NULL);
+		execlp("halt", "halt", "-f", (حرف *) تہی);
 		perror("init");
-		return;
+		واپس;
 	}
-#endif
+#اگر_ختم
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_قدر("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
-	if (!shell) {
+	اگر (!shell) {
 		shell = getenv("SHELL");
-		if (!shell) {
+		اگر (!shell) {
 			pw = getpwuid(getuid());
-			if (pw)
+			اگر (pw)
 				shell = pw->pw_shell;
-			if (!shell)
+			اگر (!shell)
 				shell = "/bin/sh";
 		}
 	}
-	run_program(shell);
+	تسلسل_پروگرام(shell);
 }
 
-static void handle_single(void)
+ساکن خالی handle_single(خالی)
 {
 	do_openrc("single");
 	open_shell();
-	init(NULL);
+	init(تہی);
 }
 
-static void dispatch_signal(int sigfd)
+ساکن خالی dispatch_signal(صحیح sigfd)
 {
-	int sig;
-	ssize_t count = read(sigfd, &sig, sizeof(sig));
+	صحیح sig;
+	ssize_t گنتی = اقرأ(sigfd, &sig, حجم(sig));
 
-	if (count < 0) {
+	اگر (گنتی < 0) {
 		perror("read(sigpipe)");
-		return;
+		واپس;
 	}
 
-	if (count != sizeof(sig)) {
+	اگر (گنتی != حجم(sig)) {
 		fputs("bad read from sigpipe\n", stderr);
-		return;
+		واپس;
 	}
 
-	switch (sig) {
-		case SIGINT:
+	انتخاب (sig) {
+		حالت SIGINT:
 			handle_shutdown("reboot", RB_AUTOBOOT);
-			break;
-		case SIGTERM:
-#ifdef SIGPWR
-		case SIGPWR:
-#endif
+			توڑو;
+		حالت SIGTERM:
+#اگر_تعریف_شدہ SIGPWR
+		حالت SIGPWR:
+#اگر_ختم
 			handle_shutdown("shutdown", RB_HALT_SYSTEM);
-			break;
-		default:
+			توڑو;
+		طےشدہ:
 			fprintf(stderr, "Unknown signal received, %d\n", sig);
-			break;
+			توڑو;
 	}
 }
 
-static void dispatch_fifo(int fifo)
+ساکن خالی dispatch_fifo(صحیح fifo)
 {
-	char buf[2048];
-	ssize_t count = read(fifo, buf, sizeof(buf) - 1);
+	حرف buf[2048];
+	ssize_t گنتی = اقرأ(fifo, buf, حجم(buf) - 1);
 
-	if (count < 0) {
+	اگر (گنتی < 0) {
 		perror("read(fifo)");
-		return;
+		واپس;
 	}
 
-	buf[count] = 0;
+	buf[گنتی] = 0;
 
-	if (!quiet)
-		printf("PID1: Received \"%s\" from FIFO...\n", buf);
+	اگر (!quiet)
+		لکھو("PID1: Received \"%s\" from FIFO...\n", buf);
 
-	if (strcmp(buf, "halt") == 0)
+	اگر (strcmp(buf, "halt") == 0)
 		handle_shutdown("shutdown", RB_HALT_SYSTEM);
-	else if (strcmp(buf, "kexec") == 0)
+	ورنہ اگر (strcmp(buf, "kexec") == 0)
 		handle_shutdown("reboot", RB_KEXEC);
-	else if (strcmp(buf, "poweroff") == 0)
+	ورنہ اگر (strcmp(buf, "poweroff") == 0)
 		handle_shutdown("shutdown", RB_POWER_OFF);
-	else if (strcmp(buf, "reboot") == 0)
+	ورنہ اگر (strcmp(buf, "reboot") == 0)
 		handle_shutdown("reboot", RB_AUTOBOOT);
-	else if (strcmp(buf, "reexec") == 0)
+	ورنہ اگر (strcmp(buf, "reexec") == 0)
 		handle_reexec();
-	else if (strcmp(buf, "single") == 0)
+	ورنہ اگر (strcmp(buf, "single") == 0)
 		handle_single();
 }
 
-static void signal_handler(int sig)
+ساکن خالی signal_handler(صحیح sig)
 {
-	int saved_errno = errno;
-	write(sigpipe[1], &sig, sizeof(sig));
+	صحیح saved_errno = errno;
+	اكتب(sigpipe[1], &sig, حجم(sig));
 	/* ensure the errno doesn't get clobbered in the rare (impossible?)
 	 * case that the write above fails */
 	errno = saved_errno;
 }
 
-static void reap_zombies(int sig RC_UNUSED)
+ساکن خالی reap_zombies(صحیح sig RC_غیر_مستعمل)
 {
-	char errmsg[] = "waitpid() failed\n";
-	int saved_errno = errno;
+	حرف errmsg[] = "waitpid() failed\n";
+	صحیح saved_errno = errno;
 
-	for (;;) {
-		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == 0)
-			break;
-		else if (pid == -1) {
-			if (errno == ECHILD)
-				break;
-			write(STDERR_FILENO, errmsg, sizeof(errmsg) - 1);
-			continue;
+	برائے (;;) {
+		pid_t pid = waitpid(-1, تہی, WNOHANG);
+		اگر (pid == 0)
+			توڑو;
+		ورنہ اگر (pid == -1) {
+			اگر (errno == ECHILD)
+				توڑو;
+			اكتب(STDERR_FILENO, errmsg, حجم(errmsg) - 1);
+			جاری;
 		}
 	}
 	errno = saved_errno;
 }
 
-int main(int argc, char **argv)
+صحیح مین(صحیح argc, حرف **argv)
 {
-	char *cmdline_runlevel = NULL;
-	int fifo;
+	حرف *cmdline_runlevel = تہی;
+	صحیح fifo;
 	bool reexec = false;
-	sigset_t signals;
-	struct sigaction sa;
-#ifdef HAVE_SELINUX
-	int enforce = 0;
-#endif
+	sigset_t اشارات;
+	ساخت sigaction sa;
+#اگر_تعریف_شدہ HAVE_SELINUX
+	صحیح enforce = 0;
+#اگر_ختم
 
 	progname = argv[0];
 
-	if (getpid() != 1)
-		return 1;
+	اگر (getpid() != 1)
+		واپس 1;
 
-#ifdef HAVE_SELINUX
-	if (getenv("SELINUX_INIT") == NULL) {
-		if (is_selinux_enabled() != 1) {
-			if (selinux_init_load_policy(&enforce) == 0) {
+#اگر_تعریف_شدہ HAVE_SELINUX
+	اگر (getenv("SELINUX_INIT") == تہی) {
+		اگر (is_selinux_enabled() != 1) {
+			اگر (selinux_init_بھرو_policy(&enforce) == 0) {
 				setenv("SELINUX_INIT", "YES", 1);
 				execv(argv[0], argv);
-			} else {
-				if (enforce > 0) {
+			} ورنہ {
+				اگر (enforce > 0) {
 					/*
 					 * SELinux in enforcing mode but load_policy failed
 					 * At this point, we probably can't open /dev/console,
@@ -315,75 +315,75 @@ int main(int argc, char **argv)
 					fprintf(stderr,"Unable to load SELinux Policy.\n");
 					fprintf(stderr,"Machine is  in enforcing mode.\n");
 					fprintf(stderr,"Halting now.\n");
-					exit(1);
+					باہر_نکلو(1);
 				}
 			}
 		}
 	}
-#endif
+#اگر_ختم
 
 	quiet = rc_yesno(getenv("EINFO_QUIET"));
 
-	if (!quiet)
-		printf("OpenRC init version %s starting\n", VERSION);
+	اگر (!quiet)
+		لکھو("OpenRC init version %s starting\n", نسخہ);
 
-	if (argc > 1) {
-		if (strcmp(argv[1], "reexec") == 0)
+	اگر (argc > 1) {
+		اگر (strcmp(argv[1], "reexec") == 0)
 			reexec = true;
-		else
+		ورنہ
 			cmdline_runlevel = argv[1];
 	}
 
-	if (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
+	اگر (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
 		perror("pipe2");
-		return 1;
+		واپس 1;
 	}
 
 	/* block all signals we do not handle */
-	sigfillset(&signals);
-	sigdelset(&signals, SIGCHLD);
-	sigdelset(&signals, SIGINT);
-	sigdelset(&signals, SIGTERM);
-#ifdef SIGPWR
-	sigdelset(&signals, SIGPWR);
-#endif
-	sigprocmask(SIG_SETMASK, &signals, NULL);
+	sigfillset(&اشارات);
+	sigdelset(&اشارات, SIGCHLD);
+	sigdelset(&اشارات, SIGINT);
+	sigdelset(&اشارات, SIGTERM);
+#اگر_تعریف_شدہ SIGPWR
+	sigdelset(&اشارات, SIGPWR);
+#اگر_ختم
+	sigprocmask(SIG_SETMASK, &اشارات, تہی);
 
 	/* install signal  handler */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, حجم(sa));
 	sa.sa_handler = reap_zombies;
-	sigaction(SIGCHLD, &sa, NULL);
+	sigaction(SIGCHLD, &sa, تہی);
 	sa.sa_handler = signal_handler;
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-#ifdef SIGPWR
-	sigaction(SIGPWR, &sa, NULL);
-#endif
+	sigaction(SIGINT, &sa, تہی);
+	sigaction(SIGTERM, &sa, تہی);
+#اگر_تعریف_شدہ SIGPWR
+	sigaction(SIGPWR, &sa, تہی);
+#اگر_ختم
 	reboot(RB_DISABLE_CAD);
 
 	/* set default path */
-	setenv("PATH", path_default, 1);
+	setenv("PATH", راستہ_default, 1);
 
-	if (!reexec)
+	اگر (!reexec)
 		init(cmdline_runlevel);
 
-	if ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
+	اگر ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
 		perror("open_rwfifo");
 
-	for (;;) {
-		enum { FD_FIFO, FD_SIG, FD_COUNT };
-		struct pollfd pfd[] = {
+	برائے (;;) {
+		شمار { FD_FIFO, FD_SIG, FD_گنتی };
+		ساخت pollfd pfd[] = {
 			[FD_FIFO] = { .fd = fifo, .events = POLLIN },
 			[FD_SIG] = { .fd = sigpipe[0], .events = POLLIN },
 		};
 
-		poll(pfd, FD_COUNT, -1);
+		poll(pfd, FD_گنتی, -1);
 
-		if (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
+		اگر (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
 			dispatch_signal(sigpipe[0]);
 
-		if (pfd[FD_FIFO].revents & POLLIN)
+		اگر (pfd[FD_FIFO].revents & POLLIN)
 			dispatch_fifo(fifo);
 	}
-	return 0;
+	واپس 0;
 }

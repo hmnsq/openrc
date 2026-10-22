@@ -10,35 +10,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __EINFO_H__
-#define __EINFO_H__
+#اگر_غیر_تعریف_شدہ __EINFO_H__
+#تعریف_کرو __EINFO_H__
 
-#define EINFO_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
-#define EINFO_XPRINTF(a, b) __attribute__((__noreturn__, __format__(__printf__, a, b)))
+#تعریف_کرو EINFO_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
+#تعریف_کرو EINFO_XPRINTF(a, b) __attribute__((__noreturn__, __format__(__printf__, a, b)))
 
-#include <sys/types.h>
-#include <stdbool.h>
+#شامل <sys/types.h>
+#شامل <stdbool.h>
 
 /* Although OpenRC requires C99, linking to us should not. */
-#ifdef restrict
-# define EINFO_RESTRICT restrict
-#else
+#اگر_تعریف_شدہ محدود
+# define EINFO_RESTRICT محدود
+#ورنہ
 # ifdef __restrict
 #  define EINFO_RESTRICT __restrict
-# else
+# ورنہ
 #  define EINFO_RESTRICT
 # endif
-#endif
+#اگر_ختم
 
 /* __BEGIN_DECLS */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#اگر_تعریف_شدہ __cplusplus
+خارجی "C" {
+#اگر_ختم
 
 /*! @brief Color types to use */
-typedef enum
+قسمتعریف شمار
 {
-	ECOLOR_NORMAL	= 1,
+	ECOLOR_معمول	= 1,
 	ECOLOR_GOOD	= 2,
 	ECOLOR_WARN	= 3,
 	ECOLOR_BAD	= 4,
@@ -47,10 +47,10 @@ typedef enum
 } ECOLOR;
 
 /*! @brief Returns the ASCII code for the color */
-const char *ecolor(ECOLOR);
+ثابت حرف *ecolor(ECOLOR);
 
 /*! @brief Writes to syslog. */
-void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+خالی elog(صحیح, ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 
 /*!
  * @brief Display informational messages.
@@ -69,22 +69,22 @@ void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  * The x suffix means function will exit() returning failure.
  */
 /*@{*/
-int einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void ewarnx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
-int eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void eerrorx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+صحیح einfon(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح ewarnn(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح eerrorn(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح einfo(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح ewarn(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+خالی ewarnx(ثابت حرف * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+صحیح eerror(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+خالی eerrorx(ثابت حرف * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
 
-int einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح einfovn(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح ewarnvn(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح ebeginvn(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح eendvn(صحیح, ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+صحیح ewendvn(صحیح, ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+صحیح einfov(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح ewarnv(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup ebegin
@@ -92,8 +92,8 @@ int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * Similar to einfo, but we add ... to the end of the message */
 /*@{*/
-int ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح ebeginv(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+صحیح ebegin(ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup eend
@@ -105,12 +105,12 @@ int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * ebracket allows you to specify the position, color and message */
 /*@{*/
-int eend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-void ebracket(int, ECOLOR, const char * EINFO_RESTRICT);
+صحیح eend(صحیح, ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+صحیح ewend(صحیح, ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+خالی ebracket(صحیح, ECOLOR, ثابت حرف * EINFO_RESTRICT);
 
-int eendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+صحیح eendv(صحیح, ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+صحیح ewendv(صحیح, ثابت حرف * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 /*@}*/
 
 /*! @ingroup eindent
@@ -118,17 +118,17 @@ int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  *
  * For each indent you should outdent when done */
 /*@{*/
-void eindent(void);
-void eoutdent(void);
-void eindentv(void);
-void eoutdentv(void);
+خالی eindent(خالی);
+خالی eoutdent(خالی);
+خالی eindentv(خالی);
+خالی eoutdentv(خالی);
 
 /*! @brief Prefix each einfo line with something */
-void eprefix(const char * EINFO_RESTRICT);
+خالی eprefix(ثابت حرف * EINFO_RESTRICT);
 
 /* __END_DECLS */
-#ifdef __cplusplus
+#اگر_تعریف_شدہ __cplusplus
 }
-#endif
+#اگر_ختم
 
-#endif
+#اگر_ختم

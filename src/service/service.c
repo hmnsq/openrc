@@ -10,59 +10,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#شامل <errno.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#شامل "einfo.h"
+#شامل "rc.h"
+#شامل "misc.h"
+#شامل "helpers.h"
 
-const char *applet = NULL;
+ثابت حرف *applet = تہی;
 
-int main(int argc, char **argv)
+صحیح مین(صحیح argc, حرف **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
-	RC_SERVICE state, bit;
+	حرف *service;
+	حرف *exec;
+	صحیح idx = 0;
+	RC_SERVICE state, ثنائی_ہندسہ;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	اگر (argc > 1)
 		service = argv[1];
-	else
+	ورنہ
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	اگر (service == تہی || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
-	bit = lookup_service_state(applet);
-	if (bit) {
-		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	ثنائی_ہندسہ = lookup_service_state(applet);
+	اگر (ثنائی_ہندسہ) {
+		ok = (state & ثنائی_ہندسہ);
+	} ورنہ اگر (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		اگر (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
-			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+			لڑی_سے_پڑھو(argv[3], "%d", &idx);
+		} ورنہ اگر (argc == 3) {
+			اگر (لڑی_سے_پڑھو(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
-		ok = rc_service_started_daemon(service, exec, NULL, idx);
+		ok = rc_service_started_daemon(service, exec, تہی, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} ورنہ اگر (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} ورنہ
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	واپس ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

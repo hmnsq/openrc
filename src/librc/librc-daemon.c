@@ -15,105 +15,105 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#شامل <errno.h>
+#شامل <dirent.h>
+#شامل <fcntl.h>
+#شامل <limits.h>
+#شامل <signal.h>
+#شامل <stdbool.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <sys/stat.h>
+#شامل <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#شامل "queue.h"
+#شامل "librc.h"
+#شامل "helpers.h"
 
-#if defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#اگر defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
-static bool
-pid_is_exec(pid_t pid, const char *exec)
+ساکن bool
+pid_is_exec(pid_t pid, ثابت حرف *exec)
 {
-	char *buffer = NULL;
+	حرف *بفر = تہی;
 	FILE *fp;
-	int c;
+	صحیح c;
 	bool retval = false;
 
 	exec = basename_c(exec);
-	xasprintf(&buffer, "/proc/%d/stat", pid);
-	if ((fp = fopen(buffer, "r"))) {
-		while ((c = getc(fp)) != EOF && c != '(')
+	xasprintf(&بفر, "/proc/%d/stat", pid);
+	اگر ((fp = fopen(بفر, "r"))) {
+		جب ((c = getc(fp)) != EOF && c != '(')
 			;
-		if (c == '(') {
-			while ((c = getc(fp)) != EOF && c == *exec)
+		اگر (c == '(') {
+			جب ((c = getc(fp)) != EOF && c == *exec)
 				exec++;
-			if (c == ')' && *exec == '\0')
+			اگر (c == ')' && *exec == '\0')
 				retval = true;
 		}
 		fclose(fp);
 	}
-	free(buffer);
-	return retval;
+	آزاد(بفر);
+	واپس retval;
 }
 
-static bool
-pid_is_argv(pid_t pid, const char *const *argv)
+ساکن bool
+pid_is_argv(pid_t pid, ثابت حرف *ثابت *argv)
 {
-	char *cmdline = NULL;
-	int fd;
-	char buffer[PATH_MAX];
-	char *p;
-	ssize_t bytes;
+	حرف *cmdline = تہی;
+	صحیح fd;
+	حرف بفر[PATH_MAX];
+	حرف *p;
+	ssize_t بائٹیں;
 
 	xasprintf(&cmdline, "/proc/%u/cmdline", pid);
-	if ((fd = open(cmdline, O_RDONLY)) < 0) {
-		free(cmdline);
-		return false;
+	اگر ((fd = open(cmdline, O_RDONLY)) < 0) {
+		آزاد(cmdline);
+		واپس false;
 	}
-	bytes = read(fd, buffer, sizeof(buffer) - 1);
+	بائٹیں = اقرأ(fd, بفر, حجم(بفر) - 1);
 	close(fd);
-	free(cmdline);
-	if (bytes == -1)
-		return false;
+	آزاد(cmdline);
+	اگر (بائٹیں == -1)
+		واپس false;
 
-	buffer[bytes] = '\0';
-	p = buffer;
-	while (*argv) {
-		if ((unsigned)(p - buffer) >= sizeof(buffer))
-			return false;
-		if (strcmp(*argv, p) != 0)
-			return false;
+	بفر[بائٹیں] = '\0';
+	p = بفر;
+	جب (*argv) {
+		اگر ((غیرعلامتی)(p - بفر) >= حجم(بفر))
+			واپس false;
+		اگر (strcmp(*argv, p) != 0)
+			واپس false;
 		argv++;
-		p += strlen(p) + 1;
+		p += لڑی_لمبائی(p) + 1;
 	}
-	return true;
+	واپس true;
 }
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_ڈھونڈو_pids(ثابت حرف *exec, ثابت حرف *ثابت *argv, uid_t uid, pid_t pid)
 {
 	DIR *procdir;
-	struct dirent *entry;
+	ساخت dirent *اندراج_2;
 	FILE *fp;
-	int rc;
+	صحیح rc;
 	bool container_pid = false;
 	bool openvz_host = false;
-	char *line = NULL;
-	char my_ns[30] = {0};
-	char proc_ns[30] = {0};
+	حرف *سطر = تہی;
+	حرف my_ns[30] = {0};
+	حرف proc_ns[30] = {0};
 	size_t len = 0;
 	pid_t p;
-	char *buffer = NULL;
-	struct stat sb;
+	حرف *بفر = تہی;
+	ساخت stat sb;
 	pid_t openrc_pid = 0;
-	char *pp;
-	RC_PIDLIST *pids = NULL;
+	حرف *pp;
+	RC_PIDLIST *pids = تہی;
 	RC_PID *pi;
 
-	if ((procdir = opendir("/proc")) == NULL)
-		return NULL;
+	اگر ((procdir = opendir("/proc")) == تہی)
+		واپس تہی;
 
 	/*
 	  We never match RC_OPENRC_PID if present so we avoid the below
@@ -126,8 +126,8 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	  nasty
 	*/
 
-	if ((pp = getenv("RC_OPENRC_PID"))) {
-		if (sscanf(pp, "%d", &openrc_pid) != 1)
+	اگر ((pp = getenv("RC_OPENRC_PID"))) {
+		اگر (لڑی_سے_پڑھو(pp, "%d", &openrc_pid) != 1)
 			openrc_pid = 0;
 	}
 
@@ -137,505 +137,505 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	from our list of pids.
 	*/
 
-	if ((fp = fopen("/proc/self/status", "r"))) {
-		while (xgetline(&line, &len, fp) != -1) {
-			if (strncmp(line, "envID:\t0", 8) == 0) {
+	اگر ((fp = fopen("/proc/self/status", "r"))) {
+		جب (xgetline(&سطر, &len, fp) != -1) {
+			اگر (لڑی_موازنہ(سطر, "envID:\t0", 8) == 0) {
 				openvz_host = true;
-				break;
+				توڑو;
 			}
 		}
 		fclose(fp);
 	}
 
-	if ((rc = readlink("/proc/self/ns/pid", my_ns, sizeof(my_ns)-1)) <= 0)
+	اگر ((rc = readlink("/proc/self/ns/pid", my_ns, حجم(my_ns)-1)) <= 0)
 		my_ns[0] = '\0';
 
-	while ((entry = readdir(procdir)) != NULL) {
-		if (sscanf(entry->d_name, "%d", &p) != 1)
-			continue;
-		if (openrc_pid != 0 && openrc_pid == p)
-			continue;
-		if (pid != 0 && pid != p)
-			continue;
-		xasprintf(&buffer, "/proc/%d/ns/pid", p);
-		if ((rc = readlink(buffer, proc_ns, sizeof(proc_ns)-1)) <= 0)
+	جب ((اندراج_2 = readdir(procdir)) != تہی) {
+		اگر (لڑی_سے_پڑھو(اندراج_2->d_name, "%d", &p) != 1)
+			جاری;
+		اگر (openrc_pid != 0 && openrc_pid == p)
+			جاری;
+		اگر (pid != 0 && pid != p)
+			جاری;
+		xasprintf(&بفر, "/proc/%d/ns/pid", p);
+		اگر ((rc = readlink(بفر, proc_ns, حجم(proc_ns)-1)) <= 0)
 			proc_ns[0] = '\0';
-		free(buffer);
-		if (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
-			continue;
-		if (uid) {
-			xasprintf(&buffer, "/proc/%d", p);
-			if (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
-				free(buffer);
-				continue;
+		آزاد(بفر);
+		اگر (pid == 0 && لڑی_لمبائی(my_ns) && لڑی_لمبائی (proc_ns) && strcmp(my_ns, proc_ns))
+			جاری;
+		اگر (uid) {
+			xasprintf(&بفر, "/proc/%d", p);
+			اگر (stat(بفر, &sb) != 0 || sb.st_uid != uid) {
+				آزاد(بفر);
+				جاری;
 			}
-			free(buffer);
+			آزاد(بفر);
 		}
-		if (exec && !pid_is_exec(p, exec))
-			continue;
-		if (argv &&
-		    !pid_is_argv(p, (const char *const *)argv))
-			continue;
+		اگر (exec && !pid_is_exec(p, exec))
+			جاری;
+		اگر (argv &&
+		    !pid_is_argv(p, (ثابت حرف *ثابت *)argv))
+			جاری;
 		/* If this is an OpenVZ host, filter out container processes */
-		if (openvz_host) {
-			xasprintf(&buffer, "/proc/%d/status", p);
-			fp = fopen(buffer, "r");
-			free(buffer);
-			if (!fp)
-				continue;
-			while (xgetline(&line, &len, fp) != -1) {
-				if (strncmp(line, "envID:", 6) == 0) {
-					container_pid = !(strncmp(line, "envID:\t0", 8) == 0);
-					break;
+		اگر (openvz_host) {
+			xasprintf(&بفر, "/proc/%d/status", p);
+			fp = fopen(بفر, "r");
+			آزاد(بفر);
+			اگر (!fp)
+				جاری;
+			جب (xgetline(&سطر, &len, fp) != -1) {
+				اگر (لڑی_موازنہ(سطر, "envID:", 6) == 0) {
+					container_pid = !(لڑی_موازنہ(سطر, "envID:\t0", 8) == 0);
+					توڑو;
 				}
 			}
 			fclose(fp);
 		}
-		if (container_pid)
-			continue;
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		اگر (container_pid)
+			جاری;
+		اگر (!pids) {
+			pids = xmalloc(حجم(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(حجم(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_داخل_کرو_سر(pids, pi, entries);
 	}
-	if (line != NULL)
-		free(line);
+	اگر (سطر != تہی)
+		آزاد(سطر);
 	closedir(procdir);
-	return pids;
+	واپس pids;
 }
 
-#elif BSD
+#وگرنہ_اگر BSD
 
-# if defined(__NetBSD__) || defined(__OpenBSD__)
+# اگر defined(__NetBSD__) || defined(__OpenBSD__)
 #  define _KVM_GETPROC2
 #  define _KINFO_PROC kinfo_proc2
 #  define _KVM_GETARGV kvm_getargv2
 #  define _GET_KINFO_UID(kp) (kp.p_ruid)
 #  define _GET_KINFO_COMM(kp) (kp.p_comm)
 #  define _GET_KINFO_PID(kp) (kp.p_pid)
-#  define _KVM_PATH NULL
+#  define KVM_راستہ تہی
 #  define _KVM_FLAGS KVM_NO_FILES
-# else
+# ورنہ
 #  ifndef KERN_PROC_PROC
 #    define KERN_PROC_PROC KERN_PROC_ALL
 #  endif
 #  define _KINFO_PROC kinfo_proc
 #  define _KVM_GETARGV kvm_getargv
-#  if defined(__DragonFly__)
+#  اگر defined(__DragonFly__)
 #    define _GET_KINFO_UID(kp) (kp.kp_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.kp_comm)
 #    define _GET_KINFO_PID(kp) (kp.kp_pid)
-#  else
+#  ورنہ
 #    define _GET_KINFO_UID(kp) (kp.ki_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.ki_comm)
 #    define _GET_KINFO_PID(kp) (kp.ki_pid)
 #  endif
-#  define _KVM_PATH _PATH_DEVNULL
+#  define KVM_راستہ _PATH_DEVNULL
 #  define _KVM_FLAGS O_RDONLY
 # endif
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_ڈھونڈو_pids(ثابت حرف *exec, ثابت حرف *ثابت *argv, uid_t uid, pid_t pid)
 {
-	static kvm_t *kd = NULL;
-	char errbuf[_POSIX2_LINE_MAX];
-	struct _KINFO_PROC *kp;
-	int i;
-	int processes = 0;
-	int pargc = 0;
-	char **pargv;
-	RC_PIDLIST *pids = NULL;
+	ساکن kvm_t *kd = تہی;
+	حرف errbuf[_POSIX2_LINE_MAX];
+	ساخت _KINFO_PROC *kp;
+	صحیح i;
+	صحیح processes = 0;
+	صحیح pargc = 0;
+	حرف **pargv;
+	RC_PIDLIST *pids = تہی;
 	RC_PID *pi;
 	pid_t p;
-	const char *const *arg;
-	int match;
+	ثابت حرف *ثابت *arg;
+	صحیح مطابقت;
 
-	if ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
-		    NULL, _KVM_FLAGS, errbuf)) == NULL)
+	اگر ((kd = kvm_openfiles(KVM_راستہ, KVM_راستہ,
+		    تہی, _KVM_FLAGS, errbuf)) == تہی)
 	{
 		fprintf(stderr, "kvm_open: %s\n", errbuf);
-		return NULL;
+		واپس تہی;
 	}
 
-#ifdef _KVM_GETPROC2
-	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(*kp), &processes);
-#else
+#اگر_تعریف_شدہ _KVM_GETPROC2
+	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, حجم(*kp), &processes);
+#ورنہ
 	kp = kvm_getprocs(kd, KERN_PROC_PROC, 0, &processes);
-#endif
-	if ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
+#اگر_ختم
+	اگر ((kp == تہی && processes > 0) || (kp != تہی && processes < 0)) {
 		fprintf(stderr, "kvm_getprocs: %s\n", kvm_geterr(kd));
 		kvm_close(kd);
-		return NULL;
+		واپس تہی;
 	}
 
-	if (exec)
+	اگر (exec)
 		exec = basename_c(exec);
-	for (i = 0; i < processes; i++) {
+	برائے (i = 0; i < processes; i++) {
 		p = _GET_KINFO_PID(kp[i]);
-		if (pid != 0 && pid != p)
-			continue;
-		if (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
-			continue;
-		if (exec) {
-			if (!_GET_KINFO_COMM(kp[i]) ||
+		اگر (pid != 0 && pid != p)
+			جاری;
+		اگر (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
+			جاری;
+		اگر (exec) {
+			اگر (!_GET_KINFO_COMM(kp[i]) ||
 			    strcmp(exec, _GET_KINFO_COMM(kp[i])) != 0)
-				continue;
+				جاری;
 		}
-		if (argv && *argv) {
+		اگر (argv && *argv) {
 			pargv = _KVM_GETARGV(kd, &kp[i], pargc);
-			if (!pargv || !*pargv)
-				continue;
+			اگر (!pargv || !*pargv)
+				جاری;
 			arg = argv;
-			match = 1;
-			while (*arg && *pargv)
-				if (strcmp(*arg++, *pargv++) != 0) {
-					match = 0;
-					break;
+			مطابقت = 1;
+			جب (*arg && *pargv)
+				اگر (strcmp(*arg++, *pargv++) != 0) {
+					مطابقت = 0;
+					توڑو;
 				}
-			if (!match)
-				continue;
+			اگر (!مطابقت)
+				جاری;
 		}
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		اگر (!pids) {
+			pids = xmalloc(حجم(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(حجم(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_داخل_کرو_سر(pids, pi, entries);
 	}
 	kvm_close(kd);
 
-	return pids;
+	واپس pids;
 }
 
-#else
+#ورنہ
 #  error "Platform not supported!"
-#endif
+#اگر_ختم
 
-static bool
-_match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
+ساکن bool
+مطابقت_daemon(ثابت حرف *svcname, ثابت حرف *instance, RC_STRINGLIST *مطابقت)
 {
-	char *line = NULL;
+	حرف *سطر = تہی;
 	size_t len = 0;
 	FILE *fp;
 	RC_STRING *m;
-	char *daemon;
+	حرف *daemon;
 
 	xasprintf(&daemon, "%s/%s", svcname, instance);
 	fp = do_fopenat(rc_dirfd(RC_DIR_DAEMONS), daemon, O_RDONLY);
-	free(daemon);
+	آزاد(daemon);
 
-	if (!fp)
-		return false;
+	اگر (!fp)
+		واپس false;
 
-	while (xgetline(&line, &len, fp) != -1) {
-		TAILQ_FOREACH(m, match, entries)
-		    if (strcmp(line, m->value) == 0) {
-			    TAILQ_REMOVE(match, m, entries);
-			    break;
+	جب (xgetline(&سطر, &len, fp) != -1) {
+		TAILQ_FOREACH(m, مطابقت, entries)
+		    اگر (strcmp(سطر, m->قدر) == 0) {
+			    TAILQ_REMOVE(مطابقت, m, entries);
+			    توڑو;
 		    }
-		if (!TAILQ_FIRST(match))
-			break;
+		اگر (!TAILQ_پہلا(مطابقت))
+			توڑو;
 	}
 	fclose(fp);
-	free(line);
-	if (TAILQ_FIRST(match))
-		return false;
-	return true;
+	آزاد(سطر);
+	اگر (TAILQ_پہلا(مطابقت))
+		واپس false;
+	واپس true;
 }
 
-static RC_STRINGLIST *
-_match_list(const char *exec, const char *const *argv, const char *pidfile)
+ساکن RC_STRINGLIST *
+مطابقت_list(ثابت حرف *exec, ثابت حرف *ثابت *argv, ثابت حرف *pidfile)
 {
-	RC_STRINGLIST *match = rc_stringlist_new();
-	int i = 0;
-	char *m;
+	RC_STRINGLIST *مطابقت = rc_stringlist_new();
+	صحیح i = 0;
+	حرف *m;
 
-	if (exec) {
+	اگر (exec) {
 		xasprintf(&m, "exec=%s", exec);
-		rc_stringlist_add(match, m);
-		free(m);
+		rc_stringlist_جوڑو(مطابقت, m);
+		آزاد(m);
 	}
 
-	while (argv && argv[i]) {
+	جب (argv && argv[i]) {
 		xasprintf(&m, "argv_0=%s", argv[i++]);
-		rc_stringlist_add(match, m);
-		free(m);
+		rc_stringlist_جوڑو(مطابقت, m);
+		آزاد(m);
 	}
 
-	if (pidfile) {
+	اگر (pidfile) {
 		xasprintf(&m, "pidfile=%s", pidfile);
-		rc_stringlist_add(match, m);
-		free(m);
+		rc_stringlist_جوڑو(مطابقت, m);
+		آزاد(m);
 	}
 
-	return match;
+	واپس مطابقت;
 }
 
 bool
-rc_service_daemon_set(const char *service, const char *exec,
-    const char *const *argv,
-    const char *pidfile, bool started)
+rc_service_daemon_سیٹ(ثابت حرف *service, ثابت حرف *exec,
+    ثابت حرف *ثابت *argv,
+    ثابت حرف *pidfile, bool started)
 {
-	char *file = NULL;
-	int nfiles = 0;
-	char oldfile[PATH_MAX] = { '\0' };
+	حرف *file = تہی;
+	صحیح nfiles = 0;
+	حرف oldfile[PATH_MAX] = { '\0' };
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
-	RC_STRINGLIST *match, *renamelist;
-	int i = 0;
+	ساخت dirent *d;
+	RC_STRINGLIST *مطابقت, *renamelist;
+	صحیح i = 0;
 	FILE *fp;
-	const char *base = basename_c(service);
+	ثابت حرف *بنیاد = basename_c(service);
 
-	if (!exec && !pidfile) {
+	اگر (!exec && !pidfile) {
 		errno = EINVAL;
-		return false;
+		واپس false;
 	}
 
 	/* Regardless, erase any existing daemon info */
-	if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		match = _match_list(exec, argv, pidfile);
+	اگر ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), بنیاد))) {
+		مطابقت = مطابقت_list(exec, argv, pidfile);
 		renamelist = rc_stringlist_new();
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
+		جب ((d = readdir(dp))) {
+			اگر (d->d_name[0] == '.')
+				جاری;
 
-			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), base, d->d_name);
-			if (rc_stringlist_find(renamelist, file)) {
-				free(file);
-				continue;
+			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), بنیاد, d->d_name);
+			اگر (rc_stringlist_ڈھونڈو(renamelist, file)) {
+				آزاد(file);
+				جاری;
 			}
 
 			nfiles++;
 
-			if (!*oldfile) {
-				if (_match_daemon(base, d->d_name, match)) {
+			اگر (!*oldfile) {
+				اگر (مطابقت_daemon(بنیاد, d->d_name, مطابقت)) {
 					unlink(file);
-					strlcpy(oldfile, file, sizeof(oldfile));
+					strlcpy(oldfile, file, حجم(oldfile));
 					nfiles--;
 				}
-			} else {
+			} ورنہ {
 				rename(file, oldfile);
-				strlcpy(oldfile, file, sizeof(oldfile));
+				strlcpy(oldfile, file, حجم(oldfile));
 				/* Add renamed file to renamelist, as this new file name could
 				 * be read again from readdir() */
-				rc_stringlist_add(renamelist, oldfile);
+				rc_stringlist_جوڑو(renamelist, oldfile);
 			}
-			free(file);
+			آزاد(file);
 		}
 		closedir(dp);
-		rc_stringlist_free(match);
+		rc_stringlist_free(مطابقت);
 		rc_stringlist_free(renamelist);
 	}
 
 	/* Now store our daemon info */
-	if (!started)
-		return true;
+	اگر (!started)
+		واپس true;
 
-	if (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
-		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), base, nfiles + 1);
-		if ((fp = fopen(file, "w"))) {
+	اگر (mkdirat(rc_dirfd(RC_DIR_DAEMONS), بنیاد, 0755) == 0 || errno == EEXIST) {
+		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), بنیاد, nfiles + 1);
+		اگر ((fp = fopen(file, "w"))) {
 			fprintf(fp, "exec=");
-			if (exec)
+			اگر (exec)
 				fprintf(fp, "%s", exec);
-			while (argv && argv[i]) {
+			جب (argv && argv[i]) {
 				fprintf(fp, "\nargv_%d=%s", i, argv[i]);
 				i++;
 			}
 			fprintf(fp, "\npidfile=");
-			if (pidfile)
+			اگر (pidfile)
 				fprintf(fp, "%s", pidfile);
 			fprintf(fp, "\n");
 			fclose(fp);
 			retval = true;
 		}
-		free(file);
+		آزاد(file);
 	}
 
-	return retval;
+	واپس retval;
 }
 
 bool
-rc_service_started_daemon(const char *service,
-    const char *exec, const char *const *argv, int indx)
+rc_service_started_daemon(ثابت حرف *service,
+    ثابت حرف *exec, ثابت حرف *ثابت *argv, صحیح indx)
 {
-	const char *base = basename_c(service);
-	char *file = NULL;
-	RC_STRINGLIST *match;
+	ثابت حرف *بنیاد = basename_c(service);
+	حرف *file = تہی;
+	RC_STRINGLIST *مطابقت;
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	ساخت dirent *d;
 
-	if (!service || !exec)
-		return false;
+	اگر (!service || !exec)
+		واپس false;
 
-	match = _match_list(exec, argv, NULL);
+	مطابقت = مطابقت_list(exec, argv, تہی);
 
-	if (indx > 0) {
+	اگر (indx > 0) {
 		xasprintf(&file, "%03d", indx);
-		retval = _match_daemon(base, file, match);
-		free(file);
-	} else if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
-			if ((retval = _match_daemon(base, d->d_name, match)))
-				break;
+		retval = مطابقت_daemon(بنیاد, file, مطابقت);
+		آزاد(file);
+	} ورنہ اگر ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), بنیاد))) {
+		جب ((d = readdir(dp))) {
+			اگر (d->d_name[0] == '.')
+				جاری;
+			اگر ((retval = مطابقت_daemon(بنیاد, d->d_name, مطابقت)))
+				توڑو;
 		}
 		closedir(dp);
 	}
 
-	rc_stringlist_free(match);
-	return retval;
+	rc_stringlist_free(مطابقت);
+	واپس retval;
 }
 
 bool
-rc_service_daemons_crashed(const char *service)
+rc_service_daemons_crashed(ثابت حرف *service)
 {
 	DIR *dp;
-	struct dirent *d;
+	ساخت dirent *d;
 	FILE *fp;
-	char *line = NULL;
+	حرف *سطر = تہی;
 	size_t len = 0;
-	char **argv = NULL;
-	char *exec = NULL;
-	char *name = NULL;
-	char *pidfile = NULL;
+	حرف **argv = تہی;
+	حرف *exec = تہی;
+	حرف *name = تہی;
+	حرف *pidfile = تہی;
 	pid_t pid = 0;
 	RC_PIDLIST *pids;
 	RC_PID *p1;
 	RC_PID *p2;
-	char *p;
-	char *token;
+	حرف *p;
+	حرف *token;
 	bool retval = false;
-	RC_STRINGLIST *list = NULL;
+	RC_STRINGLIST *list = تہی;
 	RC_STRING *s;
 	size_t i;
-	char *ch_root;
-	char *spidfile;
+	حرف *ch_جڑ;
+	حرف *spidfile;
 
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
-		return false;
+	اگر (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
+		واپس false;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	جب ((d = readdir(dp))) {
+		اگر (d->d_name[0] == '.')
+			جاری;
 
-		if (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
-			break;
+		اگر (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
+			توڑو;
 
-		while (xgetline(&line, &len, fp) != -1) {
-			p = line;
-			if ((token = strsep(&p, "=")) == NULL || !p)
-				continue;
+		جب (xgetline(&سطر, &len, fp) != -1) {
+			p = سطر;
+			اگر ((token = strsep(&p, "=")) == تہی || !p)
+				جاری;
 
-			if (!*p)
-				continue;
+			اگر (!*p)
+				جاری;
 
-			if (strcmp(token, "exec") == 0) {
-				if (exec)
-					free(exec);
+			اگر (strcmp(token, "exec") == 0) {
+				اگر (exec)
+					آزاد(exec);
 				exec = xstrdup(p);
-			} else if (strncmp(token, "argv_", 5) == 0) {
-				if (!list)
+			} ورنہ اگر (لڑی_موازنہ(token, "argv_", 5) == 0) {
+				اگر (!list)
 					list = rc_stringlist_new();
-				rc_stringlist_add(list, p);
-			} else if (strcmp(token, "name") == 0) {
-				if (name)
-					free(name);
+				rc_stringlist_جوڑو(list, p);
+			} ورنہ اگر (strcmp(token, "name") == 0) {
+				اگر (name)
+					آزاد(name);
 				name = xstrdup(p);
-			} else if (strcmp(token, "pidfile") == 0) {
+			} ورنہ اگر (strcmp(token, "pidfile") == 0) {
 				pidfile = xstrdup(p);
-				break;
+				توڑو;
 			}
 		}
 		fclose(fp);
 
-		ch_root = rc_service_value_get(basename_c(service), "chroot");
+		ch_جڑ = rc_service_قدر_get(basename_c(service), "chroot");
 		spidfile = pidfile;
-		if (ch_root && pidfile) {
-			xasprintf(&spidfile, "%s%s", ch_root, pidfile);
-			free(pidfile);
+		اگر (ch_جڑ && pidfile) {
+			xasprintf(&spidfile, "%s%s", ch_جڑ, pidfile);
+			آزاد(pidfile);
 			pidfile = spidfile;
 		}
 
 		pid = 0;
-		if (pidfile) {
+		اگر (pidfile) {
 			retval = true;
-			if ((fp = fopen(pidfile, "r"))) {
-				if (fscanf(fp, "%d", &pid) == 1)
+			اگر ((fp = fopen(pidfile, "r"))) {
+				اگر (fscanf(fp, "%d", &pid) == 1)
 					retval = false;
 				fclose(fp);
 			}
-			free(pidfile);
-			pidfile = NULL;
+			آزاد(pidfile);
+			pidfile = تہی;
 
 			/* We have the pid, so no need to match
 			   on exec or name */
-			free(exec);
-			exec = NULL;
-			free(name);
-			name = NULL;
-		} else {
-			if (exec) {
-				if (!list)
+			آزاد(exec);
+			exec = تہی;
+			آزاد(name);
+			name = تہی;
+		} ورنہ {
+			اگر (exec) {
+				اگر (!list)
 					list = rc_stringlist_new();
-				if (!TAILQ_FIRST(list))
-					rc_stringlist_add(list, exec);
+				اگر (!TAILQ_پہلا(list))
+					rc_stringlist_جوڑو(list, exec);
 
-				free(exec);
-				exec = NULL;
+				آزاد(exec);
+				exec = تہی;
 			}
 
-			if (list) {
+			اگر (list) {
 				/* We need to flatten our linked list
 				   into an array */
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    i++;
-				argv = xmalloc(sizeof(char *) * (i + 1));
+				argv = xmalloc(حجم(حرف *) * (i + 1));
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
-				    argv[i++] = s->value;
-				argv[i] = NULL;
+				    argv[i++] = s->قدر;
+				argv[i] = تہی;
 			}
 		}
 
-		if (!retval) {
-			if (pid != 0) {
-				if (kill(pid, 0) == -1 && errno == ESRCH)
+		اگر (!retval) {
+			اگر (pid != 0) {
+				اگر (kill(pid, 0) == -1 && errno == ESRCH)
 					retval = true;
-			} else if ((pids = rc_find_pids(exec,
-				    (const char *const *)argv,
+			} ورنہ اگر ((pids = rc_ڈھونڈو_pids(exec,
+				    (ثابت حرف *ثابت *)argv,
 				    0, pid)))
 			{
-				p1 = LIST_FIRST(pids);
-				while (p1) {
-					p2 = LIST_NEXT(p1, entries);
-					free(p1);
+				p1 = LIST_پہلا(pids);
+				جب (p1) {
+					p2 = LIST_اگلا(p1, entries);
+					آزاد(p1);
 					p1 = p2;
 				}
-				free(pids);
-			} else
+				آزاد(pids);
+			} ورنہ
 				retval = true;
 		}
 		rc_stringlist_free(list);
-		list = NULL;
-		free(argv);
-		argv = NULL;
-		free(exec);
-		exec = NULL;
-		free(name);
-		name = NULL;
-		if (retval)
-			break;
+		list = تہی;
+		آزاد(argv);
+		argv = تہی;
+		آزاد(exec);
+		exec = تہی;
+		آزاد(name);
+		name = تہی;
+		اگر (retval)
+			توڑو;
 	}
 	closedir(dp);
-	free(line);
+	آزاد(سطر);
 
-	return retval;
+	واپس retval;
 }

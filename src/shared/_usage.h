@@ -10,22 +10,22 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <getopt.h>
-#include <stdlib.h>
-#include "librc.h"
+#شامل <getopt.h>
+#شامل <stdlib.h>
+#شامل "librc.h"
 
-#define getoptstring_COMMON "ChqVvU"
+#تعریف_کرو getoptstring_COMMON "ChqVvU"
 
-#define longopts_COMMON							      \
-	{ "help",           0, NULL, 'h'},				      \
-	{ "nocolor",        0, NULL, 'C'},				      \
-	{ "version",        0, NULL, 'V'},				      \
-	{ "verbose",        0, NULL, 'v'},				      \
-	{ "quiet",          0, NULL, 'q'},				      \
-	{ "user",           0, NULL, 'U'},				      \
-	{ NULL,             0, NULL,  0 }
+#تعریف_کرو longopts_COMMON							      \
+	{ "help",           0, تہی, 'h'},				      \
+	{ "nocolor",        0, تہی, 'C'},				      \
+	{ "version",        0, تہی, 'V'},				      \
+	{ "verbose",        0, تہی, 'v'},				      \
+	{ "quiet",          0, تہی, 'q'},				      \
+	{ "user",           0, تہی, 'U'},				      \
+	{ تہی,             0, تہی,  0 }
 
-#define longopts_help_COMMON						      \
+#تعریف_کرو longopts_help_COMMON						      \
 	"Display this help output",					      \
 	"Disable color output",						      \
 	"Display software version",			              \
@@ -33,30 +33,30 @@
 	"Run quietly (repeat to suppress errors)",         \
 	"Run in user mode"
 
-#define case_RC_COMMON_getopt_case_C  setenv ("EINFO_COLOR", "NO", 1);
-#define case_RC_COMMON_getopt_case_h  usage (EXIT_SUCCESS);
-#define case_RC_COMMON_getopt_case_V  if (argc == 2) show_version();
-#define case_RC_COMMON_getopt_case_v  setenv ("EINFO_VERBOSE", "YES", 1);
-#define case_RC_COMMON_getopt_case_q  set_quiet_options();
-#define case_RC_COMMON_getopt_case_U  rc_set_user();
-#define case_RC_COMMON_getopt_default usage (EXIT_FAILURE);
+#تعریف_کرو case_RC_COMMON_getopt_case_C  setenv ("EINFO_COLOR", "NO", 1);
+#تعریف_کرو case_RC_COMMON_getopt_case_h  usage (EXIT_SUCCESS);
+#تعریف_کرو case_RC_COMMON_getopt_case_V  اگر (argc == 2) show_نسخہ();
+#تعریف_کرو case_RC_COMMON_getopt_case_v  setenv ("EINFO_VERBOSE", "YES", 1);
+#تعریف_کرو case_RC_COMMON_getopt_case_q  سیٹ_quiet_options();
+#تعریف_کرو case_RC_COMMON_getopt_case_U  rc_سیٹ_user();
+#تعریف_کرو case_RC_COMMON_getopt_default usage (EXIT_FAILURE);
 
-#define case_RC_COMMON_GETOPT						      \
-	case 'C': case_RC_COMMON_getopt_case_C; break;			      \
-	case 'h': case_RC_COMMON_getopt_case_h; break;			      \
-	case 'V': case_RC_COMMON_getopt_case_V; break;			      \
-	case 'v': case_RC_COMMON_getopt_case_v; break;			      \
-	case 'q': case_RC_COMMON_getopt_case_q; break;			      \
-	case 'U': case_RC_COMMON_getopt_case_U; break;			      \
-	default:  case_RC_COMMON_getopt_default; break;
+#تعریف_کرو case_RC_COMMON_GETOPT						      \
+	حالت 'C': case_RC_COMMON_getopt_case_C; توڑو;			      \
+	حالت 'h': case_RC_COMMON_getopt_case_h; توڑو;			      \
+	حالت 'V': case_RC_COMMON_getopt_case_V; توڑو;			      \
+	حالت 'v': case_RC_COMMON_getopt_case_v; توڑو;			      \
+	حالت 'q': case_RC_COMMON_getopt_case_q; توڑو;			      \
+	حالت 'U': case_RC_COMMON_getopt_case_U; توڑو;			      \
+	طےشدہ:  case_RC_COMMON_getopt_default; توڑو;
 
-extern const char *applet;
-extern const char *extraopts;
-extern const char getoptstring[];
-extern const struct option longopts[];
-extern const char * const longopts_help[];
-extern const char *usagestring;
+خارجی ثابت حرف *applet;
+خارجی ثابت حرف *extraopts;
+خارجی ثابت حرف getoptstring[];
+خارجی ثابت ساخت option longopts[];
+خارجی ثابت حرف * ثابت longopts_help[];
+خارجی ثابت حرف *usagestring;
 
-void set_quiet_options(void);
-void show_version(void);
-void usage(int exit_status);
+خالی سیٹ_quiet_options(خالی);
+خالی show_نسخہ(خالی);
+خالی usage(صحیح exit_status);

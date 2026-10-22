@@ -32,7 +32,7 @@ rc = declare_dependency(
   include_directories: '.',
   sources: rc_h,
   link_with: library('rc', librc_sources,
-    c_args: [ '-D_RC_PATH="@0@"'.format('","'.join(rc_path)) ],
+    c_args: [ '-DRC_راستہ="@0@"'.format('","'.join(rc_path)) ],
     dependencies: kvm_dep,
     include_directories : incdir,
     link_depends : 'rc.map',

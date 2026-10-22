@@ -14,10 +14,10 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef _RC_SYSVINIT_H
-#define _RC_SYSVINIT_H
+#اگر_غیر_تعریف_شدہ _RC_SYSVINIT_H
+#تعریف_کرو _RC_SYSVINIT_H
 
-void sysvinit_runlevel(char rl);
-void sysvinit_setenv(const char *name, const char *value);
+خالی sysvinit_runlevel(حرف rl);
+خالی sysvinit_setenv(ثابت حرف *name, ثابت حرف *قدر);
 
-#endif
+#اگر_ختم
