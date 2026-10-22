@@ -16,255 +16,255 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <time.h>
-#include <unistd.h>
+#ضمن <errno.h>
+#ضمن <ctype.h>
+#ضمن <fcntl.h>
+#ضمن <poll.h>
+#ضمن <signal.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <sys/types.h>
+#ضمن <sys/ioctl.h>
+#ضمن <sys/wait.h>
+#ضمن <termios.h>
+#ضمن <time.h>
+#ضمن <unistd.h>
 
-#if defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#إذا defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 #  include <pty.h>
-#elif defined(__NetBSD__) || defined(__OpenBSD__)
+#وإلاإذا defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <util.h>
-#else
+#وإلا
 #  include <libutil.h>
-#endif
+#پایان_اگر
 
-#include "einfo.h"
-#include "rc-logger.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "rc-logger.h"
+#ضمن "rc.h"
+#ضمن "misc.h"
+#ضمن "helpers.h"
 
-#define DEFAULTLOG "/var/log/rc.log"
+#تعریف_کن DEFAULTLOG "/var/log/rc.log"
 
-static int signal_pipe[2] = { -1, -1 };
-static int fd_stdout = -1;
-static int fd_stderr = -1;
-static const char *runlevel = NULL;
-static bool in_escape = false;
-static bool in_term = false;
+ساكن صحيح signal_pipe[2] = { -1, -1 };
+ساكن صحيح fd_stdout = -1;
+ساكن صحيح fd_stderr = -1;
+ساكن ثابت حرف *runlevel = عدم;
+ساكن bool درون_escape = false;
+ساكن bool درون_جمله = false;
 
-static char *logbuf = NULL;
-static size_t logbuf_size = 0;
-static size_t logbuf_len = 0;
+ساكن حرف *logbuf = عدم;
+ساكن size_t logbuf_اندازه = 0;
+ساكن size_t logbuf_len = 0;
 
 pid_t rc_logger_pid = -1;
-int rc_logger_tty = -1;
-bool rc_in_logger = false;
+صحيح rc_logger_tty = -1;
+bool rc_درون_logger = false;
 
-static void
-write_log(int logfd, const char *buffer, size_t bytes)
+ساكن فراغ
+write_log(صحيح logfd, ثابت حرف *میانگیر, size_t بایتها)
 {
-	const char *p = buffer;
+	ثابت حرف *p = میانگیر;
 
-	while ((size_t)(p - buffer) < bytes) {
-		switch (*p) {
-		case '\r':
-			goto cont;
-		case '\033':
-			in_escape = true;
-			in_term = false;
-			goto cont;
-		case '\n':
-			in_escape = in_term = false;
-			break;
-		case '[':
-			if (in_escape)
-				in_term = true;
-			break;
+	طالما ((size_t)(p - میانگیر) < بایتها) {
+		بدل (*p) {
+		حالة '\r':
+			اذهب cont;
+		حالة '\033':
+			درون_escape = true;
+			درون_جمله = false;
+			اذهب cont;
+		حالة '\n':
+			درون_escape = درون_جمله = false;
+			اكسر;
+		حالة '[':
+			إذا (درون_escape)
+				درون_جمله = true;
+			اكسر;
 		}
 
-		if (!in_escape) {
-			if (!isprint((int) *p) && *p != '\n')
-				goto cont;
-			if (write(logfd, p++, 1) == -1)
+		إذا (!درون_escape) {
+			إذا (!isprint((صحيح) *p) && *p != '\n')
+				اذهب cont;
+			إذا (اكتب(logfd, p++, 1) == -1)
 				eerror("write: %s", strerror(errno));
-			continue;
+			استمر;
 		}
 
-		if (!in_term || isalpha((unsigned char)*p))
-			in_escape = in_term = false;
+		إذا (!درون_جمله || آیا_حرف((بیعلامت حرف)*p))
+			درون_escape = درون_جمله = false;
 cont:
 		p++;
 	}
 }
 
-static void
-write_time(FILE *f, const char *s)
+ساكن فراغ
+write_زمان(FILE *f, ثابت حرف *s)
 {
-	time_t now = time(NULL);
-	struct tm *tm = localtime(&now);
+	time_t now = time(عدم);
+	بنية tm *tm = localtime(&now);
 
 	fprintf(f, "\nrc %s logging %s at %s\n", runlevel, s, asctime(tm));
 	fflush(f);
 }
 
-static void
-mkpath(const char *path)
+ساكن فراغ
+mkpath(ثابت حرف *مسیر)
 {
-	char *dir = xstrdup(path), *slash = dir;
-	while ((slash = strchr(slash + 1, '/'))) {
+	حرف *dir = xstrdup(مسیر), *slash = dir;
+	طالما ((slash = strchr(slash + 1, '/'))) {
 		*slash = '\0';
-		if (mkdir(path, 0755) == -1 && errno != EEXIST)
-			break;
+		إذا (mkdir(مسیر, 0755) == -1 && errno != EEXIST)
+			اكسر;
 		*slash = '/';
 	}
-	mkdir(path, 0755);
-	free(dir);
+	mkdir(مسیر, 0755);
+	حرر(dir);
 }
 
-void
-rc_logger_close(void)
+فراغ
+rc_logger_close(فراغ)
 {
-	int sig = SIGTERM;
+	صحيح sig = SIGTERM;
 
-	if (signal_pipe[1] > -1) {
-		if (write(signal_pipe[1], &sig, sizeof(sig)) == -1)
+	إذا (signal_pipe[1] > -1) {
+		إذا (اكتب(signal_pipe[1], &sig, حجم(sig)) == -1)
 			eerror("write: %s", strerror(errno));
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 	}
 
-	if (rc_logger_pid > 0)
+	إذا (rc_logger_pid > 0)
 		waitpid(rc_logger_pid, 0, 0);
 
-	if (fd_stdout > -1)
+	إذا (fd_stdout > -1)
 		dup2(fd_stdout, STDOUT_FILENO);
-	if (fd_stderr > -1)
+	إذا (fd_stderr > -1)
 		dup2(fd_stderr, STDERR_FILENO);
 }
 
-void
-rc_logger_open(const char *level)
+فراغ
+rc_logger_open(ثابت حرف *level)
 {
-	int slave_tty;
-	struct termios tt;
-	struct winsize ws;
-	char buffer[BUFSIZ];
-	struct pollfd fd[2];
-	int s = 0;
-	size_t bytes;
-	FILE *log = NULL;
-	FILE *plog = NULL;
-	const char *logfile;
-	char *tmplog, *usrlog = NULL;
-	int log_error = 0;
+	صحيح slave_tty;
+	بنية termios tt;
+	بنية winsize ws;
+	حرف میانگیر[BUFSIZ];
+	بنية pollfd fd[2];
+	صحيح s = 0;
+	size_t بایتها;
+	FILE *لگاریتم = عدم;
+	FILE *plog = عدم;
+	ثابت حرف *logfile;
+	حرف *tmplog, *usrlog = عدم;
+	صحيح log_error = 0;
 
-	if (!rc_conf_yesno("rc_logger"))
-		return;
+	إذا (!rc_conf_yesno("rc_logger"))
+		أرجع;
 
-	if (pipe2(signal_pipe, O_CLOEXEC) == -1)
+	إذا (pipe2(signal_pipe, O_CLOEXEC) == -1)
 		eerrorx("pipe2: %s", strerror(errno));
 
-	if (isatty(STDOUT_FILENO)) {
+	إذا (isatty(STDOUT_FILENO)) {
 		tcgetattr(STDOUT_FILENO, &tt);
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, &tt, &ws))
-			return;
-	} else
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, NULL, NULL))
-			return;
+		إذا (openpty(&rc_logger_tty, &slave_tty, عدم, &tt, &ws))
+			أرجع;
+	} وإلا
+		إذا (openpty(&rc_logger_tty, &slave_tty, عدم, عدم, عدم))
+			أرجع;
 
-	if ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
+	إذا ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
 		fcntl(rc_logger_tty, F_SETFD, s | FD_CLOEXEC);
 
-	if ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
+	إذا ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
 		fcntl(slave_tty, F_SETFD, s | FD_CLOEXEC);
 
 	rc_logger_pid = fork();
-	switch (rc_logger_pid) {
-	case -1:
+	بدل (rc_logger_pid) {
+	حالة -1:
 		eerror("fork: %s", strerror(errno));
-		break;
-	case 0:
-		rc_in_logger = true;
+		اكسر;
+	حالة 0:
+		rc_درون_logger = true;
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 
 		runlevel = level;
 		xasprintf(&tmplog, "%s/rc.log", rc_svcdir());
-		if ((log = fopen(tmplog, "ae")))
-			write_time(log, "started");
-		else {
-			free(logbuf);
-			logbuf_size = BUFSIZ * 10;
-			logbuf = xmalloc(sizeof (char) * logbuf_size);
+		إذا ((لگاریتم = fopen(tmplog, "ae")))
+			write_زمان(لگاریتم, "started");
+		وإلا {
+			حرر(logbuf);
+			logbuf_اندازه = BUFSIZ * 10;
+			logbuf = xmalloc(حجم (حرف) * logbuf_اندازه);
 			logbuf_len = 0;
 		}
 
 		fd[0].fd = signal_pipe[0];
 		fd[0].events = fd[1].events = POLLIN;
 		fd[0].revents = fd[1].revents = 0;
-		if (rc_logger_tty >= 0)
+		إذا (rc_logger_tty >= 0)
 			fd[1].fd = rc_logger_tty;
-		for (;;) {
-			if ((s = poll(fd,
+		لكل (;;) {
+			إذا ((s = poll(fd,
 				    rc_logger_tty >= 0 ? 2 : 1, -1)) == -1)
 			{
 				eerror("poll: %s", strerror(errno));
-				break;
-			} else if (s == 0)
-				continue;
+				اكسر;
+			} وإلا إذا (s == 0)
+				استمر;
 
-			if (fd[1].revents & (POLLIN | POLLHUP)) {
-				memset(buffer, 0, BUFSIZ);
-				bytes = read(rc_logger_tty, buffer, BUFSIZ);
-				if (write(STDOUT_FILENO, buffer, bytes) == -1)
+			إذا (fd[1].revents & (POLLIN | POLLHUP)) {
+				memset(میانگیر, 0, BUFSIZ);
+				بایتها = اقرأ(rc_logger_tty, میانگیر, BUFSIZ);
+				إذا (اكتب(STDOUT_FILENO, میانگیر, بایتها) == -1)
 					eerror("write: %s", strerror(errno));
 
-				if (log)
-					write_log(fileno (log), buffer, bytes);
-				else {
-					if (logbuf_size - logbuf_len < bytes) {
-						logbuf_size += BUFSIZ * 10;
+				إذا (لگاریتم)
+					write_log(fileno (لگاریتم), میانگیر, بایتها);
+				وإلا {
+					إذا (logbuf_اندازه - logbuf_len < بایتها) {
+						logbuf_اندازه += BUFSIZ * 10;
 						logbuf = xrealloc(logbuf,
-						    sizeof(char ) *
-						    logbuf_size);
+						    حجم(حرف ) *
+						    logbuf_اندازه);
 					}
 
-					memcpy(logbuf + logbuf_len,
-					    buffer, bytes);
-					logbuf_len += bytes;
+					کپی_حافظه(logbuf + logbuf_len,
+					    میانگیر, بایتها);
+					logbuf_len += بایتها;
 				}
 			}
 
 			/* Only SIGTERMS signals come down this pipe */
-			if (fd[0].revents & (POLLIN | POLLHUP))
-				break;
+			إذا (fd[0].revents & (POLLIN | POLLHUP))
+				اكسر;
 		}
-		if (logbuf) {
-			if ((log = fopen(tmplog, "ae"))) {
-				write_time(log, "started");
-				write_log(fileno(log), logbuf, logbuf_len);
+		إذا (logbuf) {
+			إذا ((لگاریتم = fopen(tmplog, "ae"))) {
+				write_زمان(لگاریتم, "started");
+				write_log(fileno(لگاریتم), logbuf, logbuf_len);
 			}
-			free(logbuf);
+			حرر(logbuf);
 		}
-		if (log) {
-			write_time(log, "stopped");
-			fclose(log);
+		إذا (لگاریتم) {
+			write_زمان(لگاریتم, "stopped");
+			fclose(لگاریتم);
 		}
 
 		/* Append the temporary log to the real log */
-		logfile = rc_conf_value("rc_log_path");
-		if (logfile == NULL) {
-			if (!rc_is_user()) {
+		logfile = rc_conf_مقدار("rc_log_path");
+		إذا (logfile == عدم) {
+			إذا (!rc_is_user()) {
 				logfile = DEFAULTLOG;
-			} else {
-				const char *state_home = getenv("XDG_STATE_HOME");
-				if (state_home) {
+			} وإلا {
+				ثابت حرف *state_home = getenv("XDG_STATE_HOME");
+				إذا (state_home) {
 					xasprintf(&usrlog, "%s/rc.log", state_home);
-				} else if ((state_home = getenv("HOME"))) {
+				} وإلا إذا ((state_home = getenv("HOME"))) {
 					xasprintf(&usrlog, "%s/.local/state/rc.log", state_home);
 					state_home = ".local/state";
 				}
@@ -272,71 +272,71 @@ rc_logger_open(const char *level)
 				logfile = usrlog;
 			}
 		}
-		if (!strcmp(logfile, tmplog)) {
+		إذا (!strcmp(logfile, tmplog)) {
 			eerror("Cowardly refusing to concatenate a logfile into itself.");
 			eerrorx("Please change rc_log_path to something other than %s to get rid of this message", tmplog);
 		}
 
-		if ((plog = fopen(logfile, "ae"))) {
-			if ((log = fopen(tmplog, "re"))) {
-				while ((bytes = fread(buffer, sizeof(*buffer), BUFSIZ, log)) > 0) {
-					if (fwrite(buffer, sizeof(*buffer), bytes, plog) < bytes) {
+		إذا ((plog = fopen(logfile, "ae"))) {
+			إذا ((لگاریتم = fopen(tmplog, "re"))) {
+				طالما ((بایتها = fread(میانگیر, حجم(*میانگیر), BUFSIZ, لگاریتم)) > 0) {
+					إذا (fwrite(میانگیر, حجم(*میانگیر), بایتها, plog) < بایتها) {
 						log_error = 1;
 						eerror("Error: write(%s) failed: %s", logfile, strerror(errno));
-						break;
+						اكسر;
 					}
 				}
-				fclose(log);
-			} else {
+				fclose(لگاریتم);
+			} وإلا {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", tmplog, strerror(errno));
 			}
 
 			fclose(plog);
-		} else {
+		} وإلا {
 			/*
 			 * logfile or its basedir may be read-only during sysinit and
 			 * shutdown so skip the error in this case
 			 */
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
+			إذا (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", logfile, strerror(errno));
 			}
 		}
 
-		free(usrlog);
+		حرر(usrlog);
 
 		/* Try to keep the temporary log in case of errors */
-		if (!log_error) {
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
-				if (unlink(tmplog) == -1)
+		إذا (!log_error) {
+			إذا (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
+				إذا (unlink(tmplog) == -1)
 					eerror("Error: unlink(%s) failed: %s", tmplog, strerror(errno));
-		} else if (access(tmplog, F_OK) == 0) {
+		} وإلا إذا (access(tmplog, F_OK) == 0) {
 			eerrorx("Warning: temporary logfile left behind: %s", tmplog);
 		}
 
-		free(tmplog);
+		حرر(tmplog);
 
-		exit(0);
+		خروج(0);
 		/* NOTREACHED */
 
-	default:
+	افتراضي:
 		setpgid(rc_logger_pid, 0);
 		fd_stdout = dup(STDOUT_FILENO);
 		fd_stderr = dup(STDERR_FILENO);
-		if ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
+		إذا ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
 			fcntl(fd_stdout, F_SETFD, s | FD_CLOEXEC);
 
-		if ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
+		إذا ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
 			fcntl(fd_stderr, F_SETFD, s | FD_CLOEXEC);
 		dup2(slave_tty, STDOUT_FILENO);
 		dup2(slave_tty, STDERR_FILENO);
-		if (slave_tty != STDIN_FILENO &&
+		إذا (slave_tty != STDIN_FILENO &&
 		    slave_tty != STDOUT_FILENO &&
 		    slave_tty != STDERR_FILENO)
 			close(slave_tty);
 		close(signal_pipe[0]);
 		signal_pipe[0] = -1;
-		break;
+		اكسر;
 	}
 }

@@ -15,124 +15,124 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __HELPERS_H__
-#define __HELPERS_H__
+#اگر_تعریف_نشده __HELPERS_H__
+#تعریف_کن __HELPERS_H__
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+#ضمن <stdarg.h>
+#ضمن <stdbool.h>
+#ضمن <stddef.h>
+#ضمن <stdint.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <sys/stat.h>
+#ضمن <dirent.h>
+#ضمن <unistd.h>
+#ضمن <fcntl.h>
+#ضمن <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#تعریف_کن ERRX افعل { fprintf (stderr, "out of memory\n"); خروج (1); } طالما (0)
 
-#define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
+#تعریف_کن UNCONST(a)		((فراغ *)(uintptr_t)(ثابت فراغ *)(a))
 
-#define RC_UNUSED __attribute__((__unused__))
-#define RC_NORETURN __attribute__((__noreturn__))
-#define RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
+#تعریف_کن RC_استفادهنشده __attribute__((__unused__))
+#تعریف_کن RC_NORETURN __attribute__((__noreturn__))
+#تعریف_کن RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#تعریف_کن ARRAY_اندازه(a) (حجم(a) / حجم((a)[0]))
 
-#ifndef HAVE_STRLCPY
-#    define strlcpy(dst, src, size) snprintf(dst, size, "%s", src)
-#endif
+#اگر_تعریف_نشده HAVE_STRLCPY
+#    define strlcpy(dst, src, اندازه) snprintf(dst, اندازه, "%s", src)
+#پایان_اگر
 
-#ifndef timespecsub
-#define	timespecsub(tsp, usp, vsp)					      \
-	do {								      \
+#اگر_تعریف_نشده timespecsub
+#تعریف_کن	timespecsub(tsp, usp, vsp)					      \
+	افعل {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		إذا ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
-#endif
+	} طالما (/* CONSTCOND */ 0)
+#پایان_اگر
 
-RC_UNUSED static void *xmalloc (size_t size)
+RC_استفادهنشده ساكن فراغ *xmalloc (size_t اندازه)
 {
-	void *value = malloc(size);
+	فراغ *مقدار = حافظه_بده(اندازه);
 
-	if (value)
-		return (value);
+	إذا (مقدار)
+		أرجع (مقدار);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static void *xrealloc(void *ptr, size_t size)
+RC_استفادهنشده ساكن فراغ *xrealloc(فراغ *ptr, size_t اندازه)
 {
-	void *value = realloc(ptr, size);
+	فراغ *مقدار = realloc(ptr, اندازه);
 
-	if (value)
-		return (value);
+	إذا (مقدار)
+		أرجع (مقدار);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static char *xstrdup(const char *str)
+RC_استفادهنشده ساكن حرف *xstrdup(ثابت حرف *str)
 {
-	char *value;
+	حرف *مقدار;
 
-	if (!str)
-		return (NULL);
+	إذا (!str)
+		أرجع (عدم);
 
-	value = strdup(str);
+	مقدار = strdup(str);
 
-	if (value)
-		return (value);
+	إذا (مقدار)
+		أرجع (مقدار);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
+RC_استفادهنشده ساكن FILE *xopen_memstream(حرف **ptr, size_t *sizeloc)
 {
 	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	إذا (f)
+		أرجع f;
 	ERRX;
 }
 
-RC_UNUSED static void xclose_memstream(FILE *f)
+RC_استفادهنشده ساكن فراغ xclose_memstream(FILE *f)
 {
 	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	إذا (ferror(f) || fclose(f) != 0)
 		ERRX;
 }
 
-#undef ERRX
+#لغو_تعریف ERRX
 
 /*
  * basename_c never modifies the argument. As such, if there is a trailing
  * slash then an empty string is returned.
  */
-RC_UNUSED static const char *basename_c(const char *path)
+RC_استفادهنشده ساكن ثابت حرف *basename_c(ثابت حرف *مسیر)
 {
-	const char *slash = strrchr(path, '/');
+	ثابت حرف *slash = strrchr(مسیر, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	إذا (slash)
+		أرجع (++slash);
+	أرجع (مسیر);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_استفادهنشده ساكن FILE *do_fopenat(صحيح dirfd, ثابت حرف *pathname, صحيح نما)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
-	const char *fmode;
+	صحيح fd = openat(dirfd, pathname, نما, 0666);
+	ثابت حرف *fmode;
 	FILE *fp;
 
-	if (fd == -1)
-		return NULL;
+	إذا (fd == -1)
+		أرجع عدم;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	إذا ((نما & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	وإلا إذا ((نما & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	وإلا
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
+	إذا (!(fp = fdopen(fd, fmode)))
 		close(fd);
-	return fp;
+	أرجع fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_استفادهنشده ساكن DIR *do_opendirat(صحيح dirfd, ثابت حرف *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	صحيح fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	إذا (fd == -1)
+		أرجع عدم;
 
-	if (!(dp = fdopendir(fd)))
+	إذا (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	أرجع dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_استفادهنشده ساكن DIR *do_dopendir(صحيح dirfd)
 {
-	int fd = dup(dirfd);
+	صحيح fd = dup(dirfd);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	إذا (fd == -1)
+		أرجع عدم;
 
-	if (!(dp = fdopendir(fd)))
+	إذا (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	أرجع dp;
 }
 
 /*
@@ -188,12 +188,12 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_استفادهنشده RC_PRINTF(2,3) ساكن صحيح xasprintf(حرف **strp, ثابت حرف *fmt, ...)
 {
 	va_list ap;
-	int len;
-	int memlen;
-	char *ret;
+	صحيح len;
+	صحيح memlen;
+	حرف *ret;
 
 	/*
 	 * Start with a buffer size that should cover the vast majority of uses
@@ -205,7 +205,7 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
 	va_end(ap);
-	if (len >= memlen) {
+	إذا (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
@@ -215,86 +215,86 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 		len = vsnprintf(ret, len + 1, fmt, ap);
 		va_end(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	إذا (len < 0 || len >= memlen) {
 		/* Give up! */
 		fprintf(stderr, "xasprintf: unable to format a buffer\n");
-		free(ret);
-		exit(1);
+		حرر(ret);
+		خروج(1);
 	}
 	*strp = ret;
-	return len;
+	أرجع len;
 }
 
-RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
+RC_استفادهنشده ساكن ssize_t xgetline(حرف **محدود lineptr, size_t *محدود n, FILE *محدود جریان)
 {
-	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	ssize_t ret = getline(lineptr, n, جریان);
+	إذا (ret <= 0)
+		أرجع ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	إذا ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	أرجع ret;
 }
 
-RC_UNUSED static char *env_findvar(const char *name, char **envp)
+RC_استفادهنشده ساكن حرف *env_findvar(ثابت حرف *name, حرف **envp)
 {
-	size_t len = strlen(name);
+	size_t len = طول_رشته(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	لكل (حرف **var = envp; *var; var++)
+		إذا (مقایسه_رشته(name, *var, len) == 0 && (*var)[len] == '=')
+			أرجع *var;
+	أرجع عدم;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_استفادهنشده ساكن صحيح xopen_nonblock(ثابت حرف *filename, صحيح flags, mode_t نما)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
+	صحيح fd = open(filename, flags | O_NONBLOCK, نما);
+	إذا (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		صحيح saved_errno = errno;
 		close(fd);
 		fd = -1;
 		errno = saved_errno;
 	}
-	return fd;
+	أرجع fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_استفادهنشده ساكن صحيح open_rwfifo(ثابت حرف *مسیر, bool nonblock)
 {
-	int r, w, err;
+	صحيح r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	إذا (mkfifo(مسیر, 0600) == -1 && errno != EEXIST)
+		أرجع -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	إذا ((r = open(مسیر, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		أرجع -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+	إذا ((w = open(مسیر, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		err = errno;
-		goto r_err;
+		اذهب r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+	إذا (!nonblock) {
+		صحيح flags = fcntl(r, F_GETFL);
+		إذا (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
 			err = errno;
-			goto w_err;
+			اذهب w_err;
 		}
 	}
 
-	return r;
+	أرجع r;
 
 w_err:
 	close(w);
 r_err:
 	close(r);
 	errno = err;
-	return -1;
+	أرجع -1;
 }
 
-#endif
+#پایان_اگر

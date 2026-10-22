@@ -15,71 +15,71 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/wait.h>
-#include <errno.h>
-#include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <spawn.h>
+#ضمن <sys/wait.h>
+#ضمن <errno.h>
+#ضمن <getopt.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <unistd.h>
+#ضمن <stdbool.h>
+#ضمن <spawn.h>
 
 /* Yay for linux and its non liking of POSIX functions.
    Okay, we could use getfsent but the man page says use getmntent instead
    AND we don't have getfsent on uclibc or dietlibc for some odd reason. */
-#ifdef __linux__
+#اگر_تعریف_شده __linux__
 #  define HAVE_GETMNTENT
 #  include <mntent.h>
 
 #  define ENT mntent
-#  define START_ENT fp = setmntent ("/etc/fstab", "r");
+#  define شروع_ENT fp = setmntent ("/etc/fstab", "r");
 #  define GET_ENT getmntent (fp)
 #  define GET_ENT_FILE(_name) getmntfile (_name)
-#  define END_ENT endmntent (fp)
+#  define انتها_ENT endmntent (fp)
 #  define ENT_BLOCKDEVICE(_ent) (_ent)->mnt_fsname
 #  define ENT_FILE(_ent) (_ent)->mnt_dir
 #  define ENT_TYPE(_ent) (_ent)->mnt_type
 #  define ENT_OPTS(_ent) (_ent)->mnt_opts
 #  define ENT_PASS(_ent) (_ent)->mnt_passno
-#else
+#وإلا
 #  define HAVE_GETFSENT
 #  include <fstab.h>
 
 #  define ENT fstab
-#  define START_ENT
+#  define شروع_ENT
 #  define GET_ENT getfsent ()
 #  define GET_ENT_FILE(_name) getfsfile (_name)
-#  define END_ENT endfsent ()
+#  define انتها_ENT endfsent ()
 #  define ENT_BLOCKDEVICE(_ent) (_ent)->fs_spec
 #  define ENT_TYPE(_ent) (_ent)->fs_vfstype
 #  define ENT_FILE(_ent) (_ent)->fs_file
 #  define ENT_OPTS(_ent) (_ent)->fs_mntops
 #  define ENT_PASS(_ent) (_ent)->fs_passno
-#endif
+#پایان_اگر
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "_usage.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "queue.h"
+#ضمن "rc.h"
+#ضمن "_usage.h"
+#ضمن "helpers.h"
 
-extern char **environ;
+خارجي حرف **environ;
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "MRbmop:t:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "mount",          0, NULL, 'M' },
-	{ "remount",        0, NULL, 'R' },
-	{ "blockdevice",    0, NULL, 'b' },
-	{ "mountargs",      0, NULL, 'm' },
-	{ "options",        0, NULL, 'o' },
-	{ "passno",         1, NULL, 'p' },
-	{ "fstype",         1, NULL, 't' },
+ثابت حرف *applet = عدم;
+ثابت حرف *extraopts = عدم;
+ثابت حرف getoptstring[] = "MRbmop:t:" getoptstring_COMMON;
+ثابت بنية option longopts[] = {
+	{ "mount",          0, عدم, 'M' },
+	{ "remount",        0, عدم, 'R' },
+	{ "blockdevice",    0, عدم, 'b' },
+	{ "mountargs",      0, عدم, 'm' },
+	{ "options",        0, عدم, 'o' },
+	{ "passno",         1, عدم, 'p' },
+	{ "fstype",         1, عدم, 't' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت حرف * ثابت longopts_help[] = {
 	"Mounts the filesystem from the mountpoint",
 	"Remounts the filesystem based on the information in fstab",
 	"Extract the block device",
@@ -89,247 +89,247 @@ const char * const longopts_help[] = {
 	"List entries with matching file system type",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ثابت حرف *usagestring = عدم;
 
-#ifdef HAVE_GETMNTENT
-static struct mntent *
-getmntfile(const char *file)
+#اگر_تعریف_شده HAVE_GETMNTENT
+ساكن بنية mntent *
+getmntfile(ثابت حرف *file)
 {
-	struct mntent *ent;
+	بنية mntent *ent;
 	FILE *fp;
 
-	START_ENT;
-	while ((ent = getmntent(fp)))
-		if (strcmp(file, ent->mnt_dir) == 0)
-			break;
-	END_ENT;
+	شروع_ENT;
+	طالما ((ent = getmntent(fp)))
+		إذا (strcmp(file, ent->mnt_dir) == 0)
+			اكسر;
+	انتها_ENT;
 
-	return ent;
+	أرجع ent;
 }
-#endif
+#پایان_اگر
 
-extern const char *applet;
+خارجي ثابت حرف *applet;
 
-static int
-do_mount(struct ENT *ent, bool remount)
+ساكن صحيح
+do_mount(بنية ENT *ent, bool remount)
 {
-	char *argv[10];
+	حرف *argv[10];
 	pid_t pid;
-	int status, err;
+	صحيح وضعیت, err;
 
 	argv[0] = UNCONST("mount");
 	argv[1] = UNCONST("-o");
 	argv[2] = ENT_OPTS(ent);
 	argv[3] = UNCONST("-t");
 	argv[4] = ENT_TYPE(ent);
-	if (!remount) {
+	إذا (!remount) {
 		argv[5] = ENT_BLOCKDEVICE(ent);
 		argv[6] = ENT_FILE(ent);
-		argv[7] = NULL;
-	} else {
-#ifdef __linux__
+		argv[7] = عدم;
+	} وإلا {
+#اگر_تعریف_شده __linux__
 		argv[5] = UNCONST("-o");
 		argv[6] = UNCONST("remount");
 		argv[7] = ENT_BLOCKDEVICE(ent);
 		argv[8] = ENT_FILE(ent);
-		argv[9] = NULL;
-#else
+		argv[9] = عدم;
+#وإلا
 		argv[5] = UNCONST("-u");
 		argv[6] = ENT_BLOCKDEVICE(ent);
 		argv[7] = ENT_FILE(ent);
-		argv[8] = NULL;
-#endif
+		argv[8] = عدم;
+#پایان_اگر
 	}
-	err = posix_spawnp(&pid, argv[0], NULL, NULL, argv, environ);
-	if (err)
+	err = posix_spawnp(&pid, argv[0], عدم, عدم, argv, environ);
+	إذا (err)
 		eerrorx("%s: posix_spawnp: %s", applet, strerror(err));
-	while (waitpid(pid, &status, 0) < 0 && errno == EINTR);
-	if (WIFEXITED(status))
-		return WEXITSTATUS(status);
-	else
-		return -1;
+	طالما (waitpid(pid, &وضعیت, 0) < 0 && errno == EINTR);
+	إذا (WIFEXITED(وضعیت))
+		أرجع WEXITSTATUS(وضعیت);
+	وإلا
+		أرجع -1;
 }
 
-#define OUTPUT_FILE      (1 << 1)
-#define OUTPUT_MOUNTARGS (1 << 2)
-#define OUTPUT_OPTIONS   (1 << 3)
-#define OUTPUT_PASSNO    (1 << 4)
-#define OUTPUT_BLOCKDEV  (1 << 5)
-#define OUTPUT_MOUNT     (1 << 6)
-#define OUTPUT_REMOUNT   (1 << 7)
+#تعریف_کن OUTPUT_FILE      (1 << 1)
+#تعریف_کن OUTPUT_MOUNTARGS (1 << 2)
+#تعریف_کن OUTPUT_OPTIONS   (1 << 3)
+#تعریف_کن OUTPUT_PASSNO    (1 << 4)
+#تعریف_کن OUTPUT_BLOCKDEV  (1 << 5)
+#تعریف_کن OUTPUT_MOUNT     (1 << 6)
+#تعریف_کن OUTPUT_REMOUNT   (1 << 7)
 
-int main(int argc, char **argv)
+صحيح اصلی(صحيح argc, حرف **argv)
 {
-	struct ENT *ent;
-	int result = EXIT_SUCCESS;
-	char *token;
-	int i, p;
-	int opt;
-	int output = OUTPUT_FILE;
+	بنية ENT *ent;
+	صحيح نتیجه = EXIT_SUCCESS;
+	حرف *token;
+	صحيح i, p;
+	صحيح opt;
+	صحيح output = OUTPUT_FILE;
 	RC_STRINGLIST *files = rc_stringlist_new();
 	RC_STRING *file, *file_np;
 	bool filtered = false;
 
-#ifdef HAVE_GETMNTENT
+#اگر_تعریف_شده HAVE_GETMNTENT
 	FILE *fp;
-#endif
+#پایان_اگر
 
 	/* fail if there is no /etc/fstab */
-	if (access("/etc/fstab", F_OK) != 0)
+	إذا (access("/etc/fstab", F_OK) != 0)
 		eerrorx("/etc/fstab does not exist");
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	طالما ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (صحيح *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'M':
+		بدل (opt) {
+		حالة 'M':
 			output = OUTPUT_MOUNT;
-			break;
-		case 'R':
+			اكسر;
+		حالة 'R':
 			output = OUTPUT_REMOUNT;
-			break;
-		case 'b':
+			اكسر;
+		حالة 'b':
 			output = OUTPUT_BLOCKDEV;
-			break;
-		case 'o':
+			اكسر;
+		حالة 'o':
 			output = OUTPUT_OPTIONS;
-			break;
-		case 'm':
+			اكسر;
+		حالة 'm':
 			output = OUTPUT_MOUNTARGS;
-			break;
+			اكسر;
 
-		case 'p':
-			switch (optarg[0]) {
-			case '=':
-			case '<':
-			case '>':
-				if (sscanf(optarg + 1, "%d", &i) != 1)
+		حالة 'p':
+			بدل (optarg[0]) {
+			حالة '=':
+			حالة '<':
+			حالة '>':
+				إذا (از_رشته_بخوان(optarg + 1, "%d", &i) != 1)
 					eerrorx("%s: invalid passno %s",
 					    argv[0], optarg + 1);
 
 				filtered = true;
 				opt = optarg[0];
-				START_ENT;
-				while ((ent = GET_ENT)) {
-					if (strcmp(ENT_FILE(ent), "none") == 0)
-						continue;
+				شروع_ENT;
+				طالما ((ent = GET_ENT)) {
+					إذا (strcmp(ENT_FILE(ent), "none") == 0)
+						استمر;
 					p = ENT_PASS(ent);
-					if ((opt == '=' && i == p) ||
+					إذا ((opt == '=' && i == p) ||
 					    (opt == '<' && i > p && p != 0) ||
 					    (opt == '>' && i < p && p != 0))
-						rc_stringlist_add(files,
+						rc_stringlist_جمع_کن(files,
 						    ENT_FILE(ent));
 				}
-				END_ENT;
-				break;
+				انتها_ENT;
+				اكسر;
 
-			default:
-				rc_stringlist_add(files, optarg);
+			افتراضي:
+				rc_stringlist_جمع_کن(files, optarg);
 				output = OUTPUT_PASSNO;
-				break;
+				اكسر;
 			}
-			break;
+			اكسر;
 
-		case 't':
+		حالة 't':
 			filtered = true;
-			while ((token = strsep(&optarg, ","))) {
-				START_ENT;
-				while ((ent = GET_ENT))
-					if (strcmp(token, ENT_TYPE(ent)) == 0)
-						rc_stringlist_add(files,
+			طالما ((token = strsep(&optarg, ","))) {
+				شروع_ENT;
+				طالما ((ent = GET_ENT))
+					إذا (strcmp(token, ENT_TYPE(ent)) == 0)
+						rc_stringlist_جمع_کن(files,
 						    ENT_FILE(ent));
-				END_ENT;
+				انتها_ENT;
 			}
-			break;
+			اكسر;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind < argc) {
-		if (TAILQ_FIRST(files)) {
-			TAILQ_FOREACH_SAFE(file, files, entries, file_np) {
-				for (i = optind; i < argc; i++)
-					if (strcmp(argv[i], file->value) == 0)
-						break;
-				if (i >= argc)
+	إذا (optind < argc) {
+		إذا (TAILQ_اولی(files)) {
+			TAILQ_FOREACH_امن(file, files, entries, file_np) {
+				لكل (i = optind; i < argc; i++)
+					إذا (strcmp(argv[i], file->مقدار) == 0)
+						اكسر;
+				إذا (i >= argc)
 					rc_stringlist_delete(files,
-					    file->value);
+					    file->مقدار);
 			}
-		} else {
-			while (optind < argc)
-				rc_stringlist_add(files, argv[optind++]);
+		} وإلا {
+			طالما (optind < argc)
+				rc_stringlist_جمع_کن(files, argv[optind++]);
 		}
-	} else if (!filtered) {
-		START_ENT;
-		while ((ent = GET_ENT))
-			rc_stringlist_add(files, ENT_FILE(ent));
-		END_ENT;
+	} وإلا إذا (!filtered) {
+		شروع_ENT;
+		طالما ((ent = GET_ENT))
+			rc_stringlist_جمع_کن(files, ENT_FILE(ent));
+		انتها_ENT;
 
-		if (!TAILQ_FIRST(files))
+		إذا (!TAILQ_اولی(files))
 			eerrorx("%s: empty fstab", argv[0]);
 	}
 
-	if (!TAILQ_FIRST(files)) {
+	إذا (!TAILQ_اولی(files)) {
 		rc_stringlist_free(files);
-		return (EXIT_FAILURE);
+		أرجع (EXIT_FAILURE);
 	}
 
 	/* Ensure we always display something */
-	START_ENT;
+	شروع_ENT;
 	TAILQ_FOREACH(file, files, entries) {
-		if (!(ent = GET_ENT_FILE(file->value))) {
-			result = EXIT_FAILURE;
-			continue;
+		إذا (!(ent = GET_ENT_FILE(file->مقدار))) {
+			نتیجه = EXIT_FAILURE;
+			استمر;
 		}
 
 		/* mount or remount? */
-		switch (output) {
-		case OUTPUT_MOUNT:
-			result += do_mount(ent, false);
-			break;
+		بدل (output) {
+		حالة OUTPUT_MOUNT:
+			نتیجه += do_mount(ent, false);
+			اكسر;
 
-		case OUTPUT_REMOUNT:
-			result += do_mount(ent, true);
-			break;
+		حالة OUTPUT_REMOUNT:
+			نتیجه += do_mount(ent, true);
+			اكسر;
 		}
 
 		/* No point in outputting if quiet */
-		if (rc_yesno(getenv("EINFO_QUIET")))
-			continue;
+		إذا (rc_yesno(getenv("EINFO_QUIET")))
+			استمر;
 
-		switch (output) {
-		case OUTPUT_BLOCKDEV:
-			printf("%s\n", ENT_BLOCKDEVICE(ent));
-			break;
+		بدل (output) {
+		حالة OUTPUT_BLOCKDEV:
+			چاپ_کن("%s\n", ENT_BLOCKDEVICE(ent));
+			اكسر;
 
-		case OUTPUT_MOUNTARGS:
-			printf("-o %s -t %s %s %s\n",
+		حالة OUTPUT_MOUNTARGS:
+			چاپ_کن("-o %s -t %s %s %s\n",
 			    ENT_OPTS(ent),
 			    ENT_TYPE(ent),
 			    ENT_BLOCKDEVICE(ent),
-			    file->value);
-			break;
+			    file->مقدار);
+			اكسر;
 
-		case OUTPUT_OPTIONS:
-			printf("%s\n", ENT_OPTS(ent));
-			break;
+		حالة OUTPUT_OPTIONS:
+			چاپ_کن("%s\n", ENT_OPTS(ent));
+			اكسر;
 
-		case OUTPUT_FILE:
-			printf("%s\n", file->value);
-			break;
+		حالة OUTPUT_FILE:
+			چاپ_کن("%s\n", file->مقدار);
+			اكسر;
 
-		case OUTPUT_PASSNO:
-			printf("%d\n", ENT_PASS(ent));
-			break;
+		حالة OUTPUT_PASSNO:
+			چاپ_کن("%d\n", ENT_PASS(ent));
+			اكسر;
 		}
 	}
-	END_ENT;
+	انتها_ENT;
 
 	rc_stringlist_free(files);
-	exit(result);
+	خروج(نتیجه);
 	/* NOTREACHED */
 }

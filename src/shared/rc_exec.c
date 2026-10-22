@@ -10,170 +10,170 @@
  * except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#ضمن <errno.h>
+#ضمن <fcntl.h>
+#ضمن <signal.h>
+#ضمن <sys/wait.h>
+#ضمن <unistd.h>
 
-#include "rc_exec.h"
-#include "helpers.h"
+#ضمن "rc_exec.h"
+#ضمن "helpers.h"
 
-static void checked_close(int fd)
+ساكن فراغ checked_close(صحيح fd)
 {
-	if (fd >= 0)
+	إذا (fd >= 0)
 		close(fd);
 }
 
-static int devnull(void)
+ساكن صحيح devnull(فراغ)
 {
-	static int devnullfd = -1;
-	if (devnullfd < 0)
+	ساكن صحيح devnullfd = -1;
+	إذا (devnullfd < 0)
 		devnullfd = open("/dev/null", O_RDWR | O_CLOEXEC);
-	if (devnullfd < 0) {
+	إذا (devnullfd < 0) {
 		fprintf(stderr, "Failed to open /dev/null: %s", strerror(errno));
 		_exit(1);
 	}
-	return devnullfd;
+	أرجع devnullfd;
 }
 
-struct exec_args exec_init(const char **argv)
+بنية exec_آرگومانها exec_init(ثابت حرف **argv)
 {
-	struct exec_args args = {0};
-	args.argv = argv;
-	args.redirect_stdin  = EXEC_NO_REDIRECT;
-	args.redirect_stdout = EXEC_NO_REDIRECT;
-	args.redirect_stderr = EXEC_NO_REDIRECT;
-	args.uid = (uid_t)-1;
-	args.gid = (gid_t)-1;
-	return args;
+	بنية exec_آرگومانها آرگومانها = {0};
+	آرگومانها.argv = argv;
+	آرگومانها.redirect_stdin  = EXEC_NO_REDIRECT;
+	آرگومانها.redirect_stdout = EXEC_NO_REDIRECT;
+	آرگومانها.redirect_stderr = EXEC_NO_REDIRECT;
+	آرگومانها.uid = (uid_t)-1;
+	آرگومانها.gid = (gid_t)-1;
+	أرجع آرگومانها;
 }
 
-struct exec_result do_exec(struct exec_args *args)
+بنية exec_نتیجه do_exec(بنية exec_آرگومانها *آرگومانها)
 {
-	struct exec_result res = { .pid = -1 };
-	sigset_t full, old;
-	int saved_errno, err, n;
-	int execpipe[2] = {-1, -1};
-	int stdin_pipe[2] = {-1, -1};
-	int stdout_pipe[2] = {-1, -1};
-	int stderr_pipe[2] = {-1, -1};
-	const char *cmd = args->cmd ? args->cmd : args->argv[0];
+	بنية exec_نتیجه res = { .pid = -1 };
+	sigset_t پر, old;
+	صحيح saved_errno, err, n;
+	صحيح execpipe[2] = {-1, -1};
+	صحيح stdin_pipe[2] = {-1, -1};
+	صحيح stdout_pipe[2] = {-1, -1};
+	صحيح stderr_pipe[2] = {-1, -1};
+	ثابت حرف *cmd = آرگومانها->cmd ? آرگومانها->cmd : آرگومانها->argv[0];
 
-	if (pipe2(execpipe, O_CLOEXEC) < 0)
-		goto exit;
-	if (args->redirect_stdin == EXEC_MKPIPE) {
-		if (pipe2(stdin_pipe, O_CLOEXEC) < 0)
-			goto exit;
-		args->redirect_stdin = stdin_pipe[0];
+	إذا (pipe2(execpipe, O_CLOEXEC) < 0)
+		اذهب خروج;
+	إذا (آرگومانها->redirect_stdin == EXEC_MKPIPE) {
+		إذا (pipe2(stdin_pipe, O_CLOEXEC) < 0)
+			اذهب خروج;
+		آرگومانها->redirect_stdin = stdin_pipe[0];
 	}
-	if (args->redirect_stdout == EXEC_MKPIPE) {
-		if (pipe2(stdout_pipe, O_CLOEXEC) < 0)
-			goto exit;
-		args->redirect_stdout = stdout_pipe[1];
+	إذا (آرگومانها->redirect_stdout == EXEC_MKPIPE) {
+		إذا (pipe2(stdout_pipe, O_CLOEXEC) < 0)
+			اذهب خروج;
+		آرگومانها->redirect_stdout = stdout_pipe[1];
 	}
-	if (args->redirect_stderr == EXEC_MKPIPE) {
-		if (pipe2(stderr_pipe, O_CLOEXEC) < 0)
-			goto exit;
-		args->redirect_stderr = stderr_pipe[1];
+	إذا (آرگومانها->redirect_stderr == EXEC_MKPIPE) {
+		إذا (pipe2(stderr_pipe, O_CLOEXEC) < 0)
+			اذهب خروج;
+		آرگومانها->redirect_stderr = stderr_pipe[1];
 	}
 
-	if (args->redirect_stdin == EXEC_DEVNULL)
-		args->redirect_stdin = devnull();
-	if (args->redirect_stdout == EXEC_DEVNULL)
-		args->redirect_stdout = devnull();
-	if (args->redirect_stderr == EXEC_DEVNULL)
-		args->redirect_stderr = devnull();
+	إذا (آرگومانها->redirect_stdin == EXEC_DEVNULL)
+		آرگومانها->redirect_stdin = devnull();
+	إذا (آرگومانها->redirect_stdout == EXEC_DEVNULL)
+		آرگومانها->redirect_stdout = devnull();
+	إذا (آرگومانها->redirect_stderr == EXEC_DEVNULL)
+		آرگومانها->redirect_stderr = devnull();
 
-	sigfillset(&full);
-	sigprocmask(SIG_SETMASK, &full, &old);
+	sigfillset(&پر);
+	sigprocmask(SIG_SETMASK, &پر, &old);
 	res.pid = fork();
 
-	if (res.pid < 0) {
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		goto exit;
-	} else if (res.pid == 0) {
-		/* child */
-		if (args->redirect_stdin != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stdin, STDIN_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stdout != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stdout, STDOUT_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stderr != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stderr, STDERR_FILENO) < 0)
-			goto child_err;
-		if (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
-			goto child_err;
-		if (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
-			goto child_err;
-		if (args->setsid && setsid() < 0)
-			goto child_err;
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		execvp(cmd, UNCONST(args->argv));
-child_err:
+	إذا (res.pid < 0) {
+		sigprocmask(SIG_SETMASK, &old, عدم);
+		اذهب خروج;
+	} وإلا إذا (res.pid == 0) {
+		/*فرزند*/
+		إذا (آرگومانها->redirect_stdin != EXEC_NO_REDIRECT &&
+		    dup2(آرگومانها->redirect_stdin, STDIN_FILENO) < 0)
+			اذهب فرزند_err;
+		إذا (آرگومانها->redirect_stdout != EXEC_NO_REDIRECT &&
+		    dup2(آرگومانها->redirect_stdout, STDOUT_FILENO) < 0)
+			اذهب فرزند_err;
+		إذا (آرگومانها->redirect_stderr != EXEC_NO_REDIRECT &&
+		    dup2(آرگومانها->redirect_stderr, STDERR_FILENO) < 0)
+			اذهب فرزند_err;
+		إذا (آرگومانها->gid != (gid_t)-1 && setgid(آرگومانها->gid) < 0)
+			اذهب فرزند_err;
+		إذا (آرگومانها->uid != (uid_t)-1 && setuid(آرگومانها->uid) < 0)
+			اذهب فرزند_err;
+		إذا (آرگومانها->setsid && setsid() < 0)
+			اذهب فرزند_err;
+		sigprocmask(SIG_SETMASK, &old, عدم);
+		execvp(cmd, UNCONST(آرگومانها->argv));
+فرزند_err:
 		saved_errno = errno;
-		write(execpipe[1], &saved_errno, sizeof saved_errno);
+		اكتب(execpipe[1], &saved_errno, حجم saved_errno);
 		_exit(1);
-	} else {
-		/* parent */
+	} وإلا {
+		/*والد*/
 		close(execpipe[1]);
 		execpipe[1] = -1;
-		n = read(execpipe[0], &err, sizeof err);
-		if (n != 0) {
+		n = اقرأ(execpipe[0], &err, حجم err);
+		إذا (n != 0) {
 			/* exec failed, reap the child and cleanup */
-			waitpid(res.pid, NULL, 0); /* do we care about waitpid failures? */
+			waitpid(res.pid, عدم, 0); /* do we care about waitpid failures? */
 			res.pid = -1;
 		}
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		if (res.pid < 0) {
-			errno = (n == sizeof err) ? err : EINVAL;
-			goto exit;
+		sigprocmask(SIG_SETMASK, &old, عدم);
+		إذا (res.pid < 0) {
+			errno = (n == حجم err) ? err : EINVAL;
+			اذهب خروج;
 		}
 
-		if (stdin_pipe[0] >= 0) {
+		إذا (stdin_pipe[0] >= 0) {
 			res.proc_stdin = stdin_pipe[1];
 			stdin_pipe[1] = -1; /* to avoid closing it below */
 		}
-		if (stdout_pipe[0] >= 0) {
+		إذا (stdout_pipe[0] >= 0) {
 			res.proc_stdout = stdout_pipe[0];
 			stdout_pipe[0] = -1;
 		}
-		if (stderr_pipe[0] >= 0) {
+		إذا (stderr_pipe[0] >= 0) {
 			res.proc_stderr = stderr_pipe[0];
 			stderr_pipe[0] = -1;
 		}
 	}
 
-exit:
+خروج:
 	saved_errno = errno;
 	checked_close(execpipe[0]); checked_close(execpipe[1]);
 	checked_close(stdin_pipe[0]); checked_close(stdin_pipe[1]);
 	checked_close(stdout_pipe[0]); checked_close(stdout_pipe[1]);
 	checked_close(stderr_pipe[0]); checked_close(stderr_pipe[1]);
 	errno = saved_errno;
-	return res;
+	أرجع res;
 }
 
-int rc_waitpid(pid_t pid)
+صحيح rc_waitpid(pid_t pid)
 {
-	int status;
-	while (waitpid(pid, &status, 0) == -1) {
-		if (errno != EINTR) {
-			status = -1;
-			break;
+	صحيح وضعیت;
+	طالما (waitpid(pid, &وضعیت, 0) == -1) {
+		إذا (errno != EINTR) {
+			وضعیت = -1;
+			اكسر;
 		}
 	}
-	return status;
+	أرجع وضعیت;
 }
 
-int rc_pipe_command(const char *cmd, int devnullfd)
+صحيح rc_pipe_command(ثابت حرف *cmd, صحيح devnullfd)
 {
-	const char *argv[] = { "/bin/sh", "-c", cmd, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
-	args.redirect_stdin = EXEC_MKPIPE;
-	args.redirect_stdout = args.redirect_stderr = devnullfd;
-	res = do_exec(&args);
-	return (res.pid > 0) ? res.proc_stdin : -1;
+	ثابت حرف *argv[] = { "/bin/sh", "-c", cmd, عدم };
+	بنية exec_نتیجه res;
+	بنية exec_آرگومانها آرگومانها = exec_init(argv);
+	آرگومانها.redirect_stdin = EXEC_MKPIPE;
+	آرگومانها.redirect_stdout = آرگومانها.redirect_stderr = devnullfd;
+	res = do_exec(&آرگومانها);
+	أرجع (res.pid > 0) ? res.proc_stdin : -1;
 }
