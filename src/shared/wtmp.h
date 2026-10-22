@@ -21,7 +21,7 @@
 #include <utmp.h>
 #include <sys/types.h>
 
-void log_wtmp(const char *user, const char *id, pid_t pid, int type,
-		const char *line);
+void log_wtmp(const var_na *user, const var_na *id, pid_t pid, ចំនួនគត់ type,
+		const var_na *line);
 
 #endif

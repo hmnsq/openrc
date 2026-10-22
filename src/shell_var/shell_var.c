@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+ចំនួនគត់ main(ចំនួនគត់ argc, var_na **argv)
 {
-	int i;
-	char *p;
-	int c;
+	ចំនួនគត់ i;
+	var_na *p;
+	ចំនួនគត់ c;
 
-	for (i = 1; i < argc; i++) {
+	សម្រាប់ (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		ប្រសិនបើ (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ខណៈពេល (*p) {
+			c = (unsigned var_na)*p++;
+			ប្រសិនបើ (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	ត្រឡប់ EXIT_SUCCESS;
 }

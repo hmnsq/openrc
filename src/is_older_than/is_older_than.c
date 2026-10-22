@@ -14,18 +14,18 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+ចំនួនគត់ main(ចំនួនគត់ argc, var_na **argv)
 {
-	int i;
+	ចំនួនគត់ i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ប្រសិនបើ (argc < 3)
+		ត្រឡប់ EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	សម្រាប់ (i = 2; i < argc; ++i)
+		ប្រសិនបើ (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			ត្រឡប់ EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	ត្រឡប់ EXIT_FAILURE;
 }

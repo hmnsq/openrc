@@ -35,30 +35,30 @@
 
 #define GENDEP          RC_LIBEXECDIR "/sh/gendepends.sh"
 
-static const char *bootlevel = NULL;
+static const var_na *bootlevel = NULL;
 
-static char *
-get_shell_value(char *string)
+static var_na *
+get_shell_value(var_na *string)
 {
-	char *p = string;
-	char *e;
+	var_na *p = string;
+	var_na *e;
 
-	if (!string)
-		return NULL;
+	ប្រសិនបើ (!string)
+		ត្រឡប់ NULL;
 
-	if (*p == '\'')
+	ប្រសិនបើ (*p == '\'')
 		p++;
 
 	e = p + strlen(p) - 1;
-	if (*e == '\n')
+	ប្រសិនបើ (*e == '\n')
 		*e-- = 0;
-	if (*e == '\'')
+	ប្រសិនបើ (*e == '\'')
 		*e-- = 0;
 
-	if (*p != 0)
-		return p;
+	ប្រសិនបើ (*p != 0)
+		ត្រឡប់ p;
 
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
 void
@@ -69,8 +69,8 @@ rc_deptree_free(RC_DEPTREE *deptree)
 	RC_DEPTYPE *dt;
 	RC_DEPTYPE *dt_save;
 
-	if (!deptree)
-		return;
+	ប្រសិនបើ (!deptree)
+		ត្រឡប់;
 
 	TAILQ_FOREACH_SAFE(di, deptree, entries, di_save) {
 		TAILQ_FOREACH_SAFE(dt, &di->depends, entries, dt_save) {
@@ -89,50 +89,50 @@ rc_deptree_free(RC_DEPTREE *deptree)
 }
 
 static RC_DEPINFO *
-get_depinfo(const RC_DEPTREE *deptree, const char *service)
+get_depinfo(const RC_DEPTREE *deptree, const var_na *service)
 {
 	RC_DEPINFO *di;
-	if (deptree) {
+	ប្រសិនបើ (deptree) {
 		TAILQ_FOREACH(di, deptree, entries)
-			if (strcmp(di->service, service) == 0)
-				return di;
+			ប្រសិនបើ (strcmp(di->service, service) == 0)
+				ត្រឡប់ di;
 	}
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
 static RC_DEPINFO *
-make_depinfo(RC_DEPTREE *deptree, const char *service)
+make_depinfo(RC_DEPTREE *deptree, const var_na *service)
 {
-	RC_DEPINFO *depinfo = xmalloc(sizeof(*depinfo));
+	RC_DEPINFO *depinfo = xmalloc(parimaa_na(*depinfo));
 	TAILQ_INIT(&depinfo->depends);
 	depinfo->service = xstrdup(service);
 	TAILQ_INSERT_TAIL(deptree, depinfo, entries);
 
-	return depinfo;
+	ត្រឡប់ depinfo;
 }
 
 static RC_DEPTYPE *
-get_deptype(const RC_DEPINFO *depinfo, const char *type)
+get_deptype(const RC_DEPINFO *depinfo, const var_na *type)
 {
 	RC_DEPTYPE *dt;
 
-	if (depinfo) {
+	ប្រសិនបើ (depinfo) {
 		TAILQ_FOREACH(dt, &depinfo->depends, entries)
-			if (strcmp(dt->type, type) == 0)
-				return dt;
+			ប្រសិនបើ (strcmp(dt->type, type) == 0)
+				ត្រឡប់ dt;
 	}
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
 static RC_DEPTYPE *
-make_deptype(RC_DEPINFO *depinfo, const char *type)
+make_deptype(RC_DEPINFO *depinfo, const var_na *type)
 {
-	RC_DEPTYPE *deptype = xmalloc(sizeof(*deptype));
+	RC_DEPTYPE *deptype = xmalloc(parimaa_na(*deptype));
 	deptype->type = xstrdup(type);
 	deptype->services = rc_stringlist_new();
 	TAILQ_INSERT_TAIL(&depinfo->depends, deptype, entries);
 
-	return deptype;
+	ត្រឡប់ deptype;
 }
 
 #ifdef HAVE_MALLOC_EXTENDED_ATTRIBUTE
@@ -140,156 +140,156 @@ __attribute__ ((malloc (rc_deptree_free, 1)))
 #endif
 static RC_DEPTREE *
 make_deptree(void) {
-	RC_DEPTREE *deptree = xmalloc(sizeof(*deptree));
+	RC_DEPTREE *deptree = xmalloc(parimaa_na(*deptree));
 	TAILQ_INIT(deptree);
-	return deptree;
+	ត្រឡប់ deptree;
 }
 
 static RC_DEPTREE *
-deptree_load_file(int dirfd, const char *pathname)
+deptree_load_file(ចំនួនគត់ dirfd, const var_na *pathname)
 {
 	RC_DEPTREE *deptree;
 	RC_DEPINFO *depinfo = NULL;
 	RC_DEPTYPE *deptype = NULL;
-	char *line = NULL;
+	var_na *line = NULL;
 	size_t size;
-	char *type;
-	char *p;
-	char *e;
-	int i;
+	var_na *type;
+	var_na *p;
+	var_na *e;
+	ចំនួនគត់ i;
 	FILE *fp;
 
-	if (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
-		return NULL;
+	ប្រសិនបើ (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
+		ត្រឡប់ NULL;
 
 	deptree = make_deptree();
-	while (xgetline(&line, &size, fp) != -1) {
+	ខណៈពេល (xgetline(&line, &size, fp) != -1) {
 		p = line;
 		e = strsep(&p, "_");
-		if (!e || strcmp(e, "depinfo") != 0)
+		ប្រសិនបើ (!e || strcmp(e, "depinfo") != 0)
 			continue;
 		e = strsep(&p, "_");
-		if (!e || sscanf(e, "%d", &i) != 1)
+		ប្រសិនបើ (!e || sscanf(e, "%d", &i) != 1)
 			continue;
-		if (!(type = strsep(&p, "_=")))
+		ប្រសិនបើ (!(type = strsep(&p, "_=")))
 			continue;
-		if (strcmp(type, "service") == 0) {
+		ប្រសិនបើ (strcmp(type, "service") == 0) {
 			/* Sanity */
 			e = get_shell_value(p);
-			if (!e || *e == '\0')
+			ប្រសិនបើ (!e || *e == '\0')
 				continue;
 			depinfo = make_depinfo(deptree, e);
 			deptype = NULL;
 			continue;
 		}
 		e = strsep(&p, "=");
-		if (!e || sscanf(e, "%d", &i) != 1)
+		ប្រសិនបើ (!e || sscanf(e, "%d", &i) != 1)
 			continue;
 		/* Sanity */
 		e = get_shell_value(p);
-		if (!e || *e == '\0')
+		ប្រសិនបើ (!e || *e == '\0')
 			continue;
-		if (!depinfo)
+		ប្រសិនបើ (!depinfo)
 			continue;
-		if (!deptype || strcmp(deptype->type, type) != 0)
+		ប្រសិនបើ (!deptype || strcmp(deptype->type, type) != 0)
 			deptype = make_deptype(depinfo, type);
 		rc_stringlist_add(deptype->services, e);
 	}
 	free(line);
 	fclose(fp);
 
-	return deptree;
+	ត្រឡប់ deptree;
 }
 
 RC_DEPTREE *
 rc_deptree_load(void)
 {
-	return deptree_load_file(rc_dirfd(RC_DIR_SVCDIR), "deptree");
+	ត្រឡប់ deptree_load_file(rc_dirfd(RC_DIR_SVCDIR), "deptree");
 }
 
 RC_DEPTREE *
-rc_deptree_load_file(const char *deptree_file)
+rc_deptree_load_file(const var_na *deptree_file)
 {
-	return deptree_load_file(AT_FDCWD, deptree_file);
+	ត្រឡប់ deptree_load_file(AT_FDCWD, deptree_file);
 }
 
 static bool
-valid_service(const char *runlevel, const char *service, const char *type)
+valid_service(const var_na *runlevel, const var_na *service, const var_na *type)
 {
 	RC_SERVICE state;
 
-	if (!runlevel ||
+	ប្រសិនបើ (!runlevel ||
 	    strcmp(type, "ineed") == 0 ||
 	    strcmp(type, "needsme") == 0  ||
 	    strcmp(type, "iwant") == 0 ||
 	    strcmp(type, "wantsme") == 0)
-		return true;
+		ត្រឡប់ true;
 
-	if (rc_service_in_runlevel(service, runlevel))
-		return true;
-	if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
-		    return false;
-	if (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 &&
+	ប្រសិនបើ (rc_service_in_runlevel(service, runlevel))
+		ត្រឡប់ true;
+	ប្រសិនបើ (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
+		    ត្រឡប់ false;
+	ប្រសិនបើ (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 &&
 	    strcmp(type, "iafter") == 0)
-		    return false;
-	if (strcmp(runlevel, bootlevel) != 0) {
-		if (rc_service_in_runlevel(service, bootlevel))
-			return true;
+		    ត្រឡប់ false;
+	ប្រសិនបើ (strcmp(runlevel, bootlevel) != 0) {
+		ប្រសិនបើ (rc_service_in_runlevel(service, bootlevel))
+			ត្រឡប់ true;
 	}
 
 	state = rc_service_state(service);
-	if (state & RC_SERVICE_HOTPLUGGED ||
+	ប្រសិនបើ (state & RC_SERVICE_HOTPLUGGED ||
 	    state & RC_SERVICE_STARTED)
-		return true;
+		ត្រឡប់ true;
 
-	return false;
+	ត្រឡប់ false;
 }
 
 static bool
-get_provided1(const char *runlevel, RC_STRINGLIST *providers,
-	      RC_DEPTYPE *deptype, const char *level,
+get_provided1(const var_na *runlevel, RC_STRINGLIST *providers,
+	      RC_DEPTYPE *deptype, const var_na *level,
 	      bool hotplugged, RC_SERVICE state)
 {
 	RC_STRING *service;
 	RC_SERVICE st;
 	bool retval = false;
 	bool ok;
-	const char *svc;
+	const var_na *svc;
 
 	TAILQ_FOREACH(service, deptype->services, entries) {
 		ok = true;
 		svc = service->value;
 		st = rc_service_state(svc);
 
-		if (level)
+		ប្រសិនបើ (level)
 			ok = rc_service_in_runlevel(svc, level);
-		else if (hotplugged)
+		បើមិនដូច្នេះ ប្រសិនបើ (hotplugged)
 			ok = (st & RC_SERVICE_HOTPLUGGED &&
 			      !rc_service_in_runlevel(svc, runlevel) &&
 			      !rc_service_in_runlevel(svc, bootlevel));
-		if (!ok)
+		ប្រសិនបើ (!ok)
 			continue;
 		switch (state) {
-			case RC_SERVICE_STARTED:
+			pak_sa RC_SERVICE_STARTED:
 				ok = (st & RC_SERVICE_STARTED);
-				break;
-			case RC_SERVICE_INACTIVE:
-			case RC_SERVICE_STARTING:
-			case RC_SERVICE_STOPPING:
+				bha_nga;
+			pak_sa RC_SERVICE_INACTIVE:
+			pak_sa RC_SERVICE_STARTING:
+			pak_sa RC_SERVICE_STOPPING:
 				ok = (st & RC_SERVICE_STARTING ||
 				      st & RC_SERVICE_STOPPING ||
 				      st & RC_SERVICE_INACTIVE);
-				break;
+				bha_nga;
 			default:
-				break;
+				bha_nga;
 		}
-		if (!ok)
+		ប្រសិនបើ (!ok)
 			continue;
 		retval = true;
 		rc_stringlist_add(providers, svc);
 	}
 
-	return retval;
+	ត្រឡប់ retval;
 }
 
 /* Work out if a service is provided by another service.
@@ -302,36 +302,36 @@ get_provided1(const char *runlevel, RC_STRINGLIST *providers,
    provided dependency can change depending on runlevel state.
    */
 static RC_STRINGLIST *
-get_provided(const RC_DEPINFO *depinfo, const char *runlevel, int options)
+get_provided(const RC_DEPINFO *depinfo, const var_na *runlevel, ចំនួនគត់ options)
 {
 	RC_DEPTYPE *dt;
 	RC_STRINGLIST *providers = rc_stringlist_new();
 	RC_STRING *service;
 
 	dt = get_deptype(depinfo, "providedby");
-	if (!dt)
-		return providers;
+	ប្រសិនបើ (!dt)
+		ត្រឡប់ providers;
 
 	/* If we are stopping then all depends are true, regardless of state.
 	   This is especially true for net services as they could force a restart
 	   of the local dns resolver which may depend on net. */
-	if (options & RC_DEP_STOP) {
+	ប្រសិនបើ (options & RC_DEP_STOP) {
 		TAILQ_FOREACH(service, dt->services, entries)
 			rc_stringlist_add(providers, service->value);
-		return providers;
+		ត្រឡប់ providers;
 	}
 
 	/* If we're strict or starting, then only use what we have in our
 	 * runlevel and bootlevel. If we starting then check hotplugged too. */
-	if (options & RC_DEP_STRICT || options & RC_DEP_START) {
+	ប្រសិនបើ (options & RC_DEP_STRICT || options & RC_DEP_START) {
 		TAILQ_FOREACH(service, dt->services, entries)
-			if (rc_service_in_runlevel(service->value, runlevel) ||
+			ប្រសិនបើ (rc_service_in_runlevel(service->value, runlevel) ||
 			    rc_service_in_runlevel(service->value, bootlevel) ||
 			    (options & RC_DEP_START &&
 			     rc_service_state(service->value) & RC_SERVICE_HOTPLUGGED))
 				rc_stringlist_add(providers, service->value);
-		if (TAILQ_FIRST(providers))
-			return providers;
+		ប្រសិនបើ (TAILQ_FIRST(providers))
+			ត្រឡប់ providers;
 	}
 
 	/* OK, we're not strict or there were no services in our runlevel.
@@ -345,51 +345,51 @@ get_provided(const RC_DEPINFO *depinfo, const char *runlevel, int options)
 	 *     runlevel, hotplugged, bootlevel, any
 	 */
 #define DO \
-	if (TAILQ_FIRST(providers)) { \
-		if (TAILQ_NEXT(TAILQ_FIRST(providers), entries)) { \
+	ប្រសិនបើ (TAILQ_FIRST(providers)) { \
+		ប្រសិនបើ (TAILQ_NEXT(TAILQ_FIRST(providers), entries)) { \
 			rc_stringlist_free(providers); \
 			providers = rc_stringlist_new(); \
 		} \
-		return providers; \
+		ត្រឡប់ providers; \
 	}
 
 	/* Anything running has to come first */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTED))
+	ប្រសិនបើ (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTED))
 	{ DO }
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STARTED))
+	ប្រសិនបើ (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STARTED))
 	{ DO }
-	if (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
+	ប្រសិនបើ (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STARTED))
 	{ DO }
-	if (get_provided1(runlevel, providers, dt, NULL, false, RC_SERVICE_STARTED))
+	ប្រសិនបើ (get_provided1(runlevel, providers, dt, NULL, false, RC_SERVICE_STARTED))
 	{ DO }
 
 	/* Check starting services */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTING))
-		return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STARTING))
-		return providers;
-	if (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
+	ប្រសិនបើ (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTING))
+		ត្រឡប់ providers;
+	ប្រសិនបើ (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STARTING))
+		ត្រឡប់ providers;
+	ប្រសិនបើ (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STARTING))
-	    return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, false, RC_SERVICE_STARTING))
-		return providers;
+	    ត្រឡប់ providers;
+	ប្រសិនបើ (get_provided1(runlevel, providers, dt, NULL, false, RC_SERVICE_STARTING))
+		ត្រឡប់ providers;
 
 	/* Nothing started then. OK, lets get the stopped services */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STOPPED))
-		return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STOPPED))
+	ប្រសិនបើ (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STOPPED))
+		ត្រឡប់ providers;
+	ប្រសិនបើ (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STOPPED))
 	{ DO }
-	if (bootlevel && (strcmp(runlevel, bootlevel) != 0) &&
+	ប្រសិនបើ (bootlevel && (strcmp(runlevel, bootlevel) != 0) &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STOPPED))
-		return providers;
+		ត្រឡប់ providers;
 
 	/* Still nothing? OK, list our first provided service. */
 	service = TAILQ_FIRST(dt->services);
-	if (service != NULL)
+	ប្រសិនបើ (service != NULL)
 		rc_stringlist_add(providers, service->value);
 
-	return providers;
+	ត្រឡប់ providers;
 }
 
 static void
@@ -398,7 +398,7 @@ visit_service(const RC_DEPTREE *deptree,
 	      RC_STRINGLIST *sorted,
 	      RC_STRINGLIST *visited,
 	      const RC_DEPINFO *depinfo,
-	      const char *runlevel, int options)
+	      const var_na *runlevel, ចំនួនគត់ options)
 {
 	RC_STRING *type;
 	RC_STRING *service;
@@ -406,41 +406,41 @@ visit_service(const RC_DEPTREE *deptree,
 	RC_DEPINFO *di;
 	RC_STRINGLIST *provided;
 	RC_STRING *p;
-	const char *svcname;
+	const var_na *svcname;
 
 	/* Check if we have already visited this service or not */
 	TAILQ_FOREACH(type, visited, entries)
-		if (strcmp(type->value, depinfo->service) == 0)
-			return;
+		ប្រសិនបើ (strcmp(type->value, depinfo->service) == 0)
+			ត្រឡប់;
 	/* Add ourselves as a visited service */
 	rc_stringlist_add(visited, depinfo->service);
 
 	TAILQ_FOREACH(type, types, entries)
 	{
-		if (!(dt = get_deptype(depinfo, type->value)))
+		ប្រសិនបើ (!(dt = get_deptype(depinfo, type->value)))
 			continue;
 
 		TAILQ_FOREACH(service, dt->services, entries) {
-			if (!(options & RC_DEP_TRACE) ||
+			ប្រសិនបើ (!(options & RC_DEP_TRACE) ||
 			    strcmp(type->value, "iprovide") == 0)
 			{
 				rc_stringlist_add(sorted, service->value);
 				continue;
 			}
 
-			if (!(di = get_depinfo(deptree, service->value)))
+			ប្រសិនបើ (!(di = get_depinfo(deptree, service->value)))
 				continue;
 			provided = get_provided(di, runlevel, options);
 
-			if (TAILQ_FIRST(provided)) {
+			ប្រសិនបើ (TAILQ_FIRST(provided)) {
 				TAILQ_FOREACH(p, provided, entries) {
 					di = get_depinfo(deptree, p->value);
-					if (di && valid_service(runlevel, di->service, type->value))
+					ប្រសិនបើ (di && valid_service(runlevel, di->service, type->value))
 						visit_service(deptree, types, sorted, visited, di,
 							      runlevel, options | RC_DEP_TRACE);
 				}
 			}
-			else if (di && valid_service(runlevel, service->value, type->value))
+			បើមិនដូច្នេះ ប្រសិនបើ (di && valid_service(runlevel, service->value, type->value))
 				visit_service(deptree, types, sorted, visited, di,
 					      runlevel, options | RC_DEP_TRACE);
 
@@ -449,18 +449,18 @@ visit_service(const RC_DEPTREE *deptree,
 	}
 
 	/* Now visit the stuff we provide for */
-	if (options & RC_DEP_TRACE &&
+	ប្រសិនបើ (options & RC_DEP_TRACE &&
 	    (dt = get_deptype(depinfo, "iprovide")))
 	{
 		TAILQ_FOREACH(service, dt->services, entries) {
-			if (!(di = get_depinfo(deptree, service->value)))
+			ប្រសិនបើ (!(di = get_depinfo(deptree, service->value)))
 				continue;
 			provided = get_provided(di, runlevel, options);
 			TAILQ_FOREACH(p, provided, entries)
-				if (strcmp(p->value, depinfo->service) == 0) {
+				ប្រសិនបើ (strcmp(p->value, depinfo->service) == 0) {
 					visit_service(deptree, types, sorted, visited, di,
 						       runlevel, options | RC_DEP_TRACE);
-					break;
+					bha_nga;
 				}
 			rc_stringlist_free(provided);
 		}
@@ -469,15 +469,15 @@ visit_service(const RC_DEPTREE *deptree,
 	/* We've visited everything we need, so add ourselves unless we
 	   are also the service calling us or we are provided by something */
 	svcname = getenv("RC_SVCNAME");
-	if (!svcname || strcmp(svcname, depinfo->service) != 0) {
-		if (!get_deptype(depinfo, "providedby"))
+	ប្រសិនបើ (!svcname || strcmp(svcname, depinfo->service) != 0) {
+		ប្រសិនបើ (!get_deptype(depinfo, "providedby"))
 			rc_stringlist_add(sorted, depinfo->service);
 	}
 }
 
 RC_STRINGLIST *
 rc_deptree_depend(const RC_DEPTREE *deptree,
-		  const char *service, const char *type)
+		  const var_na *service, const var_na *type)
 {
 	RC_DEPINFO *di;
 	RC_DEPTYPE *dt;
@@ -485,24 +485,24 @@ rc_deptree_depend(const RC_DEPTREE *deptree,
 	RC_STRING *svc;
 
 	svcs = rc_stringlist_new();
-	if (!(di = get_depinfo(deptree, service)) ||
+	ប្រសិនបើ (!(di = get_depinfo(deptree, service)) ||
 	    !(dt = get_deptype(di, type)))
 	{
 		errno = ENOENT;
-		return svcs;
+		ត្រឡប់ svcs;
 	}
 
 	/* For consistency, we copy the array */
 	TAILQ_FOREACH(svc, dt->services, entries)
 		rc_stringlist_add(svcs, svc->value);
-	return svcs;
+	ត្រឡប់ svcs;
 }
 
 RC_STRINGLIST *
 rc_deptree_depends(const RC_DEPTREE *deptree,
 		   const RC_STRINGLIST *types,
 		   const RC_STRINGLIST *services,
-		   const char *runlevel, int options)
+		   const var_na *runlevel, ចំនួនគត់ options)
 {
 	RC_STRINGLIST *sorted = rc_stringlist_new();
 	RC_STRINGLIST *visited = rc_stringlist_new();
@@ -510,23 +510,23 @@ rc_deptree_depends(const RC_DEPTREE *deptree,
 	const RC_STRING *service;
 
 	bootlevel = getenv("RC_BOOTLEVEL");
-	if (!bootlevel)
+	ប្រសិនបើ (!bootlevel)
 		bootlevel = RC_LEVEL_BOOT;
 	TAILQ_FOREACH(service, services, entries) {
-		if (!(di = get_depinfo(deptree, service->value))) {
+		ប្រសិនបើ (!(di = get_depinfo(deptree, service->value))) {
 			errno = ENOENT;
 			continue;
 		}
-		if (types)
+		ប្រសិនបើ (types)
 			visit_service(deptree, types, sorted, visited,
 				      di, runlevel, options);
 	}
 	rc_stringlist_free(visited);
-	return sorted;
+	ត្រឡប់ sorted;
 }
 
 RC_STRINGLIST *
-rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
+rc_deptree_order(const RC_DEPTREE *deptree, const var_na *runlevel, ចំនួនគត់ options)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *list2;
@@ -534,11 +534,11 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
 	RC_STRINGLIST *services;
 
 	bootlevel = getenv("RC_BOOTLEVEL");
-	if (!bootlevel)
+	ប្រសិនបើ (!bootlevel)
 		bootlevel = RC_LEVEL_BOOT;
 
 	/* When shutting down, list all running services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
+	ប្រសិនបើ (strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
 	{
 		list = rc_services_in_state(RC_SERVICE_STARTED);
@@ -548,9 +548,9 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
 		list2 = rc_services_in_state(RC_SERVICE_STARTING);
 		TAILQ_CONCAT(list, list2, entries);
 		free(list2);
-	} else {
+	} បើមិនដូច្នេះ {
 		list = rc_services_in_runlevel(RC_LEVEL_SYSINIT);
-		if (strcmp(runlevel, RC_LEVEL_SYSINIT) != 0) {
+		ប្រសិនបើ (strcmp(runlevel, RC_LEVEL_SYSINIT) != 0) {
 			list2 = rc_services_in_runlevel(runlevel);
 			TAILQ_CONCAT(list, list2, entries);
 			free(list2);
@@ -558,7 +558,7 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
 			TAILQ_CONCAT(list, list2, entries);
 			free(list2);
 			/* If we're not the boot runlevel then add that too */
-			if (strcmp(runlevel, bootlevel) != 0) {
+			ប្រសិនបើ (strcmp(runlevel, bootlevel) != 0) {
 				list2 = rc_services_in_runlevel(bootlevel);
 				TAILQ_CONCAT(list, list2, entries);
 				free(list2);
@@ -577,7 +577,7 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
 				      RC_DEP_STRICT | RC_DEP_TRACE | options);
 	rc_stringlist_free(list);
 	rc_stringlist_free(types);
-	return services;
+	ត្រឡប់ services;
 }
 
 
@@ -586,49 +586,49 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
    oldest (or newest) found.
 */
 static bool
-deep_mtime_check(int target_dir, const char *target, bool newer, time_t *rel, char *file)
+deep_mtime_check(ចំនួនគត់ target_dir, const var_na *target, bool newer, time_t *rel, var_na *file)
 {
-	struct stat buf;
+	sa_nracanaa stat buf;
 	bool retval = true;
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 
 	/* If target does not exist, return true to mimic shell test */
-	if (fstatat(target_dir, target, &buf, 0) != 0)
-		return true;
+	ប្រសិនបើ (fstatat(target_dir, target, &buf, 0) != 0)
+		ត្រឡប់ true;
 
-	if (newer) {
-		if (*rel < buf.st_mtime) {
+	ប្រសិនបើ (newer) {
+		ប្រសិនបើ (*rel < buf.st_mtime) {
 			retval = false;
 
-			if (file)
+			ប្រសិនបើ (file)
 				strlcpy(file, target, PATH_MAX);
 			*rel = buf.st_mtime;
 		}
-	} else {
-		if (*rel > buf.st_mtime) {
+	} បើមិនដូច្នេះ {
+		ប្រសិនបើ (*rel > buf.st_mtime) {
 			retval = false;
 
-			if (file)
+			ប្រសិនបើ (file)
 				strlcpy(file, target, PATH_MAX);
 			*rel = buf.st_mtime;
 		}
 	}
 
-	if (!S_ISDIR(buf.st_mode) || !(dp = do_opendirat(target_dir, target)))
-		return retval;
+	ប្រសិនបើ (!S_ISDIR(buf.st_mode) || !(dp = do_opendirat(target_dir, target)))
+		ត្រឡប់ retval;
 
 	/* Check all the entries in the dir */
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
+	ខណៈពេល ((d = readdir(dp))) {
+		ប្រសិនបើ (d->d_name[0] == '.')
 			continue;
-		if (!deep_mtime_check(dirfd(dp), d->d_name, newer, rel, file)) {
+		ប្រសិនបើ (!deep_mtime_check(dirfd(dp), d->d_name, newer, rel, file)) {
 			retval = false;
 		}
 	}
 
 	closedir(dp);
-	return retval;
+	ត្រឡប់ retval;
 }
 
 /* Recursively check if target is older/newer than source.
@@ -636,41 +636,41 @@ deep_mtime_check(int target_dir, const char *target, bool newer, time_t *rel, ch
  * the return value arguments are non-null).
  */
 static bool
-mtime_check(int dirfd, const char *source, const char *target, bool newer, time_t *rel, char *file)
+mtime_check(ចំនួនគត់ dirfd, const var_na *source, const var_na *target, bool newer, time_t *rel, var_na *file)
 {
-	struct stat buf;
+	sa_nracanaa stat buf;
 	time_t mtime;
 	bool retval = true;
 
 	/* We have to exist */
-	if (stat(source, &buf) != 0)
-		return false;
+	ប្រសិនបើ (stat(source, &buf) != 0)
+		ត្រឡប់ false;
 	mtime = buf.st_mtime;
 
 	retval = deep_mtime_check(dirfd, target,newer,&mtime,file);
-	if (rel) {
+	ប្រសិនបើ (rel) {
 		*rel = mtime;
 	}
-	return retval;
+	ត្រឡប់ retval;
 }
 
 bool
-rc_newer_than(const char *source, const char *target, time_t *newest, char *file)
+rc_newer_than(const var_na *source, const var_na *target, time_t *newest, var_na *file)
 {
 
-	return mtime_check(AT_FDCWD, source, target, true, newest, file);
+	ត្រឡប់ mtime_check(AT_FDCWD, source, target, true, newest, file);
 }
 
 bool
-rc_older_than(const char *source, const char *target, time_t *oldest, char *file)
+rc_older_than(const var_na *source, const var_na *target, time_t *oldest, var_na *file)
 {
-	return mtime_check(AT_FDCWD, source, target, false, oldest, file);
+	ត្រឡប់ mtime_check(AT_FDCWD, source, target, false, oldest, file);
 }
 
-typedef struct deppair
+typedef sa_nracanaa deppair
 {
-	const char *depend;
-	const char *addto;
+	const var_na *depend;
+	const var_na *addto;
 } DEPPAIR;
 
 static const DEPPAIR deppairs[] = {
@@ -684,25 +684,25 @@ static const DEPPAIR deppairs[] = {
 };
 
 bool
-rc_deptree_update_needed(time_t *newest, char *file)
+rc_deptree_update_needed(time_t *newest, var_na *file)
 {
 	bool newer = false;
-	const int *dirfds;
+	const ចំនួនគត់ *dirfds;
 	RC_STRINGLIST *config;
 	RC_STRING *s;
-	struct stat buf;
+	sa_nracanaa stat buf;
 	time_t mtime;
 
 	/* Quick test to see if anything we use has changed and we have
 	 * data in our deptree. */
-	if (mkdir(rc_svcdir(), 0755) != 0 && errno != EEXIST)
+	ប្រសិនបើ (mkdir(rc_svcdir(), 0755) != 0 && errno != EEXIST)
 		fprintf(stderr, "mkdir '%s': %s\n", rc_svcdir(), strerror(errno));
 
 	clear_dirfds(); /* clear our cached dirfds as a sanity check */
 
-	if (fstatat(rc_dirfd(RC_DIR_SVCDIR), "deptree", &buf, 0) == 0) {
+	ប្រសិនបើ (fstatat(rc_dirfd(RC_DIR_SVCDIR), "deptree", &buf, 0) == 0) {
 		mtime = buf.st_mtime;
-	} else {
+	} បើមិនដូច្នេះ {
 		/* No previous cache found.
 		 * We still run the scan, in case of clock skew; we still need to return
 		 * the newest time.
@@ -711,14 +711,14 @@ rc_deptree_update_needed(time_t *newest, char *file)
 		mtime = time(NULL);
 	}
 
-	for (size_t i = 0, count = rc_scriptdirfds(&dirfds); i < count; i++) {
+	សម្រាប់ (size_t i = 0, count = rc_scriptdirfds(&dirfds); i < count; i++) {
 		newer |= !deep_mtime_check(dirfds[i], "init.d", true, &mtime, file);
 		newer |= !deep_mtime_check(dirfds[i], "conf.d", true, &mtime, file);
 	}
 
 	newer |= !deep_mtime_check(rc_dirfd(RC_DIR_SYSCONF), "rc.conf", true, &mtime, file);
 	newer |= !deep_mtime_check(rc_dirfd(RC_DIR_SYSCONF), "rc.conf.d", true, &mtime, file);
-	if (rc_is_user()) {
+	ប្រសិនបើ (rc_is_user()) {
 		newer |= !deep_mtime_check(rc_dirfd(RC_DIR_USRCONF), "rc.conf", true, &mtime, file);
 		newer |= !deep_mtime_check(rc_dirfd(RC_DIR_USRCONF), "rc.conf.d", true, &mtime, file);
 	}
@@ -731,24 +731,24 @@ rc_deptree_update_needed(time_t *newest, char *file)
 	rc_stringlist_free(config);
 
 	/* Return newest file time, if requested */
-	if ((newer) && (newest != NULL)) {
+	ប្រសិនបើ ((newer) && (newest != NULL)) {
 	    *newest = mtime;
 	}
 
-	return newer;
+	ត្រឡប់ newer;
 }
 
 static void
 setup_environment(void)
 {
-	struct utsname uts;
+	sa_nracanaa utsname uts;
 	size_t env_size;
-	char *env;
+	var_na *env;
 	FILE *mem = xopen_memstream(&env, &env_size);
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
+	សម្រាប់ (const var_na * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
 		fputs(*dirs, mem);
-		if (dirs[1])
+		ប្រសិនបើ (dirs[1])
 			fputc(' ', mem);
 	}
 	xclose_memstream(mem);
@@ -758,10 +758,10 @@ setup_environment(void)
 
 	/* Some init scripts need RC_LIBEXECDIR to source stuff
 	   Ideally we should be setting our full env instead */
-	if (!getenv("RC_LIBEXECDIR"))
+	ប្រសិនបើ (!getenv("RC_LIBEXECDIR"))
 		setenv("RC_LIBEXECDIR", RC_LIBEXECDIR, 0);
 
-	if (uname(&uts) == 0)
+	ប្រសិនបើ (uname(&uts) == 0)
 		setenv("RC_UNAME", uts.sysname, 1);
 }
 
@@ -786,74 +786,74 @@ rc_deptree_update(void)
 	RC_DEPTYPE *deptype = NULL, *dt_np, *dt, *provide;
 	RC_STRINGLIST *config, *dupes, *types, *sorted, *visited;
 	RC_STRING *s, *s2, *s2_np, *s3, *s4;
-	char *line = NULL;
+	var_na *line = NULL;
 	size_t size;
-	char *depend, *depends, *service, *type;
+	var_na *depend, *depends, *service, *type;
 	size_t i, l;
 	bool retval = true;
-	const char *sys = rc_sys();
-	int serrno;
+	const var_na *sys = rc_sys();
+	ចំនួនគត់ serrno;
 
 	/* Phase 1 - source all init scripts and print dependencies */
 	setup_environment();
-	if (!(fp = popen(GENDEP, "r")))
-		return false;
+	ប្រសិនបើ (!(fp = popen(GENDEP, "r")))
+		ត្រឡប់ false;
 
 	config = rc_stringlist_new();
 
 	deptree = make_deptree();
-	while (xgetline(&line, &size, fp) != -1) {
+	ខណៈពេល (xgetline(&line, &size, fp) != -1) {
 		depends = line;
 		service = strsep(&depends, " ");
-		if (!service || !*service)
+		ប្រសិនបើ (!service || !*service)
 			continue;
 
 		type = strsep(&depends, " ");
-		if (!depinfo || strcmp(depinfo->service, service) != 0) {
+		ប្រសិនបើ (!depinfo || strcmp(depinfo->service, service) != 0) {
 			deptype = NULL;
 			depinfo = get_depinfo(deptree, service);
-			if (!depinfo)
+			ប្រសិនបើ (!depinfo)
 				depinfo = make_depinfo(deptree, service);
 		}
 
 		/* We may not have any depends */
-		if (!type || !depends)
+		ប្រសិនបើ (!type || !depends)
 			continue;
 
 		/* Get the type */
-		if (strcmp(type, "config") != 0) {
-			if (!deptype || strcmp(deptype->type, type) != 0) {
+		ប្រសិនបើ (strcmp(type, "config") != 0) {
+			ប្រសិនបើ (!deptype || strcmp(deptype->type, type) != 0) {
 				deptype = get_deptype(depinfo, type);
-				if (!deptype)
+				ប្រសិនបើ (!deptype)
 					deptype = make_deptype(depinfo, type);
 			}
 		}
 
 		/* Now add each depend to our type.
 		   We do this individually so we handle multiple spaces gracefully */
-		while ((depend = strsep(&depends, " "))) {
-			if (depend[0] == 0)
+		ខណៈពេល ((depend = strsep(&depends, " "))) {
+			ប្រសិនបើ (depend[0] == 0)
 				continue;
 
-			if (strcmp(type, "config") == 0) {
+			ប្រសិនបើ (strcmp(type, "config") == 0) {
 				rc_stringlist_addu(config, depend);
 				continue;
 			}
 
 			/* Don't depend on ourself */
-			if (strcmp(depend, service) == 0)
+			ប្រសិនបើ (strcmp(depend, service) == 0)
 				continue;
 
 			/* .sh files are not init scripts */
 			l = strlen(depend);
-			if (l > 2 &&
+			ប្រសិនបើ (l > 2 &&
 			    depend[l - 3] == '.' &&
 			    depend[l - 2] == 's' &&
 			    depend[l - 1] == 'h')
 				continue;
 
 			/* Remove our dependency if instructed */
-			if (depend[0] == '!') {
+			ប្រសិនបើ (depend[0] == '!') {
 				rc_stringlist_delete(deptype->services, depend + 1);
 				continue;
 			}
@@ -863,16 +863,16 @@ rc_deptree_update(void)
 			/* We need to allow `after *; before local;` to work.
 			 * Conversely, we need to allow 'before *; after modules' also */
 			/* If we're before something, remove us from the after list */
-			if (strcmp(type, "ibefore") == 0) {
-				if ((dt = get_deptype(depinfo, "iafter")))
+			ប្រសិនបើ (strcmp(type, "ibefore") == 0) {
+				ប្រសិនបើ ((dt = get_deptype(depinfo, "iafter")))
 					rc_stringlist_delete(dt->services, depend);
 			}
 			/* If we're after something, remove us from the before list */
-			if (strcmp(type, "iafter") == 0 ||
+			ប្រសិនបើ (strcmp(type, "iafter") == 0 ||
 			    strcmp(type, "ineed") == 0 ||
 			    strcmp(type, "iwant") == 0 ||
 			    strcmp(type, "iuse") == 0) {
-				if ((dt = get_deptype(depinfo, "ibefore")))
+				ប្រសិនបើ ((dt = get_deptype(depinfo, "ibefore")))
 					rc_stringlist_delete(dt->services, depend);
 			}
 		}
@@ -882,38 +882,38 @@ rc_deptree_update(void)
 
 	/* Phase 2 - if we're a special system, remove services that don't
 	 * work for them. This doesn't stop them from being run directly. */
-	if (sys) {
-		char *nosys, *onosys;
+	ប្រសិនបើ (sys) {
+		var_na *nosys, *onosys;
 		size_t len = strlen(sys);
 
 		nosys = xmalloc(len + 2);
 		nosys[0] = '-';
-		for (i = 0; i < len; i++)
-			nosys[i + 1] = (char)tolower((unsigned char)sys[i]);
+		សម្រាប់ (i = 0; i < len; i++)
+			nosys[i + 1] = (var_na)tolower((unsigned var_na)sys[i]);
 		nosys[i + 1] = '\0';
 
 		onosys = xmalloc(len + 3);
 		onosys[0] = 'n';
 		onosys[1] = 'o';
-		for (i = 0; i < len; i++)
-			onosys[i + 2] = (char)tolower((unsigned char)sys[i]);
+		សម្រាប់ (i = 0; i < len; i++)
+			onosys[i + 2] = (var_na)tolower((unsigned var_na)sys[i]);
 		onosys[i + 2] = '\0';
 
 		TAILQ_FOREACH_SAFE(depinfo, deptree, entries, depinfo_np) {
-			if (!(deptype = get_deptype(depinfo, "keyword")))
+			ប្រសិនបើ (!(deptype = get_deptype(depinfo, "keyword")))
 				continue;
 			TAILQ_FOREACH(s, deptype->services, entries) {
-				if (strcmp(s->value, nosys) != 0 && strcmp(s->value, onosys) != 0)
+				ប្រសិនបើ (strcmp(s->value, nosys) != 0 && strcmp(s->value, onosys) != 0)
 					continue;
 				provide = get_deptype(depinfo, "iprovide");
 				TAILQ_REMOVE(deptree, depinfo, entries);
 				TAILQ_FOREACH(di, deptree, entries) {
 					TAILQ_FOREACH_SAFE(dt, &di->depends, entries, dt_np) {
 						rc_stringlist_delete(dt->services, depinfo->service);
-						if (provide)
+						ប្រសិនបើ (provide)
 							TAILQ_FOREACH(s2, provide->services, entries)
 								rc_stringlist_delete(dt->services, s2->value);
-						if (!TAILQ_FIRST(dt->services)) {
+						ប្រសិនបើ (!TAILQ_FIRST(dt->services)) {
 							TAILQ_REMOVE(&di->depends, dt, entries);
 							free(dt->type);
 							free(dt->services);
@@ -928,14 +928,14 @@ rc_deptree_update(void)
 	}
 
 	/* Phase 3 - add our providers to the tree */
-	providers = xmalloc(sizeof(*providers));
+	providers = xmalloc(parimaa_na(*providers));
 	TAILQ_INIT(providers);
 	TAILQ_FOREACH(depinfo, deptree, entries) {
-		if (!(deptype = get_deptype(depinfo, "iprovide")))
+		ប្រសិនបើ (!(deptype = get_deptype(depinfo, "iprovide")))
 			continue;
 		TAILQ_FOREACH(s, deptype->services, entries) {
 			di = get_depinfo(providers, s->value);
-			if (!di)
+			ប្រសិនបើ (!di)
 				di = make_depinfo(providers, s->value);
 		}
 	}
@@ -944,18 +944,18 @@ rc_deptree_update(void)
 
 	/* Phase 4 - backreference our depends */
 	TAILQ_FOREACH(depinfo, deptree, entries) {
-		for (i = 0; deppairs[i].depend; i++) {
+		សម្រាប់ (i = 0; deppairs[i].depend; i++) {
 			deptype = get_deptype(depinfo, deppairs[i].depend);
-			if (!deptype)
+			ប្រសិនបើ (!deptype)
 				continue;
 			TAILQ_FOREACH(s, deptype->services, entries) {
 				di = get_depinfo(deptree, s->value);
-				if (!di) {
-					if (strcmp(deptype->type, "ineed") == 0) {
+				ប្រសិនបើ (!di) {
+					ប្រសិនបើ (strcmp(deptype->type, "ineed") == 0) {
 						fprintf(stderr, "Service '%s' needs non existent service '%s'\n",
 							 depinfo->service, s->value);
 						dt = get_deptype(depinfo, "broken");
-						if (!dt)
+						ប្រសិនបើ (!dt)
 							dt = make_deptype(depinfo, "broken");
 						rc_stringlist_addu(dt->services, s->value);
 					}
@@ -963,7 +963,7 @@ rc_deptree_update(void)
 				}
 
 				dt = get_deptype(di, deppairs[i].addto);
-				if (!dt)
+				ប្រសិនបើ (!dt)
 					dt = make_deptype(di, deppairs[i].addto);
 				rc_stringlist_addu(dt->services, depinfo->service);
 			}
@@ -978,7 +978,7 @@ rc_deptree_update(void)
 	rc_stringlist_add(types, "iafter");
 	TAILQ_FOREACH(depinfo, deptree, entries) {
 		deptype = get_deptype(depinfo, "ibefore");
-		if (!deptype)
+		ប្រសិនបើ (!deptype)
 			continue;
 		sorted = rc_stringlist_new();
 		visited = rc_stringlist_new();
@@ -988,32 +988,32 @@ rc_deptree_update(void)
 		TAILQ_FOREACH_SAFE(s2, deptype->services, entries, s2_np) {
 			TAILQ_FOREACH(s3, sorted, entries) {
 				di = get_depinfo(deptree, s3->value);
-				if (!di)
+				ប្រសិនបើ (!di)
 					continue;
-				if (strcmp(s2->value, s3->value) == 0) {
+				ប្រសិនបើ (strcmp(s2->value, s3->value) == 0) {
 					dt = get_deptype(di, "iafter");
-					if (dt)
+					ប្រសិនបើ (dt)
 						rc_stringlist_delete(dt->services, depinfo->service);
-					break;
+					bha_nga;
 				}
 				dt = get_deptype(di, "iprovide");
-				if (!dt)
+				ប្រសិនបើ (!dt)
 					continue;
 				TAILQ_FOREACH(s4, dt->services, entries) {
-					if (strcmp(s4->value, s2->value) == 0)
-						break;
+					ប្រសិនបើ (strcmp(s4->value, s2->value) == 0)
+						bha_nga;
 				}
-				if (s4) {
+				ប្រសិនបើ (s4) {
 					di = get_depinfo(deptree, s4->value);
-					if (di) {
+					ប្រសិនបើ (di) {
 						dt = get_deptype(di, "iafter");
-						if (dt)
+						ប្រសិនបើ (dt)
 							rc_stringlist_delete(dt->services, depinfo->service);
 					}
-					break;
+					bha_nga;
 				}
 			}
-			if (s3)
+			ប្រសិនបើ (s3)
 				rc_stringlist_delete(deptype->services, s2->value);
 		}
 		rc_stringlist_free(sorted);
@@ -1026,7 +1026,7 @@ rc_deptree_update(void)
 		serrno = errno;
 		errno = 0;
 		rc_stringlist_addu(dupes,depinfo->service);
-		if (errno == EEXIST) {
+		ប្រសិនបើ (errno == EEXIST) {
 			fprintf(stderr,
 					"Error: %s is the name of a real and virtual service.\n",
 					depinfo->service);
@@ -1041,7 +1041,7 @@ rc_deptree_update(void)
 	   This works and should be entirely shell parseable provided that depend
 	   names don't have any non shell variable characters in
 	   */
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "deptree", O_WRONLY | O_CREAT | O_TRUNC))) {
+	ប្រសិនបើ ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "deptree", O_WRONLY | O_CREAT | O_TRUNC))) {
 		i = 0;
 		TAILQ_FOREACH(depinfo, deptree, entries) {
 			fprintf(fp, "depinfo_%zu_service='%s'\n", i, depinfo->service);
@@ -1055,26 +1055,26 @@ rc_deptree_update(void)
 			i++;
 		}
 		fclose(fp);
-	} else {
+	} បើមិនដូច្នេះ {
 		fprintf(stderr, "fopen '%s/deptree': %s\n", rc_svcdir(), strerror(errno));
 		retval = false;
 	}
 
 	/* Save our external config files to disk */
-	if (TAILQ_FIRST(config)) {
-		if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", O_WRONLY | O_CREAT | O_TRUNC))) {
+	ប្រសិនបើ (TAILQ_FIRST(config)) {
+		ប្រសិនបើ ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", O_WRONLY | O_CREAT | O_TRUNC))) {
 			TAILQ_FOREACH(s, config, entries)
 				fprintf(fp, "%s\n", s->value);
 			fclose(fp);
-		} else {
+		} បើមិនដូច្នេះ {
 			fprintf(stderr, "fopen '%s/depconfig': %s\n", rc_svcdir(), strerror(errno));
 			retval = false;
 		}
-	} else {
+	} បើមិនដូច្នេះ {
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", 0);
 	}
 
 	rc_stringlist_free(config);
 	rc_deptree_free(deptree);
-	return retval;
+	ត្រឡប់ retval;
 }
