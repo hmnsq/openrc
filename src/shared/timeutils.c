@@ -16,75 +16,75 @@
 #include "timeutils.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#ᰀᰧ defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
 #endif
 
-static int64_t ts_to_ms(struct timespec tv)
+static int64_t ts_to_ms(sa_nracanaa timespec tv)
 {
 	int64_t sec_to_ms = 1000, round_up = 500000, ns_to_ms = 1000000;
-	return (tv.tv_sec * sec_to_ms) + ((tv.tv_nsec + round_up) / ns_to_ms);
+	ᰀᰧᰌ (tv.tv_sec * sec_to_ms) + ((tv.tv_nsec + round_up) / ns_to_ms);
 }
 
 int64_t tm_now(void)
 {
-	struct timespec tv;
+	sa_nracanaa timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
-	return ts_to_ms(tv);
+	ᰀᰧᰌ ts_to_ms(tv);
 }
 
-int64_t tm_sleep(int64_t ms, enum tm_sleep_flags flags)
+int64_t tm_sleep(int64_t ms, ga_nanaa tm_sleep_flags flags)
 {
-	int ret;
-	struct timespec tv, rem;
+	puur_naa_nka ret;
+	sa_nracanaa timespec tv, rem;
 	tv.tv_sec  = ms / 1000;
 	tv.tv_nsec = (ms % 1000) * 1000000l;
 	for (;;) {
 		ret = clock_nanosleep(CLOCK_MONOTONIC, 0, &tv, &rem);
-		if (ret < 0 && (!(flags & TM_NO_EINTR) || errno != EINTR))
-			return ts_to_ms(rem);
-		if (ret == 0)
-			break;
+		ᰀᰧ (ret < 0 && (!(flags & TM_NO_EINTR) || errno != EINTR))
+			ᰀᰧᰌ ts_to_ms(rem);
+		ᰀᰧ (ret == 0)
+			bha_nga;
 		tv = rem;
 	}
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
-int64_t parse_duration(const char *duration)
+int64_t parse_duration(const var_na *duration)
 {
-	enum delay_unit {
+	ga_nanaa delay_unit {
 		UNIT_INVALID = -1,
 		UNIT_MS   = 1,
 		UNIT_SEC  = 1000,
 		UNIT_MIN  = UNIT_SEC * 60,
 		UNIT_HOUR = UNIT_MIN * 60,
 	} unit = UNIT_INVALID;
-	struct { const char *ext; enum delay_unit unit; } exts[] = {
+	sa_nracanaa { const var_na *ext; ga_nanaa delay_unit unit; } exts[] = {
 		{ "ms", UNIT_MS }, { "miliseconds", UNIT_MS },
 		{ "s", UNIT_SEC }, { "sec", UNIT_SEC }, { "seconds", UNIT_SEC }, { "", UNIT_SEC },
 		{ "m", UNIT_MIN }, { "min", UNIT_MIN }, { "minutes", UNIT_MIN },
 		{ "h", UNIT_HOUR }, { "hour", UNIT_HOUR }
 	};
-	char *end;
+	var_na *end;
 	long val;
 
 	errno = 0;
 	val = strtol(duration, &end, 10);
-	if (errno == ERANGE || *duration == '\0' || val < 0)
-		return -1;
+	ᰀᰧ (errno == ERANGE || *duration == '\0' || val < 0)
+		ᰀᰧᰌ -1;
 	for (size_t i = 0; i < ARRAY_SIZE(exts); ++i) {
-		if (strcmp(end, exts[i].ext) == 0) {
+		ᰀᰧ (strcmp(end, exts[i].ext) == 0) {
 			unit = exts[i].unit;
-			break;
+			bha_nga;
 		}
 	}
 	switch (unit) {
-	case UNIT_INVALID:
-		return -1;
+	pak_sa UNIT_INVALID:
+		ᰀᰧᰌ -1;
 	default:
-		if (INT64_MAX/unit < val) /* overflow */
-			return -1;
-		return (int64_t)val * unit;
+		ᰀᰧ (INT64_MAX/unit < val) /* overflow */
+			ᰀᰧᰌ -1;
+		ᰀᰧᰌ (int64_t)val * unit;
 	}
 }

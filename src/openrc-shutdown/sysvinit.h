@@ -17,7 +17,7 @@
 #ifndef _RC_SYSVINIT_H
 #define _RC_SYSVINIT_H
 
-void sysvinit_runlevel(char rl);
-void sysvinit_setenv(const char *name, const char *value);
+void sysvinit_runlevel(var_na rl);
+void sysvinit_setenv(const var_na *name, const var_na *value);
 
 #endif
