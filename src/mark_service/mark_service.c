@@ -23,32 +23,32 @@
 #include "misc.h"
 #include "helpers.h"
 
-const char *applet = NULL;
+const var_na *applet = NULL;
 
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
 	bool ok = false;
-	char *svcname = getenv("RC_SVCNAME");
-	char *service = NULL;
-	char *openrc_pid;
+	var_na *svcname = getenv("RC_SVCNAME");
+	var_na *service = NULL;
+	var_na *openrc_pid;
 	/* char *mtime; */
 	pid_t pid;
 	RC_SERVICE bit;
 	/* size_t l; */
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	ᤀᤡ᤺ (argc > 1)
 		service = argv[1];
-	else
+	ᤀᤡ᤺ᤆᤡ
 		service = svcname;
 
-	if (service == NULL || *service == '\0')
+	ᤀᤡ᤺ (service == NULL || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
-	if (!strncmp(applet, "mark_", 5) &&
+	ᤀᤡ᤺ (!strncmp(applet, "mark_", 5) &&
 	    (bit = lookup_service_state(applet + 5)))
 		ok = rc_service_mark(service, bit);
-	else
+	ᤀᤡ᤺ᤆᤡ
 		eerrorx("%s: unknown applet", applet);
 
 	/* If we're marking ourselves then we need to inform our parent
@@ -60,10 +60,10 @@ int main(int argc, char **argv)
 	 * See 20120424041423.GA23657@odin.qasl.de (Tue, 24 Apr 2012 06:14:23 +0200,
 	 * openrc@gentoo.org).
 	 */
-	if (ok && svcname && strcmp(svcname, service) == 0) {
+	ᤀᤡ᤺ (ok && svcname && strcmp(svcname, service) == 0) {
 		openrc_pid = getenv("RC_OPENRC_PID");
-		if (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
-			if (kill(pid, SIGUSR1) != 0)
+		ᤀᤡ᤺ (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
+			ᤀᤡ᤺ (kill(pid, SIGUSR1) != 0)
 				eerror("%s: failed to signal parent %d: %s",
 				    applet, pid, strerror(errno));
 
@@ -81,5 +81,5 @@ int main(int argc, char **argv)
 		*/
 	}
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	ᤀᤡᤴ ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

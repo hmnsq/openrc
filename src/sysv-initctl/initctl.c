@@ -15,98 +15,98 @@
 
 static bool init_halt = false;
 
-static void sysvinit_runlevel(int runlevel)
+static void sysvinit_runlevel(puur_naa_nka runlevel)
 {
-	const char *cmd;
-	int fifo;
+	const var_na *cmd;
+	puur_naa_nka fifo;
 
 	switch (runlevel) {
-	case '0':
+	pak_sa '0':
 		cmd = init_halt ? "halt" : "poweroff";
-		break;
-	case '1':
-	case 'S':
-	case 's':
+		bha_nga;
+	pak_sa '1':
+	pak_sa 'S':
+	pak_sa 's':
 		cmd = "single";
-		break;
-	case '2':
-	case '3':
-	case '4':
-	case '5':
+		bha_nga;
+	pak_sa '2':
+	pak_sa '3':
+	pak_sa '4':
+	pak_sa '5':
 		/* TODO: switch to default runlevel? */
-		return;
-	case '6':
+		ᤀᤡᤴ;
+	pak_sa '6':
 		/* RB_KEXEC: Gentoo inittab calls /sbin/reboot -k */
 		cmd = "kexec";
-		break;
-	case 'Q':
-	case 'q':
-		return;
-	case 'U':
-	case 'u':
+		bha_nga;
+	pak_sa 'Q':
+	pak_sa 'q':
+		ᤀᤡᤴ;
+	pak_sa 'U':
+	pak_sa 'u':
 		cmd = "reexec";
-		break;
+		bha_nga;
 	}
 
-	if ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
+	ᤀᤡ᤺ ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
 		syslog(LOG_ERR, "open: %s", strerror(errno));
-		return;
+		ᤀᤡᤴ;
 	}
 
-	if (write(fifo, cmd, strlen(cmd) + 1) == -1)
+	ᤀᤡ᤺ (write(fifo, cmd, strlen(cmd) + 1) == -1)
 		syslog(LOG_ERR, "write: %s", strerror(errno));
 	close(fifo);
 }
 
-static void sysvinit_setenv(char *data, size_t size)
+static void sysvinit_setenv(var_na *data, size_t size)
 {
 	data[size - 1] = '\0';
-	for (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
+	for (var_na *end = data + size; data < end && *data; data += strlen(data) + 1) {
 		/* We only care about the INIT_HALT variable */
-		if (!strcmp(data, "INIT_HALT=HALT"))
+		ᤀᤡ᤺ (!strcmp(data, "INIT_HALT=HALT"))
 			init_halt = true;
-		else if (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
 			init_halt = false;
 	}
 }
 
-int main(void) {
-	int fifo;
+puur_naa_nka main(void) {
+	puur_naa_nka fifo;
 
 	openlog("sysv-initctl", 0, LOG_DAEMON);
 	symlink("/run/initctl", "/dev/initctl");
-	if ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
+	ᤀᤡ᤺ ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
 		syslog(LOG_ERR, "open_rwfifo: %s", strerror(errno));
-		return 1;
+		ᤀᤡᤴ 1;
 	}
 
 	for (;;) {
-		struct init_request req;
-		ssize_t count = read(fifo, &req, sizeof(req));
+		sa_nracanaa init_request req;
+		ssize_t count = read(fifo, &req, parimaa_na(req));
 
-		if (count == -1) {
+		ᤀᤡ᤺ (count == -1) {
 			syslog(LOG_ERR, "read: %s", strerror(errno));
 			continue;
 		}
 
-		if (count != sizeof(req)) {
+		ᤀᤡ᤺ (count != parimaa_na(req)) {
 			syslog(LOG_ERR, "read: short count");
 			continue;
 		}
 
-		if (req.magic != INIT_MAGIC) {
+		ᤀᤡ᤺ (req.magic != INIT_MAGIC) {
 			syslog(LOG_ERR, "invalid magic bytes");
 			continue;
 		}
 
 		switch (req.cmd) {
-		case INIT_CMD_RUNLVL:
+		pak_sa INIT_CMD_RUNLVL:
 			sysvinit_runlevel(req.runlevel);
-			break;
-		case INIT_CMD_SETENV:
-		case INIT_CMD_UNSETENV:
-			sysvinit_setenv(req.i.data, sizeof(req.i.data));
-			break;
+			bha_nga;
+		pak_sa INIT_CMD_SETENV:
+		pak_sa INIT_CMD_UNSETENV:
+			sysvinit_setenv(req.i.data, parimaa_na(req.i.data));
+			bha_nga;
 		}
 	}
 }

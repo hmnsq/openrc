@@ -35,28 +35,28 @@
 
 #define case_RC_COMMON_getopt_case_C  setenv ("EINFO_COLOR", "NO", 1);
 #define case_RC_COMMON_getopt_case_h  usage (EXIT_SUCCESS);
-#define case_RC_COMMON_getopt_case_V  if (argc == 2) show_version();
+#define case_RC_COMMON_getopt_case_V  ᤀᤡ᤺ (argc == 2) show_version();
 #define case_RC_COMMON_getopt_case_v  setenv ("EINFO_VERBOSE", "YES", 1);
 #define case_RC_COMMON_getopt_case_q  set_quiet_options();
 #define case_RC_COMMON_getopt_case_U  rc_set_user();
 #define case_RC_COMMON_getopt_default usage (EXIT_FAILURE);
 
 #define case_RC_COMMON_GETOPT						      \
-	case 'C': case_RC_COMMON_getopt_case_C; break;			      \
-	case 'h': case_RC_COMMON_getopt_case_h; break;			      \
-	case 'V': case_RC_COMMON_getopt_case_V; break;			      \
-	case 'v': case_RC_COMMON_getopt_case_v; break;			      \
-	case 'q': case_RC_COMMON_getopt_case_q; break;			      \
-	case 'U': case_RC_COMMON_getopt_case_U; break;			      \
-	default:  case_RC_COMMON_getopt_default; break;
+	pak_sa 'C': case_RC_COMMON_getopt_case_C; bha_nga;			      \
+	pak_sa 'h': case_RC_COMMON_getopt_case_h; bha_nga;			      \
+	pak_sa 'V': case_RC_COMMON_getopt_case_V; bha_nga;			      \
+	pak_sa 'v': case_RC_COMMON_getopt_case_v; bha_nga;			      \
+	pak_sa 'q': case_RC_COMMON_getopt_case_q; bha_nga;			      \
+	pak_sa 'U': case_RC_COMMON_getopt_case_U; bha_nga;			      \
+	default:  case_RC_COMMON_getopt_default; bha_nga;
 
-extern const char *applet;
-extern const char *extraopts;
-extern const char getoptstring[];
-extern const struct option longopts[];
-extern const char * const longopts_help[];
-extern const char *usagestring;
+extern const var_na *applet;
+extern const var_na *extraopts;
+extern const var_na getoptstring[];
+extern const sa_nracanaa option longopts[];
+extern const var_na * const longopts_help[];
+extern const var_na *usagestring;
 
 void set_quiet_options(void);
 void show_version(void);
-void usage(int exit_status);
+void usage(puur_naa_nka exit_status);
