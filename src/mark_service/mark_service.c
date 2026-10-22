@@ -10,45 +10,45 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/types.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <signal.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <sys/types.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#অন্তর্ভাব "einfo.h"
+#অন্তর্ভাব "rc.h"
+#অন্তর্ভাব "misc.h"
+#অন্তর্ভাব "helpers.h"
 
-const char *applet = NULL;
+ধ্রুবক অক্ষর *applet = ফাঁকা;
 
-int main(int argc, char **argv)
+পূর্ণসংখ্যা প্রধান(পূর্ণসংখ্যা argc, অক্ষর **argv)
 {
 	bool ok = false;
-	char *svcname = getenv("RC_SVCNAME");
-	char *service = NULL;
-	char *openrc_pid;
+	অক্ষর *svcname = getenv("RC_SVCNAME");
+	অক্ষর *service = ফাঁকা;
+	অক্ষর *openrc_pid;
 	/* char *mtime; */
 	pid_t pid;
 	RC_SERVICE bit;
 	/* size_t l; */
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	যদি (argc > 1)
 		service = argv[1];
-	else
+	অন্যথা
 		service = svcname;
 
-	if (service == NULL || *service == '\0')
+	যদি (service == ফাঁকা || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
-	if (!strncmp(applet, "mark_", 5) &&
+	যদি (!strncmp(applet, "mark_", 5) &&
 	    (bit = lookup_service_state(applet + 5)))
 		ok = rc_service_mark(service, bit);
-	else
+	অন্যথা
 		eerrorx("%s: unknown applet", applet);
 
 	/* If we're marking ourselves then we need to inform our parent
@@ -60,10 +60,10 @@ int main(int argc, char **argv)
 	 * See 20120424041423.GA23657@odin.qasl.de (Tue, 24 Apr 2012 06:14:23 +0200,
 	 * openrc@gentoo.org).
 	 */
-	if (ok && svcname && strcmp(svcname, service) == 0) {
+	যদি (ok && svcname && strcmp(svcname, service) == 0) {
 		openrc_pid = getenv("RC_OPENRC_PID");
-		if (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
-			if (kill(pid, SIGUSR1) != 0)
+		যদি (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
+			যদি (kill(pid, SIGUSR1) != 0)
 				eerror("%s: failed to signal parent %d: %s",
 				    applet, pid, strerror(errno));
 
@@ -81,5 +81,5 @@ int main(int argc, char **argv)
 		*/
 	}
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	ফেরত ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

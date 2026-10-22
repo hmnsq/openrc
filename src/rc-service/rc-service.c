@@ -15,39 +15,39 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <getopt.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "_usage.h"
-#include "helpers.h"
+#অন্তর্ভাব "einfo.h"
+#অন্তর্ভাব "queue.h"
+#অন্তর্ভাব "rc.h"
+#অন্তর্ভাব "_usage.h"
+#অন্তর্ভাব "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "cdDe:ilr:INsSZ" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "debug",     0, NULL, 'd' },
-	{ "nodeps",     0, NULL, 'D' },
-	{ "exists",   1, NULL, 'e' },
-	{ "ifcrashed", 0, NULL, 'c' },
-	{ "ifexists", 0, NULL, 'i' },
-	{ "ifinactive", 0, NULL, 'I' },
-	{ "ifnotstarted", 0, NULL, 'N' },
-	{ "ifstarted", 0, NULL, 's' },
-	{ "ifstopped", 0, NULL, 'S' },
-	{ "list",     0, NULL, 'l' },
-	{ "resolve",  1, NULL, 'r' },
-	{ "dry-run",     0, NULL, 'Z' },
+ধ্রুবক অক্ষর *applet = ফাঁকা;
+ধ্রুবক অক্ষর *extraopts = ফাঁকা;
+ধ্রুবক অক্ষর getoptstring[] = "cdDe:ilr:INsSZ" getoptstring_COMMON;
+ধ্রুবক কাঠামো option longopts[] = {
+	{ "debug",     0, ফাঁকা, 'd' },
+	{ "nodeps",     0, ফাঁকা, 'D' },
+	{ "exists",   1, ফাঁকা, 'e' },
+	{ "ifcrashed", 0, ফাঁকা, 'c' },
+	{ "ifexists", 0, ফাঁকা, 'i' },
+	{ "ifinactive", 0, ফাঁকা, 'I' },
+	{ "ifnotstarted", 0, ফাঁকা, 'N' },
+	{ "ifstarted", 0, ফাঁকা, 's' },
+	{ "ifstopped", 0, ফাঁকা, 'S' },
+	{ "list",     0, ফাঁকা, 'l' },
+	{ "resolve",  1, ফাঁকা, 'r' },
+	{ "dry-run",     0, ফাঁকা, 'Z' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ধ্রুবক অক্ষর * ধ্রুবক longopts_help[] = {
 	"set xtrace when running the command",
 	"ignore dependencies",
 	"tests if the service exists or not",
@@ -62,16 +62,16 @@ const char * const longopts_help[] = {
 	"dry run (show what would happen)",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+ধ্রুবক অক্ষর *usagestring = ""
 	"Usage: rc-service [options] [-i] <service> <cmd>...\n"
 	"   or: rc-service [options] -e <service>\n"
 	"   or: rc-service [options] -l\n"
 	"   or: rc-service [options] -r <service>";
 
-int main(int argc, char **argv)
+পূর্ণসংখ্যা প্রধান(পূর্ণসংখ্যা argc, অক্ষর **argv)
 {
-	int opt;
-	char *service;
+	পূর্ণসংখ্যা opt;
+	অক্ষর *service;
 	RC_STRINGLIST *list;
 	RC_STRING *s;
 	RC_SERVICE state;
@@ -86,61 +86,61 @@ int main(int argc, char **argv)
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	যখন ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (পূর্ণসংখ্যা *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'd':
+		নির্বাচন (opt) {
+		ক্ষেত্র 'd':
 			setenv("RC_DEBUG", "yes", 1);
-			break;
-		case 'D':
+			বিরতি;
+		ক্ষেত্র 'D':
 			setenv("RC_NODEPS", "yes", 1);
-			break;
-		case 'e':
+			বিরতি;
+		ক্ষেত্র 'e':
 			service = rc_service_resolve(optarg);
 			opt = service ? EXIT_SUCCESS : EXIT_FAILURE;
-			free(service);
-			return opt;
+			মুক্ত(service);
+			ফেরত opt;
 			/* NOTREACHED */
-		case 'c':
+		ক্ষেত্র 'c':
 			if_crashed = true;
-			break;
-		case 'i':
+			বিরতি;
+		ক্ষেত্র 'i':
 			if_exists = true;
-			break;
-		case 'I':
+			বিরতি;
+		ক্ষেত্র 'I':
 			if_inactive = true;
-			break;
-		case 'N':
+			বিরতি;
+		ক্ষেত্র 'N':
 			if_notstarted = true;
-			break;
-		case 'l':
-			list = rc_services_in_runlevel(NULL);
-			if (TAILQ_FIRST(list) == NULL)
-				return EXIT_FAILURE;
+			বিরতি;
+		ক্ষেত্র 'l':
+			list = rc_services_in_runlevel(ফাঁকা);
+			যদি (TAILQ_FIRST(list) == ফাঁকা)
+				ফেরত EXIT_FAILURE;
 			rc_stringlist_sort(&list);
 			TAILQ_FOREACH(s, list, entries)
-			    printf("%s\n", s->value);
+			    printf("%s\n", s->মান);
 			rc_stringlist_free(list);
-			return EXIT_SUCCESS;
+			ফেরত EXIT_SUCCESS;
 			/* NOTREACHED */
-		case 'r':
+		ক্ষেত্র 'r':
 			service = rc_service_resolve(optarg);
-			if (service == NULL)
-				return EXIT_FAILURE;
+			যদি (service == ফাঁকা)
+				ফেরত EXIT_FAILURE;
 			printf("%s\n", service);
-			free(service);
-			return EXIT_SUCCESS;
+			মুক্ত(service);
+			ফেরত EXIT_SUCCESS;
 			/* NOTREACHED */
-		case 's':
+		ক্ষেত্র 's':
 			if_started = true;
-			break;
-		case 'S':
+			বিরতি;
+		ক্ষেত্র 'S':
 			if_stopped = true;
-			break;
-		case 'Z':
+			বিরতি;
+		ক্ষেত্র 'Z':
 			setenv("IN_DRYRUN", "yes", 1);
-			break;
+			বিরতি;
 
 		case_RC_COMMON_GETOPT
 		}
@@ -148,24 +148,24 @@ int main(int argc, char **argv)
 
 	argc -= optind;
 	argv += optind;
-	if (*argv == NULL)
+	যদি (*argv == ফাঁকা)
 		eerrorx("%s: you need to specify a service", applet);
-	if ((service = rc_service_resolve(*argv)) == NULL) {
-		if (if_exists)
-			return 0;
+	যদি ((service = rc_service_resolve(*argv)) == ফাঁকা) {
+		যদি (if_exists)
+			ফেরত 0;
 		eerrorx("%s: service `%s' does not exist", applet, *argv);
 	}
 	state = rc_service_state(*argv);
-	if (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
-		return 0;
-	if (if_inactive && !(state & RC_SERVICE_INACTIVE))
-		return 0;
-	if (if_notstarted && (state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_started && !(state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_stopped && !(state & RC_SERVICE_STOPPED))
-		return 0;
+	যদি (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
+		ফেরত 0;
+	যদি (if_inactive && !(state & RC_SERVICE_INACTIVE))
+		ফেরত 0;
+	যদি (if_notstarted && (state & RC_SERVICE_STARTED))
+		ফেরত 0;
+	যদি (if_started && !(state & RC_SERVICE_STARTED))
+		ফেরত 0;
+	যদি (if_stopped && !(state & RC_SERVICE_STOPPED))
+		ফেরত 0;
 	env_filter();
 	env_config();
 	*argv = service;

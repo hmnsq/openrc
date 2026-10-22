@@ -15,45 +15,45 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <unistd.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <time.h>
+#অন্তর্ভাব <getopt.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <strings.h>
+#অন্তর্ভাব <unistd.h>
+#অন্তর্ভাব <inttypes.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <time.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "_usage.h"
-#include "helpers.h"
+#অন্তর্ভাব "einfo.h"
+#অন্তর্ভাব "queue.h"
+#অন্তর্ভাব "rc.h"
+#অন্তর্ভাব "misc.h"
+#অন্তর্ভাব "_usage.h"
+#অন্তর্ভাব "helpers.h"
 
-enum format_t {
+গণনা format_t {
 	FORMAT_DEFAULT,
 	FORMAT_INI,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "acf:i:lmrsSu" getoptstring_COMMON;
-const struct option longopts[] = {
-	{"all",         0, NULL, 'a'},
-	{"crashed",     0, NULL, 'c'},
-	{"format",     1, NULL, 'f'},
-	{"in-state",   1, NULL, 'i'},
-	{"list",        0, NULL, 'l'},
-	{"manual",        0, NULL, 'm'},
-	{"runlevel",    0, NULL, 'r'},
-	{"servicelist", 0, NULL, 's'},
-	{"supervised", 0, NULL, 'S'},
-	{"unused",      0, NULL, 'u'},
+ধ্রুবক অক্ষর *applet = ফাঁকা;
+ধ্রুবক অক্ষর *extraopts = ফাঁকা;
+ধ্রুবক অক্ষর getoptstring[] = "acf:i:lmrsSu" getoptstring_COMMON;
+ধ্রুবক কাঠামো option longopts[] = {
+	{"all",         0, ফাঁকা, 'a'},
+	{"crashed",     0, ফাঁকা, 'c'},
+	{"format",     1, ফাঁকা, 'f'},
+	{"in-state",   1, ফাঁকা, 'i'},
+	{"list",        0, ফাঁকা, 'l'},
+	{"manual",        0, ফাঁকা, 'm'},
+	{"runlevel",    0, ফাঁকা, 'r'},
+	{"servicelist", 0, ফাঁকা, 's'},
+	{"supervised", 0, ফাঁকা, 'S'},
+	{"unused",      0, ফাঁকা, 'u'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ধ্রুবক অক্ষর * ধ্রুবক longopts_help[] = {
 	"Show services from all run levels",
 	"Show crashed services",
 	"format status to be parsable (currently arg must be ini)",
@@ -66,195 +66,195 @@ const char * const longopts_help[] = {
 	"Show services not assigned to any runlevel",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+ধ্রুবক অক্ষর *usagestring = ""
 	"Usage: rc-status [-C] [-f ini] [-i state] [runlevel]\n"
 	"   or: rc-status [-C] [-f ini] [-a | -m | -S | -s | -u]\n"
 	"   or: rc-status [-C] [-c | -l | -r]";
 
-static RC_DEPTREE *deptree;
-static RC_STRINGLIST *types;
+স্থির RC_DEPTREE *deptree;
+স্থির RC_STRINGLIST *types;
 
-static RC_STRINGLIST *levels, *services, *tmp, *alist;
-static RC_STRINGLIST *sservices, *nservices, *needsme;
+স্থির RC_STRINGLIST *levels, *services, *tmp, *alist;
+স্থির RC_STRINGLIST *sservices, *nservices, *needsme;
 
-static void print_level(const char *prefix, const char *level,
-		enum format_t format)
+স্থির শূন্য print_level(ধ্রুবক অক্ষর *prefix, ধ্রুবক অক্ষর *level,
+		গণনা format_t format)
 {
-	switch (format) {
-	case FORMAT_DEFAULT:
-		if (prefix)
+	নির্বাচন (format) {
+	ক্ষেত্র FORMAT_DEFAULT:
+		যদি (prefix)
 			printf("%s ", prefix);
 		printf ("Runlevel: ");
-		if (isatty(fileno(stdout)))
+		যদি (isatty(fileno(stdout)))
 			printf("%s%s%s\n",
 					ecolor(ECOLOR_HILITE), level, ecolor(ECOLOR_NORMAL));
-		else
+		অন্যথা
 			printf("%s\n", level);
-		break;
-	case FORMAT_INI:
+		বিরতি;
+	ক্ষেত্র FORMAT_INI:
 		printf("%s", "[");
-		if (prefix)
+		যদি (prefix)
 			printf("%s ", prefix);
 		printf("%s]\n", level);
-		break;
+		বিরতি;
 	}
 }
 
-static char *get_uptime(const char *service)
+স্থির অক্ষর *get_uptime(ধ্রুবক অক্ষর *service)
 {
 	RC_SERVICE state = rc_service_state(service);
-	char *start_count;
-	char *start_time_string;
+	অক্ষর *start_গুনতি;
+	অক্ষর *start_time_string;
 	time_t start_time;
 	int64_t diff_days;
 	int64_t diff_hours;
 	int64_t diff_mins;
 	int64_t diff_secs;
-	char *uptime = NULL;
+	অক্ষর *uptime = ফাঁকা;
 
-	if (state & RC_SERVICE_STARTED) {
-		start_count = rc_service_value_get(service, "start_count");
-		start_time_string = rc_service_value_get(service, "start_time");
-		if (start_count && start_time_string) {
+	যদি (state & RC_SERVICE_STARTED) {
+		start_গুনতি = rc_service_মান_get(service, "start_count");
+		start_time_string = rc_service_মান_get(service, "start_time");
+		যদি (start_গুনতি && start_time_string) {
 			start_time = to_time_t(start_time_string);
-			diff_secs = (int64_t) difftime(time(NULL), start_time);
+			diff_secs = (int64_t) difftime(time(ফাঁকা), start_time);
 			diff_days = diff_secs / 86400;
 			diff_secs = diff_secs % 86400;
 			diff_hours = diff_secs / 3600;
 			diff_secs = diff_secs % 3600;
 			diff_mins = diff_secs / 60;
 			diff_secs = diff_secs % 60;
-			if (diff_days > 0)
+			যদি (diff_days > 0)
 				xasprintf(&uptime,
 						"%"PRId64" day(s) %02"PRId64":%02"PRId64":%02"PRId64" (%s)",
 						diff_days, diff_hours, diff_mins, diff_secs,
-						start_count);
-			else
+						start_গুনতি);
+			অন্যথা
 				xasprintf(&uptime,
 						"%02"PRId64":%02"PRId64":%02"PRId64" (%s)",
-						diff_hours, diff_mins, diff_secs, start_count);
+						diff_hours, diff_mins, diff_secs, start_গুনতি);
 		}
-		free(start_count);
-		free(start_time_string);
+		মুক্ত(start_গুনতি);
+		মুক্ত(start_time_string);
 	}
-	return uptime;
+	ফেরত uptime;
 }
 
-static void print_service(const char *service, enum format_t format,
+স্থির শূন্য print_service(ধ্রুবক অক্ষর *service, গণনা format_t format,
 	RC_SERVICE accept, RC_SERVICE reject)
 {
-	char *status = NULL;
-	char *uptime = NULL;
-	char *child_pid = NULL;
-	char *start_time = NULL;
-	int cols;
-	const char *c = ecolor(ECOLOR_GOOD);
+	অক্ষর *status = ফাঁকা;
+	অক্ষর *uptime = ফাঁকা;
+	অক্ষর *child_pid = ফাঁকা;
+	অক্ষর *start_time = ফাঁকা;
+	পূর্ণসংখ্যা cols;
+	ধ্রুবক অক্ষর *c = ecolor(ECOLOR_GOOD);
 	RC_SERVICE state = rc_service_state(service);
 	ECOLOR color = ECOLOR_BAD;
 
-	if (!(state & accept) || (state & reject))
-		return;
+	যদি (!(state & accept) || (state & reject))
+		ফেরত;
 
-	if (state & RC_SERVICE_STOPPING)
+	যদি (state & RC_SERVICE_STOPPING)
 		xasprintf(&status, "stopping ");
-	else if (state & RC_SERVICE_STARTING) {
+	অন্যথা যদি (state & RC_SERVICE_STARTING) {
 		xasprintf(&status, "starting ");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_INACTIVE) {
+	} অন্যথা যদি (state & RC_SERVICE_INACTIVE) {
 		xasprintf(&status, "inactive ");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_STARTED) {
+	} অন্যথা যদি (state & RC_SERVICE_STARTED) {
 		errno = 0;
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+		যদি (rc_service_daemons_crashed(service) && errno != EACCES)
 		{
-			child_pid = rc_service_value_get(service, "child_pid");
-			start_time = rc_service_value_get(service, "start_time");
-			if (start_time && child_pid)
+			child_pid = rc_service_মান_get(service, "child_pid");
+			start_time = rc_service_মান_get(service, "start_time");
+			যদি (start_time && child_pid)
 				xasprintf(&status, " unsupervised ");
-			else
+			অন্যথা
 				xasprintf(&status, " crashed ");
-			free(child_pid);
-			free(start_time);
-		} else {
+			মুক্ত(child_pid);
+			মুক্ত(start_time);
+		} অন্যথা {
 			uptime = get_uptime(service);
-			if (uptime) {
+			যদি (uptime) {
 				xasprintf(&status, " started %s", uptime);
-				free(uptime);
-			} else
+				মুক্ত(uptime);
+			} অন্যথা
 				xasprintf(&status, " started ");
 			color = ECOLOR_GOOD;
 		}
-	} else if (state & RC_SERVICE_SCHEDULED) {
+	} অন্যথা যদি (state & RC_SERVICE_SCHEDULED) {
 		xasprintf(&status, "scheduled");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_FAILED) {
+	} অন্যথা যদি (state & RC_SERVICE_FAILED) {
 		xasprintf(&status, "failed");
 		color = ECOLOR_WARN;
-	} else
+	} অন্যথা
 		xasprintf(&status, " stopped ");
 
 	errno = 0;
-	switch (format) {
-	case FORMAT_DEFAULT:
+	নির্বাচন (format) {
+	ক্ষেত্র FORMAT_DEFAULT:
 		cols =  printf(" %s", service);
-		if (c && *c && isatty(fileno(stdout)))
+		যদি (c && *c && isatty(fileno(stdout)))
 			printf("\n");
 		ebracket(cols, color, status);
-		break;
-	case FORMAT_INI:
+		বিরতি;
+	ক্ষেত্র FORMAT_INI:
 		printf("%s = %s\n", service, status);
-		break;
+		বিরতি;
 	}
-	free(status);
+	মুক্ত(status);
 }
 
-static void print_services_in_state(const char *runlevel, RC_STRINGLIST *svcs,
-		enum format_t format, RC_SERVICE accept, RC_SERVICE reject)
+স্থির শূন্য print_services_in_state(ধ্রুবক অক্ষর *runlevel, RC_STRINGLIST *svcs,
+		গণনা format_t format, RC_SERVICE accept, RC_SERVICE reject)
 {
-	RC_STRINGLIST *l = NULL;
+	RC_STRINGLIST *l = ফাঁকা;
 	RC_STRING *s;
-	char *r = NULL;
+	অক্ষর *r = ফাঁকা;
 
-	if (!svcs)
-		return;
-	if (!deptree)
-		deptree = _rc_deptree_load(0, NULL);
-	if (!deptree) {
+	যদি (!svcs)
+		ফেরত;
+	যদি (!deptree)
+		deptree = _rc_deptree_load(0, ফাঁকা);
+	যদি (!deptree) {
 		TAILQ_FOREACH(s, svcs, entries)
-			if (!runlevel ||
-			    rc_service_in_runlevel(s->value, runlevel))
-				print_service(s->value, format, accept, reject);
-		return;
+			যদি (!runlevel ||
+			    rc_service_in_runlevel(s->মান, runlevel))
+				print_service(s->মান, format, accept, reject);
+		ফেরত;
 	}
-	if (!types) {
+	যদি (!types) {
 		types = rc_stringlist_new();
 		rc_stringlist_add(types, "ineed");
 		rc_stringlist_add(types, "iuse");
 		rc_stringlist_add(types, "iafter");
 	}
-	if (!runlevel)
+	যদি (!runlevel)
 		r = default_runlevel();
 	l = rc_deptree_depends(deptree, types, svcs, r ? r : runlevel,
 			       RC_DEP_STRICT | RC_DEP_TRACE | RC_DEP_START);
-	free(r);
-	if (!l)
-		return;
+	মুক্ত(r);
+	যদি (!l)
+		ফেরত;
 	TAILQ_FOREACH(s, l, entries) {
-		if (!rc_stringlist_find(svcs, s->value))
-			continue;
-		if (!runlevel || rc_service_in_runlevel(s->value, runlevel))
-			print_service(s->value, format, accept, reject);
+		যদি (!rc_stringlist_find(svcs, s->মান))
+			চালু;
+		যদি (!runlevel || rc_service_in_runlevel(s->মান, runlevel))
+			print_service(s->মান, format, accept, reject);
 	}
 	rc_stringlist_free(l);
 }
 
-static void print_services(const char *runlevel, RC_STRINGLIST *svcs,
-	enum format_t format)
+স্থির শূন্য print_services(ধ্রুবক অক্ষর *runlevel, RC_STRINGLIST *svcs,
+	গণনা format_t format)
 {
 	print_services_in_state(runlevel, svcs, format, -1, 0);
 }
 
-static void print_stacked_services(const char *runlevel, enum format_t format,
+স্থির শূন্য print_stacked_services(ধ্রুবক অক্ষর *runlevel, গণনা format_t format,
 	RC_SERVICE accept, RC_SERVICE reject)
 {
 	RC_STRINGLIST *stackedlevels, *servicelist;
@@ -262,71 +262,71 @@ static void print_stacked_services(const char *runlevel, enum format_t format,
 
 	stackedlevels = rc_runlevel_stacks(runlevel);
 	TAILQ_FOREACH(stackedlevel, stackedlevels, entries) {
-		if (rc_stringlist_find(levels, stackedlevel->value) != NULL)
-			continue;
-		print_level("Stacked", stackedlevel->value, format);
-		servicelist = rc_services_in_runlevel(stackedlevel->value);
-		print_services_in_state(stackedlevel->value, servicelist,
+		যদি (rc_stringlist_find(levels, stackedlevel->মান) != ফাঁকা)
+			চালু;
+		print_level("Stacked", stackedlevel->মান, format);
+		servicelist = rc_services_in_runlevel(stackedlevel->মান);
+		print_services_in_state(stackedlevel->মান, servicelist,
 			format, accept, reject);
 		rc_stringlist_free(servicelist);
 	}
 	rc_stringlist_free(stackedlevels);
-	stackedlevels = NULL;
+	stackedlevels = ফাঁকা;
 }
 
-int main(int argc, char **argv)
+পূর্ণসংখ্যা প্রধান(পূর্ণসংখ্যা argc, অক্ষর **argv)
 {
 	RC_SERVICE state;
 	RC_SERVICE accept = -1;
 	RC_SERVICE reject = 0;
 	RC_STRING *s, *l, *t, *level;
-	const rc_service_state_name_t *it;
-	enum format_t format = FORMAT_DEFAULT;
+	ধ্রুবক rc_service_state_name_t *it;
+	গণনা format_t format = FORMAT_DEFAULT;
 	bool levels_given = false;
 	bool show_all = false;
-	char *p, *runlevel = NULL;
-	int opt, retval = 0;
+	অক্ষর *p, *runlevel = ফাঁকা;
+	পূর্ণসংখ্যা opt, retval = 0;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts,
-				  (int *) 0)) != -1)
-		switch (opt) {
-		case 'a':
+	যখন ((opt = getopt_long(argc, argv, getoptstring, longopts,
+				  (পূর্ণসংখ্যা *) 0)) != -1)
+		নির্বাচন (opt) {
+		ক্ষেত্র 'a':
 			show_all = true;
 			levels = rc_runlevel_list();
-			break;
-		case 'c':
+			বিরতি;
+		ক্ষেত্র 'c':
 			services = rc_services_in_state(RC_SERVICE_STARTED);
 			retval = 1;
 			TAILQ_FOREACH(s, services, entries)
-				if (rc_service_daemons_crashed(s->value)) {
-					printf("%s\n", s->value);
+				যদি (rc_service_daemons_crashed(s->মান)) {
+					printf("%s\n", s->মান);
 					retval = 0;
 				}
-			goto exit;
+			যাও exit;
 			/* NOTREACHED */
-		case 'f':
-			if (strcasecmp(optarg, "ini") == 0) {
+		ক্ষেত্র 'f':
+			যদি (strcasecmp(optarg, "ini") == 0) {
 				format = FORMAT_INI;
 				setenv("EINFO_QUIET", "YES", 1);
-			} else
+			} অন্যথা
 				eerrorx("%s: invalid argument to --format switch", applet);
-			break;
-		case 'i':
-			if (accept == (RC_SERVICE)-1)
+			বিরতি;
+		ক্ষেত্র 'i':
+			যদি (accept == (RC_SERVICE)-1)
 				accept = 0;
-			for (it = rc_service_state_names; it->name; ++it) {
+			জন্য (it = rc_service_state_names; it->name; ++it) {
 				/*
 				 * print_service() doesn't print wasinactive
 				 */
-				if (it->state == RC_SERVICE_WASINACTIVE)
-					continue;
-				if (strcmp(optarg, it->name) == 0) {
+				যদি (it->state == RC_SERVICE_WASINACTIVE)
+					চালু;
+				যদি (strcmp(optarg, it->name) == 0) {
 					state = it->state;
-					break;
+					বিরতি;
 				}
 			}
-			if (it->name == NULL)
+			যদি (it->name == ফাঁকা)
 				eerrorx("%s: invalid argument to --in-state"
 					" switch: %s", applet, optarg);
 			accept |= state;
@@ -334,155 +334,155 @@ int main(int argc, char **argv)
 			 * for `-i started` we don't want to show crashed
 			 * services unless `-i crashed` was used beforehand
 			 */
-			if (state == RC_SERVICE_STARTED && !(accept & RC_SERVICE_CRASHED)) {
+			যদি (state == RC_SERVICE_STARTED && !(accept & RC_SERVICE_CRASHED)) {
 				reject |= RC_SERVICE_CRASHED;
-			} else if (state == RC_SERVICE_CRASHED) {
+			} অন্যথা যদি (state == RC_SERVICE_CRASHED) {
 				/* clear it in case `-i started` set it beforehand */
 				reject &= ~RC_SERVICE_CRASHED;
 			}
 			/* similar situation here with `failed` and `stopped` */
-			if (state == RC_SERVICE_STOPPED && !(accept & RC_SERVICE_FAILED)) {
+			যদি (state == RC_SERVICE_STOPPED && !(accept & RC_SERVICE_FAILED)) {
 				reject |= RC_SERVICE_FAILED;
-			} else if (state == RC_SERVICE_FAILED) {
+			} অন্যথা যদি (state == RC_SERVICE_FAILED) {
 				reject &= ~RC_SERVICE_FAILED;
 			}
-			break;
-		case 'l':
+			বিরতি;
+		ক্ষেত্র 'l':
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH(l, levels, entries)
-				printf("%s\n", l->value);
-			goto exit;
+				printf("%s\n", l->মান);
+			যাও exit;
 			/* NOTREACHED */
-		case 'm':
-			services = rc_services_in_runlevel(NULL);
+		ক্ষেত্র 'm':
+			services = rc_services_in_runlevel(ফাঁকা);
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				TAILQ_FOREACH(l, levels, entries)
-					if (rc_service_in_runlevel(s->value, l->value)) {
+					যদি (rc_service_in_runlevel(s->মান, l->মান)) {
 						TAILQ_REMOVE(services, s, entries);
-						free(s->value);
-						free(s);
-						break;
+						মুক্ত(s->মান);
+						মুক্ত(s);
+						বিরতি;
 					}
 			}
 			TAILQ_FOREACH_SAFE(s, services, entries, t)
-				if (rc_service_state(s->value) &
+				যদি (rc_service_state(s->মান) &
 					(RC_SERVICE_STOPPED | RC_SERVICE_HOTPLUGGED)) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
-					free(s);
+					মুক্ত(s->মান);
+					মুক্ত(s);
 				}
-			print_services(NULL, services, format);
-			goto exit;
+			print_services(ফাঁকা, services, format);
+			যাও exit;
 			/* NOTREACHED */
-		case 'r':
+		ক্ষেত্র 'r':
 			runlevel = rc_runlevel_get();
 			printf("%s\n", runlevel ? runlevel : "");
-			goto exit;
+			যাও exit;
 			/* NOTREACHED */
-		case 'S':
+		ক্ষেত্র 'S':
 			services = rc_services_in_state(RC_SERVICE_STARTED);
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
-				char *ret = rc_service_value_get(s->value, "child_pid");
-				if (!ret) {
+				অক্ষর *ret = rc_service_মান_get(s->মান, "child_pid");
+				যদি (!ret) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
-					free(s);
+					মুক্ত(s->মান);
+					মুক্ত(s);
 				}
-				free(ret);
+				মুক্ত(ret);
 			}
-			print_services(NULL, services, format);
-			goto exit;
+			print_services(ফাঁকা, services, format);
+			যাও exit;
 			/* NOTREACHED */
-		case 's':
-			services = rc_services_in_runlevel(NULL);
-			print_services(NULL, services, format);
-			goto exit;
+		ক্ষেত্র 's':
+			services = rc_services_in_runlevel(ফাঁকা);
+			print_services(ফাঁকা, services, format);
+			যাও exit;
 			/* NOTREACHED */
-		case 'u':
-			services = rc_services_in_runlevel(NULL);
+		ক্ষেত্র 'u':
+			services = rc_services_in_runlevel(ফাঁকা);
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				TAILQ_FOREACH(l, levels, entries)
-					if (rc_service_in_runlevel(s->value, l->value)) {
+					যদি (rc_service_in_runlevel(s->মান, l->মান)) {
 						TAILQ_REMOVE(services, s, entries);
-						free(s->value);
-						free(s);
-						break;
+						মুক্ত(s->মান);
+						মুক্ত(s);
+						বিরতি;
 					}
 			}
-			print_services(NULL, services, format);
-			goto exit;
+			print_services(ফাঁকা, services, format);
+			যাও exit;
 			/* NOTREACHED */
 
 		case_RC_COMMON_GETOPT
 		}
 
-	if (!levels)
+	যদি (!levels)
 		levels = rc_stringlist_new();
 	opt = (optind < argc) ? 0 : 1;
-	while (optind < argc) {
-		if (rc_runlevel_exists(argv[optind])) {
+	যখন (optind < argc) {
+		যদি (rc_runlevel_exists(argv[optind])) {
 			levels_given = true;
 			rc_stringlist_add(levels, argv[optind++]);
 			opt++;
-		} else
+		} অন্যথা
 			eerror("runlevel `%s' does not exist", argv[optind++]);
 	}
-	if (opt == 0)
+	যদি (opt == 0)
 		exit(EXIT_FAILURE);
-	if (!TAILQ_FIRST(levels)) {
+	যদি (!TAILQ_FIRST(levels)) {
 		runlevel = default_runlevel();
 		rc_stringlist_add(levels, runlevel);
 	}
 
 	/* Output the services in the order in which they would start */
-	deptree = _rc_deptree_load(0, NULL);
+	deptree = _rc_deptree_load(0, ফাঁকা);
 
 	TAILQ_FOREACH(l, levels, entries) {
-		print_level(NULL, l->value, format);
-		services = rc_services_in_runlevel(l->value);
-		print_services_in_state(l->value, services, format, accept, reject);
-		print_stacked_services(l->value, format, accept, reject);
+		print_level(ফাঁকা, l->মান, format);
+		services = rc_services_in_runlevel(l->মান);
+		print_services_in_state(l->মান, services, format, accept, reject);
+		print_stacked_services(l->মান, format, accept, reject);
 		rc_stringlist_free(nservices);
-		nservices = NULL;
+		nservices = ফাঁকা;
 		rc_stringlist_free(services);
-		services = NULL;
+		services = ফাঁকা;
 	}
 
-	if (show_all || !levels_given) {
+	যদি (show_all || !levels_given) {
 		/* Show hotplugged services */
 		print_level("Dynamic", "hotplugged", format);
 		services = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
-		print_services_in_state(NULL, services, format, accept, reject);
+		print_services_in_state(ফাঁকা, services, format, accept, reject);
 		rc_stringlist_free(services);
-		services = NULL;
+		services = ফাঁকা;
 
 		/* Show manually started and unassigned depended services */
-		if (show_all) {
+		যদি (show_all) {
 			rc_stringlist_free(levels);
 			levels = rc_stringlist_new();
-			if (!runlevel)
+			যদি (!runlevel)
 				runlevel = default_runlevel();
 			rc_stringlist_add(levels, runlevel);
 		}
 		rc_stringlist_add(levels, RC_LEVEL_SYSINIT);
 		rc_stringlist_add(levels, RC_LEVEL_BOOT);
-		services = rc_services_in_runlevel(NULL);
+		services = rc_services_in_runlevel(ফাঁকা);
 		sservices = rc_stringlist_new();
 		TAILQ_FOREACH(l, levels, entries) {
-			nservices = rc_services_in_runlevel_stacked(l->value);
+			nservices = rc_services_in_runlevel_stacked(l->মান);
 			TAILQ_CONCAT(sservices, nservices, entries);
 			rc_stringlist_free(nservices);
 		}
 		TAILQ_FOREACH_SAFE(s, services, entries, t) {
-			state = rc_service_state(s->value);
-			if ((rc_stringlist_find(sservices, s->value) ||
+			state = rc_service_state(s->মান);
+			যদি ((rc_stringlist_find(sservices, s->মান) ||
 			    (state & ( RC_SERVICE_STOPPED | RC_SERVICE_HOTPLUGGED)))) {
-				if (!(state & RC_SERVICE_FAILED)) {
+				যদি (!(state & RC_SERVICE_FAILED)) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
-					free(s);
+					মুক্ত(s->মান);
+					মুক্ত(s);
 				}
 			}
 		}
@@ -492,20 +492,20 @@ int main(int argc, char **argv)
 		nservices = rc_stringlist_new();
 		alist = rc_stringlist_new();
 		l = rc_stringlist_add(alist, "");
-		p = l->value;
+		p = l->মান;
 		TAILQ_FOREACH(level, levels, entries) {
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
-				l->value = s->value;
-				setenv("RC_SVCNAME", l->value, 1);
-				tmp = rc_deptree_depends(deptree, needsme, alist, level->value, RC_DEP_TRACE);
-				if (TAILQ_FIRST(tmp)) {
+				l->মান = s->মান;
+				setenv("RC_SVCNAME", l->মান, 1);
+				tmp = rc_deptree_depends(deptree, needsme, alist, level->মান, RC_DEP_TRACE);
+				যদি (TAILQ_FIRST(tmp)) {
 					TAILQ_REMOVE(services, s, entries);
-					TAILQ_INSERT_TAIL(nservices, s, entries);
+					TAILQ_ঢোকাও_লেজ(nservices, s, entries);
 				}
 				rc_stringlist_free(tmp);
 			}
 		}
-		l->value = p;
+		l->মান = p;
 		/*
 		 * we are unsetting RC_SVCNAME because last loaded service will not
 		 * be added to the list
@@ -513,13 +513,13 @@ int main(int argc, char **argv)
 		unsetenv("RC_SVCNAME");
 
 		print_level("Dynamic", "needed/wanted", format);
-		print_services_in_state(NULL, nservices, format, accept, reject);
+		print_services_in_state(ফাঁকা, nservices, format, accept, reject);
 		print_level("Dynamic", "manual", format);
-		print_services_in_state(NULL, services, format, accept, reject);
+		print_services_in_state(ফাঁকা, services, format, accept, reject);
 	}
 
 exit:
-	free(runlevel);
+	মুক্ত(runlevel);
 	rc_stringlist_free(alist);
 	rc_stringlist_free(needsme);
 	rc_stringlist_free(sservices);
@@ -529,5 +529,5 @@ exit:
 	rc_stringlist_free(levels);
 	rc_deptree_free(deptree);
 
-	return retval;
+	ফেরত retval;
 }

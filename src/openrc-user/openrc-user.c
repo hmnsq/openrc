@@ -1,57 +1,57 @@
-#include <einfo.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <syslog.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <spawn.h>
+#অন্তর্ভাব <einfo.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <fcntl.h>
+#অন্তর্ভাব <grp.h>
+#অন্তর্ভাব <pwd.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <sys/wait.h>
+#অন্তর্ভাব <syslog.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <unistd.h>
+#অন্তর্ভাব <signal.h>
+#অন্তর্ভাব <spawn.h>
 
 #ifdef HAVE_PAM
-#include <security/pam_appl.h>
+#অন্তর্ভাব <security/pam_appl.h>
 #endif
 
 #define USER_SH RC_LIBEXECDIR "/sh/openrc-user.sh "
 
-#include "helpers.h"
-#include "rc.h"
-#include "rc_exec.h"
+#অন্তর্ভাব "helpers.h"
+#অন্তর্ভাব "rc.h"
+#অন্তর্ভাব "rc_exec.h"
 
-static bool valid_shell(const char *shell) {
+স্থির bool valid_shell(ধ্রুবক অক্ষর *shell) {
 	FILE *fp = fopen(RC_SYSCONFDIR "/shells", "r");
 	bool ret = false;
-	char *line = NULL;
-	size_t size;
+	অক্ষর *সারি = ফাঁকা;
+	size_t আকার_2;
 
-	if (!fp)
-		return true;
+	যদি (!fp)
+		ফেরত true;
 
-	while (xgetline(&line, &size, fp) != -1) {
-		if (line[0] == '#')
-			continue;
-		if (strcmp(line, shell) == 0) {
+	যখন (xgetline(&সারি, &আকার_2, fp) != -1) {
+		যদি (সারি[0] == '#')
+			চালু;
+		যদি (strcmp(সারি, shell) == 0) {
 			ret = true;
-			break;
+			বিরতি;
 		}
 	}
 
-	free(line);
-	return ret;
+	মুক্ত(সারি);
+	ফেরত ret;
 }
 
-static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
-	char *argv0;
-	const char *argv[] = {
-		NULL /* replaced below */, "-c",
-		start ? USER_SH "start" : USER_SH "stop", NULL
+স্থির bool spawn_openrc(uid_t uid, gid_t gid, ধ্রুবক অক্ষর *shell, bool start) {
+	অক্ষর *argv0;
+	ধ্রুবক অক্ষর *argv[] = {
+		ফাঁকা /* replaced below */, "-c",
+		start ? USER_SH "start" : USER_SH "stop", ফাঁকা
 	};
-	struct exec_result res;
-	struct exec_args args;
+	কাঠামো exec_ফলাফল res;
+	কাঠামো exec_args args;
 
 	/* shell might be a multicall binary, e.g busybox.
 	 * so setting argv[0] to "-" might not work */
@@ -63,39 +63,39 @@ static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
 	args.gid = gid;
 	args.redirect_stdout = 3;
 	res = do_exec(&args);
-	free(argv0);
-	if (res.pid < 0) {
+	মুক্ত(argv0);
+	যদি (res.pid < 0) {
 		elog(LOG_ERR, "do_exec: %s", strerror(errno));
-		return false;
+		ফেরত false;
 	}
-	return rc_waitpid(res.pid) == 0;
+	ফেরত rc_waitpid(res.pid) == 0;
 }
 
-int main(int argc, char **argv) {
-	const struct passwd *user;
-	char *log, *shell;
+পূর্ণসংখ্যা প্রধান(পূর্ণসংখ্যা argc, অক্ষর **argv) {
+	ধ্রুবক কাঠামো passwd *user;
+	অক্ষর *log, *shell;
 	sigset_t sigmask;
-	int sig, ret = 0;
+	পূর্ণসংখ্যা sig, ret = 0;
 	uid_t uid;
 	gid_t gid;
 #ifdef HAVE_PAM
-	struct pam_conv conv = { NULL, NULL };
-	pam_handle_t *pamh = NULL;
+	কাঠামো pam_conv conv = { ফাঁকা, ফাঁকা };
+	pam_handle_t *pamh = ফাঁকা;
 	bool pam_session = false;
-	int rc;
+	পূর্ণসংখ্যা rc;
 #endif
 
 	setenv("EINFO_LOG", "openrc-user", true);
 
-	if (argc != 2) {
+	যদি (argc != 2) {
 		elog(LOG_ERR, "Invalid usage. %s <username>", argv[0]);
-		return -1;
+		ফেরত -1;
 	}
 	/* We can't rely on the supervisor to drop perms since
 	 * pam modules might need root perms. */
-	if (!(user = getpwnam(argv[1]))) {
+	যদি (!(user = getpwnam(argv[1]))) {
 		elog(LOG_ERR, "Invalid username %s.", argv[1]);
-		return -1;
+		ফেরত -1;
 	}
 
 	/* sssd's pam module wrongly calls getpwnam, meaning
@@ -114,54 +114,54 @@ int main(int argc, char **argv) {
 
 	xasprintf(&log, "openrc-user.%s", user->pw_name);
 	setenv("EINFO_LOG", log, true);
-	free(log);
+	মুক্ত(log);
 
 #ifdef HAVE_PAM
-	if ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
+	যদি ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to start pam: %s", pam_strerror(pamh, rc));
-	else if ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	অন্যথা যদি ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to open session: %s", pam_strerror(pamh, rc));
-	else
+	অন্যথা
 		pam_session = true;
 
-	for (char **env = pam_getenvlist(pamh); env && *env; env++) {
-		if (strchr(*env, '='))
+	জন্য (অক্ষর **env = pam_getenvlist(pamh); env && *env; env++) {
+		যদি (strchr(*env, '='))
 			putenv(xstrdup(*env));
-		else
+		অন্যথা
 			unsetenv(*env);
 	}
 
-	if (!pam_session && pamh) {
+	যদি (!pam_session && pamh) {
 		pam_end(pamh, rc);
-		pamh = NULL;
+		pamh = ফাঁকা;
 	}
 #endif
 
-	if (!spawn_openrc(uid, gid, shell, true)) {
+	যদি (!spawn_openrc(uid, gid, shell, true)) {
 		ret = -1;
-		goto out;
+		যাও out;
 	}
 
 	sigfillset(&sigmask);
-	sigprocmask(SIG_SETMASK, &sigmask, NULL);
+	sigprocmask(SIG_SETMASK, &sigmask, ফাঁকা);
 
 	sigemptyset(&sigmask);
 	sigaddset(&sigmask, SIGTERM);
 
 	sigwait(&sigmask, &sig);
 
-	if (!spawn_openrc(uid, gid, shell, false))
+	যদি (!spawn_openrc(uid, gid, shell, false))
 		ret = -1;
 
 out:
 #ifdef HAVE_PAM
-	if (pamh) {
-		if ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	যদি (pamh) {
+		যদি ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 			elog(LOG_ERR, "Failed to close session: %s", pam_strerror(pamh, rc));
 		pam_end(pamh, rc);
 	}
 #endif
 
-	free(shell);
-	return ret;
+	মুক্ত(shell);
+	ফেরত ret;
 }

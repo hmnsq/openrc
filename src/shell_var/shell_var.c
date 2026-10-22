@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#অন্তর্ভাব <ctype.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
 
-int main(int argc, char **argv)
+পূর্ণসংখ্যা প্রধান(পূর্ণসংখ্যা argc, অক্ষর **argv)
 {
-	int i;
-	char *p;
-	int c;
+	পূর্ণসংখ্যা i;
+	অক্ষর *p;
+	পূর্ণসংখ্যা c;
 
-	for (i = 1; i < argc; i++) {
+	জন্য (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		যদি (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		যখন (*p) {
+			c = (unsigned অক্ষর)*p++;
+			যদি (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	ফেরত EXIT_SUCCESS;
 }

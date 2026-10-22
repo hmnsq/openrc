@@ -1,112 +1,112 @@
-#include <sys/types.h>
-#include <sys/stat.h>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <sys/stat.h>
 
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdbool.h>
-#include <syslog.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <fcntl.h>
+#অন্তর্ভাব <unistd.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <syslog.h>
 
-#include <rc.h>
+#অন্তর্ভাব <rc.h>
 
-#include "initreq.h"
-#include "helpers.h"
+#অন্তর্ভাব "initreq.h"
+#অন্তর্ভাব "helpers.h"
 
-static bool init_halt = false;
+স্থির bool init_halt = false;
 
-static void sysvinit_runlevel(int runlevel)
+স্থির শূন্য sysvinit_runlevel(পূর্ণসংখ্যা runlevel)
 {
-	const char *cmd;
-	int fifo;
+	ধ্রুবক অক্ষর *cmd;
+	পূর্ণসংখ্যা fifo;
 
-	switch (runlevel) {
-	case '0':
+	নির্বাচন (runlevel) {
+	ক্ষেত্র '0':
 		cmd = init_halt ? "halt" : "poweroff";
-		break;
-	case '1':
-	case 'S':
-	case 's':
+		বিরতি;
+	ক্ষেত্র '1':
+	ক্ষেত্র 'S':
+	ক্ষেত্র 's':
 		cmd = "single";
-		break;
-	case '2':
-	case '3':
-	case '4':
-	case '5':
+		বিরতি;
+	ক্ষেত্র '2':
+	ক্ষেত্র '3':
+	ক্ষেত্র '4':
+	ক্ষেত্র '5':
 		/* TODO: switch to default runlevel? */
-		return;
-	case '6':
+		ফেরত;
+	ক্ষেত্র '6':
 		/* RB_KEXEC: Gentoo inittab calls /sbin/reboot -k */
 		cmd = "kexec";
-		break;
-	case 'Q':
-	case 'q':
-		return;
-	case 'U':
-	case 'u':
+		বিরতি;
+	ক্ষেত্র 'Q':
+	ক্ষেত্র 'q':
+		ফেরত;
+	ক্ষেত্র 'U':
+	ক্ষেত্র 'u':
 		cmd = "reexec";
-		break;
+		বিরতি;
 	}
 
-	if ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
+	যদি ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
 		syslog(LOG_ERR, "open: %s", strerror(errno));
-		return;
+		ফেরত;
 	}
 
-	if (write(fifo, cmd, strlen(cmd) + 1) == -1)
+	যদি (লিখ(fifo, cmd, strlen(cmd) + 1) == -1)
 		syslog(LOG_ERR, "write: %s", strerror(errno));
 	close(fifo);
 }
 
-static void sysvinit_setenv(char *data, size_t size)
+স্থির শূন্য sysvinit_setenv(অক্ষর *তথ্য, size_t আকার_2)
 {
-	data[size - 1] = '\0';
-	for (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
+	তথ্য[আকার_2 - 1] = '\0';
+	জন্য (অক্ষর *end = তথ্য + আকার_2; তথ্য < end && *তথ্য; তথ্য += strlen(তথ্য) + 1) {
 		/* We only care about the INIT_HALT variable */
-		if (!strcmp(data, "INIT_HALT=HALT"))
+		যদি (!strcmp(তথ্য, "INIT_HALT=HALT"))
 			init_halt = true;
-		else if (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
+		অন্যথা যদি (!strcmp(তথ্য, "INIT_HALT") || !strncmp(তথ্য, "INIT_HALT=", 10))
 			init_halt = false;
 	}
 }
 
-int main(void) {
-	int fifo;
+পূর্ণসংখ্যা প্রধান(শূন্য) {
+	পূর্ণসংখ্যা fifo;
 
 	openlog("sysv-initctl", 0, LOG_DAEMON);
 	symlink("/run/initctl", "/dev/initctl");
-	if ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
+	যদি ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
 		syslog(LOG_ERR, "open_rwfifo: %s", strerror(errno));
-		return 1;
+		ফেরত 1;
 	}
 
-	for (;;) {
-		struct init_request req;
-		ssize_t count = read(fifo, &req, sizeof(req));
+	জন্য (;;) {
+		কাঠামো init_request req;
+		ssize_t গুনতি = পঠ(fifo, &req, আকার(req));
 
-		if (count == -1) {
+		যদি (গুনতি == -1) {
 			syslog(LOG_ERR, "read: %s", strerror(errno));
-			continue;
+			চালু;
 		}
 
-		if (count != sizeof(req)) {
+		যদি (গুনতি != আকার(req)) {
 			syslog(LOG_ERR, "read: short count");
-			continue;
+			চালু;
 		}
 
-		if (req.magic != INIT_MAGIC) {
+		যদি (req.magic != INIT_MAGIC) {
 			syslog(LOG_ERR, "invalid magic bytes");
-			continue;
+			চালু;
 		}
 
-		switch (req.cmd) {
-		case INIT_CMD_RUNLVL:
+		নির্বাচন (req.cmd) {
+		ক্ষেত্র INIT_CMD_RUNLVL:
 			sysvinit_runlevel(req.runlevel);
-			break;
-		case INIT_CMD_SETENV:
-		case INIT_CMD_UNSETENV:
-			sysvinit_setenv(req.i.data, sizeof(req.i.data));
-			break;
+			বিরতি;
+		ক্ষেত্র INIT_CMD_SETENV:
+		ক্ষেত্র INIT_CMD_UNSETENV:
+			sysvinit_setenv(req.i.তথ্য, আকার(req.i.তথ্য));
+			বিরতি;
 		}
 	}
 }

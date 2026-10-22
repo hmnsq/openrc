@@ -1,90 +1,90 @@
-#include <pwd.h>
-#include <grp.h>
-#include <security/pam_modules.h>
-#include <security/pam_appl.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/file.h>
-#include <syslog.h>
-#include <unistd.h>
+#অন্তর্ভাব <pwd.h>
+#অন্তর্ভাব <grp.h>
+#অন্তর্ভাব <security/pam_modules.h>
+#অন্তর্ভাব <security/pam_appl.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <sys/file.h>
+#অন্তর্ভাব <syslog.h>
+#অন্তর্ভাব <unistd.h>
 
-#include "librc.h"
-#include "einfo.h"
-#include "helpers.h"
+#অন্তর্ভাব "librc.h"
+#অন্তর্ভাব "einfo.h"
+#অন্তর্ভাব "helpers.h"
 
-static bool
-import_env(pam_handle_t *pamh, const char *user)
+স্থির bool
+import_env(pam_handle_t *pamh, ধ্রুবক অক্ষর *user)
 {
-	char *path, *string = NULL;
+	অক্ষর *path, *string = ফাঁকা;
 	bool ret = false;
-	size_t size;
+	size_t আকার_2;
 	FILE *fp;
 
 	xasprintf(&path, "user/%s/environ", user);
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), path, O_RDONLY)))
-		goto out;
+	যদি (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), path, O_RDONLY)))
+		যাও out;
 
-	while (getdelim(&string, &size, '\0', fp) != -1)
+	যখন (getdelim(&string, &আকার_2, '\0', fp) != -1)
 		pam_putenv(pamh, string);
 
-	free(string);
+	মুক্ত(string);
 	fclose(fp);
 
 	ret = true;
 out:
-	free(path);
+	মুক্ত(path);
 
-	return ret;
+	ফেরত ret;
 }
 
-static int
+স্থির পূর্ণসংখ্যা
 exec_openrc(pam_handle_t *pamh, bool opening, bool quiet)
 {
-	char *do_autostart = rc_conf_value("rc_autostart_user");
-	char *svc_name, *pam_lock, *logins, *script = NULL;
-	const char *username = NULL, *session = NULL;
+	অক্ষর *do_autostart = rc_conf_মান("rc_autostart_user");
+	অক্ষর *svc_name, *pam_lock, *logins, *script = ফাঁকা;
+	ধ্রুবক অক্ষর *username = ফাঁকা, *session = ফাঁকা;
 	RC_SERVICE service_status;
-	int count = 0, fd, status;
-	int ret = PAM_SUCCESS;
-	struct passwd *user;
+	পূর্ণসংখ্যা গুনতি = 0, fd, status;
+	পূর্ণসংখ্যা ret = PAM_SUCCESS;
+	কাঠামো passwd *user;
 	pid_t pid = -1;
 
 	errno = 0;
-	if (!rc_yesno(do_autostart) && errno == 0)
-		return PAM_SUCCESS;
+	যদি (!rc_yesno(do_autostart) && errno == 0)
+		ফেরত PAM_SUCCESS;
 
 	setenv("EINFO_LOG", "pam_openrc", true);
 
-	if (quiet) {
+	যদি (quiet) {
 		setenv("EINFO_QUIET", "yes", true);
 		setenv("EERROR_QUIET", "yes", true);
 	}
 
-	if (pam_get_item(pamh, PAM_SERVICE, (const void **)&session) != PAM_SUCCESS) {
+	যদি (pam_get_item(pamh, PAM_SERVICE, (ধ্রুবক শূন্য **)&session) != PAM_SUCCESS) {
 		elog(LOG_ERR, "Failed to get PAM_SERVICE");
-		return PAM_SESSION_ERR;
+		ফেরত PAM_SESSION_ERR;
 	}
 
-	if (session && strcmp(session, "openrc-user") == 0)
-		return PAM_SUCCESS;
+	যদি (session && strcmp(session, "openrc-user") == 0)
+		ফেরত PAM_SUCCESS;
 
-	if (pam_get_item(pamh, PAM_USER, (const void **)&username) != PAM_SUCCESS)
-		return PAM_SESSION_ERR;
+	যদি (pam_get_item(pamh, PAM_USER, (ধ্রুবক শূন্য **)&username) != PAM_SUCCESS)
+		ফেরত PAM_SESSION_ERR;
 
-	if (!username) {
+	যদি (!username) {
 		elog(LOG_ERR, "PAM_USER unset.");
-		return PAM_SESSION_ERR;
+		ফেরত PAM_SESSION_ERR;
 	}
 
-	if (!(user = getpwnam(username))) {
+	যদি (!(user = getpwnam(username))) {
 		elog(LOG_ERR, "User '%s' not found.", username);
-		return PAM_SESSION_ERR;
+		ফেরত PAM_SESSION_ERR;
 	}
 
-	if (user->pw_uid == 0)
-		return PAM_SUCCESS;
+	যদি (user->pw_uid == 0)
+		ফেরত PAM_SUCCESS;
 
 	xasprintf(&pam_lock, "pam_openrc[%s]", user->pw_name);
 	setenv("EINFO_LOG", pam_lock, true);
@@ -92,85 +92,85 @@ exec_openrc(pam_handle_t *pamh, bool opening, bool quiet)
 	xasprintf(&svc_name, "user.%s", user->pw_name);
 
 	service_status = rc_service_state(svc_name);
-	if (service_status & RC_SERVICE_STARTED && !(service_status & RC_SERVICE_HOTPLUGGED)) {
+	যদি (service_status & RC_SERVICE_STARTED && !(service_status & RC_SERVICE_HOTPLUGGED)) {
 		elog(LOG_INFO, "%s started and not hotplugged, skipping session.", svc_name);
-		goto out;
+		যাও out;
 	}
 
 	elog(LOG_INFO, opening ? "starting session" : "stopping session");
 
-	if ((fd = svc_lock(pam_lock, false)) == -1) {
+	যদি ((fd = svc_lock(pam_lock, false)) == -1) {
 		ret = PAM_SESSION_ERR;
-		goto out;
+		যাও out;
 	}
 
-	if (!(script = rc_service_resolve(svc_name))) {
-		if (!(script = rc_service_resolve("user"))) {
+	যদি (!(script = rc_service_resolve(svc_name))) {
+		যদি (!(script = rc_service_resolve("user"))) {
 			elog(LOG_ERR, "Failed to resolve %s.", svc_name);
 			ret = PAM_SESSION_ERR;
-			goto unlock;
+			যাও unlock;
 		}
 
-		if (symlinkat(script, rc_dirfd(RC_DIR_INITD), svc_name) != 0) {
+		যদি (symlinkat(script, rc_dirfd(RC_DIR_INITD), svc_name) != 0) {
 			elog(LOG_ERR, "symlink: %s", strerror(errno));
 			ret = PAM_SESSION_ERR;
-			goto unlock;
+			যাও unlock;
 		}
 	}
 
-	logins = rc_service_value_get(svc_name, "logins");
-	if (logins)
-		sscanf(logins, "%d", &count);
-	free(logins);
+	logins = rc_service_মান_get(svc_name, "logins");
+	যদি (logins)
+		sscanf(logins, "%d", &গুনতি);
+	মুক্ত(logins);
 
-	if (opening) {
-		if (count == 0) {
+	যদি (opening) {
+		যদি (গুনতি == 0) {
 			pid = service_start(svc_name);
 			rc_service_mark(svc_name, RC_SERVICE_HOTPLUGGED);
 		}
-		count++;
-	} else {
-		count--;
-		if (count == 0)
+		গুনতি++;
+	} অন্যথা {
+		গুনতি--;
+		যদি (গুনতি == 0)
 			pid = service_stop(svc_name);
 	}
 
-	elog(LOG_INFO, "%d sessions", count);
+	elog(LOG_INFO, "%d sessions", গুনতি);
 
-	if (pid > 0) {
+	যদি (pid > 0) {
 		waitpid(pid, &status, 0);
-		if (status != 0)
+		যদি (status != 0)
 			ret = PAM_SESSION_ERR;
 	}
 
-	xasprintf(&logins, "%d", count);
-	rc_service_value_set(svc_name, "logins", logins);
-	free(logins);
+	xasprintf(&logins, "%d", গুনতি);
+	rc_service_মান_set(svc_name, "logins", logins);
+	মুক্ত(logins);
 
 unlock:
 	svc_unlock(pam_lock, fd);
 out:
-	if (opening)
+	যদি (opening)
 		import_env(pamh, user->pw_name);
 
-	free(pam_lock);
-	free(svc_name);
-	free(script);
+	মুক্ত(pam_lock);
+	মুক্ত(svc_name);
+	মুক্ত(script);
 	unsetenv("EINFO_LOG");
-	return ret;
+	ফেরত ret;
 }
 
-PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	(void) argc;
-	(void) argv;
+PAM_EXTERN পূর্ণসংখ্যা pam_sm_open_session(pam_handle_t *pamh, পূর্ণসংখ্যা flags, পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv) {
+	(শূন্য) argc;
+	(শূন্য) argv;
 
-	return exec_openrc(pamh, true, flags & PAM_SILENT);
+	ফেরত exec_openrc(pamh, true, flags & PAM_SILENT);
 }
 
-PAM_EXTERN int pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	(void) argc;
-	(void) argv;
-	(void) flags;
+PAM_EXTERN পূর্ণসংখ্যা pam_sm_close_session(pam_handle_t *pamh, পূর্ণসংখ্যা flags, পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv) {
+	(শূন্য) argc;
+	(শূন্য) argv;
+	(শূন্য) flags;
 
-	return exec_openrc(pamh, false, flags & PAM_SILENT);
+	ফেরত exec_openrc(pamh, false, flags & PAM_SILENT);
 }

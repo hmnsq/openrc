@@ -15,21 +15,21 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <syslog.h>
-#include <unistd.h>
+#অন্তর্ভাব <sys/ioctl.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <inttypes.h>
+#অন্তর্ভাব <stdarg.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <stddef.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <strings.h>
+#অন্তর্ভাব <syslog.h>
+#অন্তর্ভাব <unistd.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#অন্তর্ভাব "einfo.h"
+#অন্তর্ভাব "helpers.h"
 
 /* In case we cannot work out how many columns from ioctl, supply a default */
 #define DEFAULT_COLS		 80
@@ -58,44 +58,44 @@
 #define ME "\033[m"
 #define UP "\033[A"
 
-#define _GET_CAP(_d, _c) strlcpy(_d, tgoto(_c, 0, 0), sizeof(_d));
-#define _ASSIGN_CAP(_v) do {						      \
+#define _GET_CAP(_d, _c) strlcpy(_d, tgoto(_c, 0, 0), আকার(_d));
+#define _ASSIGN_CAP(_v) করো {						      \
 		_v = p;							      \
-		p += strlcpy(p, tmp, sizeof(ebuffer) - (p - ebuffer)) + 1;    \
-	} while (0)
+		p += strlcpy(p, tmp, আকার(ebuffer) - (p - ebuffer)) + 1;    \
+	} যখন (0)
 
 /* A pointer to a string to prefix to einfo/ewarn/eerror messages */
-static const char *_eprefix = NULL;
+স্থির ধ্রুবক অক্ষর *_eprefix = ফাঁকা;
 
 /* Buffers and structures to hold the final colours */
-static char ebuffer[100];
-struct ecolor {
+স্থির অক্ষর ebuffer[100];
+কাঠামো ecolor {
 	ECOLOR color;
-	int def;
-	const char *name;
+	পূর্ণসংখ্যা def;
+	ধ্রুবক অক্ষর *name;
 };
-static char nullstr = '\0';
+স্থির অক্ষর nullstr = '\0';
 
-static const struct ecolor ecolors[] = {
+স্থির ধ্রুবক কাঠামো ecolor ecolors[] = {
 	{ ECOLOR_GOOD,    GOOD,    "good"    },
 	{ ECOLOR_WARN,    WARN,    "warn"    },
 	{ ECOLOR_BAD,     BAD,     "bad"     },
 	{ ECOLOR_HILITE,  HILITE,  "hilite"  },
 	{ ECOLOR_BRACKET, BRACKET, "bracket" },
-	{ ECOLOR_NORMAL,  0,       NULL      },
+	{ ECOLOR_NORMAL,  0,       ফাঁকা      },
 };
-static const char *ecolors_str[ARRAY_SIZE(ecolors)];
+স্থির ধ্রুবক অক্ষর *ecolors_str[ARRAY_আকার(ecolors)];
 
-static char *flush = NULL;
-static char *up = NULL;
-static char *goto_column = NULL;
+স্থির অক্ষর *flush = ফাঁকা;
+স্থির অক্ষর *up = ফাঁকা;
+স্থির অক্ষর *goto_column = ফাঁকা;
 
-static const char *term = NULL;
-static bool term_is_cons25 = false;
+স্থির ধ্রুবক অক্ষর *term = ফাঁকা;
+স্থির bool term_is_cons25 = false;
 
 /* Hardcoded list of colour capable terms
  * Only terminals without "color" in the name need to be explicitly listed */
-static const char *const color_terms[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক color_terms[] = {
 	"Eterm",
 	"alacritty",
 	"ansi",
@@ -136,28 +136,28 @@ static const char *const color_terms[] = {
 	"xterm-debian",
 	"xterm-kitty",
     "xterm-ghostty",
-	NULL
+	ফাঁকা
 };
 
 #ifndef HAVE_STRLCPY
-static size_t
-strlcat(char *dst, const char *src, size_t size)
+স্থির size_t
+strlcat(অক্ষর *dst, ধ্রুবক অক্ষর *src, size_t আকার_2)
 {
-	char *d = dst;
-	const char *s = src;
-	size_t src_n = size;
+	অক্ষর *d = dst;
+	ধ্রুবক অক্ষর *s = src;
+	size_t src_n = আকার_2;
 	size_t dst_n;
 
-	while (src_n-- != 0 && *d != '\0')
+	যখন (src_n-- != 0 && *d != '\0')
 		d++;
 	dst_n = d - dst;
-	src_n = size - dst_n;
+	src_n = আকার_2 - dst_n;
 
-	if (src_n == 0)
-		return dst_n + strlen(src);
+	যদি (src_n == 0)
+		ফেরত dst_n + strlen(src);
 
-	while (*s != '\0') {
-		if (src_n != 1) {
+	যখন (*s != '\0') {
+		যদি (src_n != 1) {
 			*d++ = *s;
 			src_n--;
 		}
@@ -165,231 +165,231 @@ strlcat(char *dst, const char *src, size_t size)
 	}
 	*d = '\0';
 
-	return dst_n + (s - src);
+	ফেরত dst_n + (s - src);
 }
 #endif
 
-static bool
-yesno(const char *value)
+স্থির bool
+yesno(ধ্রুবক অক্ষর *মান)
 {
-	if (!value) {
+	যদি (!মান) {
 		errno = ENOENT;
-		return false;
+		ফেরত false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "on") == 0 ||
-	    strcasecmp(value, "1") == 0)
-		return true;
+	যদি (strcasecmp(মান, "yes") == 0 ||
+	    strcasecmp(মান, "y") == 0 ||
+	    strcasecmp(মান, "true") == 0 ||
+	    strcasecmp(মান, "on") == 0 ||
+	    strcasecmp(মান, "1") == 0)
+		ফেরত true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "off") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	যদি (strcasecmp(মান, "no") != 0 &&
+	    strcasecmp(মান, "n") != 0 &&
+	    strcasecmp(মান, "false") != 0 &&
+	    strcasecmp(মান, "off") != 0 &&
+	    strcasecmp(মান, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	ফেরত false;
 }
 
-static bool
-noyes(const char *value)
+স্থির bool
+noyes(ধ্রুবক অক্ষর *মান)
 {
-	int serrno = errno;
+	পূর্ণসংখ্যা serrno = errno;
 	bool retval;
 
 	errno = 0;
-	retval = yesno(value);
-	if (errno == 0) {
+	retval = yesno(মান);
+	যদি (errno == 0) {
 		retval = !retval;
 		errno = serrno;
 	}
 
-	return retval;
+	ফেরত retval;
 }
 
-static bool
-is_quiet(void)
+স্থির bool
+is_quiet(শূন্য)
 {
-	return yesno(getenv("EINFO_QUIET"));
+	ফেরত yesno(getenv("EINFO_QUIET"));
 }
 
-static bool
-is_really_quiet(void)
+স্থির bool
+is_really_quiet(শূন্য)
 {
-	return yesno(getenv("EERROR_QUIET"));
+	ফেরত yesno(getenv("EERROR_QUIET"));
 }
 
-static bool
-is_verbose(void)
+স্থির bool
+is_verbose(শূন্য)
 {
-	return yesno(getenv ("EINFO_VERBOSE"));
+	ফেরত yesno(getenv ("EINFO_VERBOSE"));
 }
 
 /* Fake tgoto call - very crapy, but works for our needs */
-static char *
-tgoto(const char *cap, int col, int line)
+স্থির অক্ষর *
+tgoto(ধ্রুবক অক্ষর *cap, পূর্ণসংখ্যা col, পূর্ণসংখ্যা সারি)
 {
-	static char buf[20];
-	char *p, *e, c, dbuf[6];
-	int oncol = 0, which = line, i;
+	স্থির অক্ষর buf[20];
+	অক্ষর *p, *e, c, dbuf[6];
+	পূর্ণসংখ্যা oncol = 0, which = সারি, i;
 
 	p = buf;
-	e = p + sizeof(buf);
-	while ((c = *cap++)) {
-		if (c != '%' || ((c = *cap++) == '%')) {
+	e = p + আকার(buf);
+	যখন ((c = *cap++)) {
+		যদি (c != '%' || ((c = *cap++) == '%')) {
 			*p++ = c;
-			if (p >= e) {
+			যদি (p >= e) {
 				errno = E2BIG;
-				return NULL;
+				ফেরত ফাঁকা;
 			}
-			continue;
+			চালু;
 		}
-		switch (c) {
-		case '3':
-		case '2':
-		case 'd':
+		নির্বাচন (c) {
+		ক্ষেত্র '3':
+		ক্ষেত্র '2':
+		ক্ষেত্র 'd':
 			i = 0;
-			do
+			করো
 				dbuf[i++] = which % 10 | '0';
-			while ((which /= 10));
-			if (c != 'd') {
+			যখন ((which /= 10));
+			যদি (c != 'd') {
 				c -= '0';
-				if (i > c) {
+				যদি (i > c) {
 					errno = EINVAL;
-					return NULL;
+					ফেরত ফাঁকা;
 				}
-				while (i < c)
+				যখন (i < c)
 					dbuf[i++] = '0';
 			}
-			if (p + i >= e) {
+			যদি (p + i >= e) {
 				errno = E2BIG;
-				return NULL;
+				ফেরত ফাঁকা;
 			}
-			do
+			করো
 				*p++ = dbuf[--i];
-			while (i);
-			break;
-		case 'r':
+			যখন (i);
+			বিরতি;
+		ক্ষেত্র 'r':
 			oncol = 0;
-			break;
-		case 'i':
+			বিরতি;
+		ক্ষেত্র 'i':
 			col++;
-			line++;
+			সারি++;
 			which++;
-			continue;
-		default:
+			চালু;
+		পূর্বনির্ধারিত:
 			errno = EINVAL;
-			return NULL;
+			ফেরত ফাঁকা;
 		}
 
 		oncol = 1 - oncol;
-		which = oncol ? col : line;
+		which = oncol ? col : সারি;
 	}
 	*p = '\0';
-	return buf;
+	ফেরত buf;
 }
 
-static bool
+স্থির bool
 colour_terminal(FILE * EINFO_RESTRICT f)
 {
-	static int in_colour = -1;
-	char *e, *ee, *end, *d, *p;
-	int c;
-	const char *_af = NULL, *_ce = NULL, *_ch = NULL;
-	const char *_md = NULL, *_me = NULL, *_up = NULL;
-	const char *bold;
-	char tmp[100];
-	unsigned int i = 0;
+	স্থির পূর্ণসংখ্যা in_colour = -1;
+	অক্ষর *e, *ee, *end, *d, *p;
+	পূর্ণসংখ্যা c;
+	ধ্রুবক অক্ষর *_af = ফাঁকা, *_ce = ফাঁকা, *_ch = ফাঁকা;
+	ধ্রুবক অক্ষর *_md = ফাঁকা, *_me = ফাঁকা, *_up = ফাঁকা;
+	ধ্রুবক অক্ষর *bold;
+	অক্ষর tmp[100];
+	unsigned পূর্ণসংখ্যা i = 0;
 
-	if (f && !isatty(fileno(f)))
-		return false;
+	যদি (f && !isatty(fileno(f)))
+		ফেরত false;
 
-	if (noyes(getenv("EINFO_COLOR")))
-		return false;
+	যদি (noyes(getenv("EINFO_COLOR")))
+		ফেরত false;
 
-	if (in_colour == 0)
-		return false;
-	if (in_colour == 1)
-		return true;
+	যদি (in_colour == 0)
+		ফেরত false;
+	যদি (in_colour == 1)
+		ফেরত true;
 
 	term_is_cons25 = false;
-	if (!term) {
+	যদি (!term) {
 		term = getenv("TERM");
-		if (!term)
-			return false;
+		যদি (!term)
+			ফেরত false;
 	}
-	if (strcmp(term, "cons25") == 0)
+	যদি (strcmp(term, "cons25") == 0)
 		term_is_cons25 = true;
 
-	if (strstr(term, "color"))
+	যদি (strstr(term, "color"))
 		in_colour = 1;
 
-	while (color_terms[i] && in_colour != 1) {
-		if (strcmp(color_terms[i], term) == 0) {
+	যখন (color_terms[i] && in_colour != 1) {
+		যদি (strcmp(color_terms[i], term) == 0) {
 			in_colour = 1;
 		}
 		i++;
 	}
 
-	if (in_colour != 1) {
+	যদি (in_colour != 1) {
 		in_colour = 0;
-		return false;
+		ফেরত false;
 	}
 
-	if (!_af)
+	যদি (!_af)
 		_af = AF;
-	if (!_ce)
+	যদি (!_ce)
 		_ce = CE;
-	if (!_ch)
+	যদি (!_ch)
 		_ch = CH;
-	if (!_md)
+	যদি (!_md)
 		_md = MD;
-	if (!_me)
+	যদি (!_me)
 		_me = ME;
-	if (!_up)
+	যদি (!_up)
 		_up = UP;
 
 	/* Now setup our colours */
 	p = ebuffer;
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i) {
+	জন্য (i = 0; i < ARRAY_আকার(ecolors); ++i) {
 		tmp[0] = '\0';
-		if (ecolors[i].name) {
+		যদি (ecolors[i].name) {
 			bold = _md;
 			c = ecolors[i].def;
 
 			/* See if the user wants to override the colour
 			 * We use a :col;bold: format like 2;1: for bold green
 			 * and 1;0: for a normal red */
-			if ((e = getenv("EINFO_COLOR"))) {
+			যদি ((e = getenv("EINFO_COLOR"))) {
 				ee = strstr(e, ecolors[i].name);
-				if (ee)
+				যদি (ee)
 					ee += strlen(ecolors[i].name);
 
-				if (ee && *ee == '=') {
+				যদি (ee && *ee == '=') {
 					d = strdup(ee + 1);
-					if (d) {
+					যদি (d) {
 						end = strchr(d, ':');
-						if (end)
+						যদি (end)
 							*end = '\0';
 						c = atoi(d);
 						end = strchr(d, ';');
-						if (end && *++end == '0')
+						যদি (end && *++end == '0')
 							bold = _me;
-						free(d);
+						মুক্ত(d);
 					}
 				}
 			}
-			strlcpy(tmp, tgoto(bold, 0, 0), sizeof(tmp));
-			strlcat(tmp, tgoto(_af, 0, c & 0x07), sizeof(tmp));
-		} else
+			strlcpy(tmp, tgoto(bold, 0, 0), আকার(tmp));
+			strlcat(tmp, tgoto(_af, 0, c & 0x07), আকার(tmp));
+		} অন্যথা
 			_GET_CAP(tmp, _me);
 
-		if (tmp[0])
+		যদি (tmp[0])
 			_ASSIGN_CAP(ecolors_str[i]);
-		else
+		অন্যথা
 			ecolors_str[i] = &nullstr;
 	}
 
@@ -397,46 +397,46 @@ colour_terminal(FILE * EINFO_RESTRICT f)
 	_ASSIGN_CAP(flush);
 	_GET_CAP(tmp, _up);
 	_ASSIGN_CAP(up);
-	strlcpy(tmp, _ch, sizeof(tmp));
+	strlcpy(tmp, _ch, আকার(tmp));
 	_ASSIGN_CAP(goto_column);
 
 	in_colour = 1;
-	return true;
+	ফেরত true;
 }
 
-static int
+স্থির পূর্ণসংখ্যা
 get_term_columns(FILE * EINFO_RESTRICT stream)
 {
-	struct winsize ws;
-	char *env = getenv("COLUMNS");
-	char *p;
-	int i;
+	কাঠামো winsize ws;
+	অক্ষর *env = getenv("COLUMNS");
+	অক্ষর *p;
+	পূর্ণসংখ্যা i;
 
-	if (env) {
+	যদি (env) {
 		i = strtoimax(env, &p, 10);
-		if (!*p)
-			return i;
+		যদি (!*p)
+			ফেরত i;
 	}
 
-	if (ioctl(fileno(stream), TIOCGWINSZ, &ws) == 0)
-		return ws.ws_col;
+	যদি (ioctl(fileno(stream), TIOCGWINSZ, &ws) == 0)
+		ফেরত ws.ws_col;
 
-	return DEFAULT_COLS;
+	ফেরত DEFAULT_COLS;
 }
 
-void
-eprefix(const char *EINFO_RESTRICT prefix)
+শূন্য
+eprefix(ধ্রুবক অক্ষর *EINFO_RESTRICT prefix)
 {
 	_eprefix = prefix;
 }
 
-static void EINFO_PRINTF(2, 0)
-elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
+স্থির শূন্য EINFO_PRINTF(2, 0)
+elogv(পূর্ণসংখ্যা level, ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, va_list ap)
 {
-	char *e = getenv("EINFO_LOG");
+	অক্ষর *e = getenv("EINFO_LOG");
 	va_list apc;
 
-	if (fmt && e) {
+	যদি (fmt && e) {
 		closelog();
 		openlog(e, LOG_PID, LOG_DAEMON);
 		va_copy(apc, ap);
@@ -446,8 +446,8 @@ elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
 	}
 }
 
-void
-elog(int level, const char *EINFO_RESTRICT fmt, ...)
+শূন্য
+elog(পূর্ণসংখ্যা level, ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
@@ -456,54 +456,54 @@ elog(int level, const char *EINFO_RESTRICT fmt, ...)
 	va_end(ap);
 }
 
-static int
+স্থির পূর্ণসংখ্যা
 _eindent(FILE * EINFO_RESTRICT stream)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	অক্ষর *env = getenv("EINFO_INDENT");
+	পূর্ণসংখ্যা amount = 0;
 
-	if (env) {
+	যদি (env) {
 		errno = 0;
-		amount = strtoimax(env, NULL, 0);
-		if (errno != 0 || amount < 0)
+		amount = strtoimax(env, ফাঁকা, 0);
+		যদি (errno != 0 || amount < 0)
 			amount = 0;
-		else if (amount > INDENT_MAX)
+		অন্যথা যদি (amount > INDENT_MAX)
 			amount = INDENT_MAX;
 	}
 
-	return fprintf(stream, "%*s", amount, "");
+	ফেরত fprintf(stream, "%*s", amount, "");
 }
 
-static const char *
+স্থির ধ্রুবক অক্ষর *
 _ecolor(FILE * EINFO_RESTRICT f, ECOLOR color)
 {
-	unsigned int i;
+	unsigned পূর্ণসংখ্যা i;
 
-	if (!colour_terminal(f))
-		return "";
+	যদি (!colour_terminal(f))
+		ফেরত "";
 
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i)
-		if (ecolors[i].color == color)
-			return ecolors_str[i];
-	return "";
+	জন্য (i = 0; i < ARRAY_আকার(ecolors); ++i)
+		যদি (ecolors[i].color == color)
+			ফেরত ecolors_str[i];
+	ফেরত "";
 }
 
-const char *
+ধ্রুবক অক্ষর *
 ecolor(ECOLOR color)
 {
 	FILE *f = stdout;
 
 	/* Try and guess a valid tty */
-	if (!isatty(fileno(f))) {
+	যদি (!isatty(fileno(f))) {
 		f = stderr;
-		if (!isatty(fileno(f))) {
+		যদি (!isatty(fileno(f))) {
 			f = stdin;
-			if (!isatty(fileno(f)))
-				f = NULL;
+			যদি (!isatty(fileno(f)))
+				f = ফাঁকা;
 		}
 	}
 
-	return _ecolor(f, color);
+	ফেরত _ecolor(f, color);
 }
 
 #define LASTCMD(_cmd) {							      \
@@ -511,119 +511,119 @@ ecolor(ECOLOR color)
 		setenv("EINFO_LASTCMD", _cmd, 1);			      \
 	}
 
-static int EINFO_PRINTF(3, 0)
-	_einfo(FILE *f, ECOLOR color, const char *EINFO_RESTRICT fmt, va_list va)
+স্থির পূর্ণসংখ্যা EINFO_PRINTF(3, 0)
+	_einfo(FILE *f, ECOLOR color, ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, va_list va)
 {
-	int retval = 0;
-	char *last = getenv("EINFO_LASTCMD");
+	পূর্ণসংখ্যা retval = 0;
+	অক্ষর *last = getenv("EINFO_LASTCMD");
 	va_list ap;
 
-	if (last &&
+	যদি (last &&
 	    *last &&
 	    !colour_terminal(f) &&
 	    strcmp(last, "ewarn") != 0 &&
 	    last[strlen(last) - 1] == 'n')
 		fprintf(f, "\n");
-	if (_eprefix)
+	যদি (_eprefix)
 		fprintf(f, "%s%s%s|", _ecolor(f, color), _eprefix, _ecolor(f, ECOLOR_NORMAL));
 	fprintf(f, " %s*%s ", _ecolor(f, color), _ecolor(f, ECOLOR_NORMAL));
 	retval += _eindent(f);
 	va_copy(ap, va);
 	retval += vfprintf(f, fmt, ap) + 3;
 	va_end(ap); \
-	if (colour_terminal(f))
+	যদি (colour_terminal(f))
 		fprintf(f, "%s", flush);
-	return retval;
+	ফেরত retval;
 }
 
 #define _einfovn(fmt, ap) _einfo(stdout, ECOLOR_GOOD, fmt, ap)
 #define _ewarnvn(fmt, ap) _einfo(stderr, ECOLOR_WARN, fmt, ap)
 #define _eerrorvn(fmt, ap) _einfo(stderr, ECOLOR_BAD, fmt, ap)
 
-int
-einfon(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+einfon(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	যদি (!fmt || is_quiet())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfon");
-	return retval;
+	ফেরত retval;
 }
 
-int
-ewarnn(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+ewarnn(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	যদি (!fmt || is_quiet())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnn");
-	return retval;
+	ফেরত retval;
 }
 
-int
-eerrorn(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+eerrorn(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	যদি (!fmt || is_really_quiet())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("errorn");
-	return retval;
+	ফেরত retval;
 }
 
-int
-einfo(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+einfo(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	যদি (!fmt || is_quiet())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("einfo");
-	return retval;
+	ফেরত retval;
 }
 
-int
-ewarn(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+ewarn(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	যদি (!fmt || is_quiet())
+		ফেরত 0;
 	va_start(ap, fmt);
 	elogv(LOG_WARNING, fmt, ap);
 	retval = _ewarnvn(fmt, ap);
 	retval += fprintf(stderr, "\n");
 	va_end(ap);
 	LASTCMD("ewarn");
-	return retval;
+	ফেরত retval;
 }
 
-void
-ewarnx(const char *EINFO_RESTRICT fmt, ...)
+শূন্য
+ewarnx(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_quiet()) {
+	যদি (fmt && !is_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_WARNING, fmt, ap);
 		_ewarnvn(fmt, ap);
@@ -633,29 +633,29 @@ ewarnx(const char *EINFO_RESTRICT fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
-int
-eerror(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+eerror(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	যদি (!fmt || is_really_quiet())
+		ফেরত 0;
 	va_start(ap, fmt);
 	elogv(LOG_ERR, fmt, ap);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	retval += fprintf(stderr, "\n");
 	LASTCMD("eerror");
-	return retval;
+	ফেরত retval;
 }
 
-void
-eerrorx(const char *EINFO_RESTRICT fmt, ...)
+শূন্য
+eerrorx(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_really_quiet()) {
+	যদি (fmt && !is_really_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_ERR, fmt, ap);
 		_eerrorvn(fmt, ap);
@@ -665,73 +665,73 @@ eerrorx(const char *EINFO_RESTRICT fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
-int
-ebegin(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+ebegin(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	যদি (!fmt || is_quiet())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	retval += printf(" ...");
-	if (colour_terminal(stdout))
+	যদি (colour_terminal(stdout))
 		retval += printf("\n");
 	LASTCMD("ebegin");
-	return retval;
+	ফেরত retval;
 }
 
-static void
-_eend(FILE * EINFO_RESTRICT fp, int col, ECOLOR color, const char *msg)
+স্থির শূন্য
+_eend(FILE * EINFO_RESTRICT fp, পূর্ণসংখ্যা col, ECOLOR color, ধ্রুবক অক্ষর *বার্তা)
 {
-	int i;
-	int cols;
+	পূর্ণসংখ্যা i;
+	পূর্ণসংখ্যা cols;
 
-	if (!msg)
-		return;
+	যদি (!বার্তা)
+		ফেরত;
 
-	cols = get_term_columns(fp) - (strlen(msg) + 5);
+	cols = get_term_columns(fp) - (strlen(বার্তা) + 5);
 
 	/* cons25 is special - we need to remove one char, otherwise things
 	 * do not align properly at all. */
-	if (!term) {
+	যদি (!term) {
 		term = getenv("TERM");
-		if (term && strcmp(term, "cons25") == 0)
+		যদি (term && strcmp(term, "cons25") == 0)
 			term_is_cons25 = true;
-		else
+		অন্যথা
 			term_is_cons25 = false;
 	}
-	if (term_is_cons25)
+	যদি (term_is_cons25)
 		cols--;
 
-	if (cols > 0 && colour_terminal(fp)) {
+	যদি (cols > 0 && colour_terminal(fp)) {
 		fprintf(fp, "%s%s %s[%s %s %s]%s\n", up, tgoto(goto_column, 0, cols),
-		    ecolor(ECOLOR_BRACKET), ecolor(color), msg,
+		    ecolor(ECOLOR_BRACKET), ecolor(color), বার্তা,
 		    ecolor(ECOLOR_BRACKET), ecolor(ECOLOR_NORMAL));
-	} else {
-		if (col > 0)
-			for (i = 0; i < cols - col; i++)
+	} অন্যথা {
+		যদি (col > 0)
+			জন্য (i = 0; i < cols - col; i++)
 				fprintf(fp, " ");
-		fprintf(fp, " [ %s ]\n", msg);
+		fprintf(fp, " [ %s ]\n", বার্তা);
 	}
 }
 
-static int EINFO_PRINTF(3, 0)
-_do_eend(const char *cmd, int retval,
-    const char *EINFO_RESTRICT fmt, va_list ap)
+স্থির পূর্ণসংখ্যা EINFO_PRINTF(3, 0)
+_do_eend(ধ্রুবক অক্ষর *cmd, পূর্ণসংখ্যা retval,
+    ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, va_list ap)
 {
-	int col = 0;
+	পূর্ণসংখ্যা col = 0;
 	FILE *fp = stdout;
 	va_list apc;
 
-	if (fmt && *fmt != '\0' && retval != 0) {
+	যদি (fmt && *fmt != '\0' && retval != 0) {
 		fp = stderr;
 		va_copy(apc, ap);
-		if (strcmp(cmd, "ewend") == 0)
+		যদি (strcmp(cmd, "ewend") == 0)
 			col = _ewarnvn(fmt, apc);
-		else
+		অন্যথা
 			col = _eerrorvn(fmt, apc);
 		col += fprintf(fp, "\n");
 		va_end(apc);
@@ -739,206 +739,206 @@ _do_eend(const char *cmd, int retval,
 	_eend(fp, col,
 	    retval == 0 ? ECOLOR_GOOD : ECOLOR_BAD,
 	    retval == 0 ? OK : NOT_OK);
-	return retval;
+	ফেরত retval;
 }
 
-int
-eend(int retval, const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+eend(পূর্ণসংখ্যা retval, ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	যদি (is_quiet())
+		ফেরত retval;
 	va_start(ap, fmt);
 	_do_eend("eend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eend");
-	return retval;
+	ফেরত retval;
 }
 
-int
-ewend(int retval, const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+ewend(পূর্ণসংখ্যা retval, ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	যদি (is_quiet())
+		ফেরত retval;
 	va_start(ap, fmt);
 	_do_eend("ewend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewend");
-	return retval;
+	ফেরত retval;
 }
 
-void
-ebracket(int col, ECOLOR color, const char *msg)
+শূন্য
+ebracket(পূর্ণসংখ্যা col, ECOLOR color, ধ্রুবক অক্ষর *বার্তা)
 {
-	_eend(stdout, col, color, msg);
+	_eend(stdout, col, color, বার্তা);
 }
 
-void
-eindent(void)
+শূন্য
+eindent(শূন্য)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
-	char *num;
+	অক্ষর *env = getenv("EINFO_INDENT");
+	পূর্ণসংখ্যা amount = 0;
+	অক্ষর *অঙ্ক;
 
-	if (env) {
+	যদি (env) {
 		errno = 0;
-		amount = strtoimax(env, NULL, 0);
-		if (errno != 0)
+		amount = strtoimax(env, ফাঁকা, 0);
+		যদি (errno != 0)
 			amount = 0;
 	}
 	amount += INDENT_WIDTH;
-	xasprintf(&num, "%08d", amount);
-	setenv("EINFO_INDENT", num, 1);
-	free(num);
+	xasprintf(&অঙ্ক, "%08d", amount);
+	setenv("EINFO_INDENT", অঙ্ক, 1);
+	মুক্ত(অঙ্ক);
 }
 
-void eoutdent(void)
+শূন্য eoutdent(শূন্য)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
-	char *num = NULL;
-	int serrno = errno;
+	অক্ষর *env = getenv("EINFO_INDENT");
+	পূর্ণসংখ্যা amount = 0;
+	অক্ষর *অঙ্ক = ফাঁকা;
+	পূর্ণসংখ্যা serrno = errno;
 
-	if (!env)
-		return;
+	যদি (!env)
+		ফেরত;
 	errno = 0;
-	amount = strtoimax(env, NULL, 0);
-	if (errno != 0)
+	amount = strtoimax(env, ফাঁকা, 0);
+	যদি (errno != 0)
 		amount = 0;
-	else
+	অন্যথা
 		amount -= INDENT_WIDTH;
-	if (amount <= 0)
+	যদি (amount <= 0)
 		unsetenv("EINFO_INDENT");
-	else {
-		xasprintf(&num, "%08d", amount);
-		setenv("EINFO_INDENT", num, 1);
-		free(num);
+	অন্যথা {
+		xasprintf(&অঙ্ক, "%08d", amount);
+		setenv("EINFO_INDENT", অঙ্ক, 1);
+		মুক্ত(অঙ্ক);
 	}
 	errno = serrno;
 }
 
-int
-einfovn(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+einfovn(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	যদি (!fmt || !is_verbose())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfovn");
-	return retval;
+	ফেরত retval;
 }
 
-int
-ewarnvn(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+ewarnvn(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	যদি (!fmt || !is_verbose())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnvn");
-	return retval;
+	ফেরত retval;
 }
 
-int
-einfov(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+einfov(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	যদি (!fmt || !is_verbose())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("einfov");
-	return retval;
+	ফেরত retval;
 }
 
-int
-ewarnv(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+ewarnv(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	যদি (!fmt || !is_verbose())
+		ফেরত 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("ewarnv");
-	return retval;
+	ফেরত retval;
 }
 
-int
-ebeginv(const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+ebeginv(ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	পূর্ণসংখ্যা retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	যদি (!fmt || !is_verbose())
+		ফেরত 0;
 
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf(" ...");
-	if (colour_terminal(stdout))
+	যদি (colour_terminal(stdout))
 		retval += printf("\n");
 	va_end(ap);
 	LASTCMD("ebeginv");
-	return retval;
+	ফেরত retval;
 }
 
-int
-eendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+eendv(পূর্ণসংখ্যা retval, ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	যদি (!is_verbose())
+		ফেরত 0;
 	va_start(ap, fmt);
 	_do_eend("eendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eendv");
-	return retval;
+	ফেরত retval;
 }
 
-int
-ewendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+পূর্ণসংখ্যা
+ewendv(পূর্ণসংখ্যা retval, ধ্রুবক অক্ষর *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	যদি (!is_verbose())
+		ফেরত 0;
 	va_start(ap, fmt);
 	_do_eend("ewendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewendv");
-	return retval;
+	ফেরত retval;
 }
 
-void
-eindentv(void)
+শূন্য
+eindentv(শূন্য)
 {
-	if (is_verbose())
+	যদি (is_verbose())
 		eindent();
 }
 
-void
-eoutdentv(void)
+শূন্য
+eoutdentv(শূন্য)
 {
-	if (is_verbose())
+	যদি (is_verbose())
 		eoutdent();
 }

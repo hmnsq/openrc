@@ -15,114 +15,114 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <fnmatch.h>
-#include <limits.h>
+#অন্তর্ভাব <ctype.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <fcntl.h>
+#অন্তর্ভাব <fnmatch.h>
+#অন্তর্ভাব <limits.h>
 #ifdef HAVE_LINUX_CLOSE_RANGE_H
 #  include <linux/close_range.h>
 #endif
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <spawn.h>
-#include <sys/file.h>
-#include <sys/time.h>
+#অন্তর্ভাব <signal.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <spawn.h>
+#অন্তর্ভাব <sys/file.h>
+#অন্তর্ভাব <sys/time.h>
 #ifdef __linux__
 #  include <sys/syscall.h> /* for close_range */
 #  include <sys/sysinfo.h>
 #endif
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <sys/un.h>
-#include <sys/socket.h>
-#include <time.h>
-#include <unistd.h>
-#include <utime.h>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <sys/utsname.h>
+#অন্তর্ভাব <sys/un.h>
+#অন্তর্ভাব <sys/socket.h>
+#অন্তর্ভাব <time.h>
+#অন্তর্ভাব <unistd.h>
+#অন্তর্ভাব <utime.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "version.h"
-#include "helpers.h"
+#অন্তর্ভাব "einfo.h"
+#অন্তর্ভাব "queue.h"
+#অন্তর্ভাব "rc.h"
+#অন্তর্ভাব "misc.h"
+#অন্তর্ভাব "version.h"
+#অন্তর্ভাব "helpers.h"
 
-extern char **environ;
+বাহ্যিক অক্ষর **environ;
 
 bool
-rc_conf_yesno(const char *setting)
+rc_conf_yesno(ধ্রুবক অক্ষর *setting)
 {
-	return rc_yesno(rc_conf_value (setting));
+	ফেরত rc_yesno(rc_conf_মান (setting));
 }
 
-static const char *const env_allowlist[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক env_allowlist[] = {
 	"EERROR_QUIET", "EINFO_QUIET",
 	"IN_BACKGROUND", "IN_DRYRUN", "IN_HOTPLUG",
 	"RC_DEBUG", "RC_NODEPS", "RC_USER_SERVICES",
 	"RC_SVCDIR", "RC_PATH", "LANG", "LC_MESSAGES",
 	"TERM", "EINFO_COLOR", "EINFO_VERBOSE",
 	"HOSTNAME", "CHARSET", "LC_*",
-	NULL
+	ফাঁকা
 };
 
-static const char *const usrenv_allowlist[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক usrenv_allowlist[] = {
 	"USER", "LOGNAME", "HOME", "SHELL",
 	"XDG_*", "DIFFTOOL", "LESS", "PAGER",
-	"EDITOR", "VISUAL", NULL
+	"EDITOR", "VISUAL", ফাঁকা
 };
 
-static bool
-env_allowed(const char *const list[], const char *value)
+স্থির bool
+env_allowed(ধ্রুবক অক্ষর *ধ্রুবক list[], ধ্রুবক অক্ষর *মান)
 {
-	for (size_t i = 0; list[i]; i++)
-		if (fnmatch(list[i], value, FNM_NOESCAPE | FNM_PERIOD) == 0)
-			return true;
-	return false;
+	জন্য (size_t i = 0; list[i]; i++)
+		যদি (fnmatch(list[i], মান, FNM_NOESCAPE | FNM_PERIOD) == 0)
+			ফেরত true;
+	ফেরত false;
 }
 
-void
-env_filter(void)
+শূন্য
+env_filter(শূন্য)
 {
 	RC_STRINGLIST *env_allow;
 	RC_STRINGLIST *profile;
 	RC_STRINGLIST *env_list;
-	char *profile_path;
+	অক্ষর *profile_path;
 	RC_STRING *env;
-	char *e;
+	অক্ষর *e;
 	size_t i = 0;
 
 	/* Add the user defined list of vars */
-	env_allow = rc_stringlist_split(rc_conf_value("rc_env_allow"), " ");
+	env_allow = rc_stringlist_split(rc_conf_মান("rc_env_allow"), " ");
 	/*
 	 * If '*' is an entry in rc_env_allow, do nothing as we are to pass
 	 * through all environment variables.
 	 */
-	if (rc_stringlist_find(env_allow, "*")) {
+	যদি (rc_stringlist_find(env_allow, "*")) {
 		rc_stringlist_free(env_allow);
-		return;
+		ফেরত;
 	}
 
 	xasprintf(&profile_path, "%s/profile.env", rc_sysconfdir());
 	profile = rc_config_load(profile_path);
-	free(profile_path);
+	মুক্ত(profile_path);
 
-	if (rc_is_user()) {
+	যদি (rc_is_user()) {
 		RC_STRINGLIST *usrprofile;
 		xasprintf(&profile_path, "%s/profile.env", rc_usrconfdir());
 		usrprofile = rc_config_load(profile_path);
-		free(profile_path);
+		মুক্ত(profile_path);
 		TAILQ_CONCAT(profile, usrprofile, entries);
 		rc_stringlist_free(usrprofile);
 	}
 
 	/* Copy the env and work from this so we can manipulate it safely */
 	env_list = rc_stringlist_new();
-	while (environ && environ[i]) {
+	যখন (environ && environ[i]) {
 		env = rc_stringlist_add(env_list, environ[i++]);
-		e = strchr(env->value, '=');
-		if (e)
+		e = strchr(env->মান, '=');
+		যদি (e)
 			*e = '\0';
 	}
 
@@ -130,27 +130,27 @@ env_filter(void)
 		RC_STRING *var;
 
 		/* Check the whitelist */
-		if (env_allowed(env_allowlist, env->value))
-			continue;
-		if (rc_is_user() && env_allowed(usrenv_allowlist, env->value))
-			continue;
+		যদি (env_allowed(env_allowlist, env->মান))
+			চালু;
+		যদি (rc_is_user() && env_allowed(usrenv_allowlist, env->মান))
+			চালু;
 
 		/* Check our user defined list */
 		TAILQ_FOREACH(var, env_allow, entries)
-			if (fnmatch(var->value, env->value, FNM_NOESCAPE | FNM_PERIOD) == 0)
-				goto next;
+			যদি (fnmatch(var->মান, env->মান, FNM_NOESCAPE | FNM_PERIOD) == 0)
+				যাও পরবর্তী;
 
 		/* OK, not allowed! */
-		unsetenv(env->value);
-next:;
+		unsetenv(env->মান);
+পরবর্তী:;
 	}
 
 	/* Now add anything missing from the profile */
 	TAILQ_FOREACH(env, profile, entries) {
-		e = strchr(env->value, '=');
+		e = strchr(env->মান, '=');
 		*e = '\0';
-		if (!getenv(env->value))
-			setenv(env->value, e + 1, 1);
+		যদি (!getenv(env->মান))
+			setenv(env->মান, e + 1, 1);
 	}
 
 	rc_stringlist_free(env_list);
@@ -158,84 +158,84 @@ next:;
 	rc_stringlist_free(profile);
 }
 
-char *
-default_runlevel(void)
+অক্ষর *
+default_runlevel(শূন্য)
 {
-	char *runlevel = rc_runlevel_get();
+	অক্ষর *runlevel = rc_runlevel_get();
 
-	if (!runlevel)
-		runlevel = xstrdup(rc_conf_value("rc_default_runlevel"));
-	if (!runlevel || !*runlevel) {
-		free(runlevel);
+	যদি (!runlevel)
+		runlevel = xstrdup(rc_conf_মান("rc_default_runlevel"));
+	যদি (!runlevel || !*runlevel) {
+		মুক্ত(runlevel);
 		runlevel = xstrdup(RC_LEVEL_DEFAULT);
 	}
 
-	return runlevel;
+	ফেরত runlevel;
 }
 
-void
-env_config(void)
+শূন্য
+env_config(শূন্য)
 {
 	size_t pplen = strlen(RC_PATH_PREFIX);
-	char *path;
-	char *p;
-	char *e;
+	অক্ষর *path;
+	অক্ষর *p;
+	অক্ষর *e;
 	size_t l;
-	struct utsname uts;
+	কাঠামো utsname uts;
 	FILE *fp;
-	char *token;
-	char *np;
-	char *npp;
-	char *tok;
-	const char *sys = rc_sys();
-	const char *svcdir = rc_svcdir();
-	const char *const *init_path = rc_scriptdirs();
-	char *buffer = NULL;
-	char *tmpdir;
-	size_t size = 0;
+	অক্ষর *token;
+	অক্ষর *np;
+	অক্ষর *npp;
+	অক্ষর *tok;
+	ধ্রুবক অক্ষর *sys = rc_sys();
+	ধ্রুবক অক্ষর *svcdir = rc_svcdir();
+	ধ্রুবক অক্ষর *ধ্রুবক *init_path = rc_scriptdirs();
+	অক্ষর *বাফার = ফাঁকা;
+	অক্ষর *tmpdir;
+	size_t আকার_2 = 0;
 
 	/* Ensure our PATH is prefixed with the system locations first
 	   for a little extra security */
 	path = getenv("PATH");
-	if (!path)
+	যদি (!path)
 		setenv("PATH", RC_PATH_PREFIX, 1);
-	else if (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
+	অন্যথা যদি (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
 		l = strlen(path) + pplen + 3;
-		e = p = xmalloc(sizeof(char) * l);
+		e = p = xmalloc(আকার(অক্ষর) * l);
 		p += snprintf(p, l, "%s", RC_PATH_PREFIX);
 
 		/* Now go through the env var and only add bits not in our
 		 * PREFIX */
-		while ((token = strsep(&path, ":"))) {
+		যখন ((token = strsep(&path, ":"))) {
 			np = npp = xstrdup(RC_PATH_PREFIX);
-			while ((tok = strsep(&npp, ":")))
-				if (strcmp(tok, token) == 0)
-					break;
-			if (!tok)
+			যখন ((tok = strsep(&npp, ":")))
+				যদি (strcmp(tok, token) == 0)
+					বিরতি;
+			যদি (!tok)
 				p += snprintf(p, l - (p - e), ":%s", token);
-			free (np);
+			মুক্ত (np);
 		}
 		*p++ = '\0';
 		unsetenv("PATH");
 		setenv("PATH", e, 1);
-		free(e);
+		মুক্ত(e);
 	}
 
-	if (!rc_is_user()) {
+	যদি (!rc_is_user()) {
 		setenv("RC_CACHEDIR", "/var/cache/rc", 1);
-	} else {
-		const char *cache_home = getenv("XDG_CACHE_HOME");
-		char *cachedir = NULL;
+	} অন্যথা {
+		ধ্রুবক অক্ষর *cache_home = getenv("XDG_CACHE_HOME");
+		অক্ষর *cachedir = ফাঁকা;
 
-		if (cache_home)
+		যদি (cache_home)
 			xasprintf(&cachedir, "%s/rc", cache_home);
-		else if ((cache_home = getenv("HOME")))
+		অন্যথা যদি ((cache_home = getenv("HOME")))
 			xasprintf(&cachedir, "%s/.cache/rc", cache_home);
 
-		if (cachedir)
+		যদি (cachedir)
 			setenv("RC_CACHEDIR", cachedir, 1);
 
-		free(cachedir);
+		মুক্ত(cachedir);
 	}
 
 	xasprintf(&tmpdir, "%s/tmp", svcdir);
@@ -248,74 +248,74 @@ env_config(void)
 	setenv("RC_BOOTLEVEL", RC_LEVEL_BOOT, 1);
 	setenv("RC_RUNLEVEL", e, 1);
 
-	fp = xopen_memstream(&path, &size);
+	fp = xopen_memstream(&path, &আকার_2);
 	fputs("RC_PATH=", fp);
-	for (bool first = true; *init_path; init_path++, first = false) {
-		if (!first)
+	জন্য (bool first = true; *init_path; init_path++, first = false) {
+		যদি (!first)
 			fputc(':', fp);
 		fputs(*init_path, fp);
 	}
 	xclose_memstream(fp);
 	putenv(path);
 
-	free(e);
-	free(tmpdir);
+	মুক্ত(e);
+	মুক্ত(tmpdir);
 
 	/* krunlevel is a system-wide override; it never applies to
 	 * user sessions. */
-	if (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
-		if (xgetline(&buffer, &size, fp) != -1)
-			setenv("RC_DEFAULTLEVEL", buffer, 1);
-		else
+	যদি (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
+		যদি (xgetline(&বাফার, &আকার_2, fp) != -1)
+			setenv("RC_DEFAULTLEVEL", বাফার, 1);
+		অন্যথা
 			setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
-		free(buffer);
+		মুক্ত(বাফার);
 		fclose(fp);
-	} else {
+	} অন্যথা {
 		setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
 	}
 
-	if (sys)
+	যদি (sys)
 		setenv("RC_SYS", sys, 1);
 
 	/* Some scripts may need to take a different code path if
 	   Linux/FreeBSD, etc
 	   To save on calling uname, we store it in an environment variable */
-	if (uname(&uts) == 0)
+	যদি (uname(&uts) == 0)
 		setenv("RC_UNAME", uts.sysname, 1);
 
 	/* Be quiet or verbose as necessary */
-	if (rc_conf_yesno("rc_quiet"))
+	যদি (rc_conf_yesno("rc_quiet"))
 		setenv("EINFO_QUIET", "YES", 1);
-	if (rc_conf_yesno("rc_verbose"))
+	যদি (rc_conf_yesno("rc_verbose"))
 		setenv("EINFO_VERBOSE", "YES", 1);
 
 	errno = 0;
-	if ((!rc_conf_yesno("rc_color") && errno == 0) ||
+	যদি ((!rc_conf_yesno("rc_color") && errno == 0) ||
 	    rc_conf_yesno("rc_nocolor"))
 		setenv("EINFO_COLOR", "NO", 1);
 }
 
-int
-signal_setup(int sig, void (*handler)(int))
+পূর্ণসংখ্যা
+signal_setup(পূর্ণসংখ্যা sig, শূন্য (*handler)(পূর্ণসংখ্যা))
 {
-	struct sigaction sa;
+	কাঠামো sigaction sa;
 
-	memset(&sa, 0, sizeof (sa));
+	memset(&sa, 0, আকার (sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = handler;
-	return sigaction(sig, &sa, NULL);
+	ফেরত sigaction(sig, &sa, ফাঁকা);
 }
 
-int
-svc_lock(const char *applet, bool ignore_lock_failure)
+পূর্ণসংখ্যা
+svc_lock(ধ্রুবক অক্ষর *applet, bool ignore_lock_failure)
 {
-	int fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
+	পূর্ণসংখ্যা fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
 
-	if (fd == -1)
-		return -1;
-	if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
-		int saved_errno = errno;
-		if (ignore_lock_failure) {
+	যদি (fd == -1)
+		ফেরত -1;
+	যদি (flock(fd, LOCK_EX | LOCK_NB) == -1) {
+		পূর্ণসংখ্যা saved_errno = errno;
+		যদি (ignore_lock_failure) {
 			/* Two services with a need b, and b's start()
 			 * calling restart --no-deps on a would cause
 			 * harmless errors: just ignore them.
@@ -326,38 +326,38 @@ svc_lock(const char *applet, bool ignore_lock_failure)
 		eerror("Call to flock failed: %s", strerror(errno));
 		close(fd);
 		errno = saved_errno;
-		return -1;
+		ফেরত -1;
 	}
-	return fd;
+	ফেরত fd;
 }
 
-int
-svc_unlock(const char *applet, int fd)
+পূর্ণসংখ্যা
+svc_unlock(ধ্রুবক অক্ষর *applet, পূর্ণসংখ্যা fd)
 {
 	unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, 0);
 	close(fd);
-	return -1;
+	ফেরত -1;
 }
 
 pid_t
-exec_service(const char *service, const char *arg)
+exec_service(ধ্রুবক অক্ষর *service, ধ্রুবক অক্ষর *arg)
 {
-	char *file, sfd[32];
-	const char *argv[] = { service, "--lockfd", sfd, arg, NULL };
-	int fd = svc_lock(basename_c(service), false);
+	অক্ষর *file, sfd[32];
+	ধ্রুবক অক্ষর *argv[] = { service, "--lockfd", sfd, arg, ফাঁকা };
+	পূর্ণসংখ্যা fd = svc_lock(basename_c(service), false);
 	posix_spawnattr_t chldmask;
 	sigset_t empty;
 	pid_t pid = 0;
 
-	if (fd == -1)
-		return -1;
-	snprintf(sfd, sizeof(sfd), "%d", fd);
+	যদি (fd == -1)
+		ফেরত -1;
+	snprintf(sfd, আকার(sfd), "%d", fd);
 
 	file = rc_service_resolve(service);
-	if (access(file, F_OK) != 0) {
+	যদি (access(file, F_OK) != 0) {
 		rc_service_mark(service, RC_SERVICE_STOPPED);
 		svc_unlock(basename_c(service), fd);
-		goto out;
+		যাও out;
 	}
 
 	/* Unmask all signals.
@@ -369,7 +369,7 @@ exec_service(const char *service, const char *arg)
 	posix_spawnattr_setflags(&chldmask, POSIX_SPAWN_SETSIGMASK);
 	posix_spawnattr_setsigmask(&chldmask, &empty);
 
-	if ((errno = posix_spawn(&pid, file, NULL, &chldmask, UNCONST(argv), environ))) {
+	যদি ((errno = posix_spawn(&pid, file, ফাঁকা, &chldmask, UNCONST(argv), environ))) {
 		fprintf(stderr, "posix_spawn: %s\n", strerror(errno));
 		svc_unlock(basename_c(service), fd);
 	}
@@ -378,92 +378,92 @@ exec_service(const char *service, const char *arg)
 	close(fd);
 
 out:
-	free(file);
-	return pid;
+	মুক্ত(file);
+	ফেরত pid;
 }
 
-int
-parse_mode(mode_t *mode, char *text)
+পূর্ণসংখ্যা
+parse_mode(mode_t *mode, অক্ষর *text)
 {
-	char *p;
+	অক্ষর *p;
 	unsigned long l;
 
 	/* Check for a numeric mode */
-	if ((*text - '0') < 8) {
+	যদি ((*text - '0') < 8) {
 		l = strtoul(text, &p, 8);
-		if (*p || l > 07777U) {
+		যদি (*p || l > 07777U) {
 			errno = EINVAL;
-			return -1;
+			ফেরত -1;
 		}
 		*mode = (mode_t) l;
-		return 0;
+		ফেরত 0;
 	}
 
 	/* We currently don't check g+w type stuff */
 	errno = EINVAL;
-	return -1;
+	ফেরত -1;
 }
 
-RC_DEPTREE * _rc_deptree_load(int force, int *regen)
+RC_DEPTREE * _rc_deptree_load(পূর্ণসংখ্যা force, পূর্ণসংখ্যা *regen)
 {
-	int fd;
-	int retval;
-	int serrno = errno;
-	int merrno;
+	পূর্ণসংখ্যা fd;
+	পূর্ণসংখ্যা retval;
+	পূর্ণসংখ্যা serrno = errno;
+	পূর্ণসংখ্যা merrno;
 	time_t t;
-	char file[PATH_MAX];
-	struct stat st;
+	অক্ষর file[PATH_MAX];
+	কাঠামো stat st;
 	FILE *fp;
 
 	t = 0;
-	if (rc_deptree_update_needed(&t, file) || force != 0) {
-		int svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
+	যদি (rc_deptree_update_needed(&t, file) || force != 0) {
+		পূর্ণসংখ্যা svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
 
 		/* Test if we have permission to update the deptree */
 		fd = openat(svcdirfd, "deptree", O_WRONLY);
 		merrno = errno;
 		errno = serrno;
-		if (fd == -1 && merrno == EACCES)
-			return rc_deptree_load();
+		যদি (fd == -1 && merrno == EACCES)
+			ফেরত rc_deptree_load();
 		close(fd);
 
-		if (regen)
+		যদি (regen)
 			*regen = 1;
 		ebegin("Caching service dependencies");
 		retval = rc_deptree_update() ? 0 : -1;
 		eend(retval, "Failed to update the dependency tree");
 
-		if (retval == 0) {
-			if (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
+		যদি (retval == 0) {
+			যদি (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
 				eerror("stat(%s): %s/deptree", rc_svcdir(), strerror(errno));
-				return NULL;
+				ফেরত ফাঁকা;
 			}
 
-			if (st.st_mtime >= t) {
+			যদি (st.st_mtime >= t) {
 				unlinkat(svcdirfd, "clock-skewed", 0);
-				goto out;
+				যাও out;
 			}
 
 			eerror("Clock skew detected with '%s'", file);
 			eerrorn("Adjusting mtime of '%s/deptree' to %s", rc_svcdir(), ctime(&t));
-			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (struct timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
+			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (কাঠামো timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
 
-			if ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
+			যদি ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
 				fprintf(fp, "%s\n", file);
 				fclose(fp);
 			}
 		}
 
 out:
-		if (force == -1 && regen != NULL)
+		যদি (force == -1 && regen != ফাঁকা)
 			*regen = retval;
 	}
 
-	return rc_deptree_load();
+	ফেরত rc_deptree_load();
 }
 
-static const struct {
-	const char * const name;
+স্থির ধ্রুবক কাঠামো {
+	ধ্রুবক অক্ষর * ধ্রুবক name;
 	RC_SERVICE bit;
 } service_bits[] = {
 	{ "service_started",     RC_SERVICE_STARTED,     },
@@ -477,35 +477,35 @@ static const struct {
 	{ "service_crashed",     RC_SERVICE_CRASHED,     },
 };
 
-RC_SERVICE lookup_service_state(const char *service)
+RC_SERVICE lookup_service_state(ধ্রুবক অক্ষর *service)
 {
 	size_t i;
-	for (i = 0; i < ARRAY_SIZE(service_bits); ++i)
-		if (!strcmp(service, service_bits[i].name))
-			return service_bits[i].bit;
-	return 0;
+	জন্য (i = 0; i < ARRAY_আকার(service_bits); ++i)
+		যদি (!strcmp(service, service_bits[i].name))
+			ফেরত service_bits[i].bit;
+	ফেরত 0;
 }
 
-void from_time_t(char *time_string, time_t tv)
+শূন্য from_time_t(অক্ষর *time_string, time_t tv)
 {
 	strftime(time_string, 20, "%Y-%m-%d %H:%M:%S", localtime(&tv));
 }
 
-time_t to_time_t(char *timestring)
+time_t to_time_t(অক্ষর *timestring)
 {
-	int check = 0;
-	int year = 0;
-	int month = 0;
-	int day = 0;
-	int hour = 0;
-	int min = 0;
-	int sec = 0;
-	struct tm breakdown = {0};
-	time_t result = -1;
+	পূর্ণসংখ্যা check = 0;
+	পূর্ণসংখ্যা year = 0;
+	পূর্ণসংখ্যা month = 0;
+	পূর্ণসংখ্যা day = 0;
+	পূর্ণসংখ্যা hour = 0;
+	পূর্ণসংখ্যা min = 0;
+	পূর্ণসংখ্যা sec = 0;
+	কাঠামো tm breakdown = {0};
+	time_t ফলাফল = -1;
 
 	check = sscanf(timestring, "%4d-%2d-%2d %2d:%2d:%2d",
 			&year, &month, &day, &hour, &min, &sec);
-	if (check == 6) {
+	যদি (check == 6) {
 		breakdown.tm_year = year - 1900; /* years since 1900 */
 		breakdown.tm_mon = month - 1;
 		breakdown.tm_mday = day;
@@ -513,132 +513,132 @@ time_t to_time_t(char *timestring)
 		breakdown.tm_min = min;
 		breakdown.tm_sec = sec;
 		breakdown.tm_isdst = -1;
-		result = mktime(&breakdown);
+		ফলাফল = mktime(&breakdown);
 	}
-	return result;
+	ফেরত ফলাফল;
 }
 
-pid_t get_pid(const char *applet,const char *pidfile)
+pid_t get_pid(ধ্রুবক অক্ষর *applet,ধ্রুবক অক্ষর *pidfile)
 {
 	FILE *fp;
 	pid_t pid;
 
-	if (!pidfile)
-		return -1;
+	যদি (!pidfile)
+		ফেরত -1;
 
-	if ((fp = fopen(pidfile, "r")) == NULL) {
+	যদি ((fp = fopen(pidfile, "r")) == ফাঁকা) {
 		ewarnv("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
-		return -1;
+		ফেরত -1;
 	}
 
-	if (fscanf(fp, "%d", &pid) != 1) {
+	যদি (fscanf(fp, "%d", &pid) != 1) {
 		ewarnv("%s: no pid found in `%s'", applet, pidfile);
 		fclose(fp);
-		return -1;
+		ফেরত -1;
 	}
 
 	fclose(fp);
 
-	return pid;
+	ফেরত pid;
 }
 
-struct notify notify_parse(const char *applet, const char *notify_string)
+কাঠামো notify notify_parse(ধ্রুবক অক্ষর *applet, ধ্রুবক অক্ষর *notify_string)
 {
-	struct notify notify = {0};
-	if (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
+	কাঠামো notify notify = {0};
+	যদি (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
 		notify.type = NOTIFY_FD;
-		if (pipe(notify.pipe) == -1)
+		যদি (pipe(notify.pipe) == -1)
 			eerrorx("%s: pipe: %s", applet, strerror(errno));
-	} else if (strncmp(notify_string, "socket", sizeof("socket") - 1) == 0) {
-		union {
-			struct sockaddr header;
-			struct sockaddr_un unix;
+	} অন্যথা যদি (strncmp(notify_string, "socket", আকার("socket") - 1) == 0) {
+		সংঘ {
+			কাঠামো sockaddr header;
+			কাঠামো sockaddr_un unix;
 		} addr = { .unix = { .sun_family = AF_UNIX } };
-		int written;
-		const char *opts = strchr(notify_string, ':');
+		পূর্ণসংখ্যা written;
+		ধ্রুবক অক্ষর *opts = strchr(notify_string, ':');
 
-		if (!opts || opts[1] == '\0')
-			return notify;
-		if (strcmp(opts + 1, "ready") != 0)
-			return notify;
+		যদি (!opts || opts[1] == '\0')
+			ফেরত notify;
+		যদি (strcmp(opts + 1, "ready") != 0)
+			ফেরত notify;
 
-		written = snprintf(addr.unix.sun_path, sizeof(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
-		if (written >= (int)sizeof(addr.unix.sun_path))
+		written = snprintf(addr.unix.sun_path, আকার(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
+		যদি (written >= (পূর্ণসংখ্যা)আকার(addr.unix.sun_path))
 			eerrorx("%s: socket path '%s/supervise-%s.sock' too long.", applet, rc_svcdir(), applet);
 		setenv("NOTIFY_SOCKET", addr.unix.sun_path, true);
 
 		notify.type = NOTIFY_SOCKET;
-		if ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
+		যদি ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
 			eerrorx("%s: socket: %s", applet, strerror(errno));
-		if (bind(notify.fd, &addr.header, sizeof(addr.unix)) == -1)
+		যদি (bind(notify.fd, &addr.header, আকার(addr.unix)) == -1)
 			eerrorx("%s: bind: %s", applet, strerror(errno));
-	} else {
+	} অন্যথা {
 		eerrorx("%s: invalid ready '%s'.", applet, optarg);
 	}
 
-	return notify;
+	ফেরত notify;
 }
 
-bool notify_wait(const char *applet, struct notify notify)
+bool notify_wait(ধ্রুবক অক্ষর *applet, কাঠামো notify notify)
 {
-	switch (notify.type) {
-	case NOTIFY_NONE:
-		return true;
-	case NOTIFY_FD:
+	নির্বাচন (notify.type) {
+	ক্ষেত্র NOTIFY_NONE:
+		ফেরত true;
+	ক্ষেত্র NOTIFY_FD:
 		close(notify.pipe[1]);
 		notify.fd = notify.pipe[0];
-		break;
-	case NOTIFY_SOCKET:
-		break;
+		বিরতি;
+	ক্ষেত্র NOTIFY_SOCKET:
+		বিরতি;
 	}
 
-	for (;;) {
-		char buf[BUFSIZ];
-		ssize_t bytes = read(notify.fd, buf, BUFSIZ);
+	জন্য (;;) {
+		অক্ষর buf[BUFSIZ];
+		ssize_t bytes = পঠ(notify.fd, buf, BUFSIZ);
 
-		if (bytes == 0)
-			return false;
-		if (bytes == -1) {
-			if (errno != EINTR) {
+		যদি (bytes == 0)
+			ফেরত false;
+		যদি (bytes == -1) {
+			যদি (errno != EINTR) {
 				eerror("%s: read failed '%s'\n", applet, strerror(errno));
-				return false;
+				ফেরত false;
 			}
-			continue;
+			চালু;
 		}
 
-		switch (notify.type) {
-		case NOTIFY_NONE:
-			break;
-		case NOTIFY_FD:
-			if (memchr(buf, '\n', bytes))
-				return true;
-			break;
-		case NOTIFY_SOCKET:
+		নির্বাচন (notify.type) {
+		ক্ষেত্র NOTIFY_NONE:
+			বিরতি;
+		ক্ষেত্র NOTIFY_FD:
+			যদি (memchr(buf, '\n', bytes))
+				ফেরত true;
+			বিরতি;
+		ক্ষেত্র NOTIFY_SOCKET:
 			buf[bytes] = '\0';
-			if (strstr(buf, "READY=1")) {
-				char *path;
+			যদি (strstr(buf, "READY=1")) {
+				অক্ষর *path;
 				xasprintf(&path, "%s/supervise-%s.sock", rc_svcdir(), applet);
 				unlink(path);
-				free(path);
-				return true;
+				মুক্ত(path);
+				ফেরত true;
 			}
-			break;
+			বিরতি;
 		}
 	}
 
-	return true;
+	ফেরত true;
 }
 
 #ifndef HAVE_CLOSE_RANGE
-static inline int close_range(unsigned int first RC_UNUSED,
-			      unsigned int last RC_UNUSED,
-			      unsigned int flags RC_UNUSED)
+স্থির অন্তঃরেখ পূর্ণসংখ্যা close_range(unsigned পূর্ণসংখ্যা first RC_UNUSED,
+			      unsigned পূর্ণসংখ্যা last RC_UNUSED,
+			      unsigned পূর্ণসংখ্যা flags RC_UNUSED)
 {
 #ifdef SYS_close_range
-	return syscall(SYS_close_range, first, last, flags);
-#else
+	ফেরত syscall(SYS_close_range, first, last, flags);
+#অন্যথা
 	errno = ENOSYS;
-	return -1;
+	ফেরত -1;
 #endif
 }
 #endif
@@ -646,12 +646,12 @@ static inline int close_range(unsigned int first RC_UNUSED,
 # define CLOSE_RANGE_CLOEXEC	(1U << 2)
 #endif
 
-void
-cloexec_fds_from(int first)
+শূন্য
+cloexec_fds_from(পূর্ণসংখ্যা first)
 {
-	int i;
-	if (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
-		for (i = getdtablesize() - 1; i >= first; --i)
+	পূর্ণসংখ্যা i;
+	যদি (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
+		জন্য (i = getdtablesize() - 1; i >= first; --i)
 			fcntl(i, F_SETFD, FD_CLOEXEC);
 	}
 }
