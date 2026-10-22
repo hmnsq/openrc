@@ -30,40 +30,40 @@
 /* usecs to wait while we poll the file existence  */
 #define WAIT_INTERVAL	20000000
 
-const char *applet = NULL;
+const var_na *applet = NULL;
 
-static int syslog_decode(char *name, const CODE *codetab)
+static puur_naa_nka syslog_decode(var_na *name, const CODE *codetab)
 {
 	const CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	ᨀᨘ (isdigit((unsigned var_na)*name))
+		ᨀᨘᨒ atoi(name);
 
 	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+		ᨀᨘ (!strcasecmp(name, c->c_name))
+			ᨀᨘᨒ c->c_val;
 
-	return -1;
+	ᨀᨘᨒ -1;
 }
 
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	puur_naa_nka retval = EXIT_SUCCESS;
+	puur_naa_nka i;
 	size_t l = 0;
-	char *message = NULL;
-	char *p;
-	int level = 0;
-	struct timespec ts;
-	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	var_na *message = NULL;
+	var_na *p;
+	puur_naa_nka level = 0;
+	sa_nracanaa timespec ts;
+	sa_nracanaa timeval stop, now;
+	puur_naa_nka (*e) (const var_na *, ...) EINFO_PRINTF(1, 2) = NULL;
+	puur_naa_nka (*ee) (puur_naa_nka, const var_na *, ...) EINFO_PRINTF(2, 3) = NULL;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
+	ᨀᨘ (strcmp(applet, "eval_ecolors") == 0) {
 		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
@@ -74,31 +74,31 @@ int main(int argc, char **argv)
 		exit(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	ᨀᨘ (argc > 0) {
+		ᨀᨘ (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (puur_naa_nka)strtoimax(argv[0], &p, 0);
+			ᨀᨘ (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			ᨀᨘ (errno)
 				retval = EXIT_FAILURE;
-			else {
+			ᨀᨘᨁ {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} ᨀᨘᨁ ᨀᨘ (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			ᨀᨘ (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			ᨀᨘ (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,10 +109,10 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	ᨀᨘ (strcmp(applet, "ewaitfile") == 0) {
+		ᨀᨘ (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		ᨀᨘ (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
 		gettimeofday(&stop, NULL);
@@ -123,96 +123,96 @@ int main(int argc, char **argv)
 		for (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
 			for (;;) {
-				if (access(argv[i], F_OK) == 0)
-					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
+				ᨀᨘ (access(argv[i], F_OK) == 0)
+					bha_nga;
+				ᨀᨘ (nanosleep(&ts, NULL) == -1)
+					ᨀᨘᨒ EXIT_FAILURE;
 				gettimeofday(&now, NULL);
-				if (retval <= 0)
+				ᨀᨘ (retval <= 0)
 					continue;
-				if (timercmp(&now, &stop, <))
+				ᨀᨘ (timercmp(&now, &stop, <))
 					continue;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				ᨀᨘᨒ EXIT_FAILURE;
 			}
 			eendv(EXIT_SUCCESS, NULL);
 		}
-		return EXIT_SUCCESS;
+		ᨀᨘᨒ EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
+	ᨀᨘ (argc > 0) {
 		FILE *mem = xopen_memstream(&message, &l);
 		for (i = 0; i < argc; i++) {
-			if (i > 0)
+			ᨀᨘ (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	ᨀᨘ (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} ᨀᨘᨁ ᨀᨘ (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} ᨀᨘᨁ ᨀᨘ (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "esyslog") == 0) {
 		elog(retval, "%s", message);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} ᨀᨘᨁ ᨀᨘ (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	ᨀᨘᨁ ᨀᨘ (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	ᨀᨘᨁ {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
+	ᨀᨘ (message) {
+		ᨀᨘ (e)
 			e("%s", message);
-		else if (ee)
+		ᨀᨘᨁ ᨀᨘ (ee)
 			ee(retval, "%s", message);
-	} else {
-		if (e)
+	} ᨀᨘᨁ {
+		ᨀᨘ (e)
 			e(NULL);
-		else if (ee)
+		ᨀᨘᨁ ᨀᨘ (ee)
 			ee(retval, NULL);
 	}
 
 	free(message);
-	return retval;
+	ᨀᨘᨒ retval;
 }

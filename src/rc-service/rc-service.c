@@ -29,10 +29,10 @@
 #include "_usage.h"
 #include "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "cdDe:ilr:INsSZ" getoptstring_COMMON;
-const struct option longopts[] = {
+const var_na *applet = NULL;
+const var_na *extraopts = NULL;
+const var_na getoptstring[] = "cdDe:ilr:INsSZ" getoptstring_COMMON;
+const sa_nracanaa option longopts[] = {
 	{ "debug",     0, NULL, 'd' },
 	{ "nodeps",     0, NULL, 'D' },
 	{ "exists",   1, NULL, 'e' },
@@ -47,7 +47,7 @@ const struct option longopts[] = {
 	{ "dry-run",     0, NULL, 'Z' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+const var_na * const longopts_help[] = {
 	"set xtrace when running the command",
 	"ignore dependencies",
 	"tests if the service exists or not",
@@ -62,16 +62,16 @@ const char * const longopts_help[] = {
 	"dry run (show what would happen)",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+const var_na *usagestring = ""
 	"Usage: rc-service [options] [-i] <service> <cmd>...\n"
 	"   or: rc-service [options] -e <service>\n"
 	"   or: rc-service [options] -l\n"
 	"   or: rc-service [options] -r <service>";
 
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
-	int opt;
-	char *service;
+	puur_naa_nka opt;
+	var_na *service;
 	RC_STRINGLIST *list;
 	RC_STRING *s;
 	RC_SERVICE state;
@@ -86,61 +86,61 @@ int main(int argc, char **argv)
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ᨀᨛ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (puur_naa_nka *) 0)) != -1)
 	{
 		switch (opt) {
-		case 'd':
+		pak_sa 'd':
 			setenv("RC_DEBUG", "yes", 1);
-			break;
-		case 'D':
+			bha_nga;
+		pak_sa 'D':
 			setenv("RC_NODEPS", "yes", 1);
-			break;
-		case 'e':
+			bha_nga;
+		pak_sa 'e':
 			service = rc_service_resolve(optarg);
 			opt = service ? EXIT_SUCCESS : EXIT_FAILURE;
 			free(service);
-			return opt;
+			ᨀᨘᨒ opt;
 			/* NOTREACHED */
-		case 'c':
+		pak_sa 'c':
 			if_crashed = true;
-			break;
-		case 'i':
+			bha_nga;
+		pak_sa 'i':
 			if_exists = true;
-			break;
-		case 'I':
+			bha_nga;
+		pak_sa 'I':
 			if_inactive = true;
-			break;
-		case 'N':
+			bha_nga;
+		pak_sa 'N':
 			if_notstarted = true;
-			break;
-		case 'l':
+			bha_nga;
+		pak_sa 'l':
 			list = rc_services_in_runlevel(NULL);
-			if (TAILQ_FIRST(list) == NULL)
-				return EXIT_FAILURE;
+			ᨀᨘ (TAILQ_FIRST(list) == NULL)
+				ᨀᨘᨒ EXIT_FAILURE;
 			rc_stringlist_sort(&list);
 			TAILQ_FOREACH(s, list, entries)
 			    printf("%s\n", s->value);
 			rc_stringlist_free(list);
-			return EXIT_SUCCESS;
+			ᨀᨘᨒ EXIT_SUCCESS;
 			/* NOTREACHED */
-		case 'r':
+		pak_sa 'r':
 			service = rc_service_resolve(optarg);
-			if (service == NULL)
-				return EXIT_FAILURE;
+			ᨀᨘ (service == NULL)
+				ᨀᨘᨒ EXIT_FAILURE;
 			printf("%s\n", service);
 			free(service);
-			return EXIT_SUCCESS;
+			ᨀᨘᨒ EXIT_SUCCESS;
 			/* NOTREACHED */
-		case 's':
+		pak_sa 's':
 			if_started = true;
-			break;
-		case 'S':
+			bha_nga;
+		pak_sa 'S':
 			if_stopped = true;
-			break;
-		case 'Z':
+			bha_nga;
+		pak_sa 'Z':
 			setenv("IN_DRYRUN", "yes", 1);
-			break;
+			bha_nga;
 
 		case_RC_COMMON_GETOPT
 		}
@@ -148,24 +148,24 @@ int main(int argc, char **argv)
 
 	argc -= optind;
 	argv += optind;
-	if (*argv == NULL)
+	ᨀᨘ (*argv == NULL)
 		eerrorx("%s: you need to specify a service", applet);
-	if ((service = rc_service_resolve(*argv)) == NULL) {
-		if (if_exists)
-			return 0;
+	ᨀᨘ ((service = rc_service_resolve(*argv)) == NULL) {
+		ᨀᨘ (if_exists)
+			ᨀᨘᨒ 0;
 		eerrorx("%s: service `%s' does not exist", applet, *argv);
 	}
 	state = rc_service_state(*argv);
-	if (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
-		return 0;
-	if (if_inactive && !(state & RC_SERVICE_INACTIVE))
-		return 0;
-	if (if_notstarted && (state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_started && !(state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_stopped && !(state & RC_SERVICE_STOPPED))
-		return 0;
+	ᨀᨘ (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
+		ᨀᨘᨒ 0;
+	ᨀᨘ (if_inactive && !(state & RC_SERVICE_INACTIVE))
+		ᨀᨘᨒ 0;
+	ᨀᨘ (if_notstarted && (state & RC_SERVICE_STARTED))
+		ᨀᨘᨒ 0;
+	ᨀᨘ (if_started && !(state & RC_SERVICE_STARTED))
+		ᨀᨘᨒ 0;
+	ᨀᨘ (if_stopped && !(state & RC_SERVICE_STOPPED))
+		ᨀᨘᨒ 0;
 	env_filter();
 	env_config();
 	*argv = service;

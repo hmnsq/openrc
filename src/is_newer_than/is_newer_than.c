@@ -14,17 +14,17 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
-	int i;
+	puur_naa_nka i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ᨀᨘ (argc < 3)
+		ᨀᨘᨒ EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
 	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+		ᨀᨘ (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			ᨀᨘᨒ EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	ᨀᨘᨒ EXIT_SUCCESS;
 }
