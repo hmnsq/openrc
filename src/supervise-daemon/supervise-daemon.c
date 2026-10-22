@@ -16,59 +16,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <inttypes.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <limits.h>
-#include <grp.h>
-#include <pwd.h>
-#include <signal.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <strings.h>
+#ضمن <errno.h>
+#ضمن <inttypes.h>
+#ضمن <fcntl.h>
+#ضمن <getopt.h>
+#ضمن <limits.h>
+#ضمن <grp.h>
+#ضمن <pwd.h>
+#ضمن <signal.h>
+#ضمن <stddef.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <stdbool.h>
+#ضمن <strings.h>
 #ifdef __linux__
 # include <sys/syscall.h> /* For io priority */
 # include <sys/prctl.h> /* For prctl */
 #endif
-#include <syslog.h>
-#include <sys/ioctl.h>
-#include <sys/resource.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <time.h>
-#include <unistd.h>
+#ضمن <syslog.h>
+#ضمن <sys/ioctl.h>
+#ضمن <sys/resource.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/wait.h>
+#ضمن <time.h>
+#ضمن <unistd.h>
 
 #ifdef HAVE_PAM
-#include <security/pam_appl.h>
+#ضمن <security/pam_appl.h>
 
 /* We are not supporting authentication conversations */
-static struct pam_conv conv = { NULL, NULL};
+ساكن بنية pam_conv conv = { عدم, عدم};
 #endif
 
 #ifdef __linux__
-#include <sys/capability.h>
+#ضمن <sys/capability.h>
 #endif
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "rc_exec.h"
-#include "plugin.h"
-#include "schedules.h"
-#include "timeutils.h"
-#include "_usage.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "queue.h"
+#ضمن "rc.h"
+#ضمن "misc.h"
+#ضمن "rc_exec.h"
+#ضمن "plugin.h"
+#ضمن "schedules.h"
+#ضمن "timeutils.h"
+#ضمن "_usage.h"
+#ضمن "helpers.h"
 
 /* Use long option value that is out of range for 8 bit getopt values.
  * The exact enum value is internal and can freely change, so we keep the
  * options sorted.
  */
-enum {
+تعداد {
   /* This has to come first so following values stay in the 0x100+ range. */
   LONGOPT_BASE = 0x100,
 
@@ -83,46 +83,46 @@ enum {
   LONGOPT_RESPAWN_DELAY_CAP,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "A:a:D:d:e:Gg:I:Kk:m:N:p:R:r:s:Su:0:1:2:3" \
+ثابت حرف *applet = عدم;
+ثابت حرف *extraopts = عدم;
+ثابت حرف getoptstring[] = "A:a:D:d:e:Gg:I:Kk:m:N:p:R:r:s:Su:0:1:2:3" \
 	getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "healthcheck-timer",        1, NULL, 'a'},
-	{ "healthcheck-delay",        1, NULL, 'A'},
-	{ "capabilities", 1, NULL, LONGOPT_CAPABILITIES},
-	{ "secbits",      1, NULL, LONGOPT_SECBITS},
-	{ "no-new-privs", 0, NULL, LONGOPT_NO_NEW_PRIVS},
-	{ "respawn-delay",        1, NULL, 'D'},
-	{ "respawn-delay-step",   1, NULL, LONGOPT_RESPAWN_DELAY_STEP},
-	{ "respawn-delay-cap",    1, NULL, LONGOPT_RESPAWN_DELAY_CAP},
-	{ "chdir",        1, NULL, 'd'},
-	{ "env",          1, NULL, 'e'},
-	{ "group",        1, NULL, 'g'},
-	{ "stop-group",   0, NULL, 'G'},
-	{ "ionice",       1, NULL, 'I'},
-	{ "stop",         0, NULL, 'K'},
-	{ "umask",        1, NULL, 'k'},
-	{ "respawn-max",    1, NULL, 'm'},
-	{ "nicelevel",    1, NULL, 'N'},
-	{ "oom-score-adj",1, NULL, LONGOPT_OOM_SCORE_ADJ},
-	{ "pidfile",      1, NULL, 'p'},
-	{ "respawn-period",        1, NULL, 'P'},
-	{ "retry",       1, NULL, 'R'},
-	{ "chroot",       1, NULL, 'r'},
-	{ "signal",       1, NULL, 's'},
-	{ "start",        0, NULL, 'S'},
-	{ "user",         1, NULL, 'u'},
-	{ "stdin",        1, NULL, '0'},
-	{ "stdout",       1, NULL, '1'},
-	{ "stderr",       1, NULL, '2'},
-	{ "stdout-logger",1, NULL, LONGOPT_STDOUT_LOGGER},
-	{ "stderr-logger",1, NULL, LONGOPT_STDERR_LOGGER},
-	{ "reexec",       0, NULL, '3'},
-	{ "notify",       1, NULL, LONGOPT_NOTIFY},
+ثابت بنية option longopts[] = {
+	{ "healthcheck-timer",        1, عدم, 'a'},
+	{ "healthcheck-delay",        1, عدم, 'A'},
+	{ "capabilities", 1, عدم, LONGOPT_CAPABILITIES},
+	{ "secbits",      1, عدم, LONGOPT_SECBITS},
+	{ "no-new-privs", 0, عدم, LONGOPT_NO_NEW_PRIVS},
+	{ "respawn-delay",        1, عدم, 'D'},
+	{ "respawn-delay-step",   1, عدم, LONGOPT_RESPAWN_DELAY_STEP},
+	{ "respawn-delay-cap",    1, عدم, LONGOPT_RESPAWN_DELAY_CAP},
+	{ "chdir",        1, عدم, 'd'},
+	{ "env",          1, عدم, 'e'},
+	{ "group",        1, عدم, 'g'},
+	{ "stop-group",   0, عدم, 'G'},
+	{ "ionice",       1, عدم, 'I'},
+	{ "stop",         0, عدم, 'K'},
+	{ "umask",        1, عدم, 'k'},
+	{ "respawn-max",    1, عدم, 'm'},
+	{ "nicelevel",    1, عدم, 'N'},
+	{ "oom-score-adj",1, عدم, LONGOPT_OOM_SCORE_ADJ},
+	{ "pidfile",      1, عدم, 'p'},
+	{ "respawn-period",        1, عدم, 'P'},
+	{ "retry",       1, عدم, 'R'},
+	{ "chroot",       1, عدم, 'r'},
+	{ "signal",       1, عدم, 's'},
+	{ "start",        0, عدم, 'S'},
+	{ "user",         1, عدم, 'u'},
+	{ "stdin",        1, عدم, '0'},
+	{ "stdout",       1, عدم, '1'},
+	{ "stderr",       1, عدم, '2'},
+	{ "stdout-logger",1, عدم, LONGOPT_STDOUT_LOGGER},
+	{ "stderr-logger",1, عدم, LONGOPT_STDERR_LOGGER},
+	{ "reexec",       0, عدم, '3'},
+	{ "notify",       1, عدم, LONGOPT_NOTIFY},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت حرف * ثابت longopts_help[] = {
 	"set an initial health check delay",
 	"set a health check timer",
 	"Set the inheritable, ambient and bounding capabilities",
@@ -157,109 +157,109 @@ const char * const longopts_help[] = {
 	"Configures experimental notification behaviour",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ثابت حرف *usagestring = عدم;
 
-static int healthcheckdelay = 0;
-static int healthchecktimer = 0;
-static volatile sig_atomic_t do_healthcheck = 0;
-static volatile sig_atomic_t exiting = 0;
-static int nicelevel = INT_MIN;
-static int ionicec = -1;
-static int ioniced = 0;
-static int oom_score_adj = INT_MIN;
-static char *changeuser, *ch_root, *ch_dir;
-static uid_t uid = 0;
-static gid_t gid = 0;
-static bool stopgroup = false;
-static int devnull_fd = -1;
-static int stdin_fd;
-static int stdout_fd;
-static int stderr_fd;
-static struct notify notify;
-static char *redirect_stdin = NULL;
-static char *redirect_stderr = NULL;
-static char *redirect_stdout = NULL;
-static char *stderr_process = NULL;
-static char *stdout_process = NULL;
+ساكن صحيح healthcheckdelay = 0;
+ساكن صحيح healthchecktimer = 0;
+ساكن متطاير sig_atomic_t do_healthcheck = 0;
+ساكن متطاير sig_atomic_t exiting = 0;
+ساكن صحيح nicelevel = INT_MIN;
+ساكن صحيح ionicec = -1;
+ساكن صحيح ioniced = 0;
+ساكن صحيح oom_score_adj = INT_MIN;
+ساكن حرف *changeuser, *ch_root, *ch_dir;
+ساكن uid_t uid = 0;
+ساكن gid_t gid = 0;
+ساكن bool stopgroup = false;
+ساكن صحيح devnull_fd = -1;
+ساكن صحيح stdin_fd;
+ساكن صحيح stdout_fd;
+ساكن صحيح stderr_fd;
+ساكن بنية notify notify;
+ساكن حرف *redirect_stdin = عدم;
+ساكن حرف *redirect_stderr = عدم;
+ساكن حرف *redirect_stdout = عدم;
+ساكن حرف *stderr_process = عدم;
+ساكن حرف *stdout_process = عدم;
 #ifdef TIOCNOTTY
-static int tty_fd = -1;
+ساكن صحيح tty_fd = -1;
 #endif
-static pid_t child_pid;
-static int respawn_count = 0;
-static int64_t respawn_delay; /* default set inside main() */
-static int64_t respawn_delay_step = TM_MS(128);
-static int64_t respawn_delay_cap = TM_SEC(30);
-static int64_t respawn_period; /* default set inside main() */
-static int respawn_max = 10;
-static char *fifopath = NULL;
-static int fifo_fd = 0;
-static char *pidfile = NULL;
-static char *svcname = NULL;
-static bool verbose = false;
+ساكن pid_t child_pid;
+ساكن صحيح respawn_count = 0;
+ساكن int64_t respawn_delay; /* default set inside main() */
+ساكن int64_t respawn_delay_step = TM_MS(128);
+ساكن int64_t respawn_delay_cap = TM_SEC(30);
+ساكن int64_t respawn_period; /* default set inside main() */
+ساكن صحيح respawn_max = 10;
+ساكن حرف *fifopath = عدم;
+ساكن صحيح fifo_fd = 0;
+ساكن حرف *pidfile = عدم;
+ساكن حرف *svcname = عدم;
+ساكن bool verbose = false;
 #ifdef __linux__
-static cap_iab_t cap_iab = NULL;
-static unsigned secbits = 0;
+ساكن cap_iab_t cap_iab = عدم;
+ساكن unsigned secbits = 0;
 #endif
 #ifdef PR_SET_NO_NEW_PRIVS
-static bool no_new_privs = false;
+ساكن bool no_new_privs = false;
 #endif
 
-extern char **environ;
+خارجي حرف **environ;
 
-#if !defined(SYS_ioprio_set) && defined(__NR_ioprio_set)
+#𐤀𐤌 !defined(SYS_ioprio_set) && defined(__NR_ioprio_set)
 # define SYS_ioprio_set __NR_ioprio_set
 #endif
-#if !defined(__DragonFly__)
-static inline int ioprio_set(int which RC_UNUSED, int who RC_UNUSED,
-			     int ioprio RC_UNUSED)
+#𐤀𐤌 !defined(__DragonFly__)
+ساكن مضمن صحيح ioprio_set(صحيح which RC_UNUSED, صحيح who RC_UNUSED,
+			     صحيح ioprio RC_UNUSED)
 {
 #ifdef SYS_ioprio_set
-	return syscall(SYS_ioprio_set, which, who, ioprio);
-#else
-	return 0;
+	أرجع syscall(SYS_ioprio_set, which, who, ioprio);
+#وإلا
+	أرجع 0;
 #endif
 }
 #endif
 
-static void cleanup(void)
+ساكن فراغ cleanup(فراغ)
 {
-	free(changeuser);
+	حرر(changeuser);
 }
 
-RC_NORETURN static void re_exec_supervisor(void)
+RC_NORETURN ساكن فراغ re_exec_supervisor(فراغ)
 {
 	syslog(LOG_WARNING, "Re-executing for %s", svcname);
 	execlp("supervise-daemon", "supervise-daemon", svcname, "--reexec",
-			(char *) NULL);
+			(حرف *) عدم);
 	syslog(LOG_ERR, "Unable to execute supervise-daemon: %s",
 			strerror(errno));
 	exit(EXIT_FAILURE);
 }
 
-static void handle_signal(int sig)
+ساكن فراغ handle_signal(صحيح sig)
 {
-	int serrno = errno;
+	صحيح serrno = errno;
 	pid_t pid;
 
-	switch (sig) {
-	case SIGALRM:
+	بدل (sig) {
+	حالة SIGALRM:
 		do_healthcheck = 1;
-		break;
-	case SIGCHLD:
-		if (exiting)
-			while (waitpid((pid_t)(-1), NULL, WNOHANG) > 0) {}
-		else {
-			while ((pid = waitpid((pid_t)(-1), NULL, WNOHANG|WNOWAIT)) > 0) {
-				if (pid == child_pid)
-					break;
-				pid = waitpid(pid, NULL, WNOHANG);
+		اكسر;
+	حالة SIGCHLD:
+		𐤀𐤌 (exiting)
+			طالما (waitpid((pid_t)(-1), عدم, WNOHANG) > 0) {}
+		وإلا {
+			طالما ((pid = waitpid((pid_t)(-1), عدم, WNOHANG|WNOWAIT)) > 0) {
+				𐤀𐤌 (pid == child_pid)
+					اكسر;
+				pid = waitpid(pid, عدم, WNOHANG);
 			}
 		}
-		break;
-	case SIGTERM:
+		اكسر;
+	حالة SIGTERM:
 		exiting = 1;
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		syslog(LOG_WARNING, "caught signal %d", sig);
 		re_exec_supervisor();
 	}
@@ -267,138 +267,138 @@ static void handle_signal(int sig)
 	errno = serrno;
 }
 
-static char * expand_home(const char *home, const char *path)
+ساكن حرف * expand_home(ثابت حرف *home, ثابت حرف *path)
 {
-	char *opath, *ppath, *p, *nh;
-	struct passwd *pw;
+	حرف *opath, *ppath, *p, *nh;
+	بنية passwd *pw;
 
-	if (!path || *path != '~')
-		return xstrdup(path);
+	𐤀𐤌 (!path || *path != '~')
+		أرجع xstrdup(path);
 
 	opath = ppath = xstrdup(path);
-	if (ppath[1] != '/' && ppath[1] != '\0') {
+	𐤀𐤌 (ppath[1] != '/' && ppath[1] != '\0') {
 		p = strchr(ppath + 1, '/');
-		if (p)
+		𐤀𐤌 (p)
 			*p = '\0';
 		pw = getpwnam(ppath + 1);
-		if (pw) {
+		𐤀𐤌 (pw) {
 			home = pw->pw_dir;
 			ppath = p;
-			if (ppath)
+			𐤀𐤌 (ppath)
 				*ppath = '/';
-		} else
-			home = NULL;
-	} else
+		} وإلا
+			home = عدم;
+	} وإلا
 		ppath++;
 
-	if (!home) {
-		free(opath);
-		return xstrdup(path);
+	𐤀𐤌 (!home) {
+		حرر(opath);
+		أرجع xstrdup(path);
 	}
-	if (!ppath) {
-		free(opath);
-		return xstrdup(home);
+	𐤀𐤌 (!ppath) {
+		حرر(opath);
+		أرجع xstrdup(home);
 	}
 
 	xasprintf(&nh, "%s%s", home, ppath);
-	free(opath);
-	return nh;
+	حرر(opath);
+	أرجع nh;
 }
 
-static char *make_cmdline(char **argv)
+ساكن حرف *make_cmdline(حرف **argv)
 {
-	char **c;
-	char *cmdline;
+	حرف **c;
+	حرف *cmdline;
 	size_t len;
 	FILE *mem = xopen_memstream(&cmdline, &len);
 
-	for (c = argv; c && *c; c++) {
+	لكل (c = argv; c && *c; c++) {
 		fputs(*c, mem);
-		if (c[1])
+		𐤀𐤌 (c[1])
 			fputc(' ', mem);
 	}
 	xclose_memstream(mem);
-	return cmdline;
+	أرجع cmdline;
 }
 
-static pid_t exec_command(const char *cmd)
+ساكن pid_t exec_command(ثابت حرف *cmd)
 {
-	char *file;
+	حرف *file;
 	pid_t pid = -1;
 	sigset_t full;
 	sigset_t old;
-	struct sigaction sa;
+	بنية sigaction sa;
 
 	file = rc_service_resolve(svcname);
-	if (access(file, F_OK) != 0) {
-		free(file);
-		return 0;
+	𐤀𐤌 (access(file, F_OK) != 0) {
+		حرر(file);
+		أرجع 0;
 	}
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof (sa));
+	memset(&sa, 0, حجم (sa));
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
 
 	pid = fork();
-	if (pid == 0) {
+	𐤀𐤌 (pid == 0) {
 		/* Restore default handlers */
-		sigaction(SIGCHLD, &sa, NULL);
-		sigaction(SIGHUP, &sa, NULL);
-		sigaction(SIGINT, &sa, NULL);
-		sigaction(SIGQUIT, &sa, NULL);
-		sigaction(SIGTERM, &sa, NULL);
-		sigaction(SIGUSR1, &sa, NULL);
-		sigaction(SIGWINCH, &sa, NULL);
+		sigaction(SIGCHLD, &sa, عدم);
+		sigaction(SIGHUP, &sa, عدم);
+		sigaction(SIGINT, &sa, عدم);
+		sigaction(SIGQUIT, &sa, عدم);
+		sigaction(SIGTERM, &sa, عدم);
+		sigaction(SIGUSR1, &sa, عدم);
+		sigaction(SIGWINCH, &sa, عدم);
 
 		/* Unmask signals */
-		sigprocmask(SIG_SETMASK, &old, NULL);
+		sigprocmask(SIG_SETMASK, &old, عدم);
 
 		/* Safe to run now */
-		execl(file, file, cmd, (char *) NULL);
+		execl(file, file, cmd, (حرف *) عدم);
 		syslog(LOG_ERR, "unable to exec `%s': %s\n",
 		    file, strerror(errno));
 		_exit(EXIT_FAILURE);
 	}
 
-	if (pid == -1)
+	𐤀𐤌 (pid == -1)
 		syslog(LOG_ERR, "fork: %s\n",strerror (errno));
 
-	sigprocmask(SIG_SETMASK, &old, NULL);
-	free(file);
-	return pid;
+	sigprocmask(SIG_SETMASK, &old, عدم);
+	حرر(file);
+	أرجع pid;
 }
 
-RC_NORETURN static void child_process(char *exec, char **argv)
+RC_NORETURN ساكن فراغ child_process(حرف *exec, حرف **argv)
 {
 	RC_STRINGLIST *env_list;
 	RC_STRING *env;
-	int i;
-	char *p;
-	char *token;
+	صحيح i;
+	حرف *p;
+	حرف *token;
 	size_t len;
-	char *newpath;
-	char *np;
-	char *cmdline = NULL;
+	حرف *newpath;
+	حرف *np;
+	حرف *cmdline = عدم;
 	time_t start_time;
-	char start_count_string[20];
-	char start_time_string[20];
+	حرف start_count_string[20];
+	حرف start_time_string[20];
 	FILE *fp;
 	gid_t group_buf[32], *group_list = group_buf;
-	int group_count = ARRAY_SIZE(group_buf);
+	صحيح group_count = ARRAY_SIZE(group_buf);
 
 #ifdef HAVE_PAM
-	pam_handle_t *pamh = NULL;
-	int pamr;
-	const char *const *pamenv = NULL;
+	pam_handle_t *pamh = عدم;
+	صحيح pamr;
+	ثابت حرف *ثابت *pamenv = عدم;
 #endif
 
 	setsid();
 
-	if (svcname) {
-		start_time = time(NULL);
+	𐤀𐤌 (svcname) {
+		start_time = time(عدم);
 		from_time_t(start_time_string, start_time);
 		rc_service_value_set(svcname, "start_time", start_time_string);
 		sprintf(start_count_string, "%i", respawn_count);
@@ -407,27 +407,27 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 		rc_service_value_set(svcname, "child_pid", start_count_string);
 	}
 
-	if (nicelevel != INT_MIN) {
-		if (setpriority(PRIO_PROCESS, getpid(), nicelevel) == -1)
+	𐤀𐤌 (nicelevel != INT_MIN) {
+		𐤀𐤌 (setpriority(PRIO_PROCESS, getpid(), nicelevel) == -1)
 			eerrorx("%s: setpriority %d: %s", applet, nicelevel,
 					strerror(errno));
 		/* Open in "r+" mode to avoid creating if non-existent. */
 		fp = fopen("/proc/self/autogroup", "r+");
-		if (fp) {
+		𐤀𐤌 (fp) {
 			fprintf(fp, "%d\n", nicelevel);
 			fclose(fp);
-		} else if (errno != ENOENT)
+		} وإلا 𐤀𐤌 (errno != ENOENT)
 			eerrorx("%s: autogroup nice %d: %s", applet,
 			    nicelevel, strerror(errno));
 	}
 
-	if (ionicec != -1 && ioprio_set(1, getpid(), ionicec | ioniced) == -1)
+	𐤀𐤌 (ionicec != -1 && ioprio_set(1, getpid(), ionicec | ioniced) == -1)
 		eerrorx("%s: ioprio_set %d %d: %s", applet, ionicec, ioniced,
 				strerror(errno));
 
-	if (oom_score_adj != INT_MIN) {
+	𐤀𐤌 (oom_score_adj != INT_MIN) {
 		fp = fopen("/proc/self/oom_score_adj", "w");
-		if (!fp)
+		𐤀𐤌 (!fp)
 			eerrorx("%s: oom_score_adj %d: %s", applet,
 			    oom_score_adj, strerror(errno));
 		fprintf(fp, "%d\n", oom_score_adj);
@@ -435,67 +435,67 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	}
 
 #ifdef HAVE_PAM
-	if (changeuser != NULL) {
+	𐤀𐤌 (changeuser != عدم) {
 		pamr = pam_start("supervise-daemon",
 		    changeuser, &conv, &pamh);
 
-		if (pamr == PAM_SUCCESS)
+		𐤀𐤌 (pamr == PAM_SUCCESS)
 			pamr = pam_acct_mgmt(pamh, PAM_SILENT);
-		if (pamr == PAM_SUCCESS)
+		𐤀𐤌 (pamr == PAM_SUCCESS)
 			pamr = pam_open_session(pamh, PAM_SILENT);
-		if (pamr != PAM_SUCCESS)
+		𐤀𐤌 (pamr != PAM_SUCCESS)
 			eerrorx("%s: pam error: %s", applet, pam_strerror(pamh, pamr));
 	}
 #endif
 
-	if (changeuser && getgrouplist(changeuser, gid, group_list, &group_count) < 0) {
-		group_list = xmalloc(group_count * sizeof(*group_list));
-		if (getgrouplist(changeuser, gid, group_list, &group_count) < 0)
+	𐤀𐤌 (changeuser && getgrouplist(changeuser, gid, group_list, &group_count) < 0) {
+		group_list = xmalloc(group_count * حجم(*group_list));
+		𐤀𐤌 (getgrouplist(changeuser, gid, group_list, &group_count) < 0)
 			eerrorx("%s: getgrouplist(%s, %"PRIuMAX")", applet, changeuser, (uintmax_t)gid);
 	}
 
 	/* Close any fd's to the passwd database */
 	endpwent();
 
-	if (ch_root && chroot(ch_root) < 0)
+	𐤀𐤌 (ch_root && chroot(ch_root) < 0)
 		eerrorx("%s: chroot `%s': %s", applet, ch_root, strerror(errno));
 
-	if (ch_dir && chdir(ch_dir) < 0)
+	𐤀𐤌 (ch_dir && chdir(ch_dir) < 0)
 		eerrorx("%s: chdir `%s': %s", applet, ch_dir, strerror(errno));
 
-	if (gid && setgid(gid))
+	𐤀𐤌 (gid && setgid(gid))
 		eerrorx("%s: unable to set groupid to %"PRIuMAX, applet, (uintmax_t)gid);
-	if (changeuser && setgroups(group_count, group_list) < 0)
+	𐤀𐤌 (changeuser && setgroups(group_count, group_list) < 0)
 		eerrorx("%s: setgroups() failed", applet);
-	if (group_list != group_buf)
-		free(group_list);
+	𐤀𐤌 (group_list != group_buf)
+		حرر(group_list);
 #ifdef __linux__
-	if (uid && cap_setuid(uid))
-#else
-	if (uid && setuid(uid))
+	𐤀𐤌 (uid && cap_setuid(uid))
+#وإلا
+	𐤀𐤌 (uid && setuid(uid))
 #endif
 		eerrorx ("%s: unable to set userid to %"PRIuMAX, applet, (uintmax_t)uid);
 
 #ifdef __linux__
-	if (cap_iab != NULL) {
+	𐤀𐤌 (cap_iab != عدم) {
 		i = cap_iab_set_proc(cap_iab);
 
-		if (cap_free(cap_iab) != 0)
+		𐤀𐤌 (cap_free(cap_iab) != 0)
 			eerrorx("Could not releasable memory: %s", strerror(errno));
 
-		if (i != 0)
+		𐤀𐤌 (i != 0)
 			eerrorx("Could not set iab: %s", strerror(errno));
 	}
 
-	if (secbits != 0) {
-		if (cap_set_secbits(secbits) < 0)
+	𐤀𐤌 (secbits != 0) {
+		𐤀𐤌 (cap_set_secbits(secbits) < 0)
 			eerrorx("Could not set securebits to 0x%x: %s", secbits, strerror(errno));
 	}
 #endif
 
 #ifdef PR_SET_NO_NEW_PRIVS
-	if (no_new_privs) {
-		if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1)
+	𐤀𐤌 (no_new_privs) {
+		𐤀𐤌 (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1)
 			eerrorx("Could not set No New Privs flag: %s", strerror(errno));
 	}
 #endif
@@ -509,18 +509,18 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	/* Clean the environment of any RC_ variables */
 	env_list = rc_stringlist_new();
 	i = 0;
-	while (environ[i])
+	طالما (environ[i])
 		rc_stringlist_add(env_list, environ[i++]);
 
 #ifdef HAVE_PAM
-	if (changeuser != NULL) {
-		pamenv = (const char *const *)pam_getenvlist(pamh);
-		if (pamenv) {
-			while (*pamenv) {
+	𐤀𐤌 (changeuser != عدم) {
+		pamenv = (ثابت حرف *ثابت *)pam_getenvlist(pamh);
+		𐤀𐤌 (pamenv) {
+			طالما (*pamenv) {
 				/* Don't add strings unless they set a var */
-				if (strchr(*pamenv, '='))
+				𐤀𐤌 (strchr(*pamenv, '='))
 					putenv(xstrdup(*pamenv));
-				else
+				وإلا
 					unsetenv(*pamenv);
 				pamenv++;
 			}
@@ -530,7 +530,7 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 
 	unsetenv("SVCNAME");
 	TAILQ_FOREACH(env, env_list, entries) {
-		if (strncmp(env->value, "RC_", 3) == 0
+		𐤀𐤌 (strncmp(env->value, "RC_", 3) == 0
 				|| strncmp(env->value, "SSD_", 4) == 0
 				|| strncmp(env->value, "EINFO_", 6) == 0) {
 			*strchr(env->value, '=') = '\0';
@@ -540,21 +540,21 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	rc_stringlist_free(env_list);
 
 	/* For the path, remove the rcscript bin dir from it */
-	if ((token = getenv("PATH"))) {
+	𐤀𐤌 ((token = getenv("PATH"))) {
 		len = strlen(token);
 		newpath = np = xmalloc(len + 1);
-		while (token && *token) {
+		طالما (token && *token) {
 			p = strchr(token, ':');
-			if (p) {
+			𐤀𐤌 (p) {
 				*p++ = '\0';
-				while (*p == ':')
+				طالما (*p == ':')
 					p++;
 			}
-			if (strcmp(token, RC_LIBEXECDIR "/bin") != 0 &&
+			𐤀𐤌 (strcmp(token, RC_LIBEXECDIR "/bin") != 0 &&
 			    strcmp(token, RC_LIBEXECDIR "/sbin") != 0)
 			{
 				len = strlen(token);
-				if (np != newpath)
+				𐤀𐤌 (np != newpath)
 					*np++ = ':';
 				memcpy(np, token, len);
 				np += len;
@@ -569,93 +569,93 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	stdin_fd = devnull_fd;
 	stdout_fd = devnull_fd;
 	stderr_fd = devnull_fd;
-	if (redirect_stdin) {
-		if ((stdin_fd = xopen_nonblock(redirect_stdin, O_RDONLY, 0)) == -1)
+	𐤀𐤌 (redirect_stdin) {
+		𐤀𐤌 ((stdin_fd = xopen_nonblock(redirect_stdin, O_RDONLY, 0)) == -1)
 			eerrorx("%s: unable to redirect the input file"
 			    " for stdin `%s': %s",
 			    applet, redirect_stdin, strerror(errno));
 	}
-	if (redirect_stdout) {
-		if ((stdout_fd = xopen_nonblock(redirect_stdout,
+	𐤀𐤌 (redirect_stdout) {
+		𐤀𐤌 ((stdout_fd = xopen_nonblock(redirect_stdout,
 			    O_WRONLY | O_CREAT | O_APPEND,
 			    S_IRUSR | S_IWUSR)) == -1)
 			eerrorx("%s: unable to redirect the logfile"
 				    " for stdout `%s': %s",
 				    applet, redirect_stdout, strerror(errno));
-	} else if (stdout_process) {
+	} وإلا 𐤀𐤌 (stdout_process) {
 		stdout_fd = rc_pipe_command(stdout_process, devnull_fd);
-		if (stdout_fd == -1)
+		𐤀𐤌 (stdout_fd == -1)
 			eerrorx("%s: unable to open the logging process"
 			    " for stdout `%s': %s",
 			    applet, stdout_process, strerror(errno));
 	}
-	if (redirect_stderr) {
-		if ((stderr_fd = xopen_nonblock(redirect_stderr,
+	𐤀𐤌 (redirect_stderr) {
+		𐤀𐤌 ((stderr_fd = xopen_nonblock(redirect_stderr,
 			    O_WRONLY | O_CREAT | O_APPEND,
 			    S_IRUSR | S_IWUSR)) == -1)
 			eerrorx("%s: unable to redirect the logfile"
 			    " for stderr `%s': %s",
 			    applet, redirect_stderr, strerror(errno));
-	} else if (stderr_process) {
+	} وإلا 𐤀𐤌 (stderr_process) {
 		stderr_fd = rc_pipe_command(stderr_process, devnull_fd);
-		if (stderr_fd == -1)
+		𐤀𐤌 (stderr_fd == -1)
 			eerrorx("%s: unable to open the logging process"
 			    " for stderr `%s': %s",
 			    applet, stderr_process, strerror(errno));
 	}
 
 	dup2(stdin_fd, STDIN_FILENO);
-	if (redirect_stdout || stdout_process || rc_yesno(getenv("EINFO_QUIET")))
+	𐤀𐤌 (redirect_stdout || stdout_process || rc_yesno(getenv("EINFO_QUIET")))
 		dup2(stdout_fd, STDOUT_FILENO);
-	if (redirect_stderr || stderr_process || rc_yesno(getenv("EINFO_QUIET")))
+	𐤀𐤌 (redirect_stderr || stderr_process || rc_yesno(getenv("EINFO_QUIET")))
 		dup2(stderr_fd, STDERR_FILENO);
 
 	cloexec_fds_from(3);
 
-	if (notify.type == NOTIFY_FD) {
-		int error;
+	𐤀𐤌 (notify.type == NOTIFY_FD) {
+		صحيح error;
 
-		if (notify.fd == notify.pipe[1]) {
-			int flags = error = fcntl(notify.fd, F_GETFD, 0);
-			if (flags != -1)
+		𐤀𐤌 (notify.fd == notify.pipe[1]) {
+			صحيح flags = error = fcntl(notify.fd, F_GETFD, 0);
+			𐤀𐤌 (flags != -1)
 				error = fcntl(notify.fd, F_SETFD, flags & ~FD_CLOEXEC);
-		} else {
+		} وإلا {
 			error = dup2(notify.pipe[1], notify.fd) == -1;
 		}
 
-		if (error)
+		𐤀𐤌 (error)
 			eerrorx("%s: failed to dup ready fd: %s", applet, strerror(errno));
 	}
 
 	cmdline = make_cmdline(argv);
 	syslog(LOG_INFO, "Child command line: %s", cmdline);
-	free(cmdline);
+	حرر(cmdline);
 	execvp(exec, argv);
 
 #ifdef HAVE_PAM
-	if (changeuser != NULL && pamr == PAM_SUCCESS)
+	𐤀𐤌 (changeuser != عدم && pamr == PAM_SUCCESS)
 		pam_close_session(pamh, PAM_SILENT);
 #endif
 	eerrorx("%s: failed to exec `%s': %s", applet, exec,strerror(errno));
 }
 
-RC_NORETURN static void supervisor(char *exec, char **argv)
+RC_NORETURN ساكن فراغ supervisor(حرف *exec, حرف **argv)
 {
 	FILE *fp;
-	char buf[2048];
-	char cmd[2048];
-	int count;
-	int failing;
-	int health_status;
-	int healthcheck_respawn;
-	int i;
-	int nkilled;
-	int sig_send;
+	حرف buf[2048];
+	حرف cmd[2048];
+	صحيح count;
+	صحيح failing;
+	صحيح health_status;
+	صحيح healthcheck_respawn;
+	صحيح i;
+	صحيح nkilled;
+	صحيح sig_send;
 	pid_t health_pid;
 	pid_t wait_pid;
 	sigset_t old_signals;
 	sigset_t signals;
-	struct sigaction sa;
+	بنية sigaction sa;
 	int64_t respawn_now = 0;
 	int64_t first_spawn = 0;
 	int64_t sleep_for;
@@ -668,20 +668,20 @@ RC_NORETURN static void supervisor(char *exec, char **argv)
 	sigprocmask(SIG_SETMASK, &signals, &old_signals);
 
 	/* install signal  handler */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, حجم(sa));
 	sa.sa_handler = handle_signal;
-	sigaction(SIGALRM, &sa, NULL);
-	sigaction(SIGCHLD, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGALRM, &sa, عدم);
+	sigaction(SIGCHLD, &sa, عدم);
+	sigaction(SIGTERM, &sa, عدم);
 
 	fp = fopen(pidfile, "w");
-	if (!fp)
+	𐤀𐤌 (!fp)
 		eerrorx("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
 	fprintf(fp, "%d\n", getpid());
 	fclose(fp);
 
-	if (svcname)
-		rc_service_daemon_set(svcname, exec, (const char * const *) argv,
+	𐤀𐤌 (svcname)
+		rc_service_daemon_set(svcname, exec, (ثابت حرف * ثابت *) argv,
 				pidfile, true);
 
 	/* remove the controlling tty */
@@ -693,214 +693,214 @@ RC_NORETURN static void supervisor(char *exec, char **argv)
 	/*
 	 * Supervisor main loop
 	 */
-	if (healthcheckdelay)
+	𐤀𐤌 (healthcheckdelay)
 		alarm(healthcheckdelay);
-	else if (healthchecktimer)
+	وإلا 𐤀𐤌 (healthchecktimer)
 		alarm(healthchecktimer);
 	failing = 0;
-	while (!exiting) {
+	طالما (!exiting) {
 		healthcheck_respawn = 0;
 		fifo_fd = open(fifopath, O_RDONLY);
-		if (fifo_fd > 0) {
-			memset(buf, 0, sizeof(buf));
-			count = read(fifo_fd, buf, sizeof(buf) - 1);
+		𐤀𐤌 (fifo_fd > 0) {
+			memset(buf, 0, حجم(buf));
+			count = اقرأ(fifo_fd, buf, حجم(buf) - 1);
 			close(fifo_fd);
-			if (count != -1)
+			𐤀𐤌 (count != -1)
 				buf[count] = 0;
-			if (count == 0)
-				continue;
-			if (verbose)
+			𐤀𐤌 (count == 0)
+				استمر;
+			𐤀𐤌 (verbose)
 				syslog(LOG_DEBUG, "Received %s from fifo", buf);
-			if (strncasecmp(buf, "sig", 3) == 0) {
-				if ((sscanf(buf, "%s %d", cmd, &sig_send) == 2)
+			𐤀𐤌 (strncasecmp(buf, "sig", 3) == 0) {
+				𐤀𐤌 ((sscanf(buf, "%s %d", cmd, &sig_send) == 2)
 						&& (sig_send >= 0 && sig_send < NSIG)) {
 					syslog(LOG_INFO, "Sending signal %d to %d", sig_send,
 							child_pid);
-					if (kill(child_pid, sig_send) == -1)
+					𐤀𐤌 (kill(child_pid, sig_send) == -1)
 						syslog(LOG_ERR, "Unable to send signal %d to %d",
 								sig_send, child_pid);
 				}
 			}
-			continue;
+			استمر;
 		}
-		if (do_healthcheck) {
+		𐤀𐤌 (do_healthcheck) {
 			do_healthcheck = 0;
 			alarm(0);
-			if (verbose)
+			𐤀𐤌 (verbose)
 				syslog(LOG_DEBUG, "running health check for %s", svcname);
 			health_pid = exec_command("healthcheck");
 			health_status = rc_waitpid(health_pid);
-			if (WIFEXITED(health_status) && WEXITSTATUS(health_status) == 0)
+			𐤀𐤌 (WIFEXITED(health_status) && WEXITSTATUS(health_status) == 0)
 				alarm(healthchecktimer);
-			else {
+			وإلا {
 				syslog(LOG_WARNING, "health check for %s failed", svcname);
 				health_pid = exec_command("unhealthy");
 				rc_waitpid(health_pid);
 				syslog(LOG_INFO, "stopping %s, pid %d", exec, child_pid);
-				nkilled = run_stop_schedule(applet, NULL, NULL, child_pid, 0,
+				nkilled = run_stop_schedule(applet, عدم, عدم, child_pid, 0,
 						stopgroup, false, false, true);
-				if (nkilled < 0)
+				𐤀𐤌 (nkilled < 0)
 					syslog(LOG_INFO, "Unable to kill %d: %s",
 							child_pid, strerror(errno));
-				else
+				وإلا
 					healthcheck_respawn = 1;
 			}
 		}
-		if (exiting) {
+		𐤀𐤌 (exiting) {
 			alarm(0);
 			syslog(LOG_INFO, "stopping %s, pid %d", exec, child_pid);
-			nkilled = run_stop_schedule(applet, NULL, NULL, child_pid, 0,
+			nkilled = run_stop_schedule(applet, عدم, عدم, child_pid, 0,
 					stopgroup, false, false, true);
-			if (nkilled > 0)
+			𐤀𐤌 (nkilled > 0)
 				syslog(LOG_INFO, "killed %d processes", nkilled);
-			continue;
+			استمر;
 		}
 		wait_pid = waitpid(child_pid, &i, WNOHANG);
-		if (wait_pid == child_pid) {
-			if (WIFEXITED(i))
+		𐤀𐤌 (wait_pid == child_pid) {
+			𐤀𐤌 (WIFEXITED(i))
 				syslog(LOG_WARNING, "%s, pid %d, exited with return code %d",
 						exec, child_pid, WEXITSTATUS(i));
-			else if (WIFSIGNALED(i))
+			وإلا 𐤀𐤌 (WIFSIGNALED(i))
 				syslog(LOG_WARNING, "%s, pid %d, terminated by signal %d",
 						exec, child_pid, WTERMSIG(i));
 		}
-		if (wait_pid == child_pid || healthcheck_respawn) {
+		𐤀𐤌 (wait_pid == child_pid || healthcheck_respawn) {
 			do_healthcheck = 0;
 			healthcheck_respawn = 0;
 			alarm(0);
 			respawn_now = tm_now();
-			if (first_spawn == 0)
+			𐤀𐤌 (first_spawn == 0)
 				first_spawn = respawn_now;
-			if ((respawn_period > 0)
+			𐤀𐤌 ((respawn_period > 0)
 					&& (respawn_now - first_spawn > respawn_period)) {
 				respawn_count = 0;
 				first_spawn = 0;
-			} else
+			} وإلا
 				respawn_count++;
-			if (respawn_max > 0 && respawn_count > respawn_max) {
+			𐤀𐤌 (respawn_max > 0 && respawn_count > respawn_max) {
 				syslog(LOG_WARNING, "respawned \"%s\" too many times, exiting",
 						exec);
 				exiting = 1;
 				failing = 1;
-				continue;
+				استمر;
 			}
 			sleep_for = respawn_delay + (respawn_delay_step * respawn_count);
-			if (respawn_delay_step > 0 && sleep_for > respawn_delay_cap)
+			𐤀𐤌 (respawn_delay_step > 0 && sleep_for > respawn_delay_cap)
 				sleep_for = respawn_delay_cap;
 			tm_sleep(sleep_for, TM_NO_EINTR);
-			if (exiting)
-				continue;
+			𐤀𐤌 (exiting)
+				استمر;
 			child_pid = fork();
-			if (child_pid == -1) {
+			𐤀𐤌 (child_pid == -1) {
 				syslog(LOG_ERR, "%s: fork: %s", applet, strerror(errno));
 				exit(EXIT_FAILURE);
 			}
-			if (child_pid == 0) {
-				sigprocmask(SIG_SETMASK, &old_signals, NULL);
-				memset(&sa, 0, sizeof(sa));
+			𐤀𐤌 (child_pid == 0) {
+				sigprocmask(SIG_SETMASK, &old_signals, عدم);
+				memset(&sa, 0, حجم(sa));
 				sa.sa_handler = SIG_DFL;
-				sigaction(SIGALRM, &sa, NULL);
-				sigaction(SIGCHLD, &sa, NULL);
-				sigaction(SIGTERM, &sa, NULL);
+				sigaction(SIGALRM, &sa, عدم);
+				sigaction(SIGCHLD, &sa, عدم);
+				sigaction(SIGTERM, &sa, عدم);
 				child_process(exec, argv);
 			}
-			if (healthcheckdelay)
+			𐤀𐤌 (healthcheckdelay)
 				alarm(healthcheckdelay);
-			else if (healthchecktimer)
+			وإلا 𐤀𐤌 (healthchecktimer)
 				alarm(healthchecktimer);
 		}
 	}
 
-	if (svcname) {
-		rc_service_daemon_set(svcname, exec, (const char *const *)argv,
+	𐤀𐤌 (svcname) {
+		rc_service_daemon_set(svcname, exec, (ثابت حرف *ثابت *)argv,
 				pidfile, false);
-		rc_service_value_set(svcname, "child_pid", NULL);
+		rc_service_value_set(svcname, "child_pid", عدم);
 		rc_service_mark(svcname, RC_SERVICE_STOPPED);
-		if (failing)
+		𐤀𐤌 (failing)
 			rc_service_mark(svcname, RC_SERVICE_FAILED);
 	}
-	if (pidfile)
+	𐤀𐤌 (pidfile)
 		unlink(pidfile);
-	if (fifopath)
+	𐤀𐤌 (fifopath)
 		unlink(fifopath);
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+صحيح main(صحيح argc, حرف **argv)
 {
-	int opt;
-	char **c;
-	int x;
+	صحيح opt;
+	حرف **c;
+	صحيح x;
 	bool start = false;
 	bool stop = false;
 	bool reexec = false;
 	bool sendsig = false;
-	char *exec = NULL;
-	char *retry = NULL;
-	int sig = SIGTERM;
-	char *home = NULL;
-	int tid = 0;
+	حرف *exec = عدم;
+	حرف *retry = عدم;
+	صحيح sig = SIGTERM;
+	حرف *home = عدم;
+	صحيح tid = 0;
 	pid_t pid;
-	char *tmp;
-	char *p;
-	char *token;
-	int i;
-	int n;
-	char *exec_file = NULL;
-	char *varbuf = NULL;
-	char numbuf[64];
-	struct timespec ts;
-	struct passwd *pw;
-	struct group *gr;
+	حرف *tmp;
+	حرف *p;
+	حرف *token;
+	صحيح i;
+	صحيح n;
+	حرف *exec_file = عدم;
+	حرف *varbuf = عدم;
+	حرف numbuf[64];
+	بنية timespec ts;
+	بنية passwd *pw;
+	بنية group *gr;
 	FILE *fp;
 	mode_t numask = 022;
-	int child_argc = 0;
-	char **child_argv = NULL;
-	char *str = NULL;
-	char *cmdline = NULL;
-	const char *respawn_delay_str  = "0";
-	const char *respawn_period_str = "12sec";
+	صحيح child_argc = 0;
+	حرف **child_argv = عدم;
+	حرف *str = عدم;
+	حرف *cmdline = عدم;
+	ثابت حرف *respawn_delay_str  = "0";
+	ثابت حرف *respawn_period_str = "12sec";
 
 	applet = basename_c(argv[0]);
 	atexit(cleanup);
 	svcname = getenv("RC_SVCNAME");
-	if (!svcname)
+	𐤀𐤌 (!svcname)
 		eerrorx("%s: The RC_SVCNAME environment variable is not set", applet);
 	openlog(applet, LOG_PID, LOG_DAEMON);
 
-	if (argc <= 1 || strcmp(argv[1], svcname))
+	𐤀𐤌 (argc <= 1 || strcmp(argv[1], svcname))
 		eerrorx("%s: the first argument is %s and must be %s",
 				applet, argv[1], svcname);
 
-	if ((tmp = getenv("SSD_NICELEVEL")))
-		if (sscanf(tmp, "%d", &nicelevel) != 1)
+	𐤀𐤌 ((tmp = getenv("SSD_NICELEVEL")))
+		𐤀𐤌 (sscanf(tmp, "%d", &nicelevel) != 1)
 			eerror("%s: invalid nice level `%s' (SSD_NICELEVEL)",
 			    applet, tmp);
-	if ((tmp = getenv("SSD_IONICELEVEL"))) {
+	𐤀𐤌 ((tmp = getenv("SSD_IONICELEVEL"))) {
 		n = sscanf(tmp, "%d:%d", &ionicec, &ioniced);
-		if (n != 1 && n != 2)
+		𐤀𐤌 (n != 1 && n != 2)
 			eerror("%s: invalid ionice level `%s' (SSD_IONICELEVEL)",
 			    applet, tmp);
-		if (ionicec == 0)
+		𐤀𐤌 (ionicec == 0)
 			ioniced = 0;
-		else if (ionicec == 3)
+		وإلا 𐤀𐤌 (ionicec == 3)
 			ioniced = 7;
 		ionicec <<= 13; /* class shift */
 	}
-	if ((tmp = getenv("SSD_OOM_SCORE_ADJ")))
-		if (sscanf(tmp, "%d", &oom_score_adj) != 1)
+	𐤀𐤌 ((tmp = getenv("SSD_OOM_SCORE_ADJ")))
+		𐤀𐤌 (sscanf(tmp, "%d", &oom_score_adj) != 1)
 			eerror("%s: invalid oom_score_adj `%s' (SSD_OOM_SCORE_ADJ)",
 			    applet, tmp);
 
 	/* Get our user name and initial dir */
 	p = getenv("USER");
 	home = getenv("HOME");
-	if (home == NULL || p == NULL) {
+	𐤀𐤌 (home == عدم || p == عدم) {
 		pw = getpwuid(getuid());
-		if (pw != NULL) {
-			if (p == NULL)
+		𐤀𐤌 (pw != عدم) {
+			𐤀𐤌 (p == عدم)
 				setenv("USER", pw->pw_name, 1);
-			if (home == NULL) {
+			𐤀𐤌 (home == عدم) {
 				setenv("HOME", pw->pw_dir, 1);
 				home = pw->pw_dir;
 			}
@@ -908,223 +908,223 @@ int main(int argc, char **argv)
 	}
 
 	cmdline = make_cmdline(argv);
-	if (svcname) {
+	𐤀𐤌 (svcname) {
 		argc--;
 		argv++;
 	}
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts,
-		    (int *) 0)) != -1)
-		switch (opt) {
-		case 'a':  /* --healthcheck-timer <time> */
-			if (sscanf(optarg, "%d", &healthchecktimer) != 1 || healthchecktimer < 1)
+	طالما ((opt = getopt_long(argc, argv, getoptstring, longopts,
+		    (صحيح *) 0)) != -1)
+		بدل (opt) {
+		حالة 'a':  /* --healthcheck-timer <time> */
+			𐤀𐤌 (sscanf(optarg, "%d", &healthchecktimer) != 1 || healthchecktimer < 1)
 				eerrorx("%s: invalid health check timer %s", applet, optarg);
-			break;
+			اكسر;
 
-		case 'A':  /* --healthcheck-delay <time> */
-			if (sscanf(optarg, "%d", &healthcheckdelay) != 1 || healthcheckdelay < 1)
+		حالة 'A':  /* --healthcheck-delay <time> */
+			𐤀𐤌 (sscanf(optarg, "%d", &healthcheckdelay) != 1 || healthcheckdelay < 1)
 				eerrorx("%s: invalid health check delay %s", applet, optarg);
-			break;
+			اكسر;
 
-		case LONGOPT_CAPABILITIES:
+		حالة LONGOPT_CAPABILITIES:
 #ifdef __linux__
 			cap_iab = cap_iab_from_text(optarg);
-			if (cap_iab == NULL)
+			𐤀𐤌 (cap_iab == عدم)
 				eerrorx("Could not parse iab: %s", strerror(errno));
-#else
+#وإلا
 			eerrorx("Capabilities support not enabled");
 #endif
-			break;
+			اكسر;
 
-		case LONGOPT_SECBITS:
+		حالة LONGOPT_SECBITS:
 #ifdef __linux__
-			if (*optarg == '\0')
+			𐤀𐤌 (*optarg == '\0')
 				eerrorx("Secbits are empty");
 
-			tmp = NULL;
+			tmp = عدم;
 			secbits = strtoul(optarg, &tmp, 0);
-			if (*tmp != '\0')
+			𐤀𐤌 (*tmp != '\0')
 				eerrorx("Could not parse secbits: invalid char %c", *tmp);
-#else
+#وإلا
 			eerrorx("Capabilities support not enabled");
 #endif
-			break;
+			اكسر;
 
-		case LONGOPT_NO_NEW_PRIVS:
+		حالة LONGOPT_NO_NEW_PRIVS:
 #ifdef PR_SET_NO_NEW_PRIVS
 			no_new_privs = true;
-#else
+#وإلا
 			eerrorx("The No New Privs flag is only supported by Linux (since 3.5)");
 #endif
-			break;
+			اكسر;
 
-		case 'D':  /* --respawn-delay time */
+		حالة 'D':  /* --respawn-delay time */
 			respawn_delay_str = optarg;
-			break;
+			اكسر;
 
-		case 'I': /* --ionice */
-			if (sscanf(optarg, "%d:%d", &ionicec, &ioniced) == 0)
+		حالة 'I': /* --ionice */
+			𐤀𐤌 (sscanf(optarg, "%d:%d", &ionicec, &ioniced) == 0)
 				eerrorx("%s: invalid ionice `%s'",
 				    applet, optarg);
-			if (ionicec == 0)
+			𐤀𐤌 (ionicec == 0)
 				ioniced = 0;
-			else if (ionicec == 3)
+			وإلا 𐤀𐤌 (ionicec == 3)
 				ioniced = 7;
 			ionicec <<= 13; /* class shift */
-			break;
+			اكسر;
 
-		case 'K':  /* --stop */
+		حالة 'K':  /* --stop */
 			stop = true;
-			break;
+			اكسر;
 
-		case 'N':  /* --nice */
-			if (sscanf(optarg, "%d", &nicelevel) != 1)
+		حالة 'N':  /* --nice */
+			𐤀𐤌 (sscanf(optarg, "%d", &nicelevel) != 1)
 				eerrorx("%s: invalid nice level `%s'",
 				    applet, optarg);
-			break;
+			اكسر;
 
-		case LONGOPT_OOM_SCORE_ADJ: /* --oom-score-adj */
-			if (sscanf(optarg, "%d", &oom_score_adj) != 1)
+		حالة LONGOPT_OOM_SCORE_ADJ: /* --oom-score-adj */
+			𐤀𐤌 (sscanf(optarg, "%d", &oom_score_adj) != 1)
 				eerrorx("%s: invalid oom-score-adj `%s'",
 				    applet, optarg);
-			break;
+			اكسر;
 
-		case 'P':  /* --respawn-period time */
+		حالة 'P':  /* --respawn-period time */
 			respawn_period_str = optarg;
-			break;
+			اكسر;
 
-		case 's':  /* --signal */
+		حالة 's':  /* --signal */
 			sig = parse_signal(applet, optarg);
 			sendsig = true;
-			break;
-		case 'S':  /* --start */
+			اكسر;
+		حالة 'S':  /* --start */
 			start = true;
-			break;
+			اكسر;
 
-		case 'd':  /* --chdir /new/dir */
+		حالة 'd':  /* --chdir /new/dir */
 			ch_dir = optarg;
-			break;
+			اكسر;
 
-		case 'e': /* --env */
+		حالة 'e': /* --env */
 			putenv(optarg);
-			break;
+			اكسر;
 
-		case 'g':  /* --group <group>|<gid> */
-			if (sscanf(optarg, "%d", &tid) != 1)
+		حالة 'g':  /* --group <group>|<gid> */
+			𐤀𐤌 (sscanf(optarg, "%d", &tid) != 1)
 				gr = getgrnam(optarg);
-			else
+			وإلا
 				gr = getgrgid((gid_t)tid);
-			if (gr == NULL)
+			𐤀𐤌 (gr == عدم)
 				eerrorx("%s: group `%s' not found",
 				    applet, optarg);
 			gid = gr->gr_gid;
-			break;
+			اكسر;
 
-		case 'G': /* -G */
+		حالة 'G': /* -G */
 			stopgroup = true;
-			break;
+			اكسر;
 
-		case 'k':
-			if (parse_mode(&numask, optarg))
+		حالة 'k':
+			𐤀𐤌 (parse_mode(&numask, optarg))
 				eerrorx("%s: invalid mode `%s'",
 				    applet, optarg);
-			break;
+			اكسر;
 
-		case 'm':  /* --respawn-max count */
+		حالة 'm':  /* --respawn-max count */
 			n = sscanf(optarg, "%d", &respawn_max);
-			if (n	!= 1 || respawn_max < 0)
+			𐤀𐤌 (n	!= 1 || respawn_max < 0)
 				eerrorx("Invalid respawn-max value '%s'", optarg);
-			break;
+			اكسر;
 
-		case 'p':  /* --pidfile <pid-file> */
+		حالة 'p':  /* --pidfile <pid-file> */
 			pidfile = optarg;
-			break;
+			اكسر;
 
-		case 'R':  /* --retry <schedule>|timeout */
+		حالة 'R':  /* --retry <schedule>|timeout */
 			retry = optarg;
-			break;
-		case 'r':  /* --chroot /new/root */
+			اكسر;
+		حالة 'r':  /* --chroot /new/root */
 			ch_root = optarg;
-			break;
+			اكسر;
 
-		case 'u':  /* --user <username>|<uid> */
+		حالة 'u':  /* --user <username>|<uid> */
 		{
-			char dummy[2];
+			حرف dummy[2];
 			p = optarg;
 			tmp = strsep(&p, ":");
 			changeuser = xstrdup(tmp);
-			if (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
+			𐤀𐤌 (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
 				pw = getpwnam(tmp);
-			else
+			وإلا
 				pw = getpwuid((uid_t)tid);
 
-			if (pw == NULL)
+			𐤀𐤌 (pw == عدم)
 				eerrorx("%s: user `%s' not found",
 				    applet, tmp);
 			uid = pw->pw_uid;
 			home = pw->pw_dir;
 			unsetenv("HOME");
-			if (pw->pw_dir)
+			𐤀𐤌 (pw->pw_dir)
 				setenv("HOME", pw->pw_dir, 1);
 			unsetenv("USER");
-			if (pw->pw_name)
+			𐤀𐤌 (pw->pw_name)
 				setenv("USER", pw->pw_name, 1);
-			if (gid == 0)
+			𐤀𐤌 (gid == 0)
 				gid = pw->pw_gid;
 
-			if (p) {
+			𐤀𐤌 (p) {
 				tmp = strsep (&p, ":");
-				if (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
+				𐤀𐤌 (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
 					gr = getgrnam(tmp);
-				else
+				وإلا
 					gr = getgrgid((gid_t) tid);
 
-				if (gr == NULL)
+				𐤀𐤌 (gr == عدم)
 					eerrorx("%s: group `%s'"
 					    " not found",
 					    applet, tmp);
 				gid = gr->gr_gid;
 			}
 		}
-		break;
+		اكسر;
 
-		case '0':   /* --stdin /path/to/stdin.input-file */
+		حالة '0':   /* --stdin /path/to/stdin.input-file */
 			redirect_stdin = optarg;
-			break;
+			اكسر;
 
-		case '1':   /* --stdout /path/to/stdout.lgfile */
+		حالة '1':   /* --stdout /path/to/stdout.lgfile */
 			redirect_stdout = optarg;
-			break;
+			اكسر;
 
-		case '2':  /* --stderr /path/to/stderr.logfile */
+		حالة '2':  /* --stderr /path/to/stderr.logfile */
 			redirect_stderr = optarg;
-			break;
-		case '3':  /* --reexec */
+			اكسر;
+		حالة '3':  /* --reexec */
 			reexec = true;
-			break;
+			اكسر;
 
-		case LONGOPT_STDOUT_LOGGER:   /* --stdout-logger "command to run for stdout logging" */
+		حالة LONGOPT_STDOUT_LOGGER:   /* --stdout-logger "command to run for stdout logging" */
 			stdout_process = optarg;
-			break;
+			اكسر;
 
-		case LONGOPT_STDERR_LOGGER:  /* --stderr-logger "command to run for stderr logging" */
+		حالة LONGOPT_STDERR_LOGGER:  /* --stderr-logger "command to run for stderr logging" */
 			stderr_process = optarg;
-			break;
+			اكسر;
 
-		case LONGOPT_NOTIFY:
+		حالة LONGOPT_NOTIFY:
 			notify = notify_parse(svcname, optarg);
-			break;
+			اكسر;
 
-		case LONGOPT_RESPAWN_DELAY_STEP:
+		حالة LONGOPT_RESPAWN_DELAY_STEP:
 			respawn_delay_step = parse_duration(optarg);
-			if (respawn_delay_step < 0)
+			𐤀𐤌 (respawn_delay_step < 0)
 				eerrorx("Invalid respawn-delay-step value '%s'", optarg);
-			break;
+			اكسر;
 
-		case LONGOPT_RESPAWN_DELAY_CAP:
+		حالة LONGOPT_RESPAWN_DELAY_CAP:
 			respawn_delay_cap = parse_duration(optarg);
-			if (respawn_delay_cap < 0)
+			𐤀𐤌 (respawn_delay_cap < 0)
 				eerrorx("Invalid respawn-delay-cap value '%s'", optarg);
-			break;
+			اكسر;
 
 		case_RC_COMMON_GETOPT
 		}
@@ -1136,50 +1136,50 @@ int main(int argc, char **argv)
 	exec = *argv;
 
 	respawn_delay = parse_duration(respawn_delay_str);
-	if (respawn_delay < 0)
+	𐤀𐤌 (respawn_delay < 0)
 		eerrorx("Invalid respawn-delay value '%s'", respawn_delay_str);
 	respawn_period = parse_duration(respawn_period_str);
-	if (respawn_period < 0)
+	𐤀𐤌 (respawn_period < 0)
 		eerrorx("Invalid respawn-period value '%s'", respawn_period_str);
 
 	/* Expand ~ */
-	if (ch_dir && *ch_dir == '~')
+	𐤀𐤌 (ch_dir && *ch_dir == '~')
 		ch_dir = expand_home(home, ch_dir);
-	if (ch_root && *ch_root == '~')
+	𐤀𐤌 (ch_root && *ch_root == '~')
 		ch_root = expand_home(home, ch_root);
 
 	umask(numask);
-	if (!pidfile)
+	𐤀𐤌 (!pidfile)
 		xasprintf(&pidfile, "%s/supervise-%s.pid", rc_is_user() ? getenv("XDG_RUNTIME_DIR") : "/var/run", svcname);
 	xasprintf(&fifopath, "%s/supervise-%s.ctl", rc_svcdir(), svcname);
-	if (mkfifo(fifopath, 0600) == -1 && errno != EEXIST)
+	𐤀𐤌 (mkfifo(fifopath, 0600) == -1 && errno != EEXIST)
 		eerrorx("%s: unable to create control fifo: %s",
 				applet, strerror(errno));
 
-	if (reexec) {
+	𐤀𐤌 (reexec) {
 		str = rc_service_value_get(svcname, "argc");
 		sscanf(str, "%d", &child_argc);
-		child_argv = xmalloc((child_argc + 1) * sizeof(char *));
-		memset(child_argv, 0, (child_argc + 1) * sizeof(char *));
-		for (x = 0; x < child_argc; x++) {
+		child_argv = xmalloc((child_argc + 1) * حجم(حرف *));
+		memset(child_argv, 0, (child_argc + 1) * حجم(حرف *));
+		لكل (x = 0; x < child_argc; x++) {
 			xasprintf(&varbuf, "argv_%d", x);
 			str = rc_service_value_get(svcname, varbuf);
 			child_argv[x] = str;
-			free(varbuf);
-			varbuf = NULL;
+			حرر(varbuf);
+			varbuf = عدم;
 		}
-		free(str);
+		حرر(str);
 		str = rc_service_value_get(svcname, "child_pid");
 		sscanf(str, "%d", &child_pid);
-		free(str);
+		حرر(str);
 		exec = rc_service_value_get(svcname, "exec");
 		pidfile = rc_service_value_get(svcname, "pidfile");
 		retry = rc_service_value_get(svcname, "retry");
-		if (retry) {
+		𐤀𐤌 (retry) {
 			parse_schedule(applet, retry, sig);
 			rc_service_value_set(svcname, "retry", retry);
-		} else
-			parse_schedule(applet, NULL, sig);
+		} وإلا
+			parse_schedule(applet, عدم, sig);
 
 		str = rc_service_value_get(svcname, "respawn_delay");
 		respawn_delay = parse_duration(str);
@@ -1190,92 +1190,92 @@ int main(int argc, char **argv)
 		str = rc_service_value_get(svcname, "respawn_max");
 		sscanf(str, "%d", &respawn_max);
 		supervisor(exec, child_argv);
-	} else if (start) {
-		if (exec) {
-			if (*exec == '~')
+	} وإلا 𐤀𐤌 (start) {
+		𐤀𐤌 (exec) {
+			𐤀𐤌 (*exec == '~')
 				exec = expand_home(home, exec);
 
 			/* Validate that the binary exists if we are starting */
-			if (*exec == '/' || *exec == '.') {
+			𐤀𐤌 (*exec == '/' || *exec == '.') {
 				/* Full or relative path */
-				if (ch_root)
+				𐤀𐤌 (ch_root)
 					xasprintf(&exec_file, "%s/%s", ch_root, exec);
-				else
+				وإلا
 					xasprintf(&exec_file, "%s", exec);
-			} else {
+			} وإلا {
 				/* Something in $PATH */
 				p = tmp = xstrdup(getenv("PATH"));
-				exec_file = NULL;
-				while ((token = strsep(&p, ":"))) {
-					if (ch_root)
+				exec_file = عدم;
+				طالما ((token = strsep(&p, ":"))) {
+					𐤀𐤌 (ch_root)
 						xasprintf(&exec_file, "%s/%s/%s", ch_root, token, exec);
-					else
+					وإلا
 						xasprintf(&exec_file, "%s/%s", token, exec);
-					if (exec_file && access(exec_file, F_OK) == 0)
-						break;
-					free(exec_file);
-					exec_file = NULL;
+					𐤀𐤌 (exec_file && access(exec_file, F_OK) == 0)
+						اكسر;
+					حرر(exec_file);
+					exec_file = عدم;
 				}
-				free(tmp);
+				حرر(tmp);
 			}
-			if (access(exec_file, F_OK) != 0) {
+			𐤀𐤌 (access(exec_file, F_OK) != 0) {
 				eerror("%s: %s does not exist", applet,
 				    exec_file ? exec_file : exec);
-				free(exec_file);
+				حرر(exec_file);
 				exit(EXIT_FAILURE);
 			}
-		} else
+		} وإلا
 			eerrorx("%s: nothing to start", applet);
 
 		pid = get_pid(applet, pidfile);
-		if (pid != -1)
-			if (do_stop(applet, exec, (const char * const *)argv, pid, uid,
+		𐤀𐤌 (pid != -1)
+			𐤀𐤌 (do_stop(applet, exec, (ثابت حرف * ثابت *)argv, pid, uid,
 						0, false, false, true) > 0)
 				eerrorx("%s: %s is already running", applet, exec);
 
-		if (respawn_period > 0 && respawn_delay * respawn_max > respawn_period)
+		𐤀𐤌 (respawn_period > 0 && respawn_delay * respawn_max > respawn_period)
 			ewarn("%s: Please decrease the value of --respawn-period to less "
 				"than %"PRId64" to avoid infinite respawning", applet,
 				(respawn_delay * respawn_max + 500)/1000);
-		if (respawn_delay_step > 0 && respawn_delay > respawn_delay_cap)
+		𐤀𐤌 (respawn_delay_step > 0 && respawn_delay > respawn_delay_cap)
 			ewarn("%s: Please decrease the value of --respawn-delay (%"PRId64"ms) to less "
 				"than --respawn-delay-cap (%"PRId64"ms)", applet,
 				respawn_delay, respawn_delay_cap);
 
-		if (retry) {
+		𐤀𐤌 (retry) {
 			parse_schedule(applet, retry, sig);
 			rc_service_value_set(svcname, "retry", retry);
-		} else
-			parse_schedule(applet, NULL, sig);
+		} وإلا
+			parse_schedule(applet, عدم, sig);
 
 		einfov("Detaching to start `%s'", exec);
 		syslog(LOG_INFO, "Supervisor command line: %s", cmdline);
-		free(cmdline);
-		cmdline = NULL;
+		حرر(cmdline);
+		cmdline = عدم;
 
 		/* Remove existing pidfile */
-		if (pidfile)
+		𐤀𐤌 (pidfile)
 			unlink(pidfile);
 
 		/* Make sure we can write a pid file */
 		fp = fopen(pidfile, "w");
-		if (!fp)
+		𐤀𐤌 (!fp)
 			eerrorx("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
 		fclose(fp);
 
 		rc_service_value_set(svcname, "pidfile", pidfile);
 		rc_service_value_set(svcname, "respawn_delay", respawn_delay_str);
 		rc_service_value_set(svcname, "respawn_period", respawn_period_str);
-		snprintf(numbuf, sizeof(numbuf), "%"PRId64, respawn_delay_step);
+		snprintf(numbuf, حجم(numbuf), "%"PRId64, respawn_delay_step);
 		rc_service_value_set(svcname, "respawn_delay_step", numbuf);
-		snprintf(numbuf, sizeof(numbuf), "%"PRId64, respawn_delay_cap);
+		snprintf(numbuf, حجم(numbuf), "%"PRId64, respawn_delay_cap);
 		rc_service_value_set(svcname, "respawn_delay_cap", numbuf);
-		snprintf(numbuf, sizeof(numbuf), "%i", respawn_max);
+		snprintf(numbuf, حجم(numbuf), "%i", respawn_max);
 		rc_service_value_set(svcname, "respawn_max", numbuf);
 		child_pid = fork();
-		if (child_pid == -1)
+		𐤀𐤌 (child_pid == -1)
 			eerrorx("%s: fork: %s", applet, strerror(errno));
-		if (child_pid != 0)
+		𐤀𐤌 (child_pid != 0)
 			exit(notify_wait(applet, notify) ? EXIT_SUCCESS : EXIT_FAILURE);
 
 #ifdef TIOCNOTTY
@@ -1286,45 +1286,45 @@ int main(int argc, char **argv)
 		dup2(devnull_fd, STDOUT_FILENO);
 		dup2(devnull_fd, STDERR_FILENO);
 
-		if (notify.type == NOTIFY_FD)
+		𐤀𐤌 (notify.type == NOTIFY_FD)
 			close(notify.pipe[0]);
 
 		child_pid = fork();
-		if (child_pid == -1)
+		𐤀𐤌 (child_pid == -1)
 			eerrorx("%s: fork: %s", applet, strerror(errno));
-		else if (child_pid != 0) {
-			if (notify.type == NOTIFY_FD)
+		وإلا 𐤀𐤌 (child_pid != 0) {
+			𐤀𐤌 (notify.type == NOTIFY_FD)
 				close(notify.pipe[1]);
 			c = argv;
 			x = 0;
-			while (c && *c) {
-				varbuf = NULL;
+			طالما (c && *c) {
+				varbuf = عدم;
 				xasprintf(&varbuf, "argv_%-d",x);
 				rc_service_value_set(svcname, varbuf, *c);
-				free(varbuf);
-				varbuf = NULL;
+				حرر(varbuf);
+				varbuf = عدم;
 				x++;
 				c++;
 			}
-			snprintf(numbuf, sizeof(numbuf), "%d", x);
+			snprintf(numbuf, حجم(numbuf), "%d", x);
 			rc_service_value_set(svcname, "argc", numbuf);
 			rc_service_value_set(svcname, "exec", exec);
 			supervisor(exec, argv);
-		} else
+		} وإلا
 			child_process(exec, argv);
-	} else if (stop) {
+	} وإلا 𐤀𐤌 (stop) {
 		pid = get_pid(applet, pidfile);
-		if (pid != -1) {
+		𐤀𐤌 (pid != -1) {
 			i = kill(pid, SIGTERM);
-			if (i != 0)
+			𐤀𐤌 (i != 0)
 				/* We failed to send the signal */
 				ewarn("Unable to shut down the supervisor");
-			else {
+			وإلا {
 				/* wait for the supervisor to go down */
-				while (kill(pid, 0) == 0) {
+				طالما (kill(pid, 0) == 0) {
 					ts.tv_sec = 0;
 					ts.tv_nsec = 1;
-					nanosleep(&ts, NULL);
+					nanosleep(&ts, عدم);
 				}
 			}
 		}
@@ -1333,27 +1333,27 @@ int main(int argc, char **argv)
 		 * remove information about it as it may have unexpectedly
 		 * crashed out. We should also return success as the end
 		 * result would be the same. */
-		if (pidfile)
+		𐤀𐤌 (pidfile)
 			unlink(pidfile);
-		if (svcname) {
+		𐤀𐤌 (svcname) {
 			rc_service_daemon_set(svcname, exec,
-			    (const char *const *)argv,
+			    (ثابت حرف *ثابت *)argv,
 			    pidfile, false);
 			rc_service_mark(svcname, RC_SERVICE_STOPPED);
 		}
 		exit(EXIT_SUCCESS);
-	} else if (sendsig) {
+	} وإلا 𐤀𐤌 (sendsig) {
 		fifo_fd = open(fifopath, O_WRONLY |O_NONBLOCK);
-		if (fifo_fd < 0)
+		𐤀𐤌 (fifo_fd < 0)
 			eerrorx("%s: unable to open control fifo %s", applet, strerror(errno));
 		xasprintf(&str, "sig %d", sig);
-		x = write(fifo_fd, str, strlen(str));
-		if (x == -1) {
-			free(tmp);
+		x = اكتب(fifo_fd, str, strlen(str));
+		𐤀𐤌 (x == -1) {
+			حرر(tmp);
 			eerrorx("%s: error writing to control fifo: %s", applet,
 					strerror(errno));
 		}
-		free(tmp);
+		حرر(tmp);
 		exit(EXIT_SUCCESS);
 	}
 }
