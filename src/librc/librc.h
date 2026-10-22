@@ -15,49 +15,49 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef _LIBRC_H_
-#define _LIBRC_H_
+#अगर_अघोषित _LIBRC_H_
+#घोषणा _LIBRC_H_
 
-#define _IN_LIBRC
+#घोषणा _IN_LIBRC
 
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <paths.h>
-#include <regex.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <time.h>
-#include <unistd.h>
+#समावेश <sys/types.h>
+#समावेश <sys/param.h>
+#समावेश <sys/stat.h>
+#समावेश <sys/time.h>
+#समावेश <sys/wait.h>
+#समावेश <ctype.h>
+#समावेश <dirent.h>
+#समावेश <errno.h>
+#समावेश <fcntl.h>
+#समावेश <libgen.h>
+#समावेश <limits.h>
+#समावेश <paths.h>
+#समावेश <regex.h>
+#समावेश <signal.h>
+#समावेश <stdarg.h>
+#समावेश <stdbool.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <string.h>
+#समावेश <strings.h>
+#समावेश <time.h>
+#समावेश <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
-  #include <sys/user.h>
-  #endif
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#else
-#include <sys/param.h>
-#endif
+#अगर defined(BSD) && !defined(__GNU__)
+  #अगर !defined(__NetBSD__)
+  #समावेश <sys/user.h>
+  #पूर्ण_अगर
+#समावेश <sys/param.h>
+#समावेश <sys/sysctl.h>
+#समावेश <kvm.h>
+#अन्यथा
+#समावेश <sys/param.h>
+#पूर्ण_अगर
 
-#include "rc.h"
-#include "misc.h"
+#समावेश "rc.h"
+#समावेश "misc.h"
 
-static const char *const dirnames[RC_DIR_SYS_MAX] =
+अटल स्थिर अक्षर *स्थिर dirnames[RC_DIR_SYS_MAX] =
 {
 	[RC_DIR_STARTING] = "starting",
 	[RC_DIR_STARTED] = "started",
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
-void clear_dirfds(void);
+RC_STRINGLIST *config_list(पूर्णांक dirfd, स्थिर अक्षर *pathname);
+व्योम clear_dirfds(व्योम);
 
-#endif
+#पूर्ण_अगर

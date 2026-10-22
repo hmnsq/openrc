@@ -15,111 +15,111 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <dirent.h>
-#include <dlfcn.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#समावेश <sys/types.h>
+#समावेश <sys/wait.h>
+#समावेश <dirent.h>
+#समावेश <dlfcn.h>
+#समावेश <errno.h>
+#समावेश <fcntl.h>
+#समावेश <signal.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <string.h>
+#समावेश <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "plugin.h"
-#include "helpers.h"
+#समावेश "einfo.h"
+#समावेश "queue.h"
+#समावेश "rc.h"
+#समावेश "rc_exec.h"
+#समावेश "plugin.h"
+#समावेश "helpers.h"
 
-#define RC_PLUGIN_HOOK "rc_plugin_hook"
+#घोषणा RC_PLUGIN_HOOK "rc_plugin_hook"
 
 bool rc_in_plugin = false;
 
-typedef struct plugin
+प्रकार काष्ठा plugin
 {
-	char *name;
-	void *handle;
-	int (*hook)(RC_HOOK, const char *);
+	अक्षर *name;
+	व्योम *handle;
+	पूर्णांक (*hook)(RC_HOOK, स्थिर अक्षर *);
 	TAILQ_ENTRY(plugin) entries;
 } PLUGIN;
-TAILQ_HEAD(, plugin) plugins;
+TAILQ_शीर्ष(, plugin) plugins;
 
-void
-rc_plugin_load(void)
+व्योम
+rc_plugin_load(व्योम)
 {
-	DIR *dp;
-	struct dirent *d;
+	सूची *dp;
+	काष्ठा dirent *d;
 	PLUGIN *plugin;
-	char *file = NULL;
-	void *h;
-	union {
-		void *sym;
-		int (*func)(RC_HOOK, const char *);
+	अक्षर *file = शून्य;
+	व्योम *h;
+	जोड़ {
+		व्योम *sym;
+		पूर्णांक (*func)(RC_HOOK, स्थिर अक्षर *);
 	} fptr;
 
 	/* Don't load plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	अगर (rc_in_plugin)
+		वापस;
 
 	TAILQ_INIT(&plugins);
 
-	if (!(dp = opendir(RC_PLUGINDIR)))
-		return;
+	अगर (!(dp = सूची_खोलो(RC_PLUGINDIR)))
+		वापस;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	जबतक ((d = सूची_पढ़ो(dp))) {
+		अगर (d->d_name[0] == '.')
+			जारी;
 
 		xasprintf(&file, RC_PLUGINDIR "/%s",  d->d_name);
 		h = dlopen(file, RTLD_LAZY);
-		free(file);
-		if (h == NULL) {
+		मुक्त(file);
+		अगर (h == शून्य) {
 			eerror("dlopen: %s", dlerror());
-			continue;
+			जारी;
 		}
 
 		fptr.sym = dlsym(h, RC_PLUGIN_HOOK);
-		if (fptr.func == NULL) {
+		अगर (fptr.func == शून्य) {
 			eerror("%s: cannot find symbol `%s'",
 			    d->d_name, RC_PLUGIN_HOOK);
 			dlclose(h);
-		} else {
-			plugin = xmalloc(sizeof(*plugin));
+		} अन्यथा {
+			plugin = xmalloc(माप(*plugin));
 			plugin->name = xstrdup(d->d_name);
 			plugin->handle = h;
 			plugin->hook = fptr.func;
-			TAILQ_INSERT_TAIL(&plugins, plugin, entries);
+			TAILQ_जोड़ो_पुच्छ(&plugins, plugin, entries);
 		}
 	}
-	closedir(dp);
+	बंद_सूची(dp);
 }
 
-void
-rc_plugin_run(RC_HOOK hook, const char *value)
+व्योम
+rc_plugin_run(RC_HOOK hook, स्थिर अक्षर *मूल्य)
 {
 	PLUGIN *plugin;
-	struct sigaction sa;
+	काष्ठा sigaction sa;
 	sigset_t empty;
 	sigset_t full;
 	sigset_t old;
-	int pfd[2];
+	पूर्णांक pfd[2];
 	pid_t pid;
-	char *buffer;
-	char *token;
-	char *p;
+	अक्षर *बफर;
+	अक्षर *token;
+	अक्षर *p;
 	ssize_t nr;
-	int retval;
+	पूर्णांक retval;
 
 	/* Don't run plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	अगर (rc_in_plugin)
+		वापस;
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = SIG_DFL;
+	स_रखो(&sa, 0, माप(sa));
+	sa.sa_handler = संक_पूर्व;
 	sigemptyset(&sa.sa_mask);
 	sigemptyset(&empty);
 	sigfillset(&full);
@@ -130,82 +130,82 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 		 * O_CLOEXEC to stop any scripts from inheriting us.
 		 * This is actually quite important as without this, the splash
 		 * plugin will probably hang when running in silent mode. */
-		if (pipe2(pfd, O_CLOEXEC) == -1) {
-			eerror("pipe2: %s", strerror(errno));
-			return;
+		अगर (pipe2(pfd, O_CLOEXEC) == -1) {
+			eerror("pipe2: %s", म_त्रुटि(त्रुटि_सं));
+			वापस;
 		}
 
 		sigprocmask(SIG_SETMASK, &full, &old);
 
 		/* We run the plugin in a new process so we never crash
 		 * or otherwise affected by it */
-		if ((pid = fork()) == -1) {
-			eerror("fork: %s", strerror(errno));
-			break;
+		अगर ((pid = विभाजन()) == -1) {
+			eerror("fork: %s", म_त्रुटि(त्रुटि_सं));
+			अवरोध;
 		}
 
-		if (pid == 0) {
+		अगर (pid == 0) {
 			/* Restore default handlers */
-			sigaction(SIGCHLD, &sa, NULL);
-			sigaction(SIGHUP,  &sa, NULL);
-			sigaction(SIGINT,  &sa, NULL);
-			sigaction(SIGQUIT, &sa, NULL);
-			sigaction(SIGTERM, &sa, NULL);
-			sigaction(SIGUSR1, &sa, NULL);
-			sigaction(SIGWINCH, &sa, NULL);
-			sigprocmask(SIG_SETMASK, &old, NULL);
+			sigaction(SIGCHLD, &sa, शून्य);
+			sigaction(SIGHUP,  &sa, शून्य);
+			sigaction(संक_विघ्न,  &sa, शून्य);
+			sigaction(SIGQUIT, &sa, शून्य);
+			sigaction(संक_इति, &sa, शून्य);
+			sigaction(SIGUSR1, &sa, शून्य);
+			sigaction(SIGWINCH, &sa, शून्य);
+			sigprocmask(SIG_SETMASK, &old, शून्य);
 
 			rc_in_plugin = true;
-			close(pfd[0]);
+			बंद(pfd[0]);
 			rc_environ_fd = fdopen(pfd[1], "w");
-			retval = plugin->hook(hook, value);
-			fclose(rc_environ_fd);
-			rc_environ_fd = NULL;
+			retval = plugin->hook(hook, मूल्य);
+			ख_बंद(rc_environ_fd);
+			rc_environ_fd = शून्य;
 
 			/* Just in case the plugin sets this to false */
 			rc_in_plugin = true;
-			exit(retval);
+			निकास(retval);
 		}
 
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		close(pfd[1]);
-		buffer = xmalloc(sizeof(char) * BUFSIZ);
-		memset(buffer, 0, BUFSIZ);
+		sigprocmask(SIG_SETMASK, &old, शून्य);
+		बंद(pfd[1]);
+		बफर = xmalloc(माप(अक्षर) * बफ_मान);
+		स_रखो(बफर, 0, बफ_मान);
 
-		while ((nr = read(pfd[0], buffer, BUFSIZ)) > 0) {
-			p = buffer;
-			while (*p && p - buffer < nr) {
+		जबतक ((nr = पढ़ो(pfd[0], बफर, बफ_मान)) > 0) {
+			p = बफर;
+			जबतक (*p && p - बफर < nr) {
 				token = strsep(&p, "=");
-				if (token) {
+				अगर (token) {
 					unsetenv(token);
-					if (*p) {
+					अगर (*p) {
 						setenv(token, p, 1);
-						p += strlen(p) + 1;
-					} else
+						p += म_माप(p) + 1;
+					} अन्यथा
 						p++;
 				}
 			}
 		}
 
-		free(buffer);
-		close(pfd[0]);
+		मुक्त(बफर);
+		बंद(pfd[0]);
 
 		rc_waitpid(pid);
 	}
 }
 
-void
-rc_plugin_unload(void)
+व्योम
+rc_plugin_unload(व्योम)
 {
 	PLUGIN *plugin = TAILQ_FIRST(&plugins);
-	PLUGIN *next;
+	PLUGIN *अग्र;
 
-	while (plugin) {
-		next = TAILQ_NEXT(plugin, entries);
+	जबतक (plugin) {
+		अग्र = TAILQ_अग्र(plugin, entries);
 		dlclose(plugin->handle);
-		free(plugin->name);
-		free(plugin);
-		plugin = next;
+		मुक्त(plugin->name);
+		मुक्त(plugin);
+		plugin = अग्र;
 	}
 	TAILQ_INIT(&plugins);
 }

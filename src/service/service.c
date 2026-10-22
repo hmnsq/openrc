@@ -10,59 +10,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#समावेश <errno.h>
+#समावेश <stdbool.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#समावेश "einfo.h"
+#समावेश "rc.h"
+#समावेश "misc.h"
+#समावेश "helpers.h"
 
-const char *applet = NULL;
+स्थिर अक्षर *applet = शून्य;
 
-int main(int argc, char **argv)
+पूर्णांक मुख्य(पूर्णांक argc, अक्षर **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
+	अक्षर *service;
+	अक्षर *exec;
+	पूर्णांक idx = 0;
 	RC_SERVICE state, bit;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	अगर (argc > 1)
 		service = argv[1];
-	else
-		service = getenv("RC_SVCNAME");
+	अन्यथा
+		service = दो_पर्या("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	अगर (service == शून्य || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
 	bit = lookup_service_state(applet);
-	if (bit) {
+	अगर (bit) {
 		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
-		service = getenv("RC_SVCNAME");
+	} अन्यथा अगर (म_भेद(applet, "service_started_daemon") == 0) {
+		service = दो_पर्या("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		अगर (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
-			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+			माला_पूछो(argv[3], "%d", &idx);
+		} अन्यथा अगर (argc == 3) {
+			अगर (माला_पूछो(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
-		ok = rc_service_started_daemon(service, exec, NULL, idx);
+		ok = rc_service_started_daemon(service, exec, शून्य, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
-		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} अन्यथा अगर (म_भेद(applet, "service_crashed") == 0) {
+		ok = ( rc_service_daemons_crashed(service) && त्रुटि_सं != EACCES);
+	} अन्यथा
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	वापस ok ? निकास_सफल : निकास_त्रुटि;
 }

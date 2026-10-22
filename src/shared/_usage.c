@@ -10,80 +10,80 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#समावेश <ctype.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#समावेश "rc.h"
+#समावेश "_usage.h"
+#समावेश "version.h"
+#समावेश "helpers.h"
 
 
-void set_quiet_options(void)
+व्योम set_quiet_options(व्योम)
 {
-	static int qcount = 0;
+	अटल पूर्णांक qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	चयन (qcount) {
+	हाल 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		अवरोध;
+	हाल 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		अवरोध;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN व्योम show_version(व्योम)
 {
-	const char *systype = NULL;
+	स्थिर अक्षर *systype = शून्य;
 
-	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
-		printf(" [%s]", systype);
-	printf(") %s", VERSION);
-#ifdef BRANDING
-	printf(" (%s)", BRANDING);
-#endif
-	printf("\n");
-	exit(EXIT_SUCCESS);
+	म_लिखो("%s (OpenRC", applet);
+	अगर ((systype = rc_sys()))
+		म_लिखो(" [%s]", systype);
+	म_लिखो(") %s", VERSION);
+#अगर_घोषित BRANDING
+	म_लिखो(" (%s)", BRANDING);
+#पूर्ण_अगर
+	म_लिखो("\n");
+	निकास(निकास_सफल);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN व्योम usage(पूर्णांक exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	स्थिर अक्षर * स्थिर has_arg[] = { "", "<arg>", "[arg]" };
+	पूर्णांक i;
+	पूर्णांक len;
+	अक्षर *lo;
+	अक्षर *p;
+	अक्षर *token;
+	अक्षर val[4] = "-?,";
 
-	if (usagestring)
-		printf("%s", usagestring);
-	else
-		printf("Usage: %s [options] ", applet);
+	अगर (usagestring)
+		म_लिखो("%s", usagestring);
+	अन्यथा
+		म_लिखो("Usage: %s [options] ", applet);
 
-	if (extraopts)
-		printf("%s", extraopts);
+	अगर (extraopts)
+		म_लिखो("%s", extraopts);
 
-	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	म_लिखो("\n\nOptions: [ %s ]\n", getoptstring);
+	क्रम (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
-		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
+		len = म_लिखो("  %3s --%s %s", है_छाप(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		जबतक ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
-				printf("%*s", len, "");
-			puts(token);
+			अगर (len > 0)
+				म_लिखो("%*s", len, "");
+			माला_दो(token);
 			len = 0;
 		}
-		free(lo);
+		मुक्त(lo);
 	}
-	exit(exit_status);
+	निकास(exit_status);
 }

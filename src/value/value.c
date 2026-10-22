@@ -10,61 +10,61 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#define SYSLOG_NAMES
+#घोषणा SYSLOG_NAMES
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#समावेश <stdbool.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "helpers.h"
+#समावेश "einfo.h"
+#समावेश "rc.h"
+#समावेश "helpers.h"
 
-const char *applet = NULL;
-extern char **environ;
+स्थिर अक्षर *applet = शून्य;
+बाह्य अक्षर **environ;
 
-int main(int argc, char **argv)
+पूर्णांक मुख्य(पूर्णांक argc, अक्षर **argv)
 {
-	char *service = getenv("RC_SVCNAME");
-	enum { GET, SET, EXPORT } action;
-	char *option = NULL;
+	अक्षर *service = दो_पर्या("RC_SVCNAME");
+	क्रमागत { GET, SET, EXPORT } action;
+	अक्षर *option = शून्य;
 
 	applet = basename_c(argv[0]);
-	if (service == NULL)
+	अगर (service == शून्य)
 		eerrorx("%s: no service specified", applet);
 
-	if (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
+	अगर (म_भेद(applet, "service_get_value") == 0 || म_भेद(applet, "get_options") == 0)
 		action = GET;
-	else if (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
+	अन्यथा अगर (म_भेद(applet, "service_set_value") == 0 || म_भेद(applet, "save_options") == 0)
 		action = SET;
-	else if (strcmp(applet, "service_export") == 0)
+	अन्यथा अगर (म_भेद(applet, "service_export") == 0)
 		action = EXPORT;
-	else
+	अन्यथा
 		eerrorx("%s: unknown applet", applet);
 
-	if (argc < 2 || !argv[1] || *argv[1] == '\0')
+	अगर (argc < 2 || !argv[1] || *argv[1] == '\0')
 		eerrorx("%s: no %s specified", applet, action == EXPORT ? "variable" : "option");
 
-	switch (action) {
-	case GET:
-		if (!(option = rc_service_value_get(service, argv[1])))
-			return EXIT_FAILURE;
-		printf("%s", option);
-		free(option);
-		return EXIT_SUCCESS;
-	case SET:
-		return rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
-	case EXPORT:
-		for (int i = 1; i < argc; i++) {
-			char *var;
-			if (rc_service_getenv(service, argv[i], NULL) > 0)
-				continue;
-			else if ((var = getenv(argv[i])))
+	चयन (action) {
+	हाल GET:
+		अगर (!(option = rc_service_मूल्य_get(service, argv[1])))
+			वापस निकास_त्रुटि;
+		म_लिखो("%s", option);
+		मुक्त(option);
+		वापस निकास_सफल;
+	हाल SET:
+		वापस rc_service_मूल्य_set(service, argv[1], argv[2]) ? निकास_सफल : निकास_त्रुटि;
+	हाल EXPORT:
+		क्रम (पूर्णांक i = 1; i < argc; i++) {
+			अक्षर *var;
+			अगर (rc_service_getenv(service, argv[i], शून्य) > 0)
+				जारी;
+			अन्यथा अगर ((var = दो_पर्या(argv[i])))
 				rc_service_setenv(service, argv[i], var);
-			else
+			अन्यथा
 				ewarn("%s: Missing reexport variable '%s'", service, argv[i]);
 		}
-		return EXIT_SUCCESS;
+		वापस निकास_सफल;
 	}
 }

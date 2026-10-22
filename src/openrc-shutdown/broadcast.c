@@ -14,52 +14,52 @@
  */
 
 
-#include <fcntl.h>
-#include <paths.h>
-#include <pwd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/sysmacros.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <time.h>
-#include <unistd.h>
-#include <utmpx.h>
+#समावेश <fcntl.h>
+#समावेश <paths.h>
+#समावेश <pwd.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <string.h>
+#समावेश <sys/stat.h>
+#समावेश <sys/sysmacros.h>
+#समावेश <sys/types.h>
+#समावेश <sys/utsname.h>
+#समावेश <time.h>
+#समावेश <unistd.h>
+#समावेश <utmpx.h>
 
-#include "broadcast.h"
-#include "helpers.h"
+#समावेश "broadcast.h"
+#समावेश "helpers.h"
 
-#ifndef _PATH_DEV
+#अगर_अघोषित _PATH_DEV
 # define _PATH_DEV	"/dev/"
-#endif
+#पूर्ण_अगर
 
 
-static void getuidtty(char **userp, char **ttyp)
+अटल व्योम getuidtty(अक्षर **userp, अक्षर **ttyp)
 {
-	struct passwd 		*pwd;
+	काष्ठा passwd 		*pwd;
 	uid_t			uid;
-	char			*tty;
-	static char		uidbuf[32];
-	char		*ttynm = NULL;
+	अक्षर			*tty;
+	अटल अक्षर		uidbuf[32];
+	अक्षर		*ttynm = शून्य;
 
 	uid = getuid();
-	if ((pwd = getpwuid(uid)) != NULL) {
+	अगर ((pwd = getpwuid(uid)) != शून्य) {
 		uidbuf[0] = 0;
-		strncat(uidbuf, pwd->pw_name, sizeof(uidbuf) - 1);
-	} else {
-		if (uid)
-			sprintf(uidbuf, "uid %d", (int) uid);
-		else
-			sprintf(uidbuf, "root");
+		म_जोड़न(uidbuf, pwd->pw_name, माप(uidbuf) - 1);
+	} अन्यथा {
+		अगर (uid)
+			प्र_लिखो(uidbuf, "uid %d", (पूर्णांक) uid);
+		अन्यथा
+			प्र_लिखो(uidbuf, "root");
 	}
 
-	if ((tty = ttyname(0)) != NULL) {
-		const size_t plen = strlen(_PATH_DEV);
-		if (strncmp(tty, _PATH_DEV, plen) == 0) {
+	अगर ((tty = ttyname(0)) != शून्य) {
+		स्थिर माप_प्रकार plen = म_माप(_PATH_DEV);
+		अगर (म_भेदन(tty, _PATH_DEV, plen) == 0) {
 			tty += plen;
-			if (tty[0] == '/')
+			अगर (tty[0] == '/')
 				tty++;
 		}
 		xasprintf(&ttynm, "(%s) ", tty);
@@ -72,16 +72,16 @@ static void getuidtty(char **userp, char **ttyp)
 /*
  *	Check whether the given filename looks like a tty device.
  */
-static int file_isatty(const char *fname)
+अटल पूर्णांक file_isatty(स्थिर अक्षर *fname)
 {
-	struct stat		st;
-	int			major;
+	काष्ठा stat		st;
+	पूर्णांक			major;
 
-	if (stat(fname, &st) < 0)
-		return 0;
+	अगर (stat(fname, &st) < 0)
+		वापस 0;
 
-	if (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
-		return 0;
+	अगर (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
+		वापस 0;
 
 	/*
 	 *	It would be an impossible task to list all major/minors
@@ -90,12 +90,12 @@ static int file_isatty(const char *fname)
 	 *	printers and tapes.
 	 */
 	major = major(st.st_dev);
-	if (major == 1 || major == 2 || major == 6 || major == 9 ||
+	अगर (major == 1 || major == 2 || major == 6 || major == 9 ||
 	    major == 12 || major == 16 || major == 21 || major == 27 ||
 	    major == 37 || major == 96 || major == 97 || major == 206 ||
 	    major == 230)
-		return 0;
-	return 1;
+		वापस 0;
+	वापस 1;
 }
 
 /*
@@ -103,19 +103,19 @@ static int file_isatty(const char *fname)
  *
  *	NB: Not multithread safe.
  */
-void broadcast(char *text)
+व्योम broadcast(अक्षर *text)
 {
-	char *tty;
-	char *user;
-	struct utsname name;
-	time_t t;
-	char *date;
-	char *p;
-	char *line = NULL;
-	int len;
-	int fd;
-	char *term = NULL;
-	struct utmpx *utmp;
+	अक्षर *tty;
+	अक्षर *user;
+	काष्ठा utsname name;
+	समय_प्रकार t;
+	अक्षर *date;
+	अक्षर *p;
+	अक्षर *पंक्ति = शून्य;
+	पूर्णांक len;
+	पूर्णांक fd;
+	अक्षर *term = शून्य;
+	काष्ठा utmpx *utmp;
 
 	getuidtty(&user, &tty);
 
@@ -126,45 +126,45 @@ void broadcast(char *text)
 	uname(&name);
 
 	/* Get the time */
-	time(&t);
-	date = ctime(&t);
-	p = strchr(date, '\n');
-	if (p)
+	समय(&t);
+	date = स_समय(&t);
+	p = म_अक्षर(date, '\n');
+	अगर (p)
 		*p = 0;
 
-	len = xasprintf(&line, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
+	len = xasprintf(&पंक्ति, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
 			user, name.nodename, tty, date, text);
-	free(tty);
+	मुक्त(tty);
 
 	/*
 	 *	Fork to avoid hanging in a write()
 	 */
-	if (fork() != 0)
-		return;
+	अगर (विभाजन() != 0)
+		वापस;
 
 	setutxent();
 
-	while ((utmp = getutxent()) != NULL) {
-		if (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
-			continue;
-		if (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
+	जबतक ((utmp = getutxent()) != शून्य) {
+		अगर (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
+			जारी;
+		अगर (म_भेदन(utmp->ut_line, _PATH_DEV, म_माप(_PATH_DEV)) == 0)
 			xasprintf(&term, "%s", utmp->ut_line);
-		else
+		अन्यथा
 			xasprintf(&term, "%s%s", _PATH_DEV, utmp->ut_line);
-		if (strstr(term, "/../")) {
-			free(term);
-			continue;
+		अगर (म_माला(term, "/../")) {
+			मुक्त(term);
+			जारी;
 		}
 
 		/* Open it non-delay */
-		if (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
-			if (isatty(fd))
-				write(fd, line, len);
-			close(fd);
+		अगर (file_isatty(term) && (fd = खोलो(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
+			अगर (isatty(fd))
+				ग_लिखो(fd, पंक्ति, len);
+			बंद(fd);
 		}
-		free(term);
+		मुक्त(term);
 	}
 	endutxent();
-	free(line);
-	exit(0);
+	मुक्त(पंक्ति);
+	निकास(0);
 }

@@ -31,8 +31,8 @@
  *	@(#)queue.h	8.5 (Berkeley) 8/20/94
  */
 
-#ifndef	_SYS_QUEUE_H_
-#define	_SYS_QUEUE_H_
+#अगर_अघोषित	_SYS_QUEUE_H_
+#घोषणा	_SYS_QUEUE_H_
 
 /*
  * This file defines five types of data structures: singly-linked lists,
@@ -87,576 +87,576 @@
  * The caveat is that on other systems some other header
  * must provide NULL before the macros can be used.
  */
-#ifdef __NetBSD__
-#include <sys/null.h>
-#endif
+#अगर_घोषित __NetBSD__
+#समावेश <sys/null.h>
+#पूर्ण_अगर
 
-#if defined(QUEUEDEBUG)
-# if defined(_KERNEL)
+#अगर defined(QUEUEDEBUG)
+# अगर defined(_KERNEL)
 #  define QUEUEDEBUG_ABORT(...) panic(__VA_ARGS__)
-# else
+# अन्यथा
 #  include <err.h>
 #  define QUEUEDEBUG_ABORT(...) err(1, __VA_ARGS__)
 # endif
-#endif
+#पूर्ण_अगर
 
 /*
  * Singly-linked List definitions.
  */
-#define	SLIST_HEAD(name, type)						\
-struct name {								\
-	struct type *slh_first;	/* first element */			\
+#घोषणा	SLIST_शीर्ष(name, type)						\
+काष्ठा name {								\
+	काष्ठा type *slh_first;	/* first element */			\
 }
 
-#define	SLIST_HEAD_INITIALIZER(head)					\
-	{ NULL }
+#घोषणा	SLIST_शीर्ष_INITIALIZER(शीर्ष_2)					\
+	{ शून्य }
 
-#define	SLIST_ENTRY(type)						\
-struct {								\
-	struct type *sle_next;	/* next element */			\
+#घोषणा	SLIST_ENTRY(type)						\
+काष्ठा {								\
+	काष्ठा type *sle_अग्र;	/* next element */			\
 }
 
 /*
  * Singly-linked List access methods.
  */
-#define	SLIST_FIRST(head)	((head)->slh_first)
-#define	SLIST_END(head)		NULL
-#define	SLIST_EMPTY(head)	((head)->slh_first == NULL)
-#define	SLIST_NEXT(elm, field)	((elm)->field.sle_next)
+#घोषणा	SLIST_FIRST(शीर्ष_2)	((शीर्ष_2)->slh_first)
+#घोषणा	SLIST_END(शीर्ष_2)		शून्य
+#घोषणा	SLIST_EMPTY(शीर्ष_2)	((शीर्ष_2)->slh_first == शून्य)
+#घोषणा	SLIST_अग्र(elm, field)	((elm)->field.sle_अग्र)
 
-#define	SLIST_FOREACH(var, head, field)					\
-	for((var) = (head)->slh_first;					\
-	    (var) != SLIST_END(head);					\
-	    (var) = (var)->field.sle_next)
+#घोषणा	SLIST_FOREACH(var, शीर्ष_2, field)					\
+	क्रम((var) = (शीर्ष_2)->slh_first;					\
+	    (var) != SLIST_END(शीर्ष_2);					\
+	    (var) = (var)->field.sle_अग्र)
 
-#define	SLIST_FOREACH_SAFE(var, head, field, tvar)			\
-	for ((var) = SLIST_FIRST((head));				\
-	    (var) != SLIST_END(head) &&					\
-	    ((tvar) = SLIST_NEXT((var), field), 1);			\
+#घोषणा	SLIST_FOREACH_SAFE(var, शीर्ष_2, field, tvar)			\
+	क्रम ((var) = SLIST_FIRST((शीर्ष_2));				\
+	    (var) != SLIST_END(शीर्ष_2) &&					\
+	    ((tvar) = SLIST_अग्र((var), field), 1);			\
 	    (var) = (tvar))
 
 /*
  * Singly-linked List functions.
  */
-#define	SLIST_INIT(head) do {						\
-	(head)->slh_first = SLIST_END(head);				\
-} while (/*CONSTCOND*/0)
+#घोषणा	SLIST_INIT(शीर्ष_2) करो {						\
+	(शीर्ष_2)->slh_first = SLIST_END(शीर्ष_2);				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SLIST_INSERT_AFTER(slistelm, elm, field) do {			\
-	(elm)->field.sle_next = (slistelm)->field.sle_next;		\
-	(slistelm)->field.sle_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#घोषणा	SLIST_जोड़ो_AFTER(slistelm, elm, field) करो {			\
+	(elm)->field.sle_अग्र = (slistelm)->field.sle_अग्र;		\
+	(slistelm)->field.sle_अग्र = (elm);				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SLIST_INSERT_HEAD(head, elm, field) do {			\
-	(elm)->field.sle_next = (head)->slh_first;			\
-	(head)->slh_first = (elm);					\
-} while (/*CONSTCOND*/0)
+#घोषणा	SLIST_जोड़ो_शीर्ष(शीर्ष_2, elm, field) करो {			\
+	(elm)->field.sle_अग्र = (शीर्ष_2)->slh_first;			\
+	(शीर्ष_2)->slh_first = (elm);					\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SLIST_REMOVE_AFTER(slistelm, field) do {			\
-	(slistelm)->field.sle_next =					\
-	    SLIST_NEXT(SLIST_NEXT((slistelm), field), field);		\
-} while (/*CONSTCOND*/0)
+#घोषणा	SLIST_REMOVE_AFTER(slistelm, field) करो {			\
+	(slistelm)->field.sle_अग्र =					\
+	    SLIST_अग्र(SLIST_अग्र((slistelm), field), field);		\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SLIST_REMOVE_HEAD(head, field) do {				\
-	(head)->slh_first = (head)->slh_first->field.sle_next;		\
-} while (/*CONSTCOND*/0)
+#घोषणा	SLIST_REMOVE_शीर्ष(शीर्ष_2, field) करो {				\
+	(शीर्ष_2)->slh_first = (शीर्ष_2)->slh_first->field.sle_अग्र;		\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SLIST_REMOVE(head, elm, type, field) do {			\
-	if ((head)->slh_first == (elm)) {				\
-		SLIST_REMOVE_HEAD((head), field);			\
+#घोषणा	SLIST_REMOVE(शीर्ष_2, elm, type, field) करो {			\
+	अगर ((शीर्ष_2)->slh_first == (elm)) {				\
+		SLIST_REMOVE_शीर्ष((शीर्ष_2), field);			\
 	}								\
-	else {								\
-		struct type *curelm = (head)->slh_first;		\
-		while(curelm->field.sle_next != (elm))			\
-			curelm = curelm->field.sle_next;		\
-		curelm->field.sle_next =				\
-		    curelm->field.sle_next->field.sle_next;		\
+	अन्यथा {								\
+		काष्ठा type *curelm = (शीर्ष_2)->slh_first;		\
+		जबतक(curelm->field.sle_अग्र != (elm))			\
+			curelm = curelm->field.sle_अग्र;		\
+		curelm->field.sle_अग्र =				\
+		    curelm->field.sle_अग्र->field.sle_अग्र;		\
 	}								\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
 
 /*
  * List definitions.
  */
-#define	LIST_HEAD(name, type)						\
-struct name {								\
-	struct type *lh_first;	/* first element */			\
+#घोषणा	LIST_शीर्ष(name, type)						\
+काष्ठा name {								\
+	काष्ठा type *lh_first;	/* first element */			\
 }
 
-#define	LIST_HEAD_INITIALIZER(head)					\
-	{ NULL }
+#घोषणा	LIST_शीर्ष_INITIALIZER(शीर्ष_2)					\
+	{ शून्य }
 
-#define	LIST_ENTRY(type)						\
-struct {								\
-	struct type *le_next;	/* next element */			\
-	struct type **le_prev;	/* address of previous next element */	\
+#घोषणा	LIST_ENTRY(type)						\
+काष्ठा {								\
+	काष्ठा type *le_अग्र;	/* next element */			\
+	काष्ठा type **le_पूर्व;	/* address of previous next element */	\
 }
 
 /*
  * List access methods.
  */
-#define	LIST_FIRST(head)		((head)->lh_first)
-#define	LIST_END(head)			NULL
-#define	LIST_EMPTY(head)		((head)->lh_first == LIST_END(head))
-#define	LIST_NEXT(elm, field)		((elm)->field.le_next)
+#घोषणा	LIST_FIRST(शीर्ष_2)		((शीर्ष_2)->lh_first)
+#घोषणा	LIST_END(शीर्ष_2)			शून्य
+#घोषणा	LIST_EMPTY(शीर्ष_2)		((शीर्ष_2)->lh_first == LIST_END(शीर्ष_2))
+#घोषणा	LIST_अग्र(elm, field)		((elm)->field.le_अग्र)
 
-#define	LIST_FOREACH(var, head, field)					\
-	for ((var) = ((head)->lh_first);				\
-	    (var) != LIST_END(head);					\
-	    (var) = ((var)->field.le_next))
+#घोषणा	LIST_FOREACH(var, शीर्ष_2, field)					\
+	क्रम ((var) = ((शीर्ष_2)->lh_first);				\
+	    (var) != LIST_END(शीर्ष_2);					\
+	    (var) = ((var)->field.le_अग्र))
 
-#define	LIST_FOREACH_SAFE(var, head, field, tvar)			\
-	for ((var) = LIST_FIRST((head));				\
-	    (var) != LIST_END(head) &&					\
-	    ((tvar) = LIST_NEXT((var), field), 1);			\
+#घोषणा	LIST_FOREACH_SAFE(var, शीर्ष_2, field, tvar)			\
+	क्रम ((var) = LIST_FIRST((शीर्ष_2));				\
+	    (var) != LIST_END(शीर्ष_2) &&					\
+	    ((tvar) = LIST_अग्र((var), field), 1);			\
 	    (var) = (tvar))
 
-#define	LIST_MOVE(head1, head2) do {					\
+#घोषणा	LIST_MOVE(head1, head2) करो {					\
 	LIST_INIT((head2));						\
-	if (!LIST_EMPTY((head1))) {					\
+	अगर (!LIST_EMPTY((head1))) {					\
 		(head2)->lh_first = (head1)->lh_first;			\
 		LIST_INIT((head1));					\
 	}								\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
 /*
  * List functions.
  */
-#if defined(QUEUEDEBUG)
-#define	QUEUEDEBUG_LIST_INSERT_HEAD(head, elm, field)			\
-	if ((head)->lh_first &&						\
-	    (head)->lh_first->field.le_prev != &(head)->lh_first)	\
-		QUEUEDEBUG_ABORT("LIST_INSERT_HEAD %p %s:%d", (head),	\
-		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_LIST_OP(elm, field)					\
-	if ((elm)->field.le_next &&					\
-	    (elm)->field.le_next->field.le_prev !=			\
-	    &(elm)->field.le_next)					\
+#अगर defined(QUEUEDEBUG)
+#घोषणा	QUEUEDEBUG_LIST_जोड़ो_शीर्ष(शीर्ष_2, elm, field)			\
+	अगर ((शीर्ष_2)->lh_first &&						\
+	    (शीर्ष_2)->lh_first->field.le_पूर्व != &(शीर्ष_2)->lh_first)	\
+		QUEUEDEBUG_ABORT("LIST_INSERT_HEAD %p %s:%d", (शीर्ष_2),	\
+		    __खाता__, __LINE__);
+#घोषणा	QUEUEDEBUG_LIST_OP(elm, field)					\
+	अगर ((elm)->field.le_अग्र &&					\
+	    (elm)->field.le_अग्र->field.le_पूर्व !=			\
+	    &(elm)->field.le_अग्र)					\
 		QUEUEDEBUG_ABORT("LIST_* forw %p %s:%d", (elm),		\
-		    __FILE__, __LINE__);				\
-	if (*(elm)->field.le_prev != (elm))				\
+		    __खाता__, __LINE__);				\
+	अगर (*(elm)->field.le_पूर्व != (elm))				\
 		QUEUEDEBUG_ABORT("LIST_* back %p %s:%d", (elm),		\
-		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_LIST_POSTREMOVE(elm, field)				\
-	(elm)->field.le_next = (void *)1L;				\
-	(elm)->field.le_prev = (void *)1L;
-#else
-#define	QUEUEDEBUG_LIST_INSERT_HEAD(head, elm, field)
-#define	QUEUEDEBUG_LIST_OP(elm, field)
-#define	QUEUEDEBUG_LIST_POSTREMOVE(elm, field)
-#endif
+		    __खाता__, __LINE__);
+#घोषणा	QUEUEDEBUG_LIST_POSTREMOVE(elm, field)				\
+	(elm)->field.le_अग्र = (व्योम *)1L;				\
+	(elm)->field.le_पूर्व = (व्योम *)1L;
+#अन्यथा
+#घोषणा	QUEUEDEBUG_LIST_जोड़ो_शीर्ष(शीर्ष_2, elm, field)
+#घोषणा	QUEUEDEBUG_LIST_OP(elm, field)
+#घोषणा	QUEUEDEBUG_LIST_POSTREMOVE(elm, field)
+#पूर्ण_अगर
 
-#define	LIST_INIT(head) do {						\
-	(head)->lh_first = LIST_END(head);				\
-} while (/*CONSTCOND*/0)
+#घोषणा	LIST_INIT(शीर्ष_2) करो {						\
+	(शीर्ष_2)->lh_first = LIST_END(शीर्ष_2);				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_AFTER(listelm, elm, field) do {			\
+#घोषणा	LIST_जोड़ो_AFTER(listelm, elm, field) करो {			\
 	QUEUEDEBUG_LIST_OP((listelm), field)				\
-	if (((elm)->field.le_next = (listelm)->field.le_next) != 	\
-	    LIST_END(head))						\
-		(listelm)->field.le_next->field.le_prev =		\
-		    &(elm)->field.le_next;				\
-	(listelm)->field.le_next = (elm);				\
-	(elm)->field.le_prev = &(listelm)->field.le_next;		\
-} while (/*CONSTCOND*/0)
+	अगर (((elm)->field.le_अग्र = (listelm)->field.le_अग्र) != 	\
+	    LIST_END(शीर्ष_2))						\
+		(listelm)->field.le_अग्र->field.le_पूर्व =		\
+		    &(elm)->field.le_अग्र;				\
+	(listelm)->field.le_अग्र = (elm);				\
+	(elm)->field.le_पूर्व = &(listelm)->field.le_अग्र;		\
+} जबतक (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_BEFORE(listelm, elm, field) do {			\
+#घोषणा	LIST_जोड़ो_BEFORE(listelm, elm, field) करो {			\
 	QUEUEDEBUG_LIST_OP((listelm), field)				\
-	(elm)->field.le_prev = (listelm)->field.le_prev;		\
-	(elm)->field.le_next = (listelm);				\
-	*(listelm)->field.le_prev = (elm);				\
-	(listelm)->field.le_prev = &(elm)->field.le_next;		\
-} while (/*CONSTCOND*/0)
+	(elm)->field.le_पूर्व = (listelm)->field.le_पूर्व;		\
+	(elm)->field.le_अग्र = (listelm);				\
+	*(listelm)->field.le_पूर्व = (elm);				\
+	(listelm)->field.le_पूर्व = &(elm)->field.le_अग्र;		\
+} जबतक (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_HEAD(head, elm, field) do {				\
-	QUEUEDEBUG_LIST_INSERT_HEAD((head), (elm), field)		\
-	if (((elm)->field.le_next = (head)->lh_first) != LIST_END(head))\
-		(head)->lh_first->field.le_prev = &(elm)->field.le_next;\
-	(head)->lh_first = (elm);					\
-	(elm)->field.le_prev = &(head)->lh_first;			\
-} while (/*CONSTCOND*/0)
+#घोषणा	LIST_जोड़ो_शीर्ष(शीर्ष_2, elm, field) करो {				\
+	QUEUEDEBUG_LIST_जोड़ो_शीर्ष((शीर्ष_2), (elm), field)		\
+	अगर (((elm)->field.le_अग्र = (शीर्ष_2)->lh_first) != LIST_END(शीर्ष_2))\
+		(शीर्ष_2)->lh_first->field.le_पूर्व = &(elm)->field.le_अग्र;\
+	(शीर्ष_2)->lh_first = (elm);					\
+	(elm)->field.le_पूर्व = &(शीर्ष_2)->lh_first;			\
+} जबतक (/*CONSTCOND*/0)
 
-#define	LIST_REMOVE(elm, field) do {					\
+#घोषणा	LIST_REMOVE(elm, field) करो {					\
 	QUEUEDEBUG_LIST_OP((elm), field)				\
-	if ((elm)->field.le_next != NULL)				\
-		(elm)->field.le_next->field.le_prev = 			\
-		    (elm)->field.le_prev;				\
-	*(elm)->field.le_prev = (elm)->field.le_next;			\
+	अगर ((elm)->field.le_अग्र != शून्य)				\
+		(elm)->field.le_अग्र->field.le_पूर्व = 			\
+		    (elm)->field.le_पूर्व;				\
+	*(elm)->field.le_पूर्व = (elm)->field.le_अग्र;			\
 	QUEUEDEBUG_LIST_POSTREMOVE((elm), field)			\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
-#define LIST_REPLACE(elm, elm2, field) do {				\
-	if (((elm2)->field.le_next = (elm)->field.le_next) != NULL)	\
-		(elm2)->field.le_next->field.le_prev =			\
-		    &(elm2)->field.le_next;				\
-	(elm2)->field.le_prev = (elm)->field.le_prev;			\
-	*(elm2)->field.le_prev = (elm2);				\
+#घोषणा LIST_REPLACE(elm, elm2, field) करो {				\
+	अगर (((elm2)->field.le_अग्र = (elm)->field.le_अग्र) != शून्य)	\
+		(elm2)->field.le_अग्र->field.le_पूर्व =			\
+		    &(elm2)->field.le_अग्र;				\
+	(elm2)->field.le_पूर्व = (elm)->field.le_पूर्व;			\
+	*(elm2)->field.le_पूर्व = (elm2);				\
 	QUEUEDEBUG_LIST_POSTREMOVE((elm), field)			\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
 /*
  * Simple queue definitions.
  */
-#define	SIMPLEQ_HEAD(name, type)					\
-struct name {								\
-	struct type *sqh_first;	/* first element */			\
-	struct type **sqh_last;	/* addr of last next element */		\
+#घोषणा	SIMPLEQ_शीर्ष(name, type)					\
+काष्ठा name {								\
+	काष्ठा type *sqh_first;	/* first element */			\
+	काष्ठा type **sqh_last;	/* addr of last next element */		\
 }
 
-#define	SIMPLEQ_HEAD_INITIALIZER(head)					\
-	{ NULL, &(head).sqh_first }
+#घोषणा	SIMPLEQ_शीर्ष_INITIALIZER(शीर्ष_2)					\
+	{ शून्य, &(शीर्ष_2).sqh_first }
 
-#define	SIMPLEQ_ENTRY(type)						\
-struct {								\
-	struct type *sqe_next;	/* next element */			\
+#घोषणा	SIMPLEQ_ENTRY(type)						\
+काष्ठा {								\
+	काष्ठा type *sqe_अग्र;	/* next element */			\
 }
 
 /*
  * Simple queue access methods.
  */
-#define	SIMPLEQ_FIRST(head)		((head)->sqh_first)
-#define	SIMPLEQ_END(head)		NULL
-#define	SIMPLEQ_EMPTY(head)		((head)->sqh_first == SIMPLEQ_END(head))
-#define	SIMPLEQ_NEXT(elm, field)	((elm)->field.sqe_next)
+#घोषणा	SIMPLEQ_FIRST(शीर्ष_2)		((शीर्ष_2)->sqh_first)
+#घोषणा	SIMPLEQ_END(शीर्ष_2)		शून्य
+#घोषणा	SIMPLEQ_EMPTY(शीर्ष_2)		((शीर्ष_2)->sqh_first == SIMPLEQ_END(शीर्ष_2))
+#घोषणा	SIMPLEQ_अग्र(elm, field)	((elm)->field.sqe_अग्र)
 
-#define	SIMPLEQ_FOREACH(var, head, field)				\
-	for ((var) = ((head)->sqh_first);				\
-	    (var) != SIMPLEQ_END(head);					\
-	    (var) = ((var)->field.sqe_next))
+#घोषणा	SIMPLEQ_FOREACH(var, शीर्ष_2, field)				\
+	क्रम ((var) = ((शीर्ष_2)->sqh_first);				\
+	    (var) != SIMPLEQ_END(शीर्ष_2);					\
+	    (var) = ((var)->field.sqe_अग्र))
 
-#define	SIMPLEQ_FOREACH_SAFE(var, head, field, next)			\
-	for ((var) = ((head)->sqh_first);				\
-	    (var) != SIMPLEQ_END(head) &&				\
-	    ((next = ((var)->field.sqe_next)), 1);			\
-	    (var) = (next))
+#घोषणा	SIMPLEQ_FOREACH_SAFE(var, शीर्ष_2, field, अग्र)			\
+	क्रम ((var) = ((शीर्ष_2)->sqh_first);				\
+	    (var) != SIMPLEQ_END(शीर्ष_2) &&				\
+	    ((अग्र = ((var)->field.sqe_अग्र)), 1);			\
+	    (var) = (अग्र))
 
 /*
  * Simple queue functions.
  */
-#define	SIMPLEQ_INIT(head) do {						\
-	(head)->sqh_first = NULL;					\
-	(head)->sqh_last = &(head)->sqh_first;				\
-} while (/*CONSTCOND*/0)
+#घोषणा	SIMPLEQ_INIT(शीर्ष_2) करो {						\
+	(शीर्ष_2)->sqh_first = शून्य;					\
+	(शीर्ष_2)->sqh_last = &(शीर्ष_2)->sqh_first;				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_HEAD(head, elm, field) do {			\
-	if (((elm)->field.sqe_next = (head)->sqh_first) == NULL)	\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-	(head)->sqh_first = (elm);					\
-} while (/*CONSTCOND*/0)
+#घोषणा	SIMPLEQ_जोड़ो_शीर्ष(शीर्ष_2, elm, field) करो {			\
+	अगर (((elm)->field.sqe_अग्र = (शीर्ष_2)->sqh_first) == शून्य)	\
+		(शीर्ष_2)->sqh_last = &(elm)->field.sqe_अग्र;		\
+	(शीर्ष_2)->sqh_first = (elm);					\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_TAIL(head, elm, field) do {			\
-	(elm)->field.sqe_next = NULL;					\
-	*(head)->sqh_last = (elm);					\
-	(head)->sqh_last = &(elm)->field.sqe_next;			\
-} while (/*CONSTCOND*/0)
+#घोषणा	SIMPLEQ_जोड़ो_पुच्छ(शीर्ष_2, elm, field) करो {			\
+	(elm)->field.sqe_अग्र = शून्य;					\
+	*(शीर्ष_2)->sqh_last = (elm);					\
+	(शीर्ष_2)->sqh_last = &(elm)->field.sqe_अग्र;			\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	if (((elm)->field.sqe_next = (listelm)->field.sqe_next) == NULL)\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-	(listelm)->field.sqe_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#घोषणा	SIMPLEQ_जोड़ो_AFTER(शीर्ष_2, listelm, elm, field) करो {		\
+	अगर (((elm)->field.sqe_अग्र = (listelm)->field.sqe_अग्र) == शून्य)\
+		(शीर्ष_2)->sqh_last = &(elm)->field.sqe_अग्र;		\
+	(listelm)->field.sqe_अग्र = (elm);				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_REMOVE_HEAD(head, field) do {				\
-	if (((head)->sqh_first = (head)->sqh_first->field.sqe_next) == NULL) \
-		(head)->sqh_last = &(head)->sqh_first;			\
-} while (/*CONSTCOND*/0)
+#घोषणा	SIMPLEQ_REMOVE_शीर्ष(शीर्ष_2, field) करो {				\
+	अगर (((शीर्ष_2)->sqh_first = (शीर्ष_2)->sqh_first->field.sqe_अग्र) == शून्य) \
+		(शीर्ष_2)->sqh_last = &(शीर्ष_2)->sqh_first;			\
+} जबतक (/*CONSTCOND*/0)
 
-#define SIMPLEQ_REMOVE_AFTER(head, elm, field) do {			\
-	if (((elm)->field.sqe_next = (elm)->field.sqe_next->field.sqe_next) \
-	    == NULL)							\
-		(head)->sqh_last = &(elm)->field.sqe_next;		\
-} while (/*CONSTCOND*/0)
+#घोषणा SIMPLEQ_REMOVE_AFTER(शीर्ष_2, elm, field) करो {			\
+	अगर (((elm)->field.sqe_अग्र = (elm)->field.sqe_अग्र->field.sqe_अग्र) \
+	    == शून्य)							\
+		(शीर्ष_2)->sqh_last = &(elm)->field.sqe_अग्र;		\
+} जबतक (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_REMOVE(head, elm, type, field) do {			\
-	if ((head)->sqh_first == (elm)) {				\
-		SIMPLEQ_REMOVE_HEAD((head), field);			\
-	} else {							\
-		struct type *curelm = (head)->sqh_first;		\
-		while (curelm->field.sqe_next != (elm))			\
-			curelm = curelm->field.sqe_next;		\
-		if ((curelm->field.sqe_next =				\
-			curelm->field.sqe_next->field.sqe_next) == NULL) \
-			    (head)->sqh_last = &(curelm)->field.sqe_next; \
+#घोषणा	SIMPLEQ_REMOVE(शीर्ष_2, elm, type, field) करो {			\
+	अगर ((शीर्ष_2)->sqh_first == (elm)) {				\
+		SIMPLEQ_REMOVE_शीर्ष((शीर्ष_2), field);			\
+	} अन्यथा {							\
+		काष्ठा type *curelm = (शीर्ष_2)->sqh_first;		\
+		जबतक (curelm->field.sqe_अग्र != (elm))			\
+			curelm = curelm->field.sqe_अग्र;		\
+		अगर ((curelm->field.sqe_अग्र =				\
+			curelm->field.sqe_अग्र->field.sqe_अग्र) == शून्य) \
+			    (शीर्ष_2)->sqh_last = &(curelm)->field.sqe_अग्र; \
 	}								\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_CONCAT(head1, head2) do {				\
-	if (!SIMPLEQ_EMPTY((head2))) {					\
+#घोषणा	SIMPLEQ_CONCAT(head1, head2) करो {				\
+	अगर (!SIMPLEQ_EMPTY((head2))) {					\
 		*(head1)->sqh_last = (head2)->sqh_first;		\
 		(head1)->sqh_last = (head2)->sqh_last;		\
 		SIMPLEQ_INIT((head2));					\
 	}								\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_LAST(head, type, field)					\
-	(SIMPLEQ_EMPTY((head)) ?						\
-		NULL :							\
-	        ((struct type *)(void *)				\
-		((char *)((head)->sqh_last) - offsetof(struct type, field))))
+#घोषणा	SIMPLEQ_LAST(शीर्ष_2, type, field)					\
+	(SIMPLEQ_EMPTY((शीर्ष_2)) ?						\
+		शून्य :							\
+	        ((काष्ठा type *)(व्योम *)				\
+		((अक्षर *)((शीर्ष_2)->sqh_last) - दुरत्व(काष्ठा type, field))))
 
 /*
  * Tail queue definitions.
  */
-#define	_TAILQ_HEAD(name, type, qual)					\
-struct name {								\
+#घोषणा	TAILQ_शीर्ष_2(name, type, qual)					\
+काष्ठा name {								\
 	qual type *tqh_first;		/* first element */		\
 	qual type *qual *tqh_last;	/* addr of last next element */	\
 }
-#define TAILQ_HEAD(name, type)	_TAILQ_HEAD(name, struct type,)
+#घोषणा TAILQ_शीर्ष(name, type)	TAILQ_शीर्ष_2(name, काष्ठा type,)
 
-#define	TAILQ_HEAD_INITIALIZER(head)					\
-	{ TAILQ_END(head), &(head).tqh_first }
+#घोषणा	TAILQ_शीर्ष_INITIALIZER(शीर्ष_2)					\
+	{ TAILQ_END(शीर्ष_2), &(शीर्ष_2).tqh_first }
 
-#define	_TAILQ_ENTRY(type, qual)					\
-struct {								\
-	qual type *tqe_next;		/* next element */		\
-	qual type *qual *tqe_prev;	/* address of previous next element */\
+#घोषणा	_TAILQ_ENTRY(type, qual)					\
+काष्ठा {								\
+	qual type *tqe_अग्र;		/* next element */		\
+	qual type *qual *tqe_पूर्व;	/* address of previous next element */\
 }
-#define TAILQ_ENTRY(type)	_TAILQ_ENTRY(struct type,)
+#घोषणा TAILQ_ENTRY(type)	_TAILQ_ENTRY(काष्ठा type,)
 
 /*
  * Tail queue access methods.
  */
-#define	TAILQ_FIRST(head)		((head)->tqh_first)
-#define	TAILQ_END(head)			(NULL)
-#define	TAILQ_NEXT(elm, field)		((elm)->field.tqe_next)
-#define	TAILQ_LAST(head, headname) \
-	(*(((struct headname *)((head)->tqh_last))->tqh_last))
-#define	TAILQ_PREV(elm, headname, field) \
-	(*(((struct headname *)((elm)->field.tqe_prev))->tqh_last))
-#define	TAILQ_EMPTY(head)		(TAILQ_FIRST(head) == TAILQ_END(head))
+#घोषणा	TAILQ_FIRST(शीर्ष_2)		((शीर्ष_2)->tqh_first)
+#घोषणा	TAILQ_END(शीर्ष_2)			(शून्य)
+#घोषणा	TAILQ_अग्र(elm, field)		((elm)->field.tqe_अग्र)
+#घोषणा	TAILQ_LAST(शीर्ष_2, headname) \
+	(*(((काष्ठा headname *)((शीर्ष_2)->tqh_last))->tqh_last))
+#घोषणा	TAILQ_पूर्व(elm, headname, field) \
+	(*(((काष्ठा headname *)((elm)->field.tqe_पूर्व))->tqh_last))
+#घोषणा	TAILQ_EMPTY(शीर्ष_2)		(TAILQ_FIRST(शीर्ष_2) == TAILQ_END(शीर्ष_2))
 
 
-#define	TAILQ_FOREACH(var, head, field)					\
-	for ((var) = ((head)->tqh_first);				\
-	    (var) != TAILQ_END(head);					\
-	    (var) = ((var)->field.tqe_next))
+#घोषणा	TAILQ_FOREACH(var, शीर्ष_2, field)					\
+	क्रम ((var) = ((शीर्ष_2)->tqh_first);				\
+	    (var) != TAILQ_END(शीर्ष_2);					\
+	    (var) = ((var)->field.tqe_अग्र))
 
-#define	TAILQ_FOREACH_SAFE(var, head, field, next)			\
-	for ((var) = ((head)->tqh_first);				\
-	    (var) != TAILQ_END(head) &&					\
-	    ((next) = TAILQ_NEXT(var, field), 1); (var) = (next))
+#घोषणा	TAILQ_FOREACH_SAFE(var, शीर्ष_2, field, अग्र)			\
+	क्रम ((var) = ((शीर्ष_2)->tqh_first);				\
+	    (var) != TAILQ_END(शीर्ष_2) &&					\
+	    ((अग्र) = TAILQ_अग्र(var, field), 1); (var) = (अग्र))
 
-#define	TAILQ_FOREACH_REVERSE(var, head, headname, field)		\
-	for ((var) = (*(((struct headname *)((head)->tqh_last))->tqh_last));\
-	    (var) != TAILQ_END(head);					\
-	    (var) = (*(((struct headname *)((var)->field.tqe_prev))->tqh_last)))
+#घोषणा	TAILQ_FOREACH_REVERSE(var, शीर्ष_2, headname, field)		\
+	क्रम ((var) = (*(((काष्ठा headname *)((शीर्ष_2)->tqh_last))->tqh_last));\
+	    (var) != TAILQ_END(शीर्ष_2);					\
+	    (var) = (*(((काष्ठा headname *)((var)->field.tqe_पूर्व))->tqh_last)))
 
-#define	TAILQ_FOREACH_REVERSE_SAFE(var, head, headname, field, prev)	\
-	for ((var) = TAILQ_LAST((head), headname);			\
-	    (var) != TAILQ_END(head) && 				\
-	    ((prev) = TAILQ_PREV((var), headname, field), 1); (var) = (prev))
+#घोषणा	TAILQ_FOREACH_REVERSE_SAFE(var, शीर्ष_2, headname, field, पूर्व)	\
+	क्रम ((var) = TAILQ_LAST((शीर्ष_2), headname);			\
+	    (var) != TAILQ_END(शीर्ष_2) && 				\
+	    ((पूर्व) = TAILQ_पूर्व((var), headname, field), 1); (var) = (पूर्व))
 
 /*
  * Tail queue functions.
  */
-#if defined(QUEUEDEBUG)
-#define	QUEUEDEBUG_TAILQ_INSERT_HEAD(head, elm, field)			\
-	if ((head)->tqh_first &&					\
-	    (head)->tqh_first->field.tqe_prev != &(head)->tqh_first)	\
-		QUEUEDEBUG_ABORT("TAILQ_INSERT_HEAD %p %s:%d", (head),	\
-		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_INSERT_TAIL(head, elm, field)			\
-	if (*(head)->tqh_last != NULL)					\
-		QUEUEDEBUG_ABORT("TAILQ_INSERT_TAIL %p %s:%d", (head),	\
-		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_OP(elm, field)					\
-	if ((elm)->field.tqe_next &&					\
-	    (elm)->field.tqe_next->field.tqe_prev !=			\
-	    &(elm)->field.tqe_next)					\
+#अगर defined(QUEUEDEBUG)
+#घोषणा	QUEUEDEBUG_TAILQ_जोड़ो_शीर्ष(शीर्ष_2, elm, field)			\
+	अगर ((शीर्ष_2)->tqh_first &&					\
+	    (शीर्ष_2)->tqh_first->field.tqe_पूर्व != &(शीर्ष_2)->tqh_first)	\
+		QUEUEDEBUG_ABORT("TAILQ_INSERT_HEAD %p %s:%d", (शीर्ष_2),	\
+		    __खाता__, __LINE__);
+#घोषणा	QUEUEDEBUG_TAILQ_जोड़ो_पुच्छ(शीर्ष_2, elm, field)			\
+	अगर (*(शीर्ष_2)->tqh_last != शून्य)					\
+		QUEUEDEBUG_ABORT("TAILQ_INSERT_TAIL %p %s:%d", (शीर्ष_2),	\
+		    __खाता__, __LINE__);
+#घोषणा	QUEUEDEBUG_TAILQ_OP(elm, field)					\
+	अगर ((elm)->field.tqe_अग्र &&					\
+	    (elm)->field.tqe_अग्र->field.tqe_पूर्व !=			\
+	    &(elm)->field.tqe_अग्र)					\
 		QUEUEDEBUG_ABORT("TAILQ_* forw %p %s:%d", (elm),	\
-		    __FILE__, __LINE__);				\
-	if (*(elm)->field.tqe_prev != (elm))				\
+		    __खाता__, __LINE__);				\
+	अगर (*(elm)->field.tqe_पूर्व != (elm))				\
 		QUEUEDEBUG_ABORT("TAILQ_* back %p %s:%d", (elm),	\
-		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_PREREMOVE(head, elm, field)			\
-	if ((elm)->field.tqe_next == NULL &&				\
-	    (head)->tqh_last != &(elm)->field.tqe_next)			\
+		    __खाता__, __LINE__);
+#घोषणा	QUEUEDEBUG_TAILQ_PREREMOVE(शीर्ष_2, elm, field)			\
+	अगर ((elm)->field.tqe_अग्र == शून्य &&				\
+	    (शीर्ष_2)->tqh_last != &(elm)->field.tqe_अग्र)			\
 		QUEUEDEBUG_ABORT("TAILQ_PREREMOVE head %p elm %p %s:%d",\
-		    (head), (elm), __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, field)				\
-	(elm)->field.tqe_next = (void *)1L;				\
-	(elm)->field.tqe_prev = (void *)1L;
-#else
-#define	QUEUEDEBUG_TAILQ_INSERT_HEAD(head, elm, field)
-#define	QUEUEDEBUG_TAILQ_INSERT_TAIL(head, elm, field)
-#define	QUEUEDEBUG_TAILQ_OP(elm, field)
-#define	QUEUEDEBUG_TAILQ_PREREMOVE(head, elm, field)
-#define	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, field)
-#endif
+		    (शीर्ष_2), (elm), __खाता__, __LINE__);
+#घोषणा	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, field)				\
+	(elm)->field.tqe_अग्र = (व्योम *)1L;				\
+	(elm)->field.tqe_पूर्व = (व्योम *)1L;
+#अन्यथा
+#घोषणा	QUEUEDEBUG_TAILQ_जोड़ो_शीर्ष(शीर्ष_2, elm, field)
+#घोषणा	QUEUEDEBUG_TAILQ_जोड़ो_पुच्छ(शीर्ष_2, elm, field)
+#घोषणा	QUEUEDEBUG_TAILQ_OP(elm, field)
+#घोषणा	QUEUEDEBUG_TAILQ_PREREMOVE(शीर्ष_2, elm, field)
+#घोषणा	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, field)
+#पूर्ण_अगर
 
-#define	TAILQ_INIT(head) do {						\
-	(head)->tqh_first = TAILQ_END(head);				\
-	(head)->tqh_last = &(head)->tqh_first;				\
-} while (/*CONSTCOND*/0)
+#घोषणा	TAILQ_INIT(शीर्ष_2) करो {						\
+	(शीर्ष_2)->tqh_first = TAILQ_END(शीर्ष_2);				\
+	(शीर्ष_2)->tqh_last = &(शीर्ष_2)->tqh_first;				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_HEAD(head, elm, field) do {			\
-	QUEUEDEBUG_TAILQ_INSERT_HEAD((head), (elm), field)		\
-	if (((elm)->field.tqe_next = (head)->tqh_first) != TAILQ_END(head))\
-		(head)->tqh_first->field.tqe_prev =			\
-		    &(elm)->field.tqe_next;				\
-	else								\
-		(head)->tqh_last = &(elm)->field.tqe_next;		\
-	(head)->tqh_first = (elm);					\
-	(elm)->field.tqe_prev = &(head)->tqh_first;			\
-} while (/*CONSTCOND*/0)
+#घोषणा	TAILQ_जोड़ो_शीर्ष(शीर्ष_2, elm, field) करो {			\
+	QUEUEDEBUG_TAILQ_जोड़ो_शीर्ष((शीर्ष_2), (elm), field)		\
+	अगर (((elm)->field.tqe_अग्र = (शीर्ष_2)->tqh_first) != TAILQ_END(शीर्ष_2))\
+		(शीर्ष_2)->tqh_first->field.tqe_पूर्व =			\
+		    &(elm)->field.tqe_अग्र;				\
+	अन्यथा								\
+		(शीर्ष_2)->tqh_last = &(elm)->field.tqe_अग्र;		\
+	(शीर्ष_2)->tqh_first = (elm);					\
+	(elm)->field.tqe_पूर्व = &(शीर्ष_2)->tqh_first;			\
+} जबतक (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_TAIL(head, elm, field) do {			\
-	QUEUEDEBUG_TAILQ_INSERT_TAIL((head), (elm), field)		\
-	(elm)->field.tqe_next = TAILQ_END(head);			\
-	(elm)->field.tqe_prev = (head)->tqh_last;			\
-	*(head)->tqh_last = (elm);					\
-	(head)->tqh_last = &(elm)->field.tqe_next;			\
-} while (/*CONSTCOND*/0)
+#घोषणा	TAILQ_जोड़ो_पुच्छ(शीर्ष_2, elm, field) करो {			\
+	QUEUEDEBUG_TAILQ_जोड़ो_पुच्छ((शीर्ष_2), (elm), field)		\
+	(elm)->field.tqe_अग्र = TAILQ_END(शीर्ष_2);			\
+	(elm)->field.tqe_पूर्व = (शीर्ष_2)->tqh_last;			\
+	*(शीर्ष_2)->tqh_last = (elm);					\
+	(शीर्ष_2)->tqh_last = &(elm)->field.tqe_अग्र;			\
+} जबतक (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_AFTER(head, listelm, elm, field) do {		\
+#घोषणा	TAILQ_जोड़ो_AFTER(शीर्ष_2, listelm, elm, field) करो {		\
 	QUEUEDEBUG_TAILQ_OP((listelm), field)				\
-	if (((elm)->field.tqe_next = (listelm)->field.tqe_next) != 	\
-	    TAILQ_END(head))						\
-		(elm)->field.tqe_next->field.tqe_prev = 		\
-		    &(elm)->field.tqe_next;				\
-	else								\
-		(head)->tqh_last = &(elm)->field.tqe_next;		\
-	(listelm)->field.tqe_next = (elm);				\
-	(elm)->field.tqe_prev = &(listelm)->field.tqe_next;		\
-} while (/*CONSTCOND*/0)
+	अगर (((elm)->field.tqe_अग्र = (listelm)->field.tqe_अग्र) != 	\
+	    TAILQ_END(शीर्ष_2))						\
+		(elm)->field.tqe_अग्र->field.tqe_पूर्व = 		\
+		    &(elm)->field.tqe_अग्र;				\
+	अन्यथा								\
+		(शीर्ष_2)->tqh_last = &(elm)->field.tqe_अग्र;		\
+	(listelm)->field.tqe_अग्र = (elm);				\
+	(elm)->field.tqe_पूर्व = &(listelm)->field.tqe_अग्र;		\
+} जबतक (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_BEFORE(listelm, elm, field) do {			\
+#घोषणा	TAILQ_जोड़ो_BEFORE(listelm, elm, field) करो {			\
 	QUEUEDEBUG_TAILQ_OP((listelm), field)				\
-	(elm)->field.tqe_prev = (listelm)->field.tqe_prev;		\
-	(elm)->field.tqe_next = (listelm);				\
-	*(listelm)->field.tqe_prev = (elm);				\
-	(listelm)->field.tqe_prev = &(elm)->field.tqe_next;		\
-} while (/*CONSTCOND*/0)
+	(elm)->field.tqe_पूर्व = (listelm)->field.tqe_पूर्व;		\
+	(elm)->field.tqe_अग्र = (listelm);				\
+	*(listelm)->field.tqe_पूर्व = (elm);				\
+	(listelm)->field.tqe_पूर्व = &(elm)->field.tqe_अग्र;		\
+} जबतक (/*CONSTCOND*/0)
 
-#define	TAILQ_REMOVE(head, elm, field) do {				\
-	QUEUEDEBUG_TAILQ_PREREMOVE((head), (elm), field)		\
+#घोषणा	TAILQ_REMOVE(शीर्ष_2, elm, field) करो {				\
+	QUEUEDEBUG_TAILQ_PREREMOVE((शीर्ष_2), (elm), field)		\
 	QUEUEDEBUG_TAILQ_OP((elm), field)				\
-	if (((elm)->field.tqe_next) != TAILQ_END(head))			\
-		(elm)->field.tqe_next->field.tqe_prev = 		\
-		    (elm)->field.tqe_prev;				\
-	else								\
-		(head)->tqh_last = (elm)->field.tqe_prev;		\
-	*(elm)->field.tqe_prev = (elm)->field.tqe_next;			\
+	अगर (((elm)->field.tqe_अग्र) != TAILQ_END(शीर्ष_2))			\
+		(elm)->field.tqe_अग्र->field.tqe_पूर्व = 		\
+		    (elm)->field.tqe_पूर्व;				\
+	अन्यथा								\
+		(शीर्ष_2)->tqh_last = (elm)->field.tqe_पूर्व;		\
+	*(elm)->field.tqe_पूर्व = (elm)->field.tqe_अग्र;			\
 	QUEUEDEBUG_TAILQ_POSTREMOVE((elm), field);			\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
-#define TAILQ_REPLACE(head, elm, elm2, field) do {                      \
-        if (((elm2)->field.tqe_next = (elm)->field.tqe_next) != 	\
-	    TAILQ_END(head))   						\
-                (elm2)->field.tqe_next->field.tqe_prev =                \
-                    &(elm2)->field.tqe_next;                            \
-        else                                                            \
-                (head)->tqh_last = &(elm2)->field.tqe_next;             \
-        (elm2)->field.tqe_prev = (elm)->field.tqe_prev;                 \
-        *(elm2)->field.tqe_prev = (elm2);                               \
+#घोषणा TAILQ_REPLACE(शीर्ष_2, elm, elm2, field) करो {                      \
+        अगर (((elm2)->field.tqe_अग्र = (elm)->field.tqe_अग्र) != 	\
+	    TAILQ_END(शीर्ष_2))   						\
+                (elm2)->field.tqe_अग्र->field.tqe_पूर्व =                \
+                    &(elm2)->field.tqe_अग्र;                            \
+        अन्यथा                                                            \
+                (शीर्ष_2)->tqh_last = &(elm2)->field.tqe_अग्र;             \
+        (elm2)->field.tqe_पूर्व = (elm)->field.tqe_पूर्व;                 \
+        *(elm2)->field.tqe_पूर्व = (elm2);                               \
 	QUEUEDEBUG_TAILQ_POSTREMOVE((elm), field);			\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
-#define	TAILQ_CONCAT(head1, head2, field) do {				\
-	if (!TAILQ_EMPTY(head2)) {					\
+#घोषणा	TAILQ_CONCAT(head1, head2, field) करो {				\
+	अगर (!TAILQ_EMPTY(head2)) {					\
 		*(head1)->tqh_last = (head2)->tqh_first;		\
-		(head2)->tqh_first->field.tqe_prev = (head1)->tqh_last;	\
+		(head2)->tqh_first->field.tqe_पूर्व = (head1)->tqh_last;	\
 		(head1)->tqh_last = (head2)->tqh_last;			\
 		TAILQ_INIT((head2));					\
 	}								\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
 /*
  * Singly-linked Tail queue declarations.
  */
-#define	STAILQ_HEAD(name, type)						\
-struct name {								\
-	struct type *stqh_first;	/* first element */		\
-	struct type **stqh_last;	/* addr of last next element */	\
+#घोषणा	STAILQ_शीर्ष(name, type)						\
+काष्ठा name {								\
+	काष्ठा type *stqh_first;	/* first element */		\
+	काष्ठा type **stqh_last;	/* addr of last next element */	\
 }
 
-#define	STAILQ_HEAD_INITIALIZER(head)					\
-	{ NULL, &(head).stqh_first }
+#घोषणा	STAILQ_शीर्ष_INITIALIZER(शीर्ष_2)					\
+	{ शून्य, &(शीर्ष_2).stqh_first }
 
-#define	STAILQ_ENTRY(type)						\
-struct {								\
-	struct type *stqe_next;	/* next element */			\
+#घोषणा	STAILQ_ENTRY(type)						\
+काष्ठा {								\
+	काष्ठा type *stqe_अग्र;	/* next element */			\
 }
 
 /*
  * Singly-linked Tail queue access methods.
  */
-#define	STAILQ_FIRST(head)	((head)->stqh_first)
-#define	STAILQ_END(head)	NULL
-#define	STAILQ_NEXT(elm, field)	((elm)->field.stqe_next)
-#define	STAILQ_EMPTY(head)	(STAILQ_FIRST(head) == STAILQ_END(head))
+#घोषणा	STAILQ_FIRST(शीर्ष_2)	((शीर्ष_2)->stqh_first)
+#घोषणा	STAILQ_END(शीर्ष_2)	शून्य
+#घोषणा	STAILQ_अग्र(elm, field)	((elm)->field.stqe_अग्र)
+#घोषणा	STAILQ_EMPTY(शीर्ष_2)	(STAILQ_FIRST(शीर्ष_2) == STAILQ_END(शीर्ष_2))
 
 /*
  * Singly-linked Tail queue functions.
  */
-#define	STAILQ_INIT(head) do {						\
-	(head)->stqh_first = NULL;					\
-	(head)->stqh_last = &(head)->stqh_first;				\
-} while (/*CONSTCOND*/0)
+#घोषणा	STAILQ_INIT(शीर्ष_2) करो {						\
+	(शीर्ष_2)->stqh_first = शून्य;					\
+	(शीर्ष_2)->stqh_last = &(शीर्ष_2)->stqh_first;				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_HEAD(head, elm, field) do {			\
-	if (((elm)->field.stqe_next = (head)->stqh_first) == NULL)	\
-		(head)->stqh_last = &(elm)->field.stqe_next;		\
-	(head)->stqh_first = (elm);					\
-} while (/*CONSTCOND*/0)
+#घोषणा	STAILQ_जोड़ो_शीर्ष(शीर्ष_2, elm, field) करो {			\
+	अगर (((elm)->field.stqe_अग्र = (शीर्ष_2)->stqh_first) == शून्य)	\
+		(शीर्ष_2)->stqh_last = &(elm)->field.stqe_अग्र;		\
+	(शीर्ष_2)->stqh_first = (elm);					\
+} जबतक (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_TAIL(head, elm, field) do {			\
-	(elm)->field.stqe_next = NULL;					\
-	*(head)->stqh_last = (elm);					\
-	(head)->stqh_last = &(elm)->field.stqe_next;			\
-} while (/*CONSTCOND*/0)
+#घोषणा	STAILQ_जोड़ो_पुच्छ(शीर्ष_2, elm, field) करो {			\
+	(elm)->field.stqe_अग्र = शून्य;					\
+	*(शीर्ष_2)->stqh_last = (elm);					\
+	(शीर्ष_2)->stqh_last = &(elm)->field.stqe_अग्र;			\
+} जबतक (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	if (((elm)->field.stqe_next = (listelm)->field.stqe_next) == NULL)\
-		(head)->stqh_last = &(elm)->field.stqe_next;		\
-	(listelm)->field.stqe_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#घोषणा	STAILQ_जोड़ो_AFTER(शीर्ष_2, listelm, elm, field) करो {		\
+	अगर (((elm)->field.stqe_अग्र = (listelm)->field.stqe_अग्र) == शून्य)\
+		(शीर्ष_2)->stqh_last = &(elm)->field.stqe_अग्र;		\
+	(listelm)->field.stqe_अग्र = (elm);				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	STAILQ_REMOVE_HEAD(head, field) do {				\
-	if (((head)->stqh_first = (head)->stqh_first->field.stqe_next) == NULL) \
-		(head)->stqh_last = &(head)->stqh_first;			\
-} while (/*CONSTCOND*/0)
+#घोषणा	STAILQ_REMOVE_शीर्ष(शीर्ष_2, field) करो {				\
+	अगर (((शीर्ष_2)->stqh_first = (शीर्ष_2)->stqh_first->field.stqe_अग्र) == शून्य) \
+		(शीर्ष_2)->stqh_last = &(शीर्ष_2)->stqh_first;			\
+} जबतक (/*CONSTCOND*/0)
 
-#define	STAILQ_REMOVE(head, elm, type, field) do {			\
-	if ((head)->stqh_first == (elm)) {				\
-		STAILQ_REMOVE_HEAD((head), field);			\
-	} else {							\
-		struct type *curelm = (head)->stqh_first;		\
-		while (curelm->field.stqe_next != (elm))			\
-			curelm = curelm->field.stqe_next;		\
-		if ((curelm->field.stqe_next =				\
-			curelm->field.stqe_next->field.stqe_next) == NULL) \
-			    (head)->stqh_last = &(curelm)->field.stqe_next; \
+#घोषणा	STAILQ_REMOVE(शीर्ष_2, elm, type, field) करो {			\
+	अगर ((शीर्ष_2)->stqh_first == (elm)) {				\
+		STAILQ_REMOVE_शीर्ष((शीर्ष_2), field);			\
+	} अन्यथा {							\
+		काष्ठा type *curelm = (शीर्ष_2)->stqh_first;		\
+		जबतक (curelm->field.stqe_अग्र != (elm))			\
+			curelm = curelm->field.stqe_अग्र;		\
+		अगर ((curelm->field.stqe_अग्र =				\
+			curelm->field.stqe_अग्र->field.stqe_अग्र) == शून्य) \
+			    (शीर्ष_2)->stqh_last = &(curelm)->field.stqe_अग्र; \
 	}								\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
-#define	STAILQ_FOREACH(var, head, field)				\
-	for ((var) = ((head)->stqh_first);				\
+#घोषणा	STAILQ_FOREACH(var, शीर्ष_2, field)				\
+	क्रम ((var) = ((शीर्ष_2)->stqh_first);				\
 		(var);							\
-		(var) = ((var)->field.stqe_next))
+		(var) = ((var)->field.stqe_अग्र))
 
-#define	STAILQ_FOREACH_SAFE(var, head, field, tvar)			\
-	for ((var) = STAILQ_FIRST((head));				\
-	    (var) && ((tvar) = STAILQ_NEXT((var), field), 1);		\
+#घोषणा	STAILQ_FOREACH_SAFE(var, शीर्ष_2, field, tvar)			\
+	क्रम ((var) = STAILQ_FIRST((शीर्ष_2));				\
+	    (var) && ((tvar) = STAILQ_अग्र((var), field), 1);		\
 	    (var) = (tvar))
 
-#define	STAILQ_CONCAT(head1, head2) do {				\
-	if (!STAILQ_EMPTY((head2))) {					\
+#घोषणा	STAILQ_CONCAT(head1, head2) करो {				\
+	अगर (!STAILQ_EMPTY((head2))) {					\
 		*(head1)->stqh_last = (head2)->stqh_first;		\
 		(head1)->stqh_last = (head2)->stqh_last;		\
 		STAILQ_INIT((head2));					\
 	}								\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
-#define	STAILQ_LAST(head, type, field)					\
-	(STAILQ_EMPTY((head)) ?						\
-		NULL :							\
-	        ((struct type *)(void *)				\
-		((char *)((head)->stqh_last) - offsetof(struct type, field))))
+#घोषणा	STAILQ_LAST(शीर्ष_2, type, field)					\
+	(STAILQ_EMPTY((शीर्ष_2)) ?						\
+		शून्य :							\
+	        ((काष्ठा type *)(व्योम *)				\
+		((अक्षर *)((शीर्ष_2)->stqh_last) - दुरत्व(काष्ठा type, field))))
 
 
-#ifndef _KERNEL
+#अगर_अघोषित _KERNEL
 /*
  * Circular queue definitions. Do not use. We still keep the macros
  * for compatibility but because of pointer aliasing issues their use
@@ -678,169 +678,169 @@ struct {								\
  * this by changing the head/tail sentinel values, but see the note above
  * this one.
  */
-static __inline const void * __launder_type(const void *);
-static __inline const void *
-__launder_type(const void *__x)
+अटल __inline स्थिर व्योम * __launder_type(स्थिर व्योम *);
+अटल __inline स्थिर व्योम *
+__launder_type(स्थिर व्योम *__x)
 {
 	__asm __volatile("" : "+r" (__x));
-	return __x;
+	वापस __x;
 }
 
-#if defined(QUEUEDEBUG)
-#define QUEUEDEBUG_CIRCLEQ_HEAD(head, field)				\
-	if ((head)->cqh_first != CIRCLEQ_ENDC(head) &&			\
-	    (head)->cqh_first->field.cqe_prev != CIRCLEQ_ENDC(head))	\
-		QUEUEDEBUG_ABORT("CIRCLEQ head forw %p %s:%d", (head),	\
-		      __FILE__, __LINE__);				\
-	if ((head)->cqh_last != CIRCLEQ_ENDC(head) &&			\
-	    (head)->cqh_last->field.cqe_next != CIRCLEQ_ENDC(head))	\
-		QUEUEDEBUG_ABORT("CIRCLEQ head back %p %s:%d", (head),	\
-		      __FILE__, __LINE__);
-#define QUEUEDEBUG_CIRCLEQ_ELM(head, elm, field)			\
-	if ((elm)->field.cqe_next == CIRCLEQ_ENDC(head)) {		\
-		if ((head)->cqh_last != (elm))				\
+#अगर defined(QUEUEDEBUG)
+#घोषणा QUEUEDEBUG_CIRCLEQ_शीर्ष(शीर्ष_2, field)				\
+	अगर ((शीर्ष_2)->cqh_first != CIRCLEQ_ENDC(शीर्ष_2) &&			\
+	    (शीर्ष_2)->cqh_first->field.cqe_पूर्व != CIRCLEQ_ENDC(शीर्ष_2))	\
+		QUEUEDEBUG_ABORT("CIRCLEQ head forw %p %s:%d", (शीर्ष_2),	\
+		      __खाता__, __LINE__);				\
+	अगर ((शीर्ष_2)->cqh_last != CIRCLEQ_ENDC(शीर्ष_2) &&			\
+	    (शीर्ष_2)->cqh_last->field.cqe_अग्र != CIRCLEQ_ENDC(शीर्ष_2))	\
+		QUEUEDEBUG_ABORT("CIRCLEQ head back %p %s:%d", (शीर्ष_2),	\
+		      __खाता__, __LINE__);
+#घोषणा QUEUEDEBUG_CIRCLEQ_ELM(शीर्ष_2, elm, field)			\
+	अगर ((elm)->field.cqe_अग्र == CIRCLEQ_ENDC(शीर्ष_2)) {		\
+		अगर ((शीर्ष_2)->cqh_last != (elm))				\
 			QUEUEDEBUG_ABORT("CIRCLEQ elm last %p %s:%d",	\
-			    (elm), __FILE__, __LINE__);			\
-	} else {							\
-		if ((elm)->field.cqe_next->field.cqe_prev != (elm))	\
+			    (elm), __खाता__, __LINE__);			\
+	} अन्यथा {							\
+		अगर ((elm)->field.cqe_अग्र->field.cqe_पूर्व != (elm))	\
 			QUEUEDEBUG_ABORT("CIRCLEQ elm forw %p %s:%d",	\
-			    (elm), __FILE__, __LINE__);			\
+			    (elm), __खाता__, __LINE__);			\
 	}								\
-	if ((elm)->field.cqe_prev == CIRCLEQ_ENDC(head)) {		\
-		if ((head)->cqh_first != (elm))				\
+	अगर ((elm)->field.cqe_पूर्व == CIRCLEQ_ENDC(शीर्ष_2)) {		\
+		अगर ((शीर्ष_2)->cqh_first != (elm))				\
 			QUEUEDEBUG_ABORT("CIRCLEQ elm first %p %s:%d",	\
-			    (elm), __FILE__, __LINE__);			\
-	} else {							\
-		if ((elm)->field.cqe_prev->field.cqe_next != (elm))	\
+			    (elm), __खाता__, __LINE__);			\
+	} अन्यथा {							\
+		अगर ((elm)->field.cqe_पूर्व->field.cqe_अग्र != (elm))	\
 			QUEUEDEBUG_ABORT("CIRCLEQ elm prev %p %s:%d",	\
-			    (elm), __FILE__, __LINE__);			\
+			    (elm), __खाता__, __LINE__);			\
 	}
-#define QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, field)			\
-	(elm)->field.cqe_next = (void *)1L;				\
-	(elm)->field.cqe_prev = (void *)1L;
-#else
-#define QUEUEDEBUG_CIRCLEQ_HEAD(head, field)
-#define QUEUEDEBUG_CIRCLEQ_ELM(head, elm, field)
-#define QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, field)
-#endif
+#घोषणा QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, field)			\
+	(elm)->field.cqe_अग्र = (व्योम *)1L;				\
+	(elm)->field.cqe_पूर्व = (व्योम *)1L;
+#अन्यथा
+#घोषणा QUEUEDEBUG_CIRCLEQ_शीर्ष(शीर्ष_2, field)
+#घोषणा QUEUEDEBUG_CIRCLEQ_ELM(शीर्ष_2, elm, field)
+#घोषणा QUEUEDEBUG_CIRCLEQ_POSTREMOVE(elm, field)
+#पूर्ण_अगर
 
-#define	CIRCLEQ_HEAD(name, type)					\
-struct name {								\
-	struct type *cqh_first;		/* first element */		\
-	struct type *cqh_last;		/* last element */		\
+#घोषणा	CIRCLEQ_शीर्ष(name, type)					\
+काष्ठा name {								\
+	काष्ठा type *cqh_first;		/* first element */		\
+	काष्ठा type *cqh_last;		/* last element */		\
 }
 
-#define	CIRCLEQ_HEAD_INITIALIZER(head)					\
-	{ CIRCLEQ_END(&head), CIRCLEQ_END(&head) }
+#घोषणा	CIRCLEQ_शीर्ष_INITIALIZER(शीर्ष_2)					\
+	{ CIRCLEQ_END(&शीर्ष_2), CIRCLEQ_END(&शीर्ष_2) }
 
-#define	CIRCLEQ_ENTRY(type)						\
-struct {								\
-	struct type *cqe_next;		/* next element */		\
-	struct type *cqe_prev;		/* previous element */		\
+#घोषणा	CIRCLEQ_ENTRY(type)						\
+काष्ठा {								\
+	काष्ठा type *cqe_अग्र;		/* next element */		\
+	काष्ठा type *cqe_पूर्व;		/* previous element */		\
 }
 
 /*
  * Circular queue functions.
  */
-#define	CIRCLEQ_INIT(head) do {						\
-	(head)->cqh_first = CIRCLEQ_END(head);				\
-	(head)->cqh_last = CIRCLEQ_END(head);				\
-} while (/*CONSTCOND*/0)
+#घोषणा	CIRCLEQ_INIT(शीर्ष_2) करो {						\
+	(शीर्ष_2)->cqh_first = CIRCLEQ_END(शीर्ष_2);				\
+	(शीर्ष_2)->cqh_last = CIRCLEQ_END(शीर्ष_2);				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (listelm), field)		\
-	(elm)->field.cqe_next = (listelm)->field.cqe_next;		\
-	(elm)->field.cqe_prev = (listelm);				\
-	if ((listelm)->field.cqe_next == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_last = (elm);				\
-	else								\
-		(listelm)->field.cqe_next->field.cqe_prev = (elm);	\
-	(listelm)->field.cqe_next = (elm);				\
-} while (/*CONSTCOND*/0)
+#घोषणा	CIRCLEQ_जोड़ो_AFTER(शीर्ष_2, listelm, elm, field) करो {		\
+	QUEUEDEBUG_CIRCLEQ_शीर्ष((शीर्ष_2), field)				\
+	QUEUEDEBUG_CIRCLEQ_ELM((शीर्ष_2), (listelm), field)		\
+	(elm)->field.cqe_अग्र = (listelm)->field.cqe_अग्र;		\
+	(elm)->field.cqe_पूर्व = (listelm);				\
+	अगर ((listelm)->field.cqe_अग्र == CIRCLEQ_ENDC(शीर्ष_2))		\
+		(शीर्ष_2)->cqh_last = (elm);				\
+	अन्यथा								\
+		(listelm)->field.cqe_अग्र->field.cqe_पूर्व = (elm);	\
+	(listelm)->field.cqe_अग्र = (elm);				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_BEFORE(head, listelm, elm, field) do {		\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (listelm), field)		\
-	(elm)->field.cqe_next = (listelm);				\
-	(elm)->field.cqe_prev = (listelm)->field.cqe_prev;		\
-	if ((listelm)->field.cqe_prev == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_first = (elm);				\
-	else								\
-		(listelm)->field.cqe_prev->field.cqe_next = (elm);	\
-	(listelm)->field.cqe_prev = (elm);				\
-} while (/*CONSTCOND*/0)
+#घोषणा	CIRCLEQ_जोड़ो_BEFORE(शीर्ष_2, listelm, elm, field) करो {		\
+	QUEUEDEBUG_CIRCLEQ_शीर्ष((शीर्ष_2), field)				\
+	QUEUEDEBUG_CIRCLEQ_ELM((शीर्ष_2), (listelm), field)		\
+	(elm)->field.cqe_अग्र = (listelm);				\
+	(elm)->field.cqe_पूर्व = (listelm)->field.cqe_पूर्व;		\
+	अगर ((listelm)->field.cqe_पूर्व == CIRCLEQ_ENDC(शीर्ष_2))		\
+		(शीर्ष_2)->cqh_first = (elm);				\
+	अन्यथा								\
+		(listelm)->field.cqe_पूर्व->field.cqe_अग्र = (elm);	\
+	(listelm)->field.cqe_पूर्व = (elm);				\
+} जबतक (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_HEAD(head, elm, field) do {			\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	(elm)->field.cqe_next = (head)->cqh_first;			\
-	(elm)->field.cqe_prev = CIRCLEQ_END(head);			\
-	if ((head)->cqh_last == CIRCLEQ_ENDC(head))			\
-		(head)->cqh_last = (elm);				\
-	else								\
-		(head)->cqh_first->field.cqe_prev = (elm);		\
-	(head)->cqh_first = (elm);					\
-} while (/*CONSTCOND*/0)
+#घोषणा	CIRCLEQ_जोड़ो_शीर्ष(शीर्ष_2, elm, field) करो {			\
+	QUEUEDEBUG_CIRCLEQ_शीर्ष((शीर्ष_2), field)				\
+	(elm)->field.cqe_अग्र = (शीर्ष_2)->cqh_first;			\
+	(elm)->field.cqe_पूर्व = CIRCLEQ_END(शीर्ष_2);			\
+	अगर ((शीर्ष_2)->cqh_last == CIRCLEQ_ENDC(शीर्ष_2))			\
+		(शीर्ष_2)->cqh_last = (elm);				\
+	अन्यथा								\
+		(शीर्ष_2)->cqh_first->field.cqe_पूर्व = (elm);		\
+	(शीर्ष_2)->cqh_first = (elm);					\
+} जबतक (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_TAIL(head, elm, field) do {			\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	(elm)->field.cqe_next = CIRCLEQ_END(head);			\
-	(elm)->field.cqe_prev = (head)->cqh_last;			\
-	if ((head)->cqh_first == CIRCLEQ_ENDC(head))			\
-		(head)->cqh_first = (elm);				\
-	else								\
-		(head)->cqh_last->field.cqe_next = (elm);		\
-	(head)->cqh_last = (elm);					\
-} while (/*CONSTCOND*/0)
+#घोषणा	CIRCLEQ_जोड़ो_पुच्छ(शीर्ष_2, elm, field) करो {			\
+	QUEUEDEBUG_CIRCLEQ_शीर्ष((शीर्ष_2), field)				\
+	(elm)->field.cqe_अग्र = CIRCLEQ_END(शीर्ष_2);			\
+	(elm)->field.cqe_पूर्व = (शीर्ष_2)->cqh_last;			\
+	अगर ((शीर्ष_2)->cqh_first == CIRCLEQ_ENDC(शीर्ष_2))			\
+		(शीर्ष_2)->cqh_first = (elm);				\
+	अन्यथा								\
+		(शीर्ष_2)->cqh_last->field.cqe_अग्र = (elm);		\
+	(शीर्ष_2)->cqh_last = (elm);					\
+} जबतक (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_REMOVE(head, elm, field) do {				\
-	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
-	QUEUEDEBUG_CIRCLEQ_ELM((head), (elm), field)			\
-	if ((elm)->field.cqe_next == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_last = (elm)->field.cqe_prev;		\
-	else								\
-		(elm)->field.cqe_next->field.cqe_prev =			\
-		    (elm)->field.cqe_prev;				\
-	if ((elm)->field.cqe_prev == CIRCLEQ_ENDC(head))		\
-		(head)->cqh_first = (elm)->field.cqe_next;		\
-	else								\
-		(elm)->field.cqe_prev->field.cqe_next =			\
-		    (elm)->field.cqe_next;				\
+#घोषणा	CIRCLEQ_REMOVE(शीर्ष_2, elm, field) करो {				\
+	QUEUEDEBUG_CIRCLEQ_शीर्ष((शीर्ष_2), field)				\
+	QUEUEDEBUG_CIRCLEQ_ELM((शीर्ष_2), (elm), field)			\
+	अगर ((elm)->field.cqe_अग्र == CIRCLEQ_ENDC(शीर्ष_2))		\
+		(शीर्ष_2)->cqh_last = (elm)->field.cqe_पूर्व;		\
+	अन्यथा								\
+		(elm)->field.cqe_अग्र->field.cqe_पूर्व =			\
+		    (elm)->field.cqe_पूर्व;				\
+	अगर ((elm)->field.cqe_पूर्व == CIRCLEQ_ENDC(शीर्ष_2))		\
+		(शीर्ष_2)->cqh_first = (elm)->field.cqe_अग्र;		\
+	अन्यथा								\
+		(elm)->field.cqe_पूर्व->field.cqe_अग्र =			\
+		    (elm)->field.cqe_अग्र;				\
 	QUEUEDEBUG_CIRCLEQ_POSTREMOVE((elm), field)			\
-} while (/*CONSTCOND*/0)
+} जबतक (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_FOREACH(var, head, field)				\
-	for ((var) = ((head)->cqh_first);				\
-		(var) != CIRCLEQ_ENDC(head);				\
-		(var) = ((var)->field.cqe_next))
+#घोषणा	CIRCLEQ_FOREACH(var, शीर्ष_2, field)				\
+	क्रम ((var) = ((शीर्ष_2)->cqh_first);				\
+		(var) != CIRCLEQ_ENDC(शीर्ष_2);				\
+		(var) = ((var)->field.cqe_अग्र))
 
-#define	CIRCLEQ_FOREACH_REVERSE(var, head, field)			\
-	for ((var) = ((head)->cqh_last);				\
-		(var) != CIRCLEQ_ENDC(head);				\
-		(var) = ((var)->field.cqe_prev))
+#घोषणा	CIRCLEQ_FOREACH_REVERSE(var, शीर्ष_2, field)			\
+	क्रम ((var) = ((शीर्ष_2)->cqh_last);				\
+		(var) != CIRCLEQ_ENDC(शीर्ष_2);				\
+		(var) = ((var)->field.cqe_पूर्व))
 
 /*
  * Circular queue access methods.
  */
-#define	CIRCLEQ_FIRST(head)		((head)->cqh_first)
-#define	CIRCLEQ_LAST(head)		((head)->cqh_last)
+#घोषणा	CIRCLEQ_FIRST(शीर्ष_2)		((शीर्ष_2)->cqh_first)
+#घोषणा	CIRCLEQ_LAST(शीर्ष_2)		((शीर्ष_2)->cqh_last)
 /* For comparisons */
-#define	CIRCLEQ_ENDC(head)		(__launder_type(head))
+#घोषणा	CIRCLEQ_ENDC(शीर्ष_2)		(__launder_type(शीर्ष_2))
 /* For assignments */
-#define	CIRCLEQ_END(head)		((void *)(head))
-#define	CIRCLEQ_NEXT(elm, field)	((elm)->field.cqe_next)
-#define	CIRCLEQ_PREV(elm, field)	((elm)->field.cqe_prev)
-#define	CIRCLEQ_EMPTY(head)						\
-    (CIRCLEQ_FIRST(head) == CIRCLEQ_ENDC(head))
+#घोषणा	CIRCLEQ_END(शीर्ष_2)		((व्योम *)(शीर्ष_2))
+#घोषणा	CIRCLEQ_अग्र(elm, field)	((elm)->field.cqe_अग्र)
+#घोषणा	CIRCLEQ_पूर्व(elm, field)	((elm)->field.cqe_पूर्व)
+#घोषणा	CIRCLEQ_EMPTY(शीर्ष_2)						\
+    (CIRCLEQ_FIRST(शीर्ष_2) == CIRCLEQ_ENDC(शीर्ष_2))
 
-#define CIRCLEQ_LOOP_NEXT(head, elm, field)				\
-	(((elm)->field.cqe_next == CIRCLEQ_ENDC(head))			\
-	    ? ((head)->cqh_first)					\
-	    : (elm->field.cqe_next))
-#define CIRCLEQ_LOOP_PREV(head, elm, field)				\
-	(((elm)->field.cqe_prev == CIRCLEQ_ENDC(head))			\
-	    ? ((head)->cqh_last)					\
-	    : (elm->field.cqe_prev))
-#endif /* !_KERNEL */
+#घोषणा CIRCLEQ_LOOP_अग्र(शीर्ष_2, elm, field)				\
+	(((elm)->field.cqe_अग्र == CIRCLEQ_ENDC(शीर्ष_2))			\
+	    ? ((शीर्ष_2)->cqh_first)					\
+	    : (elm->field.cqe_अग्र))
+#घोषणा CIRCLEQ_LOOP_पूर्व(शीर्ष_2, elm, field)				\
+	(((elm)->field.cqe_पूर्व == CIRCLEQ_ENDC(शीर्ष_2))			\
+	    ? ((शीर्ष_2)->cqh_last)					\
+	    : (elm->field.cqe_पूर्व))
+#पूर्ण_अगर /* !_KERNEL */
 
-#endif	/* !_SYS_QUEUE_H_ */
+#पूर्ण_अगर	/* !_SYS_QUEUE_H_ */

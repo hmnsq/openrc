@@ -18,85 +18,85 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <utime.h>
-#include <string.h>
+#समावेश <sys/time.h>
+#समावेश <sys/stat.h>
+#समावेश <errno.h>
+#समावेश <fcntl.h>
+#समावेश <getopt.h>
+#समावेश <unistd.h>
+#समावेश <utime.h>
+#समावेश <string.h>
 
-#include "einfo.h"
-#include "_usage.h"
-#include "helpers.h"
+#समावेश "einfo.h"
+#समावेश "_usage.h"
+#समावेश "helpers.h"
 
 
-const char *applet = NULL;
-const char *extraopts = "file";
-const char getoptstring[] = "sw" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "save", 0, NULL, 's' },
-	{ "warn", 0, NULL, 'w' },
+स्थिर अक्षर *applet = शून्य;
+स्थिर अक्षर *extraopts = "file";
+स्थिर अक्षर getoptstring[] = "sw" getoptstring_COMMON;
+स्थिर काष्ठा option longopts[] = {
+	{ "save", 0, शून्य, 's' },
+	{ "warn", 0, शून्य, 'w' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+स्थिर अक्षर * स्थिर longopts_help[] = {
 	"saves the time",
 	"no error if no reference file",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+स्थिर अक्षर *usagestring = शून्य;
 
-int main(int argc, char **argv)
+पूर्णांक मुख्य(पूर्णांक argc, अक्षर **argv)
 {
-	int opt, sflag = 0, wflag = 0;
-	const char *file = NULL;
-	struct stat sb;
-	struct timeval tv;
+	पूर्णांक opt, sflag = 0, wflag = 0;
+	स्थिर अक्षर *file = शून्य;
+	काष्ठा stat sb;
+	काष्ठा timeval tv;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	जबतक ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (पूर्णांक *) 0)) != -1)
 	{
-		switch (opt) {
-		case 's':
+		चयन (opt) {
+		हाल 's':
 			sflag = 1;
-			break;
-		case 'w':
+			अवरोध;
+		हाल 'w':
 			wflag = 1;
-			break;
+			अवरोध;
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind < argc)
+	अगर (optind < argc)
 		file = argv[optind++];
-	else
+	अन्यथा
 		eerrorx("swclock: Reference file was not specified");
 
-	if (sflag) {
-		int fd = open(file, O_WRONLY | O_CREAT, 0644);
-		if (fd == -1)
-			eerrorx("swclock: open: %s", strerror(errno));
-		if (futimens(fd, NULL) == -1)
-			eerrorx("swclock: futimens: %s", strerror(errno));
-		close(fd);
-		return 0;
+	अगर (sflag) {
+		पूर्णांक fd = खोलो(file, O_WRONLY | O_CREAT, 0644);
+		अगर (fd == -1)
+			eerrorx("swclock: open: %s", म_त्रुटि(त्रुटि_सं));
+		अगर (futimens(fd, शून्य) == -1)
+			eerrorx("swclock: futimens: %s", म_त्रुटि(त्रुटि_सं));
+		बंद(fd);
+		वापस 0;
 	}
 
-	if (stat(file, &sb) == -1) {
-		if (wflag != 0 && errno == ENOENT)
-			ewarn("swclock: `%s': %s", file, strerror(errno));
-		else
-			eerrorx("swclock: `%s': %s", file, strerror(errno));
-		return 0;
+	अगर (stat(file, &sb) == -1) {
+		अगर (wflag != 0 && त्रुटि_सं == ENOENT)
+			ewarn("swclock: `%s': %s", file, म_त्रुटि(त्रुटि_सं));
+		अन्यथा
+			eerrorx("swclock: `%s': %s", file, म_त्रुटि(त्रुटि_सं));
+		वापस 0;
 	}
 
 	tv.tv_sec = sb.st_mtime;
 	tv.tv_usec = 0;
 
-	if (settimeofday(&tv, NULL) == -1)
-		eerrorx("swclock: settimeofday: %s", strerror(errno));
+	अगर (settimeofday(&tv, शून्य) == -1)
+		eerrorx("swclock: settimeofday: %s", म_त्रुटि(त्रुटि_सं));
 
-	return 0;
+	वापस 0;
 }

@@ -8,9 +8,9 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef BROADCAST_H
-#define BROADCAST_H
+#अगर_अघोषित BROADCAST_H
+#घोषणा BROADCAST_H
 
-void broadcast(char *text);
+व्योम broadcast(अक्षर *text);
 
-#endif
+#पूर्ण_अगर

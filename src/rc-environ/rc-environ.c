@@ -1,27 +1,27 @@
-#include <einfo.h>
-#include <errno.h>
-#include <getopt.h>
-#include <rc.h>
-#include <queue.h>
-#include <string.h>
+#समावेश <einfo.h>
+#समावेश <errno.h>
+#समावेश <getopt.h>
+#समावेश <rc.h>
+#समावेश <queue.h>
+#समावेश <string.h>
 
-#include "_usage.h"
-#include "helpers.h"
+#समावेश "_usage.h"
+#समावेश "helpers.h"
 
-const char *applet;
-const char *extraopts;
-const char *usagestring = "rc-environ [-s <service> ...] [-r <runlevel> ...] [-en0]\n";
-const char getoptstring[] = "ens:r:0" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "export",          no_argument, NULL, 'e' },
-	{ "no-escape",       no_argument, NULL, 'n' },
-	{ "null",            no_argument, NULL, '0' },
-	{ "service",   required_argument, NULL, 's' },
-	{ "runlevel",  required_argument, NULL, 'r' },
+स्थिर अक्षर *applet;
+स्थिर अक्षर *extraopts;
+स्थिर अक्षर *usagestring = "rc-environ [-s <service> ...] [-r <runlevel> ...] [-en0]\n";
+स्थिर अक्षर getoptstring[] = "ens:r:0" getoptstring_COMMON;
+स्थिर काष्ठा option longopts[] = {
+	{ "export",          no_argument, शून्य, 'e' },
+	{ "no-escape",       no_argument, शून्य, 'n' },
+	{ "null",            no_argument, शून्य, '0' },
+	{ "service",   required_argument, शून्य, 's' },
+	{ "runlevel",  required_argument, शून्य, 'r' },
 	longopts_COMMON
 };
 
-const char *const longopts_help[] = {
+स्थिर अक्षर *स्थिर longopts_help[] = {
 	"Prepend \"export\" to printed variables",
 	"Do not perform shell sensitive escape on variable values",
 	"End each output line with NUL, not newline",
@@ -30,133 +30,133 @@ const char *const longopts_help[] = {
 	longopts_help_COMMON
 };
 
-static int
-set_environment(const char *service, char *vars[])
+अटल पूर्णांक
+set_environment(स्थिर अक्षर *service, अक्षर *vars[])
 {
-	RC_DEPTREE *deptree = _rc_deptree_load(0, NULL);
+	RC_DEPTREE *deptree = _rc_deptree_load(0, शून्य);
 	RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service, "reexport");
 	RC_STRING *reexport;
 
-	if (!(rc_service_state(service) & RC_SERVICE_STARTING)) {
+	अगर (!(rc_service_state(service) & RC_SERVICE_STARTING)) {
 		eerror("service %s is not in the starting state", service);
-		return 1;
+		वापस 1;
 	}
 
-	for (const char *var; (var = *vars); vars++) {
-		size_t name_len = strcspn(var, "=");
+	क्रम (स्थिर अक्षर *var; (var = *vars); vars++) {
+		माप_प्रकार name_len = म_खोज(var, "=");
 
 		TAILQ_FOREACH(reexport, reexports, entries) {
-			if (strncmp(reexport->value, var, name_len) != 0)
-				continue;
-			if (var[name_len] == '=')
+			अगर (म_भेदन(reexport->मूल्य, var, name_len) != 0)
+				जारी;
+			अगर (var[name_len] == '=')
 				rc_service_putenv(service, var);
-			else
-				rc_service_setenv(service, var, getenv(var));
-			goto next;
+			अन्यथा
+				rc_service_setenv(service, var, दो_पर्या(var));
+			जाओ अग्र;
 		}
 
-		ewarn("service %s does not reexport %.*s, skipping", service, (int)name_len, var);
-next:;
+		ewarn("service %s does not reexport %.*s, skipping", service, (पूर्णांक)name_len, var);
+अग्र:;
 	}
 
 	rc_stringlist_free(reexports);
 	rc_deptree_free(deptree);
-	return 0;
+	वापस 0;
 }
 
-static void escape_variable(const char *value) {
-	char ch;
+अटल व्योम escape_variable(स्थिर अक्षर *मूल्य) {
+	अक्षर ch;
 
-	printf("$'");
-	for (const char *p = value; *p; p++) {
-		switch ((ch = *p)) {
-		case '\a': ch = 'a'; break;
-		case '\b': ch = 'b'; break;
-		case '\f': ch = 'f'; break;
-		case '\n': ch = 'n'; break;
-		case '\r': ch = 'r'; break;
-		case '\t': ch = 't'; break;
-		case '\v': ch = 'v'; break;
+	म_लिखो("$'");
+	क्रम (स्थिर अक्षर *p = मूल्य; *p; p++) {
+		चयन ((ch = *p)) {
+		हाल '\a': ch = 'a'; अवरोध;
+		हाल '\b': ch = 'b'; अवरोध;
+		हाल '\f': ch = 'f'; अवरोध;
+		हाल '\n': ch = 'n'; अवरोध;
+		हाल '\r': ch = 'r'; अवरोध;
+		हाल '\t': ch = 't'; अवरोध;
+		हाल '\v': ch = 'v'; अवरोध;
 		/* \e is non-standard. */
-		case 0x1b: ch = 'e'; break;
-		case '"':
-		case '\'':
-		case '\\':
-			break;
-		default:
-			putchar(ch);
-			continue;
+		हाल 0x1b: ch = 'e'; अवरोध;
+		हाल '"':
+		हाल '\'':
+		हाल '\\':
+			अवरोध;
+		शेष:
+			अक्षर_दो(ch);
+			जारी;
 		}
-		printf("\\%c", ch);
+		म_लिखो("\\%c", ch);
 	}
-	printf("\'");
+	म_लिखो("\'");
 }
 
-static int
-print_environment(RC_STRINGLIST *services, bool escape, bool export, char sep)
+अटल पूर्णांक
+print_environment(RC_STRINGLIST *services, bool escape, bool export, अक्षर sep)
 {
 	/* from POSIX.2024 Shell Command Language 2.2, excluding `=` */
-	static const char special_chars[] = "|&;<>()$`\\\"' \t\n*?[]^-!#~%{},";
-	RC_DEPTREE *deptree = _rc_deptree_load(0, NULL);
+	अटल स्थिर अक्षर special_chars[] = "|&;<>()$`\\\"' \t\n*?[]^-!#~%{},";
+	RC_DEPTREE *deptree = _rc_deptree_load(0, शून्य);
 	RC_STRING *service;
-	char *value = NULL;
-	int ret = 0;
+	अक्षर *मूल्य = शून्य;
+	पूर्णांक ret = 0;
 
-	if (!services)
+	अगर (!services)
 		services = rc_services_in_state(RC_SERVICE_STARTED);
 
 	TAILQ_FOREACH(service, services, entries) {
-		RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service->value, "reexport");
+		RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service->मूल्य, "reexport");
 		RC_STRING *reexport;
 
 		TAILQ_FOREACH(reexport, reexports, entries) {
-			if (rc_service_getenv(service->value, reexport->value, &value) == -1) {
+			अगर (rc_service_getenv(service->मूल्य, reexport->मूल्य, &मूल्य) == -1) {
 				ewarn("%s: failed to read variable '%s' for '%s': %s",
-					applet, reexport->value, service->value, strerror(errno));
+					applet, reexport->मूल्य, service->मूल्य, म_त्रुटि(त्रुटि_सं));
 				ret = 1;
-				continue;
+				जारी;
 			}
 
-			if (export)
-				fputs("export ", stdout);
-			printf("%s=", reexport->value);
-			if (escape && strpbrk(value, special_chars))
-				escape_variable(value);
-			else
-				fputs(value, stdout);
-			fputc(sep, stdout);
+			अगर (export)
+				ख_माला_दो("export ", मानक_निकास);
+			म_लिखो("%s=", reexport->मूल्य);
+			अगर (escape && strpbrk(मूल्य, special_chars))
+				escape_variable(मूल्य);
+			अन्यथा
+				ख_माला_दो(मूल्य, मानक_निकास);
+			ख_अक्षर_दो(sep, मानक_निकास);
 		}
 
 		rc_stringlist_free(reexports);
 	}
 
-	free(value);
+	मुक्त(मूल्य);
 	rc_deptree_free(deptree);
-	return ret;
+	वापस ret;
 }
 
-int main(int argc, char **argv) {
-	RC_STRINGLIST *services = NULL, *in_runlevel;
+पूर्णांक मुख्य(पूर्णांक argc, अक्षर **argv) {
+	RC_STRINGLIST *services = शून्य, *in_runlevel;
 	bool export = false, escape = true;
-	char sep = '\n';
+	अक्षर sep = '\n';
 
-	for (int opt; (opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1;) {
-		switch (opt) {
-		case 'e': export = true; break;
-		case 'n': escape = false; break;
-		case '0': sep = '\0'; break;
-		case 'r':
-			if (!services)
+	क्रम (पूर्णांक opt; (opt = getopt_long(argc, argv, getoptstring, longopts, शून्य)) != -1;) {
+		चयन (opt) {
+		हाल 'e': export = true; अवरोध;
+		हाल 'n': escape = false; अवरोध;
+		हाल '0': sep = '\0'; अवरोध;
+		हाल 'r':
+			अगर (!services)
 				services = rc_stringlist_new();
 			in_runlevel = rc_services_in_runlevel(optarg);
 			TAILQ_CONCAT(services, in_runlevel, entries);
 			rc_stringlist_free(in_runlevel);
-			break;
-		case 's':
-			if (!services)
+			अवरोध;
+		हाल 's':
+			अगर (!services)
 				services = rc_stringlist_new();
 			rc_stringlist_addu(services, optarg);
-			break;
+			अवरोध;
 		case_RC_COMMON_GETOPT
 		}
 	}
@@ -164,8 +164,8 @@ int main(int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
-	if (!argc)
-		return print_environment(services, escape, export, sep);
+	अगर (!argc)
+		वापस print_environment(services, escape, export, sep);
 
-	return set_environment(argv[0], &argv[1]);
+	वापस set_environment(argv[0], &argv[1]);
 }

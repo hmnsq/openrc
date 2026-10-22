@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#समावेश <errno.h>
+#समावेश <getopt.h>
+#समावेश <stdbool.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <string.h>
+#समावेश <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "_usage.h"
-#include "helpers.h"
+#समावेश "einfo.h"
+#समावेश "queue.h"
+#समावेश "rc.h"
+#समावेश "misc.h"
+#समावेश "_usage.h"
+#समावेश "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char *usagestring = ""
+स्थिर अक्षर *applet = शून्य;
+स्थिर अक्षर *extraopts = शून्य;
+स्थिर अक्षर *usagestring = ""
 	"Usage: rc-update [options] add <service> [<runlevel>...]\n"
 	"   or: rc-update [options] del <service> [<runlevel>...]\n"
 	"   or: rc-update [options] [show [<runlevel>...]]";
-const char getoptstring[] = "asu" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "all",             0, NULL, 'a' },
-	{ "stack",           0, NULL, 's' },
-	{ "update",          0, NULL, 'u' },
+स्थिर अक्षर getoptstring[] = "asu" getoptstring_COMMON;
+स्थिर काष्ठा option longopts[] = {
+	{ "all",             0, शून्य, 'a' },
+	{ "stack",           0, शून्य, 's' },
+	{ "update",          0, शून्य, 'u' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+स्थिर अक्षर * स्थिर longopts_help[] = {
 	"Process all runlevels",
 	"Stack a runlevel instead of a service",
 	"Force an update of the dependency tree",
@@ -55,119 +55,119 @@ const char * const longopts_help[] = {
  *   0 = no changes (nothing to do)
  *  1+ = number of runlevels updated
  */
-static int
-add(const char *runlevel, const char *service)
+अटल पूर्णांक
+add(स्थिर अक्षर *runlevel, स्थिर अक्षर *service)
 {
-	int retval = -1;
+	पूर्णांक retval = -1;
 
-	if (!rc_service_exists(service)) {
-		if (errno == ENOEXEC)
+	अगर (!rc_service_exists(service)) {
+		अगर (त्रुटि_सं == ENOEXEC)
 			eerror("%s: service `%s' is not executable",
 			    applet, service);
-		else
+		अन्यथा
 			eerror("%s: service `%s' does not exist",
 			    applet, service);
-	} else if (rc_service_in_runlevel(service, runlevel)) {
+	} अन्यथा अगर (rc_service_in_runlevel(service, runlevel)) {
 		einfo("%s: %s already installed in runlevel `%s'; skipping",
 		    applet, service, runlevel);
 		retval = 0;
-	} else if (rc_service_add(runlevel, service)) {
+	} अन्यथा अगर (rc_service_add(runlevel, service)) {
 		einfo("service %s added to runlevel %s", service, runlevel);
 		retval = 1;
-	} else
+	} अन्यथा
 		eerror("%s: failed to add service `%s' to runlevel `%s': %s",
-		    applet, service, runlevel, strerror (errno));
+		    applet, service, runlevel, म_त्रुटि (त्रुटि_सं));
 
-	return retval;
+	वापस retval;
 }
 
-static int
-delete(const char *runlevel, const char *service)
+अटल पूर्णांक
+delete(स्थिर अक्षर *runlevel, स्थिर अक्षर *service)
 {
-	int retval = -1;
+	पूर्णांक retval = -1;
 
-	errno = 0;
-	if (rc_service_delete(runlevel, service)) {
+	त्रुटि_सं = 0;
+	अगर (rc_service_delete(runlevel, service)) {
 		einfo("service %s deleted from runlevel %s",
 		    service, runlevel);
-		return 1;
+		वापस 1;
 	}
 
-	if (errno == ENOENT)
+	अगर (त्रुटि_सं == ENOENT)
 		eerror("%s: service `%s' is not in the runlevel `%s'",
 		    applet, service, runlevel);
-	else
+	अन्यथा
 		eerror("%s: failed to delete service `%s' from runlevel `%s': %s",
-		    applet, service, runlevel, strerror (errno));
+		    applet, service, runlevel, म_त्रुटि (त्रुटि_सं));
 
-	return retval;
+	वापस retval;
 }
 
-static int
-addstack(const char *runlevel, const char *stack)
+अटल पूर्णांक
+addstack(स्थिर अक्षर *runlevel, स्थिर अक्षर *ढेर)
 {
-	if (!rc_runlevel_exists(runlevel)) {
+	अगर (!rc_runlevel_exists(runlevel)) {
 		eerror("%s: runlevel `%s' does not exist", applet, runlevel);
-		return -1;
+		वापस -1;
 	}
-	if (!rc_runlevel_exists(stack)) {
-		eerror("%s: runlevel `%s' does not exist", applet, stack);
-		return -1;
+	अगर (!rc_runlevel_exists(ढेर)) {
+		eerror("%s: runlevel `%s' does not exist", applet, ढेर);
+		वापस -1;
 	}
-	if (strcmp(runlevel, stack) == 0) {
-		eerror("%s: cannot stack `%s' onto itself", applet, stack);
-		return -1;
+	अगर (म_भेद(runlevel, ढेर) == 0) {
+		eerror("%s: cannot stack `%s' onto itself", applet, ढेर);
+		वापस -1;
 	}
-	if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
-	    strcmp(stack, RC_LEVEL_SYSINIT) == 0 ||
-	    strcmp(runlevel, RC_LEVEL_BOOT) == 0 ||
-	    strcmp(stack, RC_LEVEL_BOOT) == 0 ||
-	    strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
-	    strcmp(stack, RC_LEVEL_SINGLE) == 0 ||
-	    strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 ||
-	    strcmp(stack, RC_LEVEL_SHUTDOWN) == 0)
+	अगर (म_भेद(runlevel, RC_LEVEL_SYSINIT) == 0 ||
+	    म_भेद(ढेर, RC_LEVEL_SYSINIT) == 0 ||
+	    म_भेद(runlevel, RC_LEVEL_BOOT) == 0 ||
+	    म_भेद(ढेर, RC_LEVEL_BOOT) == 0 ||
+	    म_भेद(runlevel, RC_LEVEL_SINGLE) == 0 ||
+	    म_भेद(ढेर, RC_LEVEL_SINGLE) == 0 ||
+	    म_भेद(runlevel, RC_LEVEL_SHUTDOWN) == 0 ||
+	    म_भेद(ढेर, RC_LEVEL_SHUTDOWN) == 0)
 	{
 		eerror("%s: cannot stack the %s runlevel",
 		    applet, RC_LEVEL_SYSINIT);
-		return -1;
+		वापस -1;
 	}
-	if (!rc_runlevel_stack(runlevel, stack)) {
+	अगर (!rc_runlevel_ढेर(runlevel, ढेर)) {
 		eerror("%s: failed to stack `%s' to `%s': %s",
-		    applet, stack, runlevel, strerror(errno));
-		return -1;
+		    applet, ढेर, runlevel, म_त्रुटि(त्रुटि_सं));
+		वापस -1;
 	}
-	einfo("runlevel %s added to runlevel %s", stack, runlevel);
-	return 1;
+	einfo("runlevel %s added to runlevel %s", ढेर, runlevel);
+	वापस 1;
 }
 
-static int
-delstack(const char *runlevel, const char *stack)
+अटल पूर्णांक
+delstack(स्थिर अक्षर *runlevel, स्थिर अक्षर *ढेर)
 {
-	if (rc_runlevel_unstack(runlevel, stack)) {
-		einfo("runlevel %s deleted from runlevel %s", stack, runlevel);
-		return 1;
+	अगर (rc_runlevel_unstack(runlevel, ढेर)) {
+		einfo("runlevel %s deleted from runlevel %s", ढेर, runlevel);
+		वापस 1;
 	}
 
-	if (errno == ENOENT)
+	अगर (त्रुटि_सं == ENOENT)
 		eerror("%s: runlevel `%s' is not in the runlevel `%s'",
-		    applet, stack, runlevel);
-	else
+		    applet, ढेर, runlevel);
+	अन्यथा
 		eerror("%s: failed to delete runlevel `%s' from runlevel `%s': %s",
-		    applet, stack, runlevel, strerror (errno));
+		    applet, ढेर, runlevel, म_त्रुटि (त्रुटि_सं));
 
-	return -1;
+	वापस -1;
 }
 
-static void
+अटल व्योम
 show(RC_STRINGLIST *runlevels, bool verbose)
 {
-	RC_STRINGLIST *services = rc_services_in_runlevel(NULL);
+	RC_STRINGLIST *services = rc_services_in_runlevel(शून्य);
 	RC_STRING *service;
 	RC_STRING *runlevel;
 	RC_STRINGLIST *in;
 	bool inone;
-	char *buffer = NULL;
-	size_t l;
+	अक्षर *बफर = शून्य;
+	माप_प्रकार l;
 
 	rc_stringlist_sort(&services);
 	TAILQ_FOREACH(service, services, entries) {
@@ -175,28 +175,28 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 		inone = false;
 
 		TAILQ_FOREACH(runlevel, runlevels, entries) {
-			if (rc_service_in_runlevel(service->value,
-				runlevel->value))
+			अगर (rc_service_in_runlevel(service->मूल्य,
+				runlevel->मूल्य))
 			{
-				rc_stringlist_add(in, runlevel->value);
+				rc_stringlist_add(in, runlevel->मूल्य);
 				inone = true;
-			} else {
-				l = strlen(runlevel->value);
-				buffer = xmalloc(l+1);
-				memset(buffer, ' ', l);
-				buffer[l] = 0;
-				rc_stringlist_add(in, buffer);
-				free(buffer);
+			} अन्यथा {
+				l = म_माप(runlevel->मूल्य);
+				बफर = xmalloc(l+1);
+				स_रखो(बफर, ' ', l);
+				बफर[l] = 0;
+				rc_stringlist_add(in, बफर);
+				मुक्त(बफर);
 			}
 		}
 
-		if (inone || verbose) {
+		अगर (inone || verbose) {
 			/* For more information on why padding is 26, see issue 937: */
 			/* https://github.com/OpenRC/openrc/issues/937 */
-			printf(" %26s |", service->value);
+			म_लिखो(" %26s |", service->मूल्य);
 			TAILQ_FOREACH(runlevel, in, entries)
-			    printf (" %s", runlevel->value);
-			printf("\n");
+			    म_लिखो (" %s", runlevel->मूल्य);
+			म_लिखो("\n");
 		}
 		rc_stringlist_free(in);
 	}
@@ -204,147 +204,147 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 	rc_stringlist_free(services);
 }
 
-#define DOADD    (1 << 1)
-#define DODELETE (1 << 2)
-#define DOSHOW   (1 << 3)
+#घोषणा DOADD    (1 << 1)
+#घोषणा DODELETE (1 << 2)
+#घोषणा DOSHOW   (1 << 3)
 
-int main(int argc, char **argv)
+पूर्णांक मुख्य(पूर्णांक argc, अक्षर **argv)
 {
 	RC_DEPTREE *deptree;
 	RC_STRINGLIST *runlevels;
 	RC_STRING *runlevel;
-	char *service = NULL;
-	char *p;
-	int action = 0;
-	bool verbose = false, stack = false, all_runlevels = false;
-	int opt;
-	int retval = EXIT_FAILURE;
-	int num_updated = 0;
-	int (*actfunc)(const char *, const char *);
-	int ret;
+	अक्षर *service = शून्य;
+	अक्षर *p;
+	पूर्णांक action = 0;
+	bool verbose = false, ढेर = false, all_runlevels = false;
+	पूर्णांक opt;
+	पूर्णांक retval = निकास_त्रुटि;
+	पूर्णांक अंक_updated = 0;
+	पूर्णांक (*actfunc)(स्थिर अक्षर *, स्थिर अक्षर *);
+	पूर्णांक ret;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *)0)) != -1)
-		switch (opt) {
-		case 'a':
+	जबतक ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (पूर्णांक *)0)) != -1)
+		चयन (opt) {
+		हाल 'a':
 		    all_runlevels = true;
-		break;
-		case 's':
-		    stack = true;
-		break;
-		case 'u':
+		अवरोध;
+		हाल 's':
+		    ढेर = true;
+		अवरोध;
+		हाल 'u':
 			deptree = _rc_deptree_load(-1, &ret);
-			if (deptree)
+			अगर (deptree)
 				rc_deptree_free(deptree);
-			return ret;
+			वापस ret;
 		case_RC_COMMON_GETOPT
 		}
 
-	verbose = rc_yesno(getenv ("EINFO_VERBOSE"));
+	verbose = rc_yesno(दो_पर्या ("EINFO_VERBOSE"));
 
-	if ((action & DOSHOW   && action != DOSHOW) ||
+	अगर ((action & DOSHOW   && action != DOSHOW) ||
 	    (action & DOADD    && action != DOADD) ||
 	    (action & DODELETE && action != DODELETE))
 		eerrorx("%s: cannot mix commands", applet);
 
 	/* We need to be backwards compatible */
-	if (optind < argc) {
-		if (strcmp(argv[optind], "add") == 0)
+	अगर (optind < argc) {
+		अगर (म_भेद(argv[optind], "add") == 0)
 			action = DOADD;
-		else if (strcmp(argv[optind], "delete") == 0 ||
-		    strcmp(argv[optind], "del") == 0)
+		अन्यथा अगर (म_भेद(argv[optind], "delete") == 0 ||
+		    म_भेद(argv[optind], "del") == 0)
 			action = DODELETE;
-		else if (strcmp(argv[optind], "show") == 0)
+		अन्यथा अगर (म_भेद(argv[optind], "show") == 0)
 			action = DOSHOW;
-		if (action)
+		अगर (action)
 			optind++;
-		else
+		अन्यथा
 			eerrorx("%s: invalid command `%s'",
 			    applet, argv[optind]);
 	}
-	if (!action)
+	अगर (!action)
 		action = DOSHOW;
 
 	runlevels = rc_stringlist_new();
 
-	if (optind >= argc) {
-		if (!(action & DOSHOW))
+	अगर (optind >= argc) {
+		अगर (!(action & DOSHOW))
 			eerrorx("%s: no service specified", applet);
-	} else {
+	} अन्यथा {
 		service = argv[optind];
 		optind++;
 
-		while (optind < argc)
-			if (rc_runlevel_exists(argv[optind]))
+		जबतक (optind < argc)
+			अगर (rc_runlevel_exists(argv[optind]))
 				rc_stringlist_add(runlevels, argv[optind++]);
-			else {
+			अन्यथा {
 				rc_stringlist_free(runlevels);
 				eerrorx ("%s: `%s' is not a valid runlevel",
 				    applet, argv[optind]);
 			}
 	}
 
-	retval = EXIT_SUCCESS;
-	if (action & DOSHOW) {
-		if (service)
+	retval = निकास_सफल;
+	अगर (action & DOSHOW) {
+		अगर (service)
 			rc_stringlist_add(runlevels, service);
-		if (!TAILQ_FIRST(runlevels)) {
+		अगर (!TAILQ_FIRST(runlevels)) {
 			rc_stringlist_free(runlevels);
 			runlevels = rc_runlevel_list();
 		}
 
 		rc_stringlist_sort(&runlevels);
 		show (runlevels, verbose);
-	} else {
-		if (!service)
+	} अन्यथा {
+		अगर (!service)
 			eerror ("%s: no service specified", applet);
-		else {
-			if (action & DOADD) {
-				if (all_runlevels) {
+		अन्यथा {
+			अगर (action & DOADD) {
+				अगर (all_runlevels) {
 					rc_stringlist_free(runlevels);
 					eerrorx("%s: the -a option is invalid with add", applet);
 				}
-				actfunc = stack ? addstack : add;
-			} else if (action & DODELETE) {
-				actfunc = stack ? delstack : delete;
-			} else {
+				actfunc = ढेर ? addstack : add;
+			} अन्यथा अगर (action & DODELETE) {
+				actfunc = ढेर ? delstack : delete;
+			} अन्यथा {
 				rc_stringlist_free(runlevels);
 				eerrorx("%s: invalid action", applet);
 			}
 
-			if (!TAILQ_FIRST(runlevels)) {
-				if (all_runlevels) {
-					free(runlevels);
+			अगर (!TAILQ_FIRST(runlevels)) {
+				अगर (all_runlevels) {
+					मुक्त(runlevels);
 					runlevels = rc_runlevel_list();
-				} else {
+				} अन्यथा {
 					p = rc_runlevel_get();
 					rc_stringlist_add(runlevels,
 					    p ? p : default_runlevel());
-					free(p);
+					मुक्त(p);
 				}
 			}
 
-			if (!TAILQ_FIRST(runlevels)) {
-				free(runlevels);
+			अगर (!TAILQ_FIRST(runlevels)) {
+				मुक्त(runlevels);
 				eerrorx("%s: no runlevels found", applet);
 			}
 
 			TAILQ_FOREACH(runlevel, runlevels, entries) {
-				if (!rc_runlevel_exists(runlevel->value)) {
+				अगर (!rc_runlevel_exists(runlevel->मूल्य)) {
 					eerror ("%s: runlevel `%s' does not exist",
-					    applet, runlevel->value);
-					continue;
+					    applet, runlevel->मूल्य);
+					जारी;
 				}
 
-				ret = actfunc(runlevel->value, service);
-				if (ret < 0)
-					retval = EXIT_FAILURE;
-				num_updated += ret;
+				ret = actfunc(runlevel->मूल्य, service);
+				अगर (ret < 0)
+					retval = निकास_त्रुटि;
+				अंक_updated += ret;
 			}
 
-			if (retval == EXIT_SUCCESS &&
-			    num_updated == 0 && action & DODELETE)
+			अगर (retval == निकास_सफल &&
+			    अंक_updated == 0 && action & DODELETE)
 				ewarnx("%s: service `%s' not found in any"
 				    " of the specified runlevels",
 				    applet, service);
@@ -352,5 +352,5 @@ int main(int argc, char **argv)
 	}
 
 	rc_stringlist_free(runlevels);
-	return retval;
+	वापस retval;
 }

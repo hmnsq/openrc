@@ -10,81 +10,81 @@
  * except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
+#समावेश <errno.h>
 
-#include "helpers.h"
-#include "timeutils.h"
+#समावेश "helpers.h"
+#समावेश "timeutils.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#अगर defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
-#endif
+#पूर्ण_अगर
 
-static int64_t ts_to_ms(struct timespec tv)
+अटल int64_t ts_to_ms(काष्ठा timespec tv)
 {
 	int64_t sec_to_ms = 1000, round_up = 500000, ns_to_ms = 1000000;
-	return (tv.tv_sec * sec_to_ms) + ((tv.tv_nsec + round_up) / ns_to_ms);
+	वापस (tv.tv_sec * sec_to_ms) + ((tv.tv_nsec + round_up) / ns_to_ms);
 }
 
-int64_t tm_now(void)
+int64_t tm_now(व्योम)
 {
-	struct timespec tv;
+	काष्ठा timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
-	return ts_to_ms(tv);
+	वापस ts_to_ms(tv);
 }
 
-int64_t tm_sleep(int64_t ms, enum tm_sleep_flags flags)
+int64_t tm_sleep(int64_t ms, क्रमागत tm_sleep_flags flags)
 {
-	int ret;
-	struct timespec tv, rem;
+	पूर्णांक ret;
+	काष्ठा timespec tv, rem;
 	tv.tv_sec  = ms / 1000;
 	tv.tv_nsec = (ms % 1000) * 1000000l;
-	for (;;) {
+	क्रम (;;) {
 		ret = clock_nanosleep(CLOCK_MONOTONIC, 0, &tv, &rem);
-		if (ret < 0 && (!(flags & TM_NO_EINTR) || errno != EINTR))
-			return ts_to_ms(rem);
-		if (ret == 0)
-			break;
+		अगर (ret < 0 && (!(flags & TM_NO_EINTR) || त्रुटि_सं != EINTR))
+			वापस ts_to_ms(rem);
+		अगर (ret == 0)
+			अवरोध;
 		tv = rem;
 	}
-	return 0;
+	वापस 0;
 }
 
-int64_t parse_duration(const char *duration)
+int64_t parse_duration(स्थिर अक्षर *duration)
 {
-	enum delay_unit {
+	क्रमागत delay_unit {
 		UNIT_INVALID = -1,
 		UNIT_MS   = 1,
 		UNIT_SEC  = 1000,
 		UNIT_MIN  = UNIT_SEC * 60,
 		UNIT_HOUR = UNIT_MIN * 60,
 	} unit = UNIT_INVALID;
-	struct { const char *ext; enum delay_unit unit; } exts[] = {
+	काष्ठा { स्थिर अक्षर *ext; क्रमागत delay_unit unit; } exts[] = {
 		{ "ms", UNIT_MS }, { "miliseconds", UNIT_MS },
 		{ "s", UNIT_SEC }, { "sec", UNIT_SEC }, { "seconds", UNIT_SEC }, { "", UNIT_SEC },
 		{ "m", UNIT_MIN }, { "min", UNIT_MIN }, { "minutes", UNIT_MIN },
 		{ "h", UNIT_HOUR }, { "hour", UNIT_HOUR }
 	};
-	char *end;
-	long val;
+	अक्षर *end;
+	दीर्घ val;
 
-	errno = 0;
-	val = strtol(duration, &end, 10);
-	if (errno == ERANGE || *duration == '\0' || val < 0)
-		return -1;
-	for (size_t i = 0; i < ARRAY_SIZE(exts); ++i) {
-		if (strcmp(end, exts[i].ext) == 0) {
+	त्रुटि_सं = 0;
+	val = म_से_दीर्घ(duration, &end, 10);
+	अगर (त्रुटि_सं == दुस्फल || *duration == '\0' || val < 0)
+		वापस -1;
+	क्रम (माप_प्रकार i = 0; i < ARRAY_आकार(exts); ++i) {
+		अगर (म_भेद(end, exts[i].ext) == 0) {
 			unit = exts[i].unit;
-			break;
+			अवरोध;
 		}
 	}
-	switch (unit) {
-	case UNIT_INVALID:
-		return -1;
-	default:
-		if (INT64_MAX/unit < val) /* overflow */
-			return -1;
-		return (int64_t)val * unit;
+	चयन (unit) {
+	हाल UNIT_INVALID:
+		वापस -1;
+	शेष:
+		अगर (INT64_MAX/unit < val) /* overflow */
+			वापस -1;
+		वापस (int64_t)val * unit;
 	}
 }

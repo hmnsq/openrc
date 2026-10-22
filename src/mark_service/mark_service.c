@@ -10,45 +10,45 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/types.h>
+#समावेश <errno.h>
+#समावेश <stdbool.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <signal.h>
+#समावेश <string.h>
+#समावेश <sys/types.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#समावेश "einfo.h"
+#समावेश "rc.h"
+#समावेश "misc.h"
+#समावेश "helpers.h"
 
-const char *applet = NULL;
+स्थिर अक्षर *applet = शून्य;
 
-int main(int argc, char **argv)
+पूर्णांक मुख्य(पूर्णांक argc, अक्षर **argv)
 {
 	bool ok = false;
-	char *svcname = getenv("RC_SVCNAME");
-	char *service = NULL;
-	char *openrc_pid;
+	अक्षर *svcname = दो_पर्या("RC_SVCNAME");
+	अक्षर *service = शून्य;
+	अक्षर *openrc_pid;
 	/* char *mtime; */
 	pid_t pid;
 	RC_SERVICE bit;
 	/* size_t l; */
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	अगर (argc > 1)
 		service = argv[1];
-	else
+	अन्यथा
 		service = svcname;
 
-	if (service == NULL || *service == '\0')
+	अगर (service == शून्य || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
-	if (!strncmp(applet, "mark_", 5) &&
+	अगर (!म_भेदन(applet, "mark_", 5) &&
 	    (bit = lookup_service_state(applet + 5)))
 		ok = rc_service_mark(service, bit);
-	else
+	अन्यथा
 		eerrorx("%s: unknown applet", applet);
 
 	/* If we're marking ourselves then we need to inform our parent
@@ -60,12 +60,12 @@ int main(int argc, char **argv)
 	 * See 20120424041423.GA23657@odin.qasl.de (Tue, 24 Apr 2012 06:14:23 +0200,
 	 * openrc@gentoo.org).
 	 */
-	if (ok && svcname && strcmp(svcname, service) == 0) {
-		openrc_pid = getenv("RC_OPENRC_PID");
-		if (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
-			if (kill(pid, SIGUSR1) != 0)
+	अगर (ok && svcname && म_भेद(svcname, service) == 0) {
+		openrc_pid = दो_पर्या("RC_OPENRC_PID");
+		अगर (openrc_pid && माला_पूछो(openrc_pid, "%d", &pid) == 1)
+			अगर (समाप्त(pid, SIGUSR1) != 0)
 				eerror("%s: failed to signal parent %d: %s",
-				    applet, pid, strerror(errno));
+				    applet, pid, म_त्रुटि(त्रुटि_सं));
 
 		/* Remove the exclusive time test. This ensures that it's not
 		   in control as well */
@@ -81,5 +81,5 @@ int main(int argc, char **argv)
 		*/
 	}
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	वापस ok ? निकास_सफल : निकास_त्रुटि;
 }

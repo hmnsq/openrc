@@ -9,11 +9,11 @@
  * This file may not be copied, modified, propagated, or distributed
  * except according to the terms contained in the LICENSE file.
  */
-#ifndef RC_EXEC_H
-#define RC_EXEC_H
+#अगर_अघोषित RC_EXEC_H
+#घोषणा RC_EXEC_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#समावेश <stdbool.h>
+#समावेश <sys/types.h>
 
 /*
  * goal of this api is to provide a convenient and centralized way to do most
@@ -22,7 +22,7 @@
  * here instead of ad-hoc coding fork+exec yourself.
  */
 
-enum {
+क्रमागत {
 	/* default */
 	EXEC_NO_REDIRECT = -1,
 	/* make a pipe and redirect to it */
@@ -31,30 +31,30 @@ enum {
 	EXEC_DEVNULL = -3,
 };
 
-struct exec_args {
-	const char **argv;
-	const char *cmd;  /* if NULL, argv[0] is used */
-	int redirect_stdin;
-	int redirect_stdout;
-	int redirect_stderr;
+काष्ठा exec_args {
+	स्थिर अक्षर **argv;
+	स्थिर अक्षर *cmd;  /* if NULL, argv[0] is used */
+	पूर्णांक redirect_stdin;
+	पूर्णांक redirect_stdout;
+	पूर्णांक redirect_stderr;
 	uid_t uid;
 	gid_t gid;
 	bool setsid : 1;
 };
 
-struct exec_result {
+काष्ठा exec_परिणाम {
 	pid_t pid;
 	/* returned in case of RC_EXEC_MKPIPE */
-	int proc_stdin;
-	int proc_stdout;
-	int proc_stderr;
+	पूर्णांक proc_stdin;
+	पूर्णांक proc_stdout;
+	पूर्णांक proc_stderr;
 };
 
-struct exec_args exec_init(const char **argv);
-struct exec_result do_exec(struct exec_args *args);
+काष्ठा exec_args exec_init(स्थिर अक्षर **argv);
+काष्ठा exec_परिणाम do_exec(काष्ठा exec_args *args);
 
 /* some exec related helplers */
-int rc_waitpid(pid_t pid);
-int rc_pipe_command(const char *cmd, int devnullfd);
+पूर्णांक rc_waitpid(pid_t pid);
+पूर्णांक rc_pipe_command(स्थिर अक्षर *cmd, पूर्णांक devnullfd);
 
-#endif
+#पूर्ण_अगर
