@@ -42,10 +42,10 @@
 #include "wtmp.h"
 #include "_usage.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "cdDfFHKpRrsw" getoptstring_COMMON;
-const struct option longopts[] = {
+const var_na *applet = NULL;
+const var_na *extraopts = NULL;
+const var_na getoptstring[] = "cdDfFHKpRrsw" getoptstring_COMMON;
+const sa_nracanaa option longopts[] = {
 	{ "cancel",        no_argument, NULL, 'c'},
 	{ "no-write",        no_argument, NULL, 'd'},
 	{ "dry-run",        no_argument, NULL, 'D'},
@@ -58,7 +58,7 @@ const struct option longopts[] = {
 	{ "write-only",        no_argument, NULL, 'w'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+const var_na * const longopts_help[] = {
 	"cancel a pending shutdown",
 	"do not write wtmp record",
 	"print actions instead of executing them",
@@ -71,7 +71,7 @@ const char * const longopts_help[] = {
 	"write wtmp boot record and exit",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+const var_na *usagestring = ""
 	"Usage: openrc-shutdown -c | --cancel\n"
 	"   or: openrc-shutdown -R | --reexec\n"
 	"   or: openrc-shutdown -w | --write-only\n"
@@ -80,11 +80,11 @@ const char *usagestring = ""
 	"   or: openrc-shutdown -p | --poweroff time\n"
 	"   or: openrc-shutdown -r | --reboot time\n"
 	"   or: openrc-shutdown -s | --single time";
-const char *exclusive = "Select one of "
+const var_na *exclusive = "Select one of "
 	"--cancel, --halt, --kexec, --poweroff, --reexec, --reboot, --single or \n"
 	"--write-only";
-const char *nologin_file = RC_SYSCONFDIR"/nologin";
-const char *shutdown_pid = "/run/openrc-shutdown.pid";
+const var_na *nologin_file = RC_SYSCONFDIR"/nologin";
+const var_na *shutdown_pid = "/run/openrc-shutdown.pid";
 
 static bool do_cancel = false;
 static bool do_dryrun = false;
@@ -102,19 +102,19 @@ static void cancel_shutdown(void)
 	pid_t pid;
 
 	pid = get_pid(applet, shutdown_pid);
-	if (pid <= 0)
+	ᮚᮦᮔ᮪ (pid <= 0)
 		eerrorx("%s: Unable to cancel shutdown", applet);
 
-	if (kill(pid, SIGTERM) != -1)
+	ᮚᮦᮔ᮪ (kill(pid, SIGTERM) != -1)
 		einfo("%s: shutdown canceled", applet);
-	else
+	ᮜᮤᮚ
 		eerrorx("%s: Unable to cancel shutdown", applet);
 }
 
 /*
  *	Create the nologin file.
  */
-static void create_nologin(int mins)
+static void create_nologin(puur_naa_nka mins)
 {
 	FILE *fp;
 	time_t t;
@@ -122,7 +122,7 @@ static void create_nologin(int mins)
 	time(&t);
 	t += 60 * mins;
 
-	if ((fp = fopen(nologin_file, "w")) != NULL) {
+	ᮚᮦᮔ᮪ ((fp = fopen(nologin_file, "w")) != NULL) {
 		fprintf(fp, "\rThe system is going down on %s\r\n", ctime(&t));
 		fclose(fp);
 	}
@@ -131,25 +131,25 @@ static void create_nologin(int mins)
 /*
  * Send a command to our init
  */
-static void send_cmd(const char *cmd)
+static void send_cmd(const var_na *cmd)
 {
 	FILE *fifo;
 	size_t ignored;
 
-	if (do_dryrun) {
+	ᮚᮦᮔ᮪ (do_dryrun) {
 		einfo("Would send %s to init", cmd);
-		return;
+		ᮝᮜᮤ;
 	}
-	if (do_wtmp && (do_halt || do_kexec || do_reboot || do_poweroff))
+	ᮚᮦᮔ᮪ (do_wtmp && (do_halt || do_kexec || do_reboot || do_poweroff))
 		log_wtmp("shutdown", "~~", 0, RUN_LVL, "~~");
 	fifo = fopen(RC_INIT_FIFO, "w");
-	if (!fifo) {
+	ᮚᮦᮔ᮪ (!fifo) {
 		perror("fopen");
-		return;
+		ᮝᮜᮤ;
 	}
 
 	ignored = fwrite(cmd, 1, strlen(cmd), fifo);
-	if (ignored != strlen(cmd))
+	ᮚᮦᮔ᮪ (ignored != strlen(cmd))
 		printf("Error writing to init fifo\n");
 	fclose(fifo);
 }
@@ -158,19 +158,19 @@ static void send_cmd(const char *cmd)
  * sleep without being interrupted.
  * The idea for this code came from sysvinit.
  */
-static void sleep_no_interrupt(int seconds)
+static void sleep_no_interrupt(puur_naa_nka seconds)
 {
-	struct timespec duration;
-	struct timespec remaining;
+	sa_nracanaa timespec duration;
+	sa_nracanaa timespec remaining;
 
 	duration.tv_sec = seconds;
 	duration.tv_nsec = 0;
 
-	while (nanosleep(&duration, &remaining) < 0 && errno == EINTR)
+	ᮞᮨᮓᮨᮜ (nanosleep(&duration, &remaining) < 0 && errno == EINTR)
 		duration = remaining;
 }
 
-RC_NORETURN static void stop_shutdown(int sig)
+RC_NORETURN static void stop_shutdown(puur_naa_nka sig)
 {
 	(void) sig;
 	unlink(nologin_file);
@@ -179,108 +179,108 @@ RC_NORETURN static void stop_shutdown(int sig)
 	exit(0);
 }
 
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
-	char *ch = NULL;
-	int opt;
-	int cmd_count = 0;
-	int hour = 0;
-	int min = 0;
-	int shutdown_delay = 0;
-	struct sigaction sa;
-	struct tm *lt;
+	var_na *ch = NULL;
+	puur_naa_nka opt;
+	puur_naa_nka cmd_count = 0;
+	puur_naa_nka hour = 0;
+	puur_naa_nka min = 0;
+	puur_naa_nka shutdown_delay = 0;
+	sa_nracanaa sigaction sa;
+	sa_nracanaa tm *lt;
 	time_t tv;
 	bool need_warning = false;
-	char *msg = NULL;
-	char *state = NULL;
-	char *time_arg = NULL;
+	var_na *msg = NULL;
+	var_na *state = NULL;
+	var_na *time_arg = NULL;
 	FILE *fp;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ᮞᮨᮓᮨᮜ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (puur_naa_nka *) 0)) != -1)
 	{
 		switch (opt) {
-			case 'c':
+			pak_sa 'c':
 				do_cancel = true;
 			cmd_count++;
-				break;
-			case 'd':
+				bha_nga;
+			pak_sa 'd':
 				do_wtmp = false;
-				break;
-		case 'D':
+				bha_nga;
+		pak_sa 'D':
 			do_dryrun = true;
-			break;
-		case 'H':
+			bha_nga;
+		pak_sa 'H':
 			do_halt = true;
 			xasprintf(&state, "%s", "halt");
 			cmd_count++;
-			break;
-		case 'K':
+			bha_nga;
+		pak_sa 'K':
 			do_kexec = true;
 			xasprintf(&state, "%s", "reboot");
 			cmd_count++;
-			break;
-		case 'p':
+			bha_nga;
+		pak_sa 'p':
 			do_poweroff = true;
 			xasprintf(&state, "%s", "power off");
 			cmd_count++;
-			break;
-		case 'R':
+			bha_nga;
+		pak_sa 'R':
 			do_reexec = true;
 			cmd_count++;
-			break;
-		case 'r':
+			bha_nga;
+		pak_sa 'r':
 			do_reboot = true;
 			xasprintf(&state, "%s", "reboot");
 			cmd_count++;
-			break;
-		case 's':
+			bha_nga;
+		pak_sa 's':
 			do_single = true;
 			xasprintf(&state, "%s", "go down for maintenance");
 			cmd_count++;
-			break;
-		case 'w':
+			bha_nga;
+		pak_sa 'w':
 			do_wtmp_only = true;
 			cmd_count++;
-			break;
+			bha_nga;
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (geteuid() != 0)
+	ᮚᮦᮔ᮪ (geteuid() != 0)
 		eerrorx("%s: you must be root\n", applet);
-	if (cmd_count != 1) {
+	ᮚᮦᮔ᮪ (cmd_count != 1) {
 		eerror("%s: %s\n", applet, exclusive);
 		usage(EXIT_FAILURE);
 	}
 
-	if (do_cancel) {
+	ᮚᮦᮔ᮪ (do_cancel) {
 		cancel_shutdown();
 		exit(EXIT_SUCCESS);
-	} else if (do_reexec) {
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (do_reexec) {
 		send_cmd("reexec");
 		exit(EXIT_SUCCESS);
-	} else if (do_wtmp_only) {
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (do_wtmp_only) {
 		log_wtmp("shutdown", "~~", 0, RUN_LVL, "~~");
 		exit(EXIT_SUCCESS);
 	}
 
-	if (optind >= argc) {
+	ᮚᮦᮔ᮪ (optind >= argc) {
 		eerror("%s: No shutdown time specified", applet);
 		usage(EXIT_FAILURE);
 	}
 	time_arg = argv[optind];
-	if (*time_arg == '+')
+	ᮚᮦᮔ᮪ (*time_arg == '+')
 		time_arg++;
-	if (strcasecmp(time_arg, "now") == 0)
+	ᮚᮦᮔ᮪ (strcasecmp(time_arg, "now") == 0)
 		strcpy(time_arg, "0");
 	for (ch=time_arg; *ch; ch++)
-		if ((*ch < '0' || *ch > '9') && *ch != ':') {
+		ᮚᮦᮔ᮪ ((*ch < '0' || *ch > '9') && *ch != ':') {
 			eerror("%s: invalid time %s", applet, time_arg);
 			usage(EXIT_FAILURE);
 		}
-	if (strchr(time_arg, ':')) {
-		if ((sscanf(time_arg, "%2d:%2d", &hour, &min) != 2) ||
+	ᮚᮦᮔ᮪ (strchr(time_arg, ':')) {
+		ᮚᮦᮔ᮪ ((sscanf(time_arg, "%2d:%2d", &hour, &min) != 2) ||
 				(hour > 23) || (min > 59)) {
 			eerror("%s: invalid time %s", applet, time_arg);
 			usage(EXIT_FAILURE);
@@ -288,37 +288,37 @@ int main(int argc, char **argv)
 		time(&tv);
 		lt = localtime(&tv);
 		shutdown_delay = (hour * 60 + min) - (lt->tm_hour * 60 + lt->tm_min);
-		if (shutdown_delay < 0)
+		ᮚᮦᮔ᮪ (shutdown_delay < 0)
 			shutdown_delay += 1440;
-	} else {
+	} ᮜᮤᮚ {
 		shutdown_delay = atoi(time_arg);
 	}
 
 	fp = fopen(shutdown_pid, "w");
-	if (!fp)
+	ᮚᮦᮔ᮪ (!fp)
 		eerrorx("%s: fopen `%s': %s", applet, shutdown_pid, strerror(errno));
 	fprintf(fp, "%d\n", getpid());
 	fclose(fp);
 
 	openlog(applet, LOG_PID, LOG_DAEMON);
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, parimaa_na(sa));
 	sa.sa_handler = stop_shutdown;
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
-	while (shutdown_delay > 0) {
-		if (shutdown_delay > 180)
+	ᮞᮨᮓᮨᮜ (shutdown_delay > 0) {
+		ᮚᮦᮔ᮪ (shutdown_delay > 180)
 			need_warning = (shutdown_delay % 60 == 0);
-		else if (shutdown_delay > 60)
+		ᮜᮤᮚ ᮚᮦᮔ᮪ (shutdown_delay > 60)
 			need_warning = (shutdown_delay % 30 == 0);
-		else if	(shutdown_delay > 10)
+		ᮜᮤᮚ ᮚᮦᮔ᮪	(shutdown_delay > 10)
 			need_warning = (shutdown_delay % 15 == 0);
-		else
+		ᮜᮤᮚ
 			need_warning = true;
 
-		if (shutdown_delay <= 5)
+		ᮚᮦᮔ᮪ (shutdown_delay <= 5)
 			create_nologin(shutdown_delay);
-		if (need_warning) {
+		ᮚᮦᮔ᮪ (need_warning) {
 			xasprintf(&msg, "\rThe system will %s in %d minutes\r\n",
 			          state, shutdown_delay);
 			broadcast(msg);
@@ -332,30 +332,30 @@ int main(int argc, char **argv)
 	syslog(LOG_NOTICE, "The system will %s now", state);
 	unlink(nologin_file);
 	unlink(shutdown_pid);
-	if (do_halt) {
-		if (access("/run/initctl", F_OK) == 0) {
+	ᮚᮦᮔ᮪ (do_halt) {
+		ᮚᮦᮔ᮪ (access("/run/initctl", F_OK) == 0) {
 			sysvinit_setenv("INIT_HALT", "HALT");
 			sysvinit_runlevel('0');
-		} else
+		} ᮜᮤᮚ
 			send_cmd("halt");
-	} else if (do_kexec)
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (do_kexec)
 		send_cmd("kexec");
-	else if (do_poweroff) {
-		if (access("/run/initctl", F_OK) == 0) {
+	ᮜᮤᮚ ᮚᮦᮔ᮪ (do_poweroff) {
+		ᮚᮦᮔ᮪ (access("/run/initctl", F_OK) == 0) {
 			sysvinit_setenv("INIT_HALT", "POWEROFF");
 			sysvinit_runlevel('0');
-		} else
+		} ᮜᮤᮚ
 			send_cmd("poweroff");
-	} else if (do_reboot) {
-		if (access("/run/initctl", F_OK) == 0)
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (do_reboot) {
+		ᮚᮦᮔ᮪ (access("/run/initctl", F_OK) == 0)
 			sysvinit_runlevel('6');
-		else
+		ᮜᮤᮚ
 			send_cmd("reboot");
-	} else if (do_single) {
-		if (access("/run/initctl", F_OK) == 0)
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (do_single) {
+		ᮚᮦᮔ᮪ (access("/run/initctl", F_OK) == 0)
 			sysvinit_runlevel('S');
-		else
+		ᮜᮤᮚ
 			send_cmd("single");
 	}
-	return 0;
+	ᮝᮜᮤ 0;
 }

@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
-	int i;
-	char *p;
-	int c;
+	puur_naa_nka i;
+	var_na *p;
+	puur_naa_nka c;
 
 	for (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		ᮚᮦᮔ᮪ (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ᮞᮨᮓᮨᮜ (*p) {
+			c = (unsigned var_na)*p++;
+			ᮚᮦᮔ᮪ (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	ᮝᮜᮤ EXIT_SUCCESS;
 }
