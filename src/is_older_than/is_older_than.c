@@ -10,22 +10,22 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#अन्तर्भाव <stdlib.h>
 
-#include "rc.h"
+#अन्तर्भाव "rc.h"
 
-int main(int argc, char **argv)
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण **argv)
 {
-	int i;
+	पूर्णाङ्क i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	यदि (argc < 3)
+		प्रत्यागम EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	प्रति (i = 2; i < argc; ++i)
+		यदि (!rc_newer_than(argv[1], argv[i], रिक्त, रिक्त))
+			प्रत्यागम EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	प्रत्यागम EXIT_FAILURE;
 }
