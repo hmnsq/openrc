@@ -12,58 +12,58 @@
 
 #define SYSLOG_NAMES
 
-#include <sys/time.h>
-#include <errno.h>
-#include <ctype.h>
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <strings.h>
+#ضمن <sys/time.h>
+#ضمن <errno.h>
+#ضمن <ctype.h>
+#ضمن <inttypes.h>
+#ضمن <stddef.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <syslog.h>
+#ضمن <time.h>
+#ضمن <strings.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "helpers.h"
 
 /* usecs to wait while we poll the file existence  */
 #define WAIT_INTERVAL	20000000
 
-const char *applet = NULL;
+ثابت حرف *applet = عدم;
 
-static int syslog_decode(char *name, const CODE *codetab)
+ساكن صحيح syslog_decode(حرف *name, ثابت CODE *codetab)
 {
-	const CODE *c;
+	ثابت CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	ܐܢ (isdigit((unsigned حرف)*name))
+		ܦܢܐ atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	لكل (c = codetab; c->c_name; c++)
+		ܐܢ (!strcasecmp(name, c->c_name))
+			ܦܢܐ c->c_val;
 
-	return -1;
+	ܦܢܐ -1;
 }
 
-int main(int argc, char **argv)
+صحيح main(صحيح argc, حرف **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	صحيح retval = EXIT_SUCCESS;
+	صحيح i;
 	size_t l = 0;
-	char *message = NULL;
-	char *p;
-	int level = 0;
-	struct timespec ts;
-	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	حرف *message = عدم;
+	حرف *p;
+	صحيح level = 0;
+	بنية timespec ts;
+	بنية timeval stop, now;
+	صحيح (*e) (ثابت حرف *, ...) EINFO_PRINTF(1, 2) = عدم;
+	صحيح (*ee) (صحيح, ثابت حرف *, ...) EINFO_PRINTF(2, 3) = عدم;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
+	ܐܢ (strcmp(applet, "eval_ecolors") == 0) {
 		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
@@ -74,31 +74,31 @@ int main(int argc, char **argv)
 		exit(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	ܐܢ (argc > 0) {
+		ܐܢ (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (صحيح)strtoimax(argv[0], &p, 0);
+			ܐܢ (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			ܐܢ (errno)
 				retval = EXIT_FAILURE;
-			else {
+			ܐܚܪܢܐ {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} ܐܚܪܢܐ ܐܢ (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			ܐܢ (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			ܐܢ (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,110 +109,110 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	ܐܢ (strcmp(applet, "ewaitfile") == 0) {
+		ܐܢ (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		ܐܢ (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
-		gettimeofday(&stop, NULL);
+		gettimeofday(&stop, عدم);
 		/* retval stores the timeout */
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		لكل (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
-					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
-				gettimeofday(&now, NULL);
-				if (retval <= 0)
-					continue;
-				if (timercmp(&now, &stop, <))
-					continue;
+			لكل (;;) {
+				ܐܢ (access(argv[i], F_OK) == 0)
+					اكسر;
+				ܐܢ (nanosleep(&ts, عدم) == -1)
+					ܦܢܐ EXIT_FAILURE;
+				gettimeofday(&now, عدم);
+				ܐܢ (retval <= 0)
+					استمر;
+				ܐܢ (timercmp(&now, &stop, <))
+					استمر;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				ܦܢܐ EXIT_FAILURE;
 			}
-			eendv(EXIT_SUCCESS, NULL);
+			eendv(EXIT_SUCCESS, عدم);
 		}
-		return EXIT_SUCCESS;
+		ܦܢܐ EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
+	ܐܢ (argc > 0) {
 		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+		لكل (i = 0; i < argc; i++) {
+			ܐܢ (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	ܐܢ (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} ܐܚܪܢܐ ܐܢ (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} ܐܚܪܢܐ ܐܢ (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "esyslog") == 0) {
 		elog(retval, "%s", message);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} ܐܚܪܢܐ ܐܢ (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	ܐܚܪܢܐ ܐܢ (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	ܐܚܪܢܐ {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
+	ܐܢ (message) {
+		ܐܢ (e)
 			e("%s", message);
-		else if (ee)
+		ܐܚܪܢܐ ܐܢ (ee)
 			ee(retval, "%s", message);
-	} else {
-		if (e)
-			e(NULL);
-		else if (ee)
-			ee(retval, NULL);
+	} ܐܚܪܢܐ {
+		ܐܢ (e)
+			e(عدم);
+		ܐܚܪܢܐ ܐܢ (ee)
+			ee(retval, عدم);
 	}
 
-	free(message);
-	return retval;
+	حرر(message);
+	ܦܢܐ retval;
 }

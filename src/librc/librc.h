@@ -20,44 +20,44 @@
 
 #define _IN_LIBRC
 
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <paths.h>
-#include <regex.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <time.h>
-#include <unistd.h>
+#ضمن <sys/types.h>
+#ضمن <sys/param.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/time.h>
+#ضمن <sys/wait.h>
+#ضمن <ctype.h>
+#ضمن <dirent.h>
+#ضمن <errno.h>
+#ضمن <fcntl.h>
+#ضمن <libgen.h>
+#ضمن <limits.h>
+#ضمن <paths.h>
+#ضمن <regex.h>
+#ضمن <signal.h>
+#ضمن <stdarg.h>
+#ضمن <stdbool.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <strings.h>
+#ضمن <time.h>
+#ضمن <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
-  #include <sys/user.h>
+#ܐܢ defined(BSD) && !defined(__GNU__)
+  #ܐܢ !defined(__NetBSD__)
+  #ضمن <sys/user.h>
   #endif
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#else
-#include <sys/param.h>
+#ضمن <sys/param.h>
+#ضمن <sys/sysctl.h>
+#ضمن <kvm.h>
+#ܐܚܪܢܐ
+#ضمن <sys/param.h>
 #endif
 
-#include "rc.h"
-#include "misc.h"
+#ضمن "rc.h"
+#ضمن "misc.h"
 
-static const char *const dirnames[RC_DIR_SYS_MAX] =
+ساكن ثابت حرف *ثابت dirnames[RC_DIR_SYS_MAX] =
 {
 	[RC_DIR_STARTING] = "starting",
 	[RC_DIR_STARTED] = "started",
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
-void clear_dirfds(void);
+RC_STRINGLIST *config_list(صحيح dirfd, ثابت حرف *pathname);
+فراغ clear_dirfds(فراغ);
 
 #endif

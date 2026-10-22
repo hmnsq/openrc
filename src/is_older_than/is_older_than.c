@@ -10,22 +10,22 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#ضمن <stdlib.h>
 
-#include "rc.h"
+#ضمن "rc.h"
 
-int main(int argc, char **argv)
+صحيح main(صحيح argc, حرف **argv)
 {
-	int i;
+	صحيح i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ܐܢ (argc < 3)
+		ܦܢܐ EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	لكل (i = 2; i < argc; ++i)
+		ܐܢ (!rc_newer_than(argv[1], argv[i], عدم, عدم))
+			ܦܢܐ EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	ܦܢܐ EXIT_FAILURE;
 }
