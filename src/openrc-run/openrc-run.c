@@ -15,67 +15,67 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <fnmatch.h>
-#include <getopt.h>
-#include <libgen.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <spawn.h>
-#include <sys/ioctl.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <time.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <inttypes.h>
+#ضمن <ctype.h>
+#ضمن <errno.h>
+#ضمن <fcntl.h>
+#ضمن <fnmatch.h>
+#ضمن <getopt.h>
+#ضمن <libgen.h>
+#ضمن <poll.h>
+#ضمن <signal.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <spawn.h>
+#ضمن <sys/ioctl.h>
+#ضمن <sys/file.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/types.h>
+#ضمن <sys/wait.h>
+#ضمن <termios.h>
+#ضمن <time.h>
+#ضمن <unistd.h>
+#ضمن <stdbool.h>
+#ضمن <inttypes.h>
 
-#if defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#𐡄𐡍 defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 #  include <pty.h>
-#elif defined(__NetBSD__) || defined(__OpenBSD__)
+#وإلاإذا defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <util.h>
-#else
+#وإلا
 #  include <libutil.h>
 #endif
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "misc.h"
-#include "timeutils.h"
-#include "plugin.h"
-#include "selinux.h"
-#include "_usage.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "queue.h"
+#ضمن "rc.h"
+#ضمن "rc_exec.h"
+#ضمن "misc.h"
+#ضمن "timeutils.h"
+#ضمن "plugin.h"
+#ضمن "selinux.h"
+#ضمن "_usage.h"
+#ضمن "helpers.h"
 
 #define WAIT_TIMEOUT	60		/* seconds until we timeout */
 #define WARN_TIMEOUT	10		/* warn about this every N seconds */
 
-extern char **environ;
+خارجي حرف **environ;
 
-const char *applet = NULL;
-const char *extraopts = "stop | start | restart | status | describe | zap";
-const char getoptstring[] = "dDsSvl:Z" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "debug",      0, NULL, 'd'},
-	{ "dry-run",    0, NULL, 'Z'},
-	{ "ifstarted",  0, NULL, 's'},
-	{ "ifstopped",  0, NULL, 'S'},
-	{ "nodeps",     0, NULL, 'D'},
-	{ "lockfd",     1, NULL, 'l'},
+ثابت حرف *applet = عدم;
+ثابت حرف *extraopts = "stop | start | restart | status | describe | zap";
+ثابت حرف getoptstring[] = "dDsSvl:Z" getoptstring_COMMON;
+ثابت بنية option longopts[] = {
+	{ "debug",      0, عدم, 'd'},
+	{ "dry-run",    0, عدم, 'Z'},
+	{ "ifstarted",  0, عدم, 's'},
+	{ "ifstopped",  0, عدم, 'S'},
+	{ "nodeps",     0, عدم, 'D'},
+	{ "lockfd",     1, عدم, 'l'},
 	longopts_COMMON
 };
-const char *const longopts_help[] = {
+ثابت حرف *ثابت longopts_help[] = {
 	"set xtrace when running the script",
 	"show what would be done",
 	"only run commands when started",
@@ -84,85 +84,85 @@ const char *const longopts_help[] = {
 	"fd of the exclusive lock from rc",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ثابت حرف *usagestring = عدم;
 
-static char *service, *runlevel, *ibsave, *prefix;
-static RC_DEPTREE *deptree;
-static RC_STRINGLIST *applet_list, *services, *tmplist;
-static RC_STRINGLIST *restart_services;
-static RC_STRINGLIST *need_services;
-static RC_STRINGLIST *use_services;
-static RC_STRINGLIST *want_services;
-static int exclusive_fd = -1, master_tty = -1;
-static bool in_background, deps, dry_run;
-static volatile bool sighup, skip_mark, timedout;
-static pid_t service_pid;
-static int signal_pipe[2] = { -1, -1 };
+ساكن حرف *service, *runlevel, *ibsave, *prefix;
+ساكن RC_DEPTREE *deptree;
+ساكن RC_STRINGLIST *applet_list, *services, *tmplist;
+ساكن RC_STRINGLIST *restart_services;
+ساكن RC_STRINGLIST *need_services;
+ساكن RC_STRINGLIST *use_services;
+ساكن RC_STRINGLIST *want_services;
+ساكن صحيح exclusive_fd = -1, master_tty = -1;
+ساكن bool in_background, deps, dry_run;
+ساكن متطاير bool sighup, skip_mark, timedout;
+ساكن pid_t service_pid;
+ساكن صحيح signal_pipe[2] = { -1, -1 };
 
-static RC_STRINGLIST *deptypes_b;	/* broken deps */
-static RC_STRINGLIST *deptypes_n;	/* needed deps */
-static RC_STRINGLIST *deptypes_nw;	/* need+want deps */
-static RC_STRINGLIST *deptypes_nwu;	/* need+want+use deps */
-static RC_STRINGLIST *deptypes_nwua;	/* need+want+use+after deps */
-static RC_STRINGLIST *deptypes_m;	/* needed deps for stopping */
-static RC_STRINGLIST *deptypes_mwua;	/* need+want+use+after deps for stopping */
+ساكن RC_STRINGLIST *deptypes_b;	/* broken deps */
+ساكن RC_STRINGLIST *deptypes_n;	/* needed deps */
+ساكن RC_STRINGLIST *deptypes_nw;	/* need+want deps */
+ساكن RC_STRINGLIST *deptypes_nwu;	/* need+want+use deps */
+ساكن RC_STRINGLIST *deptypes_nwua;	/* need+want+use+after deps */
+ساكن RC_STRINGLIST *deptypes_m;	/* needed deps for stopping */
+ساكن RC_STRINGLIST *deptypes_mwua;	/* need+want+use+after deps for stopping */
 
-static void
-handle_signal(int sig)
+ساكن فراغ
+handle_signal(صحيح sig)
 {
-	int serrno = errno, status;
+	صحيح serrno = errno, status;
 	pid_t pid;
-	const char *signame = NULL;
-	struct winsize ws;
+	ثابت حرف *signame = عدم;
+	بنية winsize ws;
 
-	switch (sig) {
-	case SIGHUP:
+	بدل (sig) {
+	حالة SIGHUP:
 		sighup = true;
-		break;
+		اكسر;
 
-	case SIGUSR1:
+	حالة SIGUSR1:
 		skip_mark = true;
-		break;
+		اكسر;
 
-	case SIGCHLD:
-		while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-			if (signal_pipe[1] > -1 && pid == service_pid) {
-				if (write(signal_pipe[1], &status, sizeof(status)) == -1)
+	حالة SIGCHLD:
+		طالما ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+			𐡄𐡍 (signal_pipe[1] > -1 && pid == service_pid) {
+				𐡄𐡍 (اكتب(signal_pipe[1], &status, حجم(status)) == -1)
 					eerror("%s: send: %s", applet, strerror(errno));
 			}
 		}
-		break;
+		اكسر;
 
-	case SIGWINCH:
-		if (master_tty >= 0) {
+	حالة SIGWINCH:
+		𐡄𐡍 (master_tty >= 0) {
 			ioctl(fileno(stdout), TIOCGWINSZ, &ws);
 			ioctl(master_tty, TIOCSWINSZ, &ws);
 		}
-		break;
+		اكسر;
 
-	case SIGINT:
-		if (!signame)
+	حالة SIGINT:
+		𐡄𐡍 (!signame)
 			signame = "SIGINT";
 		/* FALLTHROUGH */
-	case SIGTERM:
-		if (!signame)
+	حالة SIGTERM:
+		𐡄𐡍 (!signame)
 			signame = "SIGTERM";
 		/* FALLTHROUGH */
-	case SIGQUIT:
-		if (!signame)
+	حالة SIGQUIT:
+		𐡄𐡍 (!signame)
 			signame = "SIGQUIT";
 		/* Send the signal to our children too */
-		if (service_pid > 0)
+		𐡄𐡍 (service_pid > 0)
 			kill(service_pid, sig);
 		eerror("%s: caught %s, aborting", applet, signame);
 		exit(EXIT_FAILURE);
 		/* NOTREACHED */
 
-	case SIGALRM:
+	حالة SIGALRM:
 		timedout = true;
-		break;
+		اكسر;
 
-	default:
+	افتراضي:
 		eerror("%s: caught unknown signal %d", applet, sig);
 	}
 
@@ -170,69 +170,69 @@ handle_signal(int sig)
 	errno = serrno;
 }
 
-static void
-unhotplug(void)
+ساكن فراغ
+unhotplug(فراغ)
 {
-	if (unlinkat(rc_dirfd(RC_DIR_HOTPLUGGED), applet, 0) != 0 && errno != ENOENT)
+	𐡄𐡍 (unlinkat(rc_dirfd(RC_DIR_HOTPLUGGED), applet, 0) != 0 && errno != ENOENT)
 		eerror("%s: unlink '%s/hotplugged/%s': %s", applet, rc_svcdir(), applet, strerror(errno));
 }
 
-static void
+ساكن فراغ
 start_services(RC_STRINGLIST *list)
 {
 	RC_STRING *svc;
 	RC_SERVICE state = rc_service_state(applet);
 
-	if (!list || !(state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE | RC_SERVICE_STARTING | RC_SERVICE_STARTED)))
-		return;
+	𐡄𐡍 (!list || !(state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE | RC_SERVICE_STARTING | RC_SERVICE_STARTED)))
+		أرجع;
 
 	TAILQ_FOREACH(svc, list, entries) {
-		if (!(rc_service_state(svc->value) & RC_SERVICE_STOPPED))
-			continue;
-		if (state & RC_SERVICE_INACTIVE || state & RC_SERVICE_WASINACTIVE) {
+		𐡄𐡍 (!(rc_service_state(svc->value) & RC_SERVICE_STOPPED))
+			استمر;
+		𐡄𐡍 (state & RC_SERVICE_INACTIVE || state & RC_SERVICE_WASINACTIVE) {
 			rc_service_schedule_start(applet, svc->value);
 			ewarn("WARNING: %s will start when %s has started", svc->value, applet);
-		} else {
+		} وإلا {
 			service_start(svc->value);
 		}
 	}
 }
 
-static void
-restore_state(void)
+ساكن فراغ
+restore_state(فراغ)
 {
 	RC_SERVICE state;
 
-	if (rc_in_plugin || exclusive_fd == -1)
-		return;
+	𐡄𐡍 (rc_in_plugin || exclusive_fd == -1)
+		أرجع;
 	state = rc_service_state(applet);
-	if (state & RC_SERVICE_STOPPING) {
-		if (state & RC_SERVICE_WASINACTIVE)
+	𐡄𐡍 (state & RC_SERVICE_STOPPING) {
+		𐡄𐡍 (state & RC_SERVICE_WASINACTIVE)
 			rc_service_mark(applet, RC_SERVICE_INACTIVE);
-		else
+		وإلا
 			rc_service_mark(applet, RC_SERVICE_STARTED);
 
-		if (rc_runlevel_stopping())
+		𐡄𐡍 (rc_runlevel_stopping())
 			rc_service_mark(applet, RC_SERVICE_FAILED);
-	} else if (state & RC_SERVICE_STARTING) {
-		if (state & RC_SERVICE_WASINACTIVE)
+	} وإلا 𐡄𐡍 (state & RC_SERVICE_STARTING) {
+		𐡄𐡍 (state & RC_SERVICE_WASINACTIVE)
 			rc_service_mark(applet, RC_SERVICE_INACTIVE);
-		else
+		وإلا
 			rc_service_mark(applet, RC_SERVICE_STOPPED);
 
-		if (rc_runlevel_starting())
+		𐡄𐡍 (rc_runlevel_starting())
 			rc_service_mark(applet, RC_SERVICE_FAILED);
 	}
 	exclusive_fd = svc_unlock(applet, exclusive_fd);
 }
 
-static void
-cleanup(void)
+ساكن فراغ
+cleanup(فراغ)
 {
 	restore_state();
 
-	if (!rc_in_plugin) {
-		if (restart_services)
+	𐡄𐡍 (!rc_in_plugin) {
+		𐡄𐡍 (restart_services)
 			start_services(restart_services);
 	}
 
@@ -253,26 +253,26 @@ cleanup(void)
 	rc_stringlist_free(services);
 	rc_stringlist_free(applet_list);
 	rc_stringlist_free(tmplist);
-	free(ibsave);
-	free(prefix);
-	free(runlevel);
-	free(service);
+	حرر(ibsave);
+	حرر(prefix);
+	حرر(runlevel);
+	حرر(service);
 }
 
-static void
-svc_getenv(const char *svc)
+ساكن فراغ
+svc_getenv(ثابت حرف *svc)
 {
 	RC_STRINGLIST *reexports = rc_deptree_depend(deptree, svc, "reexport");
 	RC_STRING *reexport;
-	char *var = NULL;
+	حرف *var = عدم;
 
 	TAILQ_FOREACH(reexport, reexports, entries) {
-		if (rc_service_getenv(svc, reexport->value, &var) == -1)
-			continue;
+		𐡄𐡍 (rc_service_getenv(svc, reexport->value, &var) == -1)
+			استمر;
 		setenv(reexport->value, var, true);
 	}
 
-	free(var);
+	حرر(var);
 	rc_stringlist_free(reexports);
 }
 
@@ -283,14 +283,14 @@ svc_getenv(const char *svc)
  * Why don't we use (f)printf, as it is thread-safe through POSIX already?
  * Bug: 360013
  */
-static int
-write_prefix(const char *buffer, size_t bytes, bool *prefixed)
+ساكن صحيح
+write_prefix(ثابت حرف *buffer, size_t bytes, bool *prefixed)
 {
 	size_t i, j;
-	const char *ec = ecolor(ECOLOR_HILITE);
-	const char *ec_normal = ecolor(ECOLOR_NORMAL);
+	ثابت حرف *ec = ecolor(ECOLOR_HILITE);
+	ثابت حرف *ec_normal = ecolor(ECOLOR_NORMAL);
 	ssize_t ret = 0;
-	int fd = fileno(stdout), lock_fd = -1;
+	صحيح fd = fileno(stdout), lock_fd = -1;
 
 	/*
 	 * Lock the prefix.
@@ -298,77 +298,77 @@ write_prefix(const char *buffer, size_t bytes, bool *prefixed)
 	 */
 	lock_fd = openat(rc_dirfd(RC_DIR_SVCDIR), "prefix.lock", O_WRONLY | O_CREAT, 0664);
 
-	if (lock_fd != -1) {
-		while (flock(lock_fd, LOCK_EX) != 0) {
-			if (errno != EINTR) {
+	𐡄𐡍 (lock_fd != -1) {
+		طالما (flock(lock_fd, LOCK_EX) != 0) {
+			𐡄𐡍 (errno != EINTR) {
 				ewarnv("flock() failed: %s", strerror(errno));
-				break;
+				اكسر;
 			}
 		}
 	}
-	else
+	وإلا
 		ewarnv("Couldn't open the prefix lock, please make sure you have enough permissions");
 
-	for (i = 0; i < bytes; i++) {
+	لكل (i = 0; i < bytes; i++) {
 		/* We don't prefix eend calls (cursor up) */
-		if (buffer[i] == '\033' && !*prefixed) {
-			for (j = i + 1; j < bytes; j++) {
-				if (buffer[j] == 'A')
+		𐡄𐡍 (buffer[i] == '\033' && !*prefixed) {
+			لكل (j = i + 1; j < bytes; j++) {
+				𐡄𐡍 (buffer[j] == 'A')
 					*prefixed = true;
-				if (isalpha((unsigned int)buffer[j]))
-					break;
+				𐡄𐡍 (isalpha((unsigned صحيح)buffer[j]))
+					اكسر;
 			}
 		}
 
-		if (!*prefixed) {
-			ret += write(fd, ec, strlen(ec));
-			ret += write(fd, prefix, strlen(prefix));
-			ret += write(fd, ec_normal, strlen(ec_normal));
-			ret += write(fd, "|", 1);
+		𐡄𐡍 (!*prefixed) {
+			ret += اكتب(fd, ec, strlen(ec));
+			ret += اكتب(fd, prefix, strlen(prefix));
+			ret += اكتب(fd, ec_normal, strlen(ec_normal));
+			ret += اكتب(fd, "|", 1);
 			*prefixed = true;
 		}
 
-		if (buffer[i] == '\n')
+		𐡄𐡍 (buffer[i] == '\n')
 			*prefixed = false;
-		ret += write(fd, buffer + i, 1);
+		ret += اكتب(fd, buffer + i, 1);
 	}
 
 	/* Release the lock */
 	close(lock_fd);
 
-	return ret;
+	أرجع ret;
 }
 
-static int
-svc_exec(const char *command)
+ساكن صحيح
+svc_exec(ثابت حرف *command)
 {
-	int ret = -1, fdout = fileno(stdout), tmp;
+	صحيح ret = -1, fdout = fileno(stdout), tmp;
 	posix_spawn_file_actions_t tty;
-	struct termios tt;
-	struct winsize ws;
-	int flags = 0;
-	struct pollfd fd[2];
+	بنية termios tt;
+	بنية winsize ws;
+	صحيح flags = 0;
+	بنية pollfd fd[2];
 	bool prefixed = false;
-	int slave_tty;
+	صحيح slave_tty;
 	sigset_t sigchldmask;
 	sigset_t oldmask;
-	char *openrc_sh = NULL;
-	const char *argv[] = {
+	حرف *openrc_sh = عدم;
+	ثابت حرف *argv[] = {
 		RC_LIBEXECDIR "/sh/openrc-run.sh",
 		service,
 		command,
-		NULL
+		عدم
 	};
 
 	/* Setup our signal pipe */
-	if (pipe2(signal_pipe, O_CLOEXEC) == -1) {
+	𐡄𐡍 (pipe2(signal_pipe, O_CLOEXEC) == -1) {
 		eerror("%s: pipe2: %s", applet, applet);
-		return 1;
+		أرجع 1;
 	}
 
-	if ((errno = posix_spawn_file_actions_init(&tty))) {
+	𐡄𐡍 ((errno = posix_spawn_file_actions_init(&tty))) {
 		eerror("%s: posix_spawn_file_actions_init: %s", applet, strerror(errno));
-		return 1;
+		أرجع 1;
 	}
 
 	/* Open a pty for our prefixed output
@@ -377,73 +377,73 @@ svc_exec(const char *command)
 	 * The only loss is that we can no longer tell the difference
 	 * between the child's stdout or stderr */
 	master_tty = slave_tty = -1;
-	if (prefix && isatty(fdout)) {
+	𐡄𐡍 (prefix && isatty(fdout)) {
 		tcgetattr(fdout, &tt);
 		ioctl(fdout, TIOCGWINSZ, &ws);
 
 		/* If the below call fails due to not enough ptys then we don't
 		 * prefix the output, but we still work */
-		if (openpty(&master_tty, &slave_tty, NULL, &tt, &ws) == 0) {
-			if (master_tty >= 0 &&
+		𐡄𐡍 (openpty(&master_tty, &slave_tty, عدم, &tt, &ws) == 0) {
+			𐡄𐡍 (master_tty >= 0 &&
 			    (flags = fcntl(master_tty, F_GETFD, 0)) == 0)
 				fcntl(master_tty, F_SETFD,
 				    flags | FD_CLOEXEC);
 
-			if (slave_tty >= 0 &&
+			𐡄𐡍 (slave_tty >= 0 &&
 			    (flags = fcntl(slave_tty, F_GETFD, 0)) == 0)
 				fcntl(slave_tty, F_SETFD,
 				    flags | FD_CLOEXEC);
 
-			if ((errno = posix_spawn_file_actions_adddup2(&tty,
+			𐡄𐡍 ((errno = posix_spawn_file_actions_adddup2(&tty,
 				    slave_tty, STDOUT_FILENO)) ||
 			    (errno = posix_spawn_file_actions_adddup2(&tty,
 				    slave_tty, STDERR_FILENO))) {
 				eerror("%s: posix_spawn_file_actions_adddup2: %s",
 				    applet, strerror(errno));
-				return 1;
+				أرجع 1;
 			}
 		}
 	}
 
-	if (faccessat(rc_dirfd(RC_DIR_SVCDIR), "openrc-run.sh", F_OK, 0) == 0) {
+	𐡄𐡍 (faccessat(rc_dirfd(RC_DIR_SVCDIR), "openrc-run.sh", F_OK, 0) == 0) {
 		xasprintf(&openrc_sh, "%s/openrc-run.sh", rc_svcdir());
 		argv[0] = openrc_sh;
 	}
 
 	einfov("Executing: %s %s %s", argv[0], service, command);
-	if ((errno = posix_spawn(&service_pid, argv[0], &tty, NULL, UNCONST(argv), environ))) {
+	𐡄𐡍 ((errno = posix_spawn(&service_pid, argv[0], &tty, عدم, UNCONST(argv), environ))) {
 		eerror("%s: exec '%s': %s", service, argv[0], strerror(errno));
-		return 1;
+		أرجع 1;
 	}
 
 	posix_spawn_file_actions_destroy(&tty);
-	free(openrc_sh);
+	حرر(openrc_sh);
 
 	fd[0].fd = signal_pipe[0];
 	fd[1].fd = master_tty;
 	fd[0].events = fd[1].events = POLLIN;
 	fd[0].revents = fd[1].revents = 0;
 
-	for (;;) {
-		if (poll(fd, master_tty >= 0 ? 2 : 1, -1) == -1) {
-			if (errno == EINTR)
-				continue;
+	لكل (;;) {
+		𐡄𐡍 (poll(fd, master_tty >= 0 ? 2 : 1, -1) == -1) {
+			𐡄𐡍 (errno == EINTR)
+				استمر;
 			eerror("%s: poll: %s", applet, strerror(errno));
-			break;
+			اكسر;
 		}
 
-		if (fd[1].revents & (POLLIN | POLLHUP)) {
-			char buffer[BUFSIZ];
-			write_prefix(buffer, read(master_tty, buffer, BUFSIZ), &prefixed);
+		𐡄𐡍 (fd[1].revents & (POLLIN | POLLHUP)) {
+			حرف buffer[BUFSIZ];
+			write_prefix(buffer, اقرأ(master_tty, buffer, BUFSIZ), &prefixed);
 		}
 
 		/* signal_pipe receives service_pid's exit status */
-		if (fd[0].revents & (POLLIN | POLLHUP)) {
-			if (errno = 0, read(signal_pipe[0], &ret, sizeof(ret)) < (ssize_t)sizeof(ret))
+		𐡄𐡍 (fd[0].revents & (POLLIN | POLLHUP)) {
+			𐡄𐡍 (errno = 0, اقرأ(signal_pipe[0], &ret, حجم(ret)) < (ssize_t)حجم(ret))
 				eerror("%s: receive failed: %s", applet, errno ? strerror(errno) : "short read");
-			else if ((ret = WEXITSTATUS(ret)) != 0 && errno == ECHILD) /* killall5 -9 could cause this */
+			وإلا 𐡄𐡍 ((ret = WEXITSTATUS(ret)) != 0 && errno == ECHILD) /* killall5 -9 could cause this */
 				ret = 0;
-			break;
+			اكسر;
 		}
 	}
 
@@ -458,9 +458,9 @@ svc_exec(const char *command)
 	signal_pipe[0] = signal_pipe[1] = -1;
 	close(tmp);
 
-	sigprocmask (SIG_SETMASK, &oldmask, NULL);
+	sigprocmask (SIG_SETMASK, &oldmask, عدم);
 
-	if (master_tty >= 0) {
+	𐡄𐡍 (master_tty >= 0) {
 		/* Why did we do this? */
 		/* signal (SIGWINCH, SIG_IGN); */
 		close(master_tty);
@@ -469,68 +469,68 @@ svc_exec(const char *command)
 
 	service_pid = 0;
 
-	return ret;
+	أرجع ret;
 }
 
-static bool
-svc_wait(const char *svc)
+ساكن bool
+svc_wait(ثابت حرف *svc)
 {
-	int fd;
+	صحيح fd;
 	bool forever = false;
 	RC_STRINGLIST *keywords;
-	const char *base = basename_c(svc);
-	int timeout = WAIT_TIMEOUT;
+	ثابت حرف *base = basename_c(svc);
+	صحيح timeout = WAIT_TIMEOUT;
 	bool retval = false;
 
 	/* Some services don't have a timeout, like fsck */
 	keywords = rc_deptree_depend(deptree, svc, "keyword");
-	if (rc_stringlist_find(keywords, "-timeout") || rc_stringlist_find(keywords, "notimeout"))
+	𐡄𐡍 (rc_stringlist_find(keywords, "-timeout") || rc_stringlist_find(keywords, "notimeout"))
 		forever = true;
 	rc_stringlist_free(keywords);
 
-	if ((fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), base, O_RDONLY | O_NONBLOCK)) == -1)
-		return errno == ENOENT;
+	𐡄𐡍 ((fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), base, O_RDONLY | O_NONBLOCK)) == -1)
+		أرجع errno == ENOENT;
 
 	timedout = false;
-	for (;;) {
-		if (!forever)
+	لكل (;;) {
+		𐡄𐡍 (!forever)
 			alarm(WARN_TIMEOUT);
 
-		if (flock(fd, LOCK_SH) == 0) {
+		𐡄𐡍 (flock(fd, LOCK_SH) == 0) {
 			retval = true;
-			break;
+			اكسر;
 		}
 
-		if (errno != EINTR)
-			break;
+		𐡄𐡍 (errno != EINTR)
+			اكسر;
 
-		if (!forever && timedout) {
+		𐡄𐡍 (!forever && timedout) {
 			timedout = false;
-			if ((timeout -= WARN_TIMEOUT) > 0)
+			𐡄𐡍 ((timeout -= WARN_TIMEOUT) > 0)
 				ewarn("%s: waiting for %s (%d seconds)", applet, base, timeout);
-			else
-				break;
+			وإلا
+				اكسر;
 		}
 	}
 
 	alarm(0);
 	close(fd);
-	return retval;
+	أرجع retval;
 }
 
-static void
-get_started_services(void)
+ساكن فراغ
+get_started_services(فراغ)
 {
 	RC_STRINGLIST *tmp = rc_services_in_state(RC_SERVICE_INACTIVE);
 
 	rc_stringlist_free(restart_services);
 	restart_services = rc_services_in_state(RC_SERVICE_STARTED);
 	TAILQ_CONCAT(restart_services, tmp, entries);
-	free(tmp);
+	حرر(tmp);
 }
 
-static void
-setup_deptypes(void)
+ساكن فراغ
+setup_deptypes(فراغ)
 {
 	deptypes_b = rc_stringlist_new();
 	rc_stringlist_add(deptypes_b, "broken");
@@ -563,43 +563,43 @@ setup_deptypes(void)
 	rc_stringlist_add(deptypes_mwua, "beforeme");
 }
 
-static void
-svc_start_check(void)
+ساكن فراغ
+svc_start_check(فراغ)
 {
-	int ret = EXIT_FAILURE;
+	صحيح ret = EXIT_FAILURE;
 	RC_SERVICE state;
 
 	state = rc_service_state(applet);
 
-	if (in_background) {
-		if (!(state & (RC_SERVICE_INACTIVE | RC_SERVICE_STOPPED)))
-			goto exit;
+	𐡄𐡍 (in_background) {
+		𐡄𐡍 (!(state & (RC_SERVICE_INACTIVE | RC_SERVICE_STOPPED)))
+			اذهب exit;
 
-		if (rc_yesno(getenv("IN_HOTPLUG")))
+		𐡄𐡍 (rc_yesno(getenv("IN_HOTPLUG")))
 			rc_service_mark(applet, RC_SERVICE_HOTPLUGGED);
-		if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
+		𐡄𐡍 (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
 			ewarnx("WARNING: %s will be started in the next runlevel", applet);
 	}
 
-	if (state & RC_SERVICE_STARTED) {
+	𐡄𐡍 (state & RC_SERVICE_STARTED) {
 		ewarn("WARNING: %s has already been started", applet);
 		ret = EXIT_SUCCESS;
-		goto exit;
-	} else if (state & RC_SERVICE_INACTIVE && !in_background) {
+		اذهب exit;
+	} وإلا 𐡄𐡍 (state & RC_SERVICE_INACTIVE && !in_background) {
 		ewarnx("WARNING: %s has already started, but is inactive", applet);
 	}
 
-	if (exclusive_fd == -1)
+	𐡄𐡍 (exclusive_fd == -1)
 		exclusive_fd = svc_lock(applet, !deps);
-	if (exclusive_fd == -1) {
-		if (errno != EWOULDBLOCK) {
+	𐡄𐡍 (exclusive_fd == -1) {
+		𐡄𐡍 (errno != EWOULDBLOCK) {
 			eerror("%s: failed to acquire lock: %s", applet, strerror(errno));
-			goto exit;
+			اذهب exit;
 		}
 
-		if (state & RC_SERVICE_STOPPING)
+		𐡄𐡍 (state & RC_SERVICE_STOPPING)
 			ewarnx("WARNING: %s is stopping", applet);
-		else
+		وإلا
 			ewarnx("WARNING: %s is already starting", applet);
 	}
 	fcntl(exclusive_fd, F_SETFD, fcntl(exclusive_fd, F_GETFD, 0) | FD_CLOEXEC);
@@ -607,84 +607,84 @@ svc_start_check(void)
 	rc_service_mark(applet, RC_SERVICE_STARTING);
 	rc_plugin_run(RC_HOOK_SERVICE_START_IN, applet);
 
-	return;
+	أرجع;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
 	exit(ret);
 }
 
-static void
-svc_start_deps(void)
+ساكن فراغ
+svc_start_deps(فراغ)
 {
 	bool first;
 	RC_STRING *svc, *svc2;
 	RC_SERVICE state;
-	int depoptions = RC_DEP_TRACE;
+	صحيح depoptions = RC_DEP_TRACE;
 	size_t len, svc_count;
-	char *tmp;
+	حرف *tmp;
 	FILE *mem;
 	pid_t pid;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	𐡄𐡍 (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL)) {
+	𐡄𐡍 (!deptree && ((deptree = _rc_deptree_load(0, عدم)) == عدم)) {
 		eerror("failed to load deptree");
-		goto exit;
+		اذهب exit;
 	}
 
-	if (!deptypes_b)
+	𐡄𐡍 (!deptypes_b)
 		setup_deptypes();
 
 	services = rc_deptree_depends(deptree, deptypes_b, applet_list,
 	    runlevel, 0);
-	if (TAILQ_FIRST(services)) {
+	𐡄𐡍 (TAILQ_FIRST(services)) {
 		eerrorn("ERROR: %s needs service(s) ", applet);
 		first = true;
 		TAILQ_FOREACH(svc, services, entries) {
-			if (first)
+			𐡄𐡍 (first)
 				first = false;
-			else
+			وإلا
 				fprintf(stderr, ", ");
 			fprintf(stderr, "%s", svc->value);
 		}
 		fprintf(stderr, "\n");
-		goto exit;
+		اذهب exit;
 	}
 	rc_stringlist_free(services);
-	services = NULL;
+	services = عدم;
 
 	need_services = rc_deptree_depends(deptree, deptypes_n, applet_list, runlevel, depoptions);
 	want_services = rc_deptree_depends(deptree, deptypes_nw, applet_list, runlevel, depoptions);
 	use_services = rc_deptree_depends(deptree, deptypes_nwu, applet_list, runlevel, depoptions);
 
-	if (!rc_runlevel_starting()) {
+	𐡄𐡍 (!rc_runlevel_starting()) {
 		TAILQ_FOREACH(svc, use_services, entries) {
 			state = rc_service_state(svc->value);
 			/* Don't stop failed services again.
 			 * If you remove this check, ensure that the exclusive file isn't created. */
-			if (state & RC_SERVICE_FAILED && rc_runlevel_starting())
-				continue;
-			if (state & RC_SERVICE_STOPPED) {
-				if (dry_run) {
+			𐡄𐡍 (state & RC_SERVICE_FAILED && rc_runlevel_starting())
+				استمر;
+			𐡄𐡍 (state & RC_SERVICE_STOPPED) {
+				𐡄𐡍 (dry_run) {
 					printf(" %s", svc->value);
-					continue;
+					استمر;
 				}
 				/* FIXME(NRK): service_start() can return -1 on
 				 * failure and feeding that to rc_waitpid seems
 				 * very suspicious. needs investigation.
 				 */
 				pid = service_start(svc->value);
-				if (!rc_conf_yesno("rc_parallel"))
+				𐡄𐡍 (!rc_conf_yesno("rc_parallel"))
 					rc_waitpid(pid);
 			}
 		}
 	}
 
-	if (dry_run)
-		return;
+	𐡄𐡍 (dry_run)
+		أرجع;
 
 	/* Now wait for them to start */
 	services = rc_deptree_depends(deptree, deptypes_nwua, applet_list, runlevel, depoptions);
@@ -692,45 +692,45 @@ svc_start_deps(void)
 	tmplist = rc_stringlist_new();
 	TAILQ_FOREACH(svc, services, entries) {
 		state = rc_service_state(svc->value);
-		if (state & RC_SERVICE_STARTED) {
+		𐡄𐡍 (state & RC_SERVICE_STARTED) {
 			svc_getenv(svc->value);
-			continue;
+			استمر;
 		}
 
 		/* Don't wait for services which went inactive but are
 		 * now in starting state which we are after */
-		if (state & RC_SERVICE_STARTING && state & RC_SERVICE_WASINACTIVE)
+		𐡄𐡍 (state & RC_SERVICE_STARTING && state & RC_SERVICE_WASINACTIVE)
 		{
-			if (!rc_stringlist_find(need_services, svc->value) &&
+			𐡄𐡍 (!rc_stringlist_find(need_services, svc->value) &&
 					!rc_stringlist_find(want_services, svc->value) &&
 					!rc_stringlist_find(use_services, svc->value))
-				continue;
+				استمر;
 		}
 
-		if (!svc_wait(svc->value))
+		𐡄𐡍 (!svc_wait(svc->value))
 			eerror("%s: timed out waiting for %s", applet, svc->value);
 		state = rc_service_state(svc->value);
-		if (state & RC_SERVICE_STARTED) {
+		𐡄𐡍 (state & RC_SERVICE_STARTED) {
 			svc_getenv(svc->value);
-			continue;
+			استمر;
 		}
-		if (rc_stringlist_find(need_services, svc->value)) {
-			if (state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE)) {
+		𐡄𐡍 (rc_stringlist_find(need_services, svc->value)) {
+			𐡄𐡍 (state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE)) {
 				rc_stringlist_add(tmplist, svc->value);
-			} else if (!TAILQ_FIRST(tmplist)) {
+			} وإلا 𐡄𐡍 (!TAILQ_FIRST(tmplist)) {
 				eerror("ERROR: cannot start %s as %s would not start", applet, svc->value);
-				goto exit;
+				اذهب exit;
 			}
 		}
 	}
 
-	if (TAILQ_FIRST(tmplist)) {
+	𐡄𐡍 (TAILQ_FIRST(tmplist)) {
 		/* Set the state now, then unlink our exclusive so that
 		   our scheduled list is preserved */
 		rc_service_mark(applet, RC_SERVICE_STOPPED);
 
 		rc_stringlist_free(use_services);
-		use_services = NULL;
+		use_services = عدم;
 		mem = xopen_memstream(&tmp, &len);
 		svc_count = 0;
 		TAILQ_FOREACH(svc, tmplist, entries) {
@@ -739,25 +739,25 @@ svc_start_deps(void)
 			TAILQ_FOREACH(svc2, use_services, entries)
 			    rc_service_schedule_start(svc2->value, applet);
 			rc_stringlist_free(use_services);
-			use_services = NULL;
-			if (svc_count > 0)
+			use_services = عدم;
+			𐡄𐡍 (svc_count > 0)
 				fputs(", ", mem);
 			fputs(svc->value, mem);
 			++svc_count;
 		}
 		xclose_memstream(mem);
 		rc_stringlist_free(tmplist);
-		tmplist = NULL;
+		tmplist = عدم;
 		ewarnx("WARNING: %s will start when %s %s started", applet, tmp, svc_count > 1 ? "have" : "has");
-		free(tmp);
+		حرر(tmp);
 	}
 
 	rc_stringlist_free(tmplist);
-	tmplist = NULL;
+	tmplist = عدم;
 	rc_stringlist_free(services);
-	services = NULL;
+	services = عدم;
 
-	return;
+	أرجع;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
@@ -765,12 +765,12 @@ exit:
 }
 
 
-static void set_reexports(void)
+ساكن فراغ set_reexports(فراغ)
 {
 	RC_STRINGLIST *list = rc_deptree_depend(deptree, applet, "reexport");
 	RC_STRING *envvar;
 	size_t size;
-	char *buf;
+	حرف *buf;
 	FILE *fp;
 
 	fp = xopen_memstream(&buf, &size);
@@ -784,32 +784,32 @@ static void set_reexports(void)
 	rc_stringlist_free(list);
 }
 
-static void svc_start_real(void)
+ساكن فراغ svc_start_real(فراغ)
 {
 	bool started;
 	RC_STRING *svc, *svc2;
 
 	set_reexports();
 
-	if (ibsave)
+	𐡄𐡍 (ibsave)
 		setenv("IN_BACKGROUND", ibsave, 1);
 	rc_plugin_run(RC_HOOK_SERVICE_START_NOW, applet);
 	skip_mark = false;
 	started = (svc_exec("start") == 0);
-	if (ibsave)
+	𐡄𐡍 (ibsave)
 		unsetenv("IN_BACKGROUND");
 
-	if (!started) {
+	𐡄𐡍 (!started) {
 		rc_plugin_run(RC_HOOK_SERVICE_START_DONE, applet);
 		rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
 	}
 
-	if (rc_service_state(applet) & RC_SERVICE_INACTIVE)
+	𐡄𐡍 (rc_service_state(applet) & RC_SERVICE_INACTIVE)
 		ewarnx("WARNING: %s has started, but is inactive", applet);
-	else if (!started)
+	وإلا 𐡄𐡍 (!started)
 		eerrorx("ERROR: %s failed to start", applet);
 
-	if (!skip_mark)
+	𐡄𐡍 (!skip_mark)
 		rc_service_mark(applet, RC_SERVICE_STARTED);
 	exclusive_fd = svc_unlock(applet, exclusive_fd);
 	rc_plugin_run(RC_HOOK_SERVICE_START_DONE, applet);
@@ -817,114 +817,114 @@ static void svc_start_real(void)
 	/* Now start any scheduled services */
 	services = rc_services_scheduled(applet);
 	TAILQ_FOREACH(svc, services, entries)
-	    if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+	    𐡄𐡍 (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
 		    service_start(svc->value);
 	rc_stringlist_free(services);
-	services = NULL;
+	services = عدم;
 
 	/* Do the same for any services we provide */
-	if (deptree) {
+	𐡄𐡍 (deptree) {
 		tmplist = rc_deptree_depend(deptree, "iprovide", applet);
 		TAILQ_FOREACH(svc, tmplist, entries) {
 			services = rc_services_scheduled(svc->value);
 			TAILQ_FOREACH(svc2, services, entries)
-				if (rc_service_state(svc2->value) & RC_SERVICE_STOPPED)
+				𐡄𐡍 (rc_service_state(svc2->value) & RC_SERVICE_STOPPED)
 					service_start(svc2->value);
 			rc_stringlist_free(services);
-			services = NULL;
+			services = عدم;
 		}
 		rc_stringlist_free(tmplist);
-		tmplist = NULL;
+		tmplist = عدم;
 	}
 
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
 }
 
-static int
-svc_start(void)
+ساكن صحيح
+svc_start(فراغ)
 {
-	if (dry_run)
+	𐡄𐡍 (dry_run)
 		einfon("start:");
-	else
+	وإلا
 		svc_start_check();
 
-	if (deps)
+	𐡄𐡍 (deps)
 		svc_start_deps();
 
-	if (dry_run)
+	𐡄𐡍 (dry_run)
 		printf(" %s\n", applet);
-	else
+	وإلا
 		svc_start_real();
 
-	return 0;
+	أرجع 0;
 }
 
-static int
+ساكن صحيح
 svc_stop_check(RC_SERVICE *state)
 {
 	*state = rc_service_state(applet);
 
-	if (rc_runlevel_stopping() && *state & RC_SERVICE_FAILED)
-		goto exit;
+	𐡄𐡍 (rc_runlevel_stopping() && *state & RC_SERVICE_FAILED)
+		اذهب exit;
 
-	if (in_background && !(*state & (RC_SERVICE_STARTED) && !(*state & RC_SERVICE_INACTIVE)))
-		goto exit;
+	𐡄𐡍 (in_background && !(*state & (RC_SERVICE_STARTED) && !(*state & RC_SERVICE_INACTIVE)))
+		اذهب exit;
 
-	if (*state & RC_SERVICE_STOPPED) {
+	𐡄𐡍 (*state & RC_SERVICE_STOPPED) {
 		ewarn("WARNING: %s is already stopped", applet);
-		return 1;
+		أرجع 1;
 	}
 
-	if (exclusive_fd == -1)
+	𐡄𐡍 (exclusive_fd == -1)
 		exclusive_fd = svc_lock(applet, !deps);
-	if (exclusive_fd == -1) {
-		if (errno != EWOULDBLOCK)
+	𐡄𐡍 (exclusive_fd == -1) {
+		𐡄𐡍 (errno != EWOULDBLOCK)
 			eerror("%s: failed to acquire lock: %s", applet, strerror(errno));
-		else if (*state & RC_SERVICE_STOPPING)
+		وإلا 𐡄𐡍 (*state & RC_SERVICE_STOPPING)
 			ewarn("WARNING: %s is already stopping", applet);
-		else
+		وإلا
 			eerror("ERROR: %s stopped by something else", applet);
-		goto exit;
+		اذهب exit;
 	}
 	fcntl(exclusive_fd, F_SETFD, fcntl(exclusive_fd, F_GETFD, 0) | FD_CLOEXEC);
 
 	rc_service_mark(applet, RC_SERVICE_STOPPING);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_IN, applet);
 
-	if (!rc_runlevel_stopping()) {
-		if (rc_service_in_runlevel(applet, RC_LEVEL_SYSINIT))
+	𐡄𐡍 (!rc_runlevel_stopping()) {
+		𐡄𐡍 (rc_service_in_runlevel(applet, RC_LEVEL_SYSINIT))
 			ewarn("WARNING: you are stopping a sysinit service");
-		else if (rc_service_in_runlevel(applet, RC_LEVEL_BOOT))
+		وإلا 𐡄𐡍 (rc_service_in_runlevel(applet, RC_LEVEL_BOOT))
 			ewarn("WARNING: you are stopping a boot service");
 	}
 
-	return 0;
+	أرجع 0;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 	exit(EXIT_FAILURE);
 }
 
-static void
+ساكن فراغ
 svc_stop_deps(RC_SERVICE state)
 {
-	int depoptions = RC_DEP_TRACE;
+	صحيح depoptions = RC_DEP_TRACE;
 	RC_STRING *svc;
 	pid_t pid;
 
-	if (state & RC_SERVICE_WASINACTIVE)
-		return;
+	𐡄𐡍 (state & RC_SERVICE_WASINACTIVE)
+		أرجع;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	𐡄𐡍 (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL)) {
+	𐡄𐡍 (!deptree && ((deptree = _rc_deptree_load(0, عدم)) == عدم)) {
 		rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 		eerrorx("failed to load deptree");
 	}
 
-	if (!deptypes_m)
+	𐡄𐡍 (!deptypes_m)
 		setup_deptypes();
 
 	services = rc_deptree_depends(deptree, deptypes_m, applet_list, runlevel, depoptions);
@@ -933,61 +933,61 @@ svc_stop_deps(RC_SERVICE state)
 		state = rc_service_state(svc->value);
 		/* Don't stop failed services again.
 		 * If you remove this check, ensure that the exclusive file isn't created. */
-		if (state & RC_SERVICE_FAILED && rc_runlevel_stopping())
-			continue;
-		if (!(state & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)))
-			continue;
-		if (dry_run) {
+		𐡄𐡍 (state & RC_SERVICE_FAILED && rc_runlevel_stopping())
+			استمر;
+		𐡄𐡍 (!(state & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)))
+			استمر;
+		𐡄𐡍 (dry_run) {
 			printf(" %s", svc->value);
-			continue;
+			استمر;
 		}
 		svc_wait(svc->value);
-		if (rc_service_state(svc->value) & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)) {
+		𐡄𐡍 (rc_service_state(svc->value) & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)) {
 			pid = service_stop(svc->value);
-			if (!rc_conf_yesno("rc_parallel"))
+			𐡄𐡍 (!rc_conf_yesno("rc_parallel"))
 				rc_waitpid(pid);
 			rc_stringlist_add(tmplist, svc->value);
 		}
 	}
 	rc_stringlist_free(services);
-	services = NULL;
-	if (dry_run)
-		return;
+	services = عدم;
+	𐡄𐡍 (dry_run)
+		أرجع;
 
 	TAILQ_FOREACH(svc, tmplist, entries) {
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED) {
-			continue;
+		𐡄𐡍 (rc_service_state(svc->value) & RC_SERVICE_STOPPED) {
+			استمر;
 		}
 		svc_wait(svc->value);
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
-			continue;
-		if (rc_runlevel_stopping()) {
+		𐡄𐡍 (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+			استمر;
+		𐡄𐡍 (rc_runlevel_stopping()) {
 			/* If shutting down, we should stop even
 			 * if a dependent failed */
-			if (runlevel && (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 || strcmp(runlevel, RC_LEVEL_SINGLE) == 0))
-				continue;
+			𐡄𐡍 (runlevel && (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 || strcmp(runlevel, RC_LEVEL_SINGLE) == 0))
+				استمر;
 			rc_service_mark(applet, RC_SERVICE_FAILED);
 		}
 		rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 		eerrorx("ERROR: cannot stop %s as %s is still up", applet, svc->value);
 	}
 	rc_stringlist_free(tmplist);
-	tmplist = NULL;
+	tmplist = عدم;
 
 	/* We now wait for other services that may use us and are
 	 * stopping. This is important when a runlevel stops */
 	services = rc_deptree_depends(deptree, deptypes_mwua, applet_list, runlevel, depoptions);
 	TAILQ_FOREACH(svc, services, entries) {
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
-			continue;
+		𐡄𐡍 (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+			استمر;
 		svc_wait(svc->value);
 	}
 	rc_stringlist_free(services);
-	services = NULL;
+	services = عدم;
 }
 
-static void
-load_dep_env(void)
+ساكن فراغ
+load_dep_env(فراغ)
 {
 	RC_STRINGLIST *depsvcs;
 	RC_STRING *svc;
@@ -1000,8 +1000,8 @@ load_dep_env(void)
 	rc_stringlist_free(depsvcs);
 }
 
-static void
-svc_stop_real(void)
+ساكن فراغ
+svc_stop_real(فراغ)
 {
 	bool stopped;
 
@@ -1009,126 +1009,126 @@ svc_stop_real(void)
 
 	/* If we're stopping localmount, set LC_ALL=C so that
 	 * bash doesn't load anything blocking the unmounting of /usr */
-	if (strcmp(applet, "localmount") == 0)
+	𐡄𐡍 (strcmp(applet, "localmount") == 0)
 		setenv("LC_ALL", "C", 1);
 
-	if (ibsave)
+	𐡄𐡍 (ibsave)
 		setenv("IN_BACKGROUND", ibsave, 1);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_NOW, applet);
 	skip_mark = false;
 	stopped = (svc_exec("stop") == 0);
-	if (ibsave)
+	𐡄𐡍 (ibsave)
 		unsetenv("IN_BACKGROUND");
 
-	if (stopped && !skip_mark)
+	𐡄𐡍 (stopped && !skip_mark)
 		rc_service_mark(applet, in_background ? RC_SERVICE_INACTIVE : RC_SERVICE_STOPPED);
 
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_DONE, applet);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 
-	if (!stopped)
+	𐡄𐡍 (!stopped)
 		eerrorx("ERROR: %s failed to stop", applet);
 }
 
-static int
-svc_stop(void)
+ساكن صحيح
+svc_stop(فراغ)
 {
 	RC_SERVICE state = 0;
 
-	if (dry_run)
+	𐡄𐡍 (dry_run)
 		einfon("stop:");
-	else
-		if (svc_stop_check(&state) == 1)
-			return 1; /* Service has been stopped already */
+	وإلا
+		𐡄𐡍 (svc_stop_check(&state) == 1)
+			أرجع 1; /* Service has been stopped already */
 
-	if (deps)
+	𐡄𐡍 (deps)
 		svc_stop_deps(state);
 
-	if (dry_run)
+	𐡄𐡍 (dry_run)
 		printf(" %s\n", applet);
-	else
+	وإلا
 		svc_stop_real();
 
-	return 0;
+	أرجع 0;
 }
 
-static int
-svc_restart(void)
+ساكن صحيح
+svc_restart(فراغ)
 {
-	if (!(rc_service_state(applet) & RC_SERVICE_STOPPED)) {
+	𐡄𐡍 (!(rc_service_state(applet) & RC_SERVICE_STOPPED)) {
 		get_started_services();
 		svc_stop();
-		if (dry_run)
+		𐡄𐡍 (dry_run)
 			ewarn("Cannot calculate restart start dependencies on a dry-run");
 	}
 
 	svc_start();
 	start_services(restart_services);
 	rc_stringlist_free(restart_services);
-	restart_services = NULL;
+	restart_services = عدم;
 
-	return 0;
+	أرجع 0;
 }
 
-static bool
-service_plugable(void)
+ساكن bool
+service_plugable(فراغ)
 {
-	char *list, *p, *token;
+	حرف *list, *p, *token;
 	bool allow = true, truefalse;
-	char *match = rc_conf_value("rc_hotplug");
+	حرف *match = rc_conf_value("rc_hotplug");
 
-	if (!match)
+	𐡄𐡍 (!match)
 		match = rc_conf_value("rc_plug_services");
-	if (!match)
-		return false;
+	𐡄𐡍 (!match)
+		أرجع false;
 
 	list = xstrdup(match);
 	p = list;
-	while ((token = strsep(&p, " "))) {
-		if (token[0] == '!') {
+	طالما ((token = strsep(&p, " "))) {
+		𐡄𐡍 (token[0] == '!') {
 			truefalse = false;
 			token++;
-		} else {
+		} وإلا {
 			truefalse = true;
 		}
 
-		if (fnmatch(token, applet, 0) == 0) {
+		𐡄𐡍 (fnmatch(token, applet, 0) == 0) {
 			allow = truefalse;
-			break;
+			اكسر;
 		}
 	}
-	free(list);
-	return allow;
+	حرر(list);
+	أرجع allow;
 }
 
-static int
-simple_command(void)
+ساكن صحيح
+simple_command(فراغ)
 {
-	char *save = prefix;
-	int retval;
+	حرف *save = prefix;
+	صحيح retval;
 
-	eprefix(NULL);
-	prefix = NULL;
+	eprefix(عدم);
+	prefix = عدم;
 
 	retval = svc_exec(optarg);
 
 	eprefix(save);
 	prefix = save;
 
-	return retval;
+	أرجع retval;
 }
 
-static int
-resolve_deptype(void)
+ساكن صحيح
+resolve_deptype(فراغ)
 {
-	int depoptions = RC_DEP_TRACE;
+	صحيح depoptions = RC_DEP_TRACE;
 	RC_STRING *svc;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	𐡄𐡍 (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL))
+	𐡄𐡍 (!deptree && ((deptree = _rc_deptree_load(0, عدم)) == عدم))
 		eerrorx("failed to load deptree");
 
 	tmplist = rc_stringlist_new();
@@ -1136,69 +1136,69 @@ resolve_deptype(void)
 	services = rc_deptree_depends(deptree, tmplist, applet_list, runlevel, depoptions);
 	rc_stringlist_free(tmplist);
 
-	tmplist = NULL;
+	tmplist = عدم;
 	TAILQ_FOREACH(svc, services, entries)
 		printf("%s ", svc->value);
 	printf ("\n");
 
 	rc_stringlist_free(services);
-	services = NULL;
+	services = عدم;
 
-	return 0;
+	أرجع 0;
 }
 
-static int
-cmd_condrestart(void)
+ساكن صحيح
+cmd_condrestart(فراغ)
 {
-	if (rc_service_state(applet) & RC_SERVICE_STARTED)
+	𐡄𐡍 (rc_service_state(applet) & RC_SERVICE_STARTED)
 		svc_restart();
-	return 0;
+	أرجع 0;
 }
 
-static int
-cmd_stop(void)
+ساكن صحيح
+cmd_stop(فراغ)
 {
 	RC_STRING *svc;
 
-	if (strcmp(optarg, "pause") == 0) {
+	𐡄𐡍 (strcmp(optarg, "pause") == 0) {
 		ewarn("WARNING: 'pause' is deprecated; please use '--nodeps stop'");
 		deps = false;
 	}
 
-	if (deps && in_background)
+	𐡄𐡍 (deps && in_background)
 		get_started_services();
 
-	if (svc_stop() == 1)
-		return 0; /* Service has been stopped already */
+	𐡄𐡍 (svc_stop() == 1)
+		أرجع 0; /* Service has been stopped already */
 
-	if (deps) {
-		if (!in_background && !rc_runlevel_stopping() && rc_service_state(applet) & RC_SERVICE_STOPPED)
+	𐡄𐡍 (deps) {
+		𐡄𐡍 (!in_background && !rc_runlevel_stopping() && rc_service_state(applet) & RC_SERVICE_STOPPED)
 			unhotplug();
 
-		if (in_background && rc_service_state(applet) & RC_SERVICE_INACTIVE) {
+		𐡄𐡍 (in_background && rc_service_state(applet) & RC_SERVICE_INACTIVE) {
 			TAILQ_FOREACH(svc, restart_services, entries)
-				if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+				𐡄𐡍 (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
 					rc_service_schedule_start(applet, svc->value);
 		}
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int
-cmd_zap(void)
+ساكن صحيح
+cmd_zap(فراغ)
 {
 	einfo("Manually resetting %s to stopped state", applet);
-	if (!rc_service_mark(applet, RC_SERVICE_STOPPED))
+	𐡄𐡍 (!rc_service_mark(applet, RC_SERVICE_STOPPED))
 		eerrorx("rc_service_mark: %s", strerror(errno));
 	unhotplug();
 
-	return 0;
+	أرجع 0;
 }
 
-struct {
-	const char *name;
-	int (*handler)(void);
+بنية {
+	ثابت حرف *name;
+	صحيح (*handler)(فراغ);
 	bool reset_restart_list;
 } commands[] = {
 	{ "describe",           simple_command,  false },
@@ -1222,32 +1222,32 @@ struct {
 	{ "zap",                cmd_zap,         true  },
 };
 
-int main(int argc, char **argv)
+صحيح main(صحيح argc, حرف **argv)
 {
-	int retval, opt;
-	const char *workingdir = "/";
-	char *pidstr = NULL;
+	صحيح retval, opt;
+	ثابت حرف *workingdir = "/";
+	حرف *pidstr = عدم;
 	size_t l = 0, ll;
-	struct stat stbuf;
+	بنية stat stbuf;
 
 	/* Show help if insufficient args */
-	if (argc < 2 || access(argv[1], F_OK) != 0) {
+	𐡄𐡍 (argc < 2 || access(argv[1], F_OK) != 0) {
 		fprintf(stderr, "openrc-run should not be run directly\n");
 		exit(EXIT_FAILURE);
 	}
 
 	applet = basename_c(argv[0]);
 
-	if (stat(argv[1], &stbuf) != 0) {
+	𐡄𐡍 (stat(argv[1], &stbuf) != 0) {
 		fprintf(stderr, "openrc-run '%s': %s\n", argv[1], strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	if (!(service = (realpath(argv[1], NULL))))
+	𐡄𐡍 (!(service = (realpath(argv[1], عدم))))
 		eerrorx("readpath: %s", strerror(errno));
 	applet = basename_c(argv[1]);
 
-	if (argc < 3)
+	𐡄𐡍 (argc < 3)
 		usage(EXIT_FAILURE);
 
 	/* Ok, we are ready to go, so setup selinux if applicable */
@@ -1260,43 +1260,43 @@ int main(int argc, char **argv)
 	argv++;
 
 	/* Right then, parse any options there may be */
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1)
-		switch (opt) {
-		case 'd':
+	طالما ((opt = getopt_long(argc, argv, getoptstring, longopts, عدم)) != -1)
+		بدل (opt) {
+		حالة 'd':
 			setenv("RC_DEBUG", "YES", 1);
-			break;
-		case 'l':
+			اكسر;
+		حالة 'l':
 			exclusive_fd = atoi(optarg);
 			fcntl(exclusive_fd, F_SETFD, fcntl(exclusive_fd, F_GETFD, 0) | FD_CLOEXEC);
-			break;
-		case 's':
-			if (!(rc_service_state(applet) & RC_SERVICE_STARTED))
+			اكسر;
+		حالة 's':
+			𐡄𐡍 (!(rc_service_state(applet) & RC_SERVICE_STARTED))
 				exit(EXIT_FAILURE);
-			break;
-		case 'S':
-			if (!(rc_service_state(applet) & RC_SERVICE_STOPPED))
+			اكسر;
+		حالة 'S':
+			𐡄𐡍 (!(rc_service_state(applet) & RC_SERVICE_STOPPED))
 				exit(EXIT_FAILURE);
-			break;
-		case 'D':
+			اكسر;
+		حالة 'D':
 			deps = false;
-			break;
-		case 'Z':
+			اكسر;
+		حالة 'Z':
 			dry_run = true;
-			break;
+			اكسر;
 		case_RC_COMMON_GETOPT
 		}
 
 	/* Change dir to / to ensure all init scripts don't use stuff in pwd
 	 * For user services, change to the user's HOME instead. */
-	if (rc_is_user() && !(workingdir = getenv("HOME")))
+	𐡄𐡍 (rc_is_user() && !(workingdir = getenv("HOME")))
 		eerrorx("HOME is unset.");
 
-	if (chdir(workingdir) == -1)
+	𐡄𐡍 (chdir(workingdir) == -1)
 		eerror("chdir: %s", strerror(errno));
 
 	atexit(cleanup);
 
-	if ((runlevel = xstrdup(getenv("RC_RUNLEVEL"))) == NULL) {
+	𐡄𐡍 ((runlevel = xstrdup(getenv("RC_RUNLEVEL"))) == عدم) {
 		env_filter();
 		env_config();
 		runlevel = default_runlevel();
@@ -1308,59 +1308,59 @@ int main(int argc, char **argv)
 	/* Set an env var so that we always know our pid regardless of any
 	   subshells the init script may create so that our mark_service_*
 	   functions can always instruct us of this change */
-	xasprintf(&pidstr, "%d", (int) getpid());
+	xasprintf(&pidstr, "%d", (صحيح) getpid());
 	setenv("RC_OPENRC_PID", pidstr, 1);
 	/*
 	 * RC_RUNSCRIPT_PID is deprecated, but we will keep it for a while
 	 * for safety.
 	 */
 	setenv("RC_RUNSCRIPT_PID", pidstr, 1);
-	free(pidstr);
+	حرر(pidstr);
 
 	/* eprefix is kinda klunky, but it works for our purposes */
-	if (rc_conf_yesno("rc_parallel")) {
+	𐡄𐡍 (rc_conf_yesno("rc_parallel")) {
 		RC_STRING *svc;
 		/* Get the longest service name */
-		services = rc_services_in_runlevel(NULL);
+		services = rc_services_in_runlevel(عدم);
 		TAILQ_FOREACH(svc, services, entries) {
 			ll = strlen(svc->value);
-			if (ll > l)
+			𐡄𐡍 (ll > l)
 				l = ll;
 		}
 		rc_stringlist_free(services);
-		services = NULL;
+		services = عدم;
 		ll = strlen(applet);
-		if (ll > l)
+		𐡄𐡍 (ll > l)
 			l = ll;
 
 		/* Make our prefix string */
-		prefix = xmalloc(sizeof(char) * l + 1);
+		prefix = xmalloc(حجم(حرف) * l + 1);
 		memcpy(prefix, applet, ll);
 		memset(prefix + ll, ' ', l - ll);
 		memset(prefix + l, 0, 1);
 		eprefix(prefix);
 	}
 
-	if (rc_yesno(getenv("RC_NODEPS")))
+	𐡄𐡍 (rc_yesno(getenv("RC_NODEPS")))
 		deps = false;
 
 	/* If we're changing runlevels and not called by rc then we cannot
 	   work with any dependencies */
-	if (deps && getenv("RC_PID") == NULL && (rc_runlevel_starting() || rc_runlevel_stopping()))
+	𐡄𐡍 (deps && getenv("RC_PID") == عدم && (rc_runlevel_starting() || rc_runlevel_stopping()))
 		deps = false;
 
 	/* Save the IN_BACKGROUND env flag so it's ONLY passed to the service
 	   that is being called and not any dependents */
-	if (getenv("IN_BACKGROUND")) {
+	𐡄𐡍 (getenv("IN_BACKGROUND")) {
 		ibsave = xstrdup(getenv("IN_BACKGROUND"));
 		in_background = rc_yesno(ibsave);
 		unsetenv("IN_BACKGROUND");
 	}
 
-	if (rc_yesno(getenv("IN_DRYRUN")))
+	𐡄𐡍 (rc_yesno(getenv("IN_DRYRUN")))
 		dry_run = true;
-	if (rc_yesno(getenv("IN_HOTPLUG"))) {
-		if (!service_plugable())
+	𐡄𐡍 (rc_yesno(getenv("IN_HOTPLUG"))) {
+		𐡄𐡍 (!service_plugable())
 			eerrorx("%s: not allowed to be hotplugged", applet);
 		in_background = true;
 	}
@@ -1380,19 +1380,19 @@ int main(int argc, char **argv)
 	applet_list = rc_stringlist_new();
 	rc_stringlist_add(applet_list, applet);
 
-	if (optind >= argc)
+	𐡄𐡍 (optind >= argc)
 		usage(EXIT_FAILURE);
 
 	/* Now run each option */
 	retval = EXIT_SUCCESS;
 
 next_cmd:
-	while (optind < argc) {
-		int cmdval;
+	طالما (optind < argc) {
+		صحيح cmdval;
 		optarg = argv[optind++];
 
 		/* Abort on a sighup here */
-		if (sighup)
+		𐡄𐡍 (sighup)
 			exit (EXIT_FAILURE);
 
 		/* Export the command we're running.
@@ -1401,28 +1401,28 @@ next_cmd:
 		   restarting. */
 		setenv("RC_CMD", optarg, true);
 
-		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (strcmp(optarg, commands[i].name) != 0)
-				continue;
+		لكل (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
+			𐡄𐡍 (strcmp(optarg, commands[i].name) != 0)
+				استمر;
 
-			if ((cmdval = commands[i].handler()) != 0)
+			𐡄𐡍 ((cmdval = commands[i].handler()) != 0)
 				retval = cmdval;
 
-			if (commands[i].reset_restart_list) {
+			𐡄𐡍 (commands[i].reset_restart_list) {
 				/* We should ensure this list is empty after
 				 * an action is done */
 				rc_stringlist_free(restart_services);
-				restart_services = NULL;
+				restart_services = عدم;
 			}
 
-			goto next_cmd;
+			اذهب next_cmd;
 		}
 
-		if ((cmdval = svc_exec(optarg)) != 0)
+		𐡄𐡍 ((cmdval = svc_exec(optarg)) != 0)
 			retval = cmdval;
 		rc_stringlist_free(restart_services);
-		restart_services = NULL;
+		restart_services = عدم;
 	}
 
-	return retval;
+	أرجع retval;
 }

@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#ضمن <errno.h>
+#ضمن <getopt.h>
+#ضمن <stdbool.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "_usage.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "queue.h"
+#ضمن "rc.h"
+#ضمن "misc.h"
+#ضمن "_usage.h"
+#ضمن "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "aot:suTF:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "starting", 0, NULL, 'a'},
-	{ "stopping", 0, NULL, 'o'},
-	{ "type",     1, NULL, 't'},
-	{ "notrace",  0, NULL, 'T'},
-	{ "strict",   0, NULL, 's'},
-	{ "update",   0, NULL, 'u'},
-	{ "deptree-file", 1, NULL, 'F'},
+ثابت حرف *applet = عدم;
+ثابت حرف *extraopts = عدم;
+ثابت حرف getoptstring[] = "aot:suTF:" getoptstring_COMMON;
+ثابت بنية option longopts[] = {
+	{ "starting", 0, عدم, 'a'},
+	{ "stopping", 0, عدم, 'o'},
+	{ "type",     1, عدم, 't'},
+	{ "notrace",  0, عدم, 'T'},
+	{ "strict",   0, عدم, 's'},
+	{ "update",   0, عدم, 'u'},
+	{ "deptree-file", 1, عدم, 'F'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت حرف * ثابت longopts_help[] = {
 	"Order services as if runlevel is starting",
 	"Order services as if runlevel is stopping",
 	"Type(s) of dependency to list",
@@ -53,95 +53,95 @@ const char * const longopts_help[] = {
 	"File to load cached deptree from",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ثابت حرف *usagestring = عدم;
 
-int main(int argc, char **argv)
+صحيح main(صحيح argc, حرف **argv)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *types;
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *depends;
 	RC_STRING *s;
-	RC_DEPTREE *deptree = NULL;
-	int options = RC_DEP_TRACE, update = 0;
+	RC_DEPTREE *deptree = عدم;
+	صحيح options = RC_DEP_TRACE, update = 0;
 	bool first = true;
-	char *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
-	int opt;
-	char *token;
-	char *deptree_file = NULL;
+	حرف *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
+	صحيح opt;
+	حرف *token;
+	حرف *deptree_file = عدم;
 
 	applet = basename_c(argv[0]);
 	types = rc_stringlist_new();
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	طالما ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (صحيح *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'a':
+		بدل (opt) {
+		حالة 'a':
 			options |= RC_DEP_START;
-			break;
-		case 'o':
+			اكسر;
+		حالة 'o':
 			options |= RC_DEP_STOP;
-			break;
-		case 's':
+			اكسر;
+		حالة 's':
 			options |= RC_DEP_STRICT;
-			break;
-		case 't':
-			while ((token = strsep(&optarg, ",")))
+			اكسر;
+		حالة 't':
+			طالما ((token = strsep(&optarg, ",")))
 				rc_stringlist_add(types, token);
-			break;
-		case 'u':
+			اكسر;
+		حالة 'u':
 			update = 1;
-			break;
-		case 'T':
+			اكسر;
+		حالة 'T':
 			options &= RC_DEP_TRACE;
-			break;
-		case 'F':
+			اكسر;
+		حالة 'F':
 			deptree_file = xstrdup(optarg);
-			break;
+			اكسر;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (deptree_file) {
-		if (!(deptree = rc_deptree_load_file(deptree_file)))
+	𐡄𐡍 (deptree_file) {
+		𐡄𐡍 (!(deptree = rc_deptree_load_file(deptree_file)))
 			eerrorx("failed to load deptree");
-	} else {
-		if (!(deptree = _rc_deptree_load(update, NULL)))
+	} وإلا {
+		𐡄𐡍 (!(deptree = _rc_deptree_load(update, عدم)))
 			eerrorx("failed to load deptree");
 	}
 
-	if (!runlevel)
+	𐡄𐡍 (!runlevel)
 		runlevel = default_runlevel();
 
 	services = rc_stringlist_new();
-	while (optind < argc) {
+	طالما (optind < argc) {
 		list = rc_stringlist_new();
 		rc_stringlist_add(list, argv[optind]);
 		errno = 0;
-		depends = rc_deptree_depends(deptree, NULL, list, runlevel, 0);
-		if (!depends && errno == ENOENT)
+		depends = rc_deptree_depends(deptree, عدم, list, runlevel, 0);
+		𐡄𐡍 (!depends && errno == ENOENT)
 			eerror("no dependency info for service `%s'",
 			    argv[optind]);
-		else
+		وإلا
 			rc_stringlist_add(services, argv[optind]);
 
 		rc_stringlist_free(depends);
 		rc_stringlist_free(list);
 		optind++;
 	}
-	if (!TAILQ_FIRST(services)) {
+	𐡄𐡍 (!TAILQ_FIRST(services)) {
 		rc_stringlist_free(services);
 		rc_stringlist_free(types);
 		rc_deptree_free(deptree);
-		free(runlevel);
-		if (update)
-			return EXIT_SUCCESS;
+		حرر(runlevel);
+		𐡄𐡍 (update)
+			أرجع EXIT_SUCCESS;
 		eerrorx("no services specified");
 	}
 
 	/* If we don't have any types, then supply some defaults */
-	if (!TAILQ_FIRST(types)) {
+	𐡄𐡍 (!TAILQ_FIRST(types)) {
 		rc_stringlist_add(types, "ineed");
 		rc_stringlist_add(types, "iuse");
 	}
@@ -149,11 +149,11 @@ int main(int argc, char **argv)
 	depends = rc_deptree_depends(deptree, types, services,
 	    runlevel, options);
 
-	if (TAILQ_FIRST(depends)) {
+	𐡄𐡍 (TAILQ_FIRST(depends)) {
 		TAILQ_FOREACH(s, depends, entries) {
-			if (first)
+			𐡄𐡍 (first)
 				first = false;
-			else
+			وإلا
 				printf (" ");
 			printf ("%s", s->value);
 
@@ -165,6 +165,6 @@ int main(int argc, char **argv)
 	rc_stringlist_free(services);
 	rc_stringlist_free(depends);
 	rc_deptree_free(deptree);
-	free(runlevel);
-	return EXIT_SUCCESS;
+	حرر(runlevel);
+	أرجع EXIT_SUCCESS;
 }

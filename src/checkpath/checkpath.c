@@ -16,48 +16,48 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#ضمن <errno.h>
+#ضمن <fcntl.h>
+#ضمن <getopt.h>
+#ضمن <grp.h>
+#ضمن <pwd.h>
+#ضمن <stdbool.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/types.h>
+#ضمن <unistd.h>
 
-#include "einfo.h"
-#include "misc.h"
-#include "selinux.h"
-#include "_usage.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "misc.h"
+#ضمن "selinux.h"
+#ضمن "_usage.h"
+#ضمن "helpers.h"
 
-typedef enum {
+تعريفنوع تعداد {
 	inode_unknown = 0,
 	inode_file = 1,
 	inode_dir = 2,
 	inode_fifo = 3,
 } inode_t;
 
-const char *applet = NULL;
-const char *extraopts ="path1 [path2] [...]";
-const char getoptstring[] = "dDfFpm:o:sW" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "directory",          0, NULL, 'd'},
-	{ "directory-truncate", 0, NULL, 'D'},
-	{ "file",               0, NULL, 'f'},
-	{ "file-truncate",      0, NULL, 'F'},
-	{ "pipe",               0, NULL, 'p'},
-	{ "mode",               1, NULL, 'm'},
-	{ "owner",              1, NULL, 'o'},
-	{ "symlinks",           0, NULL, 's'},
-	{ "writable",           0, NULL, 'W'},
+ثابت حرف *applet = عدم;
+ثابت حرف *extraopts ="path1 [path2] [...]";
+ثابت حرف getoptstring[] = "dDfFpm:o:sW" getoptstring_COMMON;
+ثابت بنية option longopts[] = {
+	{ "directory",          0, عدم, 'd'},
+	{ "directory-truncate", 0, عدم, 'D'},
+	{ "file",               0, عدم, 'f'},
+	{ "file-truncate",      0, عدم, 'F'},
+	{ "pipe",               0, عدم, 'p'},
+	{ "mode",               1, عدم, 'm'},
+	{ "owner",              1, عدم, 'o'},
+	{ "symlinks",           0, عدم, 's'},
+	{ "writable",           0, عدم, 'W'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت حرف * ثابت longopts_help[] = {
 	"Create a directory if not exists",
 	"Create/empty directory",
 	"Create a file if not exists",
@@ -69,23 +69,23 @@ const char * const longopts_help[] = {
 	"Check whether the path is writable or not",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ثابت حرف *usagestring = عدم;
 
-static int get_dirfd(char *path, bool symlinks)
+ساكن صحيح get_dirfd(حرف *path, bool symlinks)
 {
-	char *ch, *item, *path_dupe, *str, *linkpath = NULL;
-	int components = 0, dirfd, flags = 0, new_dirfd;
+	حرف *ch, *item, *path_dupe, *str, *linkpath = عدم;
+	صحيح components = 0, dirfd, flags = 0, new_dirfd;
 	ssize_t linksize;
-	struct stat st;
+	بنية stat st;
 
-	if (!path || *path != '/')
+	𐡄𐡍 (!path || *path != '/')
 		eerrorx("%s: empty or relative path", applet);
 	dirfd = openat(AT_FDCWD, "/", O_RDONLY);
-	if (dirfd == -1)
+	𐡄𐡍 (dirfd == -1)
 		eerrorx("%s: unable to open the root directory: %s", applet, strerror(errno));
 	ch = path;
-	while (*ch) {
-		if (*ch == '/')
+	طالما (*ch) {
+		𐡄𐡍 (*ch == '/')
 			components++;
 		ch++;
 	}
@@ -94,325 +94,325 @@ static int get_dirfd(char *path, bool symlinks)
 #ifdef O_PATH
 	flags |= O_PATH;
 #endif
-	if (!symlinks)
+	𐡄𐡍 (!symlinks)
 		flags |= O_NOFOLLOW;
 	flags |= O_RDONLY;
-	while (dirfd > 0 && item && components > 1) {
+	طالما (dirfd > 0 && item && components > 1) {
 		str = xstrdup(linkpath ? linkpath : item);
 		new_dirfd = openat(dirfd, str, flags);
-		if (new_dirfd == -1)
+		𐡄𐡍 (new_dirfd == -1)
 			eerrorx("%s: %s: could not open %s: %s", applet, path, str, strerror(errno));
-		if (fstat(new_dirfd, &st) == -1)
+		𐡄𐡍 (fstat(new_dirfd, &st) == -1)
 			eerrorx("%s: %s: unable to stat %s: %s", applet, path, item, strerror(errno));
-		if (S_ISLNK(st.st_mode) ) {
-			if (st.st_uid != 0)
+		𐡄𐡍 (S_ISLNK(st.st_mode) ) {
+			𐡄𐡍 (st.st_uid != 0)
 				eerrorx("%s: %s: symbolic link %s not owned by root", applet, path, str);
 			linksize = st.st_size+1;
-			if (linkpath)
-				free(linkpath);
+			𐡄𐡍 (linkpath)
+				حرر(linkpath);
 			linkpath = xmalloc(linksize);
 			memset(linkpath, 0, linksize);
-			if (readlinkat(new_dirfd, "", linkpath, linksize) != st.st_size)
+			𐡄𐡍 (readlinkat(new_dirfd, "", linkpath, linksize) != st.st_size)
 				eerrorx("%s: symbolic link destination changed", applet);
 			/*
 			 * now follow the symlink.
 			 */
 			close(new_dirfd);
-		} else {
+		} وإلا {
 			/* now walk down the directory path */
 			close(dirfd);
 			dirfd = new_dirfd;
-			free(linkpath);
-			linkpath = NULL;
-			item = strtok(NULL, "/");
+			حرر(linkpath);
+			linkpath = عدم;
+			item = strtok(عدم, "/");
 			components--;
 		}
 
-		free(str);
+		حرر(str);
 	}
-	free(path_dupe);
-	free(linkpath);
-	return dirfd;
+	حرر(path_dupe);
+	حرر(linkpath);
+	أرجع dirfd;
 }
 
-static char *clean_path(char *path)
+ساكن حرف *clean_path(حرف *path)
 {
-	char *ch, *ch2, *str;
+	حرف *ch, *ch2, *str;
 
 	str = xmalloc(strlen(path) + 1);
 	ch = path;
 	ch2 = str;
-	while (true) {
+	طالما (true) {
 		*ch2 = *ch;
 		ch++;
 		ch2++;
-		if (!*(ch-1))
-			break;
-		while (*(ch - 1) == '/' && *ch == '/')
+		𐡄𐡍 (!*(ch-1))
+			اكسر;
+		طالما (*(ch - 1) == '/' && *ch == '/')
 			ch++;
 	}
 	/* get rid of trailing / characters */
-	while ((ch = strrchr(str, '/'))) {
-		if (ch == str)
-			break;
-		if (!*(ch+1))
+	طالما ((ch = strrchr(str, '/'))) {
+		𐡄𐡍 (ch == str)
+			اكسر;
+		𐡄𐡍 (!*(ch+1))
 			*ch = 0;
-		else
-			break;
+		وإلا
+			اكسر;
 	}
-	return str;
+	أرجع str;
 }
 
-static int do_create(inode_t type, const char *path, int dirfd, const char *name, int flags, mode_t mode)
+ساكن صحيح do_create(inode_t type, ثابت حرف *path, صحيح dirfd, ثابت حرف *name, صحيح flags, mode_t mode)
 {
-	int mask = umask(0);
-	int fd;
+	صحيح mask = umask(0);
+	صحيح fd;
 
-	static const mode_t default_mode[] = {
+	ساكن ثابت mode_t default_mode[] = {
 		[inode_file] = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, /* 664 */
 		[inode_dir] = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH, /* 775 */
 		[inode_fifo] = S_IRUSR | S_IWUSR, /* 600 */
 		[inode_unknown] = 0,
 	};
 
-	if (!mode)
+	𐡄𐡍 (!mode)
 		mode = default_mode[type];
 
-	switch (type) {
-	case inode_file:
+	بدل (type) {
+	حالة inode_file:
 		einfo("%s: creating file", path);
 		flags |= O_CREAT;
-		break;
-	case inode_dir:
+		اكسر;
+	حالة inode_dir:
 		einfo("%s: creating directory", path);
 
 		/* We do not recursively create parents */
-		if (mkdirat(dirfd, name, mode) == -1 && errno != EEXIST) {
+		𐡄𐡍 (mkdirat(dirfd, name, mode) == -1 && errno != EEXIST) {
 			eerror("%s: mkdirat: %s", applet, strerror (errno));
-			return -1;
+			أرجع -1;
 		}
 
-		break;
-	case inode_fifo:
+		اكسر;
+	حالة inode_fifo:
 		einfo("%s: creating fifo", path);
 
-		if (mkfifoat(dirfd, name, mode) == -1 && errno != EEXIST) {
+		𐡄𐡍 (mkfifoat(dirfd, name, mode) == -1 && errno != EEXIST) {
 			eerror("%s: mkfifo: %s", applet, strerror (errno));
-			return -1;
+			أرجع -1;
 		}
 
-		break;
-	case inode_unknown:
-		break;
+		اكسر;
+	حالة inode_unknown:
+		اكسر;
 	}
 	umask(mask);
 
-	if ((fd = openat(dirfd, name, flags, mode)) == -1) {
+	𐡄𐡍 ((fd = openat(dirfd, name, flags, mode)) == -1) {
 		eerror("%s: open: %s", applet, strerror(errno));
-		return -1;
+		أرجع -1;
 	}
-	return fd;
+	أرجع fd;
 }
 
-static int do_check(char *path, uid_t uid, gid_t gid, mode_t mode, inode_t type,
+ساكن صحيح do_check(حرف *path, uid_t uid, gid_t gid, mode_t mode, inode_t type,
 		bool trunc, bool chowner, bool writable, bool symlinks, bool selinux_on)
 {
-	int flags = O_NDELAY | O_NOCTTY | O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
-	const char *name = basename_c(path);
-	struct stat st;
-	int dirfd, fd;
+	صحيح flags = O_NDELAY | O_NOCTTY | O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
+	ثابت حرف *name = basename_c(path);
+	بنية stat st;
+	صحيح dirfd, fd;
 
-	if (writable) {
-		if (access(path, W_OK) == 0)
-			return 0;
-		if (errno != ENOENT || type == inode_unknown)
-			return -1;
+	𐡄𐡍 (writable) {
+		𐡄𐡍 (access(path, W_OK) == 0)
+			أرجع 0;
+		𐡄𐡍 (errno != ENOENT || type == inode_unknown)
+			أرجع -1;
 	}
 
-	if (trunc && type == inode_file)
+	𐡄𐡍 (trunc && type == inode_file)
 		flags |= O_TRUNC;
 
 	dirfd = get_dirfd(path, symlinks);
-	if ((fd = openat(dirfd, name, flags)) == -1 &&
+	𐡄𐡍 ((fd = openat(dirfd, name, flags)) == -1 &&
 			(fd = do_create(type, path, dirfd, name, flags, mode)) == -1)
-		return -1;
+		أرجع -1;
 
-	if (fstat(fd, &st) == -1) {
+	𐡄𐡍 (fstat(fd, &st) == -1) {
 		eerror("fstat: %s: %s", path, strerror(errno));
-		goto err;
+		اذهب err;
 	}
 
-	if (type != inode_dir && S_ISDIR(st.st_mode)) {
+	𐡄𐡍 (type != inode_dir && S_ISDIR(st.st_mode)) {
 		eerror("%s: is a directory", path);
-		goto err;
+		اذهب err;
 	}
 
-	if (type != inode_file && S_ISREG(st.st_mode)) {
+	𐡄𐡍 (type != inode_file && S_ISREG(st.st_mode)) {
 		eerror("%s: is a file", path);
-		goto err;
+		اذهب err;
 	}
 
-	if (type != inode_fifo && S_ISFIFO(st.st_mode)) {
+	𐡄𐡍 (type != inode_fifo && S_ISFIFO(st.st_mode)) {
 		eerror("%s: is a fifo", path);
-		goto err;
+		اذهب err;
 	}
 
-	if (mode && (st.st_mode & 07777) != mode) {
-		if ((type != inode_dir) && (st.st_nlink > 1)) {
+	𐡄𐡍 (mode && (st.st_mode & 07777) != mode) {
+		𐡄𐡍 ((type != inode_dir) && (st.st_nlink > 1)) {
 			eerror("%s: chmod: Too many hard links to %s", applet, path);
-			goto err;
+			اذهب err;
 		}
 
-		if (S_ISLNK(st.st_mode)) {
+		𐡄𐡍 (S_ISLNK(st.st_mode)) {
 			eerror("%s: chmod: %s is a symbolic link", applet, path);
-			goto err;
+			اذهب err;
 		}
 
 		einfo("%s: correcting mode", path);
-		if (fchmod(fd, mode)) {
+		𐡄𐡍 (fchmod(fd, mode)) {
 			eerror("%s: chmod: %s", applet, strerror(errno));
-			goto err;
+			اذهب err;
 		}
 	}
 
-	if (chowner && (st.st_uid != uid || st.st_gid != gid)) {
-		if ((type != inode_dir) && (st.st_nlink > 1)) {
+	𐡄𐡍 (chowner && (st.st_uid != uid || st.st_gid != gid)) {
+		𐡄𐡍 ((type != inode_dir) && (st.st_nlink > 1)) {
 			eerror("%s: chown: Too many hardlinks to %s", applet, path);
-			goto err;
+			اذهب err;
 		}
 
-		if (S_ISLNK(st.st_mode)) {
+		𐡄𐡍 (S_ISLNK(st.st_mode)) {
 			eerror("%s: chown: %s is a symbolic link", applet, path);
-			goto err;
+			اذهب err;
 		}
 
 		einfo("%s: correcting owner", path);
-		if (fchown(fd, uid, gid)) {
+		𐡄𐡍 (fchown(fd, uid, gid)) {
 			eerror("%s: chown: %s", applet, strerror(errno));
-			goto err;
+			اذهب err;
 		}
 	}
 
-	if (selinux_on)
+	𐡄𐡍 (selinux_on)
 		selinux_util_label(path);
 	close(fd);
 
-	return 0;
+	أرجع 0;
 err:
 	close(fd);
-	return -1;
+	أرجع -1;
 }
 
-static int parse_owner(struct passwd **user, struct group **group, const char *owner)
+ساكن صحيح parse_owner(بنية passwd **user, بنية group **group, ثابت حرف *owner)
 {
-	char *u = xstrdup(owner), *g = strchr(u, ':');
-	int id = 0, retval = 0;
+	حرف *u = xstrdup(owner), *g = strchr(u, ':');
+	صحيح id = 0, retval = 0;
 
-	if (g)
+	𐡄𐡍 (g)
 		*g++ = '\0';
 
-	if (user && *u) {
-		if (sscanf(u, "%d", &id) == 1)
+	𐡄𐡍 (user && *u) {
+		𐡄𐡍 (sscanf(u, "%d", &id) == 1)
 			*user = getpwuid((uid_t) id);
-		else
+		وإلا
 			*user = getpwnam(u);
-		if (*user == NULL)
+		𐡄𐡍 (*user == عدم)
 			retval = -1;
 	}
 
-	if (group && g && *g) {
-		if (sscanf(g, "%d", &id) == 1)
+	𐡄𐡍 (group && g && *g) {
+		𐡄𐡍 (sscanf(g, "%d", &id) == 1)
 			*group = getgrgid((gid_t) id);
-		else
+		وإلا
 			*group = getgrnam(g);
-		if (*group == NULL)
+		𐡄𐡍 (*group == عدم)
 			retval = -1;
 	}
 
-	free(u);
-	return retval;
+	حرر(u);
+	أرجع retval;
 }
 
-int main(int argc, char **argv)
+صحيح main(صحيح argc, حرف **argv)
 {
-	int opt;
+	صحيح opt;
 	uid_t uid = geteuid();
 	gid_t gid = getgid();
 	mode_t mode = 0;
-	struct passwd *pw = NULL;
-	struct group *gr = NULL;
+	بنية passwd *pw = عدم;
+	بنية group *gr = عدم;
 	inode_t type = inode_unknown;
-	int retval = EXIT_SUCCESS;
+	صحيح retval = EXIT_SUCCESS;
 	bool trunc = false;
 	bool chowner = false;
 	bool symlinks = false;
 	bool writable = false;
 	bool selinux_on = false;
-	char *path = NULL;
+	حرف *path = عدم;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1) {
-		switch (opt) {
-		case 'D':
+	طالما ((opt = getopt_long(argc, argv, getoptstring, longopts, (صحيح *) 0)) != -1) {
+		بدل (opt) {
+		حالة 'D':
 			trunc = true;
 			/* falls through */
-		case 'd':
+		حالة 'd':
 			type = inode_dir;
-			break;
-		case 'F':
+			اكسر;
+		حالة 'F':
 			trunc = true;
 			/* falls through */
-		case 'f':
+		حالة 'f':
 			type = inode_file;
-			break;
-		case 'p':
+			اكسر;
+		حالة 'p':
 			type = inode_fifo;
-			break;
-		case 'm':
-			if (parse_mode(&mode, optarg) != 0)
+			اكسر;
+		حالة 'm':
+			𐡄𐡍 (parse_mode(&mode, optarg) != 0)
 				eerrorx("%s: invalid mode '%s'", applet, optarg);
-			break;
-		case 'o':
+			اكسر;
+		حالة 'o':
 			chowner = true;
-			if (parse_owner(&pw, &gr, optarg) != 0)
+			𐡄𐡍 (parse_owner(&pw, &gr, optarg) != 0)
 				eerrorx("%s: owner '%s' not found", applet, optarg);
-			break;
-		case 's':
+			اكسر;
+		حالة 's':
 #ifndef O_PATH
 			symlinks = true;
 #endif
-			break;
-		case 'W':
+			اكسر;
+		حالة 'W':
 			writable = true;
-			break;
+			اكسر;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind >= argc)
+	𐡄𐡍 (optind >= argc)
 		usage(EXIT_FAILURE);
 
-	if (pw) {
+	𐡄𐡍 (pw) {
 		uid = pw->pw_uid;
 		gid = pw->pw_gid;
 	}
-	if (gr)
+	𐡄𐡍 (gr)
 		gid = gr->gr_gid;
 
-	if (selinux_util_open() == 1)
+	𐡄𐡍 (selinux_util_open() == 1)
 		selinux_on = true;
 
-	while (optind < argc) {
+	طالما (optind < argc) {
 		path = clean_path(argv[optind]);
-		if (do_check(path, uid, gid, mode, type, trunc, chowner, writable, symlinks, selinux_on))
+		𐡄𐡍 (do_check(path, uid, gid, mode, type, trunc, chowner, writable, symlinks, selinux_on))
 			retval = EXIT_FAILURE;
 		optind++;
-		free(path);
+		حرر(path);
 	}
 
-	if (selinux_on)
+	𐡄𐡍 (selinux_on)
 		selinux_util_close();
 
-	return retval;
+	أرجع retval;
 }
