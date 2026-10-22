@@ -10,38 +10,38 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ضمن <ctype.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#ضمن "rc.h"
+#ضمن "_usage.h"
+#ضمن "version.h"
+#ضمن "helpers.h"
 
 
-void set_quiet_options(void)
+فراغ set_quiet_options(فراغ)
 {
-	static int qcount = 0;
+	ساكن صحيح qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	بدل (qcount) {
+	حالة 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		اكسر;
+	حالة 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		اكسر;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN فراغ show_version(فراغ)
 {
-	const char *systype = NULL;
+	ثابت حرف *systype = عدم;
 
 	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
+	אם ((systype = rc_sys()))
 		printf(" [%s]", systype);
 	printf(") %s", VERSION);
 #ifdef BRANDING
@@ -51,39 +51,39 @@ RC_NORETURN void show_version(void)
 	exit(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN فراغ usage(صحيح exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	ثابت حرف * ثابت has_arg[] = { "", "<arg>", "[arg]" };
+	صحيح i;
+	صحيح len;
+	حرف *lo;
+	حرف *p;
+	حرف *token;
+	حرف val[4] = "-?,";
 
-	if (usagestring)
+	אם (usagestring)
 		printf("%s", usagestring);
-	else
+	אחרת
 		printf("Usage: %s [options] ", applet);
 
-	if (extraopts)
+	אם (extraopts)
 		printf("%s", extraopts);
 
 	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	עבור (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
 		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		כלעוד ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
+			אם (len > 0)
 				printf("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		حرر(lo);
 	}
 	exit(exit_status);
 }
