@@ -42,7 +42,7 @@ typedef struct plugin
 {
 	char *name;
 	void *handle;
-	int (*hook)(RC_HOOK, const char *);
+	整数 (*hook)(RC_HOOK, const char *);
 	TAILQ_ENTRY(plugin) entries;
 } PLUGIN;
 TAILQ_HEAD(, plugin) plugins;
@@ -57,36 +57,36 @@ rc_plugin_load(void)
 	void *h;
 	union {
 		void *sym;
-		int (*func)(RC_HOOK, const char *);
+		整数 (*func)(RC_HOOK, const char *);
 	} fptr;
 
 	/* Don't load plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	如果 (rc_in_plugin)
+		返回;
 
 	TAILQ_INIT(&plugins);
 
-	if (!(dp = opendir(RC_PLUGINDIR)))
-		return;
+	如果 (!(dp = opendir(RC_PLUGINDIR)))
+		返回;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
+	当 ((d = readdir(dp))) {
+		如果 (d->d_name[0] == '.')
 			continue;
 
 		xasprintf(&file, RC_PLUGINDIR "/%s",  d->d_name);
 		h = dlopen(file, RTLD_LAZY);
 		free(file);
-		if (h == NULL) {
+		如果 (h == NULL) {
 			eerror("dlopen: %s", dlerror());
 			continue;
 		}
 
 		fptr.sym = dlsym(h, RC_PLUGIN_HOOK);
-		if (fptr.func == NULL) {
+		如果 (fptr.func == NULL) {
 			eerror("%s: cannot find symbol `%s'",
 			    d->d_name, RC_PLUGIN_HOOK);
 			dlclose(h);
-		} else {
+		} 否则 {
 			plugin = xmalloc(sizeof(*plugin));
 			plugin->name = xstrdup(d->d_name);
 			plugin->handle = h;
@@ -105,17 +105,17 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 	sigset_t empty;
 	sigset_t full;
 	sigset_t old;
-	int pfd[2];
+	整数 pfd[2];
 	pid_t pid;
 	char *buffer;
 	char *token;
 	char *p;
 	ssize_t nr;
-	int retval;
+	整数 retval;
 
 	/* Don't run plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	如果 (rc_in_plugin)
+		返回;
 
 	/* We need to block signals until we have forked */
 	memset(&sa, 0, sizeof(sa));
@@ -130,21 +130,21 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 		 * O_CLOEXEC to stop any scripts from inheriting us.
 		 * This is actually quite important as without this, the splash
 		 * plugin will probably hang when running in silent mode. */
-		if (pipe2(pfd, O_CLOEXEC) == -1) {
+		如果 (pipe2(pfd, O_CLOEXEC) == -1) {
 			eerror("pipe2: %s", strerror(errno));
-			return;
+			返回;
 		}
 
 		sigprocmask(SIG_SETMASK, &full, &old);
 
 		/* We run the plugin in a new process so we never crash
 		 * or otherwise affected by it */
-		if ((pid = fork()) == -1) {
+		如果 ((pid = fork()) == -1) {
 			eerror("fork: %s", strerror(errno));
 			break;
 		}
 
-		if (pid == 0) {
+		如果 (pid == 0) {
 			/* Restore default handlers */
 			sigaction(SIGCHLD, &sa, NULL);
 			sigaction(SIGHUP,  &sa, NULL);
@@ -172,16 +172,16 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 		buffer = xmalloc(sizeof(char) * BUFSIZ);
 		memset(buffer, 0, BUFSIZ);
 
-		while ((nr = read(pfd[0], buffer, BUFSIZ)) > 0) {
+		当 ((nr = read(pfd[0], buffer, BUFSIZ)) > 0) {
 			p = buffer;
-			while (*p && p - buffer < nr) {
+			当 (*p && p - buffer < nr) {
 				token = strsep(&p, "=");
-				if (token) {
+				如果 (token) {
 					unsetenv(token);
-					if (*p) {
+					如果 (*p) {
 						setenv(token, p, 1);
 						p += strlen(p) + 1;
-					} else
+					} 否则
 						p++;
 				}
 			}
@@ -200,7 +200,7 @@ rc_plugin_unload(void)
 	PLUGIN *plugin = TAILQ_FIRST(&plugins);
 	PLUGIN *next;
 
-	while (plugin) {
+	当 (plugin) {
 		next = TAILQ_NEXT(plugin, entries);
 		dlclose(plugin->handle);
 		free(plugin->name);

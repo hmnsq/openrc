@@ -14,18 +14,18 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+整数 主要(整数 argc, char **argv)
 {
-	int i;
+	整数 i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	如果 (argc < 3)
+		返回 EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	为 (i = 2; i < argc; ++i)
+		如果 (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			返回 EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	返回 EXIT_FAILURE;
 }

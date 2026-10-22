@@ -38,12 +38,12 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-#if defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#如果 defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 #  include <pty.h>
 #elif defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <util.h>
-#else
+#否则
 #  include <libutil.h>
 #endif
 
@@ -93,11 +93,11 @@ static RC_STRINGLIST *restart_services;
 static RC_STRINGLIST *need_services;
 static RC_STRINGLIST *use_services;
 static RC_STRINGLIST *want_services;
-static int exclusive_fd = -1, master_tty = -1;
+static 整数 exclusive_fd = -1, master_tty = -1;
 static bool in_background, deps, dry_run;
 static volatile bool sighup, skip_mark, timedout;
 static pid_t service_pid;
-static int signal_pipe[2] = { -1, -1 };
+static 整数 signal_pipe[2] = { -1, -1 };
 
 static RC_STRINGLIST *deptypes_b;	/* broken deps */
 static RC_STRINGLIST *deptypes_n;	/* needed deps */
@@ -108,9 +108,9 @@ static RC_STRINGLIST *deptypes_m;	/* needed deps for stopping */
 static RC_STRINGLIST *deptypes_mwua;	/* need+want+use+after deps for stopping */
 
 static void
-handle_signal(int sig)
+handle_signal(整数 sig)
 {
-	int serrno = errno, status;
+	整数 serrno = errno, status;
 	pid_t pid;
 	const char *signame = NULL;
 	struct winsize ws;
@@ -125,34 +125,34 @@ handle_signal(int sig)
 		break;
 
 	case SIGCHLD:
-		while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-			if (signal_pipe[1] > -1 && pid == service_pid) {
-				if (write(signal_pipe[1], &status, sizeof(status)) == -1)
+		当 ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+			如果 (signal_pipe[1] > -1 && pid == service_pid) {
+				如果 (write(signal_pipe[1], &status, sizeof(status)) == -1)
 					eerror("%s: send: %s", applet, strerror(errno));
 			}
 		}
 		break;
 
 	case SIGWINCH:
-		if (master_tty >= 0) {
+		如果 (master_tty >= 0) {
 			ioctl(fileno(stdout), TIOCGWINSZ, &ws);
 			ioctl(master_tty, TIOCSWINSZ, &ws);
 		}
 		break;
 
 	case SIGINT:
-		if (!signame)
+		如果 (!signame)
 			signame = "SIGINT";
 		/* FALLTHROUGH */
 	case SIGTERM:
-		if (!signame)
+		如果 (!signame)
 			signame = "SIGTERM";
 		/* FALLTHROUGH */
 	case SIGQUIT:
-		if (!signame)
+		如果 (!signame)
 			signame = "SIGQUIT";
 		/* Send the signal to our children too */
-		if (service_pid > 0)
+		如果 (service_pid > 0)
 			kill(service_pid, sig);
 		eerror("%s: caught %s, aborting", applet, signame);
 		exit(EXIT_FAILURE);
@@ -173,7 +173,7 @@ handle_signal(int sig)
 static void
 unhotplug(void)
 {
-	if (unlinkat(rc_dirfd(RC_DIR_HOTPLUGGED), applet, 0) != 0 && errno != ENOENT)
+	如果 (unlinkat(rc_dirfd(RC_DIR_HOTPLUGGED), applet, 0) != 0 && errno != ENOENT)
 		eerror("%s: unlink '%s/hotplugged/%s': %s", applet, rc_svcdir(), applet, strerror(errno));
 }
 
@@ -183,16 +183,16 @@ start_services(RC_STRINGLIST *list)
 	RC_STRING *svc;
 	RC_SERVICE state = rc_service_state(applet);
 
-	if (!list || !(state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE | RC_SERVICE_STARTING | RC_SERVICE_STARTED)))
-		return;
+	如果 (!list || !(state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE | RC_SERVICE_STARTING | RC_SERVICE_STARTED)))
+		返回;
 
 	TAILQ_FOREACH(svc, list, entries) {
-		if (!(rc_service_state(svc->value) & RC_SERVICE_STOPPED))
+		如果 (!(rc_service_state(svc->value) & RC_SERVICE_STOPPED))
 			continue;
-		if (state & RC_SERVICE_INACTIVE || state & RC_SERVICE_WASINACTIVE) {
+		如果 (state & RC_SERVICE_INACTIVE || state & RC_SERVICE_WASINACTIVE) {
 			rc_service_schedule_start(applet, svc->value);
 			ewarn("WARNING: %s will start when %s has started", svc->value, applet);
-		} else {
+		} 否则 {
 			service_start(svc->value);
 		}
 	}
@@ -203,24 +203,24 @@ restore_state(void)
 {
 	RC_SERVICE state;
 
-	if (rc_in_plugin || exclusive_fd == -1)
-		return;
+	如果 (rc_in_plugin || exclusive_fd == -1)
+		返回;
 	state = rc_service_state(applet);
-	if (state & RC_SERVICE_STOPPING) {
-		if (state & RC_SERVICE_WASINACTIVE)
+	如果 (state & RC_SERVICE_STOPPING) {
+		如果 (state & RC_SERVICE_WASINACTIVE)
 			rc_service_mark(applet, RC_SERVICE_INACTIVE);
-		else
+		否则
 			rc_service_mark(applet, RC_SERVICE_STARTED);
 
-		if (rc_runlevel_stopping())
+		如果 (rc_runlevel_stopping())
 			rc_service_mark(applet, RC_SERVICE_FAILED);
-	} else if (state & RC_SERVICE_STARTING) {
-		if (state & RC_SERVICE_WASINACTIVE)
+	} 否则 如果 (state & RC_SERVICE_STARTING) {
+		如果 (state & RC_SERVICE_WASINACTIVE)
 			rc_service_mark(applet, RC_SERVICE_INACTIVE);
-		else
+		否则
 			rc_service_mark(applet, RC_SERVICE_STOPPED);
 
-		if (rc_runlevel_starting())
+		如果 (rc_runlevel_starting())
 			rc_service_mark(applet, RC_SERVICE_FAILED);
 	}
 	exclusive_fd = svc_unlock(applet, exclusive_fd);
@@ -231,8 +231,8 @@ cleanup(void)
 {
 	restore_state();
 
-	if (!rc_in_plugin) {
-		if (restart_services)
+	如果 (!rc_in_plugin) {
+		如果 (restart_services)
 			start_services(restart_services);
 	}
 
@@ -267,7 +267,7 @@ svc_getenv(const char *svc)
 	char *var = NULL;
 
 	TAILQ_FOREACH(reexport, reexports, entries) {
-		if (rc_service_getenv(svc, reexport->value, &var) == -1)
+		如果 (rc_service_getenv(svc, reexport->value, &var) == -1)
 			continue;
 		setenv(reexport->value, var, true);
 	}
@@ -283,14 +283,14 @@ svc_getenv(const char *svc)
  * Why don't we use (f)printf, as it is thread-safe through POSIX already?
  * Bug: 360013
  */
-static int
+static 整数
 write_prefix(const char *buffer, size_t bytes, bool *prefixed)
 {
 	size_t i, j;
 	const char *ec = ecolor(ECOLOR_HILITE);
 	const char *ec_normal = ecolor(ECOLOR_NORMAL);
 	ssize_t ret = 0;
-	int fd = fileno(stdout), lock_fd = -1;
+	整数 fd = fileno(stdout), lock_fd = -1;
 
 	/*
 	 * Lock the prefix.
@@ -298,29 +298,29 @@ write_prefix(const char *buffer, size_t bytes, bool *prefixed)
 	 */
 	lock_fd = openat(rc_dirfd(RC_DIR_SVCDIR), "prefix.lock", O_WRONLY | O_CREAT, 0664);
 
-	if (lock_fd != -1) {
-		while (flock(lock_fd, LOCK_EX) != 0) {
-			if (errno != EINTR) {
+	如果 (lock_fd != -1) {
+		当 (flock(lock_fd, LOCK_EX) != 0) {
+			如果 (errno != EINTR) {
 				ewarnv("flock() failed: %s", strerror(errno));
 				break;
 			}
 		}
 	}
-	else
+	否则
 		ewarnv("Couldn't open the prefix lock, please make sure you have enough permissions");
 
-	for (i = 0; i < bytes; i++) {
+	为 (i = 0; i < bytes; i++) {
 		/* We don't prefix eend calls (cursor up) */
-		if (buffer[i] == '\033' && !*prefixed) {
-			for (j = i + 1; j < bytes; j++) {
-				if (buffer[j] == 'A')
+		如果 (buffer[i] == '\033' && !*prefixed) {
+			为 (j = i + 1; j < bytes; j++) {
+				如果 (buffer[j] == 'A')
 					*prefixed = true;
-				if (isalpha((unsigned int)buffer[j]))
+				如果 (isalpha((unsigned 整数)buffer[j]))
 					break;
 			}
 		}
 
-		if (!*prefixed) {
+		如果 (!*prefixed) {
 			ret += write(fd, ec, strlen(ec));
 			ret += write(fd, prefix, strlen(prefix));
 			ret += write(fd, ec_normal, strlen(ec_normal));
@@ -328,7 +328,7 @@ write_prefix(const char *buffer, size_t bytes, bool *prefixed)
 			*prefixed = true;
 		}
 
-		if (buffer[i] == '\n')
+		如果 (buffer[i] == '\n')
 			*prefixed = false;
 		ret += write(fd, buffer + i, 1);
 	}
@@ -336,20 +336,20 @@ write_prefix(const char *buffer, size_t bytes, bool *prefixed)
 	/* Release the lock */
 	close(lock_fd);
 
-	return ret;
+	返回 ret;
 }
 
-static int
+static 整数
 svc_exec(const char *command)
 {
-	int ret = -1, fdout = fileno(stdout), tmp;
+	整数 ret = -1, fdout = fileno(stdout), tmp;
 	posix_spawn_file_actions_t tty;
 	struct termios tt;
 	struct winsize ws;
-	int flags = 0;
+	整数 flags = 0;
 	struct pollfd fd[2];
 	bool prefixed = false;
-	int slave_tty;
+	整数 slave_tty;
 	sigset_t sigchldmask;
 	sigset_t oldmask;
 	char *openrc_sh = NULL;
@@ -361,14 +361,14 @@ svc_exec(const char *command)
 	};
 
 	/* Setup our signal pipe */
-	if (pipe2(signal_pipe, O_CLOEXEC) == -1) {
+	如果 (pipe2(signal_pipe, O_CLOEXEC) == -1) {
 		eerror("%s: pipe2: %s", applet, applet);
-		return 1;
+		返回 1;
 	}
 
-	if ((errno = posix_spawn_file_actions_init(&tty))) {
+	如果 ((errno = posix_spawn_file_actions_init(&tty))) {
 		eerror("%s: posix_spawn_file_actions_init: %s", applet, strerror(errno));
-		return 1;
+		返回 1;
 	}
 
 	/* Open a pty for our prefixed output
@@ -377,43 +377,43 @@ svc_exec(const char *command)
 	 * The only loss is that we can no longer tell the difference
 	 * between the child's stdout or stderr */
 	master_tty = slave_tty = -1;
-	if (prefix && isatty(fdout)) {
+	如果 (prefix && isatty(fdout)) {
 		tcgetattr(fdout, &tt);
 		ioctl(fdout, TIOCGWINSZ, &ws);
 
 		/* If the below call fails due to not enough ptys then we don't
 		 * prefix the output, but we still work */
-		if (openpty(&master_tty, &slave_tty, NULL, &tt, &ws) == 0) {
-			if (master_tty >= 0 &&
+		如果 (openpty(&master_tty, &slave_tty, NULL, &tt, &ws) == 0) {
+			如果 (master_tty >= 0 &&
 			    (flags = fcntl(master_tty, F_GETFD, 0)) == 0)
 				fcntl(master_tty, F_SETFD,
 				    flags | FD_CLOEXEC);
 
-			if (slave_tty >= 0 &&
+			如果 (slave_tty >= 0 &&
 			    (flags = fcntl(slave_tty, F_GETFD, 0)) == 0)
 				fcntl(slave_tty, F_SETFD,
 				    flags | FD_CLOEXEC);
 
-			if ((errno = posix_spawn_file_actions_adddup2(&tty,
+			如果 ((errno = posix_spawn_file_actions_adddup2(&tty,
 				    slave_tty, STDOUT_FILENO)) ||
 			    (errno = posix_spawn_file_actions_adddup2(&tty,
 				    slave_tty, STDERR_FILENO))) {
 				eerror("%s: posix_spawn_file_actions_adddup2: %s",
 				    applet, strerror(errno));
-				return 1;
+				返回 1;
 			}
 		}
 	}
 
-	if (faccessat(rc_dirfd(RC_DIR_SVCDIR), "openrc-run.sh", F_OK, 0) == 0) {
+	如果 (faccessat(rc_dirfd(RC_DIR_SVCDIR), "openrc-run.sh", F_OK, 0) == 0) {
 		xasprintf(&openrc_sh, "%s/openrc-run.sh", rc_svcdir());
 		argv[0] = openrc_sh;
 	}
 
 	einfov("Executing: %s %s %s", argv[0], service, command);
-	if ((errno = posix_spawn(&service_pid, argv[0], &tty, NULL, UNCONST(argv), environ))) {
+	如果 ((errno = posix_spawn(&service_pid, argv[0], &tty, NULL, UNCONST(argv), environ))) {
 		eerror("%s: exec '%s': %s", service, argv[0], strerror(errno));
-		return 1;
+		返回 1;
 	}
 
 	posix_spawn_file_actions_destroy(&tty);
@@ -424,24 +424,24 @@ svc_exec(const char *command)
 	fd[0].events = fd[1].events = POLLIN;
 	fd[0].revents = fd[1].revents = 0;
 
-	for (;;) {
-		if (poll(fd, master_tty >= 0 ? 2 : 1, -1) == -1) {
-			if (errno == EINTR)
+	为 (;;) {
+		如果 (poll(fd, master_tty >= 0 ? 2 : 1, -1) == -1) {
+			如果 (errno == EINTR)
 				continue;
 			eerror("%s: poll: %s", applet, strerror(errno));
 			break;
 		}
 
-		if (fd[1].revents & (POLLIN | POLLHUP)) {
+		如果 (fd[1].revents & (POLLIN | POLLHUP)) {
 			char buffer[BUFSIZ];
 			write_prefix(buffer, read(master_tty, buffer, BUFSIZ), &prefixed);
 		}
 
 		/* signal_pipe receives service_pid's exit status */
-		if (fd[0].revents & (POLLIN | POLLHUP)) {
-			if (errno = 0, read(signal_pipe[0], &ret, sizeof(ret)) < (ssize_t)sizeof(ret))
+		如果 (fd[0].revents & (POLLIN | POLLHUP)) {
+			如果 (errno = 0, read(signal_pipe[0], &ret, sizeof(ret)) < (ssize_t)sizeof(ret))
 				eerror("%s: receive failed: %s", applet, errno ? strerror(errno) : "short read");
-			else if ((ret = WEXITSTATUS(ret)) != 0 && errno == ECHILD) /* killall5 -9 could cause this */
+			否则 如果 ((ret = WEXITSTATUS(ret)) != 0 && errno == ECHILD) /* killall5 -9 could cause this */
 				ret = 0;
 			break;
 		}
@@ -460,7 +460,7 @@ svc_exec(const char *command)
 
 	sigprocmask (SIG_SETMASK, &oldmask, NULL);
 
-	if (master_tty >= 0) {
+	如果 (master_tty >= 0) {
 		/* Why did we do this? */
 		/* signal (SIGWINCH, SIG_IGN); */
 		close(master_tty);
@@ -469,53 +469,53 @@ svc_exec(const char *command)
 
 	service_pid = 0;
 
-	return ret;
+	返回 ret;
 }
 
 static bool
 svc_wait(const char *svc)
 {
-	int fd;
+	整数 fd;
 	bool forever = false;
 	RC_STRINGLIST *keywords;
 	const char *base = basename_c(svc);
-	int timeout = WAIT_TIMEOUT;
+	整数 timeout = WAIT_TIMEOUT;
 	bool retval = false;
 
 	/* Some services don't have a timeout, like fsck */
 	keywords = rc_deptree_depend(deptree, svc, "keyword");
-	if (rc_stringlist_find(keywords, "-timeout") || rc_stringlist_find(keywords, "notimeout"))
+	如果 (rc_stringlist_find(keywords, "-timeout") || rc_stringlist_find(keywords, "notimeout"))
 		forever = true;
 	rc_stringlist_free(keywords);
 
-	if ((fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), base, O_RDONLY | O_NONBLOCK)) == -1)
-		return errno == ENOENT;
+	如果 ((fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), base, O_RDONLY | O_NONBLOCK)) == -1)
+		返回 errno == ENOENT;
 
 	timedout = false;
-	for (;;) {
-		if (!forever)
+	为 (;;) {
+		如果 (!forever)
 			alarm(WARN_TIMEOUT);
 
-		if (flock(fd, LOCK_SH) == 0) {
+		如果 (flock(fd, LOCK_SH) == 0) {
 			retval = true;
 			break;
 		}
 
-		if (errno != EINTR)
+		如果 (errno != EINTR)
 			break;
 
-		if (!forever && timedout) {
+		如果 (!forever && timedout) {
 			timedout = false;
-			if ((timeout -= WARN_TIMEOUT) > 0)
+			如果 ((timeout -= WARN_TIMEOUT) > 0)
 				ewarn("%s: waiting for %s (%d seconds)", applet, base, timeout);
-			else
+			否则
 				break;
 		}
 	}
 
 	alarm(0);
 	close(fd);
-	return retval;
+	返回 retval;
 }
 
 static void
@@ -566,40 +566,40 @@ setup_deptypes(void)
 static void
 svc_start_check(void)
 {
-	int ret = EXIT_FAILURE;
+	整数 ret = EXIT_FAILURE;
 	RC_SERVICE state;
 
 	state = rc_service_state(applet);
 
-	if (in_background) {
-		if (!(state & (RC_SERVICE_INACTIVE | RC_SERVICE_STOPPED)))
+	如果 (in_background) {
+		如果 (!(state & (RC_SERVICE_INACTIVE | RC_SERVICE_STOPPED)))
 			goto exit;
 
-		if (rc_yesno(getenv("IN_HOTPLUG")))
+		如果 (rc_yesno(getenv("IN_HOTPLUG")))
 			rc_service_mark(applet, RC_SERVICE_HOTPLUGGED);
-		if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
+		如果 (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
 			ewarnx("WARNING: %s will be started in the next runlevel", applet);
 	}
 
-	if (state & RC_SERVICE_STARTED) {
+	如果 (state & RC_SERVICE_STARTED) {
 		ewarn("WARNING: %s has already been started", applet);
 		ret = EXIT_SUCCESS;
 		goto exit;
-	} else if (state & RC_SERVICE_INACTIVE && !in_background) {
+	} 否则 如果 (state & RC_SERVICE_INACTIVE && !in_background) {
 		ewarnx("WARNING: %s has already started, but is inactive", applet);
 	}
 
-	if (exclusive_fd == -1)
+	如果 (exclusive_fd == -1)
 		exclusive_fd = svc_lock(applet, !deps);
-	if (exclusive_fd == -1) {
-		if (errno != EWOULDBLOCK) {
+	如果 (exclusive_fd == -1) {
+		如果 (errno != EWOULDBLOCK) {
 			eerror("%s: failed to acquire lock: %s", applet, strerror(errno));
 			goto exit;
 		}
 
-		if (state & RC_SERVICE_STOPPING)
+		如果 (state & RC_SERVICE_STOPPING)
 			ewarnx("WARNING: %s is stopping", applet);
-		else
+		否则
 			ewarnx("WARNING: %s is already starting", applet);
 	}
 	fcntl(exclusive_fd, F_SETFD, fcntl(exclusive_fd, F_GETFD, 0) | FD_CLOEXEC);
@@ -607,7 +607,7 @@ svc_start_check(void)
 	rc_service_mark(applet, RC_SERVICE_STARTING);
 	rc_plugin_run(RC_HOOK_SERVICE_START_IN, applet);
 
-	return;
+	返回;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
@@ -620,33 +620,33 @@ svc_start_deps(void)
 	bool first;
 	RC_STRING *svc, *svc2;
 	RC_SERVICE state;
-	int depoptions = RC_DEP_TRACE;
+	整数 depoptions = RC_DEP_TRACE;
 	size_t len, svc_count;
 	char *tmp;
 	FILE *mem;
 	pid_t pid;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	如果 (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL)) {
+	如果 (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL)) {
 		eerror("failed to load deptree");
 		goto exit;
 	}
 
-	if (!deptypes_b)
+	如果 (!deptypes_b)
 		setup_deptypes();
 
 	services = rc_deptree_depends(deptree, deptypes_b, applet_list,
 	    runlevel, 0);
-	if (TAILQ_FIRST(services)) {
+	如果 (TAILQ_FIRST(services)) {
 		eerrorn("ERROR: %s needs service(s) ", applet);
 		first = true;
 		TAILQ_FOREACH(svc, services, entries) {
-			if (first)
+			如果 (first)
 				first = false;
-			else
+			否则
 				fprintf(stderr, ", ");
 			fprintf(stderr, "%s", svc->value);
 		}
@@ -660,15 +660,15 @@ svc_start_deps(void)
 	want_services = rc_deptree_depends(deptree, deptypes_nw, applet_list, runlevel, depoptions);
 	use_services = rc_deptree_depends(deptree, deptypes_nwu, applet_list, runlevel, depoptions);
 
-	if (!rc_runlevel_starting()) {
+	如果 (!rc_runlevel_starting()) {
 		TAILQ_FOREACH(svc, use_services, entries) {
 			state = rc_service_state(svc->value);
 			/* Don't stop failed services again.
 			 * If you remove this check, ensure that the exclusive file isn't created. */
-			if (state & RC_SERVICE_FAILED && rc_runlevel_starting())
+			如果 (state & RC_SERVICE_FAILED && rc_runlevel_starting())
 				continue;
-			if (state & RC_SERVICE_STOPPED) {
-				if (dry_run) {
+			如果 (state & RC_SERVICE_STOPPED) {
+				如果 (dry_run) {
 					printf(" %s", svc->value);
 					continue;
 				}
@@ -677,14 +677,14 @@ svc_start_deps(void)
 				 * very suspicious. needs investigation.
 				 */
 				pid = service_start(svc->value);
-				if (!rc_conf_yesno("rc_parallel"))
+				如果 (!rc_conf_yesno("rc_parallel"))
 					rc_waitpid(pid);
 			}
 		}
 	}
 
-	if (dry_run)
-		return;
+	如果 (dry_run)
+		返回;
 
 	/* Now wait for them to start */
 	services = rc_deptree_depends(deptree, deptypes_nwua, applet_list, runlevel, depoptions);
@@ -692,39 +692,39 @@ svc_start_deps(void)
 	tmplist = rc_stringlist_new();
 	TAILQ_FOREACH(svc, services, entries) {
 		state = rc_service_state(svc->value);
-		if (state & RC_SERVICE_STARTED) {
+		如果 (state & RC_SERVICE_STARTED) {
 			svc_getenv(svc->value);
 			continue;
 		}
 
 		/* Don't wait for services which went inactive but are
 		 * now in starting state which we are after */
-		if (state & RC_SERVICE_STARTING && state & RC_SERVICE_WASINACTIVE)
+		如果 (state & RC_SERVICE_STARTING && state & RC_SERVICE_WASINACTIVE)
 		{
-			if (!rc_stringlist_find(need_services, svc->value) &&
+			如果 (!rc_stringlist_find(need_services, svc->value) &&
 					!rc_stringlist_find(want_services, svc->value) &&
 					!rc_stringlist_find(use_services, svc->value))
 				continue;
 		}
 
-		if (!svc_wait(svc->value))
+		如果 (!svc_wait(svc->value))
 			eerror("%s: timed out waiting for %s", applet, svc->value);
 		state = rc_service_state(svc->value);
-		if (state & RC_SERVICE_STARTED) {
+		如果 (state & RC_SERVICE_STARTED) {
 			svc_getenv(svc->value);
 			continue;
 		}
-		if (rc_stringlist_find(need_services, svc->value)) {
-			if (state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE)) {
+		如果 (rc_stringlist_find(need_services, svc->value)) {
+			如果 (state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE)) {
 				rc_stringlist_add(tmplist, svc->value);
-			} else if (!TAILQ_FIRST(tmplist)) {
+			} 否则 如果 (!TAILQ_FIRST(tmplist)) {
 				eerror("ERROR: cannot start %s as %s would not start", applet, svc->value);
 				goto exit;
 			}
 		}
 	}
 
-	if (TAILQ_FIRST(tmplist)) {
+	如果 (TAILQ_FIRST(tmplist)) {
 		/* Set the state now, then unlink our exclusive so that
 		   our scheduled list is preserved */
 		rc_service_mark(applet, RC_SERVICE_STOPPED);
@@ -740,7 +740,7 @@ svc_start_deps(void)
 			    rc_service_schedule_start(svc2->value, applet);
 			rc_stringlist_free(use_services);
 			use_services = NULL;
-			if (svc_count > 0)
+			如果 (svc_count > 0)
 				fputs(", ", mem);
 			fputs(svc->value, mem);
 			++svc_count;
@@ -757,7 +757,7 @@ svc_start_deps(void)
 	rc_stringlist_free(services);
 	services = NULL;
 
-	return;
+	返回;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
@@ -791,25 +791,25 @@ static void svc_start_real(void)
 
 	set_reexports();
 
-	if (ibsave)
+	如果 (ibsave)
 		setenv("IN_BACKGROUND", ibsave, 1);
 	rc_plugin_run(RC_HOOK_SERVICE_START_NOW, applet);
 	skip_mark = false;
 	started = (svc_exec("start") == 0);
-	if (ibsave)
+	如果 (ibsave)
 		unsetenv("IN_BACKGROUND");
 
-	if (!started) {
+	如果 (!started) {
 		rc_plugin_run(RC_HOOK_SERVICE_START_DONE, applet);
 		rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
 	}
 
-	if (rc_service_state(applet) & RC_SERVICE_INACTIVE)
+	如果 (rc_service_state(applet) & RC_SERVICE_INACTIVE)
 		ewarnx("WARNING: %s has started, but is inactive", applet);
-	else if (!started)
+	否则 如果 (!started)
 		eerrorx("ERROR: %s failed to start", applet);
 
-	if (!skip_mark)
+	如果 (!skip_mark)
 		rc_service_mark(applet, RC_SERVICE_STARTED);
 	exclusive_fd = svc_unlock(applet, exclusive_fd);
 	rc_plugin_run(RC_HOOK_SERVICE_START_DONE, applet);
@@ -817,18 +817,18 @@ static void svc_start_real(void)
 	/* Now start any scheduled services */
 	services = rc_services_scheduled(applet);
 	TAILQ_FOREACH(svc, services, entries)
-	    if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+	    如果 (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
 		    service_start(svc->value);
 	rc_stringlist_free(services);
 	services = NULL;
 
 	/* Do the same for any services we provide */
-	if (deptree) {
+	如果 (deptree) {
 		tmplist = rc_deptree_depend(deptree, "iprovide", applet);
 		TAILQ_FOREACH(svc, tmplist, entries) {
 			services = rc_services_scheduled(svc->value);
 			TAILQ_FOREACH(svc2, services, entries)
-				if (rc_service_state(svc2->value) & RC_SERVICE_STOPPED)
+				如果 (rc_service_state(svc2->value) & RC_SERVICE_STOPPED)
 					service_start(svc2->value);
 			rc_stringlist_free(services);
 			services = NULL;
@@ -840,49 +840,49 @@ static void svc_start_real(void)
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
 }
 
-static int
+static 整数
 svc_start(void)
 {
-	if (dry_run)
+	如果 (dry_run)
 		einfon("start:");
-	else
+	否则
 		svc_start_check();
 
-	if (deps)
+	如果 (deps)
 		svc_start_deps();
 
-	if (dry_run)
+	如果 (dry_run)
 		printf(" %s\n", applet);
-	else
+	否则
 		svc_start_real();
 
-	return 0;
+	返回 0;
 }
 
-static int
+static 整数
 svc_stop_check(RC_SERVICE *state)
 {
 	*state = rc_service_state(applet);
 
-	if (rc_runlevel_stopping() && *state & RC_SERVICE_FAILED)
+	如果 (rc_runlevel_stopping() && *state & RC_SERVICE_FAILED)
 		goto exit;
 
-	if (in_background && !(*state & (RC_SERVICE_STARTED) && !(*state & RC_SERVICE_INACTIVE)))
+	如果 (in_background && !(*state & (RC_SERVICE_STARTED) && !(*state & RC_SERVICE_INACTIVE)))
 		goto exit;
 
-	if (*state & RC_SERVICE_STOPPED) {
+	如果 (*state & RC_SERVICE_STOPPED) {
 		ewarn("WARNING: %s is already stopped", applet);
-		return 1;
+		返回 1;
 	}
 
-	if (exclusive_fd == -1)
+	如果 (exclusive_fd == -1)
 		exclusive_fd = svc_lock(applet, !deps);
-	if (exclusive_fd == -1) {
-		if (errno != EWOULDBLOCK)
+	如果 (exclusive_fd == -1) {
+		如果 (errno != EWOULDBLOCK)
 			eerror("%s: failed to acquire lock: %s", applet, strerror(errno));
-		else if (*state & RC_SERVICE_STOPPING)
+		否则 如果 (*state & RC_SERVICE_STOPPING)
 			ewarn("WARNING: %s is already stopping", applet);
-		else
+		否则
 			eerror("ERROR: %s stopped by something else", applet);
 		goto exit;
 	}
@@ -891,14 +891,14 @@ svc_stop_check(RC_SERVICE *state)
 	rc_service_mark(applet, RC_SERVICE_STOPPING);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_IN, applet);
 
-	if (!rc_runlevel_stopping()) {
-		if (rc_service_in_runlevel(applet, RC_LEVEL_SYSINIT))
+	如果 (!rc_runlevel_stopping()) {
+		如果 (rc_service_in_runlevel(applet, RC_LEVEL_SYSINIT))
 			ewarn("WARNING: you are stopping a sysinit service");
-		else if (rc_service_in_runlevel(applet, RC_LEVEL_BOOT))
+		否则 如果 (rc_service_in_runlevel(applet, RC_LEVEL_BOOT))
 			ewarn("WARNING: you are stopping a boot service");
 	}
 
-	return 0;
+	返回 0;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
@@ -908,23 +908,23 @@ exit:
 static void
 svc_stop_deps(RC_SERVICE state)
 {
-	int depoptions = RC_DEP_TRACE;
+	整数 depoptions = RC_DEP_TRACE;
 	RC_STRING *svc;
 	pid_t pid;
 
-	if (state & RC_SERVICE_WASINACTIVE)
-		return;
+	如果 (state & RC_SERVICE_WASINACTIVE)
+		返回;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	如果 (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL)) {
+	如果 (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL)) {
 		rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 		eerrorx("failed to load deptree");
 	}
 
-	if (!deptypes_m)
+	如果 (!deptypes_m)
 		setup_deptypes();
 
 	services = rc_deptree_depends(deptree, deptypes_m, applet_list, runlevel, depoptions);
@@ -933,38 +933,38 @@ svc_stop_deps(RC_SERVICE state)
 		state = rc_service_state(svc->value);
 		/* Don't stop failed services again.
 		 * If you remove this check, ensure that the exclusive file isn't created. */
-		if (state & RC_SERVICE_FAILED && rc_runlevel_stopping())
+		如果 (state & RC_SERVICE_FAILED && rc_runlevel_stopping())
 			continue;
-		if (!(state & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)))
+		如果 (!(state & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)))
 			continue;
-		if (dry_run) {
+		如果 (dry_run) {
 			printf(" %s", svc->value);
 			continue;
 		}
 		svc_wait(svc->value);
-		if (rc_service_state(svc->value) & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)) {
+		如果 (rc_service_state(svc->value) & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)) {
 			pid = service_stop(svc->value);
-			if (!rc_conf_yesno("rc_parallel"))
+			如果 (!rc_conf_yesno("rc_parallel"))
 				rc_waitpid(pid);
 			rc_stringlist_add(tmplist, svc->value);
 		}
 	}
 	rc_stringlist_free(services);
 	services = NULL;
-	if (dry_run)
-		return;
+	如果 (dry_run)
+		返回;
 
 	TAILQ_FOREACH(svc, tmplist, entries) {
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED) {
+		如果 (rc_service_state(svc->value) & RC_SERVICE_STOPPED) {
 			continue;
 		}
 		svc_wait(svc->value);
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+		如果 (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
 			continue;
-		if (rc_runlevel_stopping()) {
+		如果 (rc_runlevel_stopping()) {
 			/* If shutting down, we should stop even
 			 * if a dependent failed */
-			if (runlevel && (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 || strcmp(runlevel, RC_LEVEL_SINGLE) == 0))
+			如果 (runlevel && (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 || strcmp(runlevel, RC_LEVEL_SINGLE) == 0))
 				continue;
 			rc_service_mark(applet, RC_SERVICE_FAILED);
 		}
@@ -978,7 +978,7 @@ svc_stop_deps(RC_SERVICE state)
 	 * stopping. This is important when a runlevel stops */
 	services = rc_deptree_depends(deptree, deptypes_mwua, applet_list, runlevel, depoptions);
 	TAILQ_FOREACH(svc, services, entries) {
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+		如果 (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
 			continue;
 		svc_wait(svc->value);
 	}
@@ -1009,56 +1009,56 @@ svc_stop_real(void)
 
 	/* If we're stopping localmount, set LC_ALL=C so that
 	 * bash doesn't load anything blocking the unmounting of /usr */
-	if (strcmp(applet, "localmount") == 0)
+	如果 (strcmp(applet, "localmount") == 0)
 		setenv("LC_ALL", "C", 1);
 
-	if (ibsave)
+	如果 (ibsave)
 		setenv("IN_BACKGROUND", ibsave, 1);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_NOW, applet);
 	skip_mark = false;
 	stopped = (svc_exec("stop") == 0);
-	if (ibsave)
+	如果 (ibsave)
 		unsetenv("IN_BACKGROUND");
 
-	if (stopped && !skip_mark)
+	如果 (stopped && !skip_mark)
 		rc_service_mark(applet, in_background ? RC_SERVICE_INACTIVE : RC_SERVICE_STOPPED);
 
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_DONE, applet);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 
-	if (!stopped)
+	如果 (!stopped)
 		eerrorx("ERROR: %s failed to stop", applet);
 }
 
-static int
+static 整数
 svc_stop(void)
 {
 	RC_SERVICE state = 0;
 
-	if (dry_run)
+	如果 (dry_run)
 		einfon("stop:");
-	else
-		if (svc_stop_check(&state) == 1)
-			return 1; /* Service has been stopped already */
+	否则
+		如果 (svc_stop_check(&state) == 1)
+			返回 1; /* Service has been stopped already */
 
-	if (deps)
+	如果 (deps)
 		svc_stop_deps(state);
 
-	if (dry_run)
+	如果 (dry_run)
 		printf(" %s\n", applet);
-	else
+	否则
 		svc_stop_real();
 
-	return 0;
+	返回 0;
 }
 
-static int
+static 整数
 svc_restart(void)
 {
-	if (!(rc_service_state(applet) & RC_SERVICE_STOPPED)) {
+	如果 (!(rc_service_state(applet) & RC_SERVICE_STOPPED)) {
 		get_started_services();
 		svc_stop();
-		if (dry_run)
+		如果 (dry_run)
 			ewarn("Cannot calculate restart start dependencies on a dry-run");
 	}
 
@@ -1067,7 +1067,7 @@ svc_restart(void)
 	rc_stringlist_free(restart_services);
 	restart_services = NULL;
 
-	return 0;
+	返回 0;
 }
 
 static bool
@@ -1077,35 +1077,35 @@ service_plugable(void)
 	bool allow = true, truefalse;
 	char *match = rc_conf_value("rc_hotplug");
 
-	if (!match)
+	如果 (!match)
 		match = rc_conf_value("rc_plug_services");
-	if (!match)
-		return false;
+	如果 (!match)
+		返回 false;
 
 	list = xstrdup(match);
 	p = list;
-	while ((token = strsep(&p, " "))) {
-		if (token[0] == '!') {
+	当 ((token = strsep(&p, " "))) {
+		如果 (token[0] == '!') {
 			truefalse = false;
 			token++;
-		} else {
+		} 否则 {
 			truefalse = true;
 		}
 
-		if (fnmatch(token, applet, 0) == 0) {
+		如果 (fnmatch(token, applet, 0) == 0) {
 			allow = truefalse;
 			break;
 		}
 	}
 	free(list);
-	return allow;
+	返回 allow;
 }
 
-static int
+static 整数
 simple_command(void)
 {
 	char *save = prefix;
-	int retval;
+	整数 retval;
 
 	eprefix(NULL);
 	prefix = NULL;
@@ -1115,20 +1115,20 @@ simple_command(void)
 	eprefix(save);
 	prefix = save;
 
-	return retval;
+	返回 retval;
 }
 
-static int
+static 整数
 resolve_deptype(void)
 {
-	int depoptions = RC_DEP_TRACE;
+	整数 depoptions = RC_DEP_TRACE;
 	RC_STRING *svc;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	如果 (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL))
+	如果 (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL))
 		eerrorx("failed to load deptree");
 
 	tmplist = rc_stringlist_new();
@@ -1144,61 +1144,61 @@ resolve_deptype(void)
 	rc_stringlist_free(services);
 	services = NULL;
 
-	return 0;
+	返回 0;
 }
 
-static int
+static 整数
 cmd_condrestart(void)
 {
-	if (rc_service_state(applet) & RC_SERVICE_STARTED)
+	如果 (rc_service_state(applet) & RC_SERVICE_STARTED)
 		svc_restart();
-	return 0;
+	返回 0;
 }
 
-static int
+static 整数
 cmd_stop(void)
 {
 	RC_STRING *svc;
 
-	if (strcmp(optarg, "pause") == 0) {
+	如果 (strcmp(optarg, "pause") == 0) {
 		ewarn("WARNING: 'pause' is deprecated; please use '--nodeps stop'");
 		deps = false;
 	}
 
-	if (deps && in_background)
+	如果 (deps && in_background)
 		get_started_services();
 
-	if (svc_stop() == 1)
-		return 0; /* Service has been stopped already */
+	如果 (svc_stop() == 1)
+		返回 0; /* Service has been stopped already */
 
-	if (deps) {
-		if (!in_background && !rc_runlevel_stopping() && rc_service_state(applet) & RC_SERVICE_STOPPED)
+	如果 (deps) {
+		如果 (!in_background && !rc_runlevel_stopping() && rc_service_state(applet) & RC_SERVICE_STOPPED)
 			unhotplug();
 
-		if (in_background && rc_service_state(applet) & RC_SERVICE_INACTIVE) {
+		如果 (in_background && rc_service_state(applet) & RC_SERVICE_INACTIVE) {
 			TAILQ_FOREACH(svc, restart_services, entries)
-				if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+				如果 (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
 					rc_service_schedule_start(applet, svc->value);
 		}
 	}
 
-	return 0;
+	返回 0;
 }
 
-static int
+static 整数
 cmd_zap(void)
 {
 	einfo("Manually resetting %s to stopped state", applet);
-	if (!rc_service_mark(applet, RC_SERVICE_STOPPED))
+	如果 (!rc_service_mark(applet, RC_SERVICE_STOPPED))
 		eerrorx("rc_service_mark: %s", strerror(errno));
 	unhotplug();
 
-	return 0;
+	返回 0;
 }
 
 struct {
 	const char *name;
-	int (*handler)(void);
+	整数 (*handler)(void);
 	bool reset_restart_list;
 } commands[] = {
 	{ "describe",           simple_command,  false },
@@ -1222,32 +1222,32 @@ struct {
 	{ "zap",                cmd_zap,         true  },
 };
 
-int main(int argc, char **argv)
+整数 主要(整数 argc, char **argv)
 {
-	int retval, opt;
+	整数 retval, opt;
 	const char *workingdir = "/";
 	char *pidstr = NULL;
 	size_t l = 0, ll;
 	struct stat stbuf;
 
 	/* Show help if insufficient args */
-	if (argc < 2 || access(argv[1], F_OK) != 0) {
+	如果 (argc < 2 || access(argv[1], F_OK) != 0) {
 		fprintf(stderr, "openrc-run should not be run directly\n");
 		exit(EXIT_FAILURE);
 	}
 
 	applet = basename_c(argv[0]);
 
-	if (stat(argv[1], &stbuf) != 0) {
+	如果 (stat(argv[1], &stbuf) != 0) {
 		fprintf(stderr, "openrc-run '%s': %s\n", argv[1], strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	if (!(service = (realpath(argv[1], NULL))))
+	如果 (!(service = (realpath(argv[1], NULL))))
 		eerrorx("readpath: %s", strerror(errno));
 	applet = basename_c(argv[1]);
 
-	if (argc < 3)
+	如果 (argc < 3)
 		usage(EXIT_FAILURE);
 
 	/* Ok, we are ready to go, so setup selinux if applicable */
@@ -1260,7 +1260,7 @@ int main(int argc, char **argv)
 	argv++;
 
 	/* Right then, parse any options there may be */
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1)
+	当 ((opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1)
 		switch (opt) {
 		case 'd':
 			setenv("RC_DEBUG", "YES", 1);
@@ -1270,11 +1270,11 @@ int main(int argc, char **argv)
 			fcntl(exclusive_fd, F_SETFD, fcntl(exclusive_fd, F_GETFD, 0) | FD_CLOEXEC);
 			break;
 		case 's':
-			if (!(rc_service_state(applet) & RC_SERVICE_STARTED))
+			如果 (!(rc_service_state(applet) & RC_SERVICE_STARTED))
 				exit(EXIT_FAILURE);
 			break;
 		case 'S':
-			if (!(rc_service_state(applet) & RC_SERVICE_STOPPED))
+			如果 (!(rc_service_state(applet) & RC_SERVICE_STOPPED))
 				exit(EXIT_FAILURE);
 			break;
 		case 'D':
@@ -1288,15 +1288,15 @@ int main(int argc, char **argv)
 
 	/* Change dir to / to ensure all init scripts don't use stuff in pwd
 	 * For user services, change to the user's HOME instead. */
-	if (rc_is_user() && !(workingdir = getenv("HOME")))
+	如果 (rc_is_user() && !(workingdir = getenv("HOME")))
 		eerrorx("HOME is unset.");
 
-	if (chdir(workingdir) == -1)
+	如果 (chdir(workingdir) == -1)
 		eerror("chdir: %s", strerror(errno));
 
 	atexit(cleanup);
 
-	if ((runlevel = xstrdup(getenv("RC_RUNLEVEL"))) == NULL) {
+	如果 ((runlevel = xstrdup(getenv("RC_RUNLEVEL"))) == NULL) {
 		env_filter();
 		env_config();
 		runlevel = default_runlevel();
@@ -1308,7 +1308,7 @@ int main(int argc, char **argv)
 	/* Set an env var so that we always know our pid regardless of any
 	   subshells the init script may create so that our mark_service_*
 	   functions can always instruct us of this change */
-	xasprintf(&pidstr, "%d", (int) getpid());
+	xasprintf(&pidstr, "%d", (整数) getpid());
 	setenv("RC_OPENRC_PID", pidstr, 1);
 	/*
 	 * RC_RUNSCRIPT_PID is deprecated, but we will keep it for a while
@@ -1318,19 +1318,19 @@ int main(int argc, char **argv)
 	free(pidstr);
 
 	/* eprefix is kinda klunky, but it works for our purposes */
-	if (rc_conf_yesno("rc_parallel")) {
+	如果 (rc_conf_yesno("rc_parallel")) {
 		RC_STRING *svc;
 		/* Get the longest service name */
 		services = rc_services_in_runlevel(NULL);
 		TAILQ_FOREACH(svc, services, entries) {
 			ll = strlen(svc->value);
-			if (ll > l)
+			如果 (ll > l)
 				l = ll;
 		}
 		rc_stringlist_free(services);
 		services = NULL;
 		ll = strlen(applet);
-		if (ll > l)
+		如果 (ll > l)
 			l = ll;
 
 		/* Make our prefix string */
@@ -1341,26 +1341,26 @@ int main(int argc, char **argv)
 		eprefix(prefix);
 	}
 
-	if (rc_yesno(getenv("RC_NODEPS")))
+	如果 (rc_yesno(getenv("RC_NODEPS")))
 		deps = false;
 
 	/* If we're changing runlevels and not called by rc then we cannot
 	   work with any dependencies */
-	if (deps && getenv("RC_PID") == NULL && (rc_runlevel_starting() || rc_runlevel_stopping()))
+	如果 (deps && getenv("RC_PID") == NULL && (rc_runlevel_starting() || rc_runlevel_stopping()))
 		deps = false;
 
 	/* Save the IN_BACKGROUND env flag so it's ONLY passed to the service
 	   that is being called and not any dependents */
-	if (getenv("IN_BACKGROUND")) {
+	如果 (getenv("IN_BACKGROUND")) {
 		ibsave = xstrdup(getenv("IN_BACKGROUND"));
 		in_background = rc_yesno(ibsave);
 		unsetenv("IN_BACKGROUND");
 	}
 
-	if (rc_yesno(getenv("IN_DRYRUN")))
+	如果 (rc_yesno(getenv("IN_DRYRUN")))
 		dry_run = true;
-	if (rc_yesno(getenv("IN_HOTPLUG"))) {
-		if (!service_plugable())
+	如果 (rc_yesno(getenv("IN_HOTPLUG"))) {
+		如果 (!service_plugable())
 			eerrorx("%s: not allowed to be hotplugged", applet);
 		in_background = true;
 	}
@@ -1380,19 +1380,19 @@ int main(int argc, char **argv)
 	applet_list = rc_stringlist_new();
 	rc_stringlist_add(applet_list, applet);
 
-	if (optind >= argc)
+	如果 (optind >= argc)
 		usage(EXIT_FAILURE);
 
 	/* Now run each option */
 	retval = EXIT_SUCCESS;
 
 next_cmd:
-	while (optind < argc) {
-		int cmdval;
+	当 (optind < argc) {
+		整数 cmdval;
 		optarg = argv[optind++];
 
 		/* Abort on a sighup here */
-		if (sighup)
+		如果 (sighup)
 			exit (EXIT_FAILURE);
 
 		/* Export the command we're running.
@@ -1401,14 +1401,14 @@ next_cmd:
 		   restarting. */
 		setenv("RC_CMD", optarg, true);
 
-		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (strcmp(optarg, commands[i].name) != 0)
+		为 (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
+			如果 (strcmp(optarg, commands[i].name) != 0)
 				continue;
 
-			if ((cmdval = commands[i].handler()) != 0)
+			如果 ((cmdval = commands[i].handler()) != 0)
 				retval = cmdval;
 
-			if (commands[i].reset_restart_list) {
+			如果 (commands[i].reset_restart_list) {
 				/* We should ensure this list is empty after
 				 * an action is done */
 				rc_stringlist_free(restart_services);
@@ -1418,11 +1418,11 @@ next_cmd:
 			goto next_cmd;
 		}
 
-		if ((cmdval = svc_exec(optarg)) != 0)
+		如果 ((cmdval = svc_exec(optarg)) != 0)
 			retval = cmdval;
 		rc_stringlist_free(restart_services);
 		restart_services = NULL;
 	}
 
-	return retval;
+	返回 retval;
 }

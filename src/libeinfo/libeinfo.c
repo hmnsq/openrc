@@ -62,7 +62,7 @@
 #define _ASSIGN_CAP(_v) do {						      \
 		_v = p;							      \
 		p += strlcpy(p, tmp, sizeof(ebuffer) - (p - ebuffer)) + 1;    \
-	} while (0)
+	} 当 (0)
 
 /* A pointer to a string to prefix to einfo/ewarn/eerror messages */
 static const char *_eprefix = NULL;
@@ -71,7 +71,7 @@ static const char *_eprefix = NULL;
 static char ebuffer[100];
 struct ecolor {
 	ECOLOR color;
-	int def;
+	整数 def;
 	const char *name;
 };
 static char nullstr = '\0';
@@ -148,16 +148,16 @@ strlcat(char *dst, const char *src, size_t size)
 	size_t src_n = size;
 	size_t dst_n;
 
-	while (src_n-- != 0 && *d != '\0')
+	当 (src_n-- != 0 && *d != '\0')
 		d++;
 	dst_n = d - dst;
 	src_n = size - dst_n;
 
-	if (src_n == 0)
-		return dst_n + strlen(src);
+	如果 (src_n == 0)
+		返回 dst_n + strlen(src);
 
-	while (*s != '\0') {
-		if (src_n != 1) {
+	当 (*s != '\0') {
+		如果 (src_n != 1) {
 			*d++ = *s;
 			src_n--;
 		}
@@ -165,85 +165,85 @@ strlcat(char *dst, const char *src, size_t size)
 	}
 	*d = '\0';
 
-	return dst_n + (s - src);
+	返回 dst_n + (s - src);
 }
 #endif
 
 static bool
 yesno(const char *value)
 {
-	if (!value) {
+	如果 (!value) {
 		errno = ENOENT;
-		return false;
+		返回 false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
+	如果 (strcasecmp(value, "yes") == 0 ||
 	    strcasecmp(value, "y") == 0 ||
 	    strcasecmp(value, "true") == 0 ||
 	    strcasecmp(value, "on") == 0 ||
 	    strcasecmp(value, "1") == 0)
-		return true;
+		返回 true;
 
-	if (strcasecmp(value, "no") != 0 &&
+	如果 (strcasecmp(value, "no") != 0 &&
 	    strcasecmp(value, "n") != 0 &&
 	    strcasecmp(value, "false") != 0 &&
 	    strcasecmp(value, "off") != 0 &&
 	    strcasecmp(value, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	返回 false;
 }
 
 static bool
 noyes(const char *value)
 {
-	int serrno = errno;
+	整数 serrno = errno;
 	bool retval;
 
 	errno = 0;
 	retval = yesno(value);
-	if (errno == 0) {
+	如果 (errno == 0) {
 		retval = !retval;
 		errno = serrno;
 	}
 
-	return retval;
+	返回 retval;
 }
 
 static bool
 is_quiet(void)
 {
-	return yesno(getenv("EINFO_QUIET"));
+	返回 yesno(getenv("EINFO_QUIET"));
 }
 
 static bool
 is_really_quiet(void)
 {
-	return yesno(getenv("EERROR_QUIET"));
+	返回 yesno(getenv("EERROR_QUIET"));
 }
 
 static bool
 is_verbose(void)
 {
-	return yesno(getenv ("EINFO_VERBOSE"));
+	返回 yesno(getenv ("EINFO_VERBOSE"));
 }
 
 /* Fake tgoto call - very crapy, but works for our needs */
 static char *
-tgoto(const char *cap, int col, int line)
+tgoto(const char *cap, 整数 col, 整数 line)
 {
 	static char buf[20];
 	char *p, *e, c, dbuf[6];
-	int oncol = 0, which = line, i;
+	整数 oncol = 0, which = line, i;
 
 	p = buf;
 	e = p + sizeof(buf);
-	while ((c = *cap++)) {
-		if (c != '%' || ((c = *cap++) == '%')) {
+	当 ((c = *cap++)) {
+		如果 (c != '%' || ((c = *cap++) == '%')) {
 			*p++ = c;
-			if (p >= e) {
+			如果 (p >= e) {
 				errno = E2BIG;
-				return NULL;
+				返回 NULL;
 			}
 			continue;
 		}
@@ -254,23 +254,23 @@ tgoto(const char *cap, int col, int line)
 			i = 0;
 			do
 				dbuf[i++] = which % 10 | '0';
-			while ((which /= 10));
-			if (c != 'd') {
+			当 ((which /= 10));
+			如果 (c != 'd') {
 				c -= '0';
-				if (i > c) {
+				如果 (i > c) {
 					errno = EINVAL;
-					return NULL;
+					返回 NULL;
 				}
-				while (i < c)
+				当 (i < c)
 					dbuf[i++] = '0';
 			}
-			if (p + i >= e) {
+			如果 (p + i >= e) {
 				errno = E2BIG;
-				return NULL;
+				返回 NULL;
 			}
 			do
 				*p++ = dbuf[--i];
-			while (i);
+			当 (i);
 			break;
 		case 'r':
 			oncol = 0;
@@ -282,101 +282,101 @@ tgoto(const char *cap, int col, int line)
 			continue;
 		default:
 			errno = EINVAL;
-			return NULL;
+			返回 NULL;
 		}
 
 		oncol = 1 - oncol;
 		which = oncol ? col : line;
 	}
 	*p = '\0';
-	return buf;
+	返回 buf;
 }
 
 static bool
 colour_terminal(FILE * EINFO_RESTRICT f)
 {
-	static int in_colour = -1;
+	static 整数 in_colour = -1;
 	char *e, *ee, *end, *d, *p;
-	int c;
+	整数 c;
 	const char *_af = NULL, *_ce = NULL, *_ch = NULL;
 	const char *_md = NULL, *_me = NULL, *_up = NULL;
 	const char *bold;
 	char tmp[100];
-	unsigned int i = 0;
+	unsigned 整数 i = 0;
 
-	if (f && !isatty(fileno(f)))
-		return false;
+	如果 (f && !isatty(fileno(f)))
+		返回 false;
 
-	if (noyes(getenv("EINFO_COLOR")))
-		return false;
+	如果 (noyes(getenv("EINFO_COLOR")))
+		返回 false;
 
-	if (in_colour == 0)
-		return false;
-	if (in_colour == 1)
-		return true;
+	如果 (in_colour == 0)
+		返回 false;
+	如果 (in_colour == 1)
+		返回 true;
 
 	term_is_cons25 = false;
-	if (!term) {
+	如果 (!term) {
 		term = getenv("TERM");
-		if (!term)
-			return false;
+		如果 (!term)
+			返回 false;
 	}
-	if (strcmp(term, "cons25") == 0)
+	如果 (strcmp(term, "cons25") == 0)
 		term_is_cons25 = true;
 
-	if (strstr(term, "color"))
+	如果 (strstr(term, "color"))
 		in_colour = 1;
 
-	while (color_terms[i] && in_colour != 1) {
-		if (strcmp(color_terms[i], term) == 0) {
+	当 (color_terms[i] && in_colour != 1) {
+		如果 (strcmp(color_terms[i], term) == 0) {
 			in_colour = 1;
 		}
 		i++;
 	}
 
-	if (in_colour != 1) {
+	如果 (in_colour != 1) {
 		in_colour = 0;
-		return false;
+		返回 false;
 	}
 
-	if (!_af)
+	如果 (!_af)
 		_af = AF;
-	if (!_ce)
+	如果 (!_ce)
 		_ce = CE;
-	if (!_ch)
+	如果 (!_ch)
 		_ch = CH;
-	if (!_md)
+	如果 (!_md)
 		_md = MD;
-	if (!_me)
+	如果 (!_me)
 		_me = ME;
-	if (!_up)
+	如果 (!_up)
 		_up = UP;
 
 	/* Now setup our colours */
 	p = ebuffer;
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i) {
+	为 (i = 0; i < ARRAY_SIZE(ecolors); ++i) {
 		tmp[0] = '\0';
-		if (ecolors[i].name) {
+		如果 (ecolors[i].name) {
 			bold = _md;
 			c = ecolors[i].def;
 
 			/* See if the user wants to override the colour
 			 * We use a :col;bold: format like 2;1: for bold green
 			 * and 1;0: for a normal red */
-			if ((e = getenv("EINFO_COLOR"))) {
+			如果 ((e = getenv("EINFO_COLOR"))) {
 				ee = strstr(e, ecolors[i].name);
-				if (ee)
+				如果 (ee)
 					ee += strlen(ecolors[i].name);
 
-				if (ee && *ee == '=') {
+				如果 (ee && *ee == '=') {
 					d = strdup(ee + 1);
-					if (d) {
+					如果 (d) {
 						end = strchr(d, ':');
-						if (end)
+						如果 (end)
 							*end = '\0';
 						c = atoi(d);
 						end = strchr(d, ';');
-						if (end && *++end == '0')
+						如果 (end && *++end == '0')
 							bold = _me;
 						free(d);
 					}
@@ -384,12 +384,12 @@ colour_terminal(FILE * EINFO_RESTRICT f)
 			}
 			strlcpy(tmp, tgoto(bold, 0, 0), sizeof(tmp));
 			strlcat(tmp, tgoto(_af, 0, c & 0x07), sizeof(tmp));
-		} else
+		} 否则
 			_GET_CAP(tmp, _me);
 
-		if (tmp[0])
+		如果 (tmp[0])
 			_ASSIGN_CAP(ecolors_str[i]);
-		else
+		否则
 			ecolors_str[i] = &nullstr;
 	}
 
@@ -401,27 +401,27 @@ colour_terminal(FILE * EINFO_RESTRICT f)
 	_ASSIGN_CAP(goto_column);
 
 	in_colour = 1;
-	return true;
+	返回 true;
 }
 
-static int
+static 整数
 get_term_columns(FILE * EINFO_RESTRICT stream)
 {
 	struct winsize ws;
 	char *env = getenv("COLUMNS");
 	char *p;
-	int i;
+	整数 i;
 
-	if (env) {
+	如果 (env) {
 		i = strtoimax(env, &p, 10);
-		if (!*p)
-			return i;
+		如果 (!*p)
+			返回 i;
 	}
 
-	if (ioctl(fileno(stream), TIOCGWINSZ, &ws) == 0)
-		return ws.ws_col;
+	如果 (ioctl(fileno(stream), TIOCGWINSZ, &ws) == 0)
+		返回 ws.ws_col;
 
-	return DEFAULT_COLS;
+	返回 DEFAULT_COLS;
 }
 
 void
@@ -431,12 +431,12 @@ eprefix(const char *EINFO_RESTRICT prefix)
 }
 
 static void EINFO_PRINTF(2, 0)
-elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
+elogv(整数 level, const char *EINFO_RESTRICT fmt, va_list ap)
 {
 	char *e = getenv("EINFO_LOG");
 	va_list apc;
 
-	if (fmt && e) {
+	如果 (fmt && e) {
 		closelog();
 		openlog(e, LOG_PID, LOG_DAEMON);
 		va_copy(apc, ap);
@@ -447,7 +447,7 @@ elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
 }
 
 void
-elog(int level, const char *EINFO_RESTRICT fmt, ...)
+elog(整数 level, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
@@ -456,36 +456,36 @@ elog(int level, const char *EINFO_RESTRICT fmt, ...)
 	va_end(ap);
 }
 
-static int
+static 整数
 _eindent(FILE * EINFO_RESTRICT stream)
 {
 	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	整数 amount = 0;
 
-	if (env) {
+	如果 (env) {
 		errno = 0;
 		amount = strtoimax(env, NULL, 0);
-		if (errno != 0 || amount < 0)
+		如果 (errno != 0 || amount < 0)
 			amount = 0;
-		else if (amount > INDENT_MAX)
+		否则 如果 (amount > INDENT_MAX)
 			amount = INDENT_MAX;
 	}
 
-	return fprintf(stream, "%*s", amount, "");
+	返回 fprintf(stream, "%*s", amount, "");
 }
 
 static const char *
 _ecolor(FILE * EINFO_RESTRICT f, ECOLOR color)
 {
-	unsigned int i;
+	unsigned 整数 i;
 
-	if (!colour_terminal(f))
-		return "";
+	如果 (!colour_terminal(f))
+		返回 "";
 
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i)
-		if (ecolors[i].color == color)
-			return ecolors_str[i];
-	return "";
+	为 (i = 0; i < ARRAY_SIZE(ecolors); ++i)
+		如果 (ecolors[i].color == color)
+			返回 ecolors_str[i];
+	返回 "";
 }
 
 const char *
@@ -494,16 +494,16 @@ ecolor(ECOLOR color)
 	FILE *f = stdout;
 
 	/* Try and guess a valid tty */
-	if (!isatty(fileno(f))) {
+	如果 (!isatty(fileno(f))) {
 		f = stderr;
-		if (!isatty(fileno(f))) {
+		如果 (!isatty(fileno(f))) {
 			f = stdin;
-			if (!isatty(fileno(f)))
+			如果 (!isatty(fileno(f)))
 				f = NULL;
 		}
 	}
 
-	return _ecolor(f, color);
+	返回 _ecolor(f, color);
 }
 
 #define LASTCMD(_cmd) {							      \
@@ -511,111 +511,111 @@ ecolor(ECOLOR color)
 		setenv("EINFO_LASTCMD", _cmd, 1);			      \
 	}
 
-static int EINFO_PRINTF(3, 0)
+static 整数 EINFO_PRINTF(3, 0)
 	_einfo(FILE *f, ECOLOR color, const char *EINFO_RESTRICT fmt, va_list va)
 {
-	int retval = 0;
+	整数 retval = 0;
 	char *last = getenv("EINFO_LASTCMD");
 	va_list ap;
 
-	if (last &&
+	如果 (last &&
 	    *last &&
 	    !colour_terminal(f) &&
 	    strcmp(last, "ewarn") != 0 &&
 	    last[strlen(last) - 1] == 'n')
 		fprintf(f, "\n");
-	if (_eprefix)
+	如果 (_eprefix)
 		fprintf(f, "%s%s%s|", _ecolor(f, color), _eprefix, _ecolor(f, ECOLOR_NORMAL));
 	fprintf(f, " %s*%s ", _ecolor(f, color), _ecolor(f, ECOLOR_NORMAL));
 	retval += _eindent(f);
 	va_copy(ap, va);
 	retval += vfprintf(f, fmt, ap) + 3;
 	va_end(ap); \
-	if (colour_terminal(f))
+	如果 (colour_terminal(f))
 		fprintf(f, "%s", flush);
-	return retval;
+	返回 retval;
 }
 
 #define _einfovn(fmt, ap) _einfo(stdout, ECOLOR_GOOD, fmt, ap)
 #define _ewarnvn(fmt, ap) _einfo(stderr, ECOLOR_WARN, fmt, ap)
 #define _eerrorvn(fmt, ap) _einfo(stderr, ECOLOR_BAD, fmt, ap)
 
-int
+整数
 einfon(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	如果 (!fmt || is_quiet())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfon");
-	return retval;
+	返回 retval;
 }
 
-int
+整数
 ewarnn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	如果 (!fmt || is_quiet())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnn");
-	return retval;
+	返回 retval;
 }
 
-int
+整数
 eerrorn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	如果 (!fmt || is_really_quiet())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("errorn");
-	return retval;
+	返回 retval;
 }
 
-int
+整数
 einfo(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	如果 (!fmt || is_quiet())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("einfo");
-	return retval;
+	返回 retval;
 }
 
-int
+整数
 ewarn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	如果 (!fmt || is_quiet())
+		返回 0;
 	va_start(ap, fmt);
 	elogv(LOG_WARNING, fmt, ap);
 	retval = _ewarnvn(fmt, ap);
 	retval += fprintf(stderr, "\n");
 	va_end(ap);
 	LASTCMD("ewarn");
-	return retval;
+	返回 retval;
 }
 
 void
@@ -623,7 +623,7 @@ ewarnx(const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_quiet()) {
+	如果 (fmt && !is_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_WARNING, fmt, ap);
 		_ewarnvn(fmt, ap);
@@ -633,21 +633,21 @@ ewarnx(const char *EINFO_RESTRICT fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
-int
+整数
 eerror(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	如果 (!fmt || is_really_quiet())
+		返回 0;
 	va_start(ap, fmt);
 	elogv(LOG_ERR, fmt, ap);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	retval += fprintf(stderr, "\n");
 	LASTCMD("eerror");
-	return retval;
+	返回 retval;
 }
 
 void
@@ -655,7 +655,7 @@ eerrorx(const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_really_quiet()) {
+	如果 (fmt && !is_really_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_ERR, fmt, ap);
 		_eerrorvn(fmt, ap);
@@ -665,73 +665,73 @@ eerrorx(const char *EINFO_RESTRICT fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
-int
+整数
 ebegin(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	如果 (!fmt || is_quiet())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	retval += printf(" ...");
-	if (colour_terminal(stdout))
+	如果 (colour_terminal(stdout))
 		retval += printf("\n");
 	LASTCMD("ebegin");
-	return retval;
+	返回 retval;
 }
 
 static void
-_eend(FILE * EINFO_RESTRICT fp, int col, ECOLOR color, const char *msg)
+_eend(FILE * EINFO_RESTRICT fp, 整数 col, ECOLOR color, const char *msg)
 {
-	int i;
-	int cols;
+	整数 i;
+	整数 cols;
 
-	if (!msg)
-		return;
+	如果 (!msg)
+		返回;
 
 	cols = get_term_columns(fp) - (strlen(msg) + 5);
 
 	/* cons25 is special - we need to remove one char, otherwise things
 	 * do not align properly at all. */
-	if (!term) {
+	如果 (!term) {
 		term = getenv("TERM");
-		if (term && strcmp(term, "cons25") == 0)
+		如果 (term && strcmp(term, "cons25") == 0)
 			term_is_cons25 = true;
-		else
+		否则
 			term_is_cons25 = false;
 	}
-	if (term_is_cons25)
+	如果 (term_is_cons25)
 		cols--;
 
-	if (cols > 0 && colour_terminal(fp)) {
+	如果 (cols > 0 && colour_terminal(fp)) {
 		fprintf(fp, "%s%s %s[%s %s %s]%s\n", up, tgoto(goto_column, 0, cols),
 		    ecolor(ECOLOR_BRACKET), ecolor(color), msg,
 		    ecolor(ECOLOR_BRACKET), ecolor(ECOLOR_NORMAL));
-	} else {
-		if (col > 0)
-			for (i = 0; i < cols - col; i++)
+	} 否则 {
+		如果 (col > 0)
+			为 (i = 0; i < cols - col; i++)
 				fprintf(fp, " ");
 		fprintf(fp, " [ %s ]\n", msg);
 	}
 }
 
-static int EINFO_PRINTF(3, 0)
-_do_eend(const char *cmd, int retval,
+static 整数 EINFO_PRINTF(3, 0)
+_do_eend(const char *cmd, 整数 retval,
     const char *EINFO_RESTRICT fmt, va_list ap)
 {
-	int col = 0;
+	整数 col = 0;
 	FILE *fp = stdout;
 	va_list apc;
 
-	if (fmt && *fmt != '\0' && retval != 0) {
+	如果 (fmt && *fmt != '\0' && retval != 0) {
 		fp = stderr;
 		va_copy(apc, ap);
-		if (strcmp(cmd, "ewend") == 0)
+		如果 (strcmp(cmd, "ewend") == 0)
 			col = _ewarnvn(fmt, apc);
-		else
+		否则
 			col = _eerrorvn(fmt, apc);
 		col += fprintf(fp, "\n");
 		va_end(apc);
@@ -739,39 +739,39 @@ _do_eend(const char *cmd, int retval,
 	_eend(fp, col,
 	    retval == 0 ? ECOLOR_GOOD : ECOLOR_BAD,
 	    retval == 0 ? OK : NOT_OK);
-	return retval;
+	返回 retval;
 }
 
-int
-eend(int retval, const char *EINFO_RESTRICT fmt, ...)
+整数
+eend(整数 retval, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	如果 (is_quiet())
+		返回 retval;
 	va_start(ap, fmt);
 	_do_eend("eend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eend");
-	return retval;
+	返回 retval;
 }
 
-int
-ewend(int retval, const char *EINFO_RESTRICT fmt, ...)
+整数
+ewend(整数 retval, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	如果 (is_quiet())
+		返回 retval;
 	va_start(ap, fmt);
 	_do_eend("ewend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewend");
-	return retval;
+	返回 retval;
 }
 
 void
-ebracket(int col, ECOLOR color, const char *msg)
+ebracket(整数 col, ECOLOR color, const char *msg)
 {
 	_eend(stdout, col, color, msg);
 }
@@ -780,13 +780,13 @@ void
 eindent(void)
 {
 	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	整数 amount = 0;
 	char *num;
 
-	if (env) {
+	如果 (env) {
 		errno = 0;
 		amount = strtoimax(env, NULL, 0);
-		if (errno != 0)
+		如果 (errno != 0)
 			amount = 0;
 	}
 	amount += INDENT_WIDTH;
@@ -798,21 +798,21 @@ eindent(void)
 void eoutdent(void)
 {
 	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	整数 amount = 0;
 	char *num = NULL;
-	int serrno = errno;
+	整数 serrno = errno;
 
-	if (!env)
-		return;
+	如果 (!env)
+		返回;
 	errno = 0;
 	amount = strtoimax(env, NULL, 0);
-	if (errno != 0)
+	如果 (errno != 0)
 		amount = 0;
-	else
+	否则
 		amount -= INDENT_WIDTH;
-	if (amount <= 0)
+	如果 (amount <= 0)
 		unsetenv("EINFO_INDENT");
-	else {
+	否则 {
 		xasprintf(&num, "%08d", amount);
 		setenv("EINFO_INDENT", num, 1);
 		free(num);
@@ -820,125 +820,125 @@ void eoutdent(void)
 	errno = serrno;
 }
 
-int
+整数
 einfovn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	如果 (!fmt || !is_verbose())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfovn");
-	return retval;
+	返回 retval;
 }
 
-int
+整数
 ewarnvn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	如果 (!fmt || !is_verbose())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnvn");
-	return retval;
+	返回 retval;
 }
 
-int
+整数
 einfov(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	如果 (!fmt || !is_verbose())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("einfov");
-	return retval;
+	返回 retval;
 }
 
-int
+整数
 ewarnv(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	如果 (!fmt || !is_verbose())
+		返回 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("ewarnv");
-	return retval;
+	返回 retval;
 }
 
-int
+整数
 ebeginv(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	整数 retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	如果 (!fmt || !is_verbose())
+		返回 0;
 
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf(" ...");
-	if (colour_terminal(stdout))
+	如果 (colour_terminal(stdout))
 		retval += printf("\n");
 	va_end(ap);
 	LASTCMD("ebeginv");
-	return retval;
+	返回 retval;
 }
 
-int
-eendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+整数
+eendv(整数 retval, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	如果 (!is_verbose())
+		返回 0;
 	va_start(ap, fmt);
 	_do_eend("eendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eendv");
-	return retval;
+	返回 retval;
 }
 
-int
-ewendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+整数
+ewendv(整数 retval, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	如果 (!is_verbose())
+		返回 0;
 	va_start(ap, fmt);
 	_do_eend("ewendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewendv");
-	return retval;
+	返回 retval;
 }
 
 void
 eindentv(void)
 {
-	if (is_verbose())
+	如果 (is_verbose())
 		eindent();
 }
 
 void
 eoutdentv(void)
 {
-	if (is_verbose())
+	如果 (is_verbose())
 		eoutdent();
 }

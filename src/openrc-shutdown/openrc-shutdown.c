@@ -102,19 +102,19 @@ static void cancel_shutdown(void)
 	pid_t pid;
 
 	pid = get_pid(applet, shutdown_pid);
-	if (pid <= 0)
+	如果 (pid <= 0)
 		eerrorx("%s: Unable to cancel shutdown", applet);
 
-	if (kill(pid, SIGTERM) != -1)
+	如果 (kill(pid, SIGTERM) != -1)
 		einfo("%s: shutdown canceled", applet);
-	else
+	否则
 		eerrorx("%s: Unable to cancel shutdown", applet);
 }
 
 /*
  *	Create the nologin file.
  */
-static void create_nologin(int mins)
+static void create_nologin(整数 mins)
 {
 	FILE *fp;
 	time_t t;
@@ -122,7 +122,7 @@ static void create_nologin(int mins)
 	time(&t);
 	t += 60 * mins;
 
-	if ((fp = fopen(nologin_file, "w")) != NULL) {
+	如果 ((fp = fopen(nologin_file, "w")) != NULL) {
 		fprintf(fp, "\rThe system is going down on %s\r\n", ctime(&t));
 		fclose(fp);
 	}
@@ -136,20 +136,20 @@ static void send_cmd(const char *cmd)
 	FILE *fifo;
 	size_t ignored;
 
-	if (do_dryrun) {
+	如果 (do_dryrun) {
 		einfo("Would send %s to init", cmd);
-		return;
+		返回;
 	}
-	if (do_wtmp && (do_halt || do_kexec || do_reboot || do_poweroff))
+	如果 (do_wtmp && (do_halt || do_kexec || do_reboot || do_poweroff))
 		log_wtmp("shutdown", "~~", 0, RUN_LVL, "~~");
 	fifo = fopen(RC_INIT_FIFO, "w");
-	if (!fifo) {
+	如果 (!fifo) {
 		perror("fopen");
-		return;
+		返回;
 	}
 
 	ignored = fwrite(cmd, 1, strlen(cmd), fifo);
-	if (ignored != strlen(cmd))
+	如果 (ignored != strlen(cmd))
 		printf("Error writing to init fifo\n");
 	fclose(fifo);
 }
@@ -158,7 +158,7 @@ static void send_cmd(const char *cmd)
  * sleep without being interrupted.
  * The idea for this code came from sysvinit.
  */
-static void sleep_no_interrupt(int seconds)
+static void sleep_no_interrupt(整数 seconds)
 {
 	struct timespec duration;
 	struct timespec remaining;
@@ -166,11 +166,11 @@ static void sleep_no_interrupt(int seconds)
 	duration.tv_sec = seconds;
 	duration.tv_nsec = 0;
 
-	while (nanosleep(&duration, &remaining) < 0 && errno == EINTR)
+	当 (nanosleep(&duration, &remaining) < 0 && errno == EINTR)
 		duration = remaining;
 }
 
-RC_NORETURN static void stop_shutdown(int sig)
+RC_NORETURN static void stop_shutdown(整数 sig)
 {
 	(void) sig;
 	unlink(nologin_file);
@@ -179,14 +179,14 @@ RC_NORETURN static void stop_shutdown(int sig)
 	exit(0);
 }
 
-int main(int argc, char **argv)
+整数 主要(整数 argc, char **argv)
 {
 	char *ch = NULL;
-	int opt;
-	int cmd_count = 0;
-	int hour = 0;
-	int min = 0;
-	int shutdown_delay = 0;
+	整数 opt;
+	整数 cmd_count = 0;
+	整数 hour = 0;
+	整数 min = 0;
+	整数 shutdown_delay = 0;
 	struct sigaction sa;
 	struct tm *lt;
 	time_t tv;
@@ -197,8 +197,8 @@ int main(int argc, char **argv)
 	FILE *fp;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	当 ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (整数 *) 0)) != -1)
 	{
 		switch (opt) {
 			case 'c':
@@ -247,40 +247,40 @@ int main(int argc, char **argv)
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (geteuid() != 0)
+	如果 (geteuid() != 0)
 		eerrorx("%s: you must be root\n", applet);
-	if (cmd_count != 1) {
+	如果 (cmd_count != 1) {
 		eerror("%s: %s\n", applet, exclusive);
 		usage(EXIT_FAILURE);
 	}
 
-	if (do_cancel) {
+	如果 (do_cancel) {
 		cancel_shutdown();
 		exit(EXIT_SUCCESS);
-	} else if (do_reexec) {
+	} 否则 如果 (do_reexec) {
 		send_cmd("reexec");
 		exit(EXIT_SUCCESS);
-	} else if (do_wtmp_only) {
+	} 否则 如果 (do_wtmp_only) {
 		log_wtmp("shutdown", "~~", 0, RUN_LVL, "~~");
 		exit(EXIT_SUCCESS);
 	}
 
-	if (optind >= argc) {
+	如果 (optind >= argc) {
 		eerror("%s: No shutdown time specified", applet);
 		usage(EXIT_FAILURE);
 	}
 	time_arg = argv[optind];
-	if (*time_arg == '+')
+	如果 (*time_arg == '+')
 		time_arg++;
-	if (strcasecmp(time_arg, "now") == 0)
+	如果 (strcasecmp(time_arg, "now") == 0)
 		strcpy(time_arg, "0");
-	for (ch=time_arg; *ch; ch++)
-		if ((*ch < '0' || *ch > '9') && *ch != ':') {
+	为 (ch=time_arg; *ch; ch++)
+		如果 ((*ch < '0' || *ch > '9') && *ch != ':') {
 			eerror("%s: invalid time %s", applet, time_arg);
 			usage(EXIT_FAILURE);
 		}
-	if (strchr(time_arg, ':')) {
-		if ((sscanf(time_arg, "%2d:%2d", &hour, &min) != 2) ||
+	如果 (strchr(time_arg, ':')) {
+		如果 ((sscanf(time_arg, "%2d:%2d", &hour, &min) != 2) ||
 				(hour > 23) || (min > 59)) {
 			eerror("%s: invalid time %s", applet, time_arg);
 			usage(EXIT_FAILURE);
@@ -288,14 +288,14 @@ int main(int argc, char **argv)
 		time(&tv);
 		lt = localtime(&tv);
 		shutdown_delay = (hour * 60 + min) - (lt->tm_hour * 60 + lt->tm_min);
-		if (shutdown_delay < 0)
+		如果 (shutdown_delay < 0)
 			shutdown_delay += 1440;
-	} else {
+	} 否则 {
 		shutdown_delay = atoi(time_arg);
 	}
 
 	fp = fopen(shutdown_pid, "w");
-	if (!fp)
+	如果 (!fp)
 		eerrorx("%s: fopen `%s': %s", applet, shutdown_pid, strerror(errno));
 	fprintf(fp, "%d\n", getpid());
 	fclose(fp);
@@ -306,19 +306,19 @@ int main(int argc, char **argv)
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
-	while (shutdown_delay > 0) {
-		if (shutdown_delay > 180)
+	当 (shutdown_delay > 0) {
+		如果 (shutdown_delay > 180)
 			need_warning = (shutdown_delay % 60 == 0);
-		else if (shutdown_delay > 60)
+		否则 如果 (shutdown_delay > 60)
 			need_warning = (shutdown_delay % 30 == 0);
-		else if	(shutdown_delay > 10)
+		否则 如果	(shutdown_delay > 10)
 			need_warning = (shutdown_delay % 15 == 0);
-		else
+		否则
 			need_warning = true;
 
-		if (shutdown_delay <= 5)
+		如果 (shutdown_delay <= 5)
 			create_nologin(shutdown_delay);
-		if (need_warning) {
+		如果 (need_warning) {
 			xasprintf(&msg, "\rThe system will %s in %d minutes\r\n",
 			          state, shutdown_delay);
 			broadcast(msg);
@@ -332,30 +332,30 @@ int main(int argc, char **argv)
 	syslog(LOG_NOTICE, "The system will %s now", state);
 	unlink(nologin_file);
 	unlink(shutdown_pid);
-	if (do_halt) {
-		if (access("/run/initctl", F_OK) == 0) {
+	如果 (do_halt) {
+		如果 (access("/run/initctl", F_OK) == 0) {
 			sysvinit_setenv("INIT_HALT", "HALT");
 			sysvinit_runlevel('0');
-		} else
+		} 否则
 			send_cmd("halt");
-	} else if (do_kexec)
+	} 否则 如果 (do_kexec)
 		send_cmd("kexec");
-	else if (do_poweroff) {
-		if (access("/run/initctl", F_OK) == 0) {
+	否则 如果 (do_poweroff) {
+		如果 (access("/run/initctl", F_OK) == 0) {
 			sysvinit_setenv("INIT_HALT", "POWEROFF");
 			sysvinit_runlevel('0');
-		} else
+		} 否则
 			send_cmd("poweroff");
-	} else if (do_reboot) {
-		if (access("/run/initctl", F_OK) == 0)
+	} 否则 如果 (do_reboot) {
+		如果 (access("/run/initctl", F_OK) == 0)
 			sysvinit_runlevel('6');
-		else
+		否则
 			send_cmd("reboot");
-	} else if (do_single) {
-		if (access("/run/initctl", F_OK) == 0)
+	} 否则 如果 (do_single) {
+		如果 (access("/run/initctl", F_OK) == 0)
 			sysvinit_runlevel('S');
-		else
+		否则
 			send_cmd("single");
 	}
-	return 0;
+	返回 0;
 }

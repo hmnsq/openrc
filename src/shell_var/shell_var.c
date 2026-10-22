@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+整数 主要(整数 argc, char **argv)
 {
-	int i;
+	整数 i;
 	char *p;
-	int c;
+	整数 c;
 
-	for (i = 1; i < argc; i++) {
+	为 (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		如果 (i != 1)
 			putchar(' ');
-		while (*p) {
+		当 (*p) {
 			c = (unsigned char)*p++;
-			if (!isalnum(c))
+			如果 (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	返回 EXIT_SUCCESS;
 }

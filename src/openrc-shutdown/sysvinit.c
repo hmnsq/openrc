@@ -28,38 +28,38 @@
 
 static void sysvinit_send_cmd(struct init_request *request)
 {
-	int fd;
+	整数 fd;
 	char *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	如果 (fd < 0) {
+		如果 (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		返回;
 	}
 	p = (char *) request;
 	bytes = sizeof(*request);
 	do {
 		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
+		如果 (r < 0) {
+			如果 ((errno == EAGAIN) || (errno == EINTR))
 				continue;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			返回;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} 当 (bytes > 0);
 }
 
 void sysvinit_runlevel(char rl)
 {
 	struct init_request request;
 
-	if (!rl)
-		return;
+	如果 (!rl)
+		返回;
 
 	request = (struct init_request) {
 		.magic = INIT_MAGIC,
@@ -68,7 +68,7 @@ void sysvinit_runlevel(char rl)
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		返回;
 }
 
 /*
@@ -84,19 +84,19 @@ void sysvinit_setenv(const char *name, const char *value)
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
+	如果 (value)
 		vl = strlen(value);
-else
+否则
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	如果 (nl + vl + 3 >= (整数)sizeof(request.i.data))
+		返回;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	如果 (value) {
 		request.i.data[nl] = '=';
 		memcpy(request.i.data + nl + 1, value, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	返回;
 }
