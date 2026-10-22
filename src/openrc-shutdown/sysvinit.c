@@ -15,88 +15,88 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <fcntl.h>
+#ଅନ୍ତର୍ଭାଵ <stddef.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <sys/stat.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
 
-#include "einfo.h"
-#include "initreq.h"
-#include "sysvinit.h"
+#ଅନ୍ତର୍ଭାଵ "einfo.h"
+#ଅନ୍ତର୍ଭାଵ "initreq.h"
+#ଅନ୍ତର୍ଭାଵ "sysvinit.h"
 
-static void sysvinit_send_cmd(struct init_request *request)
+ସ୍ଥିର ଶୂନ୍ୟ sysvinit_send_cmd(ସଂରଚନା init_request *request)
 {
-	int fd;
-	char *p;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd;
+	ଅକ୍ଷର *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	ଯଦି (fd < 0) {
+		ଯଦି (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		ଫେରନ୍ତୁ;
 	}
-	p = (char *) request;
-	bytes = sizeof(*request);
-	do {
-		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
-				continue;
+	p = (ଅକ୍ଷର *) request;
+	bytes = ଆକାର(*request);
+	କର {
+		r = ଲିଖ(fd, p, bytes);
+		ଯଦି (r < 0) {
+			ଯଦି ((errno == EAGAIN) || (errno == EINTR))
+				ଜାରି;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			ଫେରନ୍ତୁ;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} ଯେତେବେଳେ (bytes > 0);
 }
 
-void sysvinit_runlevel(char rl)
+ଶୂନ୍ୟ sysvinit_runlevel(ଅକ୍ଷର rl)
 {
-	struct init_request request;
+	ସଂରଚନା init_request request;
 
-	if (!rl)
-		return;
+	ଯଦି (!rl)
+		ଫେରନ୍ତୁ;
 
-	request = (struct init_request) {
+	request = (ସଂରଚନା init_request) {
 		.magic = INIT_MAGIC,
 		.sleeptime = 0,
 		.cmd = INIT_CMD_RUNLVL,
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		ଫେରନ୍ତୁ;
 }
 
 /*
  *	Set environment variables in the init process.
  */
-void sysvinit_setenv(const char *name, const char *value)
+ଶୂନ୍ୟ sysvinit_setenv(ଅଚଳ ଅକ୍ଷର *name, ଅଚଳ ଅକ୍ଷର *ମୂଲ୍ୟ)
 {
-	struct init_request	request;
+	ସଂରଚନା init_request	request;
 	size_t nl;
 	size_t vl;
 
-	memset(&request, 0, sizeof(request));
+	memset(&request, 0, ଆକାର(request));
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
-		vl = strlen(value);
-else
+	ଯଦି (ମୂଲ୍ୟ)
+		vl = strlen(ମୂଲ୍ୟ);
+ଅନ୍ୟଥା
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	ଯଦି (nl + vl + 3 >= (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)ଆକାର(request.i.data))
+		ଫେରନ୍ତୁ;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	ଯଦି (ମୂଲ୍ୟ) {
 		request.i.data[nl] = '=';
-		memcpy(request.i.data + nl + 1, value, vl);
+		memcpy(request.i.data + nl + 1, ମୂଲ୍ୟ, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	ଫେରନ୍ତୁ;
 }

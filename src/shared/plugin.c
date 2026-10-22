@@ -15,110 +15,110 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <dirent.h>
-#include <dlfcn.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <sys/wait.h>
+#ଅନ୍ତର୍ଭାଵ <dirent.h>
+#ଅନ୍ତର୍ଭାଵ <dlfcn.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <fcntl.h>
+#ଅନ୍ତର୍ଭାଵ <signal.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "plugin.h"
-#include "helpers.h"
+#ଅନ୍ତର୍ଭାଵ "einfo.h"
+#ଅନ୍ତର୍ଭାଵ "queue.h"
+#ଅନ୍ତର୍ଭାଵ "rc.h"
+#ଅନ୍ତର୍ଭାଵ "rc_exec.h"
+#ଅନ୍ତର୍ଭାଵ "plugin.h"
+#ଅନ୍ତର୍ଭାଵ "helpers.h"
 
 #define RC_PLUGIN_HOOK "rc_plugin_hook"
 
 bool rc_in_plugin = false;
 
-typedef struct plugin
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା plugin
 {
-	char *name;
-	void *handle;
-	int (*hook)(RC_HOOK, const char *);
+	ଅକ୍ଷର *name;
+	ଶୂନ୍ୟ *handle;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା (*hook)(RC_HOOK, ଅଚଳ ଅକ୍ଷର *);
 	TAILQ_ENTRY(plugin) entries;
 } PLUGIN;
 TAILQ_HEAD(, plugin) plugins;
 
-void
-rc_plugin_load(void)
+ଶୂନ୍ୟ
+rc_plugin_load(ଶୂନ୍ୟ)
 {
 	DIR *dp;
-	struct dirent *d;
+	ସଂରଚନା dirent *d;
 	PLUGIN *plugin;
-	char *file = NULL;
-	void *h;
-	union {
-		void *sym;
-		int (*func)(RC_HOOK, const char *);
+	ଅକ୍ଷର *file = ଖାଲି;
+	ଶୂନ୍ୟ *h;
+	ସଂଘ {
+		ଶୂନ୍ୟ *sym;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା (*func)(RC_HOOK, ଅଚଳ ଅକ୍ଷର *);
 	} fptr;
 
 	/* Don't load plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	ଯଦି (rc_in_plugin)
+		ଫେରନ୍ତୁ;
 
 	TAILQ_INIT(&plugins);
 
-	if (!(dp = opendir(RC_PLUGINDIR)))
-		return;
+	ଯଦି (!(dp = opendir(RC_PLUGINDIR)))
+		ଫେରନ୍ତୁ;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	ଯେତେବେଳେ ((d = readdir(dp))) {
+		ଯଦି (d->d_name[0] == '.')
+			ଜାରି;
 
 		xasprintf(&file, RC_PLUGINDIR "/%s",  d->d_name);
 		h = dlopen(file, RTLD_LAZY);
-		free(file);
-		if (h == NULL) {
+		ମୁକ୍ତ(file);
+		ଯଦି (h == ଖାଲି) {
 			eerror("dlopen: %s", dlerror());
-			continue;
+			ଜାରି;
 		}
 
 		fptr.sym = dlsym(h, RC_PLUGIN_HOOK);
-		if (fptr.func == NULL) {
+		ଯଦି (fptr.func == ଖାଲି) {
 			eerror("%s: cannot find symbol `%s'",
 			    d->d_name, RC_PLUGIN_HOOK);
 			dlclose(h);
-		} else {
-			plugin = xmalloc(sizeof(*plugin));
+		} ଅନ୍ୟଥା {
+			plugin = xmalloc(ଆକାର(*plugin));
 			plugin->name = xstrdup(d->d_name);
 			plugin->handle = h;
 			plugin->hook = fptr.func;
-			TAILQ_INSERT_TAIL(&plugins, plugin, entries);
+			TAILQ_ଭର୍ତ୍ତି_TAIL(&plugins, plugin, entries);
 		}
 	}
 	closedir(dp);
 }
 
-void
-rc_plugin_run(RC_HOOK hook, const char *value)
+ଶୂନ୍ୟ
+rc_plugin_run(RC_HOOK hook, ଅଚଳ ଅକ୍ଷର *ମୂଲ୍ୟ)
 {
 	PLUGIN *plugin;
-	struct sigaction sa;
+	ସଂରଚନା sigaction sa;
 	sigset_t empty;
 	sigset_t full;
 	sigset_t old;
-	int pfd[2];
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା pfd[2];
 	pid_t pid;
-	char *buffer;
-	char *token;
-	char *p;
+	ଅକ୍ଷର *buffer;
+	ଅକ୍ଷର *token;
+	ଅକ୍ଷର *p;
 	ssize_t nr;
-	int retval;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା retval;
 
 	/* Don't run plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	ଯଦି (rc_in_plugin)
+		ଫେରନ୍ତୁ;
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, ଆକାର(sa));
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
 	sigemptyset(&empty);
@@ -130,81 +130,81 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 		 * O_CLOEXEC to stop any scripts from inheriting us.
 		 * This is actually quite important as without this, the splash
 		 * plugin will probably hang when running in silent mode. */
-		if (pipe2(pfd, O_CLOEXEC) == -1) {
+		ଯଦି (pipe2(pfd, O_CLOEXEC) == -1) {
 			eerror("pipe2: %s", strerror(errno));
-			return;
+			ଫେରନ୍ତୁ;
 		}
 
 		sigprocmask(SIG_SETMASK, &full, &old);
 
 		/* We run the plugin in a new process so we never crash
 		 * or otherwise affected by it */
-		if ((pid = fork()) == -1) {
+		ଯଦି ((pid = fork()) == -1) {
 			eerror("fork: %s", strerror(errno));
-			break;
+			ଭାଙ୍ଗ;
 		}
 
-		if (pid == 0) {
+		ଯଦି (pid == 0) {
 			/* Restore default handlers */
-			sigaction(SIGCHLD, &sa, NULL);
-			sigaction(SIGHUP,  &sa, NULL);
-			sigaction(SIGINT,  &sa, NULL);
-			sigaction(SIGQUIT, &sa, NULL);
-			sigaction(SIGTERM, &sa, NULL);
-			sigaction(SIGUSR1, &sa, NULL);
-			sigaction(SIGWINCH, &sa, NULL);
-			sigprocmask(SIG_SETMASK, &old, NULL);
+			sigaction(SIGCHLD, &sa, ଖାଲି);
+			sigaction(SIGHUP,  &sa, ଖାଲି);
+			sigaction(SIGINT,  &sa, ଖାଲି);
+			sigaction(SIGQUIT, &sa, ଖାଲି);
+			sigaction(SIGTERM, &sa, ଖାଲି);
+			sigaction(SIGUSR1, &sa, ଖାଲି);
+			sigaction(SIGWINCH, &sa, ଖାଲି);
+			sigprocmask(SIG_SETMASK, &old, ଖାଲି);
 
 			rc_in_plugin = true;
 			close(pfd[0]);
 			rc_environ_fd = fdopen(pfd[1], "w");
-			retval = plugin->hook(hook, value);
+			retval = plugin->hook(hook, ମୂଲ୍ୟ);
 			fclose(rc_environ_fd);
-			rc_environ_fd = NULL;
+			rc_environ_fd = ଖାଲି;
 
 			/* Just in case the plugin sets this to false */
 			rc_in_plugin = true;
 			exit(retval);
 		}
 
-		sigprocmask(SIG_SETMASK, &old, NULL);
+		sigprocmask(SIG_SETMASK, &old, ଖାଲି);
 		close(pfd[1]);
-		buffer = xmalloc(sizeof(char) * BUFSIZ);
+		buffer = xmalloc(ଆକାର(ଅକ୍ଷର) * BUFSIZ);
 		memset(buffer, 0, BUFSIZ);
 
-		while ((nr = read(pfd[0], buffer, BUFSIZ)) > 0) {
+		ଯେତେବେଳେ ((nr = ପଠ(pfd[0], buffer, BUFSIZ)) > 0) {
 			p = buffer;
-			while (*p && p - buffer < nr) {
+			ଯେତେବେଳେ (*p && p - buffer < nr) {
 				token = strsep(&p, "=");
-				if (token) {
+				ଯଦି (token) {
 					unsetenv(token);
-					if (*p) {
+					ଯଦି (*p) {
 						setenv(token, p, 1);
 						p += strlen(p) + 1;
-					} else
+					} ଅନ୍ୟଥା
 						p++;
 				}
 			}
 		}
 
-		free(buffer);
+		ମୁକ୍ତ(buffer);
 		close(pfd[0]);
 
 		rc_waitpid(pid);
 	}
 }
 
-void
-rc_plugin_unload(void)
+ଶୂନ୍ୟ
+rc_plugin_unload(ଶୂନ୍ୟ)
 {
 	PLUGIN *plugin = TAILQ_FIRST(&plugins);
 	PLUGIN *next;
 
-	while (plugin) {
+	ଯେତେବେଳେ (plugin) {
 		next = TAILQ_NEXT(plugin, entries);
 		dlclose(plugin->handle);
-		free(plugin->name);
-		free(plugin);
+		ମୁକ୍ତ(plugin->name);
+		ମୁକ୍ତ(plugin);
 		plugin = next;
 	}
 	TAILQ_INIT(&plugins);

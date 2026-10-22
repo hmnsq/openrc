@@ -10,22 +10,22 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
 
-#include "rc.h"
+#ଅନ୍ତର୍ଭାଵ "rc.h"
 
-int main(int argc, char **argv)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର **argv)
 {
-	int i;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ଯଦି (argc < 3)
+		ଫେରନ୍ତୁ EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	ପାଇଁ (i = 2; i < argc; ++i)
+		ଯଦି (!rc_newer_than(argv[1], argv[i], ଖାଲି, ଖାଲି))
+			ଫେରନ୍ତୁ EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	ଫେରନ୍ତୁ EXIT_FAILURE;
 }

@@ -10,136 +10,136 @@
  * except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <fcntl.h>
+#ଅନ୍ତର୍ଭାଵ <signal.h>
+#ଅନ୍ତର୍ଭାଵ <sys/wait.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
 
-#include "rc_exec.h"
-#include "helpers.h"
+#ଅନ୍ତର୍ଭାଵ "rc_exec.h"
+#ଅନ୍ତର୍ଭାଵ "helpers.h"
 
-static void checked_close(int fd)
+ସ୍ଥିର ଶୂନ୍ୟ checked_close(ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd)
 {
-	if (fd >= 0)
+	ଯଦି (fd >= 0)
 		close(fd);
 }
 
-static int devnull(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା devnull(ଶୂନ୍ୟ)
 {
-	static int devnullfd = -1;
-	if (devnullfd < 0)
+	ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା devnullfd = -1;
+	ଯଦି (devnullfd < 0)
 		devnullfd = open("/dev/null", O_RDWR | O_CLOEXEC);
-	if (devnullfd < 0) {
+	ଯଦି (devnullfd < 0) {
 		fprintf(stderr, "Failed to open /dev/null: %s", strerror(errno));
 		_exit(1);
 	}
-	return devnullfd;
+	ଫେରନ୍ତୁ devnullfd;
 }
 
-struct exec_args exec_init(const char **argv)
+ସଂରଚନା exec_args exec_init(ଅଚଳ ଅକ୍ଷର **argv)
 {
-	struct exec_args args = {0};
+	ସଂରଚନା exec_args args = {0};
 	args.argv = argv;
 	args.redirect_stdin  = EXEC_NO_REDIRECT;
 	args.redirect_stdout = EXEC_NO_REDIRECT;
 	args.redirect_stderr = EXEC_NO_REDIRECT;
 	args.uid = (uid_t)-1;
 	args.gid = (gid_t)-1;
-	return args;
+	ଫେରନ୍ତୁ args;
 }
 
-struct exec_result do_exec(struct exec_args *args)
+ସଂରଚନା exec_result do_exec(ସଂରଚନା exec_args *args)
 {
-	struct exec_result res = { .pid = -1 };
+	ସଂରଚନା exec_result res = { .pid = -1 };
 	sigset_t full, old;
-	int saved_errno, err, n;
-	int execpipe[2] = {-1, -1};
-	int stdin_pipe[2] = {-1, -1};
-	int stdout_pipe[2] = {-1, -1};
-	int stderr_pipe[2] = {-1, -1};
-	const char *cmd = args->cmd ? args->cmd : args->argv[0];
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା saved_errno, err, n;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା execpipe[2] = {-1, -1};
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା stdin_pipe[2] = {-1, -1};
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା stdout_pipe[2] = {-1, -1};
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା stderr_pipe[2] = {-1, -1};
+	ଅଚଳ ଅକ୍ଷର *cmd = args->cmd ? args->cmd : args->argv[0];
 
-	if (pipe2(execpipe, O_CLOEXEC) < 0)
-		goto exit;
-	if (args->redirect_stdin == EXEC_MKPIPE) {
-		if (pipe2(stdin_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	ଯଦି (pipe2(execpipe, O_CLOEXEC) < 0)
+		ଯାଅ exit;
+	ଯଦି (args->redirect_stdin == EXEC_MKPIPE) {
+		ଯଦି (pipe2(stdin_pipe, O_CLOEXEC) < 0)
+			ଯାଅ exit;
 		args->redirect_stdin = stdin_pipe[0];
 	}
-	if (args->redirect_stdout == EXEC_MKPIPE) {
-		if (pipe2(stdout_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	ଯଦି (args->redirect_stdout == EXEC_MKPIPE) {
+		ଯଦି (pipe2(stdout_pipe, O_CLOEXEC) < 0)
+			ଯାଅ exit;
 		args->redirect_stdout = stdout_pipe[1];
 	}
-	if (args->redirect_stderr == EXEC_MKPIPE) {
-		if (pipe2(stderr_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	ଯଦି (args->redirect_stderr == EXEC_MKPIPE) {
+		ଯଦି (pipe2(stderr_pipe, O_CLOEXEC) < 0)
+			ଯାଅ exit;
 		args->redirect_stderr = stderr_pipe[1];
 	}
 
-	if (args->redirect_stdin == EXEC_DEVNULL)
+	ଯଦି (args->redirect_stdin == EXEC_DEVNULL)
 		args->redirect_stdin = devnull();
-	if (args->redirect_stdout == EXEC_DEVNULL)
+	ଯଦି (args->redirect_stdout == EXEC_DEVNULL)
 		args->redirect_stdout = devnull();
-	if (args->redirect_stderr == EXEC_DEVNULL)
+	ଯଦି (args->redirect_stderr == EXEC_DEVNULL)
 		args->redirect_stderr = devnull();
 
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
 	res.pid = fork();
 
-	if (res.pid < 0) {
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		goto exit;
-	} else if (res.pid == 0) {
+	ଯଦି (res.pid < 0) {
+		sigprocmask(SIG_SETMASK, &old, ଖାଲି);
+		ଯାଅ exit;
+	} ଅନ୍ୟଥା ଯଦି (res.pid == 0) {
 		/* child */
-		if (args->redirect_stdin != EXEC_NO_REDIRECT &&
+		ଯଦି (args->redirect_stdin != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stdin, STDIN_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stdout != EXEC_NO_REDIRECT &&
+			ଯାଅ child_err;
+		ଯଦି (args->redirect_stdout != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stdout, STDOUT_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stderr != EXEC_NO_REDIRECT &&
+			ଯାଅ child_err;
+		ଯଦି (args->redirect_stderr != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stderr, STDERR_FILENO) < 0)
-			goto child_err;
-		if (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
-			goto child_err;
-		if (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
-			goto child_err;
-		if (args->setsid && setsid() < 0)
-			goto child_err;
-		sigprocmask(SIG_SETMASK, &old, NULL);
+			ଯାଅ child_err;
+		ଯଦି (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
+			ଯାଅ child_err;
+		ଯଦି (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
+			ଯାଅ child_err;
+		ଯଦି (args->setsid && setsid() < 0)
+			ଯାଅ child_err;
+		sigprocmask(SIG_SETMASK, &old, ଖାଲି);
 		execvp(cmd, UNCONST(args->argv));
 child_err:
 		saved_errno = errno;
-		write(execpipe[1], &saved_errno, sizeof saved_errno);
+		ଲିଖ(execpipe[1], &saved_errno, ଆକାର saved_errno);
 		_exit(1);
-	} else {
+	} ଅନ୍ୟଥା {
 		/* parent */
 		close(execpipe[1]);
 		execpipe[1] = -1;
-		n = read(execpipe[0], &err, sizeof err);
-		if (n != 0) {
+		n = ପଠ(execpipe[0], &err, ଆକାର err);
+		ଯଦି (n != 0) {
 			/* exec failed, reap the child and cleanup */
-			waitpid(res.pid, NULL, 0); /* do we care about waitpid failures? */
+			waitpid(res.pid, ଖାଲି, 0); /* do we care about waitpid failures? */
 			res.pid = -1;
 		}
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		if (res.pid < 0) {
-			errno = (n == sizeof err) ? err : EINVAL;
-			goto exit;
+		sigprocmask(SIG_SETMASK, &old, ଖାଲି);
+		ଯଦି (res.pid < 0) {
+			errno = (n == ଆକାର err) ? err : EINVAL;
+			ଯାଅ exit;
 		}
 
-		if (stdin_pipe[0] >= 0) {
+		ଯଦି (stdin_pipe[0] >= 0) {
 			res.proc_stdin = stdin_pipe[1];
 			stdin_pipe[1] = -1; /* to avoid closing it below */
 		}
-		if (stdout_pipe[0] >= 0) {
+		ଯଦି (stdout_pipe[0] >= 0) {
 			res.proc_stdout = stdout_pipe[0];
 			stdout_pipe[0] = -1;
 		}
-		if (stderr_pipe[0] >= 0) {
+		ଯଦି (stderr_pipe[0] >= 0) {
 			res.proc_stderr = stderr_pipe[0];
 			stderr_pipe[0] = -1;
 		}
@@ -152,28 +152,28 @@ exit:
 	checked_close(stdout_pipe[0]); checked_close(stdout_pipe[1]);
 	checked_close(stderr_pipe[0]); checked_close(stderr_pipe[1]);
 	errno = saved_errno;
-	return res;
+	ଫେରନ୍ତୁ res;
 }
 
-int rc_waitpid(pid_t pid)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc_waitpid(pid_t pid)
 {
-	int status;
-	while (waitpid(pid, &status, 0) == -1) {
-		if (errno != EINTR) {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା status;
+	ଯେତେବେଳେ (waitpid(pid, &status, 0) == -1) {
+		ଯଦି (errno != EINTR) {
 			status = -1;
-			break;
+			ଭାଙ୍ଗ;
 		}
 	}
-	return status;
+	ଫେରନ୍ତୁ status;
 }
 
-int rc_pipe_command(const char *cmd, int devnullfd)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc_pipe_command(ଅଚଳ ଅକ୍ଷର *cmd, ପୂର୍ଣ୍ଣସଂଖ୍ୟା devnullfd)
 {
-	const char *argv[] = { "/bin/sh", "-c", cmd, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	ଅଚଳ ଅକ୍ଷର *argv[] = { "/bin/sh", "-c", cmd, ଖାଲି };
+	ସଂରଚନା exec_result res;
+	ସଂରଚନା exec_args args = exec_init(argv);
 	args.redirect_stdin = EXEC_MKPIPE;
 	args.redirect_stdout = args.redirect_stderr = devnullfd;
 	res = do_exec(&args);
-	return (res.pid > 0) ? res.proc_stdin : -1;
+	ଫେରନ୍ତୁ (res.pid > 0) ? res.proc_stdin : -1;
 }

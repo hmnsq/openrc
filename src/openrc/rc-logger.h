@@ -13,14 +13,14 @@
 #ifndef RC_LOGGER_H
 #define RC_LOGGER_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <stdbool.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
 
-extern pid_t rc_logger_pid;
-extern int rc_logger_tty;
-extern bool rc_in_logger;
+ବାହ୍ୟ pid_t rc_logger_pid;
+ବାହ୍ୟ ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc_logger_tty;
+ବାହ୍ୟ bool rc_in_logger;
 
-void rc_logger_open(const char *runlevel);
-void rc_logger_close(void);
+ଶୂନ୍ୟ rc_logger_open(ଅଚଳ ଅକ୍ଷର *runlevel);
+ଶୂନ୍ୟ rc_logger_close(ଶୂନ୍ୟ);
 
 #endif

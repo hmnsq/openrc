@@ -16,48 +16,48 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <fcntl.h>
+#ଅନ୍ତର୍ଭାଵ <getopt.h>
+#ଅନ୍ତର୍ଭାଵ <grp.h>
+#ଅନ୍ତର୍ଭାଵ <pwd.h>
+#ଅନ୍ତର୍ଭାଵ <stdbool.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <sys/stat.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
 
-#include "einfo.h"
-#include "misc.h"
-#include "selinux.h"
-#include "_usage.h"
-#include "helpers.h"
+#ଅନ୍ତର୍ଭାଵ "einfo.h"
+#ଅନ୍ତର୍ଭାଵ "misc.h"
+#ଅନ୍ତର୍ଭାଵ "selinux.h"
+#ଅନ୍ତର୍ଭାଵ "_usage.h"
+#ଅନ୍ତର୍ଭାଵ "helpers.h"
 
-typedef enum {
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଗଣନା {
 	inode_unknown = 0,
 	inode_file = 1,
 	inode_dir = 2,
 	inode_fifo = 3,
 } inode_t;
 
-const char *applet = NULL;
-const char *extraopts ="path1 [path2] [...]";
-const char getoptstring[] = "dDfFpm:o:sW" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "directory",          0, NULL, 'd'},
-	{ "directory-truncate", 0, NULL, 'D'},
-	{ "file",               0, NULL, 'f'},
-	{ "file-truncate",      0, NULL, 'F'},
-	{ "pipe",               0, NULL, 'p'},
-	{ "mode",               1, NULL, 'm'},
-	{ "owner",              1, NULL, 'o'},
-	{ "symlinks",           0, NULL, 's'},
-	{ "writable",           0, NULL, 'W'},
+ଅଚଳ ଅକ୍ଷର *applet = ଖାଲି;
+ଅଚଳ ଅକ୍ଷର *extraopts ="path1 [path2] [...]";
+ଅଚଳ ଅକ୍ଷର getoptstring[] = "dDfFpm:o:sW" getoptstring_COMMON;
+ଅଚଳ ସଂରଚନା option longopts[] = {
+	{ "directory",          0, ଖାଲି, 'd'},
+	{ "directory-truncate", 0, ଖାଲି, 'D'},
+	{ "file",               0, ଖାଲି, 'f'},
+	{ "file-truncate",      0, ଖାଲି, 'F'},
+	{ "pipe",               0, ଖାଲି, 'p'},
+	{ "mode",               1, ଖାଲି, 'm'},
+	{ "owner",              1, ଖାଲି, 'o'},
+	{ "symlinks",           0, ଖାଲି, 's'},
+	{ "writable",           0, ଖାଲି, 'W'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ଅଚଳ ଅକ୍ଷର * ଅଚଳ longopts_help[] = {
 	"Create a directory if not exists",
 	"Create/empty directory",
 	"Create a file if not exists",
@@ -69,23 +69,23 @@ const char * const longopts_help[] = {
 	"Check whether the path is writable or not",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ଅଚଳ ଅକ୍ଷର *usagestring = ଖାଲି;
 
-static int get_dirfd(char *path, bool symlinks)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_dirfd(ଅକ୍ଷର *path, bool symlinks)
 {
-	char *ch, *item, *path_dupe, *str, *linkpath = NULL;
-	int components = 0, dirfd, flags = 0, new_dirfd;
+	ଅକ୍ଷର *ch, *item, *path_dupe, *str, *linkpath = ଖାଲି;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା components = 0, dirfd, flags = 0, new_dirfd;
 	ssize_t linksize;
-	struct stat st;
+	ସଂରଚନା stat st;
 
-	if (!path || *path != '/')
+	ଯଦି (!path || *path != '/')
 		eerrorx("%s: empty or relative path", applet);
 	dirfd = openat(AT_FDCWD, "/", O_RDONLY);
-	if (dirfd == -1)
+	ଯଦି (dirfd == -1)
 		eerrorx("%s: unable to open the root directory: %s", applet, strerror(errno));
 	ch = path;
-	while (*ch) {
-		if (*ch == '/')
+	ଯେତେବେଳେ (*ch) {
+		ଯଦି (*ch == '/')
 			components++;
 		ch++;
 	}
@@ -94,325 +94,325 @@ static int get_dirfd(char *path, bool symlinks)
 #ifdef O_PATH
 	flags |= O_PATH;
 #endif
-	if (!symlinks)
+	ଯଦି (!symlinks)
 		flags |= O_NOFOLLOW;
 	flags |= O_RDONLY;
-	while (dirfd > 0 && item && components > 1) {
+	ଯେତେବେଳେ (dirfd > 0 && item && components > 1) {
 		str = xstrdup(linkpath ? linkpath : item);
 		new_dirfd = openat(dirfd, str, flags);
-		if (new_dirfd == -1)
+		ଯଦି (new_dirfd == -1)
 			eerrorx("%s: %s: could not open %s: %s", applet, path, str, strerror(errno));
-		if (fstat(new_dirfd, &st) == -1)
+		ଯଦି (fstat(new_dirfd, &st) == -1)
 			eerrorx("%s: %s: unable to stat %s: %s", applet, path, item, strerror(errno));
-		if (S_ISLNK(st.st_mode) ) {
-			if (st.st_uid != 0)
+		ଯଦି (S_ISLNK(st.st_mode) ) {
+			ଯଦି (st.st_uid != 0)
 				eerrorx("%s: %s: symbolic link %s not owned by root", applet, path, str);
 			linksize = st.st_size+1;
-			if (linkpath)
-				free(linkpath);
+			ଯଦି (linkpath)
+				ମୁକ୍ତ(linkpath);
 			linkpath = xmalloc(linksize);
 			memset(linkpath, 0, linksize);
-			if (readlinkat(new_dirfd, "", linkpath, linksize) != st.st_size)
+			ଯଦି (readlinkat(new_dirfd, "", linkpath, linksize) != st.st_size)
 				eerrorx("%s: symbolic link destination changed", applet);
 			/*
 			 * now follow the symlink.
 			 */
 			close(new_dirfd);
-		} else {
+		} ଅନ୍ୟଥା {
 			/* now walk down the directory path */
 			close(dirfd);
 			dirfd = new_dirfd;
-			free(linkpath);
-			linkpath = NULL;
-			item = strtok(NULL, "/");
+			ମୁକ୍ତ(linkpath);
+			linkpath = ଖାଲି;
+			item = strtok(ଖାଲି, "/");
 			components--;
 		}
 
-		free(str);
+		ମୁକ୍ତ(str);
 	}
-	free(path_dupe);
-	free(linkpath);
-	return dirfd;
+	ମୁକ୍ତ(path_dupe);
+	ମୁକ୍ତ(linkpath);
+	ଫେରନ୍ତୁ dirfd;
 }
 
-static char *clean_path(char *path)
+ସ୍ଥିର ଅକ୍ଷର *clean_path(ଅକ୍ଷର *path)
 {
-	char *ch, *ch2, *str;
+	ଅକ୍ଷର *ch, *ch2, *str;
 
 	str = xmalloc(strlen(path) + 1);
 	ch = path;
 	ch2 = str;
-	while (true) {
+	ଯେତେବେଳେ (true) {
 		*ch2 = *ch;
 		ch++;
 		ch2++;
-		if (!*(ch-1))
-			break;
-		while (*(ch - 1) == '/' && *ch == '/')
+		ଯଦି (!*(ch-1))
+			ଭାଙ୍ଗ;
+		ଯେତେବେଳେ (*(ch - 1) == '/' && *ch == '/')
 			ch++;
 	}
 	/* get rid of trailing / characters */
-	while ((ch = strrchr(str, '/'))) {
-		if (ch == str)
-			break;
-		if (!*(ch+1))
+	ଯେତେବେଳେ ((ch = strrchr(str, '/'))) {
+		ଯଦି (ch == str)
+			ଭାଙ୍ଗ;
+		ଯଦି (!*(ch+1))
 			*ch = 0;
-		else
-			break;
+		ଅନ୍ୟଥା
+			ଭାଙ୍ଗ;
 	}
-	return str;
+	ଫେରନ୍ତୁ str;
 }
 
-static int do_create(inode_t type, const char *path, int dirfd, const char *name, int flags, mode_t mode)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା do_create(inode_t type, ଅଚଳ ଅକ୍ଷର *path, ପୂର୍ଣ୍ଣସଂଖ୍ୟା dirfd, ଅଚଳ ଅକ୍ଷର *name, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags, mode_t mode)
 {
-	int mask = umask(0);
-	int fd;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା mask = umask(0);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd;
 
-	static const mode_t default_mode[] = {
+	ସ୍ଥିର ଅଚଳ mode_t default_mode[] = {
 		[inode_file] = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, /* 664 */
 		[inode_dir] = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH, /* 775 */
 		[inode_fifo] = S_IRUSR | S_IWUSR, /* 600 */
 		[inode_unknown] = 0,
 	};
 
-	if (!mode)
+	ଯଦି (!mode)
 		mode = default_mode[type];
 
-	switch (type) {
-	case inode_file:
+	ବାଛ (type) {
+	ସ୍ଥିତି inode_file:
 		einfo("%s: creating file", path);
 		flags |= O_CREAT;
-		break;
-	case inode_dir:
+		ଭାଙ୍ଗ;
+	ସ୍ଥିତି inode_dir:
 		einfo("%s: creating directory", path);
 
 		/* We do not recursively create parents */
-		if (mkdirat(dirfd, name, mode) == -1 && errno != EEXIST) {
+		ଯଦି (mkdirat(dirfd, name, mode) == -1 && errno != EEXIST) {
 			eerror("%s: mkdirat: %s", applet, strerror (errno));
-			return -1;
+			ଫେରନ୍ତୁ -1;
 		}
 
-		break;
-	case inode_fifo:
+		ଭାଙ୍ଗ;
+	ସ୍ଥିତି inode_fifo:
 		einfo("%s: creating fifo", path);
 
-		if (mkfifoat(dirfd, name, mode) == -1 && errno != EEXIST) {
+		ଯଦି (mkfifoat(dirfd, name, mode) == -1 && errno != EEXIST) {
 			eerror("%s: mkfifo: %s", applet, strerror (errno));
-			return -1;
+			ଫେରନ୍ତୁ -1;
 		}
 
-		break;
-	case inode_unknown:
-		break;
+		ଭାଙ୍ଗ;
+	ସ୍ଥିତି inode_unknown:
+		ଭାଙ୍ଗ;
 	}
 	umask(mask);
 
-	if ((fd = openat(dirfd, name, flags, mode)) == -1) {
+	ଯଦି ((fd = openat(dirfd, name, flags, mode)) == -1) {
 		eerror("%s: open: %s", applet, strerror(errno));
-		return -1;
+		ଫେରନ୍ତୁ -1;
 	}
-	return fd;
+	ଫେରନ୍ତୁ fd;
 }
 
-static int do_check(char *path, uid_t uid, gid_t gid, mode_t mode, inode_t type,
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା do_check(ଅକ୍ଷର *path, uid_t uid, gid_t gid, mode_t mode, inode_t type,
 		bool trunc, bool chowner, bool writable, bool symlinks, bool selinux_on)
 {
-	int flags = O_NDELAY | O_NOCTTY | O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
-	const char *name = basename_c(path);
-	struct stat st;
-	int dirfd, fd;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags = O_NDELAY | O_NOCTTY | O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
+	ଅଚଳ ଅକ୍ଷର *name = basename_c(path);
+	ସଂରଚନା stat st;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା dirfd, fd;
 
-	if (writable) {
-		if (access(path, W_OK) == 0)
-			return 0;
-		if (errno != ENOENT || type == inode_unknown)
-			return -1;
+	ଯଦି (writable) {
+		ଯଦି (access(path, W_OK) == 0)
+			ଫେରନ୍ତୁ 0;
+		ଯଦି (errno != ENOENT || type == inode_unknown)
+			ଫେରନ୍ତୁ -1;
 	}
 
-	if (trunc && type == inode_file)
+	ଯଦି (trunc && type == inode_file)
 		flags |= O_TRUNC;
 
 	dirfd = get_dirfd(path, symlinks);
-	if ((fd = openat(dirfd, name, flags)) == -1 &&
+	ଯଦି ((fd = openat(dirfd, name, flags)) == -1 &&
 			(fd = do_create(type, path, dirfd, name, flags, mode)) == -1)
-		return -1;
+		ଫେରନ୍ତୁ -1;
 
-	if (fstat(fd, &st) == -1) {
+	ଯଦି (fstat(fd, &st) == -1) {
 		eerror("fstat: %s: %s", path, strerror(errno));
-		goto err;
+		ଯାଅ err;
 	}
 
-	if (type != inode_dir && S_ISDIR(st.st_mode)) {
+	ଯଦି (type != inode_dir && S_ISDIR(st.st_mode)) {
 		eerror("%s: is a directory", path);
-		goto err;
+		ଯାଅ err;
 	}
 
-	if (type != inode_file && S_ISREG(st.st_mode)) {
+	ଯଦି (type != inode_file && S_ISREG(st.st_mode)) {
 		eerror("%s: is a file", path);
-		goto err;
+		ଯାଅ err;
 	}
 
-	if (type != inode_fifo && S_ISFIFO(st.st_mode)) {
+	ଯଦି (type != inode_fifo && S_ISFIFO(st.st_mode)) {
 		eerror("%s: is a fifo", path);
-		goto err;
+		ଯାଅ err;
 	}
 
-	if (mode && (st.st_mode & 07777) != mode) {
-		if ((type != inode_dir) && (st.st_nlink > 1)) {
+	ଯଦି (mode && (st.st_mode & 07777) != mode) {
+		ଯଦି ((type != inode_dir) && (st.st_nlink > 1)) {
 			eerror("%s: chmod: Too many hard links to %s", applet, path);
-			goto err;
+			ଯାଅ err;
 		}
 
-		if (S_ISLNK(st.st_mode)) {
+		ଯଦି (S_ISLNK(st.st_mode)) {
 			eerror("%s: chmod: %s is a symbolic link", applet, path);
-			goto err;
+			ଯାଅ err;
 		}
 
 		einfo("%s: correcting mode", path);
-		if (fchmod(fd, mode)) {
+		ଯଦି (fchmod(fd, mode)) {
 			eerror("%s: chmod: %s", applet, strerror(errno));
-			goto err;
+			ଯାଅ err;
 		}
 	}
 
-	if (chowner && (st.st_uid != uid || st.st_gid != gid)) {
-		if ((type != inode_dir) && (st.st_nlink > 1)) {
+	ଯଦି (chowner && (st.st_uid != uid || st.st_gid != gid)) {
+		ଯଦି ((type != inode_dir) && (st.st_nlink > 1)) {
 			eerror("%s: chown: Too many hardlinks to %s", applet, path);
-			goto err;
+			ଯାଅ err;
 		}
 
-		if (S_ISLNK(st.st_mode)) {
+		ଯଦି (S_ISLNK(st.st_mode)) {
 			eerror("%s: chown: %s is a symbolic link", applet, path);
-			goto err;
+			ଯାଅ err;
 		}
 
 		einfo("%s: correcting owner", path);
-		if (fchown(fd, uid, gid)) {
+		ଯଦି (fchown(fd, uid, gid)) {
 			eerror("%s: chown: %s", applet, strerror(errno));
-			goto err;
+			ଯାଅ err;
 		}
 	}
 
-	if (selinux_on)
+	ଯଦି (selinux_on)
 		selinux_util_label(path);
 	close(fd);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 err:
 	close(fd);
-	return -1;
+	ଫେରନ୍ତୁ -1;
 }
 
-static int parse_owner(struct passwd **user, struct group **group, const char *owner)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା parse_owner(ସଂରଚନା passwd **user, ସଂରଚନା group **group, ଅଚଳ ଅକ୍ଷର *owner)
 {
-	char *u = xstrdup(owner), *g = strchr(u, ':');
-	int id = 0, retval = 0;
+	ଅକ୍ଷର *u = xstrdup(owner), *g = strchr(u, ':');
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା id = 0, retval = 0;
 
-	if (g)
+	ଯଦି (g)
 		*g++ = '\0';
 
-	if (user && *u) {
-		if (sscanf(u, "%d", &id) == 1)
+	ଯଦି (user && *u) {
+		ଯଦି (sscanf(u, "%d", &id) == 1)
 			*user = getpwuid((uid_t) id);
-		else
+		ଅନ୍ୟଥା
 			*user = getpwnam(u);
-		if (*user == NULL)
+		ଯଦି (*user == ଖାଲି)
 			retval = -1;
 	}
 
-	if (group && g && *g) {
-		if (sscanf(g, "%d", &id) == 1)
+	ଯଦି (group && g && *g) {
+		ଯଦି (sscanf(g, "%d", &id) == 1)
 			*group = getgrgid((gid_t) id);
-		else
+		ଅନ୍ୟଥା
 			*group = getgrnam(g);
-		if (*group == NULL)
+		ଯଦି (*group == ଖାଲି)
 			retval = -1;
 	}
 
-	free(u);
-	return retval;
+	ମୁକ୍ତ(u);
+	ଫେରନ୍ତୁ retval;
 }
 
-int main(int argc, char **argv)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର **argv)
 {
-	int opt;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା opt;
 	uid_t uid = geteuid();
 	gid_t gid = getgid();
 	mode_t mode = 0;
-	struct passwd *pw = NULL;
-	struct group *gr = NULL;
+	ସଂରଚନା passwd *pw = ଖାଲି;
+	ସଂରଚନା group *gr = ଖାଲି;
 	inode_t type = inode_unknown;
-	int retval = EXIT_SUCCESS;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା retval = EXIT_SUCCESS;
 	bool trunc = false;
 	bool chowner = false;
 	bool symlinks = false;
 	bool writable = false;
 	bool selinux_on = false;
-	char *path = NULL;
+	ଅକ୍ଷର *path = ଖାଲି;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1) {
-		switch (opt) {
-		case 'D':
+	ଯେତେବେଳେ ((opt = getopt_long(argc, argv, getoptstring, longopts, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା *) 0)) != -1) {
+		ବାଛ (opt) {
+		ସ୍ଥିତି 'D':
 			trunc = true;
 			/* falls through */
-		case 'd':
+		ସ୍ଥିତି 'd':
 			type = inode_dir;
-			break;
-		case 'F':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'F':
 			trunc = true;
 			/* falls through */
-		case 'f':
+		ସ୍ଥିତି 'f':
 			type = inode_file;
-			break;
-		case 'p':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'p':
 			type = inode_fifo;
-			break;
-		case 'm':
-			if (parse_mode(&mode, optarg) != 0)
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'm':
+			ଯଦି (parse_mode(&mode, optarg) != 0)
 				eerrorx("%s: invalid mode '%s'", applet, optarg);
-			break;
-		case 'o':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'o':
 			chowner = true;
-			if (parse_owner(&pw, &gr, optarg) != 0)
+			ଯଦି (parse_owner(&pw, &gr, optarg) != 0)
 				eerrorx("%s: owner '%s' not found", applet, optarg);
-			break;
-		case 's':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 's':
 #ifndef O_PATH
 			symlinks = true;
 #endif
-			break;
-		case 'W':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'W':
 			writable = true;
-			break;
+			ଭାଙ୍ଗ;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind >= argc)
+	ଯଦି (optind >= argc)
 		usage(EXIT_FAILURE);
 
-	if (pw) {
+	ଯଦି (pw) {
 		uid = pw->pw_uid;
 		gid = pw->pw_gid;
 	}
-	if (gr)
+	ଯଦି (gr)
 		gid = gr->gr_gid;
 
-	if (selinux_util_open() == 1)
+	ଯଦି (selinux_util_open() == 1)
 		selinux_on = true;
 
-	while (optind < argc) {
+	ଯେତେବେଳେ (optind < argc) {
 		path = clean_path(argv[optind]);
-		if (do_check(path, uid, gid, mode, type, trunc, chowner, writable, symlinks, selinux_on))
+		ଯଦି (do_check(path, uid, gid, mode, type, trunc, chowner, writable, symlinks, selinux_on))
 			retval = EXIT_FAILURE;
 		optind++;
-		free(path);
+		ମୁକ୍ତ(path);
 	}
 
-	if (selinux_on)
+	ଯଦି (selinux_on)
 		selinux_util_close();
 
-	return retval;
+	ଫେରନ୍ତୁ retval;
 }

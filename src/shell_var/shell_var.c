@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
 
-int main(int argc, char **argv)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର **argv)
 {
-	int i;
-	char *p;
-	int c;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+	ଅକ୍ଷର *p;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା c;
 
-	for (i = 1; i < argc; i++) {
+	ପାଇଁ (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		ଯଦି (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ଯେତେବେଳେ (*p) {
+			c = (unsigned ଅକ୍ଷର)*p++;
+			ଯଦି (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	ଫେରନ୍ତୁ EXIT_SUCCESS;
 }

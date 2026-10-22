@@ -15,67 +15,67 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <fnmatch.h>
-#include <getopt.h>
-#include <libgen.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <spawn.h>
-#include <sys/ioctl.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <time.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <inttypes.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <fcntl.h>
+#ଅନ୍ତର୍ଭାଵ <fnmatch.h>
+#ଅନ୍ତର୍ଭାଵ <getopt.h>
+#ଅନ୍ତର୍ଭାଵ <libgen.h>
+#ଅନ୍ତର୍ଭାଵ <poll.h>
+#ଅନ୍ତର୍ଭାଵ <signal.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <spawn.h>
+#ଅନ୍ତର୍ଭାଵ <sys/ioctl.h>
+#ଅନ୍ତର୍ଭାଵ <sys/file.h>
+#ଅନ୍ତର୍ଭାଵ <sys/stat.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <sys/wait.h>
+#ଅନ୍ତର୍ଭାଵ <termios.h>
+#ଅନ୍ତର୍ଭାଵ <time.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <stdbool.h>
+#ଅନ୍ତର୍ଭାଵ <inttypes.h>
 
-#if defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#ଯଦି defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 #  include <pty.h>
-#elif defined(__NetBSD__) || defined(__OpenBSD__)
+#ନଚେତଯଦି defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <util.h>
-#else
+#ଅନ୍ୟଥା
 #  include <libutil.h>
 #endif
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "misc.h"
-#include "timeutils.h"
-#include "plugin.h"
-#include "selinux.h"
-#include "_usage.h"
-#include "helpers.h"
+#ଅନ୍ତର୍ଭାଵ "einfo.h"
+#ଅନ୍ତର୍ଭାଵ "queue.h"
+#ଅନ୍ତର୍ଭାଵ "rc.h"
+#ଅନ୍ତର୍ଭାଵ "rc_exec.h"
+#ଅନ୍ତର୍ଭାଵ "misc.h"
+#ଅନ୍ତର୍ଭାଵ "timeutils.h"
+#ଅନ୍ତର୍ଭାଵ "plugin.h"
+#ଅନ୍ତର୍ଭାଵ "selinux.h"
+#ଅନ୍ତର୍ଭାଵ "_usage.h"
+#ଅନ୍ତର୍ଭାଵ "helpers.h"
 
 #define WAIT_TIMEOUT	60		/* seconds until we timeout */
 #define WARN_TIMEOUT	10		/* warn about this every N seconds */
 
-extern char **environ;
+ବାହ୍ୟ ଅକ୍ଷର **environ;
 
-const char *applet = NULL;
-const char *extraopts = "stop | start | restart | status | describe | zap";
-const char getoptstring[] = "dDsSvl:Z" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "debug",      0, NULL, 'd'},
-	{ "dry-run",    0, NULL, 'Z'},
-	{ "ifstarted",  0, NULL, 's'},
-	{ "ifstopped",  0, NULL, 'S'},
-	{ "nodeps",     0, NULL, 'D'},
-	{ "lockfd",     1, NULL, 'l'},
+ଅଚଳ ଅକ୍ଷର *applet = ଖାଲି;
+ଅଚଳ ଅକ୍ଷର *extraopts = "stop | start | restart | status | describe | zap";
+ଅଚଳ ଅକ୍ଷର getoptstring[] = "dDsSvl:Z" getoptstring_COMMON;
+ଅଚଳ ସଂରଚନା option longopts[] = {
+	{ "debug",      0, ଖାଲି, 'd'},
+	{ "dry-run",    0, ଖାଲି, 'Z'},
+	{ "ifstarted",  0, ଖାଲି, 's'},
+	{ "ifstopped",  0, ଖାଲି, 'S'},
+	{ "nodeps",     0, ଖାଲି, 'D'},
+	{ "lockfd",     1, ଖାଲି, 'l'},
 	longopts_COMMON
 };
-const char *const longopts_help[] = {
+ଅଚଳ ଅକ୍ଷର *ଅଚଳ longopts_help[] = {
 	"set xtrace when running the script",
 	"show what would be done",
 	"only run commands when started",
@@ -84,85 +84,85 @@ const char *const longopts_help[] = {
 	"fd of the exclusive lock from rc",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ଅଚଳ ଅକ୍ଷର *usagestring = ଖାଲି;
 
-static char *service, *runlevel, *ibsave, *prefix;
-static RC_DEPTREE *deptree;
-static RC_STRINGLIST *applet_list, *services, *tmplist;
-static RC_STRINGLIST *restart_services;
-static RC_STRINGLIST *need_services;
-static RC_STRINGLIST *use_services;
-static RC_STRINGLIST *want_services;
-static int exclusive_fd = -1, master_tty = -1;
-static bool in_background, deps, dry_run;
-static volatile bool sighup, skip_mark, timedout;
-static pid_t service_pid;
-static int signal_pipe[2] = { -1, -1 };
+ସ୍ଥିର ଅକ୍ଷର *service, *runlevel, *ibsave, *prefix;
+ସ୍ଥିର RC_DEPTREE *deptree;
+ସ୍ଥିର RC_STRINGLIST *applet_list, *services, *tmplist;
+ସ୍ଥିର RC_STRINGLIST *restart_services;
+ସ୍ଥିର RC_STRINGLIST *need_services;
+ସ୍ଥିର RC_STRINGLIST *use_services;
+ସ୍ଥିର RC_STRINGLIST *want_services;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା exclusive_fd = -1, master_tty = -1;
+ସ୍ଥିର bool in_background, deps, dry_run;
+ସ୍ଥିର ଅସ୍ଥିର bool sighup, skip_mark, timedout;
+ସ୍ଥିର pid_t service_pid;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା signal_pipe[2] = { -1, -1 };
 
-static RC_STRINGLIST *deptypes_b;	/* broken deps */
-static RC_STRINGLIST *deptypes_n;	/* needed deps */
-static RC_STRINGLIST *deptypes_nw;	/* need+want deps */
-static RC_STRINGLIST *deptypes_nwu;	/* need+want+use deps */
-static RC_STRINGLIST *deptypes_nwua;	/* need+want+use+after deps */
-static RC_STRINGLIST *deptypes_m;	/* needed deps for stopping */
-static RC_STRINGLIST *deptypes_mwua;	/* need+want+use+after deps for stopping */
+ସ୍ଥିର RC_STRINGLIST *deptypes_b;	/* broken deps */
+ସ୍ଥିର RC_STRINGLIST *deptypes_n;	/* needed deps */
+ସ୍ଥିର RC_STRINGLIST *deptypes_nw;	/* need+want deps */
+ସ୍ଥିର RC_STRINGLIST *deptypes_nwu;	/* need+want+use deps */
+ସ୍ଥିର RC_STRINGLIST *deptypes_nwua;	/* need+want+use+after deps */
+ସ୍ଥିର RC_STRINGLIST *deptypes_m;	/* needed deps for stopping */
+ସ୍ଥିର RC_STRINGLIST *deptypes_mwua;	/* need+want+use+after deps for stopping */
 
-static void
-handle_signal(int sig)
+ସ୍ଥିର ଶୂନ୍ୟ
+handle_signal(ପୂର୍ଣ୍ଣସଂଖ୍ୟା sig)
 {
-	int serrno = errno, status;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା serrno = errno, status;
 	pid_t pid;
-	const char *signame = NULL;
-	struct winsize ws;
+	ଅଚଳ ଅକ୍ଷର *signame = ଖାଲି;
+	ସଂରଚନା winsize ws;
 
-	switch (sig) {
-	case SIGHUP:
+	ବାଛ (sig) {
+	ସ୍ଥିତି SIGHUP:
 		sighup = true;
-		break;
+		ଭାଙ୍ଗ;
 
-	case SIGUSR1:
+	ସ୍ଥିତି SIGUSR1:
 		skip_mark = true;
-		break;
+		ଭାଙ୍ଗ;
 
-	case SIGCHLD:
-		while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-			if (signal_pipe[1] > -1 && pid == service_pid) {
-				if (write(signal_pipe[1], &status, sizeof(status)) == -1)
+	ସ୍ଥିତି SIGCHLD:
+		ଯେତେବେଳେ ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+			ଯଦି (signal_pipe[1] > -1 && pid == service_pid) {
+				ଯଦି (ଲିଖ(signal_pipe[1], &status, ଆକାର(status)) == -1)
 					eerror("%s: send: %s", applet, strerror(errno));
 			}
 		}
-		break;
+		ଭାଙ୍ଗ;
 
-	case SIGWINCH:
-		if (master_tty >= 0) {
+	ସ୍ଥିତି SIGWINCH:
+		ଯଦି (master_tty >= 0) {
 			ioctl(fileno(stdout), TIOCGWINSZ, &ws);
 			ioctl(master_tty, TIOCSWINSZ, &ws);
 		}
-		break;
+		ଭାଙ୍ଗ;
 
-	case SIGINT:
-		if (!signame)
+	ସ୍ଥିତି SIGINT:
+		ଯଦି (!signame)
 			signame = "SIGINT";
 		/* FALLTHROUGH */
-	case SIGTERM:
-		if (!signame)
+	ସ୍ଥିତି SIGTERM:
+		ଯଦି (!signame)
 			signame = "SIGTERM";
 		/* FALLTHROUGH */
-	case SIGQUIT:
-		if (!signame)
+	ସ୍ଥିତି SIGQUIT:
+		ଯଦି (!signame)
 			signame = "SIGQUIT";
 		/* Send the signal to our children too */
-		if (service_pid > 0)
+		ଯଦି (service_pid > 0)
 			kill(service_pid, sig);
 		eerror("%s: caught %s, aborting", applet, signame);
 		exit(EXIT_FAILURE);
 		/* NOTREACHED */
 
-	case SIGALRM:
+	ସ୍ଥିତି SIGALRM:
 		timedout = true;
-		break;
+		ଭାଙ୍ଗ;
 
-	default:
+	ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 		eerror("%s: caught unknown signal %d", applet, sig);
 	}
 
@@ -170,69 +170,69 @@ handle_signal(int sig)
 	errno = serrno;
 }
 
-static void
-unhotplug(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+unhotplug(ଶୂନ୍ୟ)
 {
-	if (unlinkat(rc_dirfd(RC_DIR_HOTPLUGGED), applet, 0) != 0 && errno != ENOENT)
+	ଯଦି (unlinkat(rc_dirfd(RC_DIR_HOTPLUGGED), applet, 0) != 0 && errno != ENOENT)
 		eerror("%s: unlink '%s/hotplugged/%s': %s", applet, rc_svcdir(), applet, strerror(errno));
 }
 
-static void
+ସ୍ଥିର ଶୂନ୍ୟ
 start_services(RC_STRINGLIST *list)
 {
 	RC_STRING *svc;
 	RC_SERVICE state = rc_service_state(applet);
 
-	if (!list || !(state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE | RC_SERVICE_STARTING | RC_SERVICE_STARTED)))
-		return;
+	ଯଦି (!list || !(state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE | RC_SERVICE_STARTING | RC_SERVICE_STARTED)))
+		ଫେରନ୍ତୁ;
 
 	TAILQ_FOREACH(svc, list, entries) {
-		if (!(rc_service_state(svc->value) & RC_SERVICE_STOPPED))
-			continue;
-		if (state & RC_SERVICE_INACTIVE || state & RC_SERVICE_WASINACTIVE) {
-			rc_service_schedule_start(applet, svc->value);
-			ewarn("WARNING: %s will start when %s has started", svc->value, applet);
-		} else {
-			service_start(svc->value);
+		ଯଦି (!(rc_service_state(svc->ମୂଲ୍ୟ) & RC_SERVICE_STOPPED))
+			ଜାରି;
+		ଯଦି (state & RC_SERVICE_INACTIVE || state & RC_SERVICE_WASINACTIVE) {
+			rc_service_schedule_start(applet, svc->ମୂଲ୍ୟ);
+			ewarn("WARNING: %s will start when %s has started", svc->ମୂଲ୍ୟ, applet);
+		} ଅନ୍ୟଥା {
+			service_start(svc->ମୂଲ୍ୟ);
 		}
 	}
 }
 
-static void
-restore_state(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+restore_state(ଶୂନ୍ୟ)
 {
 	RC_SERVICE state;
 
-	if (rc_in_plugin || exclusive_fd == -1)
-		return;
+	ଯଦି (rc_in_plugin || exclusive_fd == -1)
+		ଫେରନ୍ତୁ;
 	state = rc_service_state(applet);
-	if (state & RC_SERVICE_STOPPING) {
-		if (state & RC_SERVICE_WASINACTIVE)
+	ଯଦି (state & RC_SERVICE_STOPPING) {
+		ଯଦି (state & RC_SERVICE_WASINACTIVE)
 			rc_service_mark(applet, RC_SERVICE_INACTIVE);
-		else
+		ଅନ୍ୟଥା
 			rc_service_mark(applet, RC_SERVICE_STARTED);
 
-		if (rc_runlevel_stopping())
+		ଯଦି (rc_runlevel_stopping())
 			rc_service_mark(applet, RC_SERVICE_FAILED);
-	} else if (state & RC_SERVICE_STARTING) {
-		if (state & RC_SERVICE_WASINACTIVE)
+	} ଅନ୍ୟଥା ଯଦି (state & RC_SERVICE_STARTING) {
+		ଯଦି (state & RC_SERVICE_WASINACTIVE)
 			rc_service_mark(applet, RC_SERVICE_INACTIVE);
-		else
+		ଅନ୍ୟଥା
 			rc_service_mark(applet, RC_SERVICE_STOPPED);
 
-		if (rc_runlevel_starting())
+		ଯଦି (rc_runlevel_starting())
 			rc_service_mark(applet, RC_SERVICE_FAILED);
 	}
 	exclusive_fd = svc_unlock(applet, exclusive_fd);
 }
 
-static void
-cleanup(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+cleanup(ଶୂନ୍ୟ)
 {
 	restore_state();
 
-	if (!rc_in_plugin) {
-		if (restart_services)
+	ଯଦି (!rc_in_plugin) {
+		ଯଦି (restart_services)
 			start_services(restart_services);
 	}
 
@@ -253,26 +253,26 @@ cleanup(void)
 	rc_stringlist_free(services);
 	rc_stringlist_free(applet_list);
 	rc_stringlist_free(tmplist);
-	free(ibsave);
-	free(prefix);
-	free(runlevel);
-	free(service);
+	ମୁକ୍ତ(ibsave);
+	ମୁକ୍ତ(prefix);
+	ମୁକ୍ତ(runlevel);
+	ମୁକ୍ତ(service);
 }
 
-static void
-svc_getenv(const char *svc)
+ସ୍ଥିର ଶୂନ୍ୟ
+svc_getenv(ଅଚଳ ଅକ୍ଷର *svc)
 {
 	RC_STRINGLIST *reexports = rc_deptree_depend(deptree, svc, "reexport");
 	RC_STRING *reexport;
-	char *var = NULL;
+	ଅକ୍ଷର *var = ଖାଲି;
 
 	TAILQ_FOREACH(reexport, reexports, entries) {
-		if (rc_service_getenv(svc, reexport->value, &var) == -1)
-			continue;
-		setenv(reexport->value, var, true);
+		ଯଦି (rc_service_getenv(svc, reexport->ମୂଲ୍ୟ, &var) == -1)
+			ଜାରି;
+		setenv(reexport->ମୂଲ୍ୟ, var, true);
 	}
 
-	free(var);
+	ମୁକ୍ତ(var);
 	rc_stringlist_free(reexports);
 }
 
@@ -283,14 +283,14 @@ svc_getenv(const char *svc)
  * Why don't we use (f)printf, as it is thread-safe through POSIX already?
  * Bug: 360013
  */
-static int
-write_prefix(const char *buffer, size_t bytes, bool *prefixed)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+write_prefix(ଅଚଳ ଅକ୍ଷର *buffer, size_t bytes, bool *prefixed)
 {
 	size_t i, j;
-	const char *ec = ecolor(ECOLOR_HILITE);
-	const char *ec_normal = ecolor(ECOLOR_NORMAL);
+	ଅଚଳ ଅକ୍ଷର *ec = ecolor(ECOLOR_HILITE);
+	ଅଚଳ ଅକ୍ଷର *ec_normal = ecolor(ECOLOR_NORMAL);
 	ssize_t ret = 0;
-	int fd = fileno(stdout), lock_fd = -1;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd = fileno(stdout), lock_fd = -1;
 
 	/*
 	 * Lock the prefix.
@@ -298,77 +298,77 @@ write_prefix(const char *buffer, size_t bytes, bool *prefixed)
 	 */
 	lock_fd = openat(rc_dirfd(RC_DIR_SVCDIR), "prefix.lock", O_WRONLY | O_CREAT, 0664);
 
-	if (lock_fd != -1) {
-		while (flock(lock_fd, LOCK_EX) != 0) {
-			if (errno != EINTR) {
+	ଯଦି (lock_fd != -1) {
+		ଯେତେବେଳେ (flock(lock_fd, LOCK_EX) != 0) {
+			ଯଦି (errno != EINTR) {
 				ewarnv("flock() failed: %s", strerror(errno));
-				break;
+				ଭାଙ୍ଗ;
 			}
 		}
 	}
-	else
+	ଅନ୍ୟଥା
 		ewarnv("Couldn't open the prefix lock, please make sure you have enough permissions");
 
-	for (i = 0; i < bytes; i++) {
+	ପାଇଁ (i = 0; i < bytes; i++) {
 		/* We don't prefix eend calls (cursor up) */
-		if (buffer[i] == '\033' && !*prefixed) {
-			for (j = i + 1; j < bytes; j++) {
-				if (buffer[j] == 'A')
+		ଯଦି (buffer[i] == '\033' && !*prefixed) {
+			ପାଇଁ (j = i + 1; j < bytes; j++) {
+				ଯଦି (buffer[j] == 'A')
 					*prefixed = true;
-				if (isalpha((unsigned int)buffer[j]))
-					break;
+				ଯଦି (isalpha((unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା)buffer[j]))
+					ଭାଙ୍ଗ;
 			}
 		}
 
-		if (!*prefixed) {
-			ret += write(fd, ec, strlen(ec));
-			ret += write(fd, prefix, strlen(prefix));
-			ret += write(fd, ec_normal, strlen(ec_normal));
-			ret += write(fd, "|", 1);
+		ଯଦି (!*prefixed) {
+			ret += ଲିଖ(fd, ec, strlen(ec));
+			ret += ଲିଖ(fd, prefix, strlen(prefix));
+			ret += ଲିଖ(fd, ec_normal, strlen(ec_normal));
+			ret += ଲିଖ(fd, "|", 1);
 			*prefixed = true;
 		}
 
-		if (buffer[i] == '\n')
+		ଯଦି (buffer[i] == '\n')
 			*prefixed = false;
-		ret += write(fd, buffer + i, 1);
+		ret += ଲିଖ(fd, buffer + i, 1);
 	}
 
 	/* Release the lock */
 	close(lock_fd);
 
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 
-static int
-svc_exec(const char *command)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+svc_exec(ଅଚଳ ଅକ୍ଷର *command)
 {
-	int ret = -1, fdout = fileno(stdout), tmp;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = -1, fdout = fileno(stdout), tmp;
 	posix_spawn_file_actions_t tty;
-	struct termios tt;
-	struct winsize ws;
-	int flags = 0;
-	struct pollfd fd[2];
+	ସଂରଚନା termios tt;
+	ସଂରଚନା winsize ws;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags = 0;
+	ସଂରଚନା pollfd fd[2];
 	bool prefixed = false;
-	int slave_tty;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା slave_tty;
 	sigset_t sigchldmask;
 	sigset_t oldmask;
-	char *openrc_sh = NULL;
-	const char *argv[] = {
+	ଅକ୍ଷର *openrc_sh = ଖାଲି;
+	ଅଚଳ ଅକ୍ଷର *argv[] = {
 		RC_LIBEXECDIR "/sh/openrc-run.sh",
 		service,
 		command,
-		NULL
+		ଖାଲି
 	};
 
 	/* Setup our signal pipe */
-	if (pipe2(signal_pipe, O_CLOEXEC) == -1) {
+	ଯଦି (pipe2(signal_pipe, O_CLOEXEC) == -1) {
 		eerror("%s: pipe2: %s", applet, applet);
-		return 1;
+		ଫେରନ୍ତୁ 1;
 	}
 
-	if ((errno = posix_spawn_file_actions_init(&tty))) {
+	ଯଦି ((errno = posix_spawn_file_actions_init(&tty))) {
 		eerror("%s: posix_spawn_file_actions_init: %s", applet, strerror(errno));
-		return 1;
+		ଫେରନ୍ତୁ 1;
 	}
 
 	/* Open a pty for our prefixed output
@@ -377,73 +377,73 @@ svc_exec(const char *command)
 	 * The only loss is that we can no longer tell the difference
 	 * between the child's stdout or stderr */
 	master_tty = slave_tty = -1;
-	if (prefix && isatty(fdout)) {
+	ଯଦି (prefix && isatty(fdout)) {
 		tcgetattr(fdout, &tt);
 		ioctl(fdout, TIOCGWINSZ, &ws);
 
 		/* If the below call fails due to not enough ptys then we don't
 		 * prefix the output, but we still work */
-		if (openpty(&master_tty, &slave_tty, NULL, &tt, &ws) == 0) {
-			if (master_tty >= 0 &&
+		ଯଦି (openpty(&master_tty, &slave_tty, ଖାଲି, &tt, &ws) == 0) {
+			ଯଦି (master_tty >= 0 &&
 			    (flags = fcntl(master_tty, F_GETFD, 0)) == 0)
 				fcntl(master_tty, F_SETFD,
 				    flags | FD_CLOEXEC);
 
-			if (slave_tty >= 0 &&
+			ଯଦି (slave_tty >= 0 &&
 			    (flags = fcntl(slave_tty, F_GETFD, 0)) == 0)
 				fcntl(slave_tty, F_SETFD,
 				    flags | FD_CLOEXEC);
 
-			if ((errno = posix_spawn_file_actions_adddup2(&tty,
+			ଯଦି ((errno = posix_spawn_file_actions_adddup2(&tty,
 				    slave_tty, STDOUT_FILENO)) ||
 			    (errno = posix_spawn_file_actions_adddup2(&tty,
 				    slave_tty, STDERR_FILENO))) {
 				eerror("%s: posix_spawn_file_actions_adddup2: %s",
 				    applet, strerror(errno));
-				return 1;
+				ଫେରନ୍ତୁ 1;
 			}
 		}
 	}
 
-	if (faccessat(rc_dirfd(RC_DIR_SVCDIR), "openrc-run.sh", F_OK, 0) == 0) {
+	ଯଦି (faccessat(rc_dirfd(RC_DIR_SVCDIR), "openrc-run.sh", F_OK, 0) == 0) {
 		xasprintf(&openrc_sh, "%s/openrc-run.sh", rc_svcdir());
 		argv[0] = openrc_sh;
 	}
 
 	einfov("Executing: %s %s %s", argv[0], service, command);
-	if ((errno = posix_spawn(&service_pid, argv[0], &tty, NULL, UNCONST(argv), environ))) {
+	ଯଦି ((errno = posix_spawn(&service_pid, argv[0], &tty, ଖାଲି, UNCONST(argv), environ))) {
 		eerror("%s: exec '%s': %s", service, argv[0], strerror(errno));
-		return 1;
+		ଫେରନ୍ତୁ 1;
 	}
 
 	posix_spawn_file_actions_destroy(&tty);
-	free(openrc_sh);
+	ମୁକ୍ତ(openrc_sh);
 
 	fd[0].fd = signal_pipe[0];
 	fd[1].fd = master_tty;
 	fd[0].events = fd[1].events = POLLIN;
 	fd[0].revents = fd[1].revents = 0;
 
-	for (;;) {
-		if (poll(fd, master_tty >= 0 ? 2 : 1, -1) == -1) {
-			if (errno == EINTR)
-				continue;
+	ପାଇଁ (;;) {
+		ଯଦି (poll(fd, master_tty >= 0 ? 2 : 1, -1) == -1) {
+			ଯଦି (errno == EINTR)
+				ଜାରି;
 			eerror("%s: poll: %s", applet, strerror(errno));
-			break;
+			ଭାଙ୍ଗ;
 		}
 
-		if (fd[1].revents & (POLLIN | POLLHUP)) {
-			char buffer[BUFSIZ];
-			write_prefix(buffer, read(master_tty, buffer, BUFSIZ), &prefixed);
+		ଯଦି (fd[1].revents & (POLLIN | POLLHUP)) {
+			ଅକ୍ଷର buffer[BUFSIZ];
+			write_prefix(buffer, ପଠ(master_tty, buffer, BUFSIZ), &prefixed);
 		}
 
 		/* signal_pipe receives service_pid's exit status */
-		if (fd[0].revents & (POLLIN | POLLHUP)) {
-			if (errno = 0, read(signal_pipe[0], &ret, sizeof(ret)) < (ssize_t)sizeof(ret))
+		ଯଦି (fd[0].revents & (POLLIN | POLLHUP)) {
+			ଯଦି (errno = 0, ପଠ(signal_pipe[0], &ret, ଆକାର(ret)) < (ssize_t)ଆକାର(ret))
 				eerror("%s: receive failed: %s", applet, errno ? strerror(errno) : "short read");
-			else if ((ret = WEXITSTATUS(ret)) != 0 && errno == ECHILD) /* killall5 -9 could cause this */
+			ଅନ୍ୟଥା ଯଦି ((ret = WEXITSTATUS(ret)) != 0 && errno == ECHILD) /* killall5 -9 could cause this */
 				ret = 0;
-			break;
+			ଭାଙ୍ଗ;
 		}
 	}
 
@@ -458,9 +458,9 @@ svc_exec(const char *command)
 	signal_pipe[0] = signal_pipe[1] = -1;
 	close(tmp);
 
-	sigprocmask (SIG_SETMASK, &oldmask, NULL);
+	sigprocmask (SIG_SETMASK, &oldmask, ଖାଲି);
 
-	if (master_tty >= 0) {
+	ଯଦି (master_tty >= 0) {
 		/* Why did we do this? */
 		/* signal (SIGWINCH, SIG_IGN); */
 		close(master_tty);
@@ -469,68 +469,68 @@ svc_exec(const char *command)
 
 	service_pid = 0;
 
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 
-static bool
-svc_wait(const char *svc)
+ସ୍ଥିର bool
+svc_wait(ଅଚଳ ଅକ୍ଷର *svc)
 {
-	int fd;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd;
 	bool forever = false;
 	RC_STRINGLIST *keywords;
-	const char *base = basename_c(svc);
-	int timeout = WAIT_TIMEOUT;
+	ଅଚଳ ଅକ୍ଷର *base = basename_c(svc);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା timeout = WAIT_TIMEOUT;
 	bool retval = false;
 
 	/* Some services don't have a timeout, like fsck */
 	keywords = rc_deptree_depend(deptree, svc, "keyword");
-	if (rc_stringlist_find(keywords, "-timeout") || rc_stringlist_find(keywords, "notimeout"))
+	ଯଦି (rc_stringlist_find(keywords, "-timeout") || rc_stringlist_find(keywords, "notimeout"))
 		forever = true;
 	rc_stringlist_free(keywords);
 
-	if ((fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), base, O_RDONLY | O_NONBLOCK)) == -1)
-		return errno == ENOENT;
+	ଯଦି ((fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), base, O_RDONLY | O_NONBLOCK)) == -1)
+		ଫେରନ୍ତୁ errno == ENOENT;
 
 	timedout = false;
-	for (;;) {
-		if (!forever)
+	ପାଇଁ (;;) {
+		ଯଦି (!forever)
 			alarm(WARN_TIMEOUT);
 
-		if (flock(fd, LOCK_SH) == 0) {
+		ଯଦି (flock(fd, LOCK_SH) == 0) {
 			retval = true;
-			break;
+			ଭାଙ୍ଗ;
 		}
 
-		if (errno != EINTR)
-			break;
+		ଯଦି (errno != EINTR)
+			ଭାଙ୍ଗ;
 
-		if (!forever && timedout) {
+		ଯଦି (!forever && timedout) {
 			timedout = false;
-			if ((timeout -= WARN_TIMEOUT) > 0)
+			ଯଦି ((timeout -= WARN_TIMEOUT) > 0)
 				ewarn("%s: waiting for %s (%d seconds)", applet, base, timeout);
-			else
-				break;
+			ଅନ୍ୟଥା
+				ଭାଙ୍ଗ;
 		}
 	}
 
 	alarm(0);
 	close(fd);
-	return retval;
+	ଫେରନ୍ତୁ retval;
 }
 
-static void
-get_started_services(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+get_started_services(ଶୂନ୍ୟ)
 {
 	RC_STRINGLIST *tmp = rc_services_in_state(RC_SERVICE_INACTIVE);
 
 	rc_stringlist_free(restart_services);
 	restart_services = rc_services_in_state(RC_SERVICE_STARTED);
 	TAILQ_CONCAT(restart_services, tmp, entries);
-	free(tmp);
+	ମୁକ୍ତ(tmp);
 }
 
-static void
-setup_deptypes(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+setup_deptypes(ଶୂନ୍ୟ)
 {
 	deptypes_b = rc_stringlist_new();
 	rc_stringlist_add(deptypes_b, "broken");
@@ -563,43 +563,43 @@ setup_deptypes(void)
 	rc_stringlist_add(deptypes_mwua, "beforeme");
 }
 
-static void
-svc_start_check(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+svc_start_check(ଶୂନ୍ୟ)
 {
-	int ret = EXIT_FAILURE;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = EXIT_FAILURE;
 	RC_SERVICE state;
 
 	state = rc_service_state(applet);
 
-	if (in_background) {
-		if (!(state & (RC_SERVICE_INACTIVE | RC_SERVICE_STOPPED)))
-			goto exit;
+	ଯଦି (in_background) {
+		ଯଦି (!(state & (RC_SERVICE_INACTIVE | RC_SERVICE_STOPPED)))
+			ଯାଅ exit;
 
-		if (rc_yesno(getenv("IN_HOTPLUG")))
+		ଯଦି (rc_yesno(getenv("IN_HOTPLUG")))
 			rc_service_mark(applet, RC_SERVICE_HOTPLUGGED);
-		if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
+		ଯଦି (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
 			ewarnx("WARNING: %s will be started in the next runlevel", applet);
 	}
 
-	if (state & RC_SERVICE_STARTED) {
+	ଯଦି (state & RC_SERVICE_STARTED) {
 		ewarn("WARNING: %s has already been started", applet);
 		ret = EXIT_SUCCESS;
-		goto exit;
-	} else if (state & RC_SERVICE_INACTIVE && !in_background) {
+		ଯାଅ exit;
+	} ଅନ୍ୟଥା ଯଦି (state & RC_SERVICE_INACTIVE && !in_background) {
 		ewarnx("WARNING: %s has already started, but is inactive", applet);
 	}
 
-	if (exclusive_fd == -1)
+	ଯଦି (exclusive_fd == -1)
 		exclusive_fd = svc_lock(applet, !deps);
-	if (exclusive_fd == -1) {
-		if (errno != EWOULDBLOCK) {
+	ଯଦି (exclusive_fd == -1) {
+		ଯଦି (errno != EWOULDBLOCK) {
 			eerror("%s: failed to acquire lock: %s", applet, strerror(errno));
-			goto exit;
+			ଯାଅ exit;
 		}
 
-		if (state & RC_SERVICE_STOPPING)
+		ଯଦି (state & RC_SERVICE_STOPPING)
 			ewarnx("WARNING: %s is stopping", applet);
-		else
+		ଅନ୍ୟଥା
 			ewarnx("WARNING: %s is already starting", applet);
 	}
 	fcntl(exclusive_fd, F_SETFD, fcntl(exclusive_fd, F_GETFD, 0) | FD_CLOEXEC);
@@ -607,157 +607,157 @@ svc_start_check(void)
 	rc_service_mark(applet, RC_SERVICE_STARTING);
 	rc_plugin_run(RC_HOOK_SERVICE_START_IN, applet);
 
-	return;
+	ଫେରନ୍ତୁ;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
 	exit(ret);
 }
 
-static void
-svc_start_deps(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+svc_start_deps(ଶୂନ୍ୟ)
 {
 	bool first;
 	RC_STRING *svc, *svc2;
 	RC_SERVICE state;
-	int depoptions = RC_DEP_TRACE;
-	size_t len, svc_count;
-	char *tmp;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା depoptions = RC_DEP_TRACE;
+	size_t len, svc_ଗଣନା;
+	ଅକ୍ଷର *tmp;
 	FILE *mem;
 	pid_t pid;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	ଯଦି (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL)) {
+	ଯଦି (!deptree && ((deptree = _rc_deptree_load(0, ଖାଲି)) == ଖାଲି)) {
 		eerror("failed to load deptree");
-		goto exit;
+		ଯାଅ exit;
 	}
 
-	if (!deptypes_b)
+	ଯଦି (!deptypes_b)
 		setup_deptypes();
 
 	services = rc_deptree_depends(deptree, deptypes_b, applet_list,
 	    runlevel, 0);
-	if (TAILQ_FIRST(services)) {
+	ଯଦି (TAILQ_FIRST(services)) {
 		eerrorn("ERROR: %s needs service(s) ", applet);
 		first = true;
 		TAILQ_FOREACH(svc, services, entries) {
-			if (first)
+			ଯଦି (first)
 				first = false;
-			else
+			ଅନ୍ୟଥା
 				fprintf(stderr, ", ");
-			fprintf(stderr, "%s", svc->value);
+			fprintf(stderr, "%s", svc->ମୂଲ୍ୟ);
 		}
 		fprintf(stderr, "\n");
-		goto exit;
+		ଯାଅ exit;
 	}
 	rc_stringlist_free(services);
-	services = NULL;
+	services = ଖାଲି;
 
 	need_services = rc_deptree_depends(deptree, deptypes_n, applet_list, runlevel, depoptions);
 	want_services = rc_deptree_depends(deptree, deptypes_nw, applet_list, runlevel, depoptions);
 	use_services = rc_deptree_depends(deptree, deptypes_nwu, applet_list, runlevel, depoptions);
 
-	if (!rc_runlevel_starting()) {
+	ଯଦି (!rc_runlevel_starting()) {
 		TAILQ_FOREACH(svc, use_services, entries) {
-			state = rc_service_state(svc->value);
+			state = rc_service_state(svc->ମୂଲ୍ୟ);
 			/* Don't stop failed services again.
 			 * If you remove this check, ensure that the exclusive file isn't created. */
-			if (state & RC_SERVICE_FAILED && rc_runlevel_starting())
-				continue;
-			if (state & RC_SERVICE_STOPPED) {
-				if (dry_run) {
-					printf(" %s", svc->value);
-					continue;
+			ଯଦି (state & RC_SERVICE_FAILED && rc_runlevel_starting())
+				ଜାରି;
+			ଯଦି (state & RC_SERVICE_STOPPED) {
+				ଯଦି (dry_run) {
+					printf(" %s", svc->ମୂଲ୍ୟ);
+					ଜାରି;
 				}
 				/* FIXME(NRK): service_start() can return -1 on
 				 * failure and feeding that to rc_waitpid seems
 				 * very suspicious. needs investigation.
 				 */
-				pid = service_start(svc->value);
-				if (!rc_conf_yesno("rc_parallel"))
+				pid = service_start(svc->ମୂଲ୍ୟ);
+				ଯଦି (!rc_conf_yesno("rc_parallel"))
 					rc_waitpid(pid);
 			}
 		}
 	}
 
-	if (dry_run)
-		return;
+	ଯଦି (dry_run)
+		ଫେରନ୍ତୁ;
 
 	/* Now wait for them to start */
 	services = rc_deptree_depends(deptree, deptypes_nwua, applet_list, runlevel, depoptions);
 	/* We use tmplist to hold our scheduled by list */
 	tmplist = rc_stringlist_new();
 	TAILQ_FOREACH(svc, services, entries) {
-		state = rc_service_state(svc->value);
-		if (state & RC_SERVICE_STARTED) {
-			svc_getenv(svc->value);
-			continue;
+		state = rc_service_state(svc->ମୂଲ୍ୟ);
+		ଯଦି (state & RC_SERVICE_STARTED) {
+			svc_getenv(svc->ମୂଲ୍ୟ);
+			ଜାରି;
 		}
 
 		/* Don't wait for services which went inactive but are
 		 * now in starting state which we are after */
-		if (state & RC_SERVICE_STARTING && state & RC_SERVICE_WASINACTIVE)
+		ଯଦି (state & RC_SERVICE_STARTING && state & RC_SERVICE_WASINACTIVE)
 		{
-			if (!rc_stringlist_find(need_services, svc->value) &&
-					!rc_stringlist_find(want_services, svc->value) &&
-					!rc_stringlist_find(use_services, svc->value))
-				continue;
+			ଯଦି (!rc_stringlist_find(need_services, svc->ମୂଲ୍ୟ) &&
+					!rc_stringlist_find(want_services, svc->ମୂଲ୍ୟ) &&
+					!rc_stringlist_find(use_services, svc->ମୂଲ୍ୟ))
+				ଜାରି;
 		}
 
-		if (!svc_wait(svc->value))
-			eerror("%s: timed out waiting for %s", applet, svc->value);
-		state = rc_service_state(svc->value);
-		if (state & RC_SERVICE_STARTED) {
-			svc_getenv(svc->value);
-			continue;
+		ଯଦି (!svc_wait(svc->ମୂଲ୍ୟ))
+			eerror("%s: timed out waiting for %s", applet, svc->ମୂଲ୍ୟ);
+		state = rc_service_state(svc->ମୂଲ୍ୟ);
+		ଯଦି (state & RC_SERVICE_STARTED) {
+			svc_getenv(svc->ମୂଲ୍ୟ);
+			ଜାରି;
 		}
-		if (rc_stringlist_find(need_services, svc->value)) {
-			if (state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE)) {
-				rc_stringlist_add(tmplist, svc->value);
-			} else if (!TAILQ_FIRST(tmplist)) {
-				eerror("ERROR: cannot start %s as %s would not start", applet, svc->value);
-				goto exit;
+		ଯଦି (rc_stringlist_find(need_services, svc->ମୂଲ୍ୟ)) {
+			ଯଦି (state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE)) {
+				rc_stringlist_add(tmplist, svc->ମୂଲ୍ୟ);
+			} ଅନ୍ୟଥା ଯଦି (!TAILQ_FIRST(tmplist)) {
+				eerror("ERROR: cannot start %s as %s would not start", applet, svc->ମୂଲ୍ୟ);
+				ଯାଅ exit;
 			}
 		}
 	}
 
-	if (TAILQ_FIRST(tmplist)) {
+	ଯଦି (TAILQ_FIRST(tmplist)) {
 		/* Set the state now, then unlink our exclusive so that
 		   our scheduled list is preserved */
 		rc_service_mark(applet, RC_SERVICE_STOPPED);
 
 		rc_stringlist_free(use_services);
-		use_services = NULL;
+		use_services = ଖାଲି;
 		mem = xopen_memstream(&tmp, &len);
-		svc_count = 0;
+		svc_ଗଣନା = 0;
 		TAILQ_FOREACH(svc, tmplist, entries) {
-			rc_service_schedule_start(svc->value, applet);
-			use_services = rc_deptree_depend(deptree, "iprovide", svc->value);
+			rc_service_schedule_start(svc->ମୂଲ୍ୟ, applet);
+			use_services = rc_deptree_depend(deptree, "iprovide", svc->ମୂଲ୍ୟ);
 			TAILQ_FOREACH(svc2, use_services, entries)
-			    rc_service_schedule_start(svc2->value, applet);
+			    rc_service_schedule_start(svc2->ମୂଲ୍ୟ, applet);
 			rc_stringlist_free(use_services);
-			use_services = NULL;
-			if (svc_count > 0)
+			use_services = ଖାଲି;
+			ଯଦି (svc_ଗଣନା > 0)
 				fputs(", ", mem);
-			fputs(svc->value, mem);
-			++svc_count;
+			fputs(svc->ମୂଲ୍ୟ, mem);
+			++svc_ଗଣନା;
 		}
 		xclose_memstream(mem);
 		rc_stringlist_free(tmplist);
-		tmplist = NULL;
-		ewarnx("WARNING: %s will start when %s %s started", applet, tmp, svc_count > 1 ? "have" : "has");
-		free(tmp);
+		tmplist = ଖାଲି;
+		ewarnx("WARNING: %s will start when %s %s started", applet, tmp, svc_ଗଣନା > 1 ? "have" : "has");
+		ମୁକ୍ତ(tmp);
 	}
 
 	rc_stringlist_free(tmplist);
-	tmplist = NULL;
+	tmplist = ଖାଲି;
 	rc_stringlist_free(services);
-	services = NULL;
+	services = ଖାଲି;
 
-	return;
+	ଫେରନ୍ତୁ;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
@@ -765,51 +765,51 @@ exit:
 }
 
 
-static void set_reexports(void)
+ସ୍ଥିର ଶୂନ୍ୟ set_reexports(ଶୂନ୍ୟ)
 {
 	RC_STRINGLIST *list = rc_deptree_depend(deptree, applet, "reexport");
 	RC_STRING *envvar;
 	size_t size;
-	char *buf;
+	ଅକ୍ଷର *buf;
 	FILE *fp;
 
 	fp = xopen_memstream(&buf, &size);
 
 	fputs("RC_REEXPORT=", fp);
 	TAILQ_FOREACH(envvar, list, entries)
-		fprintf(fp, "%s ", envvar->value);
+		fprintf(fp, "%s ", envvar->ମୂଲ୍ୟ);
 
 	fclose(fp);
 	putenv(buf);
 	rc_stringlist_free(list);
 }
 
-static void svc_start_real(void)
+ସ୍ଥିର ଶୂନ୍ୟ svc_start_real(ଶୂନ୍ୟ)
 {
 	bool started;
 	RC_STRING *svc, *svc2;
 
 	set_reexports();
 
-	if (ibsave)
+	ଯଦି (ibsave)
 		setenv("IN_BACKGROUND", ibsave, 1);
 	rc_plugin_run(RC_HOOK_SERVICE_START_NOW, applet);
 	skip_mark = false;
 	started = (svc_exec("start") == 0);
-	if (ibsave)
+	ଯଦି (ibsave)
 		unsetenv("IN_BACKGROUND");
 
-	if (!started) {
+	ଯଦି (!started) {
 		rc_plugin_run(RC_HOOK_SERVICE_START_DONE, applet);
 		rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
 	}
 
-	if (rc_service_state(applet) & RC_SERVICE_INACTIVE)
+	ଯଦି (rc_service_state(applet) & RC_SERVICE_INACTIVE)
 		ewarnx("WARNING: %s has started, but is inactive", applet);
-	else if (!started)
+	ଅନ୍ୟଥା ଯଦି (!started)
 		eerrorx("ERROR: %s failed to start", applet);
 
-	if (!skip_mark)
+	ଯଦି (!skip_mark)
 		rc_service_mark(applet, RC_SERVICE_STARTED);
 	exclusive_fd = svc_unlock(applet, exclusive_fd);
 	rc_plugin_run(RC_HOOK_SERVICE_START_DONE, applet);
@@ -817,177 +817,177 @@ static void svc_start_real(void)
 	/* Now start any scheduled services */
 	services = rc_services_scheduled(applet);
 	TAILQ_FOREACH(svc, services, entries)
-	    if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
-		    service_start(svc->value);
+	    ଯଦି (rc_service_state(svc->ମୂଲ୍ୟ) & RC_SERVICE_STOPPED)
+		    service_start(svc->ମୂଲ୍ୟ);
 	rc_stringlist_free(services);
-	services = NULL;
+	services = ଖାଲି;
 
 	/* Do the same for any services we provide */
-	if (deptree) {
+	ଯଦି (deptree) {
 		tmplist = rc_deptree_depend(deptree, "iprovide", applet);
 		TAILQ_FOREACH(svc, tmplist, entries) {
-			services = rc_services_scheduled(svc->value);
+			services = rc_services_scheduled(svc->ମୂଲ୍ୟ);
 			TAILQ_FOREACH(svc2, services, entries)
-				if (rc_service_state(svc2->value) & RC_SERVICE_STOPPED)
-					service_start(svc2->value);
+				ଯଦି (rc_service_state(svc2->ମୂଲ୍ୟ) & RC_SERVICE_STOPPED)
+					service_start(svc2->ମୂଲ୍ୟ);
 			rc_stringlist_free(services);
-			services = NULL;
+			services = ଖାଲି;
 		}
 		rc_stringlist_free(tmplist);
-		tmplist = NULL;
+		tmplist = ଖାଲି;
 	}
 
 	rc_plugin_run(RC_HOOK_SERVICE_START_OUT, applet);
 }
 
-static int
-svc_start(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+svc_start(ଶୂନ୍ୟ)
 {
-	if (dry_run)
+	ଯଦି (dry_run)
 		einfon("start:");
-	else
+	ଅନ୍ୟଥା
 		svc_start_check();
 
-	if (deps)
+	ଯଦି (deps)
 		svc_start_deps();
 
-	if (dry_run)
+	ଯଦି (dry_run)
 		printf(" %s\n", applet);
-	else
+	ଅନ୍ୟଥା
 		svc_start_real();
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
 svc_stop_check(RC_SERVICE *state)
 {
 	*state = rc_service_state(applet);
 
-	if (rc_runlevel_stopping() && *state & RC_SERVICE_FAILED)
-		goto exit;
+	ଯଦି (rc_runlevel_stopping() && *state & RC_SERVICE_FAILED)
+		ଯାଅ exit;
 
-	if (in_background && !(*state & (RC_SERVICE_STARTED) && !(*state & RC_SERVICE_INACTIVE)))
-		goto exit;
+	ଯଦି (in_background && !(*state & (RC_SERVICE_STARTED) && !(*state & RC_SERVICE_INACTIVE)))
+		ଯାଅ exit;
 
-	if (*state & RC_SERVICE_STOPPED) {
+	ଯଦି (*state & RC_SERVICE_STOPPED) {
 		ewarn("WARNING: %s is already stopped", applet);
-		return 1;
+		ଫେରନ୍ତୁ 1;
 	}
 
-	if (exclusive_fd == -1)
+	ଯଦି (exclusive_fd == -1)
 		exclusive_fd = svc_lock(applet, !deps);
-	if (exclusive_fd == -1) {
-		if (errno != EWOULDBLOCK)
+	ଯଦି (exclusive_fd == -1) {
+		ଯଦି (errno != EWOULDBLOCK)
 			eerror("%s: failed to acquire lock: %s", applet, strerror(errno));
-		else if (*state & RC_SERVICE_STOPPING)
+		ଅନ୍ୟଥା ଯଦି (*state & RC_SERVICE_STOPPING)
 			ewarn("WARNING: %s is already stopping", applet);
-		else
+		ଅନ୍ୟଥା
 			eerror("ERROR: %s stopped by something else", applet);
-		goto exit;
+		ଯାଅ exit;
 	}
 	fcntl(exclusive_fd, F_SETFD, fcntl(exclusive_fd, F_GETFD, 0) | FD_CLOEXEC);
 
 	rc_service_mark(applet, RC_SERVICE_STOPPING);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_IN, applet);
 
-	if (!rc_runlevel_stopping()) {
-		if (rc_service_in_runlevel(applet, RC_LEVEL_SYSINIT))
+	ଯଦି (!rc_runlevel_stopping()) {
+		ଯଦି (rc_service_in_runlevel(applet, RC_LEVEL_SYSINIT))
 			ewarn("WARNING: you are stopping a sysinit service");
-		else if (rc_service_in_runlevel(applet, RC_LEVEL_BOOT))
+		ଅନ୍ୟଥା ଯଦି (rc_service_in_runlevel(applet, RC_LEVEL_BOOT))
 			ewarn("WARNING: you are stopping a boot service");
 	}
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 
 exit:
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 	exit(EXIT_FAILURE);
 }
 
-static void
+ସ୍ଥିର ଶୂନ୍ୟ
 svc_stop_deps(RC_SERVICE state)
 {
-	int depoptions = RC_DEP_TRACE;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା depoptions = RC_DEP_TRACE;
 	RC_STRING *svc;
 	pid_t pid;
 
-	if (state & RC_SERVICE_WASINACTIVE)
-		return;
+	ଯଦି (state & RC_SERVICE_WASINACTIVE)
+		ଫେରନ୍ତୁ;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	ଯଦି (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL)) {
+	ଯଦି (!deptree && ((deptree = _rc_deptree_load(0, ଖାଲି)) == ଖାଲି)) {
 		rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 		eerrorx("failed to load deptree");
 	}
 
-	if (!deptypes_m)
+	ଯଦି (!deptypes_m)
 		setup_deptypes();
 
 	services = rc_deptree_depends(deptree, deptypes_m, applet_list, runlevel, depoptions);
 	tmplist = rc_stringlist_new();
 	TAILQ_FOREACH_REVERSE(svc, services, rc_stringlist, entries) {
-		state = rc_service_state(svc->value);
+		state = rc_service_state(svc->ମୂଲ୍ୟ);
 		/* Don't stop failed services again.
 		 * If you remove this check, ensure that the exclusive file isn't created. */
-		if (state & RC_SERVICE_FAILED && rc_runlevel_stopping())
-			continue;
-		if (!(state & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)))
-			continue;
-		if (dry_run) {
-			printf(" %s", svc->value);
-			continue;
+		ଯଦି (state & RC_SERVICE_FAILED && rc_runlevel_stopping())
+			ଜାରି;
+		ଯଦି (!(state & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)))
+			ଜାରି;
+		ଯଦି (dry_run) {
+			printf(" %s", svc->ମୂଲ୍ୟ);
+			ଜାରି;
 		}
-		svc_wait(svc->value);
-		if (rc_service_state(svc->value) & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)) {
-			pid = service_stop(svc->value);
-			if (!rc_conf_yesno("rc_parallel"))
+		svc_wait(svc->ମୂଲ୍ୟ);
+		ଯଦି (rc_service_state(svc->ମୂଲ୍ୟ) & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)) {
+			pid = service_stop(svc->ମୂଲ୍ୟ);
+			ଯଦି (!rc_conf_yesno("rc_parallel"))
 				rc_waitpid(pid);
-			rc_stringlist_add(tmplist, svc->value);
+			rc_stringlist_add(tmplist, svc->ମୂଲ୍ୟ);
 		}
 	}
 	rc_stringlist_free(services);
-	services = NULL;
-	if (dry_run)
-		return;
+	services = ଖାଲି;
+	ଯଦି (dry_run)
+		ଫେରନ୍ତୁ;
 
 	TAILQ_FOREACH(svc, tmplist, entries) {
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED) {
-			continue;
+		ଯଦି (rc_service_state(svc->ମୂଲ୍ୟ) & RC_SERVICE_STOPPED) {
+			ଜାରି;
 		}
-		svc_wait(svc->value);
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
-			continue;
-		if (rc_runlevel_stopping()) {
+		svc_wait(svc->ମୂଲ୍ୟ);
+		ଯଦି (rc_service_state(svc->ମୂଲ୍ୟ) & RC_SERVICE_STOPPED)
+			ଜାରି;
+		ଯଦି (rc_runlevel_stopping()) {
 			/* If shutting down, we should stop even
 			 * if a dependent failed */
-			if (runlevel && (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 || strcmp(runlevel, RC_LEVEL_SINGLE) == 0))
-				continue;
+			ଯଦି (runlevel && (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 || strcmp(runlevel, RC_LEVEL_SINGLE) == 0))
+				ଜାରି;
 			rc_service_mark(applet, RC_SERVICE_FAILED);
 		}
 		rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
-		eerrorx("ERROR: cannot stop %s as %s is still up", applet, svc->value);
+		eerrorx("ERROR: cannot stop %s as %s is still up", applet, svc->ମୂଲ୍ୟ);
 	}
 	rc_stringlist_free(tmplist);
-	tmplist = NULL;
+	tmplist = ଖାଲି;
 
 	/* We now wait for other services that may use us and are
 	 * stopping. This is important when a runlevel stops */
 	services = rc_deptree_depends(deptree, deptypes_mwua, applet_list, runlevel, depoptions);
 	TAILQ_FOREACH(svc, services, entries) {
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
-			continue;
-		svc_wait(svc->value);
+		ଯଦି (rc_service_state(svc->ମୂଲ୍ୟ) & RC_SERVICE_STOPPED)
+			ଜାରି;
+		svc_wait(svc->ମୂଲ୍ୟ);
 	}
 	rc_stringlist_free(services);
-	services = NULL;
+	services = ଖାଲି;
 }
 
-static void
-load_dep_env(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+load_dep_env(ଶୂନ୍ୟ)
 {
 	RC_STRINGLIST *depsvcs;
 	RC_STRING *svc;
@@ -995,13 +995,13 @@ load_dep_env(void)
 	depsvcs = rc_deptree_depends(deptree, deptypes_nwu, applet_list, runlevel, 0);
 
 	TAILQ_FOREACH(svc, depsvcs, entries)
-		svc_getenv(svc->value);
+		svc_getenv(svc->ମୂଲ୍ୟ);
 
 	rc_stringlist_free(depsvcs);
 }
 
-static void
-svc_stop_real(void)
+ସ୍ଥିର ଶୂନ୍ୟ
+svc_stop_real(ଶୂନ୍ୟ)
 {
 	bool stopped;
 
@@ -1009,126 +1009,126 @@ svc_stop_real(void)
 
 	/* If we're stopping localmount, set LC_ALL=C so that
 	 * bash doesn't load anything blocking the unmounting of /usr */
-	if (strcmp(applet, "localmount") == 0)
+	ଯଦି (strcmp(applet, "localmount") == 0)
 		setenv("LC_ALL", "C", 1);
 
-	if (ibsave)
+	ଯଦି (ibsave)
 		setenv("IN_BACKGROUND", ibsave, 1);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_NOW, applet);
 	skip_mark = false;
 	stopped = (svc_exec("stop") == 0);
-	if (ibsave)
+	ଯଦି (ibsave)
 		unsetenv("IN_BACKGROUND");
 
-	if (stopped && !skip_mark)
+	ଯଦି (stopped && !skip_mark)
 		rc_service_mark(applet, in_background ? RC_SERVICE_INACTIVE : RC_SERVICE_STOPPED);
 
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_DONE, applet);
 	rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
 
-	if (!stopped)
+	ଯଦି (!stopped)
 		eerrorx("ERROR: %s failed to stop", applet);
 }
 
-static int
-svc_stop(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+svc_stop(ଶୂନ୍ୟ)
 {
 	RC_SERVICE state = 0;
 
-	if (dry_run)
+	ଯଦି (dry_run)
 		einfon("stop:");
-	else
-		if (svc_stop_check(&state) == 1)
-			return 1; /* Service has been stopped already */
+	ଅନ୍ୟଥା
+		ଯଦି (svc_stop_check(&state) == 1)
+			ଫେରନ୍ତୁ 1; /* Service has been stopped already */
 
-	if (deps)
+	ଯଦି (deps)
 		svc_stop_deps(state);
 
-	if (dry_run)
+	ଯଦି (dry_run)
 		printf(" %s\n", applet);
-	else
+	ଅନ୍ୟଥା
 		svc_stop_real();
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int
-svc_restart(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+svc_restart(ଶୂନ୍ୟ)
 {
-	if (!(rc_service_state(applet) & RC_SERVICE_STOPPED)) {
+	ଯଦି (!(rc_service_state(applet) & RC_SERVICE_STOPPED)) {
 		get_started_services();
 		svc_stop();
-		if (dry_run)
+		ଯଦି (dry_run)
 			ewarn("Cannot calculate restart start dependencies on a dry-run");
 	}
 
 	svc_start();
 	start_services(restart_services);
 	rc_stringlist_free(restart_services);
-	restart_services = NULL;
+	restart_services = ଖାଲି;
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static bool
-service_plugable(void)
+ସ୍ଥିର bool
+service_plugable(ଶୂନ୍ୟ)
 {
-	char *list, *p, *token;
+	ଅକ୍ଷର *list, *p, *token;
 	bool allow = true, truefalse;
-	char *match = rc_conf_value("rc_hotplug");
+	ଅକ୍ଷର *match = rc_conf_ମୂଲ୍ୟ("rc_hotplug");
 
-	if (!match)
-		match = rc_conf_value("rc_plug_services");
-	if (!match)
-		return false;
+	ଯଦି (!match)
+		match = rc_conf_ମୂଲ୍ୟ("rc_plug_services");
+	ଯଦି (!match)
+		ଫେରନ୍ତୁ false;
 
 	list = xstrdup(match);
 	p = list;
-	while ((token = strsep(&p, " "))) {
-		if (token[0] == '!') {
+	ଯେତେବେଳେ ((token = strsep(&p, " "))) {
+		ଯଦି (token[0] == '!') {
 			truefalse = false;
 			token++;
-		} else {
+		} ଅନ୍ୟଥା {
 			truefalse = true;
 		}
 
-		if (fnmatch(token, applet, 0) == 0) {
+		ଯଦି (fnmatch(token, applet, 0) == 0) {
 			allow = truefalse;
-			break;
+			ଭାଙ୍ଗ;
 		}
 	}
-	free(list);
-	return allow;
+	ମୁକ୍ତ(list);
+	ଫେରନ୍ତୁ allow;
 }
 
-static int
-simple_command(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+simple_command(ଶୂନ୍ୟ)
 {
-	char *save = prefix;
-	int retval;
+	ଅକ୍ଷର *save = prefix;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା retval;
 
-	eprefix(NULL);
-	prefix = NULL;
+	eprefix(ଖାଲି);
+	prefix = ଖାଲି;
 
 	retval = svc_exec(optarg);
 
 	eprefix(save);
 	prefix = save;
 
-	return retval;
+	ଫେରନ୍ତୁ retval;
 }
 
-static int
-resolve_deptype(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+resolve_deptype(ଶୂନ୍ୟ)
 {
-	int depoptions = RC_DEP_TRACE;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା depoptions = RC_DEP_TRACE;
 	RC_STRING *svc;
 
 	errno = 0;
-	if (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
+	ଯଦି (rc_conf_yesno("rc_depend_strict") || errno == ENOENT)
 		depoptions |= RC_DEP_STRICT;
 
-	if (!deptree && ((deptree = _rc_deptree_load(0, NULL)) == NULL))
+	ଯଦି (!deptree && ((deptree = _rc_deptree_load(0, ଖାଲି)) == ଖାଲି))
 		eerrorx("failed to load deptree");
 
 	tmplist = rc_stringlist_new();
@@ -1136,69 +1136,69 @@ resolve_deptype(void)
 	services = rc_deptree_depends(deptree, tmplist, applet_list, runlevel, depoptions);
 	rc_stringlist_free(tmplist);
 
-	tmplist = NULL;
+	tmplist = ଖାଲି;
 	TAILQ_FOREACH(svc, services, entries)
-		printf("%s ", svc->value);
+		printf("%s ", svc->ମୂଲ୍ୟ);
 	printf ("\n");
 
 	rc_stringlist_free(services);
-	services = NULL;
+	services = ଖାଲି;
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int
-cmd_condrestart(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+cmd_condrestart(ଶୂନ୍ୟ)
 {
-	if (rc_service_state(applet) & RC_SERVICE_STARTED)
+	ଯଦି (rc_service_state(applet) & RC_SERVICE_STARTED)
 		svc_restart();
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int
-cmd_stop(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+cmd_stop(ଶୂନ୍ୟ)
 {
 	RC_STRING *svc;
 
-	if (strcmp(optarg, "pause") == 0) {
+	ଯଦି (strcmp(optarg, "pause") == 0) {
 		ewarn("WARNING: 'pause' is deprecated; please use '--nodeps stop'");
 		deps = false;
 	}
 
-	if (deps && in_background)
+	ଯଦି (deps && in_background)
 		get_started_services();
 
-	if (svc_stop() == 1)
-		return 0; /* Service has been stopped already */
+	ଯଦି (svc_stop() == 1)
+		ଫେରନ୍ତୁ 0; /* Service has been stopped already */
 
-	if (deps) {
-		if (!in_background && !rc_runlevel_stopping() && rc_service_state(applet) & RC_SERVICE_STOPPED)
+	ଯଦି (deps) {
+		ଯଦି (!in_background && !rc_runlevel_stopping() && rc_service_state(applet) & RC_SERVICE_STOPPED)
 			unhotplug();
 
-		if (in_background && rc_service_state(applet) & RC_SERVICE_INACTIVE) {
+		ଯଦି (in_background && rc_service_state(applet) & RC_SERVICE_INACTIVE) {
 			TAILQ_FOREACH(svc, restart_services, entries)
-				if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
-					rc_service_schedule_start(applet, svc->value);
+				ଯଦି (rc_service_state(svc->ମୂଲ୍ୟ) & RC_SERVICE_STOPPED)
+					rc_service_schedule_start(applet, svc->ମୂଲ୍ୟ);
 		}
 	}
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int
-cmd_zap(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+cmd_zap(ଶୂନ୍ୟ)
 {
 	einfo("Manually resetting %s to stopped state", applet);
-	if (!rc_service_mark(applet, RC_SERVICE_STOPPED))
+	ଯଦି (!rc_service_mark(applet, RC_SERVICE_STOPPED))
 		eerrorx("rc_service_mark: %s", strerror(errno));
 	unhotplug();
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-struct {
-	const char *name;
-	int (*handler)(void);
+ସଂରଚନା {
+	ଅଚଳ ଅକ୍ଷର *name;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା (*handler)(ଶୂନ୍ୟ);
 	bool reset_restart_list;
 } commands[] = {
 	{ "describe",           simple_command,  false },
@@ -1222,32 +1222,32 @@ struct {
 	{ "zap",                cmd_zap,         true  },
 };
 
-int main(int argc, char **argv)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର **argv)
 {
-	int retval, opt;
-	const char *workingdir = "/";
-	char *pidstr = NULL;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା retval, opt;
+	ଅଚଳ ଅକ୍ଷର *workingdir = "/";
+	ଅକ୍ଷର *pidstr = ଖାଲି;
 	size_t l = 0, ll;
-	struct stat stbuf;
+	ସଂରଚନା stat stbuf;
 
 	/* Show help if insufficient args */
-	if (argc < 2 || access(argv[1], F_OK) != 0) {
+	ଯଦି (argc < 2 || access(argv[1], F_OK) != 0) {
 		fprintf(stderr, "openrc-run should not be run directly\n");
 		exit(EXIT_FAILURE);
 	}
 
 	applet = basename_c(argv[0]);
 
-	if (stat(argv[1], &stbuf) != 0) {
+	ଯଦି (stat(argv[1], &stbuf) != 0) {
 		fprintf(stderr, "openrc-run '%s': %s\n", argv[1], strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	if (!(service = (realpath(argv[1], NULL))))
+	ଯଦି (!(service = (realpath(argv[1], ଖାଲି))))
 		eerrorx("readpath: %s", strerror(errno));
 	applet = basename_c(argv[1]);
 
-	if (argc < 3)
+	ଯଦି (argc < 3)
 		usage(EXIT_FAILURE);
 
 	/* Ok, we are ready to go, so setup selinux if applicable */
@@ -1260,43 +1260,43 @@ int main(int argc, char **argv)
 	argv++;
 
 	/* Right then, parse any options there may be */
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1)
-		switch (opt) {
-		case 'd':
+	ଯେତେବେଳେ ((opt = getopt_long(argc, argv, getoptstring, longopts, ଖାଲି)) != -1)
+		ବାଛ (opt) {
+		ସ୍ଥିତି 'd':
 			setenv("RC_DEBUG", "YES", 1);
-			break;
-		case 'l':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'l':
 			exclusive_fd = atoi(optarg);
 			fcntl(exclusive_fd, F_SETFD, fcntl(exclusive_fd, F_GETFD, 0) | FD_CLOEXEC);
-			break;
-		case 's':
-			if (!(rc_service_state(applet) & RC_SERVICE_STARTED))
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 's':
+			ଯଦି (!(rc_service_state(applet) & RC_SERVICE_STARTED))
 				exit(EXIT_FAILURE);
-			break;
-		case 'S':
-			if (!(rc_service_state(applet) & RC_SERVICE_STOPPED))
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'S':
+			ଯଦି (!(rc_service_state(applet) & RC_SERVICE_STOPPED))
 				exit(EXIT_FAILURE);
-			break;
-		case 'D':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'D':
 			deps = false;
-			break;
-		case 'Z':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'Z':
 			dry_run = true;
-			break;
+			ଭାଙ୍ଗ;
 		case_RC_COMMON_GETOPT
 		}
 
 	/* Change dir to / to ensure all init scripts don't use stuff in pwd
 	 * For user services, change to the user's HOME instead. */
-	if (rc_is_user() && !(workingdir = getenv("HOME")))
+	ଯଦି (rc_is_user() && !(workingdir = getenv("HOME")))
 		eerrorx("HOME is unset.");
 
-	if (chdir(workingdir) == -1)
+	ଯଦି (chdir(workingdir) == -1)
 		eerror("chdir: %s", strerror(errno));
 
 	atexit(cleanup);
 
-	if ((runlevel = xstrdup(getenv("RC_RUNLEVEL"))) == NULL) {
+	ଯଦି ((runlevel = xstrdup(getenv("RC_RUNLEVEL"))) == ଖାଲି) {
 		env_filter();
 		env_config();
 		runlevel = default_runlevel();
@@ -1308,59 +1308,59 @@ int main(int argc, char **argv)
 	/* Set an env var so that we always know our pid regardless of any
 	   subshells the init script may create so that our mark_service_*
 	   functions can always instruct us of this change */
-	xasprintf(&pidstr, "%d", (int) getpid());
+	xasprintf(&pidstr, "%d", (ପୂର୍ଣ୍ଣସଂଖ୍ୟା) getpid());
 	setenv("RC_OPENRC_PID", pidstr, 1);
 	/*
 	 * RC_RUNSCRIPT_PID is deprecated, but we will keep it for a while
 	 * for safety.
 	 */
 	setenv("RC_RUNSCRIPT_PID", pidstr, 1);
-	free(pidstr);
+	ମୁକ୍ତ(pidstr);
 
 	/* eprefix is kinda klunky, but it works for our purposes */
-	if (rc_conf_yesno("rc_parallel")) {
+	ଯଦି (rc_conf_yesno("rc_parallel")) {
 		RC_STRING *svc;
 		/* Get the longest service name */
-		services = rc_services_in_runlevel(NULL);
+		services = rc_services_in_runlevel(ଖାଲି);
 		TAILQ_FOREACH(svc, services, entries) {
-			ll = strlen(svc->value);
-			if (ll > l)
+			ll = strlen(svc->ମୂଲ୍ୟ);
+			ଯଦି (ll > l)
 				l = ll;
 		}
 		rc_stringlist_free(services);
-		services = NULL;
+		services = ଖାଲି;
 		ll = strlen(applet);
-		if (ll > l)
+		ଯଦି (ll > l)
 			l = ll;
 
 		/* Make our prefix string */
-		prefix = xmalloc(sizeof(char) * l + 1);
+		prefix = xmalloc(ଆକାର(ଅକ୍ଷର) * l + 1);
 		memcpy(prefix, applet, ll);
 		memset(prefix + ll, ' ', l - ll);
 		memset(prefix + l, 0, 1);
 		eprefix(prefix);
 	}
 
-	if (rc_yesno(getenv("RC_NODEPS")))
+	ଯଦି (rc_yesno(getenv("RC_NODEPS")))
 		deps = false;
 
 	/* If we're changing runlevels and not called by rc then we cannot
 	   work with any dependencies */
-	if (deps && getenv("RC_PID") == NULL && (rc_runlevel_starting() || rc_runlevel_stopping()))
+	ଯଦି (deps && getenv("RC_PID") == ଖାଲି && (rc_runlevel_starting() || rc_runlevel_stopping()))
 		deps = false;
 
 	/* Save the IN_BACKGROUND env flag so it's ONLY passed to the service
 	   that is being called and not any dependents */
-	if (getenv("IN_BACKGROUND")) {
+	ଯଦି (getenv("IN_BACKGROUND")) {
 		ibsave = xstrdup(getenv("IN_BACKGROUND"));
 		in_background = rc_yesno(ibsave);
 		unsetenv("IN_BACKGROUND");
 	}
 
-	if (rc_yesno(getenv("IN_DRYRUN")))
+	ଯଦି (rc_yesno(getenv("IN_DRYRUN")))
 		dry_run = true;
-	if (rc_yesno(getenv("IN_HOTPLUG"))) {
-		if (!service_plugable())
+	ଯଦି (rc_yesno(getenv("IN_HOTPLUG"))) {
+		ଯଦି (!service_plugable())
 			eerrorx("%s: not allowed to be hotplugged", applet);
 		in_background = true;
 	}
@@ -1380,19 +1380,19 @@ int main(int argc, char **argv)
 	applet_list = rc_stringlist_new();
 	rc_stringlist_add(applet_list, applet);
 
-	if (optind >= argc)
+	ଯଦି (optind >= argc)
 		usage(EXIT_FAILURE);
 
 	/* Now run each option */
 	retval = EXIT_SUCCESS;
 
 next_cmd:
-	while (optind < argc) {
-		int cmdval;
+	ଯେତେବେଳେ (optind < argc) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmdval;
 		optarg = argv[optind++];
 
 		/* Abort on a sighup here */
-		if (sighup)
+		ଯଦି (sighup)
 			exit (EXIT_FAILURE);
 
 		/* Export the command we're running.
@@ -1401,28 +1401,28 @@ next_cmd:
 		   restarting. */
 		setenv("RC_CMD", optarg, true);
 
-		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (strcmp(optarg, commands[i].name) != 0)
-				continue;
+		ପାଇଁ (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
+			ଯଦି (strcmp(optarg, commands[i].name) != 0)
+				ଜାରି;
 
-			if ((cmdval = commands[i].handler()) != 0)
+			ଯଦି ((cmdval = commands[i].handler()) != 0)
 				retval = cmdval;
 
-			if (commands[i].reset_restart_list) {
+			ଯଦି (commands[i].reset_restart_list) {
 				/* We should ensure this list is empty after
 				 * an action is done */
 				rc_stringlist_free(restart_services);
-				restart_services = NULL;
+				restart_services = ଖାଲି;
 			}
 
-			goto next_cmd;
+			ଯାଅ next_cmd;
 		}
 
-		if ((cmdval = svc_exec(optarg)) != 0)
+		ଯଦି ((cmdval = svc_exec(optarg)) != 0)
 			retval = cmdval;
 		rc_stringlist_free(restart_services);
-		restart_services = NULL;
+		restart_services = ଖାଲି;
 	}
 
-	return retval;
+	ଫେରନ୍ତୁ retval;
 }
