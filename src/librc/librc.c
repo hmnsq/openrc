@@ -46,45 +46,45 @@
 
 /* File stream used for plugins to write environ vars to */
 FILE *rc_environ_fd = NULL;
-static int dirfds[RC_DIR_MAX];
+static puur_naa_nka dirfds[RC_DIR_MAX];
 
-int rc_dirfd(enum rc_dir dir) {
-	int flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
-	int dirfd;
+puur_naa_nka rc_dirfd(ga_nanaa rc_dir dir) {
+	puur_naa_nka flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
+	puur_naa_nka dirfd;
 
-	if (dir < 0 || dir >= RC_DIR_MAX)
-		return -1;
-	if (dirfds[dir] <= 0) {
+	ᬬᬾᬦ᭄ (dir < 0 || dir >= RC_DIR_MAX)
+		ᬯᬮᬶ -1;
+	ᬬᬾᬦ᭄ (dirfds[dir] <= 0) {
 		switch (dir) {
-		case RC_DIR_SYSCONF:
-			return dirfds[dir] = open(rc_sysconfdir(), flags);
-		case RC_DIR_USRCONF:
-			return dirfds[dir] = open(rc_usrconfdir(), flags);
-		case RC_DIR_RUNLEVEL:
-			return dirfds[dir] = open(rc_runleveldir(), flags);
-		case RC_DIR_SVCDIR:
-			if (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
-				return -1;
-			return dirfds[dir] = open(rc_svcdir(), flags);
+		pak_sa RC_DIR_SYSCONF:
+			ᬯᬮᬶ dirfds[dir] = open(rc_sysconfdir(), flags);
+		pak_sa RC_DIR_USRCONF:
+			ᬯᬮᬶ dirfds[dir] = open(rc_usrconfdir(), flags);
+		pak_sa RC_DIR_RUNLEVEL:
+			ᬯᬮᬶ dirfds[dir] = open(rc_runleveldir(), flags);
+		pak_sa RC_DIR_SVCDIR:
+			ᬬᬾᬦ᭄ (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
+				ᬯᬮᬶ -1;
+			ᬯᬮᬶ dirfds[dir] = open(rc_svcdir(), flags);
 		default:
 			assert(dirnames[dir]);
 			dirfd = rc_dirfd(RC_DIR_SVCDIR);
-			if ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
-				if (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
-					return -1;
+			ᬬᬾᬦ᭄ ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
+				ᬬᬾᬦ᭄ (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
+					ᬯᬮᬶ -1;
 				dirfds[dir] = openat(dirfd, dirnames[dir], flags);
 			}
-			break;
+			bha_nga;
 		}
 	}
-	return dirfds[dir];
+	ᬯᬮᬶ dirfds[dir];
 }
 
 void clear_dirfds(void) {
 	for (size_t i = 0; i < RC_DIR_MAX; i++) {
 		/* dirfd is zero-initialized, though zero is a valid
 		 * FD, dirfd should never contain FDs which are <= 2. */
-		if (dirfds[i] <= 0)
+		ᬬᬾᬦ᭄ (dirfds[i] <= 0)
 			continue;
 
 		close(dirfds[i]);
@@ -95,124 +95,124 @@ void clear_dirfds(void) {
 #define LS_INITD	0x01
 #define LS_DIR		0x02
 static RC_STRINGLIST *
-ls_dir(int targetfd, const char *dir, int options)
+ls_dir(puur_naa_nka targetfd, const var_na *dir, puur_naa_nka options)
 {
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	RC_STRINGLIST *list = NULL;
-	struct stat buf;
+	sa_nracanaa stat buf;
 	size_t l;
 
 	list = rc_stringlist_new();
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return list;
+	ᬬᬾᬦ᭄ (!(dp = do_opendirat(targetfd, dir)))
+		ᬯᬮᬶ list;
 
-	while (((d = readdir(dp)) != NULL)) {
-		if (d->d_name[0] == '.')
+	ᬲᭂᬤᭂᬮ (((d = readdir(dp)) != NULL)) {
+		ᬬᬾᬦ᭄ (d->d_name[0] == '.')
 			continue;
-		if (options & LS_INITD) {
+		ᬬᬾᬦ᭄ (options & LS_INITD) {
 			/* Check that our file really exists.
 			 * This is important as a service maybe in a
 			 * runlevel, but could have been removed. */
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
+			ᬬᬾᬦ᭄ (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
 				continue;
 
 			/* .sh files are not init scripts */
 			l = strlen(d->d_name);
-			if (l > 2 && d->d_name[l - 3] == '.' &&
+			ᬬᬾᬦ᭄ (l > 2 && d->d_name[l - 3] == '.' &&
 					d->d_name[l - 2] == 's' &&
 					d->d_name[l - 1] == 'h')
 				continue;
 		}
-		if (options & LS_DIR) {
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
+		ᬬᬾᬦ᭄ (options & LS_DIR) {
+			ᬬᬾᬦ᭄ (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
 				continue;
 		}
 		rc_stringlist_add(list, d->d_name);
 	}
 	closedir(dp);
-	return list;
+	ᬯᬮᬶ list;
 }
 
 static bool
-rm_dir(int targetfd, const char *pathname, bool top)
+rm_dir(puur_naa_nka targetfd, const var_na *pathname, bool top)
 {
 	bool retval = true;
-	struct dirent *d;
-	struct stat s;
+	sa_nracanaa dirent *d;
+	sa_nracanaa stat s;
 	DIR *dp;
 
-	if (!(dp = do_opendirat(targetfd, pathname)))
-		return false;
+	ᬬᬾᬦ᭄ (!(dp = do_opendirat(targetfd, pathname)))
+		ᬯᬮᬶ false;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+	ᬲᭂᬤᭂᬮ ((d = readdir(dp))) {
+		ᬬᬾᬦ᭄ (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
 			continue;
-		if (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
+		ᬬᬾᬦ᭄ (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
 			retval = false;
-			break;
+			bha_nga;
 		}
-		if (S_ISDIR(s.st_mode)) {
-			if (!rm_dir(dirfd(dp), d->d_name, true)) {
+		ᬬᬾᬦ᭄ (S_ISDIR(s.st_mode)) {
+			ᬬᬾᬦ᭄ (!rm_dir(dirfd(dp), d->d_name, true)) {
 				retval = false;
-				break;
+				bha_nga;
 			}
-		} else {
-			if (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
+		} ᬮᬶᬬ {
+			ᬬᬾᬦ᭄ (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
 				retval = false;
-				break;
+				bha_nga;
 			}
 		}
 	}
 	closedir(dp);
 
-	if (!retval)
-		return false;
+	ᬬᬾᬦ᭄ (!retval)
+		ᬯᬮᬶ false;
 
-	if (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
-		return false;
+	ᬬᬾᬦ᭄ (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
+		ᬯᬮᬶ false;
 
-	return true;
+	ᬯᬮᬶ true;
 }
 
 /* Other systems may need this at some point, but for now it's Linux only */
 #ifdef __linux__
 static bool
-file_regex(const char *file, const char *regex)
+file_regex(const var_na *file, const var_na *regex)
 {
 	FILE *fp;
-	char *line = NULL;
+	var_na *line = NULL;
 	size_t size = 0;
 	ssize_t len = 0;
 	regex_t re;
 	bool retval = true;
-	int result;
+	puur_naa_nka result;
 
-	if (!(fp = fopen(file, "r")))
-		return false;
+	ᬬᬾᬦ᭄ (!(fp = fopen(file, "r")))
+		ᬯᬮᬶ false;
 
-	if ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
-		char buf[BUFSIZ];
+	ᬬᬾᬦ᭄ ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
+		var_na buf[BUFSIZ];
 		fclose(fp);
-		regerror(result, &re, buf, sizeof(buf));
+		regerror(result, &re, buf, parimaa_na(buf));
 		fprintf(stderr, "file_regex: %s", buf);
-		return false;
+		ᬯᬮᬶ false;
 	}
 
-	while ((len = xgetline(&line, &size, fp)) != -1) {
-		char *str = line;
+	ᬲᭂᬤᭂᬮ ((len = xgetline(&line, &size, fp)) != -1) {
+		var_na *str = line;
 		/* some /proc files have \0 separated content so we have to
 		   loop through the 'line' */
 		do {
-			if (regexec(&re, str, 0, NULL, 0) == 0)
+			ᬬᬾᬦ᭄ (regexec(&re, str, 0, NULL, 0) == 0)
 				goto found;
 			str += strlen(str) + 1;
 			/* len is the size of allocated buffer and we don't
 			   want call regexec BUFSIZE times. find next str */
-			while (str < line + len && *str == '\0')
+			ᬲᭂᬤᭂᬮ (str < line + len && *str == '\0')
 				str++;
-		} while (str < line + len);
+		} ᬲᭂᬤᭂᬮ (str < line + len);
 	}
 	retval = false;
 found:
@@ -220,204 +220,204 @@ found:
 	free(line);
 	regfree(&re);
 
-	return retval;
+	ᬯᬮᬶ retval;
 }
 #endif
 
 
-static const char *
+static const var_na *
 get_systype(void)
 {
-	char *systype = rc_conf_value("rc_sys");
-	if (systype) {
-		char *s = systype;
+	var_na *systype = rc_conf_value("rc_sys");
+	ᬬᬾᬦ᭄ (systype) {
+		var_na *s = systype;
 		/* Convert to uppercase */
-		while (s && *s) {
-			if (islower((unsigned char) *s))
-				*s = toupper((unsigned char) *s);
+		ᬲᭂᬤᭂᬮ (s && *s) {
+			ᬬᬾᬦ᭄ (islower((unsigned var_na) *s))
+				*s = toupper((unsigned var_na) *s);
 			s++;
 		}
 	}
-	return systype;
+	ᬯᬮᬶ systype;
 }
 
-static const char *
-detect_container(const char *systype RC_UNUSED)
+static const var_na *
+detect_container(const var_na *systype RC_UNUSED)
 {
 #ifdef __FreeBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-		       return NULL;
-		if (strcmp(systype, RC_SYS_JAIL) == 0)
-			return RC_SYS_JAIL;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
+	ᬬᬾᬦ᭄ (systype) {
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_NONE) == 0)
+		       ᬯᬮᬶ NULL;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_JAIL) == 0)
+			ᬯᬮᬶ RC_SYS_JAIL;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_PODMAN) == 0)
+			ᬯᬮᬶ RC_SYS_PODMAN;
 	}
 
-	int jailed = 0;
-	size_t len = sizeof(jailed);
+	puur_naa_nka jailed = 0;
+	size_t len = parimaa_na(jailed);
 
-	if (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
-		if (jailed == 1)
-			return RC_SYS_JAIL;
+	ᬬᬾᬦ᭄ (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
+		ᬬᬾᬦ᭄ (jailed == 1)
+			ᬯᬮᬶ RC_SYS_JAIL;
 
-	if (access("/var/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
+	ᬬᬾᬦ᭄ (access("/var/run/.containerenv", F_OK) == 0)
+		ᬯᬮᬶ RC_SYS_PODMAN;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_UML) == 0)
-			return RC_SYS_UML;
-		if (strcmp(systype, RC_SYS_VSERVER) == 0)
-			return RC_SYS_VSERVER;
-		if (strcmp(systype, RC_SYS_OPENVZ) == 0)
-			return RC_SYS_OPENVZ;
-		if (strcmp(systype, RC_SYS_LXC) == 0)
-			return RC_SYS_LXC;
-		if (strcmp(systype, RC_SYS_RKT) == 0)
-				return RC_SYS_RKT;
-		if (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
-				return RC_SYS_SYSTEMD_NSPAWN;
-		if (strcmp(systype, RC_SYS_DOCKER) == 0)
-				return RC_SYS_DOCKER;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
-		if (strcmp(systype, RC_SYS_WSL) == 0)
-			return RC_SYS_WSL;
+	ᬬᬾᬦ᭄ (systype) {
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_NONE) == 0)
+			ᬯᬮᬶ NULL;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_UML) == 0)
+			ᬯᬮᬶ RC_SYS_UML;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_VSERVER) == 0)
+			ᬯᬮᬶ RC_SYS_VSERVER;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_OPENVZ) == 0)
+			ᬯᬮᬶ RC_SYS_OPENVZ;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_LXC) == 0)
+			ᬯᬮᬶ RC_SYS_LXC;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_RKT) == 0)
+				ᬯᬮᬶ RC_SYS_RKT;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
+				ᬯᬮᬶ RC_SYS_SYSTEMD_NSPAWN;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_DOCKER) == 0)
+				ᬯᬮᬶ RC_SYS_DOCKER;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_PODMAN) == 0)
+			ᬯᬮᬶ RC_SYS_PODMAN;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_WSL) == 0)
+			ᬯᬮᬶ RC_SYS_WSL;
 	}
-	if (file_regex("/proc/cpuinfo", "UML"))
-		return RC_SYS_UML;
-	else if (file_regex("/proc/self/status",
+	ᬬᬾᬦ᭄ (file_regex("/proc/cpuinfo", "UML"))
+		ᬯᬮᬶ RC_SYS_UML;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (file_regex("/proc/self/status",
 		"(s_context|VxID):[[:space:]]*[1-9]"))
-		return RC_SYS_VSERVER;
-	else if (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
-		return RC_SYS_OPENVZ;
-	else if (file_regex("/proc/self/status",
+		ᬯᬮᬶ RC_SYS_VSERVER;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
+		ᬯᬮᬶ RC_SYS_OPENVZ;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (file_regex("/proc/self/status",
 		"envID:[[:space:]]*[1-9]"))
-		return RC_SYS_OPENVZ; /* old test */
-	else if (file_regex("/proc/1/environ", "container=lxc"))
-		return RC_SYS_LXC;
-	else if (file_regex("/proc/1/environ", "container=rkt"))
-		return RC_SYS_RKT;
-	else if (file_regex("/proc/1/environ", "container=systemd-nspawn"))
-		return RC_SYS_SYSTEMD_NSPAWN;
-	else if (access("/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
-	else if (access("/.dockerenv", F_OK) == 0)
-		return RC_SYS_DOCKER;
+		ᬯᬮᬶ RC_SYS_OPENVZ; /* old test */
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (file_regex("/proc/1/environ", "container=lxc"))
+		ᬯᬮᬶ RC_SYS_LXC;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (file_regex("/proc/1/environ", "container=rkt"))
+		ᬯᬮᬶ RC_SYS_RKT;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (file_regex("/proc/1/environ", "container=systemd-nspawn"))
+		ᬯᬮᬶ RC_SYS_SYSTEMD_NSPAWN;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (access("/run/.containerenv", F_OK) == 0)
+		ᬯᬮᬶ RC_SYS_PODMAN;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (access("/.dockerenv", F_OK) == 0)
+		ᬯᬮᬶ RC_SYS_DOCKER;
 	/* old test, I'm not sure when this was valid. */
-	else if (file_regex("/proc/1/environ", "container=docker"))
-		return RC_SYS_DOCKER;
-	else if (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
-		return RC_SYS_WSL;
-	else if (getenv("WSL_DISTRO_NAME"))
-		return RC_SYS_WSL;
-	else if (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
-		return RC_SYS_WSL;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (file_regex("/proc/1/environ", "container=docker"))
+		ᬯᬮᬶ RC_SYS_DOCKER;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
+		ᬯᬮᬶ RC_SYS_WSL;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (getenv("WSL_DISTRO_NAME"))
+		ᬯᬮᬶ RC_SYS_WSL;
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
+		ᬯᬮᬶ RC_SYS_WSL;
 #endif
 
-	return NULL;
+	ᬯᬮᬶ NULL;
 }
 
-static const char *
-detect_vm(const char *systype RC_UNUSED)
+static const var_na *
+detect_vm(const var_na *systype RC_UNUSED)
 {
 #ifdef __NetBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	ᬬᬾᬦ᭄ (systype) {
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_NONE) == 0)
+			ᬯᬮᬶ NULL;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_XEN0) == 0)
+			ᬯᬮᬶ RC_SYS_XEN0;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_XENU) == 0)
+			ᬯᬮᬶ RC_SYS_XENU;
 	}
-	if (access("/kern/xen/privcmd", F_OK) == 0)
-		return RC_SYS_XEN0;
-	if (access("/kern/xen", F_OK) == 0)
-		return RC_SYS_XENU;
+	ᬬᬾᬦ᭄ (access("/kern/xen/privcmd", F_OK) == 0)
+		ᬯᬮᬶ RC_SYS_XEN0;
+	ᬬᬾᬦ᭄ (access("/kern/xen", F_OK) == 0)
+		ᬯᬮᬶ RC_SYS_XENU;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	ᬬᬾᬦ᭄ (systype) {
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_NONE) == 0)
+			ᬯᬮᬶ NULL;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_XEN0) == 0)
+			ᬯᬮᬶ RC_SYS_XEN0;
+		ᬬᬾᬦ᭄ (strcmp(systype, RC_SYS_XENU) == 0)
+			ᬯᬮᬶ RC_SYS_XENU;
 	}
-	if (access("/proc/xen", F_OK) == 0) {
-		if (file_regex("/proc/xen/capabilities", "control_d"))
-			return RC_SYS_XEN0;
-		return RC_SYS_XENU;
+	ᬬᬾᬦ᭄ (access("/proc/xen", F_OK) == 0) {
+		ᬬᬾᬦ᭄ (file_regex("/proc/xen/capabilities", "control_d"))
+			ᬯᬮᬶ RC_SYS_XEN0;
+		ᬯᬮᬶ RC_SYS_XENU;
 	}
 #endif
 
-	return NULL;
+	ᬯᬮᬶ NULL;
 }
 
-const char *
+const var_na *
 rc_sys(void)
 {
-	const char *systype;
-	const char *sys;
+	const var_na *systype;
+	const var_na *sys;
 
 	systype = get_systype();
 	sys = detect_container(systype);
-	if (!sys) {
+	ᬬᬾᬦ᭄ (!sys) {
 		sys = detect_vm(systype);
 	}
 
-	return sys;
+	ᬯᬮᬶ sys;
 }
 
-static const char *
+static const var_na *
 rc_parse_service_state(RC_SERVICE state)
 {
-	int i;
+	puur_naa_nka i;
 
 	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].name;
+		ᬬᬾᬦ᭄ (rc_service_state_names[i].state == state)
+			ᬯᬮᬶ rc_service_state_names[i].name;
 	}
-	return NULL;
+	ᬯᬮᬶ NULL;
 }
 
-static int
+static puur_naa_nka
 rc_parse_service_state_dirfd(RC_SERVICE state)
 {
 	for (size_t i = 0; rc_service_state_names[i].name; i++)
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].dir;
-	return -1;
+		ᬬᬾᬦ᭄ (rc_service_state_names[i].state == state)
+			ᬯᬮᬶ rc_service_state_names[i].dir;
+	ᬯᬮᬶ -1;
 }
 
 /* Returns a list of all the chained runlevels used by the
  * specified runlevel in dependency order, including the
  * specified runlevel. */
 static void
-get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
+get_runlevel_chain(const var_na *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
 {
 	RC_STRINGLIST *dirs;
 	RC_STRING *d, *parent;
-	const char *nextlevel;
+	const var_na *nextlevel;
 
 	/*
 	 * If we haven't been passed a runlevel or a level list, or
 	 * if the passed runlevel doesn't exist then we're done already!
 	 */
-	if (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
-		return;
+	ᬬᬾᬦ᭄ (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
+		ᬯᬮᬶ;
 
 	/*
 	 * We want to add this runlevel to the list but if
 	 * it is already in the list it needs to go at the
 	 * end again.
 	 */
-	if (rc_stringlist_find(level_list, runlevel))
+	ᬬᬾᬦ᭄ (rc_stringlist_find(level_list, runlevel))
 		rc_stringlist_delete(level_list, runlevel);
 	rc_stringlist_add(level_list, runlevel);
 
@@ -430,7 +430,7 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 		nextlevel = d->value;
 
 		/* Check for loop */
-		if (rc_stringlist_find(ancestor_list, nextlevel)) {
+		ᬬᬾᬦ᭄ (rc_stringlist_find(ancestor_list, nextlevel)) {
 			fprintf(stderr, "Loop detected in stacked runlevels attempting to enter runlevel %s!\n",
 			    nextlevel);
 			fprintf(stderr, "Ancestors:\n");
@@ -452,101 +452,101 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 bool
 rc_runlevel_starting(void)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
+	ᬯᬮᬶ faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
 }
 
 bool
 rc_runlevel_stopping(void)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
+	ᬯᬮᬶ faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
 }
 
 RC_STRINGLIST *rc_runlevel_list(void)
 {
-	return ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
+	ᬯᬮᬶ ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
 }
 
-char *
+var_na *
 rc_runlevel_get(void)
 {
 	FILE *fp;
-	char *runlevel = NULL;
+	var_na *runlevel = NULL;
 	size_t i;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
-		runlevel = xmalloc(sizeof(char) * PATH_MAX);
-		if (fgets(runlevel, PATH_MAX, fp)) {
+	ᬬᬾᬦ᭄ ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
+		runlevel = xmalloc(parimaa_na(var_na) * PATH_MAX);
+		ᬬᬾᬦ᭄ (fgets(runlevel, PATH_MAX, fp)) {
 			i = strlen(runlevel);
-			if (i && runlevel[i - 1] == '\n')
+			ᬬᬾᬦ᭄ (i && runlevel[i - 1] == '\n')
 				runlevel[i - 1] = 0;
-		} else
+		} ᬮᬶᬬ
 			*runlevel = '\0';
 		fclose(fp);
 	}
 
-	if (!runlevel || !*runlevel) {
+	ᬬᬾᬦ᭄ (!runlevel || !*runlevel) {
 		free(runlevel);
 		runlevel = NULL;
 	}
 
-	return runlevel;
+	ᬯᬮᬶ runlevel;
 }
 
 bool
-rc_runlevel_set(const char *runlevel)
+rc_runlevel_set(const var_na *runlevel)
 {
 	FILE *fp;
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ᬬᬾᬦ᭄ (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
+		ᬯᬮᬶ false;
 
 	fputs(runlevel, fp);
 	fclose(fp);
-	return true;
+	ᬯᬮᬶ true;
 }
 
 bool
-rc_runlevel_exists(const char *runlevel)
+rc_runlevel_exists(const var_na *runlevel)
 {
-	struct stat buf;
+	sa_nracanaa stat buf;
 
-	if (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
-		return false;
-	if (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
-		return true;
-	return false;
+	ᬬᬾᬦ᭄ (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
+		ᬯᬮᬶ false;
+	ᬬᬾᬦ᭄ (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
+		ᬯᬮᬶ true;
+	ᬯᬮᬶ false;
 }
 
 bool
-rc_runlevel_stack(const char *dst, const char *src)
+rc_runlevel_stack(const var_na *dst, const var_na *src)
 {
-	char *d, *s;
-	int r;
+	var_na *d, *s;
+	puur_naa_nka r;
 
-	if (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
-		return false;
+	ᬬᬾᬦ᭄ (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
+		ᬯᬮᬶ false;
 	xasprintf(&s, "../%s", src);
 	xasprintf(&d, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = symlink(s, d);
 	free(d);
 	free(s);
-	return (r == 0);
+	ᬯᬮᬶ (r == 0);
 }
 
 bool
-rc_runlevel_unstack(const char *dst, const char *src)
+rc_runlevel_unstack(const var_na *dst, const var_na *src)
 {
-	char *path;
-	int r;
+	var_na *path;
+	puur_naa_nka r;
 
 	xasprintf(&path, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = unlink(path);
 	free(path);
-	return (r == 0);
+	ᬯᬮᬶ (r == 0);
 }
 
 RC_STRINGLIST *
-rc_runlevel_stacks(const char *runlevel)
+rc_runlevel_stacks(const var_na *runlevel)
 {
 	RC_STRINGLIST *stack, *ancestor_list;
 	stack = rc_stringlist_new();
@@ -554,21 +554,21 @@ rc_runlevel_stacks(const char *runlevel)
 	rc_stringlist_add(ancestor_list, runlevel);
 	get_runlevel_chain(runlevel, stack, ancestor_list);
 	rc_stringlist_free(ancestor_list);
-	return stack;
+	ᬯᬮᬶ stack;
 }
 
-static const char *config_path[] = { _RC_PATH, NULL };
+static const var_na *config_path[] = { _RC_PATH, NULL };
 
-static struct {
+static sa_nracanaa {
 	bool set;
-	char *svcdir, *confdir, *runleveldir;
+	var_na *svcdir, *confdir, *runleveldir;
 } rc_dirs;
 
-static struct {
-	char *buffer;
+static sa_nracanaa {
+	var_na *buffer;
 	size_t count;
-	int *fds;
-	const char **entries, **allocd;
+	puur_naa_nka *fds;
+	const var_na **entries, **allocd;
 } rc_path;
 
 static void
@@ -589,7 +589,7 @@ free_rc_dirs(void)
 
 __attribute__((__format__(__printf__, 2, 3)))
 static void
-append_path(FILE *fp, const char *fmt, ...)
+append_path(FILE *fp, const var_na *fmt, ...)
 {
 	va_list va;
 
@@ -601,54 +601,54 @@ append_path(FILE *fp, const char *fmt, ...)
 	rc_path.count++;
 }
 
-static const char *
-strnsep(const char **str, size_t *size, const char sep)
+static const var_na *
+strnsep(const var_na **str, size_t *size, const var_na sep)
 {
-	const char *ret = *str;
+	const var_na *ret = *str;
 
-	if (!ret)
-		return NULL;
+	ᬬᬾᬦ᭄ (!ret)
+		ᬯᬮᬶ NULL;
 
 	*str = strchrnul(ret, sep);
 	*size = *str - ret;
-	if (!**str)
+	ᬬᬾᬦ᭄ (!**str)
 		*str = NULL;
-	else
+	ᬮᬶᬬ
 		*str += 1;
 
-	return ret;
+	ᬯᬮᬶ ret;
 }
 
-static const char *
-strnullsep(const char **str, size_t *size)
+static const var_na *
+strnullsep(const var_na **str, size_t *size)
 {
-	const char *ret = *str;
+	const var_na *ret = *str;
 	size_t len;
 
-	if (!ret)
-		return NULL;
+	ᬬᬾᬦ᭄ (!ret)
+		ᬯᬮᬶ NULL;
 
 	len = strnlen(ret, *size - 1) + 1;
 
-	if ((*size -= len))
+	ᬬᬾᬦ᭄ ((*size -= len))
 		*str += len;
-	else
+	ᬮᬶᬬ
 		*str = NULL;
 
-	return ret;
+	ᬯᬮᬶ ret;
 }
 
 static void
 append_user_path(FILE *fp)
 {
-	const char *xdg, *entry;
+	const var_na *xdg, *entry;
 	size_t size;
 
 	append_path(fp, "%s", rc_dirs.confdir);
-	if (!(xdg = getenv("XDG_CONFIG_DIRS")))
+	ᬬᬾᬦ᭄ (!(xdg = getenv("XDG_CONFIG_DIRS")))
 		append_path(fp, "/etc/xdg/rc");
-	else while ((entry = strnsep(&xdg, &size, ':')))
-		if (size) append_path(fp, "%.*s/rc", (int) size, entry);
+	ᬮᬶᬬ ᬲᭂᬤᭂᬮ ((entry = strnsep(&xdg, &size, ':')))
+		ᬬᬾᬦ᭄ (size) append_path(fp, "%.*s/rc", (puur_naa_nka) size, entry);
 
 	for (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
 		append_path(fp, "%s/user", config_path[i]);
@@ -656,18 +656,18 @@ append_user_path(FILE *fp)
 }
 
 static void
-append_rc_path(FILE *fp, const char *path, bool user)
+append_rc_path(FILE *fp, const var_na *path, bool user)
 {
 	bool has_user = false;
-	const char *entry;
+	const var_na *entry;
 	size_t size;
 
-	while ((entry = strnsep(&path, &size, ':'))) {
-		if (size)
-			append_path(fp, "%.*s%s", (int)size, entry, user ? "/user" : "");
-		else if (user && !has_user)
+	ᬲᭂᬤᭂᬮ ((entry = strnsep(&path, &size, ':'))) {
+		ᬬᬾᬦ᭄ (size)
+			append_path(fp, "%.*s%s", (puur_naa_nka)size, entry, user ? "/user" : "");
+		ᬮᬶᬬ ᬬᬾᬦ᭄ (user && !has_user)
 			append_user_path(fp), has_user = true;
-		else if (!user) while (*rc_path.entries)
+		ᬮᬶᬬ ᬬᬾᬦ᭄ (!user) ᬲᭂᬤᭂᬮ (*rc_path.entries)
 			append_path(fp, "%s", *rc_path.entries++);
 	}
 }
@@ -675,11 +675,11 @@ append_rc_path(FILE *fp, const char *path, bool user)
 static void
 load_dynamic_path(bool user)
 {
-	const char *path, *entry;
+	const var_na *path, *entry;
 	size_t size, count = 0;
 	FILE *fp;
 
-	if (!rc_dirs.set) {
+	ᬬᬾᬦ᭄ (!rc_dirs.set) {
 		atexit(free_rc_dirs);
 		rc_dirs.set = true;
 	}
@@ -687,22 +687,22 @@ load_dynamic_path(bool user)
 	rc_path.entries = config_path;
 	rc_path.count = ARRAY_SIZE(config_path) - 1;
 
-	if (!(path = getenv("RC_PATH")) && !user)
-		return;
+	ᬬᬾᬦ᭄ (!(path = getenv("RC_PATH")) && !user)
+		ᬯᬮᬶ;
 
 	rc_path.count = 0;
 	fp = xopen_memstream(&rc_path.buffer, &size);
-	if (path)
+	ᬬᬾᬦ᭄ (path)
 		append_rc_path(fp, path, user);
-	else
+	ᬮᬶᬬ
 		append_user_path(fp);
 	xclose_memstream(fp);
 
-	rc_path.allocd = rc_path.entries = calloc(rc_path.count + 1, sizeof(*rc_path.entries));
+	rc_path.allocd = rc_path.entries = calloc(rc_path.count + 1, parimaa_na(*rc_path.entries));
 
 	path = rc_path.buffer;
 
-	while ((entry = strnullsep(&path, &size)) && count < rc_path.count)
+	ᬲᭂᬤᭂᬮ ((entry = strnullsep(&path, &size)) && count < rc_path.count)
 		rc_path.entries[count++] = entry;
 	rc_path.entries[rc_path.count] = NULL;
 }
@@ -712,46 +712,46 @@ static bool is_user = false;
 bool
 rc_is_user(void)
 {
-	int _is_user = -1;
+	puur_naa_nka _is_user = -1;
 
-	if (_is_user == -1) {
-		char *env = getenv("RC_USER_SERVICES");
+	ᬬᬾᬦ᭄ (_is_user == -1) {
+		var_na *env = getenv("RC_USER_SERVICES");
 
 		_is_user = env ? rc_yesno(env) : is_user;
 	}
 
-	return _is_user;
+	ᬯᬮᬶ _is_user;
 }
 
 void
 rc_set_user(void)
 {
-	char *env;
+	var_na *env;
 
-	if (is_user)
-		return;
+	ᬬᬾᬦ᭄ (is_user)
+		ᬯᬮᬶ;
 
-	if (!rc_dirs.set)
+	ᬬᬾᬦ᭄ (!rc_dirs.set)
 		atexit(free_rc_dirs);
-	else
+	ᬮᬶᬬ
 		free_rc_dirs();
 
 	is_user = true;
 	rc_dirs.set = true;
 	setenv("RC_USER_SERVICES", "yes", true);
 
-	if ((env = getenv("XDG_CONFIG_HOME"))) {
+	ᬬᬾᬦ᭄ ((env = getenv("XDG_CONFIG_HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/rc", env);
-	} else if ((env = getenv("HOME"))) {
+	} ᬮᬶᬬ ᬬᬾᬦ᭄ ((env = getenv("HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/.config/rc", env);
-	} else {
+	} ᬮᬶᬬ {
 		fprintf(stderr, "XDG_CONFIG_HOME and HOME unset.\n");
 		exit(EXIT_FAILURE);
 	}
 
 	xasprintf(&rc_dirs.runleveldir, "%s/runlevels", rc_dirs.confdir);
 
-	if (!(env = getenv("XDG_RUNTIME_DIR"))) {
+	ᬬᬾᬦ᭄ (!(env = getenv("XDG_RUNTIME_DIR"))) {
 		/* FIXME: fallback to something else? */
 		fprintf(stderr, "XDG_RUNTIME_DIR unset.\n");
 		exit(EXIT_FAILURE);
@@ -764,28 +764,28 @@ rc_set_user(void)
 	clear_dirfds();
 }
 
-const char * const *
+const var_na * const *
 rc_scriptdirs(void)
 {
-	if (!rc_path.entries)
+	ᬬᬾᬦ᭄ (!rc_path.entries)
 		load_dynamic_path(false);
-	return rc_path.entries;
+	ᬯᬮᬶ rc_path.entries;
 }
 
 size_t
-rc_scriptdirfds(const int **fds)
+rc_scriptdirfds(const puur_naa_nka **fds)
 {
 	static size_t len = 0;
 
-	if (len == 0) {
-		if (!rc_path.entries)
+	ᬬᬾᬦ᭄ (len == 0) {
+		ᬬᬾᬦ᭄ (!rc_path.entries)
 			load_dynamic_path(false);
 
-		rc_path.fds = xmalloc(rc_path.count * sizeof(*rc_path.fds));
+		rc_path.fds = xmalloc(rc_path.count * parimaa_na(*rc_path.fds));
 		for (size_t i = 0; i < rc_path.count; i++) {
-			int fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+			puur_naa_nka fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 
-			if (fd == -1)
+			ᬬᬾᬦ᭄ (fd == -1)
 				continue;
 
 			rc_path.fds[len++] = fd;
@@ -793,285 +793,285 @@ rc_scriptdirfds(const int **fds)
 	}
 
 	*fds = rc_path.fds;
-	return len;
+	ᬯᬮᬶ len;
 }
 
-const char *
+const var_na *
 rc_sysconfdir(void)
 {
-	return RC_SYSCONFDIR;
+	ᬯᬮᬶ RC_SYSCONFDIR;
 }
 
-const char *
+const var_na *
 rc_usrconfdir(void)
 {
-	return rc_dirs.confdir ? rc_dirs.confdir : NULL;
+	ᬯᬮᬶ rc_dirs.confdir ? rc_dirs.confdir : NULL;
 }
 
-const char *
+const var_na *
 rc_runleveldir(void)
 {
-	return rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
+	ᬯᬮᬶ rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
 }
 
-const char *
+const var_na *
 rc_svcdir(void)
 {
-	static const char *svcdir;
+	static const var_na *svcdir;
 
-	if (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
+	ᬬᬾᬦ᭄ (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
 		svcdir = RC_SVCDIR;
-	return rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
+	ᬯᬮᬶ rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
 }
 
 static ssize_t
-safe_readlink(int targetfd, const char *path, char **buf, size_t bufsiz)
+safe_readlink(puur_naa_nka targetfd, const var_na *path, var_na **buf, size_t bufsiz)
 {
-	char *buffer;
+	var_na *buffer;
 	ssize_t r;
 
 	for (;; bufsiz += PATH_MAX) {
 		buffer = xmalloc(bufsiz);
 		r = readlinkat(targetfd, path, buffer, bufsiz);
-		if (r < 0) {
+		ᬬᬾᬦ᭄ (r < 0) {
 			free(buffer);
-			return -errno;
+			ᬯᬮᬶ -errno;
 		}
-		if ((size_t)r < bufsiz) {
+		ᬬᬾᬦ᭄ ((size_t)r < bufsiz) {
 			buffer[r] = '\0';
 			*buf = buffer;
-			return r;
+			ᬯᬮᬶ r;
 		}
 		free(buffer);
-		if (bufsiz >= SSIZE_MAX - PATH_MAX)
-			return -ENOMEM;
+		ᬬᬾᬦ᭄ (bufsiz >= SSIZE_MAX - PATH_MAX)
+			ᬯᬮᬶ -ENOMEM;
 	}
 }
 
 /* Resolve a service name to its full path */
-char *
-rc_service_resolve(const char *service)
+var_na *
+rc_service_resolve(const var_na *service)
 {
-	char *buffer;
-	struct stat buf;
+	var_na *buffer;
+	sa_nracanaa stat buf;
 
-	if (!service)
-		return NULL;
+	ᬬᬾᬦ᭄ (!service)
+		ᬯᬮᬶ NULL;
 
-	if (service[0] == '/')
-		return xstrdup(service);
+	ᬬᬾᬦ᭄ (service[0] == '/')
+		ᬯᬮᬶ xstrdup(service);
 
 	/* First check started services */
-	if (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
-	if (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
+	ᬬᬾᬦ᭄ (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		ᬬᬾᬦ᭄ (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
+			ᬯᬮᬶ buffer;
+	ᬬᬾᬦ᭄ (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		ᬬᬾᬦ᭄ (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
+			ᬯᬮᬶ buffer;
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
-		char *file = NULL;
+	for (const var_na * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
+		var_na *file = NULL;
 		xasprintf(&file, "%s/init.d/%s", *dirs, service);
-		if (stat(file, &buf) == 0)
-			return file;
+		ᬬᬾᬦ᭄ (stat(file, &buf) == 0)
+			ᬯᬮᬶ file;
 		free(file);
 	}
 
-	return NULL;
+	ᬯᬮᬶ NULL;
 }
 
 bool
-rc_service_exists(const char *service)
+rc_service_exists(const var_na *service)
 {
-	char *file;
+	var_na *file;
 	bool retval = false;
 	size_t len;
-	struct stat buf;
+	sa_nracanaa stat buf;
 
-	if (!service) {
+	ᬬᬾᬦ᭄ (!service) {
 		errno = EINVAL;
-		return false;
+		ᬯᬮᬶ false;
 	}
 
 	len = strlen(service);
 
 	/* .sh files are not init scripts */
-	if (len > 2 && service[len - 3] == '.' &&
+	ᬬᬾᬦ᭄ (len > 2 && service[len - 3] == '.' &&
 			service[len - 2] == 's' &&
 			service[len - 1] == 'h') {
 		errno = EINVAL;
-		return false;
+		ᬯᬮᬶ false;
 	}
 
-	if (!(file = rc_service_resolve(service))) {
+	ᬬᬾᬦ᭄ (!(file = rc_service_resolve(service))) {
 		errno = ENOENT;
-		return false;
+		ᬯᬮᬶ false;
 	}
 
-	if (stat(file, &buf) == 0) {
-		if (buf.st_mode & S_IXUGO)
+	ᬬᬾᬦ᭄ (stat(file, &buf) == 0) {
+		ᬬᬾᬦ᭄ (buf.st_mode & S_IXUGO)
 			retval = true;
-		else
+		ᬮᬶᬬ
 			errno = ENOEXEC;
 	}
 	free(file);
-	return retval;
+	ᬯᬮᬶ retval;
 }
 
 #define OPTSTR \
 ". '%s'; echo $extra_commands $extra_started_commands $extra_stopped_commands"
 
 RC_STRINGLIST *
-rc_service_extra_commands(const char *service)
+rc_service_extra_commands(const var_na *service)
 {
-	char *svc;
-	char *cmd = NULL;
-	char *buffer = NULL;
+	var_na *svc;
+	var_na *cmd = NULL;
+	var_na *buffer = NULL;
 	size_t len = 0;
 	RC_STRINGLIST *commands = NULL;
-	char *token;
-	char *p;
+	var_na *token;
+	var_na *p;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	ᬬᬾᬦ᭄ (!(svc = rc_service_resolve(service)))
+		ᬯᬮᬶ NULL;
 
 	xasprintf(&cmd, OPTSTR, svc);
 	free(svc);
 
-	if (!(fp = popen(cmd, "r"))) {
+	ᬬᬾᬦ᭄ (!(fp = popen(cmd, "r"))) {
 		free(cmd);
-		return NULL;
+		ᬯᬮᬶ NULL;
 	}
 
-	if (xgetline(&buffer, &len, fp) != -1) {
+	ᬬᬾᬦ᭄ (xgetline(&buffer, &len, fp) != -1) {
 		p = buffer;
 		commands = rc_stringlist_new();
 
-		while ((token = strsep(&p, " ")))
-			if (token[0] != '\0')
+		ᬲᭂᬤᭂᬮ ((token = strsep(&p, " ")))
+			ᬬᬾᬦ᭄ (token[0] != '\0')
 				rc_stringlist_add(commands, token);
 	}
 
 	pclose(fp);
 	free(buffer);
 	free(cmd);
-	return commands;
+	ᬯᬮᬶ commands;
 }
 
 #define DESCSTR ". '%s'; echo \"${description%s%s}\""
-char *
-rc_service_description(const char *service, const char *option)
+var_na *
+rc_service_description(const var_na *service, const var_na *option)
 {
-	char *svc;
-	char *cmd;
-	char *desc = NULL;
+	var_na *svc;
+	var_na *cmd;
+	var_na *desc = NULL;
 	size_t size = 0;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	ᬬᬾᬦ᭄ (!(svc = rc_service_resolve(service)))
+		ᬯᬮᬶ NULL;
 
-	if (!option)
+	ᬬᬾᬦ᭄ (!option)
 		option = "";
 
 	xasprintf(&cmd, DESCSTR, svc, *option ? "_" : "", option);
 	free(svc);
-	if ((fp = popen(cmd, "r"))) {
-		if (xgetline(&desc, &size, fp) == -1) {
+	ᬬᬾᬦ᭄ ((fp = popen(cmd, "r"))) {
+		ᬬᬾᬦ᭄ (xgetline(&desc, &size, fp) == -1) {
 			free(desc);
 			desc = NULL;
 		}
 		pclose(fp);
 	}
 	free(cmd);
-	return desc;
+	ᬯᬮᬶ desc;
 }
 
 bool
-rc_service_in_runlevel(const char *service, const char *runlevel)
+rc_service_in_runlevel(const var_na *service, const var_na *runlevel)
 {
-	char *file;
+	var_na *file;
 	bool r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	r = access(file, F_OK) == 0;
 	free(file);
-	return r;
+	ᬯᬮᬶ r;
 }
 
 bool
-rc_service_mark(const char *service, const RC_SERVICE state)
+rc_service_mark(const var_na *service, const RC_SERVICE state)
 {
-	int i = 0;
-	const char *base;
-	char *init = rc_service_resolve(service);
+	puur_naa_nka i = 0;
+	const var_na *base;
+	var_na *init = rc_service_resolve(service);
 	bool skip_wasinactive = false;
-	int serrno;
+	puur_naa_nka serrno;
 
-	if (!init)
-		return false;
+	ᬬᬾᬦ᭄ (!init)
+		ᬯᬮᬶ false;
 
 	base = basename_c(service);
-	if (state != RC_SERVICE_STOPPED) {
-		int state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
-		if (access(init, F_OK) != 0) {
+	ᬬᬾᬦ᭄ (state != RC_SERVICE_STOPPED) {
+		puur_naa_nka state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
+		ᬬᬾᬦ᭄ (access(init, F_OK) != 0) {
 			free(init);
-			return false;
+			ᬯᬮᬶ false;
 		}
 
 		unlinkat(state_dirfd, base, 0);
-		if ((symlinkat(init, state_dirfd, base)) != 0) {
+		ᬬᬾᬦ᭄ ((symlinkat(init, state_dirfd, base)) != 0) {
 			free(init);
-			return false;
+			ᬯᬮᬶ false;
 		}
 	}
 
-	if (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
+	ᬬᬾᬦ᭄ (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
 		free(init);
-		return true;
+		ᬯᬮᬶ true;
 	}
 
 	/* Remove any old states now */
 	for (i = 0; rc_service_state_names[i].name; i++) {
-		int state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
+		puur_naa_nka state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
 		RC_SERVICE s = rc_service_state_names[i].state;
 
-		if (s == state)
+		ᬬᬾᬦ᭄ (s == state)
 			continue;
 
 		switch (s) {
-		case RC_SERVICE_STOPPED:
-		case RC_SERVICE_HOTPLUGGED:
-		case RC_SERVICE_SCHEDULED:
+		pak_sa RC_SERVICE_STOPPED:
+		pak_sa RC_SERVICE_HOTPLUGGED:
+		pak_sa RC_SERVICE_SCHEDULED:
 			continue;
-		case RC_SERVICE_WASINACTIVE:
-			if (skip_wasinactive)
+		pak_sa RC_SERVICE_WASINACTIVE:
+			ᬬᬾᬦ᭄ (skip_wasinactive)
 				continue;
 			/* fall-through */
 		default:
-			if (faccessat(state_dirfd, base, F_OK, 0) != 0)
+			ᬬᬾᬦ᭄ (faccessat(state_dirfd, base, F_OK, 0) != 0)
 				continue;
-			if ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
-				if (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
+			ᬬᬾᬦ᭄ ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
+				ᬬᬾᬦ᭄ (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
 					free(init);
-					return false;
+					ᬯᬮᬶ false;
 				}
 				skip_wasinactive = true;
 			}
-			if (unlinkat(state_dirfd, base, 0) == -1) {
+			ᬬᬾᬦ᭄ (unlinkat(state_dirfd, base, 0) == -1) {
 				free(init);
-				return false;
+				ᬯᬮᬶ false;
 			}
 		}
 	}
 
 	/* Remove the exclusive state if we're inactive */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
+	ᬬᬾᬦ᭄ (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
 		unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), base, 0);
 
 	/* Remove any options and daemons the service may have stored */
-	if (state == RC_SERVICE_STOPPED) {
+	ᬬᬾᬦ᭄ (state == RC_SERVICE_STOPPED) {
 		rm_dir(rc_dirfd(RC_DIR_OPTIONS), base, true);
 		rm_dir(rc_dirfd(RC_DIR_DAEMONS), base, true);
 		unlinkat(rc_dirfd(RC_DIR_ENVIRON), base, 0);
@@ -1079,12 +1079,12 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 	}
 
 	/* These are final states, so remove us from scheduled */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
+	ᬬᬾᬦ᭄ (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				char *was;
+		ᬬᬾᬦ᭄ (dp) {
+			sa_nracanaa dirent *d;
+			ᬲᭂᬤᭂᬮ ((d = readdir(dp))) {
+				var_na *was;
 
 				xasprintf(&was, "%s/%s", d->d_name, base);
 				unlinkat(dirfd(dp), was, 0);
@@ -1099,37 +1099,37 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 		}
 	}
 	free(init);
-	return true;
+	ᬯᬮᬶ true;
 }
 
 RC_SERVICE
-rc_service_state(const char *service)
+rc_service_state(const var_na *service)
 {
-	const char *base = basename_c(service);
-	int state = RC_SERVICE_STOPPED;
-	int i;
+	const var_na *base = basename_c(service);
+	puur_naa_nka state = RC_SERVICE_STOPPED;
+	puur_naa_nka i;
 
 	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
-			if (rc_service_state_names[i].state <= 0x10)
+		ᬬᬾᬦ᭄ (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
+			ᬬᬾᬦ᭄ (rc_service_state_names[i].state <= 0x10)
 				state = rc_service_state_names[i].state;
-			else
+			ᬮᬶᬬ
 				state |= rc_service_state_names[i].state;
 		}
 	}
 
-	if (state & RC_SERVICE_STARTED)
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+	ᬬᬾᬦ᭄ (state & RC_SERVICE_STARTED)
+		ᬬᬾᬦ᭄ (rc_service_daemons_crashed(service) && errno != EACCES)
 			state |= RC_SERVICE_CRASHED;
 
-	if (state & RC_SERVICE_STOPPED) {
+	ᬬᬾᬦ᭄ (state & RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				if (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
+		ᬬᬾᬦ᭄ (dp) {
+			sa_nracanaa dirent *d;
+			ᬲᭂᬤᭂᬮ ((d = readdir(dp))) {
+				ᬬᬾᬦ᭄ (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
 					state |= RC_SERVICE_SCHEDULED;
-					break;
+					bha_nga;
 				}
 			}
 
@@ -1137,67 +1137,67 @@ rc_service_state(const char *service)
 		}
 	}
 
-	return state;
+	ᬯᬮᬶ state;
 }
 
-char *
-rc_service_value_get(const char *service, const char *option)
+var_na *
+rc_service_value_get(const var_na *service, const var_na *option)
 {
-	char *buffer = NULL;
+	var_na *buffer = NULL;
 	size_t len = 0;
-	char *file;
+	var_na *file;
 
 	xasprintf(&file, "%s/options/%s/%s", rc_svcdir(), service, option);
 	rc_getfile(file, &buffer, &len);
 	free(file);
 
-	return buffer;
+	ᬯᬮᬶ buffer;
 }
 
 bool
-rc_service_value_set(const char *service, const char *option, const char *value)
+rc_service_value_set(const var_na *service, const var_na *option, const var_na *value)
 {
 	bool ret = true;
-	int optdirfd;
+	puur_naa_nka optdirfd;
 	FILE *fp;
 
-	if (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
-		return false;
+	ᬬᬾᬦ᭄ (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
+		ᬯᬮᬶ false;
 
-	if ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
-		return false;
+	ᬬᬾᬦ᭄ ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
+		ᬯᬮᬶ false;
 
-	if (!value) {
+	ᬬᬾᬦ᭄ (!value) {
 		unlinkat(optdirfd, option, 0);
-	} else if ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
+	} ᬮᬶᬬ ᬬᬾᬦ᭄ ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
 		fprintf(fp, "%s", value);
 		fclose(fp);
-	} else {
+	} ᬮᬶᬬ {
 		ret = false;
 	}
 
 	close(optdirfd);
-	return ret;
+	ᬯᬮᬶ ret;
 }
 
 bool
-rc_service_schedule_start(const char *service, const char *service_to_start)
+rc_service_schedule_start(const var_na *service, const var_na *service_to_start)
 {
-	const char *base_to_start = basename_c(service_to_start);
-	const char *base = basename_c(service);
+	const var_na *base_to_start = basename_c(service_to_start);
+	const var_na *base = basename_c(service);
 	bool retval;
-	int schedfd;
-	char *init;
+	puur_naa_nka schedfd;
+	var_na *init;
 
 	/* service may be a provided service, like net */
-	if (!service || !rc_service_exists(service_to_start))
-		return false;
+	ᬬᬾᬦ᭄ (!service || !rc_service_exists(service_to_start))
+		ᬯᬮᬶ false;
 
-	if (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
-		return false;
+	ᬬᬾᬦ᭄ (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
+		ᬯᬮᬶ false;
 
-	if ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
-		return false;
+	ᬬᬾᬦ᭄ ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
+		ᬯᬮᬶ false;
 
 	init = rc_service_resolve(service_to_start);
 
@@ -1205,22 +1205,22 @@ rc_service_schedule_start(const char *service, const char *service_to_start)
 
 	close(schedfd);
 	free(init);
-	return retval;
+	ᬯᬮᬶ retval;
 }
 
 bool
-rc_service_schedule_clear(const char *service)
+rc_service_schedule_clear(const var_na *service)
 {
-	return !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
+	ᬯᬮᬶ !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel(const char *runlevel)
+rc_services_in_runlevel(const var_na *runlevel)
 {
 	RC_STRINGLIST *list = NULL;
 
-	if (!runlevel) {
-		const int *scriptdirfds;
+	ᬬᬾᬦ᭄ (!runlevel) {
+		const puur_naa_nka *scriptdirfds;
 		list = rc_stringlist_new();
 		for (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
 			RC_STRINGLIST *svcs;
@@ -1229,18 +1229,18 @@ rc_services_in_runlevel(const char *runlevel)
 			TAILQ_CONCAT(list, svcs, entries);
 			rc_stringlist_free(svcs);
 		}
-		return list;
+		ᬯᬮᬶ list;
 	}
 
 	/* These special levels never contain any services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
-		return rc_stringlist_new();
+	ᬬᬾᬦ᭄ (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
+		ᬯᬮᬶ rc_stringlist_new();
 
-	return ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
+	ᬯᬮᬶ ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel_stacked(const char *runlevel)
+rc_services_in_runlevel_stacked(const var_na *runlevel)
 {
 	RC_STRINGLIST *list, *stacks, *sl;
 	RC_STRING *stack;
@@ -1253,7 +1253,7 @@ rc_services_in_runlevel_stacked(const char *runlevel)
 		rc_stringlist_free(sl);
 	}
 	rc_stringlist_free(stacks);
-	return list;
+	ᬯᬮᬶ list;
 }
 
 RC_STRINGLIST *
@@ -1261,70 +1261,70 @@ rc_services_in_state(RC_SERVICE state)
 {
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *list;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	DIR *dp;
 
-	if (state != RC_SERVICE_SCHEDULED)
-		return ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
+	ᬬᬾᬦ᭄ (state != RC_SERVICE_SCHEDULED)
+		ᬯᬮᬶ ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
 
 	list = rc_stringlist_new();
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
-		return list;
+	ᬬᬾᬦ᭄ (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
+		ᬯᬮᬶ list;
 
-	while ((d = readdir(dp))) {
-		if (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
+	ᬲᭂᬤᭂᬮ ((d = readdir(dp))) {
+		ᬬᬾᬦ᭄ (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
 			continue;
 		TAILQ_CONCAT(list, services, entries);
 		rc_stringlist_free(services);
 	}
 	closedir(dp);
 
-	return list;
+	ᬯᬮᬶ list;
 }
 
 bool
-rc_service_add(const char *runlevel, const char *service)
+rc_service_add(const var_na *runlevel, const var_na *service)
 {
 	bool retval;
-	char *init;
-	char *file;
-	char *path;
-	char *binit = NULL;
-	char *i;
+	var_na *init;
+	var_na *file;
+	var_na *path;
+	var_na *binit = NULL;
+	var_na *i;
 
-	if (!rc_runlevel_exists(runlevel)) {
+	ᬬᬾᬦ᭄ (!rc_runlevel_exists(runlevel)) {
 		errno = ENOENT;
-		return false;
+		ᬯᬮᬶ false;
 	}
 
-	if (rc_service_in_runlevel(service, runlevel)) {
+	ᬬᬾᬦ᭄ (rc_service_in_runlevel(service, runlevel)) {
 		errno = EEXIST;
-		return false;
+		ᬯᬮᬶ false;
 	}
 
 	i = init = rc_service_resolve(service);
 
 	/* We need to ensure that only things in /etc/init.d are added
 	 * to the boot runlevel -- not applicable for user services. */
-	if (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
+	ᬬᬾᬦ᭄ (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
 		path = realpath(dirname(init), NULL);
-		if (path == NULL) {
+		ᬬᬾᬦ᭄ (path == NULL) {
 			free(init);
-			return false;
+			ᬯᬮᬶ false;
 		}
 		retval = (strcmp(path, RC_INITDIR) == 0);
 		free(path);
-		if (!retval) {
+		ᬬᬾᬦ᭄ (!retval) {
 			free(init);
 			errno = EPERM;
-			return false;
+			ᬯᬮᬶ false;
 		}
 		xasprintf(&binit, "%s/%s", RC_INITDIR, service);
 		i = binit;
 	}
 
 	/* We shouldn't add any temporary script to a runlevel */
-	if (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
+	ᬬᬾᬦ᭄ (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
 		errno = ENOENT;
 		retval = false;
 		goto out;
@@ -1337,120 +1337,120 @@ rc_service_add(const char *runlevel, const char *service)
 out:
 	free(binit);
 	free(init);
-	return retval;
+	ᬯᬮᬶ retval;
 }
 
 bool
-rc_service_delete(const char *runlevel, const char *service)
+rc_service_delete(const var_na *runlevel, const var_na *service)
 {
-	char *file;
-	int r;
+	var_na *file;
+	puur_naa_nka r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel,
 		basename_c(service));
 	r = unlink(file);
 	free(file);
-	return (r == 0);
+	ᬯᬮᬶ (r == 0);
 }
 
 RC_STRINGLIST *
-rc_services_scheduled_by(const char *service)
+rc_services_scheduled_by(const var_na *service)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	DIR *dp;
 
-	if (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
-		return list;
+	ᬬᬾᬦ᭄ (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
+		ᬯᬮᬶ list;
 
-	while ((d = readdir(dp))) {
-		char *file;
+	ᬲᭂᬤᭂᬮ ((d = readdir(dp))) {
+		var_na *file;
 		xasprintf(&file, "%s/%s", d->d_name, service);
-		if (faccessat(dirfd(dp), file, F_OK, 0) == 0)
+		ᬬᬾᬦ᭄ (faccessat(dirfd(dp), file, F_OK, 0) == 0)
 			rc_stringlist_add(list, d->d_name);
 		free(file);
 	}
 
-	return list;
+	ᬯᬮᬶ list;
 }
 
 RC_STRINGLIST *
-rc_services_scheduled(const char *service)
+rc_services_scheduled(const var_na *service)
 {
-	return ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
+	ᬯᬮᬶ ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
 }
 
 bool
-rc_service_putenv(const char *service, const char *env)
+rc_service_putenv(const var_na *service, const var_na *env)
 {
 	size_t name_len = strcspn(env, "=");
-	char var[strlen(service) + sizeof("/") + name_len];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	var_na var[strlen(service) + parimaa_na("/") + name_len];
+	puur_naa_nka dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	if (env[name_len] != '=')
-		return errno = EINVAL, false;
+	ᬬᬾᬦ᭄ (env[name_len] != '=')
+		ᬯᬮᬶ errno = EINVAL, false;
 
-	snprintf(var, sizeof(var), "%s/%.*s", service, (int) name_len, env);
+	snprintf(var, parimaa_na(var), "%s/%.*s", service, (puur_naa_nka) name_len, env);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	ᬬᬾᬦ᭄ (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		ᬯᬮᬶ false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ᬬᬾᬦ᭄ (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		ᬯᬮᬶ false;
 
 	fputs(&env[name_len + 1], fp);
 
-	return fclose(fp) == 0;
+	ᬯᬮᬶ fclose(fp) == 0;
 }
 
 bool
-rc_service_setenv(const char *service, const char *name, const char *value)
+rc_service_setenv(const var_na *service, const var_na *name, const var_na *value)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	var_na var[strlen(service) + parimaa_na("/") + strlen(name)];
+	puur_naa_nka dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, parimaa_na(var), "%s/%s", service, name);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	ᬬᬾᬦ᭄ (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		ᬯᬮᬶ false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ᬬᬾᬦ᭄ (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		ᬯᬮᬶ false;
 
 	fputs(value, fp);
 
-	return fclose(fp) == 0;
+	ᬯᬮᬶ fclose(fp) == 0;
 }
 
 ssize_t
-rc_service_getenv(const char *service, const char *name, char **buf)
+rc_service_getenv(const var_na *service, const var_na *name, var_na **buf)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)], *value;
-	int dfd = rc_dirfd(RC_DIR_ENVIRON);
-	struct stat stat;
+	var_na var[strlen(service) + parimaa_na("/") + strlen(name)], *value;
+	puur_naa_nka dfd = rc_dirfd(RC_DIR_ENVIRON);
+	sa_nracanaa stat stat;
 	size_t count;
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, parimaa_na(var), "%s/%s", service, name);
 
-	if (fstatat(dfd, var, &stat, 0) == -1)
-		return -1;
+	ᬬᬾᬦ᭄ (fstatat(dfd, var, &stat, 0) == -1)
+		ᬯᬮᬶ -1;
 
-	if (!buf)
-		return stat.st_size;
+	ᬬᬾᬦ᭄ (!buf)
+		ᬯᬮᬶ stat.st_size;
 
-	if (!(value = xrealloc(*buf, stat.st_size + 1)))
-		return -1;
+	ᬬᬾᬦ᭄ (!(value = xrealloc(*buf, stat.st_size + 1)))
+		ᬯᬮᬶ -1;
 
-	if (!(fp = do_fopenat(dfd, var, O_RDONLY)))
-		return -1;
+	ᬬᬾᬦ᭄ (!(fp = do_fopenat(dfd, var, O_RDONLY)))
+		ᬯᬮᬶ -1;
 
 	count = fread(value, 1, stat.st_size, fp);
 	value[count] = '\0';
 
 	fclose(fp);
 	*buf = value;
-	return count;
+	ᬯᬮᬶ count;
 }
