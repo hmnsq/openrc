@@ -10,45 +10,45 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/types.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdbool.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <signal.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/types.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "einfo.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "rc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "misc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "helpers.h"
 
-const char *applet = NULL;
+ਅਚਲ ਅੱਖਰ *applet = ਨਿਰਾ;
 
-int main(int argc, char **argv)
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ **argv)
 {
 	bool ok = false;
-	char *svcname = getenv("RC_SVCNAME");
-	char *service = NULL;
-	char *openrc_pid;
+	ਅੱਖਰ *svcname = getenv("RC_SVCNAME");
+	ਅੱਖਰ *service = ਨਿਰਾ;
+	ਅੱਖਰ *openrc_pid;
 	/* char *mtime; */
 	pid_t pid;
-	RC_SERVICE bit;
+	RC_SERVICE ਦੋਆਧਾਰੀ_ਅੰਕ;
 	/* size_t l; */
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	ਜੇ (argc > 1)
 		service = argv[1];
-	else
+	ਨਹੀਂਤਾਂ
 		service = svcname;
 
-	if (service == NULL || *service == '\0')
+	ਜੇ (service == ਨਿਰਾ || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
-	if (!strncmp(applet, "mark_", 5) &&
-	    (bit = lookup_service_state(applet + 5)))
-		ok = rc_service_mark(service, bit);
-	else
+	ਜੇ (!ਲੜੀ_ਤੁਲਨਾ(applet, "mark_", 5) &&
+	    (ਦੋਆਧਾਰੀ_ਅੰਕ = lookup_service_state(applet + 5)))
+		ok = rc_service_mark(service, ਦੋਆਧਾਰੀ_ਅੰਕ);
+	ਨਹੀਂਤਾਂ
 		eerrorx("%s: unknown applet", applet);
 
 	/* If we're marking ourselves then we need to inform our parent
@@ -60,10 +60,10 @@ int main(int argc, char **argv)
 	 * See 20120424041423.GA23657@odin.qasl.de (Tue, 24 Apr 2012 06:14:23 +0200,
 	 * openrc@gentoo.org).
 	 */
-	if (ok && svcname && strcmp(svcname, service) == 0) {
+	ਜੇ (ok && svcname && strcmp(svcname, service) == 0) {
 		openrc_pid = getenv("RC_OPENRC_PID");
-		if (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
-			if (kill(pid, SIGUSR1) != 0)
+		ਜੇ (openrc_pid && ਲੜੀ_ਤੋਂ_ਪੜ੍ਹੋ(openrc_pid, "%d", &pid) == 1)
+			ਜੇ (kill(pid, SIGUSR1) != 0)
 				eerror("%s: failed to signal parent %d: %s",
 				    applet, pid, strerror(errno));
 
@@ -81,5 +81,5 @@ int main(int argc, char **argv)
 		*/
 	}
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	ਵਾਪਸ ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

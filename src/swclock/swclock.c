@@ -18,85 +18,85 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <utime.h>
-#include <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/time.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/stat.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <fcntl.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <getopt.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <utime.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
 
-#include "einfo.h"
-#include "_usage.h"
-#include "helpers.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "einfo.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "_usage.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "helpers.h"
 
 
-const char *applet = NULL;
-const char *extraopts = "file";
-const char getoptstring[] = "sw" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "save", 0, NULL, 's' },
-	{ "warn", 0, NULL, 'w' },
+ਅਚਲ ਅੱਖਰ *applet = ਨਿਰਾ;
+ਅਚਲ ਅੱਖਰ *extraopts = "file";
+ਅਚਲ ਅੱਖਰ getoptstring[] = "sw" getoptstring_COMMON;
+ਅਚਲ ਬਣਤਰ option longopts[] = {
+	{ "save", 0, ਨਿਰਾ, 's' },
+	{ "warn", 0, ਨਿਰਾ, 'w' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ਅਚਲ ਅੱਖਰ * ਅਚਲ longopts_help[] = {
 	"saves the time",
 	"no error if no reference file",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ਅਚਲ ਅੱਖਰ *usagestring = ਨਿਰਾ;
 
-int main(int argc, char **argv)
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ **argv)
 {
-	int opt, sflag = 0, wflag = 0;
-	const char *file = NULL;
-	struct stat sb;
-	struct timeval tv;
+	ਪੂਰਨ opt, sflag = 0, wflag = 0;
+	ਅਚਲ ਅੱਖਰ *file = ਨਿਰਾ;
+	ਬਣਤਰ stat sb;
+	ਬਣਤਰ timeval tv;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ਜਦੋਂ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (ਪੂਰਨ *) 0)) != -1)
 	{
-		switch (opt) {
-		case 's':
+		ਚੋਣ (opt) {
+		ਹਾਲਤ 's':
 			sflag = 1;
-			break;
-		case 'w':
+			ਰੋਕੋ;
+		ਹਾਲਤ 'w':
 			wflag = 1;
-			break;
+			ਰੋਕੋ;
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind < argc)
+	ਜੇ (optind < argc)
 		file = argv[optind++];
-	else
+	ਨਹੀਂਤਾਂ
 		eerrorx("swclock: Reference file was not specified");
 
-	if (sflag) {
-		int fd = open(file, O_WRONLY | O_CREAT, 0644);
-		if (fd == -1)
+	ਜੇ (sflag) {
+		ਪੂਰਨ fd = open(file, O_WRONLY | O_CREAT, 0644);
+		ਜੇ (fd == -1)
 			eerrorx("swclock: open: %s", strerror(errno));
-		if (futimens(fd, NULL) == -1)
+		ਜੇ (futimens(fd, ਨਿਰਾ) == -1)
 			eerrorx("swclock: futimens: %s", strerror(errno));
 		close(fd);
-		return 0;
+		ਵਾਪਸ 0;
 	}
 
-	if (stat(file, &sb) == -1) {
-		if (wflag != 0 && errno == ENOENT)
+	ਜੇ (stat(file, &sb) == -1) {
+		ਜੇ (wflag != 0 && errno == ENOENT)
 			ewarn("swclock: `%s': %s", file, strerror(errno));
-		else
+		ਨਹੀਂਤਾਂ
 			eerrorx("swclock: `%s': %s", file, strerror(errno));
-		return 0;
+		ਵਾਪਸ 0;
 	}
 
 	tv.tv_sec = sb.st_mtime;
 	tv.tv_usec = 0;
 
-	if (settimeofday(&tv, NULL) == -1)
+	ਜੇ (settimeofday(&tv, ਨਿਰਾ) == -1)
 		eerrorx("swclock: settimeofday: %s", strerror(errno));
 
-	return 0;
+	ਵਾਪਸ 0;
 }

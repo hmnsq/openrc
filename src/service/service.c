@@ -10,59 +10,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdbool.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "einfo.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "rc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "misc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "helpers.h"
 
-const char *applet = NULL;
+ਅਚਲ ਅੱਖਰ *applet = ਨਿਰਾ;
 
-int main(int argc, char **argv)
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
-	RC_SERVICE state, bit;
+	ਅੱਖਰ *service;
+	ਅੱਖਰ *exec;
+	ਪੂਰਨ idx = 0;
+	RC_SERVICE state, ਦੋਆਧਾਰੀ_ਅੰਕ;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	ਜੇ (argc > 1)
 		service = argv[1];
-	else
+	ਨਹੀਂਤਾਂ
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	ਜੇ (service == ਨਿਰਾ || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
-	bit = lookup_service_state(applet);
-	if (bit) {
-		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	ਦੋਆਧਾਰੀ_ਅੰਕ = lookup_service_state(applet);
+	ਜੇ (ਦੋਆਧਾਰੀ_ਅੰਕ) {
+		ok = (state & ਦੋਆਧਾਰੀ_ਅੰਕ);
+	} ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		ਜੇ (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
-			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+			ਲੜੀ_ਤੋਂ_ਪੜ੍ਹੋ(argv[3], "%d", &idx);
+		} ਨਹੀਂਤਾਂ ਜੇ (argc == 3) {
+			ਜੇ (ਲੜੀ_ਤੋਂ_ਪੜ੍ਹੋ(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
-		ok = rc_service_started_daemon(service, exec, NULL, idx);
+		ok = rc_service_started_daemon(service, exec, ਨਿਰਾ, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} ਨਹੀਂਤਾਂ
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	ਵਾਪਸ ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

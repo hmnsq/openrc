@@ -15,124 +15,124 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __HELPERS_H__
-#define __HELPERS_H__
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ __HELPERS_H__
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ __HELPERS_H__
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdarg.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdbool.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stddef.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdint.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/stat.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <dirent.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <fcntl.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ERRX ਕਰੋ { fprintf (stderr, "out of memory\n"); ਬਾਹਰ_ਨਿਕਲੋ (1); } ਜਦੋਂ (0)
 
-#define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ UNCONST(a)		((ਖਾਲੀ *)(uintptr_t)(ਅਚਲ ਖਾਲੀ *)(a))
 
-#define RC_UNUSED __attribute__((__unused__))
-#define RC_NORETURN __attribute__((__noreturn__))
-#define RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ RC_ਅਣਵਰਤਿਆ __attribute__((__unused__))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ RC_NORETURN __attribute__((__noreturn__))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ARRAY_ਮਾਪ(a) (ਆਕਾਰ(a) / ਆਕਾਰ((a)[0]))
 
-#ifndef HAVE_STRLCPY
-#    define strlcpy(dst, src, size) snprintf(dst, size, "%s", src)
-#endif
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ HAVE_STRLCPY
+#    define strlcpy(dst, src, ਮਾਪ) snprintf(dst, ਮਾਪ, "%s", src)
+#ਜੇ_ਅੰਤ
 
-#ifndef timespecsub
-#define	timespecsub(tsp, usp, vsp)					      \
-	do {								      \
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ timespecsub
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ	timespecsub(tsp, usp, vsp)					      \
+	ਕਰੋ {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		ਜੇ ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
-#endif
+	} ਜਦੋਂ (/* CONSTCOND */ 0)
+#ਜੇ_ਅੰਤ
 
-RC_UNUSED static void *xmalloc (size_t size)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ਖਾਲੀ *xmalloc (size_t ਮਾਪ)
 {
-	void *value = malloc(size);
+	ਖਾਲੀ *ਮੁੱਲ = ਸਮ੍ਰਿਤੀ_ਦਿਓ(ਮਾਪ);
 
-	if (value)
-		return (value);
+	ਜੇ (ਮੁੱਲ)
+		ਵਾਪਸ (ਮੁੱਲ);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static void *xrealloc(void *ptr, size_t size)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ਖਾਲੀ *xrealloc(ਖਾਲੀ *ptr, size_t ਮਾਪ)
 {
-	void *value = realloc(ptr, size);
+	ਖਾਲੀ *ਮੁੱਲ = realloc(ptr, ਮਾਪ);
 
-	if (value)
-		return (value);
+	ਜੇ (ਮੁੱਲ)
+		ਵਾਪਸ (ਮੁੱਲ);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static char *xstrdup(const char *str)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ਅੱਖਰ *xstrdup(ਅਚਲ ਅੱਖਰ *str)
 {
-	char *value;
+	ਅੱਖਰ *ਮੁੱਲ;
 
-	if (!str)
-		return (NULL);
+	ਜੇ (!str)
+		ਵਾਪਸ (ਨਿਰਾ);
 
-	value = strdup(str);
+	ਮੁੱਲ = strdup(str);
 
-	if (value)
-		return (value);
+	ਜੇ (ਮੁੱਲ)
+		ਵਾਪਸ (ਮੁੱਲ);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ FILE *xopen_memstream(ਅੱਖਰ **ptr, size_t *sizeloc)
 {
 	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	ਜੇ (f)
+		ਵਾਪਸ f;
 	ERRX;
 }
 
-RC_UNUSED static void xclose_memstream(FILE *f)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ਖਾਲੀ xclose_memstream(FILE *f)
 {
 	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	ਜੇ (ferror(f) || fclose(f) != 0)
 		ERRX;
 }
 
-#undef ERRX
+#ਪਰਿਭਾਸ਼ਾ_ਰੱਦ ERRX
 
 /*
  * basename_c never modifies the argument. As such, if there is a trailing
  * slash then an empty string is returned.
  */
-RC_UNUSED static const char *basename_c(const char *path)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ਅਚਲ ਅੱਖਰ *basename_c(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	const char *slash = strrchr(path, '/');
+	ਅਚਲ ਅੱਖਰ *slash = strrchr(ਰਸਤਾ, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	ਜੇ (slash)
+		ਵਾਪਸ (++slash);
+	ਵਾਪਸ (ਰਸਤਾ);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ FILE *do_fopenat(ਪੂਰਨ dirfd, ਅਚਲ ਅੱਖਰ *pathname, ਪੂਰਨ ਬਹੁਲਕ)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
-	const char *fmode;
+	ਪੂਰਨ fd = openat(dirfd, pathname, ਬਹੁਲਕ, 0666);
+	ਅਚਲ ਅੱਖਰ *fmode;
 	FILE *fp;
 
-	if (fd == -1)
-		return NULL;
+	ਜੇ (fd == -1)
+		ਵਾਪਸ ਨਿਰਾ;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	ਜੇ ((ਬਹੁਲਕ & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	ਨਹੀਂਤਾਂ ਜੇ ((ਬਹੁਲਕ & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	ਨਹੀਂਤਾਂ
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
+	ਜੇ (!(fp = fdopen(fd, fmode)))
 		close(fd);
-	return fp;
+	ਵਾਪਸ fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ DIR *do_opendirat(ਪੂਰਨ dirfd, ਅਚਲ ਅੱਖਰ *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	ਪੂਰਨ fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	ਜੇ (fd == -1)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	if (!(dp = fdopendir(fd)))
+	ਜੇ (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	ਵਾਪਸ dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ DIR *do_dopendir(ਪੂਰਨ dirfd)
 {
-	int fd = dup(dirfd);
+	ਪੂਰਨ fd = dup(dirfd);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	ਜੇ (fd == -1)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	if (!(dp = fdopendir(fd)))
+	ਜੇ (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	ਵਾਪਸ dp;
 }
 
 /*
@@ -188,12 +188,12 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_ਅਣਵਰਤਿਆ RC_PRINTF(2,3) ਸਥਿਰ ਪੂਰਨ xasprintf(ਅੱਖਰ **strp, ਅਚਲ ਅੱਖਰ *fmt, ...)
 {
 	va_list ap;
-	int len;
-	int memlen;
-	char *ret;
+	ਪੂਰਨ len;
+	ਪੂਰਨ memlen;
+	ਅੱਖਰ *ret;
 
 	/*
 	 * Start with a buffer size that should cover the vast majority of uses
@@ -205,7 +205,7 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
 	va_end(ap);
-	if (len >= memlen) {
+	ਜੇ (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
@@ -215,86 +215,86 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 		len = vsnprintf(ret, len + 1, fmt, ap);
 		va_end(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	ਜੇ (len < 0 || len >= memlen) {
 		/* Give up! */
 		fprintf(stderr, "xasprintf: unable to format a buffer\n");
-		free(ret);
-		exit(1);
+		ਮੁਕਤ(ret);
+		ਬਾਹਰ_ਨਿਕਲੋ(1);
 	}
 	*strp = ret;
-	return len;
+	ਵਾਪਸ len;
 }
 
-RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ssize_t xgetline(ਅੱਖਰ **ਸੀਮਿਤ lineptr, size_t *ਸੀਮਿਤ n, FILE *ਸੀਮਿਤ ਧਾਰਾ)
 {
-	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	ssize_t ret = getline(lineptr, n, ਧਾਰਾ);
+	ਜੇ (ret <= 0)
+		ਵਾਪਸ ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	ਜੇ ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-RC_UNUSED static char *env_findvar(const char *name, char **envp)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ਅੱਖਰ *env_findvar(ਅਚਲ ਅੱਖਰ *name, ਅੱਖਰ **envp)
 {
-	size_t len = strlen(name);
+	size_t len = ਲੜੀ_ਲੰਬਾਈ(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	ਲਈ (ਅੱਖਰ **var = envp; *var; var++)
+		ਜੇ (ਲੜੀ_ਤੁਲਨਾ(name, *var, len) == 0 && (*var)[len] == '=')
+			ਵਾਪਸ *var;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ਪੂਰਨ xopen_nonblock(ਅਚਲ ਅੱਖਰ *filename, ਪੂਰਨ flags, mode_t ਬਹੁਲਕ)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
+	ਪੂਰਨ fd = open(filename, flags | O_NONBLOCK, ਬਹੁਲਕ);
+	ਜੇ (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		ਪੂਰਨ saved_errno = errno;
 		close(fd);
 		fd = -1;
 		errno = saved_errno;
 	}
-	return fd;
+	ਵਾਪਸ fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_ਅਣਵਰਤਿਆ ਸਥਿਰ ਪੂਰਨ open_rwfifo(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, bool nonblock)
 {
-	int r, w, err;
+	ਪੂਰਨ r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	ਜੇ (mkfifo(ਰਸਤਾ, 0600) == -1 && errno != EEXIST)
+		ਵਾਪਸ -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	ਜੇ ((r = open(ਰਸਤਾ, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		ਵਾਪਸ -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+	ਜੇ ((w = open(ਰਸਤਾ, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		err = errno;
-		goto r_err;
+		ਜਾਓ r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+	ਜੇ (!nonblock) {
+		ਪੂਰਨ flags = fcntl(r, F_GETFL);
+		ਜੇ (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
 			err = errno;
-			goto w_err;
+			ਜਾਓ w_err;
 		}
 	}
 
-	return r;
+	ਵਾਪਸ r;
 
 w_err:
 	close(w);
 r_err:
 	close(r);
 	errno = err;
-	return -1;
+	ਵਾਪਸ -1;
 }
 
-#endif
+#ਜੇ_ਅੰਤ

@@ -10,95 +10,95 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#define SYSLOG_NAMES
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SYSLOG_ਨਾਂ
 
-#include <sys/time.h>
-#include <errno.h>
-#include <ctype.h>
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <strings.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/time.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <ctype.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <inttypes.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stddef.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <syslog.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <time.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <strings.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "einfo.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "helpers.h"
 
 /* usecs to wait while we poll the file existence  */
-#define WAIT_INTERVAL	20000000
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ WAIT_INTERVAL	20000000
 
-const char *applet = NULL;
+ਅਚਲ ਅੱਖਰ *applet = ਨਿਰਾ;
 
-static int syslog_decode(char *name, const CODE *codetab)
+ਸਥਿਰ ਪੂਰਨ syslog_decode(ਅੱਖਰ *name, ਅਚਲ CODE *codetab)
 {
-	const CODE *c;
+	ਅਚਲ CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	ਜੇ (ਅੰਕ_ਹੈ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)*name))
+		ਵਾਪਸ atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	ਲਈ (c = codetab; c->c_name; c++)
+		ਜੇ (!strcasecmp(name, c->c_name))
+			ਵਾਪਸ c->c_val;
 
-	return -1;
+	ਵਾਪਸ -1;
 }
 
-int main(int argc, char **argv)
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	ਪੂਰਨ retval = EXIT_SUCCESS;
+	ਪੂਰਨ i;
 	size_t l = 0;
-	char *message = NULL;
-	char *p;
-	int level = 0;
-	struct timespec ts;
-	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	ਅੱਖਰ *ਸੁਨੇਹਾ = ਨਿਰਾ;
+	ਅੱਖਰ *p;
+	ਪੂਰਨ level = 0;
+	ਬਣਤਰ timespec ts;
+	ਬਣਤਰ timeval stop, now;
+	ਪੂਰਨ (*e) (ਅਚਲ ਅੱਖਰ *, ...) EINFO_PRINTF(1, 2) = ਨਿਰਾ;
+	ਪੂਰਨ (*ee) (ਪੂਰਨ, ਅਚਲ ਅੱਖਰ *, ...) EINFO_PRINTF(2, 3) = ਨਿਰਾ;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
-		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
+	ਜੇ (strcmp(applet, "eval_ecolors") == 0) {
+		ਲਿਖੋ("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
 		    ecolor(ECOLOR_BAD),
 		    ecolor(ECOLOR_HILITE),
 		    ecolor(ECOLOR_BRACKET),
-		    ecolor(ECOLOR_NORMAL));
-		exit(EXIT_SUCCESS);
+		    ecolor(ECOLOR_ਸਾਧਾਰਨ));
+		ਬਾਹਰ_ਨਿਕਲੋ(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	ਜੇ (argc > 0) {
+		ਜੇ (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (ਪੂਰਨ)strtoimax(argv[0], &p, 0);
+			ਜੇ (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			ਜੇ (errno)
 				retval = EXIT_FAILURE;
-			else {
+			ਨਹੀਂਤਾਂ {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			ਜੇ (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			ਜੇ (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,110 +109,110 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	ਜੇ (strcmp(applet, "ewaitfile") == 0) {
+		ਜੇ (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		ਜੇ (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
-		gettimeofday(&stop, NULL);
+		gettimeofday(&stop, ਨਿਰਾ);
 		/* retval stores the timeout */
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		ਲਈ (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
-					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
-				gettimeofday(&now, NULL);
-				if (retval <= 0)
-					continue;
-				if (timercmp(&now, &stop, <))
-					continue;
+			ਲਈ (;;) {
+				ਜੇ (access(argv[i], F_OK) == 0)
+					ਰੋਕੋ;
+				ਜੇ (nanosleep(&ts, ਨਿਰਾ) == -1)
+					ਵਾਪਸ EXIT_FAILURE;
+				gettimeofday(&now, ਨਿਰਾ);
+				ਜੇ (retval <= 0)
+					ਜਾਰੀ;
+				ਜੇ (timercmp(&now, &stop, <))
+					ਜਾਰੀ;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				ਵਾਪਸ EXIT_FAILURE;
 			}
-			eendv(EXIT_SUCCESS, NULL);
+			eendv(EXIT_SUCCESS, ਨਿਰਾ);
 		}
-		return EXIT_SUCCESS;
+		ਵਾਪਸ EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
-		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+	ਜੇ (argc > 0) {
+		FILE *mem = xopen_memstream(&ਸੁਨੇਹਾ, &l);
+		ਲਈ (i = 0; i < argc; i++) {
+			ਜੇ (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	ਜੇ (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
-		elog(retval, "%s", message);
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "esyslog") == 0) {
+		elog(retval, "%s", ਸੁਨੇਹਾ);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	ਨਹੀਂਤਾਂ {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
-			e("%s", message);
-		else if (ee)
-			ee(retval, "%s", message);
-	} else {
-		if (e)
-			e(NULL);
-		else if (ee)
-			ee(retval, NULL);
+	ਜੇ (ਸੁਨੇਹਾ) {
+		ਜੇ (e)
+			e("%s", ਸੁਨੇਹਾ);
+		ਨਹੀਂਤਾਂ ਜੇ (ee)
+			ee(retval, "%s", ਸੁਨੇਹਾ);
+	} ਨਹੀਂਤਾਂ {
+		ਜੇ (e)
+			e(ਨਿਰਾ);
+		ਨਹੀਂਤਾਂ ਜੇ (ee)
+			ee(retval, ਨਿਰਾ);
 	}
 
-	free(message);
-	return retval;
+	ਮੁਕਤ(ਸੁਨੇਹਾ);
+	ਵਾਪਸ retval;
 }

@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <ctype.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
 
-int main(int argc, char **argv)
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ **argv)
 {
-	int i;
-	char *p;
-	int c;
+	ਪੂਰਨ i;
+	ਅੱਖਰ *p;
+	ਪੂਰਨ c;
 
-	for (i = 1; i < argc; i++) {
+	ਲਈ (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
-			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ਜੇ (i != 1)
+			ਅੱਖਰ_ਲਿਖੋ(' ');
+		ਜਦੋਂ (*p) {
+			c = (ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ)*p++;
+			ਜੇ (!ਅੱਖਰ_ਜਾਂ_ਅੰਕ(c))
 				c = '_';
-			putchar(c);
+			ਅੱਖਰ_ਲਿਖੋ(c);
 		}
 	}
-	putchar('\n');
-	return EXIT_SUCCESS;
+	ਅੱਖਰ_ਲਿਖੋ('\n');
+	ਵਾਪਸ EXIT_SUCCESS;
 }

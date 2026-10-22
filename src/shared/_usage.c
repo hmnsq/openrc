@@ -10,80 +10,80 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <ctype.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "rc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "_usage.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "version.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "helpers.h"
 
 
-void set_quiet_options(void)
+ਖਾਲੀ ਸੈੱਟ_quiet_options(ਖਾਲੀ)
 {
-	static int qcount = 0;
+	ਸਥਿਰ ਪੂਰਨ qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	ਚੋਣ (qcount) {
+	ਹਾਲਤ 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		ਰੋਕੋ;
+	ਹਾਲਤ 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		ਰੋਕੋ;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN ਖਾਲੀ show_ਸੰਸਕਰਣ(ਖਾਲੀ)
 {
-	const char *systype = NULL;
+	ਅਚਲ ਅੱਖਰ *systype = ਨਿਰਾ;
 
-	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
-		printf(" [%s]", systype);
-	printf(") %s", VERSION);
-#ifdef BRANDING
-	printf(" (%s)", BRANDING);
-#endif
-	printf("\n");
-	exit(EXIT_SUCCESS);
+	ਲਿਖੋ("%s (OpenRC", applet);
+	ਜੇ ((systype = rc_sys()))
+		ਲਿਖੋ(" [%s]", systype);
+	ਲਿਖੋ(") %s", ਸੰਸਕਰਣ);
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ BRANDING
+	ਲਿਖੋ(" (%s)", BRANDING);
+#ਜੇ_ਅੰਤ
+	ਲਿਖੋ("\n");
+	ਬਾਹਰ_ਨਿਕਲੋ(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN ਖਾਲੀ usage(ਪੂਰਨ exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	ਅਚਲ ਅੱਖਰ * ਅਚਲ has_arg[] = { "", "<arg>", "[arg]" };
+	ਪੂਰਨ i;
+	ਪੂਰਨ len;
+	ਅੱਖਰ *lo;
+	ਅੱਖਰ *p;
+	ਅੱਖਰ *token;
+	ਅੱਖਰ val[4] = "-?,";
 
-	if (usagestring)
-		printf("%s", usagestring);
-	else
-		printf("Usage: %s [options] ", applet);
+	ਜੇ (usagestring)
+		ਲਿਖੋ("%s", usagestring);
+	ਨਹੀਂਤਾਂ
+		ਲਿਖੋ("Usage: %s [options] ", applet);
 
-	if (extraopts)
-		printf("%s", extraopts);
+	ਜੇ (extraopts)
+		ਲਿਖੋ("%s", extraopts);
 
-	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	ਲਿਖੋ("\n\nOptions: [ %s ]\n", getoptstring);
+	ਲਈ (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
-		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
+		len = ਲਿਖੋ("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		ਜਦੋਂ ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
-				printf("%*s", len, "");
+			ਜੇ (len > 0)
+				ਲਿਖੋ("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		ਮੁਕਤ(lo);
 	}
-	exit(exit_status);
+	ਬਾਹਰ_ਨਿਕਲੋ(exit_status);
 }

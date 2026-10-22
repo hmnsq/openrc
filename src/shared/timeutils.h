@@ -9,33 +9,33 @@
  * This file may not be copied, modified, propagated, or distributed
  * except according to the terms contained in the LICENSE file.
  */
-#ifndef RC_TIMEUTILS_H
-#define RC_TIMEUTILS_H
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ RC_TIMEUTILS_H
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ RC_TIMEUTILS_H
 
-#include <stdint.h>
-#include <time.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdint.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <time.h>
 
 /*
  * A couple helper utilities to deal with monotonic clock at milliseconds
  * resolution.
  */
 
-enum tm_sleep_flags {
+ਗਿਣਤੀ tm_sleep_flags {
 	TM_NO_EINTR = 1 << 0,
 };
 
-int64_t tm_now(void);
+int64_t tm_now(ਖਾਲੀ);
 /* returns 0 on success, amount of time remaining on failure.
  * if TM_NO_EINTR is specified in flags, it will restart the sleep if it was
  * failed due to EINTR.
  */
-int64_t tm_sleep(int64_t, enum tm_sleep_flags);
+int64_t tm_sleep(int64_t, ਗਿਣਤੀ tm_sleep_flags);
 /* parse a integer followed by an optional time unit (e.g "sec", "ms").
  * returns negative on failure
  */
-int64_t parse_duration(const char *duration);
+int64_t parse_duration(ਅਚਲ ਅੱਖਰ *duration);
 
-#define TM_MS(N)   ((N) * INT64_C(1))
-#define TM_SEC(N)  ((N) * INT64_C(1000))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ TM_MS(N)   ((N) * INT64_C(1))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ TM_SEC(N)  ((N) * INT64_C(1000))
 
-#endif
+#ਜੇ_ਅੰਤ
