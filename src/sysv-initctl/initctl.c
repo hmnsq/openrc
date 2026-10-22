@@ -1,112 +1,112 @@
-#include <sys/types.h>
-#include <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
 
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdbool.h>
-#include <syslog.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <syslog.h>
 
-#include <rc.h>
+#ಅನ್ತರ್ಭಾವ <rc.h>
 
-#include "initreq.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "initreq.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
-static bool init_halt = false;
+ಸ್ಥಿರ bool init_halt = false;
 
-static void sysvinit_runlevel(int runlevel)
+ಸ್ಥಿರ ಶೂನ್ಯ sysvinit_runlevel(ಪೂರ್ಣಾಙ್ಕ runlevel)
 {
-	const char *cmd;
-	int fifo;
+	ಧ್ರುವ ವರ್ಣ *cmd;
+	ಪೂರ್ಣಾಙ್ಕ fifo;
 
-	switch (runlevel) {
-	case '0':
+	ವಿಕಲ್ಪ (runlevel) {
+	ಪಕ್ಷ '0':
 		cmd = init_halt ? "halt" : "poweroff";
-		break;
-	case '1':
-	case 'S':
-	case 's':
+		ಭಙ್ಗ;
+	ಪಕ್ಷ '1':
+	ಪಕ್ಷ 'S':
+	ಪಕ್ಷ 's':
 		cmd = "single";
-		break;
-	case '2':
-	case '3':
-	case '4':
-	case '5':
+		ಭಙ್ಗ;
+	ಪಕ್ಷ '2':
+	ಪಕ್ಷ '3':
+	ಪಕ್ಷ '4':
+	ಪಕ್ಷ '5':
 		/* TODO: switch to default runlevel? */
-		return;
-	case '6':
+		ಪ್ರತ್ಯಾಗಮ;
+	ಪಕ್ಷ '6':
 		/* RB_KEXEC: Gentoo inittab calls /sbin/reboot -k */
 		cmd = "kexec";
-		break;
-	case 'Q':
-	case 'q':
-		return;
-	case 'U':
-	case 'u':
+		ಭಙ್ಗ;
+	ಪಕ್ಷ 'Q':
+	ಪಕ್ಷ 'q':
+		ಪ್ರತ್ಯಾಗಮ;
+	ಪಕ್ಷ 'U':
+	ಪಕ್ಷ 'u':
 		cmd = "reexec";
-		break;
+		ಭಙ್ಗ;
 	}
 
-	if ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
+	ಯದಿ ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
 		syslog(LOG_ERR, "open: %s", strerror(errno));
-		return;
+		ಪ್ರತ್ಯಾಗಮ;
 	}
 
-	if (write(fifo, cmd, strlen(cmd) + 1) == -1)
+	ಯದಿ (ಲಿಖ(fifo, cmd, strlen(cmd) + 1) == -1)
 		syslog(LOG_ERR, "write: %s", strerror(errno));
 	close(fifo);
 }
 
-static void sysvinit_setenv(char *data, size_t size)
+ಸ್ಥಿರ ಶೂನ್ಯ sysvinit_setenv(ವರ್ಣ *data, size_t size)
 {
 	data[size - 1] = '\0';
-	for (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
+	ಪ್ರತಿ (ವರ್ಣ *end = data + size; data < end && *data; data += strlen(data) + 1) {
 		/* We only care about the INIT_HALT variable */
-		if (!strcmp(data, "INIT_HALT=HALT"))
+		ಯದಿ (!strcmp(data, "INIT_HALT=HALT"))
 			init_halt = true;
-		else if (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
+		ಅನ್ಯಥಾ ಯದಿ (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
 			init_halt = false;
 	}
 }
 
-int main(void) {
-	int fifo;
+ಪೂರ್ಣಾಙ್ಕ main(ಶೂನ್ಯ) {
+	ಪೂರ್ಣಾಙ್ಕ fifo;
 
 	openlog("sysv-initctl", 0, LOG_DAEMON);
 	symlink("/run/initctl", "/dev/initctl");
-	if ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
+	ಯದಿ ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
 		syslog(LOG_ERR, "open_rwfifo: %s", strerror(errno));
-		return 1;
+		ಪ್ರತ್ಯಾಗಮ 1;
 	}
 
-	for (;;) {
-		struct init_request req;
-		ssize_t count = read(fifo, &req, sizeof(req));
+	ಪ್ರತಿ (;;) {
+		ಸಂರಚನಾ init_request req;
+		ssize_t ಎಣಿಕೆ = ಪಠ(fifo, &req, ಪರಿಮಾಣ(req));
 
-		if (count == -1) {
+		ಯದಿ (ಎಣಿಕೆ == -1) {
 			syslog(LOG_ERR, "read: %s", strerror(errno));
-			continue;
+			ಅನುವರ್ತ;
 		}
 
-		if (count != sizeof(req)) {
+		ಯದಿ (ಎಣಿಕೆ != ಪರಿಮಾಣ(req)) {
 			syslog(LOG_ERR, "read: short count");
-			continue;
+			ಅನುವರ್ತ;
 		}
 
-		if (req.magic != INIT_MAGIC) {
+		ಯದಿ (req.magic != INIT_MAGIC) {
 			syslog(LOG_ERR, "invalid magic bytes");
-			continue;
+			ಅನುವರ್ತ;
 		}
 
-		switch (req.cmd) {
-		case INIT_CMD_RUNLVL:
+		ವಿಕಲ್ಪ (req.cmd) {
+		ಪಕ್ಷ INIT_CMD_RUNLVL:
 			sysvinit_runlevel(req.runlevel);
-			break;
-		case INIT_CMD_SETENV:
-		case INIT_CMD_UNSETENV:
-			sysvinit_setenv(req.i.data, sizeof(req.i.data));
-			break;
+			ಭಙ್ಗ;
+		ಪಕ್ಷ INIT_CMD_SETENV:
+		ಪಕ್ಷ INIT_CMD_UNSETENV:
+			sysvinit_setenv(req.i.data, ಪರಿಮಾಣ(req.i.data));
+			ಭಙ್ಗ;
 		}
 	}
 }

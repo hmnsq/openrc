@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
 
-int main(int argc, char **argv)
+ಪೂರ್ಣಾಙ್ಕ main(ಪೂರ್ಣಾಙ್ಕ argc, ವರ್ಣ **argv)
 {
-	int i;
-	char *p;
-	int c;
+	ಪೂರ್ಣಾಙ್ಕ i;
+	ವರ್ಣ *p;
+	ಪೂರ್ಣಾಙ್ಕ c;
 
-	for (i = 1; i < argc; i++) {
+	ಪ್ರತಿ (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		ಯದಿ (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ಯಾವತ್ (*p) {
+			c = (unsigned ವರ್ಣ)*p++;
+			ಯದಿ (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	ಪ್ರತ್ಯಾಗಮ EXIT_SUCCESS;
 }

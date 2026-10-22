@@ -10,21 +10,21 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
 
-#include "rc.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
 
-int main(int argc, char **argv)
+ಪೂರ್ಣಾಙ್ಕ main(ಪೂರ್ಣಾಙ್ಕ argc, ವರ್ಣ **argv)
 {
-	int i;
+	ಪೂರ್ಣಾಙ್ಕ i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ಯದಿ (argc < 3)
+		ಪ್ರತ್ಯಾಗಮ EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	ಪ್ರತಿ (i = 2; i < argc; ++i)
+		ಯದಿ (!rc_newer_than(argv[1], argv[i], ರಿಕ್ತ, ರಿಕ್ತ))
+			ಪ್ರತ್ಯಾಗಮ EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	ಪ್ರತ್ಯಾಗಮ EXIT_SUCCESS;
 }

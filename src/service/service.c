@@ -10,59 +10,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "misc.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
-const char *applet = NULL;
+ಧ್ರುವ ವರ್ಣ *applet = ರಿಕ್ತ;
 
-int main(int argc, char **argv)
+ಪೂರ್ಣಾಙ್ಕ main(ಪೂರ್ಣಾಙ್ಕ argc, ವರ್ಣ **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
+	ವರ್ಣ *service;
+	ವರ್ಣ *exec;
+	ಪೂರ್ಣಾಙ್ಕ idx = 0;
 	RC_SERVICE state, bit;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	ಯದಿ (argc > 1)
 		service = argv[1];
-	else
+	ಅನ್ಯಥಾ
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	ಯದಿ (service == ರಿಕ್ತ || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
 	bit = lookup_service_state(applet);
-	if (bit) {
+	ಯದಿ (bit) {
 		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	} ಅನ್ಯಥಾ ಯದಿ (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		ಯದಿ (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
 			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+		} ಅನ್ಯಥಾ ಯದಿ (argc == 3) {
+			ಯದಿ (sscanf(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
-		ok = rc_service_started_daemon(service, exec, NULL, idx);
+		ok = rc_service_started_daemon(service, exec, ರಿಕ್ತ, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} ಅನ್ಯಥಾ ಯದಿ (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} ಅನ್ಯಥಾ
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	ಪ್ರತ್ಯಾಗಮ ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

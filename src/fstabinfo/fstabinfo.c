@@ -15,15 +15,15 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/wait.h>
-#include <errno.h>
-#include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <spawn.h>
+#ಅನ್ತರ್ಭಾವ <sys/wait.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <getopt.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <spawn.h>
 
 /* Yay for linux and its non liking of POSIX functions.
    Okay, we could use getfsent but the man page says use getmntent instead
@@ -42,7 +42,7 @@
 #  define ENT_TYPE(_ent) (_ent)->mnt_type
 #  define ENT_OPTS(_ent) (_ent)->mnt_opts
 #  define ENT_PASS(_ent) (_ent)->mnt_passno
-#else
+#ಅನ್ಯಥಾ
 #  define HAVE_GETFSENT
 #  include <fstab.h>
 
@@ -58,28 +58,28 @@
 #  define ENT_PASS(_ent) (_ent)->fs_passno
 #endif
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "_usage.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "queue.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "_usage.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
-extern char **environ;
+ಬಾಹ್ಯ ವರ್ಣ **environ;
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "MRbmop:t:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "mount",          0, NULL, 'M' },
-	{ "remount",        0, NULL, 'R' },
-	{ "blockdevice",    0, NULL, 'b' },
-	{ "mountargs",      0, NULL, 'm' },
-	{ "options",        0, NULL, 'o' },
-	{ "passno",         1, NULL, 'p' },
-	{ "fstype",         1, NULL, 't' },
+ಧ್ರುವ ವರ್ಣ *applet = ರಿಕ್ತ;
+ಧ್ರುವ ವರ್ಣ *extraopts = ರಿಕ್ತ;
+ಧ್ರುವ ವರ್ಣ getoptstring[] = "MRbmop:t:" getoptstring_COMMON;
+ಧ್ರುವ ಸಂರಚನಾ option longopts[] = {
+	{ "mount",          0, ರಿಕ್ತ, 'M' },
+	{ "remount",        0, ರಿಕ್ತ, 'R' },
+	{ "blockdevice",    0, ರಿಕ್ತ, 'b' },
+	{ "mountargs",      0, ರಿಕ್ತ, 'm' },
+	{ "options",        0, ರಿಕ್ತ, 'o' },
+	{ "passno",         1, ರಿಕ್ತ, 'p' },
+	{ "fstype",         1, ರಿಕ್ತ, 't' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ longopts_help[] = {
 	"Mounts the filesystem from the mountpoint",
 	"Remounts the filesystem based on the information in fstab",
 	"Extract the block device",
@@ -89,65 +89,65 @@ const char * const longopts_help[] = {
 	"List entries with matching file system type",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ಧ್ರುವ ವರ್ಣ *usagestring = ರಿಕ್ತ;
 
 #ifdef HAVE_GETMNTENT
-static struct mntent *
-getmntfile(const char *file)
+ಸ್ಥಿರ ಸಂರಚನಾ mntent *
+getmntfile(ಧ್ರುವ ವರ್ಣ *file)
 {
-	struct mntent *ent;
+	ಸಂರಚನಾ mntent *ent;
 	FILE *fp;
 
 	START_ENT;
-	while ((ent = getmntent(fp)))
-		if (strcmp(file, ent->mnt_dir) == 0)
-			break;
+	ಯಾವತ್ ((ent = getmntent(fp)))
+		ಯದಿ (strcmp(file, ent->mnt_dir) == 0)
+			ಭಙ್ಗ;
 	END_ENT;
 
-	return ent;
+	ಪ್ರತ್ಯಾಗಮ ent;
 }
 #endif
 
-extern const char *applet;
+ಬಾಹ್ಯ ಧ್ರುವ ವರ್ಣ *applet;
 
-static int
-do_mount(struct ENT *ent, bool remount)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ
+do_mount(ಸಂರಚನಾ ENT *ent, bool remount)
 {
-	char *argv[10];
+	ವರ್ಣ *argv[10];
 	pid_t pid;
-	int status, err;
+	ಪೂರ್ಣಾಙ್ಕ status, err;
 
 	argv[0] = UNCONST("mount");
 	argv[1] = UNCONST("-o");
 	argv[2] = ENT_OPTS(ent);
 	argv[3] = UNCONST("-t");
 	argv[4] = ENT_TYPE(ent);
-	if (!remount) {
+	ಯದಿ (!remount) {
 		argv[5] = ENT_BLOCKDEVICE(ent);
 		argv[6] = ENT_FILE(ent);
-		argv[7] = NULL;
-	} else {
+		argv[7] = ರಿಕ್ತ;
+	} ಅನ್ಯಥಾ {
 #ifdef __linux__
 		argv[5] = UNCONST("-o");
 		argv[6] = UNCONST("remount");
 		argv[7] = ENT_BLOCKDEVICE(ent);
 		argv[8] = ENT_FILE(ent);
-		argv[9] = NULL;
-#else
+		argv[9] = ರಿಕ್ತ;
+#ಅನ್ಯಥಾ
 		argv[5] = UNCONST("-u");
 		argv[6] = ENT_BLOCKDEVICE(ent);
 		argv[7] = ENT_FILE(ent);
-		argv[8] = NULL;
+		argv[8] = ರಿಕ್ತ;
 #endif
 	}
-	err = posix_spawnp(&pid, argv[0], NULL, NULL, argv, environ);
-	if (err)
+	err = posix_spawnp(&pid, argv[0], ರಿಕ್ತ, ರಿಕ್ತ, argv, environ);
+	ಯದಿ (err)
 		eerrorx("%s: posix_spawnp: %s", applet, strerror(err));
-	while (waitpid(pid, &status, 0) < 0 && errno == EINTR);
-	if (WIFEXITED(status))
-		return WEXITSTATUS(status);
-	else
-		return -1;
+	ಯಾವತ್ (waitpid(pid, &status, 0) < 0 && errno == EINTR);
+	ಯದಿ (WIFEXITED(status))
+		ಪ್ರತ್ಯಾಗಮ WEXITSTATUS(status);
+	ಅನ್ಯಥಾ
+		ಪ್ರತ್ಯಾಗಮ -1;
 }
 
 #define OUTPUT_FILE      (1 << 1)
@@ -158,14 +158,14 @@ do_mount(struct ENT *ent, bool remount)
 #define OUTPUT_MOUNT     (1 << 6)
 #define OUTPUT_REMOUNT   (1 << 7)
 
-int main(int argc, char **argv)
+ಪೂರ್ಣಾಙ್ಕ main(ಪೂರ್ಣಾಙ್ಕ argc, ವರ್ಣ **argv)
 {
-	struct ENT *ent;
-	int result = EXIT_SUCCESS;
-	char *token;
-	int i, p;
-	int opt;
-	int output = OUTPUT_FILE;
+	ಸಂರಚನಾ ENT *ent;
+	ಪೂರ್ಣಾಙ್ಕ result = EXIT_SUCCESS;
+	ವರ್ಣ *token;
+	ಪೂರ್ಣಾಙ್ಕ i, p;
+	ಪೂರ್ಣಾಙ್ಕ opt;
+	ಪೂರ್ಣಾಙ್ಕ output = OUTPUT_FILE;
 	RC_STRINGLIST *files = rc_stringlist_new();
 	RC_STRING *file, *file_np;
 	bool filtered = false;
@@ -175,156 +175,156 @@ int main(int argc, char **argv)
 #endif
 
 	/* fail if there is no /etc/fstab */
-	if (access("/etc/fstab", F_OK) != 0)
+	ಯದಿ (access("/etc/fstab", F_OK) != 0)
 		eerrorx("/etc/fstab does not exist");
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ಯಾವತ್ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (ಪೂರ್ಣಾಙ್ಕ *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'M':
+		ವಿಕಲ್ಪ (opt) {
+		ಪಕ್ಷ 'M':
 			output = OUTPUT_MOUNT;
-			break;
-		case 'R':
+			ಭಙ್ಗ;
+		ಪಕ್ಷ 'R':
 			output = OUTPUT_REMOUNT;
-			break;
-		case 'b':
+			ಭಙ್ಗ;
+		ಪಕ್ಷ 'b':
 			output = OUTPUT_BLOCKDEV;
-			break;
-		case 'o':
+			ಭಙ್ಗ;
+		ಪಕ್ಷ 'o':
 			output = OUTPUT_OPTIONS;
-			break;
-		case 'm':
+			ಭಙ್ಗ;
+		ಪಕ್ಷ 'm':
 			output = OUTPUT_MOUNTARGS;
-			break;
+			ಭಙ್ಗ;
 
-		case 'p':
-			switch (optarg[0]) {
-			case '=':
-			case '<':
-			case '>':
-				if (sscanf(optarg + 1, "%d", &i) != 1)
+		ಪಕ್ಷ 'p':
+			ವಿಕಲ್ಪ (optarg[0]) {
+			ಪಕ್ಷ '=':
+			ಪಕ್ಷ '<':
+			ಪಕ್ಷ '>':
+				ಯದಿ (sscanf(optarg + 1, "%d", &i) != 1)
 					eerrorx("%s: invalid passno %s",
 					    argv[0], optarg + 1);
 
 				filtered = true;
 				opt = optarg[0];
 				START_ENT;
-				while ((ent = GET_ENT)) {
-					if (strcmp(ENT_FILE(ent), "none") == 0)
-						continue;
+				ಯಾವತ್ ((ent = GET_ENT)) {
+					ಯದಿ (strcmp(ENT_FILE(ent), "none") == 0)
+						ಅನುವರ್ತ;
 					p = ENT_PASS(ent);
-					if ((opt == '=' && i == p) ||
+					ಯದಿ ((opt == '=' && i == p) ||
 					    (opt == '<' && i > p && p != 0) ||
 					    (opt == '>' && i < p && p != 0))
 						rc_stringlist_add(files,
 						    ENT_FILE(ent));
 				}
 				END_ENT;
-				break;
+				ಭಙ್ಗ;
 
-			default:
+			ಸ್ವಭಾವ:
 				rc_stringlist_add(files, optarg);
 				output = OUTPUT_PASSNO;
-				break;
+				ಭಙ್ಗ;
 			}
-			break;
+			ಭಙ್ಗ;
 
-		case 't':
+		ಪಕ್ಷ 't':
 			filtered = true;
-			while ((token = strsep(&optarg, ","))) {
+			ಯಾವತ್ ((token = strsep(&optarg, ","))) {
 				START_ENT;
-				while ((ent = GET_ENT))
-					if (strcmp(token, ENT_TYPE(ent)) == 0)
+				ಯಾವತ್ ((ent = GET_ENT))
+					ಯದಿ (strcmp(token, ENT_TYPE(ent)) == 0)
 						rc_stringlist_add(files,
 						    ENT_FILE(ent));
 				END_ENT;
 			}
-			break;
+			ಭಙ್ಗ;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind < argc) {
-		if (TAILQ_FIRST(files)) {
+	ಯದಿ (optind < argc) {
+		ಯದಿ (TAILQ_FIRST(files)) {
 			TAILQ_FOREACH_SAFE(file, files, entries, file_np) {
-				for (i = optind; i < argc; i++)
-					if (strcmp(argv[i], file->value) == 0)
-						break;
-				if (i >= argc)
+				ಪ್ರತಿ (i = optind; i < argc; i++)
+					ಯದಿ (strcmp(argv[i], file->ಮೌಲ್ಯ) == 0)
+						ಭಙ್ಗ;
+				ಯದಿ (i >= argc)
 					rc_stringlist_delete(files,
-					    file->value);
+					    file->ಮೌಲ್ಯ);
 			}
-		} else {
-			while (optind < argc)
+		} ಅನ್ಯಥಾ {
+			ಯಾವತ್ (optind < argc)
 				rc_stringlist_add(files, argv[optind++]);
 		}
-	} else if (!filtered) {
+	} ಅನ್ಯಥಾ ಯದಿ (!filtered) {
 		START_ENT;
-		while ((ent = GET_ENT))
+		ಯಾವತ್ ((ent = GET_ENT))
 			rc_stringlist_add(files, ENT_FILE(ent));
 		END_ENT;
 
-		if (!TAILQ_FIRST(files))
+		ಯದಿ (!TAILQ_FIRST(files))
 			eerrorx("%s: empty fstab", argv[0]);
 	}
 
-	if (!TAILQ_FIRST(files)) {
+	ಯದಿ (!TAILQ_FIRST(files)) {
 		rc_stringlist_free(files);
-		return (EXIT_FAILURE);
+		ಪ್ರತ್ಯಾಗಮ (EXIT_FAILURE);
 	}
 
 	/* Ensure we always display something */
 	START_ENT;
 	TAILQ_FOREACH(file, files, entries) {
-		if (!(ent = GET_ENT_FILE(file->value))) {
+		ಯದಿ (!(ent = GET_ENT_FILE(file->ಮೌಲ್ಯ))) {
 			result = EXIT_FAILURE;
-			continue;
+			ಅನುವರ್ತ;
 		}
 
 		/* mount or remount? */
-		switch (output) {
-		case OUTPUT_MOUNT:
+		ವಿಕಲ್ಪ (output) {
+		ಪಕ್ಷ OUTPUT_MOUNT:
 			result += do_mount(ent, false);
-			break;
+			ಭಙ್ಗ;
 
-		case OUTPUT_REMOUNT:
+		ಪಕ್ಷ OUTPUT_REMOUNT:
 			result += do_mount(ent, true);
-			break;
+			ಭಙ್ಗ;
 		}
 
 		/* No point in outputting if quiet */
-		if (rc_yesno(getenv("EINFO_QUIET")))
-			continue;
+		ಯದಿ (rc_yesno(getenv("EINFO_QUIET")))
+			ಅನುವರ್ತ;
 
-		switch (output) {
-		case OUTPUT_BLOCKDEV:
+		ವಿಕಲ್ಪ (output) {
+		ಪಕ್ಷ OUTPUT_BLOCKDEV:
 			printf("%s\n", ENT_BLOCKDEVICE(ent));
-			break;
+			ಭಙ್ಗ;
 
-		case OUTPUT_MOUNTARGS:
+		ಪಕ್ಷ OUTPUT_MOUNTARGS:
 			printf("-o %s -t %s %s %s\n",
 			    ENT_OPTS(ent),
 			    ENT_TYPE(ent),
 			    ENT_BLOCKDEVICE(ent),
-			    file->value);
-			break;
+			    file->ಮೌಲ್ಯ);
+			ಭಙ್ಗ;
 
-		case OUTPUT_OPTIONS:
+		ಪಕ್ಷ OUTPUT_OPTIONS:
 			printf("%s\n", ENT_OPTS(ent));
-			break;
+			ಭಙ್ಗ;
 
-		case OUTPUT_FILE:
-			printf("%s\n", file->value);
-			break;
+		ಪಕ್ಷ OUTPUT_FILE:
+			printf("%s\n", file->ಮೌಲ್ಯ);
+			ಭಙ್ಗ;
 
-		case OUTPUT_PASSNO:
+		ಪಕ್ಷ OUTPUT_PASSNO:
 			printf("%d\n", ENT_PASS(ent));
-			break;
+			ಭಙ್ಗ;
 		}
 	}
 	END_ENT;

@@ -15,88 +15,88 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <stddef.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#include "einfo.h"
-#include "initreq.h"
-#include "sysvinit.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "initreq.h"
+#ಅನ್ತರ್ಭಾವ "sysvinit.h"
 
-static void sysvinit_send_cmd(struct init_request *request)
+ಸ್ಥಿರ ಶೂನ್ಯ sysvinit_send_cmd(ಸಂರಚನಾ init_request *request)
 {
-	int fd;
-	char *p;
+	ಪೂರ್ಣಾಙ್ಕ fd;
+	ವರ್ಣ *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	ಯದಿ (fd < 0) {
+		ಯದಿ (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		ಪ್ರತ್ಯಾಗಮ;
 	}
-	p = (char *) request;
-	bytes = sizeof(*request);
-	do {
-		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
-				continue;
+	p = (ವರ್ಣ *) request;
+	bytes = ಪರಿಮಾಣ(*request);
+	ಕುರು {
+		r = ಲಿಖ(fd, p, bytes);
+		ಯದಿ (r < 0) {
+			ಯದಿ ((errno == EAGAIN) || (errno == EINTR))
+				ಅನುವರ್ತ;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			ಪ್ರತ್ಯಾಗಮ;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} ಯಾವತ್ (bytes > 0);
 }
 
-void sysvinit_runlevel(char rl)
+ಶೂನ್ಯ sysvinit_runlevel(ವರ್ಣ rl)
 {
-	struct init_request request;
+	ಸಂರಚನಾ init_request request;
 
-	if (!rl)
-		return;
+	ಯದಿ (!rl)
+		ಪ್ರತ್ಯಾಗಮ;
 
-	request = (struct init_request) {
+	request = (ಸಂರಚನಾ init_request) {
 		.magic = INIT_MAGIC,
 		.sleeptime = 0,
 		.cmd = INIT_CMD_RUNLVL,
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		ಪ್ರತ್ಯಾಗಮ;
 }
 
 /*
  *	Set environment variables in the init process.
  */
-void sysvinit_setenv(const char *name, const char *value)
+ಶೂನ್ಯ sysvinit_setenv(ಧ್ರುವ ವರ್ಣ *name, ಧ್ರುವ ವರ್ಣ *ಮೌಲ್ಯ)
 {
-	struct init_request	request;
+	ಸಂರಚನಾ init_request	request;
 	size_t nl;
 	size_t vl;
 
-	memset(&request, 0, sizeof(request));
+	memset(&request, 0, ಪರಿಮಾಣ(request));
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
-		vl = strlen(value);
-else
+	ಯದಿ (ಮೌಲ್ಯ)
+		vl = strlen(ಮೌಲ್ಯ);
+ಅನ್ಯಥಾ
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	ಯದಿ (nl + vl + 3 >= (ಪೂರ್ಣಾಙ್ಕ)ಪರಿಮಾಣ(request.i.data))
+		ಪ್ರತ್ಯಾಗಮ;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	ಯದಿ (ಮೌಲ್ಯ) {
 		request.i.data[nl] = '=';
-		memcpy(request.i.data + nl + 1, value, vl);
+		memcpy(request.i.data + nl + 1, ಮೌಲ್ಯ, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	ಪ್ರತ್ಯಾಗಮ;
 }

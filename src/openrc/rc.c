@@ -20,52 +20,52 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <dirent.h>
-#include <getopt.h>
-#include <libgen.h>
-#include <pwd.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <dirent.h>
+#ಅನ್ತರ್ಭಾವ <getopt.h>
+#ಅನ್ತರ್ಭಾವ <libgen.h>
+#ಅನ್ತರ್ಭಾವ <pwd.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <signal.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <sys/ioctl.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/utsname.h>
+#ಅನ್ತರ್ಭಾವ <sys/wait.h>
+#ಅನ್ತರ್ಭಾವ <termios.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "rc-logger.h"
-#include "misc.h"
-#include "plugin.h"
-#include "version.h"
-#include "_usage.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "queue.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "rc_exec.h"
+#ಅನ್ತರ್ಭಾವ "rc-logger.h"
+#ಅನ್ತರ್ಭಾವ "misc.h"
+#ಅನ್ತರ್ಭಾವ "plugin.h"
+#ಅನ್ತರ್ಭಾವ "version.h"
+#ಅನ್ತರ್ಭಾವ "_usage.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
-const char *extraopts = NULL;
-const char getoptstring[] = "a:no:s:S" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "no-stop", 0, NULL, 'n' },
-	{ "override",    1, NULL, 'o' },
-	{ "service",     1, NULL, 's' },
-	{ "sys",         0, NULL, 'S' },
+ಧ್ರುವ ವರ್ಣ *extraopts = ರಿಕ್ತ;
+ಧ್ರುವ ವರ್ಣ getoptstring[] = "a:no:s:S" getoptstring_COMMON;
+ಧ್ರುವ ಸಂರಚನಾ option longopts[] = {
+	{ "no-stop", 0, ರಿಕ್ತ, 'n' },
+	{ "override",    1, ರಿಕ್ತ, 'o' },
+	{ "service",     1, ರಿಕ್ತ, 's' },
+	{ "sys",         0, ರಿಕ್ತ, 'S' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ longopts_help[] = {
 	"do not stop any services",
 	"override the next runlevel to change into\nwhen leaving single user or boot runlevels",
 	"runs the service specified with the rest\nof the arguments",
 	"output the RC system type, if any",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+ಧ್ರುವ ವರ್ಣ *usagestring = ""
 	"Usage: openrc [options] [<runlevel>]";
 
 #define INITSH                  RC_LIBEXECDIR "/sh/init.sh"
@@ -73,54 +73,54 @@ const char *usagestring = ""
 
 #define DEVBOOT			"/dev/.rcboot"
 
-const char *applet = NULL;
-static RC_STRINGLIST *main_hotplugged_services;
-static RC_STRINGLIST *main_stop_services;
-static RC_STRINGLIST *main_start_services;
-static RC_STRINGLIST *main_types_nw;
-static RC_STRINGLIST *main_types_nwua;
-static RC_DEPTREE *main_deptree;
-static char *runlevel;
+ಧ್ರುವ ವರ್ಣ *applet = ರಿಕ್ತ;
+ಸ್ಥಿರ RC_STRINGLIST *main_hotplugged_services;
+ಸ್ಥಿರ RC_STRINGLIST *main_stop_services;
+ಸ್ಥಿರ RC_STRINGLIST *main_start_services;
+ಸ್ಥಿರ RC_STRINGLIST *main_types_nw;
+ಸ್ಥಿರ RC_STRINGLIST *main_types_nwua;
+ಸ್ಥಿರ RC_DEPTREE *main_deptree;
+ಸ್ಥಿರ ವರ್ಣ *runlevel;
 
-struct termios *termios_orig = NULL;
+ಸಂರಚನಾ termios *termios_orig = ರಿಕ್ತ;
 
 RC_PIDLIST service_pids;
 RC_PIDLIST free_these_pids;
 
-static void
-clean_failed(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+clean_failed(ಶೂನ್ಯ)
 {
 	DIR *dp;
-	struct dirent *d;
+	ಸಂರಚನಾ dirent *d;
 
 	/* Clean the failed services state dir now */
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "failed")))
-		return;
+	ಯದಿ (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "failed")))
+		ಪ್ರತ್ಯಾಗಮ;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
-			continue;
+	ಯಾವತ್ ((d = readdir(dp))) {
+		ಯದಿ (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+			ಅನುವರ್ತ;
 
-		if (unlinkat(dirfd(dp), d->d_name, 0) == -1)
+		ಯದಿ (unlinkat(dirfd(dp), d->d_name, 0) == -1)
 			eerror("%s: unlink '%s/failed/%s': %s", applet, rc_svcdir(), d->d_name, strerror(errno));
 	}
 	closedir(dp);
 }
 
-static void
-cleanup(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+cleanup(ಶೂನ್ಯ)
 {
-	int svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
+	ಪೂರ್ಣಾಙ್ಕ svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
 	RC_PID *p, *tmp;
 
-	if (!rc_in_logger && !rc_in_plugin &&
+	ಯದಿ (!rc_in_logger && !rc_in_plugin &&
 	    applet && (strcmp(applet, "rc") == 0 || strcmp(applet, "openrc") == 0))
 	{
 		rc_plugin_unload();
 
-		if (termios_orig) {
+		ಯದಿ (termios_orig) {
 			tcsetattr(STDIN_FILENO, TCSANOW, termios_orig);
-			free(termios_orig);
+			ಮುಕ್ತ(termios_orig);
 		}
 
 		/* Clean runlevel start, stop markers */
@@ -133,11 +133,11 @@ cleanup(void)
 
 	LIST_FOREACH_SAFE(p, &service_pids, entries, tmp) {
 		LIST_REMOVE(p, entries);
-		free(p);
+		ಮುಕ್ತ(p);
 	}
 	LIST_FOREACH_SAFE(p, &free_these_pids, entries, tmp) {
 		LIST_REMOVE(p, entries);
-		free(p);
+		ಮುಕ್ತ(p);
 	}
 
 	rc_stringlist_free(main_hotplugged_services);
@@ -146,210 +146,210 @@ cleanup(void)
 	rc_stringlist_free(main_types_nw);
 	rc_stringlist_free(main_types_nwua);
 	rc_deptree_free(main_deptree);
-	free(runlevel);
+	ಮುಕ್ತ(runlevel);
 }
 
-static char
-read_key(bool block)
+ಸ್ಥಿರ ವರ್ಣ
+read_ಕೀಲಿ(bool block)
 {
-	struct termios termios;
-	char c = 0;
-	int fd = STDIN_FILENO;
+	ಸಂರಚನಾ termios termios;
+	ವರ್ಣ c = 0;
+	ಪೂರ್ಣಾಙ್ಕ fd = STDIN_FILENO;
 
-	if (!isatty(fd))
-		return false;
+	ಯದಿ (!isatty(fd))
+		ಪ್ರತ್ಯಾಗಮ false;
 
 	/* Now save our terminal settings. We need to restore them at exit as
 	   we will be changing it for non-blocking reads for Interactive */
-	if (!termios_orig) {
-		termios_orig = xmalloc(sizeof(*termios_orig));
+	ಯದಿ (!termios_orig) {
+		termios_orig = xmalloc(ಪರಿಮಾಣ(*termios_orig));
 		tcgetattr(fd, termios_orig);
 	}
 
 	tcgetattr(fd, &termios);
 	termios.c_lflag &= ~(ICANON | ECHO);
-	if (block)
+	ಯದಿ (block)
 		termios.c_cc[VMIN] = 1;
-	else {
+	ಅನ್ಯಥಾ {
 		termios.c_cc[VMIN] = 0;
 		termios.c_cc[VTIME] = 0;
 	}
 	tcsetattr(fd, TCSANOW, &termios);
-	if (read(fd, &c, 1) == -1)
+	ಯದಿ (ಪಠ(fd, &c, 1) == -1)
 		eerror("read: %s", strerror(errno));
 	tcsetattr(fd, TCSANOW, termios_orig);
-	return c;
+	ಪ್ರತ್ಯಾಗಮ c;
 }
 
-static bool
-want_interactive(void)
+ಸ್ಥಿರ bool
+want_interactive(ಶೂನ್ಯ)
 {
-	char c;
-	static bool gotinteractive;
-	static bool interactive;
+	ವರ್ಣ c;
+	ಸ್ಥಿರ bool gotinteractive;
+	ಸ್ಥಿರ bool interactive;
 
-	if (rc_yesno(getenv("EINFO_QUIET")))
-		return false;
-	if (!gotinteractive) {
+	ಯದಿ (rc_yesno(getenv("EINFO_QUIET")))
+		ಪ್ರತ್ಯಾಗಮ false;
+	ಯದಿ (!gotinteractive) {
 		gotinteractive = true;
 		interactive = rc_conf_yesno("rc_interactive");
 	}
-	if (!interactive)
-		return false;
-	c = read_key(false);
-	return (c == 'I' || c == 'i') ? true : false;
+	ಯದಿ (!interactive)
+		ಪ್ರತ್ಯಾಗಮ false;
+	c = read_ಕೀಲಿ(false);
+	ಪ್ರತ್ಯಾಗಮ (c == 'I' || c == 'i') ? true : false;
 }
 
-static void
-mark_interactive(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+mark_interactive(ಶೂನ್ಯ)
 {
 	FILE *fp;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "interactive", O_WRONLY | O_CREAT | O_TRUNC)))
+	ಯದಿ ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "interactive", O_WRONLY | O_CREAT | O_TRUNC)))
 		fclose(fp);
 }
 
-static void
-run_program(const char *prog)
+ಸ್ಥಿರ ಶೂನ್ಯ
+run_program(ಧ್ರುವ ವರ್ಣ *prog)
 {
-	struct sigaction sa;
+	ಸಂರಚನಾ sigaction sa;
 	sigset_t full;
 	sigset_t old;
 	pid_t pid;
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, ಪರಿಮಾಣ(sa));
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
 	pid = fork();
 
-	if (pid == -1) {
+	ಯದಿ (pid == -1) {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_START_OUT, runlevel);
 		eerrorx("%s: fork: %s", applet, strerror(errno));
 	}
-	if (pid == 0) {
+	ಯದಿ (pid == 0) {
 		/* Restore default handlers */
-		sigaction(SIGCHLD, &sa, NULL);
-		sigaction(SIGHUP, &sa, NULL);
-		sigaction(SIGINT, &sa, NULL);
-		sigaction(SIGQUIT, &sa, NULL);
-		sigaction(SIGTERM, &sa, NULL);
-		sigaction(SIGUSR1, &sa, NULL);
-		sigaction(SIGWINCH, &sa, NULL);
+		sigaction(SIGCHLD, &sa, ರಿಕ್ತ);
+		sigaction(SIGHUP, &sa, ರಿಕ್ತ);
+		sigaction(SIGINT, &sa, ರಿಕ್ತ);
+		sigaction(SIGQUIT, &sa, ರಿಕ್ತ);
+		sigaction(SIGTERM, &sa, ರಿಕ್ತ);
+		sigaction(SIGUSR1, &sa, ರಿಕ್ತ);
+		sigaction(SIGWINCH, &sa, ರಿಕ್ತ);
 
 		/* Unmask signals */
-		sigprocmask(SIG_SETMASK, &old, NULL);
+		sigprocmask(SIG_SETMASK, &old, ರಿಕ್ತ);
 
-		if (termios_orig)
+		ಯದಿ (termios_orig)
 			tcsetattr(STDIN_FILENO, TCSANOW, termios_orig);
 
-		execl(prog, prog, (char *)NULL);
+		execl(prog, prog, (ವರ್ಣ *)ರಿಕ್ತ);
 		eerror("%s: unable to exec `%s': %s", applet, prog,
 		    strerror(errno));
 		_exit(EXIT_FAILURE);
 	}
 
 	/* Unmask signals and wait for child */
-	sigprocmask(SIG_SETMASK, &old, NULL);
-	if (rc_waitpid(pid) == -1) {
+	sigprocmask(SIG_SETMASK, &old, ರಿಕ್ತ);
+	ಯದಿ (rc_waitpid(pid) == -1) {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_START_OUT, runlevel);
 		eerrorx("%s: failed to exec `%s'", applet, prog);
 	}
 }
 
-static void
-open_shell(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+open_shell(ಶೂನ್ಯ)
 {
-	const char *shell;
-	struct passwd *pw;
+	ಧ್ರುವ ವರ್ಣ *shell;
+	ಸಂರಚನಾ passwd *pw;
 
 #ifdef __linux__
-	const char *sys = rc_sys();
+	ಧ್ರುವ ವರ್ಣ *sys = rc_sys();
 
 	/* VSERVER systems cannot really drop to shells */
-	if (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
+	ಯದಿ (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
 	{
-		execlp("halt", "halt", "-f", (char *) NULL);
+		execlp("halt", "halt", "-f", (ವರ್ಣ *) ರಿಕ್ತ);
 		eerrorx("%s: unable to exec `halt -f': %s",
 		    applet, strerror(errno));
 	}
 #endif
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_ಮೌಲ್ಯ("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
-	if (shell == NULL) {
+	ಯದಿ (shell == ರಿಕ್ತ) {
 		shell = getenv("SHELL");
-		if (shell == NULL) {
+		ಯದಿ (shell == ರಿಕ್ತ) {
 			pw = getpwuid(getuid());
-			if (pw)
+			ಯದಿ (pw)
 				shell = pw->pw_shell;
-			if (shell == NULL)
+			ಯದಿ (shell == ರಿಕ್ತ)
 				shell = "/bin/sh";
 		}
 	}
 	run_program(shell);
 }
 
-static bool
-set_krunlevel(const char *level)
+ಸ್ಥಿರ bool
+set_krunlevel(ಧ್ರುವ ವರ್ಣ *level)
 {
 	FILE *fp;
 
-	if (rc_is_user())
-		return true;
+	ಯದಿ (rc_is_user())
+		ಪ್ರತ್ಯಾಗಮ true;
 
-	if (!level ||
+	ಯದಿ (!level ||
 	    strcmp(level, getenv ("RC_BOOTLEVEL")) == 0 ||
 	    strcmp(level, RC_LEVEL_SINGLE) == 0 ||
 	    strcmp(level, RC_LEVEL_SYSINIT) == 0)
 	{
-		if (access(RC_KRUNLEVEL, F_OK) == 0 && unlink(RC_KRUNLEVEL) != 0)
+		ಯದಿ (access(RC_KRUNLEVEL, F_OK) == 0 && unlink(RC_KRUNLEVEL) != 0)
 			eerror("unlink `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return false;
+		ಪ್ರತ್ಯಾಗಮ false;
 	}
 
-	if (!(fp = fopen(RC_KRUNLEVEL, "w"))) {
+	ಯದಿ (!(fp = fopen(RC_KRUNLEVEL, "w"))) {
 		eerror("fopen `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return false;
+		ಪ್ರತ್ಯಾಗಮ false;
 	}
 
 	fprintf(fp, "%s", level);
 	fclose(fp);
-	return true;
+	ಪ್ರತ್ಯಾಗಮ true;
 }
 
-static char *get_krunlevel(void)
+ಸ್ಥಿರ ವರ್ಣ *get_krunlevel(ಶೂನ್ಯ)
 {
-	char *buffer = NULL;
+	ವರ್ಣ *buffer = ರಿಕ್ತ;
 	FILE *fp;
 	size_t i = 0;
 
-	if (rc_is_user())
-		return NULL;
+	ಯದಿ (rc_is_user())
+		ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 
-	if (access(RC_KRUNLEVEL, F_OK) != 0)
-		return NULL;
-	if (!(fp = fopen(RC_KRUNLEVEL, "r"))) {
+	ಯದಿ (access(RC_KRUNLEVEL, F_OK) != 0)
+		ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
+	ಯದಿ (!(fp = fopen(RC_KRUNLEVEL, "r"))) {
 		eerror("fopen `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return NULL;
+		ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 	}
 
-	if (xgetline(&buffer, &i, fp) == -1) {
-		free(buffer);
-		buffer = NULL;
+	ಯದಿ (xgetline(&buffer, &i, fp) == -1) {
+		ಮುಕ್ತ(buffer);
+		buffer = ರಿಕ್ತ;
 	}
 
 	fclose(fp);
-	return buffer;
+	ಪ್ರತ್ಯಾಗಮ buffer;
 }
 
-static void
+ಸ್ಥಿರ ಶೂನ್ಯ
 add_pid(pid_t pid)
 {
 	sigset_t sset, old;
-	RC_PID *p = xmalloc(sizeof(*p));
+	RC_PID *p = xmalloc(ಪರಿಮಾಣ(*p));
 	p->pid = pid;
 
 	/* this list will be accessed inside the SIGCHLD signal handler.
@@ -359,11 +359,11 @@ add_pid(pid_t pid)
 	sigemptyset(&sset);
 	sigaddset(&sset, SIGCHLD);
 	sigprocmask(SIG_SETMASK, &sset, &old);
-	LIST_INSERT_HEAD(&service_pids, p, entries);
-	sigprocmask(SIG_SETMASK, &old, NULL);
+	LIST_ಸೇರಿಸು_HEAD(&service_pids, p, entries);
+	sigprocmask(SIG_SETMASK, &old, ರಿಕ್ತ);
 }
 
-static void
+ಸ್ಥಿರ ಶೂನ್ಯ
 remove_pid(pid_t pid, bool inside_signal)
 {
 	sigset_t sset, old;
@@ -374,99 +374,99 @@ remove_pid(pid_t pid, bool inside_signal)
 	sigaddset(&sset, SIGCHLD);
 	sigprocmask(SIG_SETMASK, &sset, &old);
 	LIST_FOREACH(p, &service_pids, entries) {
-		if (p->pid == pid) {
+		ಯದಿ (p->pid == pid) {
 			LIST_REMOVE(p, entries);
-			LIST_INSERT_HEAD(&free_these_pids, p, entries);
-			break;
+			LIST_ಸೇರಿಸು_HEAD(&free_these_pids, p, entries);
+			ಭಙ್ಗ;
 		}
 	}
 	/* only call free if we're not inside a signal handler */
-	if (!inside_signal) {
+	ಯದಿ (!inside_signal) {
 		LIST_FOREACH_SAFE(p, &free_these_pids, entries, tmp) {
 			LIST_REMOVE(p, entries);
-			free(p);
+			ಮುಕ್ತ(p);
 		}
 	}
-	sigprocmask(SIG_SETMASK, &old, NULL);
+	sigprocmask(SIG_SETMASK, &old, ರಿಕ್ತ);
 }
 
-static void
-wait_for_services(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+wait_for_services(ಶೂನ್ಯ)
 {
-	for (;;) {
-		while (waitpid(0, 0, 0) != -1)
+	ಪ್ರತಿ (;;) {
+		ಯಾವತ್ (waitpid(0, 0, 0) != -1)
 			;
-		if (errno != EINTR)
-			break;
+		ಯದಿ (errno != EINTR)
+			ಭಙ್ಗ;
 	}
 }
 
-static void
-handle_signal(int sig)
+ಸ್ಥಿರ ಶೂನ್ಯ
+handle_signal(ಪೂರ್ಣಾಙ್ಕ sig)
 {
-	int serrno = errno;
-	const char *signame = NULL;
+	ಪೂರ್ಣಾಙ್ಕ serrno = errno;
+	ಧ್ರುವ ವರ್ಣ *signame = ರಿಕ್ತ;
 	pid_t pid;
 	RC_PID *pi;
-	int status = 0;
-	struct winsize ws;
+	ಪೂರ್ಣಾಙ್ಕ status = 0;
+	ಸಂರಚನಾ winsize ws;
 	sigset_t sset;
 
-	switch (sig) {
-	case SIGCHLD:
-		do {
+	ವಿಕಲ್ಪ (sig) {
+	ಪಕ್ಷ SIGCHLD:
+		ಕುರು {
 			pid = waitpid(-1, &status, WNOHANG);
-			if (pid < 0) {
-				if (errno != ECHILD)
+			ಯದಿ (pid < 0) {
+				ಯದಿ (errno != ECHILD)
 					eerror("waitpid: %s", strerror(errno));
-				return;
+				ಪ್ರತ್ಯಾಗಮ;
 			}
-		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+		} ಯಾವತ್ (!WIFEXITED(status) && !WIFSIGNALED(status));
 
 		/* Remove that pid from our list */
-		if (pid > 0)
+		ಯದಿ (pid > 0)
 			remove_pid(pid, true);
-		break;
+		ಭಙ್ಗ;
 
-	case SIGWINCH:
-		if (rc_logger_tty >= 0) {
+	ಪಕ್ಷ SIGWINCH:
+		ಯದಿ (rc_logger_tty >= 0) {
 			ioctl(STDIN_FILENO, TIOCGWINSZ, &ws);
 			ioctl(rc_logger_tty, TIOCSWINSZ, &ws);
 		}
-		break;
+		ಭಙ್ಗ;
 
-	case SIGINT:
-		if (!signame)
+	ಪಕ್ಷ SIGINT:
+		ಯದಿ (!signame)
 			signame = "SIGINT";
 		/* FALLTHROUGH */
-	case SIGTERM:
-		if (!signame)
+	ಪಕ್ಷ SIGTERM:
+		ಯದಿ (!signame)
 			signame = "SIGTERM";
 		/* FALLTHROUGH */
-	case SIGQUIT:
-		if (!signame)
+	ಪಕ್ಷ SIGQUIT:
+		ಯದಿ (!signame)
 			signame = "SIGQUIT";
 		eerrorx("%s: caught %s, aborting", applet, signame);
 		/* NOTREACHED */
-	case SIGUSR1:
+	ಪಕ್ಷ SIGUSR1:
 		eerror("rc: Aborting!");
 
 		/* Block child signals */
 		sigemptyset(&sset);
 		sigaddset(&sset, SIGCHLD);
-		sigprocmask(SIG_BLOCK, &sset, NULL);
+		sigprocmask(SIG_BLOCK, &sset, ರಿಕ್ತ);
 
 		/* Kill any running services we have started */
 		LIST_FOREACH(pi, &service_pids, entries)
 		    kill(pi->pid, SIGTERM);
 
 		/* Notify plugins we are aborting */
-		rc_plugin_run(RC_HOOK_ABORT, NULL);
+		rc_plugin_run(RC_HOOK_ABORT, ರಿಕ್ತ);
 
 		exit(EXIT_FAILURE);
 		/* NOTREACHED */
 
-	default:
+	ಸ್ವಭಾವ:
 		eerror("%s: caught unknown signal %d", applet, sig);
 	}
 
@@ -474,26 +474,26 @@ handle_signal(int sig)
 	errno = serrno;
 }
 
-static void
-do_sysinit(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+do_sysinit(ಶೂನ್ಯ)
 {
-	struct utsname uts;
-	const char *sys;
+	ಸಂರಚನಾ utsname uts;
+	ಧ್ರುವ ವರ್ಣ *sys;
 
 	/* exec init-early.sh if it exists
 	 * This should just setup the console to use the correct
 	 * font. Maybe it should setup the keyboard too? */
-	if (access(INITEARLYSH, F_OK) == 0)
+	ಯದಿ (access(INITEARLYSH, F_OK) == 0)
 		run_program(INITEARLYSH);
 
 	uname(&uts);
-	if (!rc_yesno(getenv("EINFO_QUIET"))) {
+	ಯದಿ (!rc_yesno(getenv("EINFO_QUIET"))) {
 		printf("\n   %sOpenRC %s" VERSION "%s is starting up %s",
 		    ecolor(ECOLOR_GOOD), ecolor(ECOLOR_HILITE),
 		    ecolor(ECOLOR_NORMAL), ecolor(ECOLOR_BRACKET));
 #ifdef BRANDING
 		printf(BRANDING " (%s)", uts.machine);
-#else
+#ಅನ್ಯಥಾ
 		printf("%s %s (%s)",
 		    uts.sysname,
 		    uts.release,
@@ -501,12 +501,12 @@ do_sysinit(void)
 #endif
 	}
 
-	if ((sys = rc_sys()))
+	ಯದಿ ((sys = rc_sys()))
 		printf(" [%s]", sys);
 
 	printf("%s\n\n", ecolor(ECOLOR_NORMAL));
 
-	if (!rc_yesno(getenv ("EINFO_QUIET")) &&
+	ಯದಿ (!rc_yesno(getenv ("EINFO_QUIET")) &&
 	    rc_conf_yesno("rc_interactive"))
 		printf("Press %sI%s to enter interactive boot mode\n\n",
 		    ecolor(ECOLOR_GOOD), ecolor(ECOLOR_NORMAL));
@@ -516,41 +516,41 @@ do_sysinit(void)
 
 	/* init may have mounted /proc so we can now detect or real
 	 * sys */
-	if ((sys = rc_sys()))
+	ಯದಿ ((sys = rc_sys()))
 		setenv("RC_SYS", sys, 1);
-	if ((main_deptree = _rc_deptree_load(false, NULL)) == NULL)
+	ಯದಿ ((main_deptree = _rc_deptree_load(false, ರಿಕ್ತ)) == ರಿಕ್ತ)
 		eerrorx("failed to load deptree");
 }
 
-static bool
-runlevel_config(const char *service, const char *level)
+ಸ್ಥಿರ bool
+runlevel_config(ಧ್ರುವ ವರ್ಣ *service, ಧ್ರುವ ವರ್ಣ *level)
 {
-	char *init = rc_service_resolve(service);
-	char *conf, *dir;
+	ವರ್ಣ *init = rc_service_resolve(service);
+	ವರ್ಣ *conf, *dir;
 	bool retval;
 
 	dir = dirname(dirname(init));
 	xasprintf(&conf, "%s/conf.d/%s.%s", dir, service, level);
 	retval = access(conf, F_OK) == 0;
-	free(conf);
-	free(init);
-	return retval;
+	ಮುಕ್ತ(conf);
+	ಮುಕ್ತ(init);
+	ಪ್ರತ್ಯಾಗಮ retval;
 }
 
-static void
+ಸ್ಥಿರ ಶೂನ್ಯ
 do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
-				 const RC_STRINGLIST *stop_services, const RC_DEPTREE *deptree,
-				 const char *newlevel, bool parallel, bool going_down)
+				 ಧ್ರುವ RC_STRINGLIST *stop_services, ಧ್ರುವ RC_DEPTREE *deptree,
+				 ಧ್ರುವ ವರ್ಣ *newlevel, bool parallel, bool going_down)
 {
 	pid_t pid;
 	RC_STRING *service, *svc1, *svc2;
 	RC_STRINGLIST *deporder, *tmplist, *kwords;
-	RC_STRINGLIST *types_nw_save = NULL;
+	RC_STRINGLIST *types_nw_save = ರಿಕ್ತ;
 	RC_SERVICE state;
 	RC_STRINGLIST *nostop;
 	bool crashed, nstop;
 
-	if (!types_nw) {
+	ಯದಿ (!types_nw) {
 		types_nw = types_nw_save = rc_stringlist_new();
 		rc_stringlist_add(types_nw, "needsme");
 		rc_stringlist_add(types_nw, "wantsme");
@@ -558,97 +558,97 @@ do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
 
 	crashed = rc_conf_yesno("rc_crashed_stop");
 
-	nostop = rc_stringlist_split(rc_conf_value("rc_nostop"), " ");
+	nostop = rc_stringlist_split(rc_conf_ಮೌಲ್ಯ("rc_nostop"), " ");
 	TAILQ_FOREACH_REVERSE(service, stop_services, rc_stringlist, entries)
 	{
-		state = rc_service_state(service->value);
-		if (state & RC_SERVICE_STOPPED || state & RC_SERVICE_FAILED)
-			continue;
+		state = rc_service_state(service->ಮೌಲ್ಯ);
+		ಯದಿ (state & RC_SERVICE_STOPPED || state & RC_SERVICE_FAILED)
+			ಅನುವರ್ತ;
 
 		/* Sometimes we don't ever want to stop a service. */
-		if (rc_stringlist_find(nostop, service->value)) {
-			rc_service_mark(service->value, RC_SERVICE_FAILED);
-			continue;
+		ಯದಿ (rc_stringlist_find(nostop, service->ಮೌಲ್ಯ)) {
+			rc_service_mark(service->ಮೌಲ್ಯ, RC_SERVICE_FAILED);
+			ಅನುವರ್ತ;
 		}
-		kwords = rc_deptree_depend(deptree, service->value, "keyword");
-		if (rc_stringlist_find(kwords, "-stop") ||
+		kwords = rc_deptree_depend(deptree, service->ಮೌಲ್ಯ, "keyword");
+		ಯದಿ (rc_stringlist_find(kwords, "-stop") ||
 		    rc_stringlist_find(kwords, "nostop") ||
 		    (going_down &&
 			(rc_stringlist_find(kwords, "-shutdown") ||
 			    rc_stringlist_find(kwords, "noshutdown"))))
 			nstop = true;
-		else
+		ಅನ್ಯಥಾ
 			nstop = false;
 		rc_stringlist_free(kwords);
-		if (nstop) {
-			rc_service_mark(service->value, RC_SERVICE_FAILED);
-			continue;
+		ಯದಿ (nstop) {
+			rc_service_mark(service->ಮೌಲ್ಯ, RC_SERVICE_FAILED);
+			ಅನುವರ್ತ;
 		}
 
 		/* If the service has crashed, skip further checks and just stop
 		   it */
-		if (crashed &&
-		    rc_service_daemons_crashed(service->value))
-			goto stop;
+		ಯದಿ (crashed &&
+		    rc_service_daemons_crashed(service->ಮೌಲ್ಯ))
+			ಗಚ್ಛ stop;
 
 		/* If we're in the start list then don't bother stopping us */
-		svc1 = rc_stringlist_find(start_services, service->value);
-		if (svc1) {
-			if (newlevel && strcmp(runlevel, newlevel) != 0) {
+		svc1 = rc_stringlist_find(start_services, service->ಮೌಲ್ಯ);
+		ಯದಿ (svc1) {
+			ಯದಿ (newlevel && strcmp(runlevel, newlevel) != 0) {
 				/* So we're in the start list. But we should
 				 * be stopped if we have a runlevel
 				 * configuration file for either the current
 				 * or next so we use the correct one. */
-				if (!runlevel_config(service->value,runlevel) &&
-				    !runlevel_config(service->value,newlevel))
-					continue;
+				ಯದಿ (!runlevel_config(service->ಮೌಲ್ಯ,runlevel) &&
+				    !runlevel_config(service->ಮೌಲ್ಯ,newlevel))
+					ಅನುವರ್ತ;
 			}
-			else
-				continue;
+			ಅನ್ಯಥಾ
+				ಅನುವರ್ತ;
 		}
 
 		/* We got this far. Last check is to see if any service
 		 * that going to be started depends on us */
-		if (!svc1) {
+		ಯದಿ (!svc1) {
 			tmplist = rc_stringlist_new();
-			rc_stringlist_add(tmplist, service->value);
+			rc_stringlist_add(tmplist, service->ಮೌಲ್ಯ);
 			deporder = rc_deptree_depends(deptree, types_nw,
 			    tmplist, newlevel ? newlevel : runlevel,
 			    RC_DEP_STRICT | RC_DEP_TRACE);
 			rc_stringlist_free(tmplist);
-			svc2 = NULL;
+			svc2 = ರಿಕ್ತ;
 			TAILQ_FOREACH(svc1, deporder, entries) {
 				svc2 = rc_stringlist_find(start_services,
-				    svc1->value);
-				if (svc2)
-					break;
+				    svc1->ಮೌಲ್ಯ);
+				ಯದಿ (svc2)
+					ಭಙ್ಗ;
 			}
 			rc_stringlist_free(deporder);
 
-			if (svc2)
-				continue;
+			ಯದಿ (svc2)
+				ಅನುವರ್ತ;
 		}
 
 stop:
 		/* After all that we can finally stop the blighter! */
-		pid = service_stop(service->value);
-		if (pid > 0) {
+		pid = service_stop(service->ಮೌಲ್ಯ);
+		ಯದಿ (pid > 0) {
 			add_pid(pid);
-			if (!parallel) {
+			ಯದಿ (!parallel) {
 				rc_waitpid(pid);
 				remove_pid(pid, false);
 			}
 		}
 	}
 
-	if (types_nw_save)
+	ಯದಿ (types_nw_save)
 		rc_stringlist_free(types_nw_save);
 
 	rc_stringlist_free(nostop);
 }
 
-static void
-do_start_services(const RC_STRINGLIST *start_services, bool parallel)
+ಸ್ಥಿರ ಶೂನ್ಯ
+do_start_services(ಧ್ರುವ RC_STRINGLIST *start_services, bool parallel)
 {
 	RC_STRING *service;
 	pid_t pid;
@@ -656,54 +656,54 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 	RC_SERVICE state;
 	bool crashed = false;
 
-	if (!rc_yesno(getenv("EINFO_QUIET")))
+	ಯದಿ (!rc_yesno(getenv("EINFO_QUIET")))
 		interactive = faccessat(rc_dirfd(RC_DIR_SVCDIR), "interactive", F_OK, 0) == 0;
 	errno = 0;
 	crashed = rc_conf_yesno("rc_crashed_start");
-	if (errno == ENOENT)
+	ಯದಿ (errno == ENOENT)
 		crashed = true;
 
 	TAILQ_FOREACH(service, start_services, entries) {
-		state = rc_service_state(service->value);
-		if (state & RC_SERVICE_FAILED)
-			continue;
-		if (!(state & RC_SERVICE_STOPPED)) {
-			if (crashed &&
-			    rc_service_daemons_crashed(service->value))
-				rc_service_mark(service->value,
+		state = rc_service_state(service->ಮೌಲ್ಯ);
+		ಯದಿ (state & RC_SERVICE_FAILED)
+			ಅನುವರ್ತ;
+		ಯದಿ (!(state & RC_SERVICE_STOPPED)) {
+			ಯದಿ (crashed &&
+			    rc_service_daemons_crashed(service->ಮೌಲ್ಯ))
+				rc_service_mark(service->ಮೌಲ್ಯ,
 				    RC_SERVICE_STOPPED);
-			else
-			    continue;
+			ಅನ್ಯಥಾ
+			    ಅನುವರ್ತ;
 		}
-		if (!interactive)
+		ಯದಿ (!interactive)
 			interactive = want_interactive();
 
-		if (interactive) {
+		ಯದಿ (interactive) {
 	interactive_retry:
 			printf("\n");
 			einfo("About to start the service %s",
-			    service->value);
+			    service->ಮೌಲ್ಯ);
 			eindent();
 			einfo("1) Start the service\t\t2) Skip the service");
 			einfo("3) Continue boot process\t\t4) Exit to shell");
 			eoutdent();
 	interactive_option:
-			switch (read_key(true)) {
-			case '1': break;
-			case '2': continue;
-			case '3': interactive = false; break;
-			case '4': open_shell(); goto interactive_retry;
-			default: goto interactive_option;
+			ವಿಕಲ್ಪ (read_ಕೀಲಿ(true)) {
+			ಪಕ್ಷ '1': ಭಙ್ಗ;
+			ಪಕ್ಷ '2': ಅನುವರ್ತ;
+			ಪಕ್ಷ '3': interactive = false; ಭಙ್ಗ;
+			ಪಕ್ಷ '4': open_shell(); ಗಚ್ಛ interactive_retry;
+			ಸ್ವಭಾವ: ಗಚ್ಛ interactive_option;
 			}
 		}
 
-		pid = service_start(service->value);
-		if (pid == -1)
-			break;
+		pid = service_start(service->ಮೌಲ್ಯ);
+		ಯದಿ (pid == -1)
+			ಭಙ್ಗ;
 		/* Remember the pid if we're running in parallel */
-		if (pid > 0) {
+		ಯದಿ (pid > 0) {
 			add_pid(pid);
-			if (!parallel) {
+			ಯದಿ (!parallel) {
 				rc_waitpid(pid);
 				remove_pid(pid, false);
 			}
@@ -711,33 +711,33 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 	}
 
 	/* Store our interactive status for boot */
-	if (interactive &&
+	ಯದಿ (interactive &&
 			(strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
 			 strcmp(runlevel, getenv("RC_BOOTLEVEL")) == 0))
 		mark_interactive();
-	else
+	ಅನ್ಯಥಾ
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "interactive", 0);
 }
 
 #ifdef RC_DEBUG
-RC_NORETURN static void
-handle_bad_signal(int sig)
+RC_NORETURN ಸ್ಥಿರ ಶೂನ್ಯ
+handle_bad_signal(ಪೂರ್ಣಾಙ್ಕ sig)
 {
-	char pid[10];
-	int status;
+	ವರ್ಣ pid[10];
+	ಪೂರ್ಣಾಙ್ಕ status;
 	pid_t crashed_pid = getpid();
 
-	switch (fork()) {
-	case -1:
+	ವಿಕಲ್ಪ (fork()) {
+	ಪಕ್ಷ -1:
 		_exit(sig);
 		/* NOTREACHED */
-	case 0:
+	ಪಕ್ಷ 0:
 		sprintf(pid, "%i", crashed_pid);
 		printf("\nAuto launching gdb!\n\n");
 		_exit(execlp("gdb", "gdb", "--quiet", "--pid", pid,
-			"-ex", "bt full", NULL));
+			"-ex", "bt full", ರಿಕ್ತ));
 		/* NOTREACHED */
-	default:
+	ಸ್ವಭಾವ:
 		wait(&status);
 	}
 	_exit(1);
@@ -745,27 +745,27 @@ handle_bad_signal(int sig)
 }
 #endif
 
-int main(int argc, char **argv)
+ಪೂರ್ಣಾಙ್ಕ main(ಪೂರ್ಣಾಙ್ಕ argc, ವರ್ಣ **argv)
 {
-	const char *bootlevel = NULL;
-	char *newlevel = NULL;
-	const char *systype = NULL;
-	RC_STRINGLIST *deporder = NULL;
+	ಧ್ರುವ ವರ್ಣ *bootlevel = ರಿಕ್ತ;
+	ವರ್ಣ *newlevel = ರಿಕ್ತ;
+	ಧ್ರುವ ವರ್ಣ *systype = ರಿಕ್ತ;
+	RC_STRINGLIST *deporder = ರಿಕ್ತ;
 	RC_STRINGLIST *tmplist;
 	RC_STRING *service;
 	bool going_down = false;
-	int depoptions = RC_DEP_STRICT | RC_DEP_TRACE;
-	char *krunlevel = NULL;
-	const char *workingdir = "/";
-	char *pidstr = NULL;
-	int opt;
+	ಪೂರ್ಣಾಙ್ಕ depoptions = RC_DEP_STRICT | RC_DEP_TRACE;
+	ವರ್ಣ *krunlevel = ರಿಕ್ತ;
+	ಧ್ರುವ ವರ್ಣ *workingdir = "/";
+	ವರ್ಣ *pidstr = ರಿಕ್ತ;
+	ಪೂರ್ಣಾಙ್ಕ opt;
 	bool parallel;
-	int regen = 0;
+	ಪೂರ್ಣಾಙ್ಕ regen = 0;
 	bool nostop = false;
 #ifdef __linux__
-	char *proc;
-	char *p;
-	char *token;
+	ವರ್ಣ *proc;
+	ವರ್ಣ *p;
+	ವರ್ಣ *token;
 #endif
 
 #ifdef RC_DEBUG
@@ -777,44 +777,44 @@ int main(int argc, char **argv)
 	applet = basename_c(argv[0]);
 	LIST_INIT(&service_pids);
 	LIST_INIT(&free_these_pids);
-	if (!applet)
+	ಯದಿ (!applet)
 		eerrorx("arguments required");
 
 	argc--;
 	argv++;
 
 	/* complain about old configuration settings if they exist */
-	if (access(RC_CONF_OLD, F_OK) == 0) {
+	ಯದಿ (access(RC_CONF_OLD, F_OK) == 0) {
 		ewarn("%s still exists on your system and should be removed.", RC_CONF_OLD);
 		ewarn("Please migrate to the appropriate settings in %s", RC_CONF);
 	}
 
 	argc++;
 	argv--;
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ಯಾವತ್ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (ಪೂರ್ಣಾಙ್ಕ *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'n':
+		ವಿಕಲ್ಪ (opt) {
+		ಪಕ್ಷ 'n':
 			nostop = true;
-			break;
-		case 'o':
-			if (*optarg == '\0')
-				optarg = NULL;
-			if (!rc_runlevel_exists(optarg)) {
+			ಭಙ್ಗ;
+		ಪಕ್ಷ 'o':
+			ಯದಿ (*optarg == '\0')
+				optarg = ರಿಕ್ತ;
+			ಯದಿ (!rc_runlevel_exists(optarg)) {
 				eerror("runlevel `%s' does not exist", optarg);
 				exit(EXIT_FAILURE);
 			}
-			if (rc_is_user())
+			ಯದಿ (rc_is_user())
 				eerrorx("user services do not currently support --override");
-			if (!set_krunlevel(optarg))
+			ಯದಿ (!set_krunlevel(optarg))
 				exit(EXIT_FAILURE);
 			einfo("Overriding next runlevel to %s", optarg);
 			exit(EXIT_SUCCESS);
 			/* NOTREACHED */
-		case 's':
+		ಪಕ್ಷ 's':
 			newlevel = rc_service_resolve(optarg);
-			if (!newlevel)
+			ಯದಿ (!newlevel)
 				eerrorx("%s: service `%s' does not exist",
 				    applet, optarg);
 			argv += optind - 1;
@@ -822,9 +822,9 @@ int main(int argc, char **argv)
 			execv(*argv, argv);
 			eerrorx("%s: %s", applet, strerror(errno));
 			/* NOTREACHED */
-		case 'S':
+		ಪಕ್ಷ 'S':
 			systype = rc_sys();
-			if (systype)
+			ಯದಿ (systype)
 				printf("%s\n", systype);
 			exit(EXIT_SUCCESS);
 			/* NOTREACHED */
@@ -834,10 +834,10 @@ int main(int argc, char **argv)
 
 	/* Change dir to / to ensure all init scripts don't use stuff in pwd
 	 * For user services, change to the user's HOME instead. */
-	if (rc_is_user() && !(workingdir = getenv("HOME")))
+	ಯದಿ (rc_is_user() && !(workingdir = getenv("HOME")))
 		eerrorx("HOME is unset.");
 
-	if (chdir(workingdir) == -1)
+	ಯದಿ (chdir(workingdir) == -1)
 		eerror("chdir: %s", strerror(errno));
 
 	/* Ensure our environment is pure
@@ -849,11 +849,11 @@ int main(int argc, char **argv)
 	/* To make life easier, we only have the shutdown runlevel as
 	 * nothing really needs to know that we're rebooting.
 	 * But for those that do, you can test against RC_REBOOT. */
-	if (newlevel) {
-		if (rc_is_user() && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0)
+	ಯದಿ (newlevel) {
+		ಯದಿ (rc_is_user() && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0)
 			eerrorx("%s: the sysinit runlevel can't be used for user services.", applet);
 
-		if (strcmp(newlevel, "reboot") == 0) {
+		ಯದಿ (strcmp(newlevel, "reboot") == 0) {
 			newlevel = UNCONST(RC_LEVEL_SHUTDOWN);
 			setenv("RC_REBOOT", "YES", 1);
 		}
@@ -867,7 +867,7 @@ int main(int argc, char **argv)
 	/* Export our PID */
 	xasprintf(&pidstr, "%d", getpid());
 	setenv("RC_PID", pidstr, 1);
-	free(pidstr);
+	ಮುಕ್ತ(pidstr);
 
 	/* Create a list of all services which should be started for the new or
 	* current runlevel including those in boot, sysinit and hotplugged
@@ -887,9 +887,9 @@ int main(int argc, char **argv)
 	signal_setup(SIGWINCH, handle_signal);
 
 	/* Run any special sysinit foo */
-	if (newlevel && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
+	ಯದಿ (newlevel && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
 		do_sysinit();
-		free(runlevel);
+		ಮುಕ್ತ(runlevel);
 		runlevel = default_runlevel();
 	}
 
@@ -898,50 +898,50 @@ int main(int argc, char **argv)
 	/* Now we start handling our children */
 	signal_setup(SIGCHLD, handle_signal);
 
-	if (newlevel &&
+	ಯದಿ (newlevel &&
 	    (strcmp(newlevel, RC_LEVEL_SHUTDOWN) == 0 ||
 		strcmp(newlevel, RC_LEVEL_SINGLE) == 0))
 	{
 		going_down = true;
-		if (access(RC_KRUNLEVEL, F_OK) != 0)
+		ಯದಿ (access(RC_KRUNLEVEL, F_OK) != 0)
 			set_krunlevel(runlevel);
 		rc_runlevel_set(newlevel);
 		setenv("RC_RUNLEVEL", newlevel, 1);
 		setenv("RC_GOINGDOWN", "YES", 1);
-	} else {
+	} ಅನ್ಯಥಾ {
 		/* We should not use krunlevel in sysinit or boot runlevels */
-		if (!newlevel ||
+		ಯದಿ (!newlevel ||
 		    (strcmp(newlevel, RC_LEVEL_SYSINIT) != 0 &&
 			strcmp(newlevel, getenv("RC_BOOTLEVEL")) != 0))
 		{
 			krunlevel = get_krunlevel();
-			if (krunlevel) {
+			ಯದಿ (krunlevel) {
 				newlevel = krunlevel;
-				set_krunlevel(NULL);
+				set_krunlevel(ರಿಕ್ತ);
 			}
 		}
 
-		if (newlevel) {
-			if (strcmp(runlevel, newlevel) != 0 &&
+		ಯದಿ (newlevel) {
+			ಯದಿ (strcmp(runlevel, newlevel) != 0 &&
 			    !rc_runlevel_exists(newlevel))
 				eerrorx("%s: not a valid runlevel", newlevel);
 
 #ifdef __linux__
-			if (strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
+			ಯದಿ (strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
 				/* If we requested a runlevel, save it now */
 				p = rc_proc_getent("rc_runlevel");
-				if (p == NULL)
+				ಯದಿ (p == ರಿಕ್ತ)
 					p = rc_proc_getent("softlevel");
-				if (p != NULL) {
+				ಯದಿ (p != ರಿಕ್ತ) {
 					set_krunlevel(p);
-					free(p);
+					ಮುಕ್ತ(p);
 				}
 			}
 #endif
 		}
 	}
 
-	if (going_down) {
+	ಯದಿ (going_down) {
 #ifdef __FreeBSD__
 		/* FIXME: we shouldn't have todo this */
 		/* For some reason, wait_for_services waits for the logger
@@ -951,31 +951,31 @@ int main(int argc, char **argv)
 #endif
 
 		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_IN, newlevel);
-	} else {
+	} ಅನ್ಯಥಾ {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_IN, runlevel);
 	}
 
 	/* Check if runlevel is valid if we're changing */
-	if (newlevel && strcmp(runlevel, newlevel) != 0 && !going_down) {
-		if (!rc_runlevel_exists(newlevel)) {
+	ಯದಿ (newlevel && strcmp(runlevel, newlevel) != 0 && !going_down) {
+		ಯದಿ (!rc_runlevel_exists(newlevel)) {
 			rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
 			eerrorx("%s: is not a valid runlevel", newlevel);
 		}
 	}
 
 	/* Load our deptree */
-	if ((main_deptree = _rc_deptree_load(0, &regen)) == NULL) {
+	ಯದಿ ((main_deptree = _rc_deptree_load(0, &regen)) == ರಿಕ್ತ) {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
 		eerrorx("failed to load deptree");
 	}
 
-	if (faccessat(rc_dirfd(RC_DIR_SVCDIR), "clock-skewed", F_OK, 0) == 0)
+	ಯದಿ (faccessat(rc_dirfd(RC_DIR_SVCDIR), "clock-skewed", F_OK, 0) == 0)
 		ewarn("WARNING: clock skew detected!");
 
 	/* Clean the failed services state dir */
 	clean_failed();
 
-	if (mkdirat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", 0755) != 0) {
+	ಯದಿ (mkdirat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", 0755) != 0) {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
 		eerrorx("%s: failed to create stopping dir '%s/rc.stopping': %s", applet, rc_svcdir(), strerror(errno));
 	}
@@ -990,11 +990,11 @@ int main(int argc, char **argv)
 	main_stop_services = rc_services_in_state(RC_SERVICE_STARTED);
 	tmplist = rc_services_in_state(RC_SERVICE_INACTIVE);
 	TAILQ_CONCAT(main_stop_services, tmplist, entries);
-	free(tmplist);
+	ಮುಕ್ತ(tmplist);
 	tmplist = rc_services_in_state(RC_SERVICE_STARTING);
 	TAILQ_CONCAT(main_stop_services, tmplist, entries);
-	free(tmplist);
-	if (main_stop_services)
+	ಮುಕ್ತ(tmplist);
+	ಯದಿ (main_stop_services)
 		rc_stringlist_sort(&main_stop_services);
 
 	main_types_nwua = rc_stringlist_new();
@@ -1003,7 +1003,7 @@ int main(int argc, char **argv)
 	rc_stringlist_add(main_types_nwua, "iuse");
 	rc_stringlist_add(main_types_nwua, "iafter");
 
-	if (main_stop_services) {
+	ಯದಿ (main_stop_services) {
 		tmplist = rc_deptree_depends(main_deptree, main_types_nwua, main_stop_services,
 		    runlevel, depoptions | RC_DEP_STOP);
 		rc_stringlist_free(main_stop_services);
@@ -1018,29 +1018,29 @@ int main(int argc, char **argv)
 	main_hotplugged_services = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
 	main_start_services = rc_services_in_runlevel_stacked(newlevel ?
 	    newlevel : runlevel);
-	if (strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SHUTDOWN) != 0 &&
+	ಯದಿ (strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SHUTDOWN) != 0 &&
 	    strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SYSINIT) != 0)
 	{
 		tmplist = rc_services_in_runlevel(RC_LEVEL_SYSINIT);
 		TAILQ_CONCAT(main_start_services, tmplist, entries);
-		free(tmplist);
+		ಮುಕ್ತ(tmplist);
 		/* If we are NOT headed for the single-user runlevel... */
-		if (strcmp(newlevel ? newlevel : runlevel,
+		ಯದಿ (strcmp(newlevel ? newlevel : runlevel,
 			RC_LEVEL_SINGLE) != 0)
 		{
 			/* If we are NOT headed for the boot runlevel... */
-			if (strcmp(newlevel ? newlevel : runlevel,
+			ಯದಿ (strcmp(newlevel ? newlevel : runlevel,
 				bootlevel) != 0)
 			{
 				tmplist = rc_services_in_runlevel(bootlevel);
 				TAILQ_CONCAT(main_start_services, tmplist, entries);
-				free(tmplist);
+				ಮುಕ್ತ(tmplist);
 			}
-			if (main_hotplugged_services) {
+			ಯದಿ (main_hotplugged_services) {
 				TAILQ_FOREACH(service, main_hotplugged_services,
 				    entries)
 				    rc_stringlist_addu(main_start_services,
-					service->value);
+					service->ಮೌಲ್ಯ);
 			}
 		}
 	}
@@ -1048,7 +1048,7 @@ int main(int argc, char **argv)
 	parallel = rc_conf_yesno("rc_parallel");
 
 	/* Now stop the services that shouldn't be running */
-	if (main_stop_services && !nostop)
+	ಯದಿ (main_stop_services && !nostop)
 		do_stop_services(main_types_nw, main_start_services, main_stop_services, main_deptree, newlevel, parallel, going_down);
 
 	/* Wait for our services to finish */
@@ -1061,9 +1061,9 @@ int main(int argc, char **argv)
 	unlinkat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", AT_REMOVEDIR);
 
 	/* Store the new runlevel */
-	if (newlevel) {
+	ಯದಿ (newlevel) {
 		rc_runlevel_set(newlevel);
-		free(runlevel);
+		ಮುಕ್ತ(runlevel);
 		runlevel = xstrdup(newlevel);
 		setenv("RC_RUNLEVEL", runlevel, 1);
 	}
@@ -1071,7 +1071,7 @@ int main(int argc, char **argv)
 #ifdef __linux__
 	/* We can't log beyond this point as the shutdown runlevel
 	 * will mount / readonly. */
-	if (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
+	ಯದಿ (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
 		rc_logger_close();
 #endif
 
@@ -1080,24 +1080,24 @@ int main(int argc, char **argv)
 	rc_plugin_run(RC_HOOK_RUNLEVEL_START_IN, runlevel);
 
 	/* Re-add our hotplugged services if they stopped */
-	if (main_hotplugged_services)
+	ಯದಿ (main_hotplugged_services)
 		TAILQ_FOREACH(service, main_hotplugged_services, entries)
-		    rc_service_mark(service->value, RC_SERVICE_HOTPLUGGED);
+		    rc_service_mark(service->ಮೌಲ್ಯ, RC_SERVICE_HOTPLUGGED);
 
 #ifdef __linux__
 	/* If the "noinit" parameter was passed on the kernel command line then
 	 * mark the specified services as started so they will not be started
 	 * by us. */
 	proc = p = rc_proc_getent("noinit");
-	if (proc) {
-		while ((token = strsep(&p, ",")))
+	ಯದಿ (proc) {
+		ಯಾವತ್ ((token = strsep(&p, ",")))
 			rc_service_mark(token, RC_SERVICE_STARTED);
-		free(proc);
+		ಮುಕ್ತ(proc);
 	}
 #endif
 
 	/* If we have a list of services to start then... */
-	if (main_start_services) {
+	ಯದಿ (main_start_services) {
 		/* Get a list of the chained runlevels which compose the target runlevel */
 		RC_STRINGLIST *runlevel_chain = rc_runlevel_stacks(runlevel);
 
@@ -1106,11 +1106,11 @@ int main(int argc, char **argv)
 		TAILQ_FOREACH_REVERSE(rlevel, runlevel_chain, rc_stringlist, entries)
 		{
 			/* Get a list of all the services in that runlevel */
-			RC_STRINGLIST *run_services = rc_services_in_runlevel(rlevel->value);
+			RC_STRINGLIST *run_services = rc_services_in_runlevel(rlevel->ಮೌಲ್ಯ);
 
 			/* Start those services. */
 			rc_stringlist_sort(&run_services);
-			deporder = rc_deptree_depends(main_deptree, main_types_nwua, run_services, rlevel->value, depoptions | RC_DEP_START);
+			deporder = rc_deptree_depends(main_deptree, main_types_nwua, run_services, rlevel->ಮೌಲ್ಯ, depoptions | RC_DEP_START);
 			rc_stringlist_free(run_services);
 			run_services = deporder;
 			do_start_services(run_services, parallel);
@@ -1129,10 +1129,10 @@ int main(int argc, char **argv)
 	 * mark the specified services as stopped so that our records reflect
 	 * reality.	 */
 	proc = p = rc_proc_getent("noinit");
-	if (proc) {
-		while ((token = strsep(&p, ",")))
+	ಯದಿ (proc) {
+		ಯಾವತ್ ((token = strsep(&p, ",")))
 			rc_service_mark(token, RC_SERVICE_STOPPED);
-		free(proc);
+		ಮುಕ್ತ(proc);
 	}
 
 #endif
@@ -1143,8 +1143,8 @@ int main(int argc, char **argv)
 	 * we need to delete them so that they are regenerated again in the
 	 * default runlevel as they may depend on things that are now
 	 * available */
-	if (regen && strcmp(runlevel, bootlevel) == 0)
+	ಯದಿ (regen && strcmp(runlevel, bootlevel) == 0)
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "deptree", 0);
 
-	return EXIT_SUCCESS;
+	ಪ್ರತ್ಯಾಗಮ EXIT_SUCCESS;
 }
