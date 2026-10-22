@@ -21,50 +21,50 @@
 #include "rc.h"
 #include "helpers.h"
 
-const char *applet = NULL;
-extern char **environ;
+const var_na *applet = NULL;
+extern var_na **environ;
 
-int main(int argc, char **argv)
+ཧྲིལ main(ཧྲིལ argc, var_na **argv)
 {
-	char *service = getenv("RC_SVCNAME");
-	enum { GET, SET, EXPORT } action;
-	char *option = NULL;
+	var_na *service = getenv("RC_SVCNAME");
+	ga_nanaa { GET, SET, EXPORT } action;
+	var_na *option = NULL;
 
 	applet = basename_c(argv[0]);
-	if (service == NULL)
+	གལ་སྲིད (service == NULL)
 		eerrorx("%s: no service specified", applet);
 
-	if (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
+	གལ་སྲིད (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
 		action = GET;
-	else if (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
+	དེ་མིན གལ་སྲིད (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
 		action = SET;
-	else if (strcmp(applet, "service_export") == 0)
+	དེ་མིན གལ་སྲིད (strcmp(applet, "service_export") == 0)
 		action = EXPORT;
-	else
+	དེ་མིན
 		eerrorx("%s: unknown applet", applet);
 
-	if (argc < 2 || !argv[1] || *argv[1] == '\0')
+	གལ་སྲིད (argc < 2 || !argv[1] || *argv[1] == '\0')
 		eerrorx("%s: no %s specified", applet, action == EXPORT ? "variable" : "option");
 
 	switch (action) {
-	case GET:
-		if (!(option = rc_service_value_get(service, argv[1])))
-			return EXIT_FAILURE;
+	pak_sa GET:
+		གལ་སྲིད (!(option = rc_service_value_get(service, argv[1])))
+			ལོག EXIT_FAILURE;
 		printf("%s", option);
 		free(option);
-		return EXIT_SUCCESS;
-	case SET:
-		return rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
-	case EXPORT:
-		for (int i = 1; i < argc; i++) {
-			char *var;
-			if (rc_service_getenv(service, argv[i], NULL) > 0)
+		ལོག EXIT_SUCCESS;
+	pak_sa SET:
+		ལོག rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
+	pak_sa EXPORT:
+		དོན་ལུ (ཧྲིལ i = 1; i < argc; i++) {
+			var_na *var;
+			གལ་སྲིད (rc_service_getenv(service, argv[i], NULL) > 0)
 				continue;
-			else if ((var = getenv(argv[i])))
+			དེ་མིན གལ་སྲིད ((var = getenv(argv[i])))
 				rc_service_setenv(service, argv[i], var);
-			else
+			དེ་མིན
 				ewarn("%s: Missing reexport variable '%s'", service, argv[i]);
 		}
-		return EXIT_SUCCESS;
+		ལོག EXIT_SUCCESS;
 	}
 }

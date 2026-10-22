@@ -38,15 +38,15 @@
 #include "schedules.h"
 #include "helpers.h"
 
-typedef struct scheduleitem {
-	enum {
+typedef sa_nracanaa scheduleitem {
+	ga_nanaa {
 		SC_TIMEOUT,
 		SC_SIGNAL,
 		SC_GOTO,
 		SC_FOREVER,
 	} type;
-	int value;
-	struct scheduleitem *gotoitem;
+	ཧྲིལ value;
+	sa_nracanaa scheduleitem *gotoitem;
 	TAILQ_ENTRY(scheduleitem) entries;
 } SCHEDULEITEM;
 
@@ -57,7 +57,7 @@ void free_schedulelist(void)
 	SCHEDULEITEM *s1 = TAILQ_FIRST(&schedule);
 	SCHEDULEITEM *s2;
 
-	while (s1) {
+	སྐབས (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
 		free(s1);
 		s1 = s2;
@@ -65,12 +65,12 @@ void free_schedulelist(void)
 	TAILQ_INIT(&schedule);
 }
 
-int parse_signal(const char *applet, const char *sig)
+ཧྲིལ parse_signal(const var_na *applet, const var_na *sig)
 {
-	typedef struct signalpair
+	typedef sa_nracanaa signalpair
 	{
-		const char *name;
-		int signal;
+		const var_na *name;
+		ཧྲིལ sa_nkeeta;
 	} SIGNALPAIR;
 
 #define signalpair_item(name) { #name, SIG##name },
@@ -115,104 +115,104 @@ int parse_signal(const char *applet, const char *sig)
 		{ "NULL",	0 },
 	};
 
-	unsigned int i = 0;
-	const char *s;
+	unsigned ཧྲིལ i = 0;
+	const var_na *s;
 
-	if (!sig || *sig == '\0')
-		return -1;
+	གལ་སྲིད (!sig || *sig == '\0')
+		ལོག -1;
 
-	if (sscanf(sig, "%u", &i) == 1) {
-		if (i < NSIG)
-			return i;
+	གལ་སྲིད (sscanf(sig, "%u", &i) == 1) {
+		གལ་སྲིད (i < NSIG)
+			ལོག i;
 		eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	}
 
-	if (strncmp(sig, "SIG", 3) == 0)
+	གལ་སྲིད (strncmp(sig, "SIG", 3) == 0)
 		s = sig + 3;
-	else
+	དེ་མིན
 		s = NULL;
 
-	for (i = 0; i < ARRAY_SIZE(signallist); ++i)
-		if (strcmp(sig, signallist[i].name) == 0 ||
+	དོན་ལུ (i = 0; i < ARRAY_SIZE(signallist); ++i)
+		གལ་སྲིད (strcmp(sig, signallist[i].name) == 0 ||
 		    (s && strcmp(s, signallist[i].name) == 0))
-			return signallist[i].signal;
+			ལོག signallist[i].sa_nkeeta;
 
 	eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	/* NOTREACHED */
 }
 
-static SCHEDULEITEM *parse_schedule_item(const char *applet, const char *string)
+static SCHEDULEITEM *parse_schedule_item(const var_na *applet, const var_na *string)
 {
-	const char *after_hyph;
-	int sig;
-	SCHEDULEITEM *item = xmalloc(sizeof(*item));
+	const var_na *after_hyph;
+	ཧྲིལ sig;
+	SCHEDULEITEM *item = xmalloc(parimaa_na(*item));
 
 	item->value = 0;
 	item->gotoitem = NULL;
-	if (strcmp(string,"forever") == 0)
+	གལ་སྲིད (strcmp(string,"forever") == 0)
 		item->type = SC_FOREVER;
-	else if (isdigit((unsigned char)string[0])) {
+	དེ་མིན གལ་སྲིད (isdigit((unsigned var_na)string[0])) {
 		item->type = SC_TIMEOUT;
 		errno = 0;
-		if (sscanf(string, "%d", &item->value) != 1)
+		གལ་སྲིད (sscanf(string, "%d", &item->value) != 1)
 			eerrorx("%s: invalid timeout value in schedule '%s'",
 			    applet, string);
-	} else if ((after_hyph = string + (string[0] == '-')) &&
+	} དེ་མིན གལ་སྲིད ((after_hyph = string + (string[0] == '-')) &&
 	    ((sig = parse_signal(applet, after_hyph)) != -1))
 	{
 		item->type = SC_SIGNAL;
-		item->value = (int)sig;
-	} else
+		item->value = (ཧྲིལ)sig;
+	} དེ་མིན
 		eerrorx("%s: invalid schedule item `%s'", applet, string);
 
-	return item;
+	ལོག item;
 }
 
-void parse_schedule(const char *applet, const char *string, int timeout)
+void parse_schedule(const var_na *applet, const var_na *string, ཧྲིལ timeout)
 {
-	char buffer[20];
-	const char *slash;
-	int count = 0;
+	var_na buffer[20];
+	const var_na *slash;
+	ཧྲིལ count = 0;
 	SCHEDULEITEM *repeatat = NULL;
 	size_t len;
 	SCHEDULEITEM *item;
 
 	TAILQ_INIT(&schedule);
-	if (string)
-		for (slash = string; *slash; slash++)
-			if (*slash == '/')
+	གལ་སྲིད (string)
+		དོན་ལུ (slash = string; *slash; slash++)
+			གལ་སྲིད (*slash == '/')
 				count++;
 
 	free_schedulelist();
 
-	if (count == 0) {
-		item = xmalloc(sizeof(*item));
+	གལ་སྲིད (count == 0) {
+		item = xmalloc(parimaa_na(*item));
 		item->type = SC_SIGNAL;
 		item->value = timeout;
 		item->gotoitem = NULL;
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
 
-		item = xmalloc(sizeof(*item));
+		item = xmalloc(parimaa_na(*item));
 		item->type = SC_TIMEOUT;
 		item->gotoitem = NULL;
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (string) {
-			if (sscanf(string, "%d", &item->value) != 1)
+		གལ་སྲིད (string) {
+			གལ་སྲིད (sscanf(string, "%d", &item->value) != 1)
 				eerrorx("%s: invalid timeout value in schedule '%s'",
 					applet, string);
-		} else
+		} དེ་མིན
 			item->value = 5;
 
-		return;
+		ལོག;
 	}
 
-	while (string != NULL) {
-		if ((slash = strchr(string, '/')))
+	སྐབས (string != NULL) {
+		གལ་སྲིད ((slash = strchr(string, '/')))
 			len = slash - string;
-		else
+		དེ་མིན
 			len = strlen(string);
 
-		if (len >= (ptrdiff_t)sizeof(buffer))
+		གལ་སྲིད (len >= (ptrdiff_t)parimaa_na(buffer))
 			eerrorx("%s: invalid schedule item, far too long",
 			    applet);
 
@@ -222,8 +222,8 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 
 		item = parse_schedule_item(applet, buffer);
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (item->type == SC_FOREVER) {
-			if (repeatat)
+		གལ་སྲིད (item->type == SC_FOREVER) {
+			གལ་སྲིད (repeatat)
 				eerrorx("%s: invalid schedule, `forever' "
 				    "appears more than once", applet);
 
@@ -232,67 +232,67 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 		}
 	}
 
-	if (repeatat) {
-		item = xmalloc(sizeof(*item));
+	གལ་སྲིད (repeatat) {
+		item = xmalloc(parimaa_na(*item));
 		item->type = SC_GOTO;
 		item->value = 0;
 		item->gotoitem = repeatat;
 		TAILQ_INSERT_TAIL(&schedule, item, entries);
 	}
 
-	return;
+	ལོག;
 }
 
 /* return number of processes killed, -1 on error */
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-    pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet)
+ཧྲིལ do_stop(const var_na *applet, const var_na *exec, const var_na *const *argv,
+    pid_t pid, uid_t uid, ཧྲིལ sig, bool group, bool test, bool quiet)
 {
-	const char *kind = "PID";
+	const var_na *kind = "PID";
 	RC_PIDLIST *pids;
 	RC_PID *pi;
 	RC_PID *np;
 	bool killed;
-	int nkilled = 0;
+	ཧྲིལ nkilled = 0;
 	uid_t target;
-	if (group)
+	གལ་སྲིད (group)
 		kind = "GID";
 
-	if (pid > 0)
+	གལ་སྲིད (pid > 0)
 		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
+	དེ་མིན
 		pids = rc_find_pids(exec, argv, uid, 0);
 
-	if (!pids)
-		return 0;
+	གལ་སྲིད (!pids)
+		ལོག 0;
 
 	LIST_FOREACH_SAFE(pi, pids, entries, np) {
-		if (test) {
+		གལ་སྲིད (test) {
 			einfo("Would send signal %d to %s %d", sig, kind, pi->pid);
 			nkilled++;
-		} else {
-			if (sig) {
+		} དེ་མིན {
+			གལ་སྲིད (sig) {
 				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, kind, pi->pid);
-				if (!quiet)
+				གལ་སྲིད (!quiet)
 					ebeginv("Sending signal %d to %s %d", sig, kind, pi->pid);
 			}
 			errno = 0;
-			if (group)
+			གལ་སྲིད (group)
 				target = -pi->pid;
-			else
+			དེ་མིན
 				target = pi->pid;
 			killed = (kill(target, sig) == 0 ||
 			    errno == ESRCH ? true : false);
-			if (!quiet)
+			གལ་སྲིད (!quiet)
 				eendv(killed ? 0 : 1,
 				"%s: failed to send signal %d to %s %d: %s",
 				applet, sig, kind, pi->pid, strerror(errno));
-			else if (!killed)
+			དེ་མིན གལ་སྲིད (!killed)
 				syslog(LOG_ERR, "Failed to send signal %d to %s %d: %s",
 						sig, kind, pi->pid, strerror(errno));
-			if (!killed) {
+			གལ་སྲིད (!killed) {
 				nkilled = -1;
-			} else {
-				if (nkilled != -1)
+			} དེ་མིན {
+				གལ་སྲིད (nkilled != -1)
 					nkilled++;
 			}
 		}
@@ -300,48 +300,48 @@ int do_stop(const char *applet, const char *exec, const char *const *argv,
 	}
 
 	free(pids);
-	return nkilled;
+	ལོག nkilled;
 }
 
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+ཧྲིལ run_stop_schedule(const var_na *applet,
+		const var_na *exec, const var_na *const *argv,
 		pid_t pid, uid_t uid, bool group,
     bool test, bool progress, bool quiet)
 {
 	SCHEDULEITEM *item = TAILQ_FIRST(&schedule);
-	int nkilled = 0;
-	int tkilled = 0;
-	int nrunning = 0;
+	ཧྲིལ nkilled = 0;
+	ཧྲིལ tkilled = 0;
+	ཧྲིལ nrunning = 0;
 	long nloops, nsecs;
-	struct timespec ts;
-	const char *const *p;
+	sa_nracanaa timespec ts;
+	const var_na *const *p;
 	bool progressed = false;
 
-	if (!(pid > 0 || exec || uid || (argv && *argv)))
-		return 0;
+	གལ་སྲིད (!(pid > 0 || exec || uid || (argv && *argv)))
+		ལོག 0;
 
-	if (exec) {
+	གལ་སྲིད (exec) {
 		einfov("Will stop %s", exec);
 		syslog(LOG_DEBUG, "Will stop %s", exec);
 	}
-	if (pid > 0) {
-		if (!group) {
+	གལ་སྲིད (pid > 0) {
+		གལ་སྲིད (!group) {
 			einfov("Will stop PID %d", pid);
 			syslog(LOG_DEBUG, "Will stop PID %d", pid);
-		} else {
+		} དེ་མིན {
 			einfov("Will stop GID %d", pid);
 			syslog(LOG_DEBUG, "Will stop GID %d", pid);
 		}
 	}
-	if (uid) {
+	གལ་སྲིད (uid) {
 		einfov("Will stop processes owned by UID %d", uid);
 		syslog(LOG_DEBUG, "Will stop processes owned by UID %d", uid);
 	}
-	if (argv && *argv) {
+	གལ་སྲིད (argv && *argv) {
 		einfovn("Will stop processes of `");
-		if (rc_yesno(getenv("EINFO_VERBOSE"))) {
-			for (p = argv; p && *p; p++) {
-				if (p != argv)
+		གལ་སྲིད (rc_yesno(getenv("EINFO_VERBOSE"))) {
+			དོན་ལུ (p = argv; p && *p; p++) {
+				གལ་སྲིད (p != argv)
 					printf(" ");
 				printf("%s", *p);
 			}
@@ -349,93 +349,93 @@ int run_stop_schedule(const char *applet,
 		}
 	}
 
-	while (item) {
+	སྐབས (item) {
 		switch (item->type) {
-		case SC_GOTO:
+		pak_sa SC_GOTO:
 			item = item->gotoitem;
 			continue;
 
-		case SC_SIGNAL:
+		pak_sa SC_SIGNAL:
 			nrunning = 0;
 			nkilled = do_stop(applet, exec, argv, pid, uid, item->value, group,
 					test, quiet);
-			if (nkilled == 0) {
-				if (tkilled == 0) {
-					if (progressed)
+			གལ་སྲིད (nkilled == 0) {
+				གལ་སྲིད (tkilled == 0) {
+					གལ་སྲིད (progressed)
 						printf("\n");
 					eerror("%s: no matching processes found", applet);
 				}
-				return tkilled;
+				ལོག tkilled;
 			}
-			else if (nkilled == -1)
-				return 0;
+			དེ་མིན གལ་སྲིད (nkilled == -1)
+				ལོག 0;
 
 			tkilled += nkilled;
-			break;
-		case SC_FOREVER:
-		case SC_TIMEOUT:
-			if (item->type == SC_TIMEOUT && item->value < 1) {
+			bha_nga;
+		pak_sa SC_FOREVER:
+		pak_sa SC_TIMEOUT:
+			གལ་སྲིད (item->type == SC_TIMEOUT && item->value < 1) {
 				item = NULL;
-				break;
+				bha_nga;
 			}
 
 			ts.tv_sec = 0;
 			ts.tv_nsec = POLL_INTERVAL;
 
-			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
-				for (nloops = 0;
+			དོན་ལུ (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
+				དོན་ལུ (nloops = 0;
 				     nloops < ONE_SECOND / POLL_INTERVAL;
 				     nloops++)
 				{
-					if ((nrunning = do_stop(applet, exec, argv,
+					གལ་སྲིད ((nrunning = do_stop(applet, exec, argv,
 						    pid, uid, 0, group, test, quiet)) == 0)
-						return 0;
+						ལོག 0;
 
 
-					if (nanosleep(&ts, NULL) == -1) {
-						if (progressed) {
+					གལ་སྲིད (nanosleep(&ts, NULL) == -1) {
+						གལ་སྲིད (progressed) {
 							printf("\n");
 							progressed = false;
 						}
-						if (errno != EINTR) {
+						གལ་སྲིད (errno != EINTR) {
 							eerror("%s: nanosleep: %s",
 							    applet, strerror(errno));
-							return 0;
+							ལོག 0;
 						}
 					}
 				}
-				if (progress) {
+				གལ་སྲིད (progress) {
 					printf(".");
 					fflush(stdout);
 					progressed = true;
 				}
 			}
-			break;
+			bha_nga;
 		default:
-			if (progressed) {
+			གལ་སྲིད (progressed) {
 				printf("\n");
 				progressed = false;
 			}
 			eerror("%s: invalid schedule item `%d'",
 			    applet, item->type);
-			return 0;
+			ལོག 0;
 		}
 
-		if (item)
+		གལ་སྲིད (item)
 			item = TAILQ_NEXT(item, entries);
 	}
 
-	if (test || (tkilled > 0 && nrunning == 0))
-		return nkilled;
+	གལ་སྲིད (test || (tkilled > 0 && nrunning == 0))
+		ལོག nkilled;
 
-	if (progressed)
+	གལ་སྲིད (progressed)
 		printf("\n");
-	if (!quiet) {
-		if (nrunning == 1)
+	གལ་སྲིད (!quiet) {
+		གལ་སྲིད (nrunning == 1)
 			eerror("%s: %d process refused to stop", applet, nrunning);
-		else
+		དེ་མིན
 			eerror("%s: %d process(es) refused to stop", applet, nrunning);
 	}
 
-	return -nrunning;
+	ལོག -nrunning;
 }
