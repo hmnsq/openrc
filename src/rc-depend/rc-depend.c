@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#অন্তর্ভাৱ <errno.h>
+#অন্তর্ভাৱ <getopt.h>
+#অন্তর্ভাৱ <stdbool.h>
+#অন্তর্ভাৱ <stdio.h>
+#অন্তর্ভাৱ <stdlib.h>
+#অন্তর্ভাৱ <string.h>
+#অন্তর্ভাৱ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "_usage.h"
-#include "helpers.h"
+#অন্তর্ভাৱ "einfo.h"
+#অন্তর্ভাৱ "queue.h"
+#অন্তর্ভাৱ "rc.h"
+#অন্তর্ভাৱ "misc.h"
+#অন্তর্ভাৱ "_usage.h"
+#অন্তর্ভাৱ "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "aot:suTF:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "starting", 0, NULL, 'a'},
-	{ "stopping", 0, NULL, 'o'},
-	{ "type",     1, NULL, 't'},
-	{ "notrace",  0, NULL, 'T'},
-	{ "strict",   0, NULL, 's'},
-	{ "update",   0, NULL, 'u'},
-	{ "deptree-file", 1, NULL, 'F'},
+ধ্রুৱ ৱর্ণ *applet = রিক্ত;
+ধ্রুৱ ৱর্ণ *extraopts = রিক্ত;
+ধ্রুৱ ৱর্ণ getoptstring[] = "aot:suTF:" getoptstring_COMMON;
+ধ্রুৱ সংরচনা option longopts[] = {
+	{ "starting", 0, রিক্ত, 'a'},
+	{ "stopping", 0, রিক্ত, 'o'},
+	{ "type",     1, রিক্ত, 't'},
+	{ "notrace",  0, রিক্ত, 'T'},
+	{ "strict",   0, রিক্ত, 's'},
+	{ "update",   0, রিক্ত, 'u'},
+	{ "deptree-file", 1, রিক্ত, 'F'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ধ্রুৱ ৱর্ণ * ধ্রুৱ longopts_help[] = {
 	"Order services as if runlevel is starting",
 	"Order services as if runlevel is stopping",
 	"Type(s) of dependency to list",
@@ -53,95 +53,95 @@ const char * const longopts_help[] = {
 	"File to load cached deptree from",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ধ্রুৱ ৱর্ণ *usagestring = রিক্ত;
 
-int main(int argc, char **argv)
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, ৱর্ণ **argv)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *types;
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *depends;
 	RC_STRING *s;
-	RC_DEPTREE *deptree = NULL;
-	int options = RC_DEP_TRACE, update = 0;
+	RC_DEPTREE *deptree = রিক্ত;
+	পূর্ণাঙ্ক options = RC_DEP_TRACE, update = 0;
 	bool first = true;
-	char *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
-	int opt;
-	char *token;
-	char *deptree_file = NULL;
+	ৱর্ণ *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
+	পূর্ণাঙ্ক opt;
+	ৱর্ণ *token;
+	ৱর্ণ *deptree_file = রিক্ত;
 
 	applet = basename_c(argv[0]);
 	types = rc_stringlist_new();
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	যেতিয়ালৈ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (পূর্ণাঙ্ক *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'a':
+		ৱিকল্প (opt) {
+		পক্ষ 'a':
 			options |= RC_DEP_START;
-			break;
-		case 'o':
+			ভঙ্গ;
+		পক্ষ 'o':
 			options |= RC_DEP_STOP;
-			break;
-		case 's':
+			ভঙ্গ;
+		পক্ষ 's':
 			options |= RC_DEP_STRICT;
-			break;
-		case 't':
-			while ((token = strsep(&optarg, ",")))
+			ভঙ্গ;
+		পক্ষ 't':
+			যেতিয়ালৈ ((token = strsep(&optarg, ",")))
 				rc_stringlist_add(types, token);
-			break;
-		case 'u':
+			ভঙ্গ;
+		পক্ষ 'u':
 			update = 1;
-			break;
-		case 'T':
+			ভঙ্গ;
+		পক্ষ 'T':
 			options &= RC_DEP_TRACE;
-			break;
-		case 'F':
+			ভঙ্গ;
+		পক্ষ 'F':
 			deptree_file = xstrdup(optarg);
-			break;
+			ভঙ্গ;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (deptree_file) {
-		if (!(deptree = rc_deptree_load_file(deptree_file)))
+	যদি (deptree_file) {
+		যদি (!(deptree = rc_deptree_load_file(deptree_file)))
 			eerrorx("failed to load deptree");
-	} else {
-		if (!(deptree = _rc_deptree_load(update, NULL)))
+	} অন্যথা {
+		যদি (!(deptree = _rc_deptree_load(update, রিক্ত)))
 			eerrorx("failed to load deptree");
 	}
 
-	if (!runlevel)
+	যদি (!runlevel)
 		runlevel = default_runlevel();
 
 	services = rc_stringlist_new();
-	while (optind < argc) {
+	যেতিয়ালৈ (optind < argc) {
 		list = rc_stringlist_new();
 		rc_stringlist_add(list, argv[optind]);
 		errno = 0;
-		depends = rc_deptree_depends(deptree, NULL, list, runlevel, 0);
-		if (!depends && errno == ENOENT)
+		depends = rc_deptree_depends(deptree, রিক্ত, list, runlevel, 0);
+		যদি (!depends && errno == ENOENT)
 			eerror("no dependency info for service `%s'",
 			    argv[optind]);
-		else
+		অন্যথা
 			rc_stringlist_add(services, argv[optind]);
 
 		rc_stringlist_free(depends);
 		rc_stringlist_free(list);
 		optind++;
 	}
-	if (!TAILQ_FIRST(services)) {
+	যদি (!TAILQ_FIRST(services)) {
 		rc_stringlist_free(services);
 		rc_stringlist_free(types);
 		rc_deptree_free(deptree);
-		free(runlevel);
-		if (update)
-			return EXIT_SUCCESS;
+		মুক্ত(runlevel);
+		যদি (update)
+			ঘূৰাই EXIT_SUCCESS;
 		eerrorx("no services specified");
 	}
 
 	/* If we don't have any types, then supply some defaults */
-	if (!TAILQ_FIRST(types)) {
+	যদি (!TAILQ_FIRST(types)) {
 		rc_stringlist_add(types, "ineed");
 		rc_stringlist_add(types, "iuse");
 	}
@@ -149,13 +149,13 @@ int main(int argc, char **argv)
 	depends = rc_deptree_depends(deptree, types, services,
 	    runlevel, options);
 
-	if (TAILQ_FIRST(depends)) {
+	যদি (TAILQ_FIRST(depends)) {
 		TAILQ_FOREACH(s, depends, entries) {
-			if (first)
+			যদি (first)
 				first = false;
-			else
+			অন্যথা
 				printf (" ");
-			printf ("%s", s->value);
+			printf ("%s", s->মান);
 
 		}
 		printf ("\n");
@@ -165,6 +165,6 @@ int main(int argc, char **argv)
 	rc_stringlist_free(services);
 	rc_stringlist_free(depends);
 	rc_deptree_free(deptree);
-	free(runlevel);
-	return EXIT_SUCCESS;
+	মুক্ত(runlevel);
+	ঘূৰাই EXIT_SUCCESS;
 }

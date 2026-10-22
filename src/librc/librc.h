@@ -20,44 +20,44 @@
 
 #define _IN_LIBRC
 
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <paths.h>
-#include <regex.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <time.h>
-#include <unistd.h>
+#অন্তর্ভাৱ <sys/types.h>
+#অন্তর্ভাৱ <sys/param.h>
+#অন্তর্ভাৱ <sys/stat.h>
+#অন্তর্ভাৱ <sys/time.h>
+#অন্তর্ভাৱ <sys/wait.h>
+#অন্তর্ভাৱ <ctype.h>
+#অন্তর্ভাৱ <dirent.h>
+#অন্তর্ভাৱ <errno.h>
+#অন্তর্ভাৱ <fcntl.h>
+#অন্তর্ভাৱ <libgen.h>
+#অন্তর্ভাৱ <limits.h>
+#অন্তর্ভাৱ <paths.h>
+#অন্তর্ভাৱ <regex.h>
+#অন্তর্ভাৱ <signal.h>
+#অন্তর্ভাৱ <stdarg.h>
+#অন্তর্ভাৱ <stdbool.h>
+#অন্তর্ভাৱ <stdio.h>
+#অন্তর্ভাৱ <stdlib.h>
+#অন্তর্ভাৱ <string.h>
+#অন্তর্ভাৱ <strings.h>
+#অন্তর্ভাৱ <time.h>
+#অন্তর্ভাৱ <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
-  #include <sys/user.h>
+#যদি defined(BSD) && !defined(__GNU__)
+  #যদি !defined(__NetBSD__)
+  #অন্তর্ভাৱ <sys/user.h>
   #endif
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#else
-#include <sys/param.h>
+#অন্তর্ভাৱ <sys/param.h>
+#অন্তর্ভাৱ <sys/sysctl.h>
+#অন্তর্ভাৱ <kvm.h>
+#অন্যথা
+#অন্তর্ভাৱ <sys/param.h>
 #endif
 
-#include "rc.h"
-#include "misc.h"
+#অন্তর্ভাৱ "rc.h"
+#অন্তর্ভাৱ "misc.h"
 
-static const char *const dirnames[RC_DIR_SYS_MAX] =
+স্থির ধ্রুৱ ৱর্ণ *ধ্রুৱ dirnames[RC_DIR_SYS_MAX] =
 {
 	[RC_DIR_STARTING] = "starting",
 	[RC_DIR_STARTED] = "started",
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
-void clear_dirfds(void);
+RC_STRINGLIST *config_list(পূর্ণাঙ্ক dirfd, ধ্রুৱ ৱর্ণ *pathname);
+শূন্য clear_dirfds(শূন্য);
 
 #endif

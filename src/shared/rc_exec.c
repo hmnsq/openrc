@@ -10,136 +10,136 @@
  * except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#অন্তর্ভাৱ <errno.h>
+#অন্তর্ভাৱ <fcntl.h>
+#অন্তর্ভাৱ <signal.h>
+#অন্তর্ভাৱ <sys/wait.h>
+#অন্তর্ভাৱ <unistd.h>
 
-#include "rc_exec.h"
-#include "helpers.h"
+#অন্তর্ভাৱ "rc_exec.h"
+#অন্তর্ভাৱ "helpers.h"
 
-static void checked_close(int fd)
+স্থির শূন্য checked_close(পূর্ণাঙ্ক fd)
 {
-	if (fd >= 0)
+	যদি (fd >= 0)
 		close(fd);
 }
 
-static int devnull(void)
+স্থির পূর্ণাঙ্ক devnull(শূন্য)
 {
-	static int devnullfd = -1;
-	if (devnullfd < 0)
+	স্থির পূর্ণাঙ্ক devnullfd = -1;
+	যদি (devnullfd < 0)
 		devnullfd = open("/dev/null", O_RDWR | O_CLOEXEC);
-	if (devnullfd < 0) {
+	যদি (devnullfd < 0) {
 		fprintf(stderr, "Failed to open /dev/null: %s", strerror(errno));
 		_exit(1);
 	}
-	return devnullfd;
+	ঘূৰাই devnullfd;
 }
 
-struct exec_args exec_init(const char **argv)
+সংরচনা exec_args exec_init(ধ্রুৱ ৱর্ণ **argv)
 {
-	struct exec_args args = {0};
+	সংরচনা exec_args args = {0};
 	args.argv = argv;
 	args.redirect_stdin  = EXEC_NO_REDIRECT;
 	args.redirect_stdout = EXEC_NO_REDIRECT;
 	args.redirect_stderr = EXEC_NO_REDIRECT;
 	args.uid = (uid_t)-1;
 	args.gid = (gid_t)-1;
-	return args;
+	ঘূৰাই args;
 }
 
-struct exec_result do_exec(struct exec_args *args)
+সংরচনা exec_result do_exec(সংরচনা exec_args *args)
 {
-	struct exec_result res = { .pid = -1 };
+	সংরচনা exec_result res = { .pid = -1 };
 	sigset_t full, old;
-	int saved_errno, err, n;
-	int execpipe[2] = {-1, -1};
-	int stdin_pipe[2] = {-1, -1};
-	int stdout_pipe[2] = {-1, -1};
-	int stderr_pipe[2] = {-1, -1};
-	const char *cmd = args->cmd ? args->cmd : args->argv[0];
+	পূর্ণাঙ্ক saved_errno, err, n;
+	পূর্ণাঙ্ক execpipe[2] = {-1, -1};
+	পূর্ণাঙ্ক stdin_pipe[2] = {-1, -1};
+	পূর্ণাঙ্ক stdout_pipe[2] = {-1, -1};
+	পূর্ণাঙ্ক stderr_pipe[2] = {-1, -1};
+	ধ্রুৱ ৱর্ণ *cmd = args->cmd ? args->cmd : args->argv[0];
 
-	if (pipe2(execpipe, O_CLOEXEC) < 0)
-		goto exit;
-	if (args->redirect_stdin == EXEC_MKPIPE) {
-		if (pipe2(stdin_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	যদি (pipe2(execpipe, O_CLOEXEC) < 0)
+		গচ্ছ exit;
+	যদি (args->redirect_stdin == EXEC_MKPIPE) {
+		যদি (pipe2(stdin_pipe, O_CLOEXEC) < 0)
+			গচ্ছ exit;
 		args->redirect_stdin = stdin_pipe[0];
 	}
-	if (args->redirect_stdout == EXEC_MKPIPE) {
-		if (pipe2(stdout_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	যদি (args->redirect_stdout == EXEC_MKPIPE) {
+		যদি (pipe2(stdout_pipe, O_CLOEXEC) < 0)
+			গচ্ছ exit;
 		args->redirect_stdout = stdout_pipe[1];
 	}
-	if (args->redirect_stderr == EXEC_MKPIPE) {
-		if (pipe2(stderr_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	যদি (args->redirect_stderr == EXEC_MKPIPE) {
+		যদি (pipe2(stderr_pipe, O_CLOEXEC) < 0)
+			গচ্ছ exit;
 		args->redirect_stderr = stderr_pipe[1];
 	}
 
-	if (args->redirect_stdin == EXEC_DEVNULL)
+	যদি (args->redirect_stdin == EXEC_DEVNULL)
 		args->redirect_stdin = devnull();
-	if (args->redirect_stdout == EXEC_DEVNULL)
+	যদি (args->redirect_stdout == EXEC_DEVNULL)
 		args->redirect_stdout = devnull();
-	if (args->redirect_stderr == EXEC_DEVNULL)
+	যদি (args->redirect_stderr == EXEC_DEVNULL)
 		args->redirect_stderr = devnull();
 
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
 	res.pid = fork();
 
-	if (res.pid < 0) {
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		goto exit;
-	} else if (res.pid == 0) {
+	যদি (res.pid < 0) {
+		sigprocmask(SIG_SETMASK, &old, রিক্ত);
+		গচ্ছ exit;
+	} অন্যথা যদি (res.pid == 0) {
 		/* child */
-		if (args->redirect_stdin != EXEC_NO_REDIRECT &&
+		যদি (args->redirect_stdin != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stdin, STDIN_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stdout != EXEC_NO_REDIRECT &&
+			গচ্ছ child_err;
+		যদি (args->redirect_stdout != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stdout, STDOUT_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stderr != EXEC_NO_REDIRECT &&
+			গচ্ছ child_err;
+		যদি (args->redirect_stderr != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stderr, STDERR_FILENO) < 0)
-			goto child_err;
-		if (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
-			goto child_err;
-		if (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
-			goto child_err;
-		if (args->setsid && setsid() < 0)
-			goto child_err;
-		sigprocmask(SIG_SETMASK, &old, NULL);
+			গচ্ছ child_err;
+		যদি (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
+			গচ্ছ child_err;
+		যদি (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
+			গচ্ছ child_err;
+		যদি (args->setsid && setsid() < 0)
+			গচ্ছ child_err;
+		sigprocmask(SIG_SETMASK, &old, রিক্ত);
 		execvp(cmd, UNCONST(args->argv));
 child_err:
 		saved_errno = errno;
-		write(execpipe[1], &saved_errno, sizeof saved_errno);
+		লিখ(execpipe[1], &saved_errno, পরিমাণ saved_errno);
 		_exit(1);
-	} else {
+	} অন্যথা {
 		/* parent */
 		close(execpipe[1]);
 		execpipe[1] = -1;
-		n = read(execpipe[0], &err, sizeof err);
-		if (n != 0) {
+		n = পঠ(execpipe[0], &err, পরিমাণ err);
+		যদি (n != 0) {
 			/* exec failed, reap the child and cleanup */
-			waitpid(res.pid, NULL, 0); /* do we care about waitpid failures? */
+			waitpid(res.pid, রিক্ত, 0); /* do we care about waitpid failures? */
 			res.pid = -1;
 		}
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		if (res.pid < 0) {
-			errno = (n == sizeof err) ? err : EINVAL;
-			goto exit;
+		sigprocmask(SIG_SETMASK, &old, রিক্ত);
+		যদি (res.pid < 0) {
+			errno = (n == পরিমাণ err) ? err : EINVAL;
+			গচ্ছ exit;
 		}
 
-		if (stdin_pipe[0] >= 0) {
+		যদি (stdin_pipe[0] >= 0) {
 			res.proc_stdin = stdin_pipe[1];
 			stdin_pipe[1] = -1; /* to avoid closing it below */
 		}
-		if (stdout_pipe[0] >= 0) {
+		যদি (stdout_pipe[0] >= 0) {
 			res.proc_stdout = stdout_pipe[0];
 			stdout_pipe[0] = -1;
 		}
-		if (stderr_pipe[0] >= 0) {
+		যদি (stderr_pipe[0] >= 0) {
 			res.proc_stderr = stderr_pipe[0];
 			stderr_pipe[0] = -1;
 		}
@@ -152,28 +152,28 @@ exit:
 	checked_close(stdout_pipe[0]); checked_close(stdout_pipe[1]);
 	checked_close(stderr_pipe[0]); checked_close(stderr_pipe[1]);
 	errno = saved_errno;
-	return res;
+	ঘূৰাই res;
 }
 
-int rc_waitpid(pid_t pid)
+পূর্ণাঙ্ক rc_waitpid(pid_t pid)
 {
-	int status;
-	while (waitpid(pid, &status, 0) == -1) {
-		if (errno != EINTR) {
+	পূর্ণাঙ্ক status;
+	যেতিয়ালৈ (waitpid(pid, &status, 0) == -1) {
+		যদি (errno != EINTR) {
 			status = -1;
-			break;
+			ভঙ্গ;
 		}
 	}
-	return status;
+	ঘূৰাই status;
 }
 
-int rc_pipe_command(const char *cmd, int devnullfd)
+পূর্ণাঙ্ক rc_pipe_command(ধ্রুৱ ৱর্ণ *cmd, পূর্ণাঙ্ক devnullfd)
 {
-	const char *argv[] = { "/bin/sh", "-c", cmd, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	ধ্রুৱ ৱর্ণ *argv[] = { "/bin/sh", "-c", cmd, রিক্ত };
+	সংরচনা exec_result res;
+	সংরচনা exec_args args = exec_init(argv);
 	args.redirect_stdin = EXEC_MKPIPE;
 	args.redirect_stdout = args.redirect_stderr = devnullfd;
 	res = do_exec(&args);
-	return (res.pid > 0) ? res.proc_stdin : -1;
+	ঘূৰাই (res.pid > 0) ? res.proc_stdin : -1;
 }

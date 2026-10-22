@@ -10,38 +10,38 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#অন্তর্ভাৱ <ctype.h>
+#অন্তর্ভাৱ <stdio.h>
+#অন্তর্ভাৱ <stdlib.h>
+#অন্তর্ভাৱ <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#অন্তর্ভাৱ "rc.h"
+#অন্তর্ভাৱ "_usage.h"
+#অন্তর্ভাৱ "version.h"
+#অন্তর্ভাৱ "helpers.h"
 
 
-void set_quiet_options(void)
+শূন্য set_quiet_options(শূন্য)
 {
-	static int qcount = 0;
+	স্থির পূর্ণাঙ্ক qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	ৱিকল্প (qcount) {
+	পক্ষ 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		ভঙ্গ;
+	পক্ষ 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		ভঙ্গ;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN শূন্য show_version(শূন্য)
 {
-	const char *systype = NULL;
+	ধ্রুৱ ৱর্ণ *systype = রিক্ত;
 
 	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
+	যদি ((systype = rc_sys()))
 		printf(" [%s]", systype);
 	printf(") %s", VERSION);
 #ifdef BRANDING
@@ -51,39 +51,39 @@ RC_NORETURN void show_version(void)
 	exit(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN শূন্য usage(পূর্ণাঙ্ক exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	ধ্রুৱ ৱর্ণ * ধ্রুৱ has_arg[] = { "", "<arg>", "[arg]" };
+	পূর্ণাঙ্ক i;
+	পূর্ণাঙ্ক len;
+	ৱর্ণ *lo;
+	ৱর্ণ *p;
+	ৱর্ণ *token;
+	ৱর্ণ val[4] = "-?,";
 
-	if (usagestring)
+	যদি (usagestring)
 		printf("%s", usagestring);
-	else
+	অন্যথা
 		printf("Usage: %s [options] ", applet);
 
-	if (extraopts)
+	যদি (extraopts)
 		printf("%s", extraopts);
 
 	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	বাবে (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
 		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		যেতিয়ালৈ ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
+			যদি (len > 0)
 				printf("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		মুক্ত(lo);
 	}
 	exit(exit_status);
 }

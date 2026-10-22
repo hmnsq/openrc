@@ -15,53 +15,53 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/utsname.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
+#অন্তর্ভাৱ <sys/utsname.h>
+#অন্তর্ভাৱ <ctype.h>
+#অন্তর্ভাৱ <dirent.h>
+#অন্তর্ভাৱ <errno.h>
+#অন্তর্ভাৱ <limits.h>
+#অন্তর্ভাৱ <stdbool.h>
+#অন্তর্ভাৱ <stdio.h>
+#অন্তর্ভাৱ <stdlib.h>
+#অন্তর্ভাৱ <string.h>
+#অন্তর্ভাৱ <sys/stat.h>
+#অন্তর্ভাৱ <time.h>
+#অন্তর্ভাৱ <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
-#include "misc.h"
+#অন্তর্ভাৱ "queue.h"
+#অন্তর্ভাৱ "librc.h"
+#অন্তর্ভাৱ "helpers.h"
+#অন্তর্ভাৱ "misc.h"
 
 #define GENDEP          RC_LIBEXECDIR "/sh/gendepends.sh"
 
-static const char *bootlevel = NULL;
+স্থির ধ্রুৱ ৱর্ণ *bootlevel = রিক্ত;
 
-static char *
-get_shell_value(char *string)
+স্থির ৱর্ণ *
+get_shell_মান(ৱর্ণ *string)
 {
-	char *p = string;
-	char *e;
+	ৱর্ণ *p = string;
+	ৱর্ণ *e;
 
-	if (!string)
-		return NULL;
+	যদি (!string)
+		ঘূৰাই রিক্ত;
 
-	if (*p == '\'')
+	যদি (*p == '\'')
 		p++;
 
 	e = p + strlen(p) - 1;
-	if (*e == '\n')
+	যদি (*e == '\n')
 		*e-- = 0;
-	if (*e == '\'')
+	যদি (*e == '\'')
 		*e-- = 0;
 
-	if (*p != 0)
-		return p;
+	যদি (*p != 0)
+		ঘূৰাই p;
 
-	return NULL;
+	ঘূৰাই রিক্ত;
 }
 
-void
+শূন্য
 rc_deptree_free(RC_DEPTREE *deptree)
 {
 	RC_DEPINFO *di;
@@ -69,227 +69,227 @@ rc_deptree_free(RC_DEPTREE *deptree)
 	RC_DEPTYPE *dt;
 	RC_DEPTYPE *dt_save;
 
-	if (!deptree)
-		return;
+	যদি (!deptree)
+		ঘূৰাই;
 
 	TAILQ_FOREACH_SAFE(di, deptree, entries, di_save) {
 		TAILQ_FOREACH_SAFE(dt, &di->depends, entries, dt_save) {
 			TAILQ_REMOVE(&di->depends, dt, entries);
 			rc_stringlist_free(dt->services);
-			free(dt->type);
-			free(dt);
+			মুক্ত(dt->type);
+			মুক্ত(dt);
 		}
 		TAILQ_REMOVE(deptree, di, entries);
-		free(di->service);
-		free(di);
+		মুক্ত(di->service);
+		মুক্ত(di);
 	}
 
 	/* Use free() here since rc_deptree_free should not call itself */
-	free(deptree);
+	মুক্ত(deptree);
 }
 
-static RC_DEPINFO *
-get_depinfo(const RC_DEPTREE *deptree, const char *service)
+স্থির RC_DEPINFO *
+get_depinfo(ধ্রুৱ RC_DEPTREE *deptree, ধ্রুৱ ৱর্ণ *service)
 {
 	RC_DEPINFO *di;
-	if (deptree) {
+	যদি (deptree) {
 		TAILQ_FOREACH(di, deptree, entries)
-			if (strcmp(di->service, service) == 0)
-				return di;
+			যদি (strcmp(di->service, service) == 0)
+				ঘূৰাই di;
 	}
-	return NULL;
+	ঘূৰাই রিক্ত;
 }
 
-static RC_DEPINFO *
-make_depinfo(RC_DEPTREE *deptree, const char *service)
+স্থির RC_DEPINFO *
+make_depinfo(RC_DEPTREE *deptree, ধ্রুৱ ৱর্ণ *service)
 {
-	RC_DEPINFO *depinfo = xmalloc(sizeof(*depinfo));
+	RC_DEPINFO *depinfo = xmalloc(পরিমাণ(*depinfo));
 	TAILQ_INIT(&depinfo->depends);
 	depinfo->service = xstrdup(service);
-	TAILQ_INSERT_TAIL(deptree, depinfo, entries);
+	TAILQ_ঢোকাও_TAIL(deptree, depinfo, entries);
 
-	return depinfo;
+	ঘূৰাই depinfo;
 }
 
-static RC_DEPTYPE *
-get_deptype(const RC_DEPINFO *depinfo, const char *type)
+স্থির RC_DEPTYPE *
+get_deptype(ধ্রুৱ RC_DEPINFO *depinfo, ধ্রুৱ ৱর্ণ *type)
 {
 	RC_DEPTYPE *dt;
 
-	if (depinfo) {
+	যদি (depinfo) {
 		TAILQ_FOREACH(dt, &depinfo->depends, entries)
-			if (strcmp(dt->type, type) == 0)
-				return dt;
+			যদি (strcmp(dt->type, type) == 0)
+				ঘূৰাই dt;
 	}
-	return NULL;
+	ঘূৰাই রিক্ত;
 }
 
-static RC_DEPTYPE *
-make_deptype(RC_DEPINFO *depinfo, const char *type)
+স্থির RC_DEPTYPE *
+make_deptype(RC_DEPINFO *depinfo, ধ্রুৱ ৱর্ণ *type)
 {
-	RC_DEPTYPE *deptype = xmalloc(sizeof(*deptype));
+	RC_DEPTYPE *deptype = xmalloc(পরিমাণ(*deptype));
 	deptype->type = xstrdup(type);
 	deptype->services = rc_stringlist_new();
-	TAILQ_INSERT_TAIL(&depinfo->depends, deptype, entries);
+	TAILQ_ঢোকাও_TAIL(&depinfo->depends, deptype, entries);
 
-	return deptype;
+	ঘূৰাই deptype;
 }
 
 #ifdef HAVE_MALLOC_EXTENDED_ATTRIBUTE
 __attribute__ ((malloc (rc_deptree_free, 1)))
 #endif
-static RC_DEPTREE *
-make_deptree(void) {
-	RC_DEPTREE *deptree = xmalloc(sizeof(*deptree));
+স্থির RC_DEPTREE *
+make_deptree(শূন্য) {
+	RC_DEPTREE *deptree = xmalloc(পরিমাণ(*deptree));
 	TAILQ_INIT(deptree);
-	return deptree;
+	ঘূৰাই deptree;
 }
 
-static RC_DEPTREE *
-deptree_load_file(int dirfd, const char *pathname)
+স্থির RC_DEPTREE *
+deptree_load_file(পূর্ণাঙ্ক dirfd, ধ্রুৱ ৱর্ণ *pathname)
 {
 	RC_DEPTREE *deptree;
-	RC_DEPINFO *depinfo = NULL;
-	RC_DEPTYPE *deptype = NULL;
-	char *line = NULL;
+	RC_DEPINFO *depinfo = রিক্ত;
+	RC_DEPTYPE *deptype = রিক্ত;
+	ৱর্ণ *সাৰি = রিক্ত;
 	size_t size;
-	char *type;
-	char *p;
-	char *e;
-	int i;
+	ৱর্ণ *type;
+	ৱর্ণ *p;
+	ৱর্ণ *e;
+	পূর্ণাঙ্ক i;
 	FILE *fp;
 
-	if (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
-		return NULL;
+	যদি (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
+		ঘূৰাই রিক্ত;
 
 	deptree = make_deptree();
-	while (xgetline(&line, &size, fp) != -1) {
-		p = line;
+	যেতিয়ালৈ (xgetline(&সাৰি, &size, fp) != -1) {
+		p = সাৰি;
 		e = strsep(&p, "_");
-		if (!e || strcmp(e, "depinfo") != 0)
-			continue;
+		যদি (!e || strcmp(e, "depinfo") != 0)
+			অনুৱর্ত;
 		e = strsep(&p, "_");
-		if (!e || sscanf(e, "%d", &i) != 1)
-			continue;
-		if (!(type = strsep(&p, "_=")))
-			continue;
-		if (strcmp(type, "service") == 0) {
+		যদি (!e || sscanf(e, "%d", &i) != 1)
+			অনুৱর্ত;
+		যদি (!(type = strsep(&p, "_=")))
+			অনুৱর্ত;
+		যদি (strcmp(type, "service") == 0) {
 			/* Sanity */
-			e = get_shell_value(p);
-			if (!e || *e == '\0')
-				continue;
+			e = get_shell_মান(p);
+			যদি (!e || *e == '\0')
+				অনুৱর্ত;
 			depinfo = make_depinfo(deptree, e);
-			deptype = NULL;
-			continue;
+			deptype = রিক্ত;
+			অনুৱর্ত;
 		}
 		e = strsep(&p, "=");
-		if (!e || sscanf(e, "%d", &i) != 1)
-			continue;
+		যদি (!e || sscanf(e, "%d", &i) != 1)
+			অনুৱর্ত;
 		/* Sanity */
-		e = get_shell_value(p);
-		if (!e || *e == '\0')
-			continue;
-		if (!depinfo)
-			continue;
-		if (!deptype || strcmp(deptype->type, type) != 0)
+		e = get_shell_মান(p);
+		যদি (!e || *e == '\0')
+			অনুৱর্ত;
+		যদি (!depinfo)
+			অনুৱর্ত;
+		যদি (!deptype || strcmp(deptype->type, type) != 0)
 			deptype = make_deptype(depinfo, type);
 		rc_stringlist_add(deptype->services, e);
 	}
-	free(line);
+	মুক্ত(সাৰি);
 	fclose(fp);
 
-	return deptree;
+	ঘূৰাই deptree;
 }
 
 RC_DEPTREE *
-rc_deptree_load(void)
+rc_deptree_load(শূন্য)
 {
-	return deptree_load_file(rc_dirfd(RC_DIR_SVCDIR), "deptree");
+	ঘূৰাই deptree_load_file(rc_dirfd(RC_DIR_SVCDIR), "deptree");
 }
 
 RC_DEPTREE *
-rc_deptree_load_file(const char *deptree_file)
+rc_deptree_load_file(ধ্রুৱ ৱর্ণ *deptree_file)
 {
-	return deptree_load_file(AT_FDCWD, deptree_file);
+	ঘূৰাই deptree_load_file(AT_FDCWD, deptree_file);
 }
 
-static bool
-valid_service(const char *runlevel, const char *service, const char *type)
+স্থির bool
+valid_service(ধ্রুৱ ৱর্ণ *runlevel, ধ্রুৱ ৱর্ণ *service, ধ্রুৱ ৱর্ণ *type)
 {
 	RC_SERVICE state;
 
-	if (!runlevel ||
+	যদি (!runlevel ||
 	    strcmp(type, "ineed") == 0 ||
 	    strcmp(type, "needsme") == 0  ||
 	    strcmp(type, "iwant") == 0 ||
 	    strcmp(type, "wantsme") == 0)
-		return true;
+		ঘূৰাই true;
 
-	if (rc_service_in_runlevel(service, runlevel))
-		return true;
-	if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
-		    return false;
-	if (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 &&
+	যদি (rc_service_in_runlevel(service, runlevel))
+		ঘূৰাই true;
+	যদি (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0)
+		    ঘূৰাই false;
+	যদি (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 &&
 	    strcmp(type, "iafter") == 0)
-		    return false;
-	if (strcmp(runlevel, bootlevel) != 0) {
-		if (rc_service_in_runlevel(service, bootlevel))
-			return true;
+		    ঘূৰাই false;
+	যদি (strcmp(runlevel, bootlevel) != 0) {
+		যদি (rc_service_in_runlevel(service, bootlevel))
+			ঘূৰাই true;
 	}
 
 	state = rc_service_state(service);
-	if (state & RC_SERVICE_HOTPLUGGED ||
+	যদি (state & RC_SERVICE_HOTPLUGGED ||
 	    state & RC_SERVICE_STARTED)
-		return true;
+		ঘূৰাই true;
 
-	return false;
+	ঘূৰাই false;
 }
 
-static bool
-get_provided1(const char *runlevel, RC_STRINGLIST *providers,
-	      RC_DEPTYPE *deptype, const char *level,
+স্থির bool
+get_provided1(ধ্রুৱ ৱর্ণ *runlevel, RC_STRINGLIST *providers,
+	      RC_DEPTYPE *deptype, ধ্রুৱ ৱর্ণ *level,
 	      bool hotplugged, RC_SERVICE state)
 {
 	RC_STRING *service;
 	RC_SERVICE st;
 	bool retval = false;
 	bool ok;
-	const char *svc;
+	ধ্রুৱ ৱর্ণ *svc;
 
 	TAILQ_FOREACH(service, deptype->services, entries) {
 		ok = true;
-		svc = service->value;
+		svc = service->মান;
 		st = rc_service_state(svc);
 
-		if (level)
+		যদি (level)
 			ok = rc_service_in_runlevel(svc, level);
-		else if (hotplugged)
+		অন্যথা যদি (hotplugged)
 			ok = (st & RC_SERVICE_HOTPLUGGED &&
 			      !rc_service_in_runlevel(svc, runlevel) &&
 			      !rc_service_in_runlevel(svc, bootlevel));
-		if (!ok)
-			continue;
-		switch (state) {
-			case RC_SERVICE_STARTED:
+		যদি (!ok)
+			অনুৱর্ত;
+		ৱিকল্প (state) {
+			পক্ষ RC_SERVICE_STARTED:
 				ok = (st & RC_SERVICE_STARTED);
-				break;
-			case RC_SERVICE_INACTIVE:
-			case RC_SERVICE_STARTING:
-			case RC_SERVICE_STOPPING:
+				ভঙ্গ;
+			পক্ষ RC_SERVICE_INACTIVE:
+			পক্ষ RC_SERVICE_STARTING:
+			পক্ষ RC_SERVICE_STOPPING:
 				ok = (st & RC_SERVICE_STARTING ||
 				      st & RC_SERVICE_STOPPING ||
 				      st & RC_SERVICE_INACTIVE);
-				break;
-			default:
-				break;
+				ভঙ্গ;
+			স্ৱভাৱ:
+				ভঙ্গ;
 		}
-		if (!ok)
-			continue;
+		যদি (!ok)
+			অনুৱর্ত;
 		retval = true;
 		rc_stringlist_add(providers, svc);
 	}
 
-	return retval;
+	ঘূৰাই retval;
 }
 
 /* Work out if a service is provided by another service.
@@ -301,37 +301,37 @@ get_provided1(const char *runlevel, RC_STRINGLIST *providers,
    If there are any bugs in rc-depend, they will probably be here as
    provided dependency can change depending on runlevel state.
    */
-static RC_STRINGLIST *
-get_provided(const RC_DEPINFO *depinfo, const char *runlevel, int options)
+স্থির RC_STRINGLIST *
+get_provided(ধ্রুৱ RC_DEPINFO *depinfo, ধ্রুৱ ৱর্ণ *runlevel, পূর্ণাঙ্ক options)
 {
 	RC_DEPTYPE *dt;
 	RC_STRINGLIST *providers = rc_stringlist_new();
 	RC_STRING *service;
 
 	dt = get_deptype(depinfo, "providedby");
-	if (!dt)
-		return providers;
+	যদি (!dt)
+		ঘূৰাই providers;
 
 	/* If we are stopping then all depends are true, regardless of state.
 	   This is especially true for net services as they could force a restart
 	   of the local dns resolver which may depend on net. */
-	if (options & RC_DEP_STOP) {
+	যদি (options & RC_DEP_STOP) {
 		TAILQ_FOREACH(service, dt->services, entries)
-			rc_stringlist_add(providers, service->value);
-		return providers;
+			rc_stringlist_add(providers, service->মান);
+		ঘূৰাই providers;
 	}
 
 	/* If we're strict or starting, then only use what we have in our
 	 * runlevel and bootlevel. If we starting then check hotplugged too. */
-	if (options & RC_DEP_STRICT || options & RC_DEP_START) {
+	যদি (options & RC_DEP_STRICT || options & RC_DEP_START) {
 		TAILQ_FOREACH(service, dt->services, entries)
-			if (rc_service_in_runlevel(service->value, runlevel) ||
-			    rc_service_in_runlevel(service->value, bootlevel) ||
+			যদি (rc_service_in_runlevel(service->মান, runlevel) ||
+			    rc_service_in_runlevel(service->মান, bootlevel) ||
 			    (options & RC_DEP_START &&
-			     rc_service_state(service->value) & RC_SERVICE_HOTPLUGGED))
-				rc_stringlist_add(providers, service->value);
-		if (TAILQ_FIRST(providers))
-			return providers;
+			     rc_service_state(service->মান) & RC_SERVICE_HOTPLUGGED))
+				rc_stringlist_add(providers, service->মান);
+		যদি (TAILQ_FIRST(providers))
+			ঘূৰাই providers;
 	}
 
 	/* OK, we're not strict or there were no services in our runlevel.
@@ -345,60 +345,60 @@ get_provided(const RC_DEPINFO *depinfo, const char *runlevel, int options)
 	 *     runlevel, hotplugged, bootlevel, any
 	 */
 #define DO \
-	if (TAILQ_FIRST(providers)) { \
-		if (TAILQ_NEXT(TAILQ_FIRST(providers), entries)) { \
+	যদি (TAILQ_FIRST(providers)) { \
+		যদি (TAILQ_NEXT(TAILQ_FIRST(providers), entries)) { \
 			rc_stringlist_free(providers); \
 			providers = rc_stringlist_new(); \
 		} \
-		return providers; \
+		ঘূৰাই providers; \
 	}
 
 	/* Anything running has to come first */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTED))
+	যদি (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTED))
 	{ DO }
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STARTED))
+	যদি (get_provided1(runlevel, providers, dt, রিক্ত, true, RC_SERVICE_STARTED))
 	{ DO }
-	if (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
+	যদি (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STARTED))
 	{ DO }
-	if (get_provided1(runlevel, providers, dt, NULL, false, RC_SERVICE_STARTED))
+	যদি (get_provided1(runlevel, providers, dt, রিক্ত, false, RC_SERVICE_STARTED))
 	{ DO }
 
 	/* Check starting services */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTING))
-		return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STARTING))
-		return providers;
-	if (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
+	যদি (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STARTING))
+		ঘূৰাই providers;
+	যদি (get_provided1(runlevel, providers, dt, রিক্ত, true, RC_SERVICE_STARTING))
+		ঘূৰাই providers;
+	যদি (bootlevel && strcmp(runlevel, bootlevel) != 0 &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STARTING))
-	    return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, false, RC_SERVICE_STARTING))
-		return providers;
+	    ঘূৰাই providers;
+	যদি (get_provided1(runlevel, providers, dt, রিক্ত, false, RC_SERVICE_STARTING))
+		ঘূৰাই providers;
 
 	/* Nothing started then. OK, lets get the stopped services */
-	if (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STOPPED))
-		return providers;
-	if (get_provided1(runlevel, providers, dt, NULL, true, RC_SERVICE_STOPPED))
+	যদি (get_provided1(runlevel, providers, dt, runlevel, false, RC_SERVICE_STOPPED))
+		ঘূৰাই providers;
+	যদি (get_provided1(runlevel, providers, dt, রিক্ত, true, RC_SERVICE_STOPPED))
 	{ DO }
-	if (bootlevel && (strcmp(runlevel, bootlevel) != 0) &&
+	যদি (bootlevel && (strcmp(runlevel, bootlevel) != 0) &&
 	    get_provided1(runlevel, providers, dt, bootlevel, false, RC_SERVICE_STOPPED))
-		return providers;
+		ঘূৰাই providers;
 
 	/* Still nothing? OK, list our first provided service. */
 	service = TAILQ_FIRST(dt->services);
-	if (service != NULL)
-		rc_stringlist_add(providers, service->value);
+	যদি (service != রিক্ত)
+		rc_stringlist_add(providers, service->মান);
 
-	return providers;
+	ঘূৰাই providers;
 }
 
-static void
-visit_service(const RC_DEPTREE *deptree,
-	      const RC_STRINGLIST *types,
+স্থির শূন্য
+visit_service(ধ্রুৱ RC_DEPTREE *deptree,
+	      ধ্রুৱ RC_STRINGLIST *types,
 	      RC_STRINGLIST *sorted,
 	      RC_STRINGLIST *visited,
-	      const RC_DEPINFO *depinfo,
-	      const char *runlevel, int options)
+	      ধ্রুৱ RC_DEPINFO *depinfo,
+	      ধ্রুৱ ৱর্ণ *runlevel, পূর্ণাঙ্ক options)
 {
 	RC_STRING *type;
 	RC_STRING *service;
@@ -406,41 +406,41 @@ visit_service(const RC_DEPTREE *deptree,
 	RC_DEPINFO *di;
 	RC_STRINGLIST *provided;
 	RC_STRING *p;
-	const char *svcname;
+	ধ্রুৱ ৱর্ণ *svcname;
 
 	/* Check if we have already visited this service or not */
 	TAILQ_FOREACH(type, visited, entries)
-		if (strcmp(type->value, depinfo->service) == 0)
-			return;
+		যদি (strcmp(type->মান, depinfo->service) == 0)
+			ঘূৰাই;
 	/* Add ourselves as a visited service */
 	rc_stringlist_add(visited, depinfo->service);
 
 	TAILQ_FOREACH(type, types, entries)
 	{
-		if (!(dt = get_deptype(depinfo, type->value)))
-			continue;
+		যদি (!(dt = get_deptype(depinfo, type->মান)))
+			অনুৱর্ত;
 
 		TAILQ_FOREACH(service, dt->services, entries) {
-			if (!(options & RC_DEP_TRACE) ||
-			    strcmp(type->value, "iprovide") == 0)
+			যদি (!(options & RC_DEP_TRACE) ||
+			    strcmp(type->মান, "iprovide") == 0)
 			{
-				rc_stringlist_add(sorted, service->value);
-				continue;
+				rc_stringlist_add(sorted, service->মান);
+				অনুৱর্ত;
 			}
 
-			if (!(di = get_depinfo(deptree, service->value)))
-				continue;
+			যদি (!(di = get_depinfo(deptree, service->মান)))
+				অনুৱর্ত;
 			provided = get_provided(di, runlevel, options);
 
-			if (TAILQ_FIRST(provided)) {
+			যদি (TAILQ_FIRST(provided)) {
 				TAILQ_FOREACH(p, provided, entries) {
-					di = get_depinfo(deptree, p->value);
-					if (di && valid_service(runlevel, di->service, type->value))
+					di = get_depinfo(deptree, p->মান);
+					যদি (di && valid_service(runlevel, di->service, type->মান))
 						visit_service(deptree, types, sorted, visited, di,
 							      runlevel, options | RC_DEP_TRACE);
 				}
 			}
-			else if (di && valid_service(runlevel, service->value, type->value))
+			অন্যথা যদি (di && valid_service(runlevel, service->মান, type->মান))
 				visit_service(deptree, types, sorted, visited, di,
 					      runlevel, options | RC_DEP_TRACE);
 
@@ -449,18 +449,18 @@ visit_service(const RC_DEPTREE *deptree,
 	}
 
 	/* Now visit the stuff we provide for */
-	if (options & RC_DEP_TRACE &&
+	যদি (options & RC_DEP_TRACE &&
 	    (dt = get_deptype(depinfo, "iprovide")))
 	{
 		TAILQ_FOREACH(service, dt->services, entries) {
-			if (!(di = get_depinfo(deptree, service->value)))
-				continue;
+			যদি (!(di = get_depinfo(deptree, service->মান)))
+				অনুৱর্ত;
 			provided = get_provided(di, runlevel, options);
 			TAILQ_FOREACH(p, provided, entries)
-				if (strcmp(p->value, depinfo->service) == 0) {
+				যদি (strcmp(p->মান, depinfo->service) == 0) {
 					visit_service(deptree, types, sorted, visited, di,
 						       runlevel, options | RC_DEP_TRACE);
-					break;
+					ভঙ্গ;
 				}
 			rc_stringlist_free(provided);
 		}
@@ -469,15 +469,15 @@ visit_service(const RC_DEPTREE *deptree,
 	/* We've visited everything we need, so add ourselves unless we
 	   are also the service calling us or we are provided by something */
 	svcname = getenv("RC_SVCNAME");
-	if (!svcname || strcmp(svcname, depinfo->service) != 0) {
-		if (!get_deptype(depinfo, "providedby"))
+	যদি (!svcname || strcmp(svcname, depinfo->service) != 0) {
+		যদি (!get_deptype(depinfo, "providedby"))
 			rc_stringlist_add(sorted, depinfo->service);
 	}
 }
 
 RC_STRINGLIST *
-rc_deptree_depend(const RC_DEPTREE *deptree,
-		  const char *service, const char *type)
+rc_deptree_depend(ধ্রুৱ RC_DEPTREE *deptree,
+		  ধ্রুৱ ৱর্ণ *service, ধ্রুৱ ৱর্ণ *type)
 {
 	RC_DEPINFO *di;
 	RC_DEPTYPE *dt;
@@ -485,48 +485,48 @@ rc_deptree_depend(const RC_DEPTREE *deptree,
 	RC_STRING *svc;
 
 	svcs = rc_stringlist_new();
-	if (!(di = get_depinfo(deptree, service)) ||
+	যদি (!(di = get_depinfo(deptree, service)) ||
 	    !(dt = get_deptype(di, type)))
 	{
 		errno = ENOENT;
-		return svcs;
+		ঘূৰাই svcs;
 	}
 
 	/* For consistency, we copy the array */
 	TAILQ_FOREACH(svc, dt->services, entries)
-		rc_stringlist_add(svcs, svc->value);
-	return svcs;
+		rc_stringlist_add(svcs, svc->মান);
+	ঘূৰাই svcs;
 }
 
 RC_STRINGLIST *
-rc_deptree_depends(const RC_DEPTREE *deptree,
-		   const RC_STRINGLIST *types,
-		   const RC_STRINGLIST *services,
-		   const char *runlevel, int options)
+rc_deptree_depends(ধ্রুৱ RC_DEPTREE *deptree,
+		   ধ্রুৱ RC_STRINGLIST *types,
+		   ধ্রুৱ RC_STRINGLIST *services,
+		   ধ্রুৱ ৱর্ণ *runlevel, পূর্ণাঙ্ক options)
 {
 	RC_STRINGLIST *sorted = rc_stringlist_new();
 	RC_STRINGLIST *visited = rc_stringlist_new();
 	RC_DEPINFO *di;
-	const RC_STRING *service;
+	ধ্রুৱ RC_STRING *service;
 
 	bootlevel = getenv("RC_BOOTLEVEL");
-	if (!bootlevel)
+	যদি (!bootlevel)
 		bootlevel = RC_LEVEL_BOOT;
 	TAILQ_FOREACH(service, services, entries) {
-		if (!(di = get_depinfo(deptree, service->value))) {
+		যদি (!(di = get_depinfo(deptree, service->মান))) {
 			errno = ENOENT;
-			continue;
+			অনুৱর্ত;
 		}
-		if (types)
+		যদি (types)
 			visit_service(deptree, types, sorted, visited,
 				      di, runlevel, options);
 	}
 	rc_stringlist_free(visited);
-	return sorted;
+	ঘূৰাই sorted;
 }
 
 RC_STRINGLIST *
-rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
+rc_deptree_order(ধ্রুৱ RC_DEPTREE *deptree, ধ্রুৱ ৱর্ণ *runlevel, পূর্ণাঙ্ক options)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *list2;
@@ -534,34 +534,34 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
 	RC_STRINGLIST *services;
 
 	bootlevel = getenv("RC_BOOTLEVEL");
-	if (!bootlevel)
+	যদি (!bootlevel)
 		bootlevel = RC_LEVEL_BOOT;
 
 	/* When shutting down, list all running services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
+	যদি (strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
 	{
 		list = rc_services_in_state(RC_SERVICE_STARTED);
 		list2 = rc_services_in_state(RC_SERVICE_INACTIVE);
 		TAILQ_CONCAT(list, list2, entries);
-		free(list2);
+		মুক্ত(list2);
 		list2 = rc_services_in_state(RC_SERVICE_STARTING);
 		TAILQ_CONCAT(list, list2, entries);
-		free(list2);
-	} else {
+		মুক্ত(list2);
+	} অন্যথা {
 		list = rc_services_in_runlevel(RC_LEVEL_SYSINIT);
-		if (strcmp(runlevel, RC_LEVEL_SYSINIT) != 0) {
+		যদি (strcmp(runlevel, RC_LEVEL_SYSINIT) != 0) {
 			list2 = rc_services_in_runlevel(runlevel);
 			TAILQ_CONCAT(list, list2, entries);
-			free(list2);
+			মুক্ত(list2);
 			list2 = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
 			TAILQ_CONCAT(list, list2, entries);
-			free(list2);
+			মুক্ত(list2);
 			/* If we're not the boot runlevel then add that too */
-			if (strcmp(runlevel, bootlevel) != 0) {
+			যদি (strcmp(runlevel, bootlevel) != 0) {
 				list2 = rc_services_in_runlevel(bootlevel);
 				TAILQ_CONCAT(list, list2, entries);
-				free(list2);
+				মুক্ত(list2);
 			}
 		}
 	}
@@ -577,7 +577,7 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
 				      RC_DEP_STRICT | RC_DEP_TRACE | options);
 	rc_stringlist_free(list);
 	rc_stringlist_free(types);
-	return services;
+	ঘূৰাই services;
 }
 
 
@@ -585,140 +585,140 @@ rc_deptree_order(const RC_DEPTREE *deptree, const char *runlevel, int options)
    any older (or newer) files.   If false, sets the time to the
    oldest (or newest) found.
 */
-static bool
-deep_mtime_check(int target_dir, const char *target, bool newer, time_t *rel, char *file)
+স্থির bool
+deep_mtime_check(পূর্ণাঙ্ক target_dir, ধ্রুৱ ৱর্ণ *target, bool newer, time_t *rel, ৱর্ণ *file)
 {
-	struct stat buf;
+	সংরচনা stat buf;
 	bool retval = true;
 	DIR *dp;
-	struct dirent *d;
+	সংরচনা dirent *d;
 
 	/* If target does not exist, return true to mimic shell test */
-	if (fstatat(target_dir, target, &buf, 0) != 0)
-		return true;
+	যদি (fstatat(target_dir, target, &buf, 0) != 0)
+		ঘূৰাই true;
 
-	if (newer) {
-		if (*rel < buf.st_mtime) {
+	যদি (newer) {
+		যদি (*rel < buf.st_mtime) {
 			retval = false;
 
-			if (file)
+			যদি (file)
 				strlcpy(file, target, PATH_MAX);
 			*rel = buf.st_mtime;
 		}
-	} else {
-		if (*rel > buf.st_mtime) {
+	} অন্যথা {
+		যদি (*rel > buf.st_mtime) {
 			retval = false;
 
-			if (file)
+			যদি (file)
 				strlcpy(file, target, PATH_MAX);
 			*rel = buf.st_mtime;
 		}
 	}
 
-	if (!S_ISDIR(buf.st_mode) || !(dp = do_opendirat(target_dir, target)))
-		return retval;
+	যদি (!S_ISDIR(buf.st_mode) || !(dp = do_opendirat(target_dir, target)))
+		ঘূৰাই retval;
 
 	/* Check all the entries in the dir */
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
-		if (!deep_mtime_check(dirfd(dp), d->d_name, newer, rel, file)) {
+	যেতিয়ালৈ ((d = readdir(dp))) {
+		যদি (d->d_name[0] == '.')
+			অনুৱর্ত;
+		যদি (!deep_mtime_check(dirfd(dp), d->d_name, newer, rel, file)) {
 			retval = false;
 		}
 	}
 
 	closedir(dp);
-	return retval;
+	ঘূৰাই retval;
 }
 
 /* Recursively check if target is older/newer than source.
  * If false, return the filename and most different time (if
  * the return value arguments are non-null).
  */
-static bool
-mtime_check(int dirfd, const char *source, const char *target, bool newer, time_t *rel, char *file)
+স্থির bool
+mtime_check(পূর্ণাঙ্ক dirfd, ধ্রুৱ ৱর্ণ *source, ধ্রুৱ ৱর্ণ *target, bool newer, time_t *rel, ৱর্ণ *file)
 {
-	struct stat buf;
+	সংরচনা stat buf;
 	time_t mtime;
 	bool retval = true;
 
 	/* We have to exist */
-	if (stat(source, &buf) != 0)
-		return false;
+	যদি (stat(source, &buf) != 0)
+		ঘূৰাই false;
 	mtime = buf.st_mtime;
 
 	retval = deep_mtime_check(dirfd, target,newer,&mtime,file);
-	if (rel) {
+	যদি (rel) {
 		*rel = mtime;
 	}
-	return retval;
+	ঘূৰাই retval;
 }
 
 bool
-rc_newer_than(const char *source, const char *target, time_t *newest, char *file)
+rc_newer_than(ধ্রুৱ ৱর্ণ *source, ধ্রুৱ ৱর্ণ *target, time_t *newest, ৱর্ণ *file)
 {
 
-	return mtime_check(AT_FDCWD, source, target, true, newest, file);
+	ঘূৰাই mtime_check(AT_FDCWD, source, target, true, newest, file);
 }
 
 bool
-rc_older_than(const char *source, const char *target, time_t *oldest, char *file)
+rc_older_than(ধ্রুৱ ৱর্ণ *source, ধ্রুৱ ৱর্ণ *target, time_t *oldest, ৱর্ণ *file)
 {
-	return mtime_check(AT_FDCWD, source, target, false, oldest, file);
+	ঘূৰাই mtime_check(AT_FDCWD, source, target, false, oldest, file);
 }
 
-typedef struct deppair
+প্রকারনির্দেশ সংরচনা deppair
 {
-	const char *depend;
-	const char *addto;
+	ধ্রুৱ ৱর্ণ *depend;
+	ধ্রুৱ ৱর্ণ *addto;
 } DEPPAIR;
 
-static const DEPPAIR deppairs[] = {
+স্থির ধ্রুৱ DEPPAIR deppairs[] = {
 	{ "ineed",	"needsme" },
 	{ "iuse",	"usesme" },
 	{ "iwant",	"wantsme" },
 	{ "iafter",	"ibefore" },
 	{ "ibefore",	"iafter" },
 	{ "iprovide",	"providedby" },
-	{ NULL, NULL }
+	{ রিক্ত, রিক্ত }
 };
 
 bool
-rc_deptree_update_needed(time_t *newest, char *file)
+rc_deptree_update_needed(time_t *newest, ৱর্ণ *file)
 {
 	bool newer = false;
-	const int *dirfds;
+	ধ্রুৱ পূর্ণাঙ্ক *dirfds;
 	RC_STRINGLIST *config;
 	RC_STRING *s;
-	struct stat buf;
+	সংরচনা stat buf;
 	time_t mtime;
 
 	/* Quick test to see if anything we use has changed and we have
 	 * data in our deptree. */
-	if (mkdir(rc_svcdir(), 0755) != 0 && errno != EEXIST)
+	যদি (mkdir(rc_svcdir(), 0755) != 0 && errno != EEXIST)
 		fprintf(stderr, "mkdir '%s': %s\n", rc_svcdir(), strerror(errno));
 
 	clear_dirfds(); /* clear our cached dirfds as a sanity check */
 
-	if (fstatat(rc_dirfd(RC_DIR_SVCDIR), "deptree", &buf, 0) == 0) {
+	যদি (fstatat(rc_dirfd(RC_DIR_SVCDIR), "deptree", &buf, 0) == 0) {
 		mtime = buf.st_mtime;
-	} else {
+	} অন্যথা {
 		/* No previous cache found.
 		 * We still run the scan, in case of clock skew; we still need to return
 		 * the newest time.
 		 */
 		newer = true;
-		mtime = time(NULL);
+		mtime = time(রিক্ত);
 	}
 
-	for (size_t i = 0, count = rc_scriptdirfds(&dirfds); i < count; i++) {
+	বাবে (size_t i = 0, গুনতি = rc_scriptdirfds(&dirfds); i < গুনতি; i++) {
 		newer |= !deep_mtime_check(dirfds[i], "init.d", true, &mtime, file);
 		newer |= !deep_mtime_check(dirfds[i], "conf.d", true, &mtime, file);
 	}
 
 	newer |= !deep_mtime_check(rc_dirfd(RC_DIR_SYSCONF), "rc.conf", true, &mtime, file);
 	newer |= !deep_mtime_check(rc_dirfd(RC_DIR_SYSCONF), "rc.conf.d", true, &mtime, file);
-	if (rc_is_user()) {
+	যদি (rc_is_user()) {
 		newer |= !deep_mtime_check(rc_dirfd(RC_DIR_USRCONF), "rc.conf", true, &mtime, file);
 		newer |= !deep_mtime_check(rc_dirfd(RC_DIR_USRCONF), "rc.conf.d", true, &mtime, file);
 	}
@@ -727,41 +727,41 @@ rc_deptree_update_needed(time_t *newest, char *file)
 	 * outside of baselayout, like syslog-ng, so we check those too. */
 	config = config_list(rc_dirfd(RC_DIR_SVCDIR), "depconfig");
 	TAILQ_FOREACH(s, config, entries)
-		newer |= !deep_mtime_check(AT_FDCWD, s->value, true, &mtime, file);
+		newer |= !deep_mtime_check(AT_FDCWD, s->মান, true, &mtime, file);
 	rc_stringlist_free(config);
 
 	/* Return newest file time, if requested */
-	if ((newer) && (newest != NULL)) {
+	যদি ((newer) && (newest != রিক্ত)) {
 	    *newest = mtime;
 	}
 
-	return newer;
+	ঘূৰাই newer;
 }
 
-static void
-setup_environment(void)
+স্থির শূন্য
+setup_environment(শূন্য)
 {
-	struct utsname uts;
+	সংরচনা utsname uts;
 	size_t env_size;
-	char *env;
+	ৱর্ণ *env;
 	FILE *mem = xopen_memstream(&env, &env_size);
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
+	বাবে (ধ্রুৱ ৱর্ণ * ধ্রুৱ *dirs = rc_scriptdirs(); *dirs; dirs++) {
 		fputs(*dirs, mem);
-		if (dirs[1])
+		যদি (dirs[1])
 			fputc(' ', mem);
 	}
 	xclose_memstream(mem);
 
 	setenv("RC_SCRIPTDIRS", env, 1);
-	free(env);
+	মুক্ত(env);
 
 	/* Some init scripts need RC_LIBEXECDIR to source stuff
 	   Ideally we should be setting our full env instead */
-	if (!getenv("RC_LIBEXECDIR"))
+	যদি (!getenv("RC_LIBEXECDIR"))
 		setenv("RC_LIBEXECDIR", RC_LIBEXECDIR, 0);
 
-	if (uname(&uts) == 0)
+	যদি (uname(&uts) == 0)
 		setenv("RC_UNAME", uts.sysname, 1);
 }
 
@@ -777,85 +777,85 @@ setup_environment(void)
    Phase 7 saves the depinfo object to disk
    */
 bool
-rc_deptree_update(void)
+rc_deptree_update(শূন্য)
 {
 
 	FILE *fp;
 	RC_DEPTREE *deptree, *providers;
-	RC_DEPINFO *depinfo = NULL, *depinfo_np, *di;
-	RC_DEPTYPE *deptype = NULL, *dt_np, *dt, *provide;
+	RC_DEPINFO *depinfo = রিক্ত, *depinfo_np, *di;
+	RC_DEPTYPE *deptype = রিক্ত, *dt_np, *dt, *provide;
 	RC_STRINGLIST *config, *dupes, *types, *sorted, *visited;
 	RC_STRING *s, *s2, *s2_np, *s3, *s4;
-	char *line = NULL;
+	ৱর্ণ *সাৰি = রিক্ত;
 	size_t size;
-	char *depend, *depends, *service, *type;
+	ৱর্ণ *depend, *depends, *service, *type;
 	size_t i, l;
 	bool retval = true;
-	const char *sys = rc_sys();
-	int serrno;
+	ধ্রুৱ ৱর্ণ *sys = rc_sys();
+	পূর্ণাঙ্ক serrno;
 
 	/* Phase 1 - source all init scripts and print dependencies */
 	setup_environment();
-	if (!(fp = popen(GENDEP, "r")))
-		return false;
+	যদি (!(fp = popen(GENDEP, "r")))
+		ঘূৰাই false;
 
 	config = rc_stringlist_new();
 
 	deptree = make_deptree();
-	while (xgetline(&line, &size, fp) != -1) {
-		depends = line;
+	যেতিয়ালৈ (xgetline(&সাৰি, &size, fp) != -1) {
+		depends = সাৰি;
 		service = strsep(&depends, " ");
-		if (!service || !*service)
-			continue;
+		যদি (!service || !*service)
+			অনুৱর্ত;
 
 		type = strsep(&depends, " ");
-		if (!depinfo || strcmp(depinfo->service, service) != 0) {
-			deptype = NULL;
+		যদি (!depinfo || strcmp(depinfo->service, service) != 0) {
+			deptype = রিক্ত;
 			depinfo = get_depinfo(deptree, service);
-			if (!depinfo)
+			যদি (!depinfo)
 				depinfo = make_depinfo(deptree, service);
 		}
 
 		/* We may not have any depends */
-		if (!type || !depends)
-			continue;
+		যদি (!type || !depends)
+			অনুৱর্ত;
 
 		/* Get the type */
-		if (strcmp(type, "config") != 0) {
-			if (!deptype || strcmp(deptype->type, type) != 0) {
+		যদি (strcmp(type, "config") != 0) {
+			যদি (!deptype || strcmp(deptype->type, type) != 0) {
 				deptype = get_deptype(depinfo, type);
-				if (!deptype)
+				যদি (!deptype)
 					deptype = make_deptype(depinfo, type);
 			}
 		}
 
 		/* Now add each depend to our type.
 		   We do this individually so we handle multiple spaces gracefully */
-		while ((depend = strsep(&depends, " "))) {
-			if (depend[0] == 0)
-				continue;
+		যেতিয়ালৈ ((depend = strsep(&depends, " "))) {
+			যদি (depend[0] == 0)
+				অনুৱর্ত;
 
-			if (strcmp(type, "config") == 0) {
+			যদি (strcmp(type, "config") == 0) {
 				rc_stringlist_addu(config, depend);
-				continue;
+				অনুৱর্ত;
 			}
 
 			/* Don't depend on ourself */
-			if (strcmp(depend, service) == 0)
-				continue;
+			যদি (strcmp(depend, service) == 0)
+				অনুৱর্ত;
 
 			/* .sh files are not init scripts */
 			l = strlen(depend);
-			if (l > 2 &&
+			যদি (l > 2 &&
 			    depend[l - 3] == '.' &&
 			    depend[l - 2] == 's' &&
 			    depend[l - 1] == 'h')
-				continue;
+				অনুৱর্ত;
 
 			/* Remove our dependency if instructed */
-			if (depend[0] == '!') {
+			যদি (depend[0] == '!') {
 				rc_stringlist_delete(deptype->services, depend + 1);
-				continue;
+				অনুৱর্ত;
 			}
 
 			rc_stringlist_add(deptype->services, depend);
@@ -863,107 +863,107 @@ rc_deptree_update(void)
 			/* We need to allow `after *; before local;` to work.
 			 * Conversely, we need to allow 'before *; after modules' also */
 			/* If we're before something, remove us from the after list */
-			if (strcmp(type, "ibefore") == 0) {
-				if ((dt = get_deptype(depinfo, "iafter")))
+			যদি (strcmp(type, "ibefore") == 0) {
+				যদি ((dt = get_deptype(depinfo, "iafter")))
 					rc_stringlist_delete(dt->services, depend);
 			}
 			/* If we're after something, remove us from the before list */
-			if (strcmp(type, "iafter") == 0 ||
+			যদি (strcmp(type, "iafter") == 0 ||
 			    strcmp(type, "ineed") == 0 ||
 			    strcmp(type, "iwant") == 0 ||
 			    strcmp(type, "iuse") == 0) {
-				if ((dt = get_deptype(depinfo, "ibefore")))
+				যদি ((dt = get_deptype(depinfo, "ibefore")))
 					rc_stringlist_delete(dt->services, depend);
 			}
 		}
 	}
-	free(line);
+	মুক্ত(সাৰি);
 	pclose(fp);
 
 	/* Phase 2 - if we're a special system, remove services that don't
 	 * work for them. This doesn't stop them from being run directly. */
-	if (sys) {
-		char *nosys, *onosys;
+	যদি (sys) {
+		ৱর্ণ *nosys, *onosys;
 		size_t len = strlen(sys);
 
 		nosys = xmalloc(len + 2);
 		nosys[0] = '-';
-		for (i = 0; i < len; i++)
-			nosys[i + 1] = (char)tolower((unsigned char)sys[i]);
+		বাবে (i = 0; i < len; i++)
+			nosys[i + 1] = (ৱর্ণ)tolower((unsigned ৱর্ণ)sys[i]);
 		nosys[i + 1] = '\0';
 
 		onosys = xmalloc(len + 3);
 		onosys[0] = 'n';
 		onosys[1] = 'o';
-		for (i = 0; i < len; i++)
-			onosys[i + 2] = (char)tolower((unsigned char)sys[i]);
+		বাবে (i = 0; i < len; i++)
+			onosys[i + 2] = (ৱর্ণ)tolower((unsigned ৱর্ণ)sys[i]);
 		onosys[i + 2] = '\0';
 
 		TAILQ_FOREACH_SAFE(depinfo, deptree, entries, depinfo_np) {
-			if (!(deptype = get_deptype(depinfo, "keyword")))
-				continue;
+			যদি (!(deptype = get_deptype(depinfo, "keyword")))
+				অনুৱর্ত;
 			TAILQ_FOREACH(s, deptype->services, entries) {
-				if (strcmp(s->value, nosys) != 0 && strcmp(s->value, onosys) != 0)
-					continue;
+				যদি (strcmp(s->মান, nosys) != 0 && strcmp(s->মান, onosys) != 0)
+					অনুৱর্ত;
 				provide = get_deptype(depinfo, "iprovide");
 				TAILQ_REMOVE(deptree, depinfo, entries);
 				TAILQ_FOREACH(di, deptree, entries) {
 					TAILQ_FOREACH_SAFE(dt, &di->depends, entries, dt_np) {
 						rc_stringlist_delete(dt->services, depinfo->service);
-						if (provide)
+						যদি (provide)
 							TAILQ_FOREACH(s2, provide->services, entries)
-								rc_stringlist_delete(dt->services, s2->value);
-						if (!TAILQ_FIRST(dt->services)) {
+								rc_stringlist_delete(dt->services, s2->মান);
+						যদি (!TAILQ_FIRST(dt->services)) {
 							TAILQ_REMOVE(&di->depends, dt, entries);
-							free(dt->type);
-							free(dt->services);
-							free(dt);
+							মুক্ত(dt->type);
+							মুক্ত(dt->services);
+							মুক্ত(dt);
 						}
 					}
 				}
 			}
 		}
-		free(nosys);
-		free(onosys);
+		মুক্ত(nosys);
+		মুক্ত(onosys);
 	}
 
 	/* Phase 3 - add our providers to the tree */
-	providers = xmalloc(sizeof(*providers));
+	providers = xmalloc(পরিমাণ(*providers));
 	TAILQ_INIT(providers);
 	TAILQ_FOREACH(depinfo, deptree, entries) {
-		if (!(deptype = get_deptype(depinfo, "iprovide")))
-			continue;
+		যদি (!(deptype = get_deptype(depinfo, "iprovide")))
+			অনুৱর্ত;
 		TAILQ_FOREACH(s, deptype->services, entries) {
-			di = get_depinfo(providers, s->value);
-			if (!di)
-				di = make_depinfo(providers, s->value);
+			di = get_depinfo(providers, s->মান);
+			যদি (!di)
+				di = make_depinfo(providers, s->মান);
 		}
 	}
 	TAILQ_CONCAT(deptree, providers, entries);
-	free(providers);
+	মুক্ত(providers);
 
 	/* Phase 4 - backreference our depends */
 	TAILQ_FOREACH(depinfo, deptree, entries) {
-		for (i = 0; deppairs[i].depend; i++) {
+		বাবে (i = 0; deppairs[i].depend; i++) {
 			deptype = get_deptype(depinfo, deppairs[i].depend);
-			if (!deptype)
-				continue;
+			যদি (!deptype)
+				অনুৱর্ত;
 			TAILQ_FOREACH(s, deptype->services, entries) {
-				di = get_depinfo(deptree, s->value);
-				if (!di) {
-					if (strcmp(deptype->type, "ineed") == 0) {
+				di = get_depinfo(deptree, s->মান);
+				যদি (!di) {
+					যদি (strcmp(deptype->type, "ineed") == 0) {
 						fprintf(stderr, "Service '%s' needs non existent service '%s'\n",
-							 depinfo->service, s->value);
+							 depinfo->service, s->মান);
 						dt = get_deptype(depinfo, "broken");
-						if (!dt)
+						যদি (!dt)
 							dt = make_deptype(depinfo, "broken");
-						rc_stringlist_addu(dt->services, s->value);
+						rc_stringlist_addu(dt->services, s->মান);
 					}
-					continue;
+					অনুৱর্ত;
 				}
 
 				dt = get_deptype(di, deppairs[i].addto);
-				if (!dt)
+				যদি (!dt)
 					dt = make_deptype(di, deppairs[i].addto);
 				rc_stringlist_addu(dt->services, depinfo->service);
 			}
@@ -978,43 +978,43 @@ rc_deptree_update(void)
 	rc_stringlist_add(types, "iafter");
 	TAILQ_FOREACH(depinfo, deptree, entries) {
 		deptype = get_deptype(depinfo, "ibefore");
-		if (!deptype)
-			continue;
+		যদি (!deptype)
+			অনুৱর্ত;
 		sorted = rc_stringlist_new();
 		visited = rc_stringlist_new();
 		visit_service(deptree, types, sorted, visited, depinfo,
-			      NULL, 0);
+			      রিক্ত, 0);
 		rc_stringlist_free(visited);
 		TAILQ_FOREACH_SAFE(s2, deptype->services, entries, s2_np) {
 			TAILQ_FOREACH(s3, sorted, entries) {
-				di = get_depinfo(deptree, s3->value);
-				if (!di)
-					continue;
-				if (strcmp(s2->value, s3->value) == 0) {
+				di = get_depinfo(deptree, s3->মান);
+				যদি (!di)
+					অনুৱর্ত;
+				যদি (strcmp(s2->মান, s3->মান) == 0) {
 					dt = get_deptype(di, "iafter");
-					if (dt)
+					যদি (dt)
 						rc_stringlist_delete(dt->services, depinfo->service);
-					break;
+					ভঙ্গ;
 				}
 				dt = get_deptype(di, "iprovide");
-				if (!dt)
-					continue;
+				যদি (!dt)
+					অনুৱর্ত;
 				TAILQ_FOREACH(s4, dt->services, entries) {
-					if (strcmp(s4->value, s2->value) == 0)
-						break;
+					যদি (strcmp(s4->মান, s2->মান) == 0)
+						ভঙ্গ;
 				}
-				if (s4) {
-					di = get_depinfo(deptree, s4->value);
-					if (di) {
+				যদি (s4) {
+					di = get_depinfo(deptree, s4->মান);
+					যদি (di) {
 						dt = get_deptype(di, "iafter");
-						if (dt)
+						যদি (dt)
 							rc_stringlist_delete(dt->services, depinfo->service);
 					}
-					break;
+					ভঙ্গ;
 				}
 			}
-			if (s3)
-				rc_stringlist_delete(deptype->services, s2->value);
+			যদি (s3)
+				rc_stringlist_delete(deptype->services, s2->মান);
 		}
 		rc_stringlist_free(sorted);
 	}
@@ -1026,7 +1026,7 @@ rc_deptree_update(void)
 		serrno = errno;
 		errno = 0;
 		rc_stringlist_addu(dupes,depinfo->service);
-		if (errno == EEXIST) {
+		যদি (errno == EEXIST) {
 			fprintf(stderr,
 					"Error: %s is the name of a real and virtual service.\n",
 					depinfo->service);
@@ -1041,7 +1041,7 @@ rc_deptree_update(void)
 	   This works and should be entirely shell parseable provided that depend
 	   names don't have any non shell variable characters in
 	   */
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "deptree", O_WRONLY | O_CREAT | O_TRUNC))) {
+	যদি ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "deptree", O_WRONLY | O_CREAT | O_TRUNC))) {
 		i = 0;
 		TAILQ_FOREACH(depinfo, deptree, entries) {
 			fprintf(fp, "depinfo_%zu_service='%s'\n", i, depinfo->service);
@@ -1049,32 +1049,32 @@ rc_deptree_update(void)
 				size_t k = 0;
 				TAILQ_FOREACH(s, deptype->services, entries) {
 					fprintf(fp, "depinfo_%zu_%s_%zu='%s'\n",
-							i, deptype->type, k++, s->value);
+							i, deptype->type, k++, s->মান);
 				}
 			}
 			i++;
 		}
 		fclose(fp);
-	} else {
+	} অন্যথা {
 		fprintf(stderr, "fopen '%s/deptree': %s\n", rc_svcdir(), strerror(errno));
 		retval = false;
 	}
 
 	/* Save our external config files to disk */
-	if (TAILQ_FIRST(config)) {
-		if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", O_WRONLY | O_CREAT | O_TRUNC))) {
+	যদি (TAILQ_FIRST(config)) {
+		যদি ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", O_WRONLY | O_CREAT | O_TRUNC))) {
 			TAILQ_FOREACH(s, config, entries)
-				fprintf(fp, "%s\n", s->value);
+				fprintf(fp, "%s\n", s->মান);
 			fclose(fp);
-		} else {
+		} অন্যথা {
 			fprintf(stderr, "fopen '%s/depconfig': %s\n", rc_svcdir(), strerror(errno));
 			retval = false;
 		}
-	} else {
+	} অন্যথা {
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "depconfig", 0);
 	}
 
 	rc_stringlist_free(config);
 	rc_deptree_free(deptree);
-	return retval;
+	ঘূৰাই retval;
 }

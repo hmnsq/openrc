@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#অন্তর্ভাৱ <ctype.h>
+#অন্তর্ভাৱ <stdio.h>
+#অন্তর্ভাৱ <stdlib.h>
 
-int main(int argc, char **argv)
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, ৱর্ণ **argv)
 {
-	int i;
-	char *p;
-	int c;
+	পূর্ণাঙ্ক i;
+	ৱর্ণ *p;
+	পূর্ণাঙ্ক c;
 
-	for (i = 1; i < argc; i++) {
+	বাবে (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		যদি (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		যেতিয়ালৈ (*p) {
+			c = (unsigned ৱর্ণ)*p++;
+			যদি (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	ঘূৰাই EXIT_SUCCESS;
 }

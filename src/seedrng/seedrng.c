@@ -16,29 +16,29 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <linux/random.h>
-#include <sys/random.h>
-#include <sys/ioctl.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <poll.h>
-#include <unistd.h>
-#include <time.h>
-#include <errno.h>
-#include <endian.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#অন্তর্ভাৱ <linux/random.h>
+#অন্তর্ভাৱ <sys/random.h>
+#অন্তর্ভাৱ <sys/ioctl.h>
+#অন্তর্ভাৱ <sys/file.h>
+#অন্তর্ভাৱ <sys/stat.h>
+#অন্তর্ভাৱ <sys/types.h>
+#অন্তর্ভাৱ <fcntl.h>
+#অন্তর্ভাৱ <getopt.h>
+#অন্তর্ভাৱ <poll.h>
+#অন্তর্ভাৱ <unistd.h>
+#অন্তর্ভাৱ <time.h>
+#অন্তর্ভাৱ <errno.h>
+#অন্তর্ভাৱ <endian.h>
+#অন্তর্ভাৱ <stdbool.h>
+#অন্তর্ভাৱ <stddef.h>
+#অন্তর্ভাৱ <stdint.h>
+#অন্তর্ভাৱ <string.h>
+#অন্তর্ভাৱ <stdio.h>
+#অন্তর্ভাৱ <stdlib.h>
 
-#include "einfo.h"
-#include "helpers.h"
-#include "_usage.h"
+#অন্তর্ভাৱ "einfo.h"
+#অন্তর্ভাৱ "helpers.h"
+#অন্তর্ভাৱ "_usage.h"
 
 #ifndef GRND_INSECURE
 #define GRND_INSECURE 0x0004 /* Apparently some headers don't ship with this yet. */
@@ -52,84 +52,84 @@
  * The exact enum value is internal and can freely change, so we keep the
  * options sorted.
  */
-enum long_opts {
+গণনা long_opts {
 	/* This has to come first so following values stay in the 0x100+ range. */
 	LONGOPT_BASE = 0x100,
 	LONGOPT_SEED_DIR,
 	LONGOPT_SKIP_CREDIT,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "seed-dir", 1, NULL, LONGOPT_SEED_DIR },
-	{ "skip-credit", 0, NULL, LONGOPT_SKIP_CREDIT },
+ধ্রুৱ ৱর্ণ *applet = রিক্ত;
+ধ্রুৱ ৱর্ণ *extraopts = রিক্ত;
+ধ্রুৱ ৱর্ণ getoptstring[] = getoptstring_COMMON;
+ধ্রুৱ সংরচনা option longopts[] = {
+	{ "seed-dir", 1, রিক্ত, LONGOPT_SEED_DIR },
+	{ "skip-credit", 0, রিক্ত, LONGOPT_SKIP_CREDIT },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ধ্রুৱ ৱর্ণ * ধ্রুৱ longopts_help[] = {
 	"Directory for seed files (default: " DEFAULT_SEED_DIR ")",
 	"Skip crediting entropy of seeds",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ধ্রুৱ ৱর্ণ *usagestring = রিক্ত;
 
-enum blake2s_lengths {
+গণনা blake2s_lengths {
 	BLAKE2S_BLOCK_LEN = 64,
 	BLAKE2S_HASH_LEN = 32,
-	BLAKE2S_KEY_LEN = 32
+	BLAKE2_S_চাবি_LEN = 32
 };
 
-enum seedrng_lengths {
+গণনা seedrng_lengths {
 	MAX_SEED_LEN = 512,
 	MIN_SEED_LEN = BLAKE2S_HASH_LEN
 };
 
-struct blake2s_state {
+সংরচনা blake2s_state {
 	uint32_t h[8];
 	uint32_t t[2];
 	uint32_t f[2];
 	uint8_t buf[BLAKE2S_BLOCK_LEN];
-	unsigned int buflen;
-	unsigned int outlen;
+	unsigned পূর্ণাঙ্ক buflen;
+	unsigned পূর্ণাঙ্ক outlen;
 };
 
 #define le32_to_cpup(a) le32toh(*(a))
 #define cpu_to_le32(a) htole32(a)
 #ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#define ARRAY_SIZE(x) (পরিমাণ(x) / পরিমাণ((x)[0]))
 #endif
 #ifndef DIV_ROUND_UP
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 #endif
 
-static inline void cpu_to_le32_array(uint32_t *buf, unsigned int words)
+স্থির অন্তঃস্থ শূন্য cpu_to_le32_array(uint32_t *buf, unsigned পূর্ণাঙ্ক শব্দগুলি)
 {
-	while (words--) {
+	যেতিয়ালৈ (শব্দগুলি--) {
 		*buf = cpu_to_le32(*buf);
 		++buf;
 	}
 }
 
-static inline void le32_to_cpu_array(uint32_t *buf, unsigned int words)
+স্থির অন্তঃস্থ শূন্য le32_to_cpu_array(uint32_t *buf, unsigned পূর্ণাঙ্ক শব্দগুলি)
 {
-	while (words--) {
+	যেতিয়ালৈ (শব্দগুলি--) {
 		*buf = le32_to_cpup(buf);
 		++buf;
 	}
 }
 
-static inline uint32_t ror32(uint32_t word, unsigned int shift)
+স্থির অন্তঃস্থ uint32_t ror32(uint32_t word, unsigned পূর্ণাঙ্ক shift)
 {
-	return (word >> (shift & 31)) | (word << ((-shift) & 31));
+	ঘূৰাই (word >> (shift & 31)) | (word << ((-shift) & 31));
 }
 
-static const uint32_t blake2s_iv[8] = {
+স্থির ধ্রুৱ uint32_t blake2s_iv[8] = {
 	0x6A09E667UL, 0xBB67AE85UL, 0x3C6EF372UL, 0xA54FF53AUL,
 	0x510E527FUL, 0x9B05688CUL, 0x1F83D9ABUL, 0x5BE0CD19UL
 };
 
-static const uint8_t blake2s_sigma[10][16] = {
+স্থির ধ্রুৱ uint8_t blake2s_sigma[10][16] = {
 	{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
 	{ 14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3 },
 	{ 11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4 },
@@ -142,40 +142,40 @@ static const uint8_t blake2s_sigma[10][16] = {
 	{ 10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0 },
 };
 
-static void blake2s_set_lastblock(struct blake2s_state *state)
+স্থির শূন্য blake2s_set_lastblock(সংরচনা blake2s_state *state)
 {
 	state->f[0] = -1;
 }
 
-static void blake2s_increment_counter(struct blake2s_state *state, const uint32_t inc)
+স্থির শূন্য blake2s_increment_counter(সংরচনা blake2s_state *state, ধ্রুৱ uint32_t inc)
 {
 	state->t[0] += inc;
 	state->t[1] += (state->t[0] < inc);
 }
 
-static void blake2s_init_param(struct blake2s_state *state, const uint32_t param)
+স্থির শূন্য blake2s_init_param(সংরচনা blake2s_state *state, ধ্রুৱ uint32_t param)
 {
-	int i;
+	পূর্ণাঙ্ক i;
 
-	memset(state, 0, sizeof(*state));
-	for (i = 0; i < 8; ++i)
+	memset(state, 0, পরিমাণ(*state));
+	বাবে (i = 0; i < 8; ++i)
 		state->h[i] = blake2s_iv[i];
 	state->h[0] ^= param;
 }
 
-static void blake2s_init(struct blake2s_state *state, const size_t outlen)
+স্থির শূন্য blake2s_init(সংরচনা blake2s_state *state, ধ্রুৱ size_t outlen)
 {
 	blake2s_init_param(state, 0x01010000 | outlen);
 	state->outlen = outlen;
 }
 
-static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, size_t nblocks, const uint32_t inc)
+স্থির শূন্য blake2s_compress(সংরচনা blake2s_state *state, ধ্রুৱ uint8_t *block, size_t nblocks, ধ্রুৱ uint32_t inc)
 {
 	uint32_t m[16];
 	uint32_t v[16];
-	int i;
+	পূর্ণাঙ্ক i;
 
-	while (nblocks > 0) {
+	যেতিয়ালৈ (nblocks > 0) {
 		blake2s_increment_counter(state, inc);
 		memcpy(m, block, BLAKE2S_BLOCK_LEN);
 		le32_to_cpu_array(m, ARRAY_SIZE(m));
@@ -189,7 +189,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 		v[14] = blake2s_iv[6] ^ state->f[0];
 		v[15] = blake2s_iv[7] ^ state->f[1];
 
-#define G(r, i, a, b, c, d) do { \
+#define G(r, i, a, b, c, d) কৰা { \
 	a += b + m[blake2s_sigma[r][2 * i + 0]]; \
 	d = ror32(d ^ a, 16); \
 	c += d; \
@@ -198,9 +198,9 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	d = ror32(d ^ a, 8); \
 	c += d; \
 	b = ror32(b ^ c, 7); \
-} while (0)
+} যেতিয়ালৈ (0)
 
-#define ROUND(r) do { \
+#define ROUND(r) কৰা { \
 	G(r, 0, v[0], v[ 4], v[ 8], v[12]); \
 	G(r, 1, v[1], v[ 5], v[ 9], v[13]); \
 	G(r, 2, v[2], v[ 6], v[10], v[14]); \
@@ -209,7 +209,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	G(r, 5, v[1], v[ 6], v[11], v[12]); \
 	G(r, 6, v[2], v[ 7], v[ 8], v[13]); \
 	G(r, 7, v[3], v[ 4], v[ 9], v[14]); \
-} while (0)
+} যেতিয়ালৈ (0)
 		ROUND(0);
 		ROUND(1);
 		ROUND(2);
@@ -224,7 +224,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 #undef G
 #undef ROUND
 
-		for (i = 0; i < 8; ++i)
+		বাবে (i = 0; i < 8; ++i)
 			state->h[i] ^= v[i] ^ v[i + 8];
 
 		block += BLAKE2S_BLOCK_LEN;
@@ -232,22 +232,22 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	}
 }
 
-static void blake2s_update(struct blake2s_state *state, const void *inp, size_t inlen)
+স্থির শূন্য blake2s_update(সংরচনা blake2s_state *state, ধ্রুৱ শূন্য *inp, size_t inlen)
 {
-	const size_t fill = BLAKE2S_BLOCK_LEN - state->buflen;
-	const uint8_t *in = inp;
+	ধ্রুৱ size_t fill = BLAKE2S_BLOCK_LEN - state->buflen;
+	ধ্রুৱ uint8_t *in = inp;
 
-	if (!inlen)
-		return;
-	if (inlen > fill) {
+	যদি (!inlen)
+		ঘূৰাই;
+	যদি (inlen > fill) {
 		memcpy(state->buf + state->buflen, in, fill);
 		blake2s_compress(state, state->buf, 1, BLAKE2S_BLOCK_LEN);
 		state->buflen = 0;
 		in += fill;
 		inlen -= fill;
 	}
-	if (inlen > BLAKE2S_BLOCK_LEN) {
-		const size_t nblocks = DIV_ROUND_UP(inlen, BLAKE2S_BLOCK_LEN);
+	যদি (inlen > BLAKE2S_BLOCK_LEN) {
+		ধ্রুৱ size_t nblocks = DIV_ROUND_UP(inlen, BLAKE2S_BLOCK_LEN);
 		blake2s_compress(state, in, nblocks - 1, BLAKE2S_BLOCK_LEN);
 		in += BLAKE2S_BLOCK_LEN * (nblocks - 1);
 		inlen -= BLAKE2S_BLOCK_LEN * (nblocks - 1);
@@ -256,7 +256,7 @@ static void blake2s_update(struct blake2s_state *state, const void *inp, size_t 
 	state->buflen += inlen;
 }
 
-static void blake2s_final(struct blake2s_state *state, uint8_t *out)
+স্থির শূন্য blake2s_final(সংরচনা blake2s_state *state, uint8_t *out)
 {
 	blake2s_set_lastblock(state);
 	memset(state->buf + state->buflen, 0, BLAKE2S_BLOCK_LEN - state->buflen);
@@ -265,222 +265,222 @@ static void blake2s_final(struct blake2s_state *state, uint8_t *out)
 	memcpy(out, state->h, state->outlen);
 }
 
-static ssize_t getrandom_full(void *buf, size_t count, unsigned int flags)
+স্থির ssize_t getrandom_full(শূন্য *buf, size_t গুনতি, unsigned পূর্ণাঙ্ক flags)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
-	do {
-		ret = getrandom(p, count, flags);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
+	কৰা {
+		ret = getrandom(p, গুনতি, flags);
+		যদি (ret < 0 && errno == EINTR)
+			অনুৱর্ত;
+		অন্যথা যদি (ret < 0)
+			ঘূৰাই ret;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		গুনতি -= ret;
+	} যেতিয়ালৈ (গুনতি);
+	ঘূৰাই total;
 }
 
-static ssize_t read_full(int fd, void *buf, size_t count)
+স্থির ssize_t read_full(পূর্ণাঙ্ক fd, শূন্য *buf, size_t গুনতি)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
-	do {
-		ret = read(fd, p, count);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
-		else if (ret == 0)
-			break;
+	কৰা {
+		ret = পঠ(fd, p, গুনতি);
+		যদি (ret < 0 && errno == EINTR)
+			অনুৱর্ত;
+		অন্যথা যদি (ret < 0)
+			ঘূৰাই ret;
+		অন্যথা যদি (ret == 0)
+			ভঙ্গ;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		গুনতি -= ret;
+	} যেতিয়ালৈ (গুনতি);
+	ঘূৰাই total;
 }
 
-static ssize_t write_full(int fd, const void *buf, size_t count)
+স্থির ssize_t write_full(পূর্ণাঙ্ক fd, ধ্রুৱ শূন্য *buf, size_t গুনতি)
 {
 	ssize_t ret, total = 0;
-	const uint8_t *p = buf;
+	ধ্রুৱ uint8_t *p = buf;
 
-	do {
-		ret = write(fd, p, count);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
+	কৰা {
+		ret = লিখ(fd, p, গুনতি);
+		যদি (ret < 0 && errno == EINTR)
+			অনুৱর্ত;
+		অন্যথা যদি (ret < 0)
+			ঘূৰাই ret;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		গুনতি -= ret;
+	} যেতিয়ালৈ (গুনতি);
+	ঘূৰাই total;
 }
 
-static size_t determine_optimal_seed_len(void)
+স্থির size_t determine_optimal_seed_len(শূন্য)
 {
 	size_t ret = 0;
-	char poolsize_str[11] = { 0 };
-	int fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
+	ৱর্ণ poolsize_str[11] = { 0 };
+	পূর্ণাঙ্ক fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
 
-	if (fd < 0 || read_full(fd, poolsize_str, sizeof(poolsize_str) - 1) < 0) {
+	যদি (fd < 0 || read_full(fd, poolsize_str, পরিমাণ(poolsize_str) - 1) < 0) {
 		ewarn("%s: Unable to determine pool size, falling back to %u bits: %s",
 		      applet, MIN_SEED_LEN * 8, strerror(errno));
 		ret = MIN_SEED_LEN;
-	} else
-		ret = DIV_ROUND_UP(strtoul(poolsize_str, NULL, 10), 8);
-	if (fd >= 0)
+	} অন্যথা
+		ret = DIV_ROUND_UP(strtoul(poolsize_str, রিক্ত, 10), 8);
+	যদি (fd >= 0)
 		close(fd);
-	if (ret < MIN_SEED_LEN)
+	যদি (ret < MIN_SEED_LEN)
 		ret = MIN_SEED_LEN;
-	else if (ret > MAX_SEED_LEN)
+	অন্যথা যদি (ret > MAX_SEED_LEN)
 		ret = MAX_SEED_LEN;
-	return ret;
+	ঘূৰাই ret;
 }
 
-static int read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
+স্থির পূর্ণাঙ্ক read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
 {
 	ssize_t ret;
-	int urandom_fd;
+	পূর্ণাঙ্ক urandom_fd;
 
 	*is_creditable = false;
 	ret = getrandom_full(seed, len, GRND_NONBLOCK);
-	if (ret == (ssize_t)len) {
+	যদি (ret == (ssize_t)len) {
 		*is_creditable = true;
-		return 0;
-	} else if (ret < 0 && errno == ENOSYS) {
-		struct pollfd random_fd = {
+		ঘূৰাই 0;
+	} অন্যথা যদি (ret < 0 && errno == ENOSYS) {
+		সংরচনা pollfd random_fd = {
 			.fd = open("/dev/random", O_RDONLY),
 			.events = POLLIN
 		};
-		if (random_fd.fd < 0)
-			return -errno;
+		যদি (random_fd.fd < 0)
+			ঘূৰাই -errno;
 		*is_creditable = poll(&random_fd, 1, 0) == 1;
 		close(random_fd.fd);
-	} else if (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
-		return 0;
+	} অন্যথা যদি (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
+		ঘূৰাই 0;
 	urandom_fd = open("/dev/urandom", O_RDONLY);
-	if (urandom_fd < 0)
-		return -1;
+	যদি (urandom_fd < 0)
+		ঘূৰাই -1;
 	ret = read_full(urandom_fd, seed, len);
-	if (ret == (ssize_t)len)
+	যদি (ret == (ssize_t)len)
 		ret = 0;
-	else
+	অন্যথা
 		ret = -errno ? -errno : -EIO;
 	close(urandom_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	ঘূৰাই ret ? -1 : 0;
 }
 
-static int seed_rng(uint8_t *seed, size_t len, bool credit)
+স্থির পূর্ণাঙ্ক seed_rng(uint8_t *seed, size_t len, bool credit)
 {
-	struct {
-		int entropy_count;
-		int buf_size;
+	সংরচনা {
+		পূর্ণাঙ্ক entropy_গুনতি;
+		পূর্ণাঙ্ক buf_size;
 		uint8_t buffer[MAX_SEED_LEN];
 	} req = {
-		.entropy_count = credit ? len * 8 : 0,
+		.entropy_গুনতি = credit ? len * 8 : 0,
 		.buf_size = len
 	};
-	int random_fd, ret;
+	পূর্ণাঙ্ক random_fd, ret;
 
-	if (len > sizeof(req.buffer)) {
+	যদি (len > পরিমাণ(req.buffer)) {
 		errno = EFBIG;
-		return -1;
+		ঘূৰাই -1;
 	}
 	memcpy(req.buffer, seed, len);
 
 	random_fd = open("/dev/urandom", O_RDONLY);
-	if (random_fd < 0)
-		return -1;
+	যদি (random_fd < 0)
+		ঘূৰাই -1;
 	ret = ioctl(random_fd, RNDADDENTROPY, &req);
-	if (ret)
+	যদি (ret)
 		ret = -errno ? -errno : -EIO;
 	close(random_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	ঘূৰাই ret ? -1 : 0;
 }
 
-static int seed_from_file_if_exists(const char *filename, int dfd, bool credit, struct blake2s_state *hash)
+স্থির পূর্ণাঙ্ক seed_from_file_if_exists(ধ্রুৱ ৱর্ণ *filename, পূর্ণাঙ্ক dfd, bool credit, সংরচনা blake2s_state *hash)
 {
 	uint8_t seed[MAX_SEED_LEN];
 	ssize_t seed_len;
-	int fd = -1, ret = 0;
+	পূর্ণাঙ্ক fd = -1, ret = 0;
 
 	fd = openat(dfd, filename, O_RDONLY);
-	if (fd < 0 && errno == ENOENT)
-		return 0;
-	else if (fd < 0) {
+	যদি (fd < 0 && errno == ENOENT)
+		ঘূৰাই 0;
+	অন্যথা যদি (fd < 0) {
 		ret = -errno;
 		eerror("%s: Unable to open seed file: %s", applet, strerror(errno));
-		goto out;
+		গচ্ছ out;
 	}
-	seed_len = read_full(fd, seed, sizeof(seed));
-	if (seed_len < 0) {
+	seed_len = read_full(fd, seed, পরিমাণ(seed));
+	যদি (seed_len < 0) {
 		ret = -errno;
 		eerror("%s: Unable to read seed file: %s", applet, strerror(errno));
-		goto out;
+		গচ্ছ out;
 	}
-	if ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
+	যদি ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
 		ret = -errno;
 		eerror("%s: Unable to remove seed after reading, so not seeding: %s",
 		       applet, strerror(errno));
-		goto out;
+		গচ্ছ out;
 	}
-	if (!seed_len)
-		goto out;
+	যদি (!seed_len)
+		গচ্ছ out;
 
-	blake2s_update(hash, &seed_len, sizeof(seed_len));
+	blake2s_update(hash, &seed_len, পরিমাণ(seed_len));
 	blake2s_update(hash, seed, seed_len);
 
 	einfo("Seeding %zd bits %s crediting", seed_len * 8, credit ? "and" : "without");
-	if (seed_rng(seed, seed_len, credit) < 0) {
+	যদি (seed_rng(seed, seed_len, credit) < 0) {
 		ret = -errno;
 		eerror("%s: Unable to seed: %s", applet, strerror(errno));
 	}
 
 out:
-	if (fd >= 0)
+	যদি (fd >= 0)
 		close(fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	ঘূৰাই ret ? -1 : 0;
 }
 
-int main(int argc, char **argv)
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, ৱর্ণ **argv)
 {
-	static const char seedrng_prefix[] = "SeedRNG v1 Old+New Prefix";
-	static const char seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
-	int opt, fd, dfd, program_ret = 0;
-	const char *seed_dir = NULL;
+	স্থির ধ্রুৱ ৱর্ণ seedrng_prefix[] = "SeedRNG v1 Old+New Prefix";
+	স্থির ধ্রুৱ ৱর্ণ seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
+	পূর্ণাঙ্ক opt, fd, dfd, program_ret = 0;
+	ধ্রুৱ ৱর্ণ *seed_dir = রিক্ত;
 	uint8_t new_seed[MAX_SEED_LEN];
 	size_t new_seed_len;
 	bool new_seed_creditable;
-	struct timespec realtime = { 0 }, boottime = { 0 };
-	struct blake2s_state hash;
+	সংরচনা timespec realtime = { 0 }, boottime = { 0 };
+	সংরচনা blake2s_state hash;
 	bool skip_credit = false;
 
 	applet = basename_c(argv[0]);
 
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1)
+	যেতিয়ালৈ ((opt = getopt_long(argc, argv, getoptstring, longopts, (পূর্ণাঙ্ক *) 0)) != -1)
 	{
-		switch (opt) {
-		case LONGOPT_SEED_DIR:
-			if (!seed_dir)
+		ৱিকল্প (opt) {
+		পক্ষ LONGOPT_SEED_DIR:
+			যদি (!seed_dir)
 				seed_dir = optarg;
-			break;
-		case LONGOPT_SKIP_CREDIT:
+			ভঙ্গ;
+		পক্ষ LONGOPT_SKIP_CREDIT:
 			skip_credit = true;
-			break;
+			ভঙ্গ;
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (!seed_dir)
+	যদি (!seed_dir)
 		seed_dir = DEFAULT_SEED_DIR;
-	if (getuid())
+	যদি (getuid())
 		eerrorx("%s: superuser access is required", applet);
 	umask(0077);
 
@@ -488,45 +488,45 @@ int main(int argc, char **argv)
 	blake2s_update(&hash, seedrng_prefix, strlen(seedrng_prefix));
 	clock_gettime(CLOCK_REALTIME, &realtime);
 	clock_gettime(CLOCK_BOOTTIME, &boottime);
-	blake2s_update(&hash, &realtime, sizeof(realtime));
-	blake2s_update(&hash, &boottime, sizeof(boottime));
+	blake2s_update(&hash, &realtime, পরিমাণ(realtime));
+	blake2s_update(&hash, &boottime, পরিমাণ(boottime));
 
-	if (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
+	যদি (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
 		eerrorx("%s: Unable to create seed directory: %s", applet, strerror(errno));
 
 	dfd = open(seed_dir, O_DIRECTORY | O_RDONLY);
-	if (dfd < 0 || flock(dfd, LOCK_EX) < 0)
+	যদি (dfd < 0 || flock(dfd, LOCK_EX) < 0)
 		eerrorx("%s: Unable to lock seed directory: %s", applet, strerror(errno));
 
-	if (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
+	যদি (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
 		program_ret |= 1 << 1;
-	if (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
+	যদি (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
 		program_ret |= 1 << 2;
 
 	new_seed_len = determine_optimal_seed_len();
-	if (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
+	যদি (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
 		eerror("%s: Unable to read new seed: %s", applet, strerror(errno));
 		new_seed_len = BLAKE2S_HASH_LEN;
-		strncpy((char *)new_seed, seedrng_failure, new_seed_len);
+		strncpy((ৱর্ণ *)new_seed, seedrng_failure, new_seed_len);
 		program_ret |= 1 << 3;
 	}
-	blake2s_update(&hash, &new_seed_len, sizeof(new_seed_len));
+	blake2s_update(&hash, &new_seed_len, পরিমাণ(new_seed_len));
 	blake2s_update(&hash, new_seed, new_seed_len);
 	blake2s_final(&hash, new_seed + new_seed_len - BLAKE2S_HASH_LEN);
 
 	einfo("Saving %zu bits of %s seed for next boot", new_seed_len * 8, new_seed_creditable ? "creditable" : "non-creditable");
 	fd = openat(dfd, NON_CREDITABLE_SEED, O_WRONLY | O_CREAT | O_TRUNC, 0400);
-	if (fd < 0) {
+	যদি (fd < 0) {
 		eerror("%s: Unable to open seed file for writing: %s", applet, strerror(errno));
-		return program_ret | (1 << 4);
+		ঘূৰাই program_ret | (1 << 4);
 	}
-	if (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
+	যদি (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
 		eerror("%s: Unable to write seed file: %s", applet, strerror(errno));
-		return program_ret | (1 << 5);
+		ঘূৰাই program_ret | (1 << 5);
 	}
-	if (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
+	যদি (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
 		ewarn("%s: Unable to make new seed creditable: %s", applet, strerror(errno));
-		return program_ret | (1 << 6);
+		ঘূৰাই program_ret | (1 << 6);
 	}
-	return program_ret;
+	ঘূৰাই program_ret;
 }

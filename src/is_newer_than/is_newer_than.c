@@ -10,21 +10,21 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#অন্তর্ভাৱ <stdlib.h>
 
-#include "rc.h"
+#অন্তর্ভাৱ "rc.h"
 
-int main(int argc, char **argv)
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, ৱর্ণ **argv)
 {
-	int i;
+	পূর্ণাঙ্ক i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	যদি (argc < 3)
+		ঘূৰাই EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	বাবে (i = 2; i < argc; ++i)
+		যদি (!rc_newer_than(argv[1], argv[i], রিক্ত, রিক্ত))
+			ঘূৰাই EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	ঘূৰাই EXIT_SUCCESS;
 }

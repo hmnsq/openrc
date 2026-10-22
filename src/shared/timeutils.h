@@ -12,28 +12,28 @@
 #ifndef RC_TIMEUTILS_H
 #define RC_TIMEUTILS_H
 
-#include <stdint.h>
-#include <time.h>
+#অন্তর্ভাৱ <stdint.h>
+#অন্তর্ভাৱ <time.h>
 
 /*
  * A couple helper utilities to deal with monotonic clock at milliseconds
  * resolution.
  */
 
-enum tm_sleep_flags {
+গণনা tm_sleep_flags {
 	TM_NO_EINTR = 1 << 0,
 };
 
-int64_t tm_now(void);
+int64_t tm_now(শূন্য);
 /* returns 0 on success, amount of time remaining on failure.
  * if TM_NO_EINTR is specified in flags, it will restart the sleep if it was
  * failed due to EINTR.
  */
-int64_t tm_sleep(int64_t, enum tm_sleep_flags);
+int64_t tm_sleep(int64_t, গণনা tm_sleep_flags);
 /* parse a integer followed by an optional time unit (e.g "sec", "ms").
  * returns negative on failure
  */
-int64_t parse_duration(const char *duration);
+int64_t parse_duration(ধ্রুৱ ৱর্ণ *duration);
 
 #define TM_MS(N)   ((N) * INT64_C(1))
 #define TM_SEC(N)  ((N) * INT64_C(1000))
