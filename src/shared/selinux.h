@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef RC_SELINUX_UTIL_H
-#define RC_SELINUX_UTIL_H
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ RC_SELINUX_UTIL_H
+#ವ್ಯಾಖ್ಯಾನಿಸು RC_SELINUX_UTIL_H
 
-#ifdef HAVE_SELINUX
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_SELINUX
 
-int selinux_util_open(void);
-int selinux_util_label(const char *path);
-int selinux_util_close(void);
+ಪೂರ್ಣಾಂಕ selinux_util_open(ಶೂನ್ಯ);
+ಪೂರ್ಣಾಂಕ selinux_util_label(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ);
+ಪೂರ್ಣಾಂಕ selinux_util_close(ಶೂನ್ಯ);
 
-void selinux_setup(char **argv);
+ಶೂನ್ಯ selinux_ಸಿದ್ಧತೆ(ಅಕ್ಷರ **argv);
 
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 
 /* always return false for selinux_util_open() */
-#define selinux_util_open() (0)
-#define selinux_util_label(x) do { } while (0)
-#define selinux_util_close() do { } while (0)
+#ವ್ಯಾಖ್ಯಾನಿಸು selinux_util_open() (0)
+#ವ್ಯಾಖ್ಯಾನಿಸು selinux_util_label(x) ಮಾಡು { } ಆಗ (0)
+#ವ್ಯಾಖ್ಯಾನಿಸು selinux_util_close() ಮಾಡು { } ಆಗ (0)
 
-#define selinux_setup(x) do { } while (0)
+#ವ್ಯಾಖ್ಯಾನಿಸು selinux_ಸಿದ್ಧತೆ(x) ಮಾಡು { } ಆಗ (0)
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

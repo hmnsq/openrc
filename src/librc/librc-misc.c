@@ -15,44 +15,44 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <fnmatch.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <fnmatch.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <dirent.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <limits.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <strings.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
-#include "misc.h"
+#ಅನ್ತರ್ಭಾವ "queue.h"
+#ಅನ್ತರ್ಭಾವ "librc.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
+#ಅನ್ತರ್ಭಾವ "misc.h"
 
 bool
-rc_yesno(const char *value)
+rc_yesno(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ)
 {
-	if (!value) {
+	ಆದರೆ (!ಮೌಲ್ಯ) {
 		errno = ENOENT;
-		return false;
+		ಹಿಂತಿರುಗಿ false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "1") == 0)
-		return true;
+	ಆದರೆ (strcasecmp(ಮೌಲ್ಯ, "yes") == 0 ||
+	    strcasecmp(ಮೌಲ್ಯ, "y") == 0 ||
+	    strcasecmp(ಮೌಲ್ಯ, "true") == 0 ||
+	    strcasecmp(ಮೌಲ್ಯ, "1") == 0)
+		ಹಿಂತಿರುಗಿ true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	ಆದರೆ (strcasecmp(ಮೌಲ್ಯ, "no") != 0 &&
+	    strcasecmp(ಮೌಲ್ಯ, "n") != 0 &&
+	    strcasecmp(ಮೌಲ್ಯ, "false") != 0 &&
+	    strcasecmp(ಮೌಲ್ಯ, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	ಹಿಂತಿರುಗಿ false;
 }
 
 
@@ -63,185 +63,185 @@ rc_yesno(const char *value)
  * Don't forget to free the buffer afterwards!
  */
 bool
-rc_getfile(const char *file, char **buffer, size_t *len)
+rc_getfile(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *file, ಅಕ್ಷರ **ಬಫರ್, size_t *len)
 {
 	bool ret = false;
 	FILE *fp;
-	int fd;
-	struct stat st;
-	size_t done, left;
+	ಪೂರ್ಣಾಂಕ fd;
+	ರಚನೆ stat st;
+	size_t ಮುಗಿದ, ಎಡ;
 
 	fp = fopen(file, "re");
-	if (!fp)
-		return false;
+	ಆದರೆ (!fp)
+		ಹಿಂತಿರುಗಿ false;
 
 	/* assume fileno() never fails */
 	fd = fileno(fp);
 
-	if (fstat(fd, &st))
-		goto finished;
+	ಆದರೆ (fstat(fd, &st))
+		ಹೋಗು ಪೂರ್ಣಗೊಂಡ;
 
-	left = st.st_size;
-	*len = left + 1; /* NUL terminator */
-	*buffer = xrealloc(*buffer, *len);
-	while (left) {
-		done = fread(*buffer, sizeof(*buffer[0]), left, fp);
-		if (done == 0 && ferror(fp))
-			goto finished;
-		left -= done;
+	ಎಡ = st.st_size;
+	*len = ಎಡ + 1; /* NUL terminator */
+	*ಬಫರ್ = xrealloc(*ಬಫರ್, *len);
+	ಆಗ (ಎಡ) {
+		ಮುಗಿದ = fread(*ಬಫರ್, ಗಾತ್ರ(*ಬಫರ್[0]), ಎಡ, fp);
+		ಆದರೆ (ಮುಗಿದ == 0 && ferror(fp))
+			ಹೋಗು ಪೂರ್ಣಗೊಂಡ;
+		ಎಡ -= ಮುಗಿದ;
 	}
 	ret = true;
 
- finished:
-	if (!ret) {
-		free(*buffer);
+ ಪೂರ್ಣಗೊಂಡ:
+	ಆದರೆ (!ret) {
+		ಬಿಡುಗಡೆ(*ಬಫರ್);
 		*len = 0;
-	} else
-		(*buffer)[*len - 1] = '\0';
+	} ಇಲ್ಲದಿದ್ದರೆ
+		(*ಬಫರ್)[*len - 1] = '\0';
 	fclose(fp);
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-char *
-rc_proc_getent(const char *ent RC_UNUSED)
+ಅಕ್ಷರ *
+rc_proc_getent(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ent RC_ಬಳಸದ)
 {
-#ifdef __linux__
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
 	FILE *fp;
-	char *proc = NULL, *p, *value = NULL, *save;
+	ಅಕ್ಷರ *proc = ಖಾಲಿ, *p, *ಮೌಲ್ಯ = ಖಾಲಿ, *save;
 	size_t i, len;
 
-	if (!(fp = fopen("/proc/cmdline", "r")))
-		return NULL;
+	ಆದರೆ (!(fp = fopen("/proc/cmdline", "r")))
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
 	i = 0;
-	if (xgetline(&proc, &i, fp) == -1)
-		goto out;
+	ಆದರೆ (xgetline(&proc, &i, fp) == -1)
+		ಹೋಗು ಹೊರಹೋಗು;
 	save = proc;
 
-	len = strlen(ent);
-	while ((p = strsep(&save, " "))) {
-		if (strncmp(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
+	len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ent);
+	ಆಗ ((p = strsep(&save, " "))) {
+		ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
 			p += len;
-			if (*p == '=')
+			ಆದರೆ (*p == '=')
 				p++;
-			value = xstrdup(p);
+			ಮೌಲ್ಯ = xstrdup(p);
 		}
 	}
 
-	if (!value)
+	ಆದರೆ (!ಮೌಲ್ಯ)
 		errno = ENOENT;
 
-out:
+ಹೊರಹೋಗು:
 	fclose(fp);
-	free(proc);
+	ಬಿಡುಗಡೆ(proc);
 
-	return value;
-#else
-	return NULL;
-#endif
+	ಹಿಂತಿರುಗಿ ಮೌಲ್ಯ;
+#ಇಲ್ಲದಿದ್ದರೆ
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
 RC_STRINGLIST *
-config_list(int dirfd, const char *pathname)
+config_list(ಪೂರ್ಣಾಂಕ dirfd, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *pathname)
 {
 	FILE *fp;
-	char *buffer = NULL;
+	ಅಕ್ಷರ *ಬಫರ್ = ಖಾಲಿ;
 	size_t len = 0;
-	char *p;
-	char *token;
+	ಅಕ್ಷರ *p;
+	ಅಕ್ಷರ *token;
 	RC_STRINGLIST *list = rc_stringlist_new();
 
-	if (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
-		return list;
+	ಆದರೆ (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
+		ಹಿಂತಿರುಗಿ list;
 
-	while (xgetline(&buffer, &len, fp) != -1) {
-		p = buffer;
+	ಆಗ (xgetline(&ಬಫರ್, &len, fp) != -1) {
+		p = ಬಫರ್;
 		/* Strip leading spaces/tabs */
-		while ((*p == ' ') || (*p == '\t'))
+		ಆಗ ((*p == ' ') || (*p == '\t'))
 			p++;
 
 		/* Get entry - we do not want comments */
 		token = strsep(&p, "#");
-		if (token && (strlen(token) > 1)) {
+		ಆದರೆ (token && (ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(token) > 1)) {
 			/* If not variable assignment then skip */
-			if (strchr(token, '=')) {
+			ಆದರೆ (strchr(token, '=')) {
 				/* Strip the newline if present */
-				if (token[strlen(token) - 1] == '\n')
-					token[strlen(token) - 1] = 0;
+				ಆದರೆ (token[ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(token) - 1] == '\n')
+					token[ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(token) - 1] = 0;
 
-				rc_stringlist_add(list, token);
+				rc_stringlist_ಕೂಡಿಸು(list, token);
 			}
 		}
 	}
-	free(buffer);
+	ಬಿಡುಗಡೆ(ಬಫರ್);
 	fclose(fp);
 
-	return list;
+	ಹಿಂತಿರುಗಿ list;
 }
 
 RC_STRINGLIST *
-rc_config_list(const char *file)
+rc_config_list(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *file)
 {
-	return config_list(AT_FDCWD, file);
+	ಹಿಂತಿರುಗಿ config_list(AT_FDCWD, file);
 }
 
-static void rc_config_set_value(RC_STRINGLIST *config, char *value)
+ಸ್ಥಿರ ಶೂನ್ಯ rc_config_ಗಣ_ಮೌಲ್ಯ(RC_STRINGLIST *config, ಅಕ್ಷರ *ಮೌಲ್ಯ)
 {
 	RC_STRING *cline;
-	char *entry;
+	ಅಕ್ಷರ *ನಮೂದು;
 	size_t i = 0;
-	char *newline;
-	char *p = value;
+	ಅಕ್ಷರ *newline;
+	ಅಕ್ಷರ *p = ಮೌಲ್ಯ;
 	bool replaced;
-	char *token;
+	ಅಕ್ಷರ *token;
 
-	if (!p)
-		return;
-	if (strncmp(p, "export ", 7) == 0)
+	ಆದರೆ (!p)
+		ಹಿಂತಿರುಗಿ;
+	ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(p, "export ", 7) == 0)
 		p += 7;
-	if (!(token = strsep(&p, "=")))
-		return;
+	ಆದರೆ (!(token = strsep(&p, "=")))
+		ಹಿಂತಿರುಗಿ;
 
-	entry = xstrdup(token);
+	ನಮೂದು = xstrdup(token);
 	/* Preserve shell coloring */
-	if (*p == '$')
-		token = value;
-	else
-		do {
+	ಆದರೆ (*p == '$')
+		token = ಮೌಲ್ಯ;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಮಾಡು {
 			/* Bash variables are usually quoted */
 			token = strsep(&p, "\"\'");
-		} while (token && *token == '\0');
+		} ಆಗ (token && *token == '\0');
 
 	/* Drop a newline if that's all we have */
-	if (token) {
-		i = strlen(token) - 1;
-		if (token[i] == '\n')
+	ಆದರೆ (token) {
+		i = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(token) - 1;
+		ಆದರೆ (token[i] == '\n')
 			token[i] = 0;
 
-		xasprintf(&newline, "%s=%s", entry, token);
-	} else {
-		xasprintf(&newline, "%s=", entry);
+		xasprintf(&newline, "%s=%s", ನಮೂದು, token);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		xasprintf(&newline, "%s=", ನಮೂದು);
 	}
 
 	replaced = false;
 	/* In shells the last item takes precedence, so we need to remove
 	   any prior values we may already have */
 	TAILQ_FOREACH(cline, config, entries) {
-		i = strlen(entry);
-		if (strncmp(entry, cline->value, i) == 0 && cline->value[i] == '=') {
+		i = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ನಮೂದು);
+		ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(ನಮೂದು, cline->ಮೌಲ್ಯ, i) == 0 && cline->ಮೌಲ್ಯ[i] == '=') {
 			/* We have a match now - to save time we directly replace it */
-			free(cline->value);
-			cline->value = newline;
+			ಬಿಡುಗಡೆ(cline->ಮೌಲ್ಯ);
+			cline->ಮೌಲ್ಯ = newline;
 			replaced = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
 	}
 
-	if (!replaced) {
-		rc_stringlist_add(config, newline);
-		free(newline);
+	ಆದರೆ (!replaced) {
+		rc_stringlist_ಕೂಡಿಸು(config, newline);
+		ಬಿಡುಗಡೆ(newline);
 	}
-	free(entry);
+	ಬಿಡುಗಡೆ(ನಮೂದು);
 }
 
 /*
@@ -250,179 +250,179 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
  * a patch for this on *BSD or tell me how to write the code to do this,
  * any suggestions are welcome.
  */
-static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
+ಸ್ಥಿರ RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 {
-#ifdef __linux__
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
 	RC_STRINGLIST *overrides;
 	RC_STRING *cline, *override, *config_np;
-	char *tmp = NULL;
-	char *value = NULL;
+	ಅಕ್ಷರ *tmp = ಖಾಲಿ;
+	ಅಕ್ಷರ *ಮೌಲ್ಯ = ಖಾಲಿ;
 	size_t varlen = 0;
 
 	overrides = rc_stringlist_new();
 
 	/* A list of variables which may be overridden on the kernel command line */
-	rc_stringlist_add(overrides, "rc_interactive");
-	rc_stringlist_add(overrides, "rc_parallel");
+	rc_stringlist_ಕೂಡಿಸು(overrides, "rc_interactive");
+	rc_stringlist_ಕೂಡಿಸು(overrides, "rc_parallel");
 
 	TAILQ_FOREACH(override, overrides, entries) {
-		varlen = strlen(override->value);
-		value = rc_proc_getent(override->value);
+		varlen = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(override->ಮೌಲ್ಯ);
+		ಮೌಲ್ಯ = rc_proc_getent(override->ಮೌಲ್ಯ);
 
 		/* No need to continue if there's nothing to override */
-		if (!value) {
-			free(value);
-			continue;
+		ಆದರೆ (!ಮೌಲ್ಯ) {
+			ಬಿಡುಗಡೆ(ಮೌಲ್ಯ);
+			ಮುಂದುವರಿ;
 		}
 
-		if (value != NULL) {
-			xasprintf(&tmp, "%s=%s", override->value, value);
+		ಆದರೆ (ಮೌಲ್ಯ != ಖಾಲಿ) {
+			xasprintf(&tmp, "%s=%s", override->ಮೌಲ್ಯ, ಮೌಲ್ಯ);
 		}
 
 		/*
 		 * Whenever necessary remove the old config entry first to prevent
 		 * duplicates
 		 */
-		TAILQ_FOREACH_SAFE(cline, config, entries, config_np) {
-			if (strncmp(override->value, cline->value, varlen) == 0
-				&& cline->value[varlen] == '=') {
-				rc_stringlist_delete(config, cline->value);
-				break;
+		TAILQ_FOREACH_ಸುರಕ್ಷಿತ(cline, config, entries, config_np) {
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(override->ಮೌಲ್ಯ, cline->ಮೌಲ್ಯ, varlen) == 0
+				&& cline->ಮೌಲ್ಯ[varlen] == '=') {
+				rc_stringlist_delete(config, cline->ಮೌಲ್ಯ);
+				ನಿಲ್ಲಿಸು;
 			}
 		}
 
 		/* Add the option (var/value) to the current config */
-		rc_stringlist_add(config, tmp);
+		rc_stringlist_ಕೂಡಿಸು(config, tmp);
 
-		free(tmp);
-		free(value);
+		ಬಿಡುಗಡೆ(tmp);
+		ಬಿಡುಗಡೆ(ಮೌಲ್ಯ);
 	}
 
 	rc_stringlist_free(overrides);
-#endif
-	return config;
+#ಆದರೆ_ಅಂತ್ಯ
+	ಹಿಂತಿರುಗಿ config;
 }
 
-static void
-rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
+ಸ್ಥಿರ ಶೂನ್ಯ
+rc_config_directory(RC_STRINGLIST *config, ಪೂರ್ಣಾಂಕ targetfd, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *dir)
 {
 	DIR *dp;
-	struct dirent *d;
+	ರಚನೆ dirent *d;
 	RC_STRINGLIST *rc_conf_d_files;
 	RC_STRING *fname;
 	RC_STRINGLIST *rc_conf_d_list;
-	RC_STRING *line;
+	RC_STRING *ಸಾಲು;
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return;
+	ಆದರೆ (!(dp = do_opendirat(targetfd, dir)))
+		ಹಿಂತಿರುಗಿ;
 
 	rc_conf_d_files = rc_stringlist_new();
-	while ((d = readdir(dp)) != NULL) {
-		if (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
+	ಆಗ ((d = readdir(dp)) != ಖಾಲಿ) {
+		ಆದರೆ (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
 			rc_stringlist_addu(rc_conf_d_files, d->d_name);
 		}
 	}
 
-	rc_stringlist_sort(&rc_conf_d_files);
+	rc_stringlist_ವಿಂಗಡಿಸು(&rc_conf_d_files);
 	TAILQ_FOREACH(fname, rc_conf_d_files, entries) {
-		if (!fname->value)
-			continue;
+		ಆದರೆ (!fname->ಮೌಲ್ಯ)
+			ಮುಂದುವರಿ;
 
-		rc_conf_d_list = config_list(dirfd(dp), fname->value);
-		TAILQ_FOREACH(line, rc_conf_d_list, entries)
-			if (line->value)
-				rc_config_set_value(config, line->value);
+		rc_conf_d_list = config_list(dirfd(dp), fname->ಮೌಲ್ಯ);
+		TAILQ_FOREACH(ಸಾಲು, rc_conf_d_list, entries)
+			ಆದರೆ (ಸಾಲು->ಮೌಲ್ಯ)
+				rc_config_ಗಣ_ಮೌಲ್ಯ(config, ಸಾಲು->ಮೌಲ್ಯ);
 		rc_stringlist_free(rc_conf_d_list);
 	}
 
 	rc_stringlist_free(rc_conf_d_files);
 	closedir(dp);
 
-	return;
+	ಹಿಂತಿರುಗಿ;
 }
 
-static RC_STRINGLIST *
-config_load(int dirfd, const char *pathname)
+ಸ್ಥಿರ RC_STRINGLIST *
+config_ತುಂಬು(ಪೂರ್ಣಾಂಕ dirfd, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *pathname)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *config;
-	RC_STRING *line;
+	RC_STRING *ಸಾಲು;
 
 	list = config_list(dirfd, pathname);
 	config = rc_stringlist_new();
-	TAILQ_FOREACH(line, list, entries) {
-		rc_config_set_value(config, line->value);
+	TAILQ_FOREACH(ಸಾಲು, list, entries) {
+		rc_config_ಗಣ_ಮೌಲ್ಯ(config, ಸಾಲು->ಮೌಲ್ಯ);
 	}
 	rc_stringlist_free(list);
 
-	return config;
+	ಹಿಂತಿರುಗಿ config;
 }
 
 RC_STRINGLIST *
-rc_config_load(const char *file)
+rc_config_ತುಂಬು(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *file)
 {
-	return config_load(AT_FDCWD, file);
+	ಹಿಂತಿರುಗಿ config_ತುಂಬು(AT_FDCWD, file);
 }
 
-char *
-rc_config_value(RC_STRINGLIST *list, const char *entry)
+ಅಕ್ಷರ *
+rc_config_ಮೌಲ್ಯ(RC_STRINGLIST *list, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ನಮೂದು)
 {
-	RC_STRING *line;
-	char *p;
+	RC_STRING *ಸಾಲು;
+	ಅಕ್ಷರ *p;
 	size_t len;
 
-	len = strlen(entry);
-	TAILQ_FOREACH(line, list, entries) {
-		p = strchr(line->value, '=');
-		if (p != NULL) {
-			if (strncmp(entry, line->value, len) == 0 && line->value[len] == '=')
-				return ++p;
+	len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ನಮೂದು);
+	TAILQ_FOREACH(ಸಾಲು, list, entries) {
+		p = strchr(ಸಾಲು->ಮೌಲ್ಯ, '=');
+		ಆದರೆ (p != ಖಾಲಿ) {
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(ನಮೂದು, ಸಾಲು->ಮೌಲ್ಯ, len) == 0 && ಸಾಲು->ಮೌಲ್ಯ[len] == '=')
+				ಹಿಂತಿರುಗಿ ++p;
 		}
 	}
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
 /* Global for caching the strings loaded from rc.conf to avoid reparsing for
  * each rc_conf_value call */
-static RC_STRINGLIST *rc_conf = NULL;
+ಸ್ಥಿರ RC_STRINGLIST *rc_conf = ಖಾಲಿ;
 
-static void
-_free_rc_conf(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+_free_rc_conf(ಶೂನ್ಯ)
 {
 	rc_stringlist_free(rc_conf);
 }
 
-static void
-rc_conf_append(int dirfd)
+ಸ್ಥಿರ ಶೂನ್ಯ
+rc_conf_append(ಪೂರ್ಣಾಂಕ dirfd)
 {
-	RC_STRINGLIST *conf = config_load(dirfd, "rc.conf");
+	RC_STRINGLIST *conf = config_ತುಂಬು(dirfd, "rc.conf");
 	TAILQ_CONCAT(rc_conf, conf, entries);
 	rc_stringlist_free(conf);
 }
 
-char *
-rc_conf_value(const char *setting)
+ಅಕ್ಷರ *
+rc_conf_ಮೌಲ್ಯ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *setting)
 {
-	const int *dirfds;
-	size_t dir_count = rc_scriptdirfds(&dirfds);
+	ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ *dirfds;
+	size_t dir_ಎಣಿಕೆ = rc_scriptdirfds(&dirfds);
 	RC_STRING *s;
 
-	if (rc_conf)
-		return rc_config_value(rc_conf, setting);
+	ಆದರೆ (rc_conf)
+		ಹಿಂತಿರುಗಿ rc_config_ಮೌಲ್ಯ(rc_conf, setting);
 
 	rc_conf = rc_stringlist_new();
 	atexit(_free_rc_conf);
 
-	for (size_t i = 0; i < dir_count; i++) {
+	ಗಾಗಿ (size_t i = 0; i < dir_ಎಣಿಕೆ; i++) {
 		/* load configs in reverse order, so earlier entries override later ones */
-		size_t idx = dir_count - 1 - i;
+		size_t idx = dir_ಎಣಿಕೆ - 1 - i;
 		rc_conf_append(dirfds[idx]);
 		rc_config_directory(rc_conf, dirfds[idx], "rc.conf.d");
 	}
 
 	/* Support old configs. */
-	if (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
-		RC_STRINGLIST *old_conf = config_load(AT_FDCWD, RC_CONF_OLD);
+	ಆದರೆ (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
+		RC_STRINGLIST *old_conf = config_ತುಂಬು(AT_FDCWD, RC_CONF_OLD);
 		TAILQ_CONCAT(rc_conf, old_conf, entries);
 		rc_stringlist_free(old_conf);
 	}
@@ -431,13 +431,13 @@ rc_conf_value(const char *setting)
 
 	/* Convert old uppercase to lowercase */
 	TAILQ_FOREACH(s, rc_conf, entries) {
-		char *p = s->value;
-		while (p && *p && *p != '=') {
-			if (isupper((unsigned char)*p))
-				*p = tolower((unsigned char)*p);
+		ಅಕ್ಷರ *p = s->ಮೌಲ್ಯ;
+		ಆಗ (p && *p && *p != '=') {
+			ಆದರೆ (isupper((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)*p))
+				*p = tolower((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)*p);
 			p++;
 		}
 	}
 
-	return rc_config_value(rc_conf, setting);
+	ಹಿಂತಿರುಗಿ rc_config_ಮೌಲ್ಯ(rc_conf, setting);
 }

@@ -16,426 +16,426 @@
  */
 
 /* nano seconds */
-#define POLL_INTERVAL   20000000
-#define WAIT_PIDFILE   500000000
-#define ONE_SECOND    1000000000
-#define ONE_MS           1000000
+#ವ್ಯಾಖ್ಯಾನಿಸು POLL_INTERVAL   20000000
+#ವ್ಯಾಖ್ಯಾನಿಸು WAIT_PIDFILE   500000000
+#ವ್ಯಾಖ್ಯಾನಿಸು ONE_ಎರಡನೇ    1000000000
+#ವ್ಯಾಖ್ಯಾನಿಸು ONE_MS           1000000
 
-#include <ctype.h>
-#include <errno.h>
-#include <signal.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <signal.h>
+#ಅನ್ತರ್ಭಾವ <stddef.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <syslog.h>
+#ಅನ್ತರ್ಭಾವ <time.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "schedules.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "queue.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "schedules.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
-typedef struct scheduleitem {
-	enum {
+ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ರಚನೆ scheduleitem {
+	ಎಣಿಕೆ {
 		SC_TIMEOUT,
 		SC_SIGNAL,
 		SC_GOTO,
 		SC_FOREVER,
 	} type;
-	int value;
-	struct scheduleitem *gotoitem;
-	TAILQ_ENTRY(scheduleitem) entries;
+	ಪೂರ್ಣಾಂಕ ಮೌಲ್ಯ;
+	ರಚನೆ scheduleitem *gotoitem;
+	TAILQ_ನಮೂದು(scheduleitem) entries;
 } SCHEDULEITEM;
 
-static TAILQ_HEAD(, scheduleitem) schedule;
+ಸ್ಥಿರ TAILQ_ತಲೆ(, scheduleitem) ವೇಳಾಪಟ್ಟಿ;
 
-void free_schedulelist(void)
+ಶೂನ್ಯ free_schedulelist(ಶೂನ್ಯ)
 {
-	SCHEDULEITEM *s1 = TAILQ_FIRST(&schedule);
+	SCHEDULEITEM *s1 = TAILQ_ಮೊದಲ(&ವೇಳಾಪಟ್ಟಿ);
 	SCHEDULEITEM *s2;
 
-	while (s1) {
-		s2 = TAILQ_NEXT(s1, entries);
-		free(s1);
+	ಆಗ (s1) {
+		s2 = TAILQ_ಮುಂದಿನ(s1, entries);
+		ಬಿಡುಗಡೆ(s1);
 		s1 = s2;
 	}
-	TAILQ_INIT(&schedule);
+	TAILQ_INIT(&ವೇಳಾಪಟ್ಟಿ);
 }
 
-int parse_signal(const char *applet, const char *sig)
+ಪೂರ್ಣಾಂಕ parse_signal(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *sig)
 {
-	typedef struct signalpair
+	ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ರಚನೆ signalpair
 	{
-		const char *name;
-		int signal;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+		ಪೂರ್ಣಾಂಕ ಸಂಕೇತ;
 	} SIGNALPAIR;
 
-#define signalpair_item(name) { #name, SIG##name },
+#ವ್ಯಾಖ್ಯಾನಿಸು signalpair_ಅಂಶ(name) { #name, SIG##name },
 
-	static const SIGNALPAIR signallist[] = {
-		signalpair_item(HUP)
-		signalpair_item(INT)
-		signalpair_item(QUIT)
-		signalpair_item(ILL)
-		signalpair_item(TRAP)
-		signalpair_item(ABRT)
-		signalpair_item(BUS)
-		signalpair_item(FPE)
-		signalpair_item(KILL)
-		signalpair_item(USR1)
-		signalpair_item(SEGV)
-		signalpair_item(USR2)
-		signalpair_item(PIPE)
-		signalpair_item(ALRM)
-		signalpair_item(TERM)
-		signalpair_item(CHLD)
-		signalpair_item(CONT)
-		signalpair_item(STOP)
-		signalpair_item(TSTP)
-		signalpair_item(TTIN)
-		signalpair_item(TTOU)
-		signalpair_item(URG)
-		signalpair_item(XCPU)
-		signalpair_item(XFSZ)
-		signalpair_item(VTALRM)
-		signalpair_item(PROF)
-#ifdef SIGWINCH
-		signalpair_item(WINCH)
-#endif
-#ifdef SIGIO
-		signalpair_item(IO)
-#endif
-#ifdef SIGPWR
-		signalpair_item(PWR)
-#endif
-		signalpair_item(SYS)
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ SIGNALPAIR signallist[] = {
+		signalpair_ಅಂಶ(HUP)
+		signalpair_ಅಂಶ(INT)
+		signalpair_ಅಂಶ(QUIT)
+		signalpair_ಅಂಶ(ILL)
+		signalpair_ಅಂಶ(TRAP)
+		signalpair_ಅಂಶ(ABRT)
+		signalpair_ಅಂಶ(BUS)
+		signalpair_ಅಂಶ(FPE)
+		signalpair_ಅಂಶ(KILL)
+		signalpair_ಅಂಶ(USR1)
+		signalpair_ಅಂಶ(SEGV)
+		signalpair_ಅಂಶ(USR2)
+		signalpair_ಅಂಶ(PIPE)
+		signalpair_ಅಂಶ(ALRM)
+		signalpair_ಅಂಶ(ಪದ_2)
+		signalpair_ಅಂಶ(CHLD)
+		signalpair_ಅಂಶ(CONT)
+		signalpair_ಅಂಶ(STOP)
+		signalpair_ಅಂಶ(TSTP)
+		signalpair_ಅಂಶ(TTIN)
+		signalpair_ಅಂಶ(TTOU)
+		signalpair_ಅಂಶ(URG)
+		signalpair_ಅಂಶ(XCPU)
+		signalpair_ಅಂಶ(XFSZ)
+		signalpair_ಅಂಶ(VTALRM)
+		signalpair_ಅಂಶ(PROF)
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ SIGWINCH
+		signalpair_ಅಂಶ(WINCH)
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ SIGIO
+		signalpair_ಅಂಶ(IO)
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ SIGPWR
+		signalpair_ಅಂಶ(PWR)
+#ಆದರೆ_ಅಂತ್ಯ
+		signalpair_ಅಂಶ(SYS)
 		{ "NULL",	0 },
 	};
 
-	unsigned int i = 0;
-	const char *s;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s;
 
-	if (!sig || *sig == '\0')
-		return -1;
+	ಆದರೆ (!sig || *sig == '\0')
+		ಹಿಂತಿರುಗಿ -1;
 
-	if (sscanf(sig, "%u", &i) == 1) {
-		if (i < NSIG)
-			return i;
+	ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(sig, "%u", &i) == 1) {
+		ಆದರೆ (i < NSIG)
+			ಹಿಂತಿರುಗಿ i;
 		eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	}
 
-	if (strncmp(sig, "SIG", 3) == 0)
+	ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(sig, "SIG", 3) == 0)
 		s = sig + 3;
-	else
-		s = NULL;
+	ಇಲ್ಲದಿದ್ದರೆ
+		s = ಖಾಲಿ;
 
-	for (i = 0; i < ARRAY_SIZE(signallist); ++i)
-		if (strcmp(sig, signallist[i].name) == 0 ||
+	ಗಾಗಿ (i = 0; i < ARRAY_ಗಾತ್ರ(signallist); ++i)
+		ಆದರೆ (strcmp(sig, signallist[i].name) == 0 ||
 		    (s && strcmp(s, signallist[i].name) == 0))
-			return signallist[i].signal;
+			ಹಿಂತಿರುಗಿ signallist[i].ಸಂಕೇತ;
 
 	eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	/* NOTREACHED */
 }
 
-static SCHEDULEITEM *parse_schedule_item(const char *applet, const char *string)
+ಸ್ಥಿರ SCHEDULEITEM *parse_ವೇಳಾಪಟ್ಟಿ_ಅಂಶ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *string)
 {
-	const char *after_hyph;
-	int sig;
-	SCHEDULEITEM *item = xmalloc(sizeof(*item));
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *after_hyph;
+	ಪೂರ್ಣಾಂಕ sig;
+	SCHEDULEITEM *ಅಂಶ = xmalloc(ಗಾತ್ರ(*ಅಂಶ));
 
-	item->value = 0;
-	item->gotoitem = NULL;
-	if (strcmp(string,"forever") == 0)
-		item->type = SC_FOREVER;
-	else if (isdigit((unsigned char)string[0])) {
-		item->type = SC_TIMEOUT;
+	ಅಂಶ->ಮೌಲ್ಯ = 0;
+	ಅಂಶ->gotoitem = ಖಾಲಿ;
+	ಆದರೆ (strcmp(string,"forever") == 0)
+		ಅಂಶ->type = SC_FOREVER;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಅಂಕಿಯೇ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)string[0])) {
+		ಅಂಶ->type = SC_TIMEOUT;
 		errno = 0;
-		if (sscanf(string, "%d", &item->value) != 1)
+		ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(string, "%d", &ಅಂಶ->ಮೌಲ್ಯ) != 1)
 			eerrorx("%s: invalid timeout value in schedule '%s'",
 			    applet, string);
-	} else if ((after_hyph = string + (string[0] == '-')) &&
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ ((after_hyph = string + (string[0] == '-')) &&
 	    ((sig = parse_signal(applet, after_hyph)) != -1))
 	{
-		item->type = SC_SIGNAL;
-		item->value = (int)sig;
-	} else
+		ಅಂಶ->type = SC_SIGNAL;
+		ಅಂಶ->ಮೌಲ್ಯ = (ಪೂರ್ಣಾಂಕ)sig;
+	} ಇಲ್ಲದಿದ್ದರೆ
 		eerrorx("%s: invalid schedule item `%s'", applet, string);
 
-	return item;
+	ಹಿಂತಿರುಗಿ ಅಂಶ;
 }
 
-void parse_schedule(const char *applet, const char *string, int timeout)
+ಶೂನ್ಯ parse_ವೇಳಾಪಟ್ಟಿ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *string, ಪೂರ್ಣಾಂಕ timeout)
 {
-	char buffer[20];
-	const char *slash;
-	int count = 0;
-	SCHEDULEITEM *repeatat = NULL;
+	ಅಕ್ಷರ ಬಫರ್[20];
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *slash;
+	ಪೂರ್ಣಾಂಕ ಎಣಿಕೆ_2 = 0;
+	SCHEDULEITEM *repeatat = ಖಾಲಿ;
 	size_t len;
-	SCHEDULEITEM *item;
+	SCHEDULEITEM *ಅಂಶ;
 
-	TAILQ_INIT(&schedule);
-	if (string)
-		for (slash = string; *slash; slash++)
-			if (*slash == '/')
-				count++;
+	TAILQ_INIT(&ವೇಳಾಪಟ್ಟಿ);
+	ಆದರೆ (string)
+		ಗಾಗಿ (slash = string; *slash; slash++)
+			ಆದರೆ (*slash == '/')
+				ಎಣಿಕೆ_2++;
 
 	free_schedulelist();
 
-	if (count == 0) {
-		item = xmalloc(sizeof(*item));
-		item->type = SC_SIGNAL;
-		item->value = timeout;
-		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+	ಆದರೆ (ಎಣಿಕೆ_2 == 0) {
+		ಅಂಶ = xmalloc(ಗಾತ್ರ(*ಅಂಶ));
+		ಅಂಶ->type = SC_SIGNAL;
+		ಅಂಶ->ಮೌಲ್ಯ = timeout;
+		ಅಂಶ->gotoitem = ಖಾಲಿ;
+		TAILQ_ಸೇರಿಸು_ಬಾಲ(&ವೇಳಾಪಟ್ಟಿ, ಅಂಶ, entries);
 
-		item = xmalloc(sizeof(*item));
-		item->type = SC_TIMEOUT;
-		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (string) {
-			if (sscanf(string, "%d", &item->value) != 1)
+		ಅಂಶ = xmalloc(ಗಾತ್ರ(*ಅಂಶ));
+		ಅಂಶ->type = SC_TIMEOUT;
+		ಅಂಶ->gotoitem = ಖಾಲಿ;
+		TAILQ_ಸೇರಿಸು_ಬಾಲ(&ವೇಳಾಪಟ್ಟಿ, ಅಂಶ, entries);
+		ಆದರೆ (string) {
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(string, "%d", &ಅಂಶ->ಮೌಲ್ಯ) != 1)
 				eerrorx("%s: invalid timeout value in schedule '%s'",
 					applet, string);
-		} else
-			item->value = 5;
+		} ಇಲ್ಲದಿದ್ದರೆ
+			ಅಂಶ->ಮೌಲ್ಯ = 5;
 
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	while (string != NULL) {
-		if ((slash = strchr(string, '/')))
+	ಆಗ (string != ಖಾಲಿ) {
+		ಆದರೆ ((slash = strchr(string, '/')))
 			len = slash - string;
-		else
-			len = strlen(string);
+		ಇಲ್ಲದಿದ್ದರೆ
+			len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(string);
 
-		if (len >= (ptrdiff_t)sizeof(buffer))
+		ಆದರೆ (len >= (ptrdiff_t)ಗಾತ್ರ(ಬಫರ್))
 			eerrorx("%s: invalid schedule item, far too long",
 			    applet);
 
-		memcpy(buffer, string, len);
-		buffer[len] = 0;
-		string = slash ? slash + 1 : NULL;
+		ಸ್ಮರಣೆ_ನಕಲು(ಬಫರ್, string, len);
+		ಬಫರ್[len] = 0;
+		string = slash ? slash + 1 : ಖಾಲಿ;
 
-		item = parse_schedule_item(applet, buffer);
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (item->type == SC_FOREVER) {
-			if (repeatat)
+		ಅಂಶ = parse_ವೇಳಾಪಟ್ಟಿ_ಅಂಶ(applet, ಬಫರ್);
+		TAILQ_ಸೇರಿಸು_ಬಾಲ(&ವೇಳಾಪಟ್ಟಿ, ಅಂಶ, entries);
+		ಆದರೆ (ಅಂಶ->type == SC_FOREVER) {
+			ಆದರೆ (repeatat)
 				eerrorx("%s: invalid schedule, `forever' "
 				    "appears more than once", applet);
 
-			repeatat = item;
-			continue;
+			repeatat = ಅಂಶ;
+			ಮುಂದುವರಿ;
 		}
 	}
 
-	if (repeatat) {
-		item = xmalloc(sizeof(*item));
-		item->type = SC_GOTO;
-		item->value = 0;
-		item->gotoitem = repeatat;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+	ಆದರೆ (repeatat) {
+		ಅಂಶ = xmalloc(ಗಾತ್ರ(*ಅಂಶ));
+		ಅಂಶ->type = SC_GOTO;
+		ಅಂಶ->ಮೌಲ್ಯ = 0;
+		ಅಂಶ->gotoitem = repeatat;
+		TAILQ_ಸೇರಿಸು_ಬಾಲ(&ವೇಳಾಪಟ್ಟಿ, ಅಂಶ, entries);
 	}
 
-	return;
+	ಹಿಂತಿರುಗಿ;
 }
 
 /* return number of processes killed, -1 on error */
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-    pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet)
+ಪೂರ್ಣಾಂಕ do_stop(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *exec, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *argv,
+    pid_t pid, uid_t uid, ಪೂರ್ಣಾಂಕ sig, bool group, bool test, bool quiet)
 {
-	const char *kind = "PID";
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಬಗೆ = "PID";
 	RC_PIDLIST *pids;
 	RC_PID *pi;
 	RC_PID *np;
 	bool killed;
-	int nkilled = 0;
-	uid_t target;
-	if (group)
-		kind = "GID";
+	ಪೂರ್ಣಾಂಕ nkilled = 0;
+	uid_t ಗುರಿ;
+	ಆದರೆ (group)
+		ಬಗೆ = "GID";
 
-	if (pid > 0)
-		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
-		pids = rc_find_pids(exec, argv, uid, 0);
+	ಆದರೆ (pid > 0)
+		pids = rc_ಕಂಡುಹಿಡಿ_pids(ಖಾಲಿ, ಖಾಲಿ, 0, pid);
+	ಇಲ್ಲದಿದ್ದರೆ
+		pids = rc_ಕಂಡುಹಿಡಿ_pids(exec, argv, uid, 0);
 
-	if (!pids)
-		return 0;
+	ಆದರೆ (!pids)
+		ಹಿಂತಿರುಗಿ 0;
 
-	LIST_FOREACH_SAFE(pi, pids, entries, np) {
-		if (test) {
-			einfo("Would send signal %d to %s %d", sig, kind, pi->pid);
+	LIST_FOREACH_ಸುರಕ್ಷಿತ(pi, pids, entries, np) {
+		ಆದರೆ (test) {
+			einfo("Would send signal %d to %s %d", sig, ಬಗೆ, pi->pid);
 			nkilled++;
-		} else {
-			if (sig) {
-				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, kind, pi->pid);
-				if (!quiet)
-					ebeginv("Sending signal %d to %s %d", sig, kind, pi->pid);
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಆದರೆ (sig) {
+				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, ಬಗೆ, pi->pid);
+				ಆದರೆ (!quiet)
+					ebeginv("Sending signal %d to %s %d", sig, ಬಗೆ, pi->pid);
 			}
 			errno = 0;
-			if (group)
-				target = -pi->pid;
-			else
-				target = pi->pid;
-			killed = (kill(target, sig) == 0 ||
+			ಆದರೆ (group)
+				ಗುರಿ = -pi->pid;
+			ಇಲ್ಲದಿದ್ದರೆ
+				ಗುರಿ = pi->pid;
+			killed = (kill(ಗುರಿ, sig) == 0 ||
 			    errno == ESRCH ? true : false);
-			if (!quiet)
+			ಆದರೆ (!quiet)
 				eendv(killed ? 0 : 1,
 				"%s: failed to send signal %d to %s %d: %s",
-				applet, sig, kind, pi->pid, strerror(errno));
-			else if (!killed)
+				applet, sig, ಬಗೆ, pi->pid, strerror(errno));
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!killed)
 				syslog(LOG_ERR, "Failed to send signal %d to %s %d: %s",
-						sig, kind, pi->pid, strerror(errno));
-			if (!killed) {
+						sig, ಬಗೆ, pi->pid, strerror(errno));
+			ಆದರೆ (!killed) {
 				nkilled = -1;
-			} else {
-				if (nkilled != -1)
+			} ಇಲ್ಲದಿದ್ದರೆ {
+				ಆದರೆ (nkilled != -1)
 					nkilled++;
 			}
 		}
-		free(pi);
+		ಬಿಡುಗಡೆ(pi);
 	}
 
-	free(pids);
-	return nkilled;
+	ಬಿಡುಗಡೆ(pids);
+	ಹಿಂತಿರುಗಿ nkilled;
 }
 
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+ಪೂರ್ಣಾಂಕ ಸತತ_stop_ವೇಳಾಪಟ್ಟಿ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *exec, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *argv,
 		pid_t pid, uid_t uid, bool group,
-    bool test, bool progress, bool quiet)
+    bool test, bool ಪ್ರಗತಿ, bool quiet)
 {
-	SCHEDULEITEM *item = TAILQ_FIRST(&schedule);
-	int nkilled = 0;
-	int tkilled = 0;
-	int nrunning = 0;
-	long nloops, nsecs;
-	struct timespec ts;
-	const char *const *p;
+	SCHEDULEITEM *ಅಂಶ = TAILQ_ಮೊದಲ(&ವೇಳಾಪಟ್ಟಿ);
+	ಪೂರ್ಣಾಂಕ nkilled = 0;
+	ಪೂರ್ಣಾಂಕ tkilled = 0;
+	ಪೂರ್ಣಾಂಕ nrunning = 0;
+	ದೀರ್ಘ nloops, nsecs;
+	ರಚನೆ timespec ts;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *p;
 	bool progressed = false;
 
-	if (!(pid > 0 || exec || uid || (argv && *argv)))
-		return 0;
+	ಆದರೆ (!(pid > 0 || exec || uid || (argv && *argv)))
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (exec) {
+	ಆದರೆ (exec) {
 		einfov("Will stop %s", exec);
 		syslog(LOG_DEBUG, "Will stop %s", exec);
 	}
-	if (pid > 0) {
-		if (!group) {
+	ಆದರೆ (pid > 0) {
+		ಆದರೆ (!group) {
 			einfov("Will stop PID %d", pid);
 			syslog(LOG_DEBUG, "Will stop PID %d", pid);
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			einfov("Will stop GID %d", pid);
 			syslog(LOG_DEBUG, "Will stop GID %d", pid);
 		}
 	}
-	if (uid) {
+	ಆದರೆ (uid) {
 		einfov("Will stop processes owned by UID %d", uid);
 		syslog(LOG_DEBUG, "Will stop processes owned by UID %d", uid);
 	}
-	if (argv && *argv) {
+	ಆದರೆ (argv && *argv) {
 		einfovn("Will stop processes of `");
-		if (rc_yesno(getenv("EINFO_VERBOSE"))) {
-			for (p = argv; p && *p; p++) {
-				if (p != argv)
-					printf(" ");
-				printf("%s", *p);
+		ಆದರೆ (rc_yesno(getenv("EINFO_VERBOSE"))) {
+			ಗಾಗಿ (p = argv; p && *p; p++) {
+				ಆದರೆ (p != argv)
+					ಬರೆ(" ");
+				ಬರೆ("%s", *p);
 			}
-			printf("'\n");
+			ಬರೆ("'\n");
 		}
 	}
 
-	while (item) {
-		switch (item->type) {
-		case SC_GOTO:
-			item = item->gotoitem;
-			continue;
+	ಆಗ (ಅಂಶ) {
+		ಆಯ್ಕೆ (ಅಂಶ->type) {
+		ಸ್ಥಿತಿ SC_GOTO:
+			ಅಂಶ = ಅಂಶ->gotoitem;
+			ಮುಂದುವರಿ;
 
-		case SC_SIGNAL:
+		ಸ್ಥಿತಿ SC_SIGNAL:
 			nrunning = 0;
-			nkilled = do_stop(applet, exec, argv, pid, uid, item->value, group,
+			nkilled = do_stop(applet, exec, argv, pid, uid, ಅಂಶ->ಮೌಲ್ಯ, group,
 					test, quiet);
-			if (nkilled == 0) {
-				if (tkilled == 0) {
-					if (progressed)
-						printf("\n");
+			ಆದರೆ (nkilled == 0) {
+				ಆದರೆ (tkilled == 0) {
+					ಆದರೆ (progressed)
+						ಬರೆ("\n");
 					eerror("%s: no matching processes found", applet);
 				}
-				return tkilled;
+				ಹಿಂತಿರುಗಿ tkilled;
 			}
-			else if (nkilled == -1)
-				return 0;
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (nkilled == -1)
+				ಹಿಂತಿರುಗಿ 0;
 
 			tkilled += nkilled;
-			break;
-		case SC_FOREVER:
-		case SC_TIMEOUT:
-			if (item->type == SC_TIMEOUT && item->value < 1) {
-				item = NULL;
-				break;
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ SC_FOREVER:
+		ಸ್ಥಿತಿ SC_TIMEOUT:
+			ಆದರೆ (ಅಂಶ->type == SC_TIMEOUT && ಅಂಶ->ಮೌಲ್ಯ < 1) {
+				ಅಂಶ = ಖಾಲಿ;
+				ನಿಲ್ಲಿಸು;
 			}
 
 			ts.tv_sec = 0;
 			ts.tv_nsec = POLL_INTERVAL;
 
-			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
-				for (nloops = 0;
-				     nloops < ONE_SECOND / POLL_INTERVAL;
+			ಗಾಗಿ (nsecs = 0; ಅಂಶ->type == SC_FOREVER || nsecs < ಅಂಶ->ಮೌಲ್ಯ; nsecs++) {
+				ಗಾಗಿ (nloops = 0;
+				     nloops < ONE_ಎರಡನೇ / POLL_INTERVAL;
 				     nloops++)
 				{
-					if ((nrunning = do_stop(applet, exec, argv,
+					ಆದರೆ ((nrunning = do_stop(applet, exec, argv,
 						    pid, uid, 0, group, test, quiet)) == 0)
-						return 0;
+						ಹಿಂತಿರುಗಿ 0;
 
 
-					if (nanosleep(&ts, NULL) == -1) {
-						if (progressed) {
-							printf("\n");
+					ಆದರೆ (nanosleep(&ts, ಖಾಲಿ) == -1) {
+						ಆದರೆ (progressed) {
+							ಬರೆ("\n");
 							progressed = false;
 						}
-						if (errno != EINTR) {
+						ಆದರೆ (errno != EINTR) {
 							eerror("%s: nanosleep: %s",
 							    applet, strerror(errno));
-							return 0;
+							ಹಿಂತಿರುಗಿ 0;
 						}
 					}
 				}
-				if (progress) {
-					printf(".");
+				ಆದರೆ (ಪ್ರಗತಿ) {
+					ಬರೆ(".");
 					fflush(stdout);
 					progressed = true;
 				}
 			}
-			break;
-		default:
-			if (progressed) {
-				printf("\n");
+			ನಿಲ್ಲಿಸು;
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			ಆದರೆ (progressed) {
+				ಬರೆ("\n");
 				progressed = false;
 			}
 			eerror("%s: invalid schedule item `%d'",
-			    applet, item->type);
-			return 0;
+			    applet, ಅಂಶ->type);
+			ಹಿಂತಿರುಗಿ 0;
 		}
 
-		if (item)
-			item = TAILQ_NEXT(item, entries);
+		ಆದರೆ (ಅಂಶ)
+			ಅಂಶ = TAILQ_ಮುಂದಿನ(ಅಂಶ, entries);
 	}
 
-	if (test || (tkilled > 0 && nrunning == 0))
-		return nkilled;
+	ಆದರೆ (test || (tkilled > 0 && nrunning == 0))
+		ಹಿಂತಿರುಗಿ nkilled;
 
-	if (progressed)
-		printf("\n");
-	if (!quiet) {
-		if (nrunning == 1)
+	ಆದರೆ (progressed)
+		ಬರೆ("\n");
+	ಆದರೆ (!quiet) {
+		ಆದರೆ (nrunning == 1)
 			eerror("%s: %d process refused to stop", applet, nrunning);
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			eerror("%s: %d process(es) refused to stop", applet, nrunning);
 	}
 
-	return -nrunning;
+	ಹಿಂತಿರುಗಿ -nrunning;
 }

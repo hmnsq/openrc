@@ -9,11 +9,11 @@
  * This file may not be copied, modified, propagated, or distributed
  * except according to the terms contained in the LICENSE file.
  */
-#ifndef RC_EXEC_H
-#define RC_EXEC_H
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ RC_EXEC_H
+#ವ್ಯಾಖ್ಯಾನಿಸು RC_EXEC_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
 
 /*
  * goal of this api is to provide a convenient and centralized way to do most
@@ -22,7 +22,7 @@
  * here instead of ad-hoc coding fork+exec yourself.
  */
 
-enum {
+ಎಣಿಕೆ {
 	/* default */
 	EXEC_NO_REDIRECT = -1,
 	/* make a pipe and redirect to it */
@@ -31,30 +31,30 @@ enum {
 	EXEC_DEVNULL = -3,
 };
 
-struct exec_args {
-	const char **argv;
-	const char *cmd;  /* if NULL, argv[0] is used */
-	int redirect_stdin;
-	int redirect_stdout;
-	int redirect_stderr;
+ರಚನೆ exec_ವಾದಗಳು {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *cmd;  /* if NULL, argv[0] is used */
+	ಪೂರ್ಣಾಂಕ redirect_stdin;
+	ಪೂರ್ಣಾಂಕ redirect_stdout;
+	ಪೂರ್ಣಾಂಕ redirect_stderr;
 	uid_t uid;
 	gid_t gid;
 	bool setsid : 1;
 };
 
-struct exec_result {
+ರಚನೆ exec_ಫಲಿತಾಂಶ {
 	pid_t pid;
 	/* returned in case of RC_EXEC_MKPIPE */
-	int proc_stdin;
-	int proc_stdout;
-	int proc_stderr;
+	ಪೂರ್ಣಾಂಕ proc_stdin;
+	ಪೂರ್ಣಾಂಕ proc_stdout;
+	ಪೂರ್ಣಾಂಕ proc_stderr;
 };
 
-struct exec_args exec_init(const char **argv);
-struct exec_result do_exec(struct exec_args *args);
+ರಚನೆ exec_ವಾದಗಳು exec_init(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv);
+ರಚನೆ exec_ಫಲಿತಾಂಶ do_exec(ರಚನೆ exec_ವಾದಗಳು *ವಾದಗಳು);
 
 /* some exec related helplers */
-int rc_waitpid(pid_t pid);
-int rc_pipe_command(const char *cmd, int devnullfd);
+ಪೂರ್ಣಾಂಕ rc_waitpid(pid_t pid);
+ಪೂರ್ಣಾಂಕ rc_pipe_command(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *cmd, ಪೂರ್ಣಾಂಕ devnullfd);
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

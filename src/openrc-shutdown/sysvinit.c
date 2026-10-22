@@ -15,88 +15,88 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <stddef.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#include "einfo.h"
-#include "initreq.h"
-#include "sysvinit.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "initreq.h"
+#ಅನ್ತರ್ಭಾವ "sysvinit.h"
 
-static void sysvinit_send_cmd(struct init_request *request)
+ಸ್ಥಿರ ಶೂನ್ಯ sysvinit_send_cmd(ರಚನೆ init_request *request)
 {
-	int fd;
-	char *p;
-	size_t bytes;
+	ಪೂರ್ಣಾಂಕ fd;
+	ಅಕ್ಷರ *p;
+	size_t ಬೈಟುಗಳು;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	ಆದರೆ (fd < 0) {
+		ಆದರೆ (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
-	p = (char *) request;
-	bytes = sizeof(*request);
-	do {
-		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
-				continue;
+	p = (ಅಕ್ಷರ *) request;
+	ಬೈಟುಗಳು = ಗಾತ್ರ(*request);
+	ಮಾಡು {
+		r = ಲಿಖ(fd, p, ಬೈಟುಗಳು);
+		ಆದರೆ (r < 0) {
+			ಆದರೆ ((errno == EAGAIN) || (errno == EINTR))
+				ಮುಂದುವರಿ;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			ಹಿಂತಿರುಗಿ;
 		}
 		p += r;
-		bytes -= r;
-	} while (bytes > 0);
+		ಬೈಟುಗಳು -= r;
+	} ಆಗ (ಬೈಟುಗಳು > 0);
 }
 
-void sysvinit_runlevel(char rl)
+ಶೂನ್ಯ sysvinit_runlevel(ಅಕ್ಷರ rl)
 {
-	struct init_request request;
+	ರಚನೆ init_request request;
 
-	if (!rl)
-		return;
+	ಆದರೆ (!rl)
+		ಹಿಂತಿರುಗಿ;
 
-	request = (struct init_request) {
+	request = (ರಚನೆ init_request) {
 		.magic = INIT_MAGIC,
 		.sleeptime = 0,
 		.cmd = INIT_CMD_RUNLVL,
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		ಹಿಂತಿರುಗಿ;
 }
 
 /*
  *	Set environment variables in the init process.
  */
-void sysvinit_setenv(const char *name, const char *value)
+ಶೂನ್ಯ sysvinit_setenv(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ)
 {
-	struct init_request	request;
+	ರಚನೆ init_request	request;
 	size_t nl;
 	size_t vl;
 
-	memset(&request, 0, sizeof(request));
+	memset(&request, 0, ಗಾತ್ರ(request));
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
-	nl = strlen(name);
-	if (value)
-		vl = strlen(value);
-else
+	nl = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(name);
+	ಆದರೆ (ಮೌಲ್ಯ)
+		vl = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಮೌಲ್ಯ);
+ಇಲ್ಲದಿದ್ದರೆ
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	ಆದರೆ (nl + vl + 3 >= (ಪೂರ್ಣಾಂಕ)ಗಾತ್ರ(request.i.ದತ್ತಾಂಶ))
+		ಹಿಂತಿರುಗಿ;
 
-	memcpy(request.i.data, name, nl);
-	if (value) {
-		request.i.data[nl] = '=';
-		memcpy(request.i.data + nl + 1, value, vl);
+	ಸ್ಮರಣೆ_ನಕಲು(request.i.ದತ್ತಾಂಶ, name, nl);
+	ಆದರೆ (ಮೌಲ್ಯ) {
+		request.i.ದತ್ತಾಂಶ[nl] = '=';
+		ಸ್ಮರಣೆ_ನಕಲು(request.i.ದತ್ತಾಂಶ + nl + 1, ಮೌಲ್ಯ, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	ಹಿಂತಿರುಗಿ;
 }

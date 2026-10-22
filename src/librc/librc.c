@@ -15,411 +15,411 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <assert.h>
-#include <helpers.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <regex.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <assert.h>
+#ಅನ್ತರ್ಭಾವ <helpers.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <dirent.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <libgen.h>
+#ಅನ್ತರ್ಭಾವ <limits.h>
+#ಅನ್ತರ್ಭಾವ <regex.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <sys/param.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "misc.h"
-#include "rc.h"
-#ifdef __FreeBSD__
+#ಅನ್ತರ್ಭಾವ "queue.h"
+#ಅನ್ತರ್ಭಾವ "librc.h"
+#ಅನ್ತರ್ಭಾವ "misc.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __FreeBSD__
 #  include <sys/sysctl.h>
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifndef S_IXUGO
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ S_IXUGO
 #  define S_IXUGO (S_IXUSR | S_IXGRP | S_IXOTH)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 /* File stream used for plugins to write environ vars to */
-FILE *rc_environ_fd = NULL;
-static int dirfds[RC_DIR_MAX];
+FILE *rc_environ_fd = ಖಾಲಿ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ dirfds[RC_DIR_MAX];
 
-int rc_dirfd(enum rc_dir dir) {
-	int flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
-	int dirfd;
+ಪೂರ್ಣಾಂಕ rc_dirfd(ಎಣಿಕೆ rc_dir dir) {
+	ಪೂರ್ಣಾಂಕ flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
+	ಪೂರ್ಣಾಂಕ dirfd;
 
-	if (dir < 0 || dir >= RC_DIR_MAX)
-		return -1;
-	if (dirfds[dir] <= 0) {
-		switch (dir) {
-		case RC_DIR_SYSCONF:
-			return dirfds[dir] = open(rc_sysconfdir(), flags);
-		case RC_DIR_USRCONF:
-			return dirfds[dir] = open(rc_usrconfdir(), flags);
-		case RC_DIR_RUNLEVEL:
-			return dirfds[dir] = open(rc_runleveldir(), flags);
-		case RC_DIR_SVCDIR:
-			if (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
-				return -1;
-			return dirfds[dir] = open(rc_svcdir(), flags);
-		default:
-			assert(dirnames[dir]);
+	ಆದರೆ (dir < 0 || dir >= RC_DIR_MAX)
+		ಹಿಂತಿರುಗಿ -1;
+	ಆದರೆ (dirfds[dir] <= 0) {
+		ಆಯ್ಕೆ (dir) {
+		ಸ್ಥಿತಿ RC_DIR_SYSCONF:
+			ಹಿಂತಿರುಗಿ dirfds[dir] = open(rc_sysconfdir(), flags);
+		ಸ್ಥಿತಿ RC_DIR_USRCONF:
+			ಹಿಂತಿರುಗಿ dirfds[dir] = open(rc_usrconfdir(), flags);
+		ಸ್ಥಿತಿ RC_DIR_RUNLEVEL:
+			ಹಿಂತಿರುಗಿ dirfds[dir] = open(rc_runleveldir(), flags);
+		ಸ್ಥಿತಿ RC_DIR_SVCDIR:
+			ಆದರೆ (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
+				ಹಿಂತಿರುಗಿ -1;
+			ಹಿಂತಿರುಗಿ dirfds[dir] = open(rc_svcdir(), flags);
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			ಪ್ರತಿಜ್ಞಾ(dirnames[dir]);
 			dirfd = rc_dirfd(RC_DIR_SVCDIR);
-			if ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
-				if (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
-					return -1;
+			ಆದರೆ ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
+				ಆದರೆ (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
+					ಹಿಂತಿರುಗಿ -1;
 				dirfds[dir] = openat(dirfd, dirnames[dir], flags);
 			}
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
 	}
-	return dirfds[dir];
+	ಹಿಂತಿರುಗಿ dirfds[dir];
 }
 
-void clear_dirfds(void) {
-	for (size_t i = 0; i < RC_DIR_MAX; i++) {
+ಶೂನ್ಯ clear_dirfds(ಶೂನ್ಯ) {
+	ಗಾಗಿ (size_t i = 0; i < RC_DIR_MAX; i++) {
 		/* dirfd is zero-initialized, though zero is a valid
 		 * FD, dirfd should never contain FDs which are <= 2. */
-		if (dirfds[i] <= 0)
-			continue;
+		ಆದರೆ (dirfds[i] <= 0)
+			ಮುಂದುವರಿ;
 
 		close(dirfds[i]);
 		dirfds[i] = -1;
 	}
 }
 
-#define LS_INITD	0x01
-#define LS_DIR		0x02
-static RC_STRINGLIST *
-ls_dir(int targetfd, const char *dir, int options)
+#ವ್ಯಾಖ್ಯಾನಿಸು LS_INITD	0x01
+#ವ್ಯಾಖ್ಯಾನಿಸು LS_DIR		0x02
+ಸ್ಥಿರ RC_STRINGLIST *
+ls_dir(ಪೂರ್ಣಾಂಕ targetfd, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *dir, ಪೂರ್ಣಾಂಕ options)
 {
 	DIR *dp;
-	struct dirent *d;
-	RC_STRINGLIST *list = NULL;
-	struct stat buf;
+	ರಚನೆ dirent *d;
+	RC_STRINGLIST *list = ಖಾಲಿ;
+	ರಚನೆ stat buf;
 	size_t l;
 
 	list = rc_stringlist_new();
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return list;
+	ಆದರೆ (!(dp = do_opendirat(targetfd, dir)))
+		ಹಿಂತಿರುಗಿ list;
 
-	while (((d = readdir(dp)) != NULL)) {
-		if (d->d_name[0] == '.')
-			continue;
-		if (options & LS_INITD) {
+	ಆಗ (((d = readdir(dp)) != ಖಾಲಿ)) {
+		ಆದರೆ (d->d_name[0] == '.')
+			ಮುಂದುವರಿ;
+		ಆದರೆ (options & LS_INITD) {
 			/* Check that our file really exists.
 			 * This is important as a service maybe in a
 			 * runlevel, but could have been removed. */
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
-				continue;
+			ಆದರೆ (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
+				ಮುಂದುವರಿ;
 
 			/* .sh files are not init scripts */
-			l = strlen(d->d_name);
-			if (l > 2 && d->d_name[l - 3] == '.' &&
+			l = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(d->d_name);
+			ಆದರೆ (l > 2 && d->d_name[l - 3] == '.' &&
 					d->d_name[l - 2] == 's' &&
 					d->d_name[l - 1] == 'h')
-				continue;
+				ಮುಂದುವರಿ;
 		}
-		if (options & LS_DIR) {
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
-				continue;
+		ಆದರೆ (options & LS_DIR) {
+			ಆದರೆ (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
+				ಮುಂದುವರಿ;
 		}
-		rc_stringlist_add(list, d->d_name);
+		rc_stringlist_ಕೂಡಿಸು(list, d->d_name);
 	}
 	closedir(dp);
-	return list;
+	ಹಿಂತಿರುಗಿ list;
 }
 
-static bool
-rm_dir(int targetfd, const char *pathname, bool top)
+ಸ್ಥಿರ bool
+rm_dir(ಪೂರ್ಣಾಂಕ targetfd, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *pathname, bool ತುದಿ)
 {
 	bool retval = true;
-	struct dirent *d;
-	struct stat s;
+	ರಚನೆ dirent *d;
+	ರಚನೆ stat s;
 	DIR *dp;
 
-	if (!(dp = do_opendirat(targetfd, pathname)))
-		return false;
+	ಆದರೆ (!(dp = do_opendirat(targetfd, pathname)))
+		ಹಿಂತಿರುಗಿ false;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
-			continue;
-		if (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
+	ಆಗ ((d = readdir(dp))) {
+		ಆದರೆ (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+			ಮುಂದುವರಿ;
+		ಆದರೆ (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
 			retval = false;
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
-		if (S_ISDIR(s.st_mode)) {
-			if (!rm_dir(dirfd(dp), d->d_name, true)) {
+		ಆದರೆ (S_ISDIR(s.st_mode)) {
+			ಆದರೆ (!rm_dir(dirfd(dp), d->d_name, true)) {
 				retval = false;
-				break;
+				ನಿಲ್ಲಿಸು;
 			}
-		} else {
-			if (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಆದರೆ (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
 				retval = false;
-				break;
+				ನಿಲ್ಲಿಸು;
 			}
 		}
 	}
 	closedir(dp);
 
-	if (!retval)
-		return false;
+	ಆದರೆ (!retval)
+		ಹಿಂತಿರುಗಿ false;
 
-	if (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
-		return false;
+	ಆದರೆ (ತುದಿ && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
+		ಹಿಂತಿರುಗಿ false;
 
-	return true;
+	ಹಿಂತಿರುಗಿ true;
 }
 
 /* Other systems may need this at some point, but for now it's Linux only */
-#ifdef __linux__
-static bool
-file_regex(const char *file, const char *regex)
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
+ಸ್ಥಿರ bool
+file_regex(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *file, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *regex)
 {
 	FILE *fp;
-	char *line = NULL;
-	size_t size = 0;
+	ಅಕ್ಷರ *ಸಾಲು = ಖಾಲಿ;
+	size_t ಗಾತ್ರ_2 = 0;
 	ssize_t len = 0;
 	regex_t re;
 	bool retval = true;
-	int result;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ;
 
-	if (!(fp = fopen(file, "r")))
-		return false;
+	ಆದರೆ (!(fp = fopen(file, "r")))
+		ಹಿಂತಿರುಗಿ false;
 
-	if ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
-		char buf[BUFSIZ];
+	ಆದರೆ ((ಫಲಿತಾಂಶ = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
+		ಅಕ್ಷರ buf[BUFSIZ];
 		fclose(fp);
-		regerror(result, &re, buf, sizeof(buf));
+		regerror(ಫಲಿತಾಂಶ, &re, buf, ಗಾತ್ರ(buf));
 		fprintf(stderr, "file_regex: %s", buf);
-		return false;
+		ಹಿಂತಿರುಗಿ false;
 	}
 
-	while ((len = xgetline(&line, &size, fp)) != -1) {
-		char *str = line;
+	ಆಗ ((len = xgetline(&ಸಾಲು, &ಗಾತ್ರ_2, fp)) != -1) {
+		ಅಕ್ಷರ *str = ಸಾಲು;
 		/* some /proc files have \0 separated content so we have to
 		   loop through the 'line' */
-		do {
-			if (regexec(&re, str, 0, NULL, 0) == 0)
-				goto found;
-			str += strlen(str) + 1;
+		ಮಾಡು {
+			ಆದರೆ (regexec(&re, str, 0, ಖಾಲಿ, 0) == 0)
+				ಹೋಗು ಸಿಕ್ಕಿತು;
+			str += ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(str) + 1;
 			/* len is the size of allocated buffer and we don't
 			   want call regexec BUFSIZE times. find next str */
-			while (str < line + len && *str == '\0')
+			ಆಗ (str < ಸಾಲು + len && *str == '\0')
 				str++;
-		} while (str < line + len);
+		} ಆಗ (str < ಸಾಲು + len);
 	}
 	retval = false;
-found:
+ಸಿಕ್ಕಿತು:
 	fclose(fp);
-	free(line);
+	ಬಿಡುಗಡೆ(ಸಾಲು);
 	regfree(&re);
 
-	return retval;
+	ಹಿಂತಿರುಗಿ retval;
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-static const char *
-get_systype(void)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+get_systype(ಶೂನ್ಯ)
 {
-	char *systype = rc_conf_value("rc_sys");
-	if (systype) {
-		char *s = systype;
+	ಅಕ್ಷರ *systype = rc_conf_ಮೌಲ್ಯ("rc_sys");
+	ಆದರೆ (systype) {
+		ಅಕ್ಷರ *s = systype;
 		/* Convert to uppercase */
-		while (s && *s) {
-			if (islower((unsigned char) *s))
-				*s = toupper((unsigned char) *s);
+		ಆಗ (s && *s) {
+			ಆದರೆ (islower((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ) *s))
+				*s = ದೊಡ್ಡ_ಅಕ್ಷರ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ) *s);
 			s++;
 		}
 	}
-	return systype;
+	ಹಿಂತಿರುಗಿ systype;
 }
 
-static const char *
-detect_container(const char *systype RC_UNUSED)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+detect_container(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *systype RC_ಬಳಸದ)
 {
-#ifdef __FreeBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-		       return NULL;
-		if (strcmp(systype, RC_SYS_JAIL) == 0)
-			return RC_SYS_JAIL;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __FreeBSD__
+	ಆದರೆ (systype) {
+		ಆದರೆ (strcmp(systype, RC_SYS_NONE) == 0)
+		       ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+		ಆದರೆ (strcmp(systype, RC_SYS_JAIL) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_JAIL;
+		ಆದರೆ (strcmp(systype, RC_SYS_PODMAN) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_PODMAN;
 	}
 
-	int jailed = 0;
-	size_t len = sizeof(jailed);
+	ಪೂರ್ಣಾಂಕ jailed = 0;
+	size_t len = ಗಾತ್ರ(jailed);
 
-	if (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
-		if (jailed == 1)
-			return RC_SYS_JAIL;
+	ಆದರೆ (sysctlbyname("security.jail.jailed", &jailed, &len, ಖಾಲಿ, 0) == 0)
+		ಆದರೆ (jailed == 1)
+			ಹಿಂತಿರುಗಿ RC_SYS_JAIL;
 
-	if (access("/var/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
-#endif
+	ಆದರೆ (access("/var/run/.containerenv", F_OK) == 0)
+		ಹಿಂತಿರುಗಿ RC_SYS_PODMAN;
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_UML) == 0)
-			return RC_SYS_UML;
-		if (strcmp(systype, RC_SYS_VSERVER) == 0)
-			return RC_SYS_VSERVER;
-		if (strcmp(systype, RC_SYS_OPENVZ) == 0)
-			return RC_SYS_OPENVZ;
-		if (strcmp(systype, RC_SYS_LXC) == 0)
-			return RC_SYS_LXC;
-		if (strcmp(systype, RC_SYS_RKT) == 0)
-				return RC_SYS_RKT;
-		if (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
-				return RC_SYS_SYSTEMD_NSPAWN;
-		if (strcmp(systype, RC_SYS_DOCKER) == 0)
-				return RC_SYS_DOCKER;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
-		if (strcmp(systype, RC_SYS_WSL) == 0)
-			return RC_SYS_WSL;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
+	ಆದರೆ (systype) {
+		ಆದರೆ (strcmp(systype, RC_SYS_NONE) == 0)
+			ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+		ಆದರೆ (strcmp(systype, RC_SYS_UML) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_UML;
+		ಆದರೆ (strcmp(systype, RC_SYS_VSERVER) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_VSERVER;
+		ಆದರೆ (strcmp(systype, RC_SYS_OPENVZ) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_OPENVZ;
+		ಆದರೆ (strcmp(systype, RC_SYS_LXC) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_LXC;
+		ಆದರೆ (strcmp(systype, RC_SYS_RKT) == 0)
+				ಹಿಂತಿರುಗಿ RC_SYS_RKT;
+		ಆದರೆ (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
+				ಹಿಂತಿರುಗಿ RC_SYS_SYSTEMD_NSPAWN;
+		ಆದರೆ (strcmp(systype, RC_SYS_DOCKER) == 0)
+				ಹಿಂತಿರುಗಿ RC_SYS_DOCKER;
+		ಆದರೆ (strcmp(systype, RC_SYS_PODMAN) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_PODMAN;
+		ಆದರೆ (strcmp(systype, RC_SYS_WSL) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_WSL;
 	}
-	if (file_regex("/proc/cpuinfo", "UML"))
-		return RC_SYS_UML;
-	else if (file_regex("/proc/self/status",
+	ಆದರೆ (file_regex("/proc/cpuinfo", "UML"))
+		ಹಿಂತಿರುಗಿ RC_SYS_UML;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (file_regex("/proc/self/status",
 		"(s_context|VxID):[[:space:]]*[1-9]"))
-		return RC_SYS_VSERVER;
-	else if (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
-		return RC_SYS_OPENVZ;
-	else if (file_regex("/proc/self/status",
+		ಹಿಂತಿರುಗಿ RC_SYS_VSERVER;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
+		ಹಿಂತಿರುಗಿ RC_SYS_OPENVZ;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (file_regex("/proc/self/status",
 		"envID:[[:space:]]*[1-9]"))
-		return RC_SYS_OPENVZ; /* old test */
-	else if (file_regex("/proc/1/environ", "container=lxc"))
-		return RC_SYS_LXC;
-	else if (file_regex("/proc/1/environ", "container=rkt"))
-		return RC_SYS_RKT;
-	else if (file_regex("/proc/1/environ", "container=systemd-nspawn"))
-		return RC_SYS_SYSTEMD_NSPAWN;
-	else if (access("/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
-	else if (access("/.dockerenv", F_OK) == 0)
-		return RC_SYS_DOCKER;
+		ಹಿಂತಿರುಗಿ RC_SYS_OPENVZ; /* old test */
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (file_regex("/proc/1/environ", "container=lxc"))
+		ಹಿಂತಿರುಗಿ RC_SYS_LXC;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (file_regex("/proc/1/environ", "container=rkt"))
+		ಹಿಂತಿರುಗಿ RC_SYS_RKT;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (file_regex("/proc/1/environ", "container=systemd-nspawn"))
+		ಹಿಂತಿರುಗಿ RC_SYS_SYSTEMD_NSPAWN;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (access("/run/.containerenv", F_OK) == 0)
+		ಹಿಂತಿರುಗಿ RC_SYS_PODMAN;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (access("/.dockerenv", F_OK) == 0)
+		ಹಿಂತಿರುಗಿ RC_SYS_DOCKER;
 	/* old test, I'm not sure when this was valid. */
-	else if (file_regex("/proc/1/environ", "container=docker"))
-		return RC_SYS_DOCKER;
-	else if (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
-		return RC_SYS_WSL;
-	else if (getenv("WSL_DISTRO_NAME"))
-		return RC_SYS_WSL;
-	else if (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
-		return RC_SYS_WSL;
-#endif
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (file_regex("/proc/1/environ", "container=docker"))
+		ಹಿಂತಿರುಗಿ RC_SYS_DOCKER;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
+		ಹಿಂತಿರುಗಿ RC_SYS_WSL;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (getenv("WSL_DISTRO_NAME"))
+		ಹಿಂತಿರುಗಿ RC_SYS_WSL;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
+		ಹಿಂತಿರುಗಿ RC_SYS_WSL;
+#ಆದರೆ_ಅಂತ್ಯ
 
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-static const char *
-detect_vm(const char *systype RC_UNUSED)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+detect_vm(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *systype RC_ಬಳಸದ)
 {
-#ifdef __NetBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __NetBSD__
+	ಆದರೆ (systype) {
+		ಆದರೆ (strcmp(systype, RC_SYS_NONE) == 0)
+			ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+		ಆದರೆ (strcmp(systype, RC_SYS_XEN0) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_XEN0;
+		ಆದರೆ (strcmp(systype, RC_SYS_XENU) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_XENU;
 	}
-	if (access("/kern/xen/privcmd", F_OK) == 0)
-		return RC_SYS_XEN0;
-	if (access("/kern/xen", F_OK) == 0)
-		return RC_SYS_XENU;
-#endif
+	ಆದರೆ (access("/kern/xen/privcmd", F_OK) == 0)
+		ಹಿಂತಿರುಗಿ RC_SYS_XEN0;
+	ಆದರೆ (access("/kern/xen", F_OK) == 0)
+		ಹಿಂತಿರುಗಿ RC_SYS_XENU;
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
+	ಆದರೆ (systype) {
+		ಆದರೆ (strcmp(systype, RC_SYS_NONE) == 0)
+			ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+		ಆದರೆ (strcmp(systype, RC_SYS_XEN0) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_XEN0;
+		ಆದರೆ (strcmp(systype, RC_SYS_XENU) == 0)
+			ಹಿಂತಿರುಗಿ RC_SYS_XENU;
 	}
-	if (access("/proc/xen", F_OK) == 0) {
-		if (file_regex("/proc/xen/capabilities", "control_d"))
-			return RC_SYS_XEN0;
-		return RC_SYS_XENU;
+	ಆದರೆ (access("/proc/xen", F_OK) == 0) {
+		ಆದರೆ (file_regex("/proc/xen/capabilities", "control_d"))
+			ಹಿಂತಿರುಗಿ RC_SYS_XEN0;
+		ಹಿಂತಿರುಗಿ RC_SYS_XENU;
 	}
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-const char *
-rc_sys(void)
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+rc_sys(ಶೂನ್ಯ)
 {
-	const char *systype;
-	const char *sys;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *systype;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *sys;
 
 	systype = get_systype();
 	sys = detect_container(systype);
-	if (!sys) {
+	ಆದರೆ (!sys) {
 		sys = detect_vm(systype);
 	}
 
-	return sys;
+	ಹಿಂತಿರುಗಿ sys;
 }
 
-static const char *
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
 rc_parse_service_state(RC_SERVICE state)
 {
-	int i;
+	ಪೂರ್ಣಾಂಕ i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].name;
+	ಗಾಗಿ (i = 0; rc_service_state_ಹೆಸರುಗಳು[i].name; i++) {
+		ಆದರೆ (rc_service_state_ಹೆಸರುಗಳು[i].state == state)
+			ಹಿಂತಿರುಗಿ rc_service_state_ಹೆಸರುಗಳು[i].name;
 	}
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-static int
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ
 rc_parse_service_state_dirfd(RC_SERVICE state)
 {
-	for (size_t i = 0; rc_service_state_names[i].name; i++)
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].dir;
-	return -1;
+	ಗಾಗಿ (size_t i = 0; rc_service_state_ಹೆಸರುಗಳು[i].name; i++)
+		ಆದರೆ (rc_service_state_ಹೆಸರುಗಳು[i].state == state)
+			ಹಿಂತಿರುಗಿ rc_service_state_ಹೆಸರುಗಳು[i].dir;
+	ಹಿಂತಿರುಗಿ -1;
 }
 
 /* Returns a list of all the chained runlevels used by the
  * specified runlevel in dependency order, including the
  * specified runlevel. */
-static void
-get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
+ಸ್ಥಿರ ಶೂನ್ಯ
+get_runlevel_chain(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
 {
 	RC_STRINGLIST *dirs;
-	RC_STRING *d, *parent;
-	const char *nextlevel;
+	RC_STRING *d, *ಪೋಷಕ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *nextlevel;
 
 	/*
 	 * If we haven't been passed a runlevel or a level list, or
 	 * if the passed runlevel doesn't exist then we're done already!
 	 */
-	if (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
-		return;
+	ಆದರೆ (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
+		ಹಿಂತಿರುಗಿ;
 
 	/*
 	 * We want to add this runlevel to the list but if
 	 * it is already in the list it needs to go at the
 	 * end again.
 	 */
-	if (rc_stringlist_find(level_list, runlevel))
+	ಆದರೆ (rc_stringlist_ಕಂಡುಹಿಡಿ(level_list, runlevel))
 		rc_stringlist_delete(level_list, runlevel);
-	rc_stringlist_add(level_list, runlevel);
+	rc_stringlist_ಕೂಡಿಸು(level_list, runlevel);
 
 	/*
 	 * We can now do exactly the above procedure for our chained
@@ -427,20 +427,20 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 	 */
 	dirs = ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_DIR);
 	TAILQ_FOREACH(d, dirs, entries) {
-		nextlevel = d->value;
+		nextlevel = d->ಮೌಲ್ಯ;
 
 		/* Check for loop */
-		if (rc_stringlist_find(ancestor_list, nextlevel)) {
+		ಆದರೆ (rc_stringlist_ಕಂಡುಹಿಡಿ(ancestor_list, nextlevel)) {
 			fprintf(stderr, "Loop detected in stacked runlevels attempting to enter runlevel %s!\n",
 			    nextlevel);
 			fprintf(stderr, "Ancestors:\n");
-			TAILQ_FOREACH(parent, ancestor_list, entries)
-				fprintf(stderr, "\t%s\n", parent->value);
-			exit(1);
+			TAILQ_FOREACH(ಪೋಷಕ, ancestor_list, entries)
+				fprintf(stderr, "\t%s\n", ಪೋಷಕ->ಮೌಲ್ಯ);
+			ನಿರ್ಗಮಿಸು(1);
 		}
 
 		/* Add new ancestor */
-		rc_stringlist_add(ancestor_list, nextlevel);
+		rc_stringlist_ಕೂಡಿಸು(ancestor_list, nextlevel);
 
 		get_runlevel_chain(nextlevel, level_list, ancestor_list);
 
@@ -450,146 +450,146 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 }
 
 bool
-rc_runlevel_starting(void)
+rc_runlevel_starting(ಶೂನ್ಯ)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
+	ಹಿಂತಿರುಗಿ faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
 }
 
 bool
-rc_runlevel_stopping(void)
+rc_runlevel_stopping(ಶೂನ್ಯ)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
+	ಹಿಂತಿರುಗಿ faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
 }
 
-RC_STRINGLIST *rc_runlevel_list(void)
+RC_STRINGLIST *rc_runlevel_list(ಶೂನ್ಯ)
 {
-	return ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
+	ಹಿಂತಿರುಗಿ ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
 }
 
-char *
-rc_runlevel_get(void)
+ಅಕ್ಷರ *
+rc_runlevel_get(ಶೂನ್ಯ)
 {
 	FILE *fp;
-	char *runlevel = NULL;
+	ಅಕ್ಷರ *runlevel = ಖಾಲಿ;
 	size_t i;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
-		runlevel = xmalloc(sizeof(char) * PATH_MAX);
-		if (fgets(runlevel, PATH_MAX, fp)) {
-			i = strlen(runlevel);
-			if (i && runlevel[i - 1] == '\n')
+	ಆದರೆ ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
+		runlevel = xmalloc(ಗಾತ್ರ(ಅಕ್ಷರ) * PATH_MAX);
+		ಆದರೆ (fgets(runlevel, PATH_MAX, fp)) {
+			i = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(runlevel);
+			ಆದರೆ (i && runlevel[i - 1] == '\n')
 				runlevel[i - 1] = 0;
-		} else
+		} ಇಲ್ಲದಿದ್ದರೆ
 			*runlevel = '\0';
 		fclose(fp);
 	}
 
-	if (!runlevel || !*runlevel) {
-		free(runlevel);
-		runlevel = NULL;
+	ಆದರೆ (!runlevel || !*runlevel) {
+		ಬಿಡುಗಡೆ(runlevel);
+		runlevel = ಖಾಲಿ;
 	}
 
-	return runlevel;
+	ಹಿಂತಿರುಗಿ runlevel;
 }
 
 bool
-rc_runlevel_set(const char *runlevel)
+rc_runlevel_ಗಣ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel)
 {
 	FILE *fp;
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ಆದರೆ (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
+		ಹಿಂತಿರುಗಿ false;
 
 	fputs(runlevel, fp);
 	fclose(fp);
-	return true;
+	ಹಿಂತಿರುಗಿ true;
 }
 
 bool
-rc_runlevel_exists(const char *runlevel)
+rc_runlevel_exists(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel)
 {
-	struct stat buf;
+	ರಚನೆ stat buf;
 
-	if (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
-		return false;
-	if (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
-		return true;
-	return false;
+	ಆದರೆ (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
+		ಹಿಂತಿರುಗಿ false;
+	ಆದರೆ (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
+		ಹಿಂತಿರುಗಿ true;
+	ಹಿಂತಿರುಗಿ false;
 }
 
 bool
-rc_runlevel_stack(const char *dst, const char *src)
+rc_runlevel_ರಾಶಿ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *dst, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *src)
 {
-	char *d, *s;
-	int r;
+	ಅಕ್ಷರ *d, *s;
+	ಪೂರ್ಣಾಂಕ r;
 
-	if (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
-		return false;
+	ಆದರೆ (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
+		ಹಿಂತಿರುಗಿ false;
 	xasprintf(&s, "../%s", src);
 	xasprintf(&d, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = symlink(s, d);
-	free(d);
-	free(s);
-	return (r == 0);
+	ಬಿಡುಗಡೆ(d);
+	ಬಿಡುಗಡೆ(s);
+	ಹಿಂತಿರುಗಿ (r == 0);
 }
 
 bool
-rc_runlevel_unstack(const char *dst, const char *src)
+rc_runlevel_unstack(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *dst, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *src)
 {
-	char *path;
-	int r;
+	ಅಕ್ಷರ *ಮಾರ್ಗ;
+	ಪೂರ್ಣಾಂಕ r;
 
-	xasprintf(&path, "%s/%s/%s", rc_runleveldir(), dst, src);
-	r = unlink(path);
-	free(path);
-	return (r == 0);
+	xasprintf(&ಮಾರ್ಗ, "%s/%s/%s", rc_runleveldir(), dst, src);
+	r = unlink(ಮಾರ್ಗ);
+	ಬಿಡುಗಡೆ(ಮಾರ್ಗ);
+	ಹಿಂತಿರುಗಿ (r == 0);
 }
 
 RC_STRINGLIST *
-rc_runlevel_stacks(const char *runlevel)
+rc_runlevel_stacks(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel)
 {
-	RC_STRINGLIST *stack, *ancestor_list;
-	stack = rc_stringlist_new();
+	RC_STRINGLIST *ರಾಶಿ, *ancestor_list;
+	ರಾಶಿ = rc_stringlist_new();
 	ancestor_list = rc_stringlist_new();
-	rc_stringlist_add(ancestor_list, runlevel);
-	get_runlevel_chain(runlevel, stack, ancestor_list);
+	rc_stringlist_ಕೂಡಿಸು(ancestor_list, runlevel);
+	get_runlevel_chain(runlevel, ರಾಶಿ, ancestor_list);
 	rc_stringlist_free(ancestor_list);
-	return stack;
+	ಹಿಂತಿರುಗಿ ರಾಶಿ;
 }
 
-static const char *config_path[] = { _RC_PATH, NULL };
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *config_ಮಾರ್ಗ[] = { RC_ಮಾರ್ಗ, ಖಾಲಿ };
 
-static struct {
-	bool set;
-	char *svcdir, *confdir, *runleveldir;
+ಸ್ಥಿರ ರಚನೆ {
+	bool ಗಣ;
+	ಅಕ್ಷರ *svcdir, *confdir, *runleveldir;
 } rc_dirs;
 
-static struct {
-	char *buffer;
-	size_t count;
-	int *fds;
-	const char **entries, **allocd;
-} rc_path;
+ಸ್ಥಿರ ರಚನೆ {
+	ಅಕ್ಷರ *ಬಫರ್;
+	size_t ಎಣಿಕೆ_2;
+	ಪೂರ್ಣಾಂಕ *fds;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **entries, **allocd;
+} rc_ಮಾರ್ಗ;
 
-static void
-free_rc_dirs(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+free_rc_dirs(ಶೂನ್ಯ)
 {
-#define X(ptr) ptr = (free(ptr), NULL)
+#ವ್ಯಾಖ್ಯಾನಿಸು X(ptr) ptr = (ಬಿಡುಗಡೆ(ptr), ಖಾಲಿ)
 	X(rc_dirs.svcdir);
 	X(rc_dirs.confdir);
 	X(rc_dirs.runleveldir);
-	X(rc_path.allocd);
+	X(rc_ಮಾರ್ಗ.allocd);
 	/* entries alias freed allocation */
-	rc_path.entries = NULL;
-	X(rc_path.buffer);
-	X(rc_path.fds);
-	rc_path.count = 0;
-#undef X
+	rc_ಮಾರ್ಗ.entries = ಖಾಲಿ;
+	X(rc_ಮಾರ್ಗ.ಬಫರ್);
+	X(rc_ಮಾರ್ಗ.fds);
+	rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2 = 0;
+#ವ್ಯಾಖ್ಯಾನ_ರದ್ದು X
 }
 
 __attribute__((__format__(__printf__, 2, 3)))
-static void
-append_path(FILE *fp, const char *fmt, ...)
+ಸ್ಥಿರ ಶೂನ್ಯ
+append_ಮಾರ್ಗ(FILE *fp, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *fmt, ...)
 {
 	va_list va;
 
@@ -598,497 +598,497 @@ append_path(FILE *fp, const char *fmt, ...)
 	fputc('\0', fp);
 	va_end(va);
 
-	rc_path.count++;
+	rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2++;
 }
 
-static const char *
-strnsep(const char **str, size_t *size, const char sep)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+strnsep(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **str, size_t *ಗಾತ್ರ_2, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ sep)
 {
-	const char *ret = *str;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ret = *str;
 
-	if (!ret)
-		return NULL;
+	ಆದರೆ (!ret)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
 	*str = strchrnul(ret, sep);
-	*size = *str - ret;
-	if (!**str)
-		*str = NULL;
-	else
+	*ಗಾತ್ರ_2 = *str - ret;
+	ಆದರೆ (!**str)
+		*str = ಖಾಲಿ;
+	ಇಲ್ಲದಿದ್ದರೆ
 		*str += 1;
 
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static const char *
-strnullsep(const char **str, size_t *size)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+strnullsep(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **str, size_t *ಗಾತ್ರ_2)
 {
-	const char *ret = *str;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ret = *str;
 	size_t len;
 
-	if (!ret)
-		return NULL;
+	ಆದರೆ (!ret)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	len = strnlen(ret, *size - 1) + 1;
+	len = strnlen(ret, *ಗಾತ್ರ_2 - 1) + 1;
 
-	if ((*size -= len))
+	ಆದರೆ ((*ಗಾತ್ರ_2 -= len))
 		*str += len;
-	else
-		*str = NULL;
+	ಇಲ್ಲದಿದ್ದರೆ
+		*str = ಖಾಲಿ;
 
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static void
-append_user_path(FILE *fp)
+ಸ್ಥಿರ ಶೂನ್ಯ
+append_user_ಮಾರ್ಗ(FILE *fp)
 {
-	const char *xdg, *entry;
-	size_t size;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *xdg, *ನಮೂದು;
+	size_t ಗಾತ್ರ_2;
 
-	append_path(fp, "%s", rc_dirs.confdir);
-	if (!(xdg = getenv("XDG_CONFIG_DIRS")))
-		append_path(fp, "/etc/xdg/rc");
-	else while ((entry = strnsep(&xdg, &size, ':')))
-		if (size) append_path(fp, "%.*s/rc", (int) size, entry);
+	append_ಮಾರ್ಗ(fp, "%s", rc_dirs.confdir);
+	ಆದರೆ (!(xdg = getenv("XDG_CONFIG_DIRS")))
+		append_ಮಾರ್ಗ(fp, "/etc/xdg/rc");
+	ಇಲ್ಲದಿದ್ದರೆ ಆಗ ((ನಮೂದು = strnsep(&xdg, &ಗಾತ್ರ_2, ':')))
+		ಆದರೆ (ಗಾತ್ರ_2) append_ಮಾರ್ಗ(fp, "%.*s/rc", (ಪೂರ್ಣಾಂಕ) ಗಾತ್ರ_2, ನಮೂದು);
 
-	for (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
-		append_path(fp, "%s/user", config_path[i]);
-	append_path(fp, "%s", rc_dirs.svcdir);
+	ಗಾಗಿ (size_t i = 0; i < ARRAY_ಗಾತ್ರ(config_ಮಾರ್ಗ) - 2; i++)
+		append_ಮಾರ್ಗ(fp, "%s/user", config_ಮಾರ್ಗ[i]);
+	append_ಮಾರ್ಗ(fp, "%s", rc_dirs.svcdir);
 }
 
-static void
-append_rc_path(FILE *fp, const char *path, bool user)
+ಸ್ಥಿರ ಶೂನ್ಯ
+append_rc_ಮಾರ್ಗ(FILE *fp, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, bool user)
 {
 	bool has_user = false;
-	const char *entry;
-	size_t size;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ನಮೂದು;
+	size_t ಗಾತ್ರ_2;
 
-	while ((entry = strnsep(&path, &size, ':'))) {
-		if (size)
-			append_path(fp, "%.*s%s", (int)size, entry, user ? "/user" : "");
-		else if (user && !has_user)
-			append_user_path(fp), has_user = true;
-		else if (!user) while (*rc_path.entries)
-			append_path(fp, "%s", *rc_path.entries++);
+	ಆಗ ((ನಮೂದು = strnsep(&ಮಾರ್ಗ, &ಗಾತ್ರ_2, ':'))) {
+		ಆದರೆ (ಗಾತ್ರ_2)
+			append_ಮಾರ್ಗ(fp, "%.*s%s", (ಪೂರ್ಣಾಂಕ)ಗಾತ್ರ_2, ನಮೂದು, user ? "/user" : "");
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (user && !has_user)
+			append_user_ಮಾರ್ಗ(fp), has_user = true;
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!user) ಆಗ (*rc_ಮಾರ್ಗ.entries)
+			append_ಮಾರ್ಗ(fp, "%s", *rc_ಮಾರ್ಗ.entries++);
 	}
 }
 
-static void
-load_dynamic_path(bool user)
+ಸ್ಥಿರ ಶೂನ್ಯ
+ತುಂಬು_dynamic_ಮಾರ್ಗ(bool user)
 {
-	const char *path, *entry;
-	size_t size, count = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, *ನಮೂದು;
+	size_t ಗಾತ್ರ_2, ಎಣಿಕೆ_2 = 0;
 	FILE *fp;
 
-	if (!rc_dirs.set) {
+	ಆದರೆ (!rc_dirs.ಗಣ) {
 		atexit(free_rc_dirs);
-		rc_dirs.set = true;
+		rc_dirs.ಗಣ = true;
 	}
 
-	rc_path.entries = config_path;
-	rc_path.count = ARRAY_SIZE(config_path) - 1;
+	rc_ಮಾರ್ಗ.entries = config_ಮಾರ್ಗ;
+	rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2 = ARRAY_ಗಾತ್ರ(config_ಮಾರ್ಗ) - 1;
 
-	if (!(path = getenv("RC_PATH")) && !user)
-		return;
+	ಆದರೆ (!(ಮಾರ್ಗ = getenv("RC_PATH")) && !user)
+		ಹಿಂತಿರುಗಿ;
 
-	rc_path.count = 0;
-	fp = xopen_memstream(&rc_path.buffer, &size);
-	if (path)
-		append_rc_path(fp, path, user);
-	else
-		append_user_path(fp);
+	rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2 = 0;
+	fp = xopen_memstream(&rc_ಮಾರ್ಗ.ಬಫರ್, &ಗಾತ್ರ_2);
+	ಆದರೆ (ಮಾರ್ಗ)
+		append_rc_ಮಾರ್ಗ(fp, ಮಾರ್ಗ, user);
+	ಇಲ್ಲದಿದ್ದರೆ
+		append_user_ಮಾರ್ಗ(fp);
 	xclose_memstream(fp);
 
-	rc_path.allocd = rc_path.entries = calloc(rc_path.count + 1, sizeof(*rc_path.entries));
+	rc_ಮಾರ್ಗ.allocd = rc_ಮಾರ್ಗ.entries = ಸೊನ್ನೆ_ಸ್ಮರಣೆ_ಕೊಡು(rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2 + 1, ಗಾತ್ರ(*rc_ಮಾರ್ಗ.entries));
 
-	path = rc_path.buffer;
+	ಮಾರ್ಗ = rc_ಮಾರ್ಗ.ಬಫರ್;
 
-	while ((entry = strnullsep(&path, &size)) && count < rc_path.count)
-		rc_path.entries[count++] = entry;
-	rc_path.entries[rc_path.count] = NULL;
+	ಆಗ ((ನಮೂದು = strnullsep(&ಮಾರ್ಗ, &ಗಾತ್ರ_2)) && ಎಣಿಕೆ_2 < rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2)
+		rc_ಮಾರ್ಗ.entries[ಎಣಿಕೆ_2++] = ನಮೂದು;
+	rc_ಮಾರ್ಗ.entries[rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2] = ಖಾಲಿ;
 }
 
-static bool is_user = false;
+ಸ್ಥಿರ bool is_user = false;
 
 bool
-rc_is_user(void)
+rc_is_user(ಶೂನ್ಯ)
 {
-	int _is_user = -1;
+	ಪೂರ್ಣಾಂಕ _is_user = -1;
 
-	if (_is_user == -1) {
-		char *env = getenv("RC_USER_SERVICES");
+	ಆದರೆ (_is_user == -1) {
+		ಅಕ್ಷರ *env = getenv("RC_USER_SERVICES");
 
 		_is_user = env ? rc_yesno(env) : is_user;
 	}
 
-	return _is_user;
+	ಹಿಂತಿರುಗಿ _is_user;
 }
 
-void
-rc_set_user(void)
+ಶೂನ್ಯ
+rc_ಗಣ_user(ಶೂನ್ಯ)
 {
-	char *env;
+	ಅಕ್ಷರ *env;
 
-	if (is_user)
-		return;
+	ಆದರೆ (is_user)
+		ಹಿಂತಿರುಗಿ;
 
-	if (!rc_dirs.set)
+	ಆದರೆ (!rc_dirs.ಗಣ)
 		atexit(free_rc_dirs);
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		free_rc_dirs();
 
 	is_user = true;
-	rc_dirs.set = true;
+	rc_dirs.ಗಣ = true;
 	setenv("RC_USER_SERVICES", "yes", true);
 
-	if ((env = getenv("XDG_CONFIG_HOME"))) {
+	ಆದರೆ ((env = getenv("XDG_CONFIG_HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/rc", env);
-	} else if ((env = getenv("HOME"))) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ ((env = getenv("HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/.config/rc", env);
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		fprintf(stderr, "XDG_CONFIG_HOME and HOME unset.\n");
-		exit(EXIT_FAILURE);
+		ನಿರ್ಗಮಿಸು(EXIT_FAILURE);
 	}
 
 	xasprintf(&rc_dirs.runleveldir, "%s/runlevels", rc_dirs.confdir);
 
-	if (!(env = getenv("XDG_RUNTIME_DIR"))) {
+	ಆದರೆ (!(env = getenv("XDG_RUNTIME_DIR"))) {
 		/* FIXME: fallback to something else? */
 		fprintf(stderr, "XDG_RUNTIME_DIR unset.\n");
-		exit(EXIT_FAILURE);
+		ನಿರ್ಗಮಿಸು(EXIT_FAILURE);
 	}
 
 	xasprintf(&rc_dirs.svcdir, "%s/openrc", env);
 
-	load_dynamic_path(true);
+	ತುಂಬು_dynamic_ಮಾರ್ಗ(true);
 
 	clear_dirfds();
 }
 
-const char * const *
-rc_scriptdirs(void)
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ *
+rc_scriptdirs(ಶೂನ್ಯ)
 {
-	if (!rc_path.entries)
-		load_dynamic_path(false);
-	return rc_path.entries;
+	ಆದರೆ (!rc_ಮಾರ್ಗ.entries)
+		ತುಂಬು_dynamic_ಮಾರ್ಗ(false);
+	ಹಿಂತಿರುಗಿ rc_ಮಾರ್ಗ.entries;
 }
 
 size_t
-rc_scriptdirfds(const int **fds)
+rc_scriptdirfds(ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ **fds)
 {
-	static size_t len = 0;
+	ಸ್ಥಿರ size_t len = 0;
 
-	if (len == 0) {
-		if (!rc_path.entries)
-			load_dynamic_path(false);
+	ಆದರೆ (len == 0) {
+		ಆದರೆ (!rc_ಮಾರ್ಗ.entries)
+			ತುಂಬು_dynamic_ಮಾರ್ಗ(false);
 
-		rc_path.fds = xmalloc(rc_path.count * sizeof(*rc_path.fds));
-		for (size_t i = 0; i < rc_path.count; i++) {
-			int fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+		rc_ಮಾರ್ಗ.fds = xmalloc(rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2 * ಗಾತ್ರ(*rc_ಮಾರ್ಗ.fds));
+		ಗಾಗಿ (size_t i = 0; i < rc_ಮಾರ್ಗ.ಎಣಿಕೆ_2; i++) {
+			ಪೂರ್ಣಾಂಕ fd = open(rc_ಮಾರ್ಗ.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 
-			if (fd == -1)
-				continue;
+			ಆದರೆ (fd == -1)
+				ಮುಂದುವರಿ;
 
-			rc_path.fds[len++] = fd;
+			rc_ಮಾರ್ಗ.fds[len++] = fd;
 		}
 	}
 
-	*fds = rc_path.fds;
-	return len;
+	*fds = rc_ಮಾರ್ಗ.fds;
+	ಹಿಂತಿರುಗಿ len;
 }
 
-const char *
-rc_sysconfdir(void)
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+rc_sysconfdir(ಶೂನ್ಯ)
 {
-	return RC_SYSCONFDIR;
+	ಹಿಂತಿರುಗಿ RC_SYSCONFDIR;
 }
 
-const char *
-rc_usrconfdir(void)
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+rc_usrconfdir(ಶೂನ್ಯ)
 {
-	return rc_dirs.confdir ? rc_dirs.confdir : NULL;
+	ಹಿಂತಿರುಗಿ rc_dirs.confdir ? rc_dirs.confdir : ಖಾಲಿ;
 }
 
-const char *
-rc_runleveldir(void)
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+rc_runleveldir(ಶೂನ್ಯ)
 {
-	return rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
+	ಹಿಂತಿರುಗಿ rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
 }
 
-const char *
-rc_svcdir(void)
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *
+rc_svcdir(ಶೂನ್ಯ)
 {
-	static const char *svcdir;
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *svcdir;
 
-	if (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
+	ಆದರೆ (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
 		svcdir = RC_SVCDIR;
-	return rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
+	ಹಿಂತಿರುಗಿ rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
 }
 
-static ssize_t
-safe_readlink(int targetfd, const char *path, char **buf, size_t bufsiz)
+ಸ್ಥಿರ ssize_t
+ಸುರಕ್ಷಿತ_readlink(ಪೂರ್ಣಾಂಕ targetfd, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, ಅಕ್ಷರ **buf, size_t bufsiz)
 {
-	char *buffer;
+	ಅಕ್ಷರ *ಬಫರ್;
 	ssize_t r;
 
-	for (;; bufsiz += PATH_MAX) {
-		buffer = xmalloc(bufsiz);
-		r = readlinkat(targetfd, path, buffer, bufsiz);
-		if (r < 0) {
-			free(buffer);
-			return -errno;
+	ಗಾಗಿ (;; bufsiz += PATH_MAX) {
+		ಬಫರ್ = xmalloc(bufsiz);
+		r = readlinkat(targetfd, ಮಾರ್ಗ, ಬಫರ್, bufsiz);
+		ಆದರೆ (r < 0) {
+			ಬಿಡುಗಡೆ(ಬಫರ್);
+			ಹಿಂತಿರುಗಿ -errno;
 		}
-		if ((size_t)r < bufsiz) {
-			buffer[r] = '\0';
-			*buf = buffer;
-			return r;
+		ಆದರೆ ((size_t)r < bufsiz) {
+			ಬಫರ್[r] = '\0';
+			*buf = ಬಫರ್;
+			ಹಿಂತಿರುಗಿ r;
 		}
-		free(buffer);
-		if (bufsiz >= SSIZE_MAX - PATH_MAX)
-			return -ENOMEM;
+		ಬಿಡುಗಡೆ(ಬಫರ್);
+		ಆದರೆ (bufsiz >= SSIZE_MAX - PATH_MAX)
+			ಹಿಂತಿರುಗಿ -ENOMEM;
 	}
 }
 
 /* Resolve a service name to its full path */
-char *
-rc_service_resolve(const char *service)
+ಅಕ್ಷರ *
+rc_service_resolve(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
-	char *buffer;
-	struct stat buf;
+	ಅಕ್ಷರ *ಬಫರ್;
+	ರಚನೆ stat buf;
 
-	if (!service)
-		return NULL;
+	ಆದರೆ (!service)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	if (service[0] == '/')
-		return xstrdup(service);
+	ಆದರೆ (service[0] == '/')
+		ಹಿಂತಿರುಗಿ xstrdup(service);
 
 	/* First check started services */
-	if (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
-	if (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
+	ಆದರೆ (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		ಆದರೆ (ಸುರಕ್ಷಿತ_readlink(rc_dirfd(RC_DIR_STARTED), service, &ಬಫರ್, buf.st_size + 1) >= 0)
+			ಹಿಂತಿರುಗಿ ಬಫರ್;
+	ಆದರೆ (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		ಆದರೆ (ಸುರಕ್ಷಿತ_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &ಬಫರ್, buf.st_size + 1) >= 0)
+			ಹಿಂತಿರುಗಿ ಬಫರ್;
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
-		char *file = NULL;
+	ಗಾಗಿ (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ *dirs = rc_scriptdirs(); *dirs; dirs++) {
+		ಅಕ್ಷರ *file = ಖಾಲಿ;
 		xasprintf(&file, "%s/init.d/%s", *dirs, service);
-		if (stat(file, &buf) == 0)
-			return file;
-		free(file);
+		ಆದರೆ (stat(file, &buf) == 0)
+			ಹಿಂತಿರುಗಿ file;
+		ಬಿಡುಗಡೆ(file);
 	}
 
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
 bool
-rc_service_exists(const char *service)
+rc_service_exists(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
-	char *file;
+	ಅಕ್ಷರ *file;
 	bool retval = false;
 	size_t len;
-	struct stat buf;
+	ರಚನೆ stat buf;
 
-	if (!service) {
+	ಆದರೆ (!service) {
 		errno = EINVAL;
-		return false;
+		ಹಿಂತಿರುಗಿ false;
 	}
 
-	len = strlen(service);
+	len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(service);
 
 	/* .sh files are not init scripts */
-	if (len > 2 && service[len - 3] == '.' &&
+	ಆದರೆ (len > 2 && service[len - 3] == '.' &&
 			service[len - 2] == 's' &&
 			service[len - 1] == 'h') {
 		errno = EINVAL;
-		return false;
+		ಹಿಂತಿರುಗಿ false;
 	}
 
-	if (!(file = rc_service_resolve(service))) {
+	ಆದರೆ (!(file = rc_service_resolve(service))) {
 		errno = ENOENT;
-		return false;
+		ಹಿಂತಿರುಗಿ false;
 	}
 
-	if (stat(file, &buf) == 0) {
-		if (buf.st_mode & S_IXUGO)
+	ಆದರೆ (stat(file, &buf) == 0) {
+		ಆದರೆ (buf.st_mode & S_IXUGO)
 			retval = true;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			errno = ENOEXEC;
 	}
-	free(file);
-	return retval;
+	ಬಿಡುಗಡೆ(file);
+	ಹಿಂತಿರುಗಿ retval;
 }
 
-#define OPTSTR \
+#ವ್ಯಾಖ್ಯಾನಿಸು OPTSTR \
 ". '%s'; echo $extra_commands $extra_started_commands $extra_stopped_commands"
 
 RC_STRINGLIST *
-rc_service_extra_commands(const char *service)
+rc_service_extra_commands(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
-	char *svc;
-	char *cmd = NULL;
-	char *buffer = NULL;
+	ಅಕ್ಷರ *svc;
+	ಅಕ್ಷರ *cmd = ಖಾಲಿ;
+	ಅಕ್ಷರ *ಬಫರ್ = ಖಾಲಿ;
 	size_t len = 0;
-	RC_STRINGLIST *commands = NULL;
-	char *token;
-	char *p;
+	RC_STRINGLIST *commands = ಖಾಲಿ;
+	ಅಕ್ಷರ *token;
+	ಅಕ್ಷರ *p;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	ಆದರೆ (!(svc = rc_service_resolve(service)))
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
 	xasprintf(&cmd, OPTSTR, svc);
-	free(svc);
+	ಬಿಡುಗಡೆ(svc);
 
-	if (!(fp = popen(cmd, "r"))) {
-		free(cmd);
-		return NULL;
+	ಆದರೆ (!(fp = popen(cmd, "r"))) {
+		ಬಿಡುಗಡೆ(cmd);
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 	}
 
-	if (xgetline(&buffer, &len, fp) != -1) {
-		p = buffer;
+	ಆದರೆ (xgetline(&ಬಫರ್, &len, fp) != -1) {
+		p = ಬಫರ್;
 		commands = rc_stringlist_new();
 
-		while ((token = strsep(&p, " ")))
-			if (token[0] != '\0')
-				rc_stringlist_add(commands, token);
+		ಆಗ ((token = strsep(&p, " ")))
+			ಆದರೆ (token[0] != '\0')
+				rc_stringlist_ಕೂಡಿಸು(commands, token);
 	}
 
 	pclose(fp);
-	free(buffer);
-	free(cmd);
-	return commands;
+	ಬಿಡುಗಡೆ(ಬಫರ್);
+	ಬಿಡುಗಡೆ(cmd);
+	ಹಿಂತಿರುಗಿ commands;
 }
 
-#define DESCSTR ". '%s'; echo \"${description%s%s}\""
-char *
-rc_service_description(const char *service, const char *option)
+#ವ್ಯಾಖ್ಯಾನಿಸು DESCSTR ". '%s'; echo \"${description%s%s}\""
+ಅಕ್ಷರ *
+rc_service_description(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *option)
 {
-	char *svc;
-	char *cmd;
-	char *desc = NULL;
-	size_t size = 0;
+	ಅಕ್ಷರ *svc;
+	ಅಕ್ಷರ *cmd;
+	ಅಕ್ಷರ *desc = ಖಾಲಿ;
+	size_t ಗಾತ್ರ_2 = 0;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	ಆದರೆ (!(svc = rc_service_resolve(service)))
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	if (!option)
+	ಆದರೆ (!option)
 		option = "";
 
 	xasprintf(&cmd, DESCSTR, svc, *option ? "_" : "", option);
-	free(svc);
-	if ((fp = popen(cmd, "r"))) {
-		if (xgetline(&desc, &size, fp) == -1) {
-			free(desc);
-			desc = NULL;
+	ಬಿಡುಗಡೆ(svc);
+	ಆದರೆ ((fp = popen(cmd, "r"))) {
+		ಆದರೆ (xgetline(&desc, &ಗಾತ್ರ_2, fp) == -1) {
+			ಬಿಡುಗಡೆ(desc);
+			desc = ಖಾಲಿ;
 		}
 		pclose(fp);
 	}
-	free(cmd);
-	return desc;
+	ಬಿಡುಗಡೆ(cmd);
+	ಹಿಂತಿರುಗಿ desc;
 }
 
 bool
-rc_service_in_runlevel(const char *service, const char *runlevel)
+rc_service_ಒಳ_runlevel(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel)
 {
-	char *file;
+	ಅಕ್ಷರ *file;
 	bool r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	r = access(file, F_OK) == 0;
-	free(file);
-	return r;
+	ಬಿಡುಗಡೆ(file);
+	ಹಿಂತಿರುಗಿ r;
 }
 
 bool
-rc_service_mark(const char *service, const RC_SERVICE state)
+rc_service_mark(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ RC_SERVICE state)
 {
-	int i = 0;
-	const char *base;
-	char *init = rc_service_resolve(service);
+	ಪೂರ್ಣಾಂಕ i = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಳ;
+	ಅಕ್ಷರ *init = rc_service_resolve(service);
 	bool skip_wasinactive = false;
-	int serrno;
+	ಪೂರ್ಣಾಂಕ serrno;
 
-	if (!init)
-		return false;
+	ಆದರೆ (!init)
+		ಹಿಂತಿರುಗಿ false;
 
-	base = basename_c(service);
-	if (state != RC_SERVICE_STOPPED) {
-		int state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
-		if (access(init, F_OK) != 0) {
-			free(init);
-			return false;
+	ತಳ = basename_c(service);
+	ಆದರೆ (state != RC_SERVICE_STOPPED) {
+		ಪೂರ್ಣಾಂಕ state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
+		ಆದರೆ (access(init, F_OK) != 0) {
+			ಬಿಡುಗಡೆ(init);
+			ಹಿಂತಿರುಗಿ false;
 		}
 
-		unlinkat(state_dirfd, base, 0);
-		if ((symlinkat(init, state_dirfd, base)) != 0) {
-			free(init);
-			return false;
+		unlinkat(state_dirfd, ತಳ, 0);
+		ಆದರೆ ((symlinkat(init, state_dirfd, ತಳ)) != 0) {
+			ಬಿಡುಗಡೆ(init);
+			ಹಿಂತಿರುಗಿ false;
 		}
 	}
 
-	if (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
-		free(init);
-		return true;
+	ಆದರೆ (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
+		ಬಿಡುಗಡೆ(init);
+		ಹಿಂತಿರುಗಿ true;
 	}
 
 	/* Remove any old states now */
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		int state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
-		RC_SERVICE s = rc_service_state_names[i].state;
+	ಗಾಗಿ (i = 0; rc_service_state_ಹೆಸರುಗಳು[i].name; i++) {
+		ಪೂರ್ಣಾಂಕ state_dirfd = rc_dirfd(rc_service_state_ಹೆಸರುಗಳು[i].dir);
+		RC_SERVICE s = rc_service_state_ಹೆಸರುಗಳು[i].state;
 
-		if (s == state)
-			continue;
+		ಆದರೆ (s == state)
+			ಮುಂದುವರಿ;
 
-		switch (s) {
-		case RC_SERVICE_STOPPED:
-		case RC_SERVICE_HOTPLUGGED:
-		case RC_SERVICE_SCHEDULED:
-			continue;
-		case RC_SERVICE_WASINACTIVE:
-			if (skip_wasinactive)
-				continue;
+		ಆಯ್ಕೆ (s) {
+		ಸ್ಥಿತಿ RC_SERVICE_STOPPED:
+		ಸ್ಥಿತಿ RC_SERVICE_HOTPLUGGED:
+		ಸ್ಥಿತಿ RC_SERVICE_SCHEDULED:
+			ಮುಂದುವರಿ;
+		ಸ್ಥಿತಿ RC_SERVICE_WASINACTIVE:
+			ಆದರೆ (skip_wasinactive)
+				ಮುಂದುವರಿ;
 			/* fall-through */
-		default:
-			if (faccessat(state_dirfd, base, F_OK, 0) != 0)
-				continue;
-			if ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
-				if (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
-					free(init);
-					return false;
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			ಆದರೆ (faccessat(state_dirfd, ತಳ, F_OK, 0) != 0)
+				ಮುಂದುವರಿ;
+			ಆದರೆ ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
+				ಆದರೆ (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), ತಳ) == -1) {
+					ಬಿಡುಗಡೆ(init);
+					ಹಿಂತಿರುಗಿ false;
 				}
 				skip_wasinactive = true;
 			}
-			if (unlinkat(state_dirfd, base, 0) == -1) {
-				free(init);
-				return false;
+			ಆದರೆ (unlinkat(state_dirfd, ತಳ, 0) == -1) {
+				ಬಿಡುಗಡೆ(init);
+				ಹಿಂತಿರುಗಿ false;
 			}
 		}
 	}
 
 	/* Remove the exclusive state if we're inactive */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
-		unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), base, 0);
+	ಆದರೆ (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
+		unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), ತಳ, 0);
 
 	/* Remove any options and daemons the service may have stored */
-	if (state == RC_SERVICE_STOPPED) {
-		rm_dir(rc_dirfd(RC_DIR_OPTIONS), base, true);
-		rm_dir(rc_dirfd(RC_DIR_DAEMONS), base, true);
-		unlinkat(rc_dirfd(RC_DIR_ENVIRON), base, 0);
-		rc_service_schedule_clear(service);
+	ಆದರೆ (state == RC_SERVICE_STOPPED) {
+		rm_dir(rc_dirfd(RC_DIR_OPTIONS), ತಳ, true);
+		rm_dir(rc_dirfd(RC_DIR_DAEMONS), ತಳ, true);
+		unlinkat(rc_dirfd(RC_DIR_ENVIRON), ತಳ, 0);
+		rc_service_ವೇಳಾಪಟ್ಟಿ_clear(service);
 	}
 
 	/* These are final states, so remove us from scheduled */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
+	ಆದರೆ (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				char *was;
+		ಆದರೆ (dp) {
+			ರಚನೆ dirent *d;
+			ಆಗ ((d = readdir(dp))) {
+				ಅಕ್ಷರ *was;
 
-				xasprintf(&was, "%s/%s", d->d_name, base);
+				xasprintf(&was, "%s/%s", d->d_name, ತಳ);
 				unlinkat(dirfd(dp), was, 0);
-				free(was);
+				ಬಿಡುಗಡೆ(was);
 
 				serrno = errno;
 				unlinkat(dirfd(dp), d->d_name, AT_REMOVEDIR);
@@ -1098,38 +1098,38 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 			closedir(dp);
 		}
 	}
-	free(init);
-	return true;
+	ಬಿಡುಗಡೆ(init);
+	ಹಿಂತಿರುಗಿ true;
 }
 
 RC_SERVICE
-rc_service_state(const char *service)
+rc_service_state(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
-	const char *base = basename_c(service);
-	int state = RC_SERVICE_STOPPED;
-	int i;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಳ = basename_c(service);
+	ಪೂರ್ಣಾಂಕ state = RC_SERVICE_STOPPED;
+	ಪೂರ್ಣಾಂಕ i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
-			if (rc_service_state_names[i].state <= 0x10)
-				state = rc_service_state_names[i].state;
-			else
-				state |= rc_service_state_names[i].state;
+	ಗಾಗಿ (i = 0; rc_service_state_ಹೆಸರುಗಳು[i].name; i++) {
+		ಆದರೆ (faccessat(rc_dirfd(rc_service_state_ಹೆಸರುಗಳು[i].dir), ತಳ, F_OK, 0) == 0) {
+			ಆದರೆ (rc_service_state_ಹೆಸರುಗಳು[i].state <= 0x10)
+				state = rc_service_state_ಹೆಸರುಗಳು[i].state;
+			ಇಲ್ಲದಿದ್ದರೆ
+				state |= rc_service_state_ಹೆಸರುಗಳು[i].state;
 		}
 	}
 
-	if (state & RC_SERVICE_STARTED)
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+	ಆದರೆ (state & RC_SERVICE_STARTED)
+		ಆದರೆ (rc_service_daemons_crashed(service) && errno != EACCES)
 			state |= RC_SERVICE_CRASHED;
 
-	if (state & RC_SERVICE_STOPPED) {
+	ಆದರೆ (state & RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				if (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
+		ಆದರೆ (dp) {
+			ರಚನೆ dirent *d;
+			ಆಗ ((d = readdir(dp))) {
+				ಆದರೆ (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
 					state |= RC_SERVICE_SCHEDULED;
-					break;
+					ನಿಲ್ಲಿಸು;
 				}
 			}
 
@@ -1137,320 +1137,320 @@ rc_service_state(const char *service)
 		}
 	}
 
-	return state;
+	ಹಿಂತಿರುಗಿ state;
 }
 
-char *
-rc_service_value_get(const char *service, const char *option)
+ಅಕ್ಷರ *
+rc_service_ಮೌಲ್ಯ_get(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *option)
 {
-	char *buffer = NULL;
+	ಅಕ್ಷರ *ಬಫರ್ = ಖಾಲಿ;
 	size_t len = 0;
-	char *file;
+	ಅಕ್ಷರ *file;
 
 	xasprintf(&file, "%s/options/%s/%s", rc_svcdir(), service, option);
-	rc_getfile(file, &buffer, &len);
-	free(file);
+	rc_getfile(file, &ಬಫರ್, &len);
+	ಬಿಡುಗಡೆ(file);
 
-	return buffer;
+	ಹಿಂತಿರುಗಿ ಬಫರ್;
 }
 
 bool
-rc_service_value_set(const char *service, const char *option, const char *value)
+rc_service_ಮೌಲ್ಯ_ಗಣ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *option, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ)
 {
 	bool ret = true;
-	int optdirfd;
+	ಪೂರ್ಣಾಂಕ optdirfd;
 	FILE *fp;
 
-	if (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
-		return false;
+	ಆದರೆ (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
+		ಹಿಂತಿರುಗಿ false;
 
-	if ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
-		return false;
+	ಆದರೆ ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
+		ಹಿಂತಿರುಗಿ false;
 
-	if (!value) {
+	ಆದರೆ (!ಮೌಲ್ಯ) {
 		unlinkat(optdirfd, option, 0);
-	} else if ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
-		fprintf(fp, "%s", value);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
+		fprintf(fp, "%s", ಮೌಲ್ಯ);
 		fclose(fp);
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		ret = false;
 	}
 
 	close(optdirfd);
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
 bool
-rc_service_schedule_start(const char *service, const char *service_to_start)
+rc_service_ವೇಳಾಪಟ್ಟಿ_ಆರಂಭ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service_ಗಮ್ಯ_ಆರಂಭ)
 {
-	const char *base_to_start = basename_c(service_to_start);
-	const char *base = basename_c(service);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಳ_ಗಮ್ಯ_ಆರಂಭ = basename_c(service_ಗಮ್ಯ_ಆರಂಭ);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಳ = basename_c(service);
 	bool retval;
-	int schedfd;
-	char *init;
+	ಪೂರ್ಣಾಂಕ schedfd;
+	ಅಕ್ಷರ *init;
 
 	/* service may be a provided service, like net */
-	if (!service || !rc_service_exists(service_to_start))
-		return false;
+	ಆದರೆ (!service || !rc_service_exists(service_ಗಮ್ಯ_ಆರಂಭ))
+		ಹಿಂತಿರುಗಿ false;
 
-	if (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
-		return false;
+	ಆದರೆ (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), ತಳ, 0755) != 0 && errno != EEXIST)
+		ಹಿಂತಿರುಗಿ false;
 
-	if ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
-		return false;
+	ಆದರೆ ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), ತಳ, O_RDONLY)) == -1)
+		ಹಿಂತಿರುಗಿ false;
 
-	init = rc_service_resolve(service_to_start);
+	init = rc_service_resolve(service_ಗಮ್ಯ_ಆರಂಭ);
 
-	retval = (faccessat(schedfd, base_to_start, F_OK, 0) == 0) || (symlinkat(init, schedfd, base_to_start) == 0);
+	retval = (faccessat(schedfd, ತಳ_ಗಮ್ಯ_ಆರಂಭ, F_OK, 0) == 0) || (symlinkat(init, schedfd, ತಳ_ಗಮ್ಯ_ಆರಂಭ) == 0);
 
 	close(schedfd);
-	free(init);
-	return retval;
+	ಬಿಡುಗಡೆ(init);
+	ಹಿಂತಿರುಗಿ retval;
 }
 
 bool
-rc_service_schedule_clear(const char *service)
+rc_service_ವೇಳಾಪಟ್ಟಿ_clear(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
-	return !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
+	ಹಿಂತಿರುಗಿ !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel(const char *runlevel)
+rc_services_ಒಳ_runlevel(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel)
 {
-	RC_STRINGLIST *list = NULL;
+	RC_STRINGLIST *list = ಖಾಲಿ;
 
-	if (!runlevel) {
-		const int *scriptdirfds;
+	ಆದರೆ (!runlevel) {
+		ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ *scriptdirfds;
 		list = rc_stringlist_new();
-		for (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
+		ಗಾಗಿ (size_t i = 0, ಎಣಿಕೆ_2 = rc_scriptdirfds(&scriptdirfds); i < ಎಣಿಕೆ_2; i++) {
 			RC_STRINGLIST *svcs;
 
 			svcs = ls_dir(scriptdirfds[i], "init.d", LS_INITD);
 			TAILQ_CONCAT(list, svcs, entries);
 			rc_stringlist_free(svcs);
 		}
-		return list;
+		ಹಿಂತಿರುಗಿ list;
 	}
 
 	/* These special levels never contain any services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
-		return rc_stringlist_new();
+	ಆದರೆ (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
+		ಹಿಂತಿರುಗಿ rc_stringlist_new();
 
-	return ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
+	ಹಿಂತಿರುಗಿ ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel_stacked(const char *runlevel)
+rc_services_ಒಳ_runlevel_stacked(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel)
 {
 	RC_STRINGLIST *list, *stacks, *sl;
-	RC_STRING *stack;
+	RC_STRING *ರಾಶಿ;
 
-	list = rc_services_in_runlevel(runlevel);
+	list = rc_services_ಒಳ_runlevel(runlevel);
 	stacks = rc_runlevel_stacks(runlevel);
-	TAILQ_FOREACH(stack, stacks, entries) {
-		sl = rc_services_in_runlevel(stack->value);
+	TAILQ_FOREACH(ರಾಶಿ, stacks, entries) {
+		sl = rc_services_ಒಳ_runlevel(ರಾಶಿ->ಮೌಲ್ಯ);
 		TAILQ_CONCAT(list, sl, entries);
 		rc_stringlist_free(sl);
 	}
 	rc_stringlist_free(stacks);
-	return list;
+	ಹಿಂತಿರುಗಿ list;
 }
 
 RC_STRINGLIST *
-rc_services_in_state(RC_SERVICE state)
+rc_services_ಒಳ_state(RC_SERVICE state)
 {
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *list;
-	struct dirent *d;
+	ರಚನೆ dirent *d;
 	DIR *dp;
 
-	if (state != RC_SERVICE_SCHEDULED)
-		return ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
+	ಆದರೆ (state != RC_SERVICE_SCHEDULED)
+		ಹಿಂತಿರುಗಿ ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
 
 	list = rc_stringlist_new();
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
-		return list;
+	ಆದರೆ (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
+		ಹಿಂತಿರುಗಿ list;
 
-	while ((d = readdir(dp))) {
-		if (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
-			continue;
+	ಆಗ ((d = readdir(dp))) {
+		ಆದರೆ (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
+			ಮುಂದುವರಿ;
 		TAILQ_CONCAT(list, services, entries);
 		rc_stringlist_free(services);
 	}
 	closedir(dp);
 
-	return list;
+	ಹಿಂತಿರುಗಿ list;
 }
 
 bool
-rc_service_add(const char *runlevel, const char *service)
+rc_service_ಕೂಡಿಸು(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
 	bool retval;
-	char *init;
-	char *file;
-	char *path;
-	char *binit = NULL;
-	char *i;
+	ಅಕ್ಷರ *init;
+	ಅಕ್ಷರ *file;
+	ಅಕ್ಷರ *ಮಾರ್ಗ;
+	ಅಕ್ಷರ *binit = ಖಾಲಿ;
+	ಅಕ್ಷರ *i;
 
-	if (!rc_runlevel_exists(runlevel)) {
+	ಆದರೆ (!rc_runlevel_exists(runlevel)) {
 		errno = ENOENT;
-		return false;
+		ಹಿಂತಿರುಗಿ false;
 	}
 
-	if (rc_service_in_runlevel(service, runlevel)) {
+	ಆದರೆ (rc_service_ಒಳ_runlevel(service, runlevel)) {
 		errno = EEXIST;
-		return false;
+		ಹಿಂತಿರುಗಿ false;
 	}
 
 	i = init = rc_service_resolve(service);
 
 	/* We need to ensure that only things in /etc/init.d are added
 	 * to the boot runlevel -- not applicable for user services. */
-	if (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
-		path = realpath(dirname(init), NULL);
-		if (path == NULL) {
-			free(init);
-			return false;
+	ಆದರೆ (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
+		ಮಾರ್ಗ = realpath(dirname(init), ಖಾಲಿ);
+		ಆದರೆ (ಮಾರ್ಗ == ಖಾಲಿ) {
+			ಬಿಡುಗಡೆ(init);
+			ಹಿಂತಿರುಗಿ false;
 		}
-		retval = (strcmp(path, RC_INITDIR) == 0);
-		free(path);
-		if (!retval) {
-			free(init);
+		retval = (strcmp(ಮಾರ್ಗ, RC_INITDIR) == 0);
+		ಬಿಡುಗಡೆ(ಮಾರ್ಗ);
+		ಆದರೆ (!retval) {
+			ಬಿಡುಗಡೆ(init);
 			errno = EPERM;
-			return false;
+			ಹಿಂತಿರುಗಿ false;
 		}
 		xasprintf(&binit, "%s/%s", RC_INITDIR, service);
 		i = binit;
 	}
 
 	/* We shouldn't add any temporary script to a runlevel */
-	if (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
+	ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(i, rc_svcdir(), ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(rc_svcdir())) == 0) {
 		errno = ENOENT;
 		retval = false;
-		goto out;
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	retval = (symlink(i, file) == 0);
-	free(file);
+	ಬಿಡುಗಡೆ(file);
 
-out:
-	free(binit);
-	free(init);
-	return retval;
+ಹೊರಹೋಗು:
+	ಬಿಡುಗಡೆ(binit);
+	ಬಿಡುಗಡೆ(init);
+	ಹಿಂತಿರುಗಿ retval;
 }
 
 bool
-rc_service_delete(const char *runlevel, const char *service)
+rc_service_delete(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *runlevel, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
-	char *file;
-	int r;
+	ಅಕ್ಷರ *file;
+	ಪೂರ್ಣಾಂಕ r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel,
 		basename_c(service));
 	r = unlink(file);
-	free(file);
-	return (r == 0);
+	ಬಿಡುಗಡೆ(file);
+	ಹಿಂತಿರುಗಿ (r == 0);
 }
 
 RC_STRINGLIST *
-rc_services_scheduled_by(const char *service)
+rc_services_scheduled_by(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	struct dirent *d;
+	ರಚನೆ dirent *d;
 	DIR *dp;
 
-	if (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
-		return list;
+	ಆದರೆ (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
+		ಹಿಂತಿರುಗಿ list;
 
-	while ((d = readdir(dp))) {
-		char *file;
+	ಆಗ ((d = readdir(dp))) {
+		ಅಕ್ಷರ *file;
 		xasprintf(&file, "%s/%s", d->d_name, service);
-		if (faccessat(dirfd(dp), file, F_OK, 0) == 0)
-			rc_stringlist_add(list, d->d_name);
-		free(file);
+		ಆದರೆ (faccessat(dirfd(dp), file, F_OK, 0) == 0)
+			rc_stringlist_ಕೂಡಿಸು(list, d->d_name);
+		ಬಿಡುಗಡೆ(file);
 	}
 
-	return list;
+	ಹಿಂತಿರುಗಿ list;
 }
 
 RC_STRINGLIST *
-rc_services_scheduled(const char *service)
+rc_services_scheduled(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service)
 {
-	return ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
+	ಹಿಂತಿರುಗಿ ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
 }
 
 bool
-rc_service_putenv(const char *service, const char *env)
+rc_service_putenv(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *env)
 {
 	size_t name_len = strcspn(env, "=");
-	char var[strlen(service) + sizeof("/") + name_len];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	ಅಕ್ಷರ var[ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(service) + ಗಾತ್ರ("/") + name_len];
+	ಪೂರ್ಣಾಂಕ dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	if (env[name_len] != '=')
-		return errno = EINVAL, false;
+	ಆದರೆ (env[name_len] != '=')
+		ಹಿಂತಿರುಗಿ errno = EINVAL, false;
 
-	snprintf(var, sizeof(var), "%s/%.*s", service, (int) name_len, env);
+	snprintf(var, ಗಾತ್ರ(var), "%s/%.*s", service, (ಪೂರ್ಣಾಂಕ) name_len, env);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	ಆದರೆ (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		ಹಿಂತಿರುಗಿ false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ಆದರೆ (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		ಹಿಂತಿರುಗಿ false;
 
 	fputs(&env[name_len + 1], fp);
 
-	return fclose(fp) == 0;
+	ಹಿಂತಿರುಗಿ fclose(fp) == 0;
 }
 
 bool
-rc_service_setenv(const char *service, const char *name, const char *value)
+rc_service_setenv(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	ಅಕ್ಷರ var[ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(service) + ಗಾತ್ರ("/") + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(name)];
+	ಪೂರ್ಣಾಂಕ dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, ಗಾತ್ರ(var), "%s/%s", service, name);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	ಆದರೆ (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		ಹಿಂತಿರುಗಿ false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	ಆದರೆ (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		ಹಿಂತಿರುಗಿ false;
 
-	fputs(value, fp);
+	fputs(ಮೌಲ್ಯ, fp);
 
-	return fclose(fp) == 0;
+	ಹಿಂತಿರುಗಿ fclose(fp) == 0;
 }
 
 ssize_t
-rc_service_getenv(const char *service, const char *name, char **buf)
+rc_service_getenv(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *service, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಅಕ್ಷರ **buf)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)], *value;
-	int dfd = rc_dirfd(RC_DIR_ENVIRON);
-	struct stat stat;
-	size_t count;
+	ಅಕ್ಷರ var[ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(service) + ಗಾತ್ರ("/") + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(name)], *ಮೌಲ್ಯ;
+	ಪೂರ್ಣಾಂಕ dfd = rc_dirfd(RC_DIR_ENVIRON);
+	ರಚನೆ stat stat;
+	size_t ಎಣಿಕೆ_2;
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, ಗಾತ್ರ(var), "%s/%s", service, name);
 
-	if (fstatat(dfd, var, &stat, 0) == -1)
-		return -1;
+	ಆದರೆ (fstatat(dfd, var, &stat, 0) == -1)
+		ಹಿಂತಿರುಗಿ -1;
 
-	if (!buf)
-		return stat.st_size;
+	ಆದರೆ (!buf)
+		ಹಿಂತಿರುಗಿ stat.st_size;
 
-	if (!(value = xrealloc(*buf, stat.st_size + 1)))
-		return -1;
+	ಆದರೆ (!(ಮೌಲ್ಯ = xrealloc(*buf, stat.st_size + 1)))
+		ಹಿಂತಿರುಗಿ -1;
 
-	if (!(fp = do_fopenat(dfd, var, O_RDONLY)))
-		return -1;
+	ಆದರೆ (!(fp = do_fopenat(dfd, var, O_RDONLY)))
+		ಹಿಂತಿರುಗಿ -1;
 
-	count = fread(value, 1, stat.st_size, fp);
-	value[count] = '\0';
+	ಎಣಿಕೆ_2 = fread(ಮೌಲ್ಯ, 1, stat.st_size, fp);
+	ಮೌಲ್ಯ[ಎಣಿಕೆ_2] = '\0';
 
 	fclose(fp);
-	*buf = value;
-	return count;
+	*buf = ಮೌಲ್ಯ;
+	ಹಿಂತಿರುಗಿ ಎಣಿಕೆ_2;
 }

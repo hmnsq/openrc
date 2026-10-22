@@ -15,132 +15,132 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stddef.h>
-#include <errno.h>
-#include <dlfcn.h>
-#include <ctype.h>
-#include <limits.h>
-#include <pwd.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <stddef.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <dlfcn.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <limits.h>
+#ಅನ್ತರ್ಭಾವ <pwd.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#include <selinux/selinux.h>
-#include <selinux/label.h>
-#include <selinux/get_default_type.h>
-#include <selinux/context.h>
+#ಅನ್ತರ್ಭಾವ <selinux/selinux.h>
+#ಅನ್ತರ್ಭಾವ <selinux/label.h>
+#ಅನ್ತರ್ಭಾವ <selinux/get_default_type.h>
+#ಅನ್ತರ್ಭಾವ <selinux/context.h>
 
-#include <sys/stat.h>
-#include <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "plugin.h"
-#include "selinux.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "queue.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "misc.h"
+#ಅನ್ತರ್ಭಾವ "plugin.h"
+#ಅನ್ತರ್ಭಾವ "selinux.h"
 
 /* the context files for selinux */
-#define INITRC_FILE "initrc_context"
+#ವ್ಯಾಖ್ಯಾನಿಸು INITRC_FILE "initrc_context"
 
-#ifdef HAVE_AUDIT
-#include <libaudit.h>
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_AUDIT
+#ಅನ್ತರ್ಭಾವ <libaudit.h>
+#ಆದರೆ_ಅಂತ್ಯ
 
 /* PAM or shadow for authentication */
-#ifdef HAVE_PAM
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
 #    define PAM_SERVICE_NAME "run_init" /* the name of this program for PAM */
 #    include <security/pam_appl.h>
 #    include <security/pam_misc.h>
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 #    define PASSWORD_PROMPT "Password:"
 #    include <crypt.h>
 #    include <shadow.h>
 #    include <string.h>
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 
 /* The handle for the fcontext lookups */
-static struct selabel_handle *hnd = NULL;
+ಸ್ಥಿರ ರಚನೆ selabel_handle *hnd = ಖಾಲಿ;
 
-int selinux_util_label(const char *path)
+ಪೂರ್ಣಾಂಕ selinux_util_label(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	int retval = 0;
-	int enforce;
-	struct stat st;
-	char *con;
+	ಪೂರ್ಣಾಂಕ retval = 0;
+	ಪೂರ್ಣಾಂಕ enforce;
+	ರಚನೆ stat st;
+	ಅಕ್ಷರ *con;
 
 	enforce = security_getenforce();
-	if (retval < 0)
-		return retval;
+	ಆದರೆ (retval < 0)
+		ಹಿಂತಿರುಗಿ retval;
 
-	if (!hnd)
-		return (enforce) ? -1 : 0;
+	ಆದರೆ (!hnd)
+		ಹಿಂತಿರುಗಿ (enforce) ? -1 : 0;
 
-	retval = lstat(path, &st);
-	if (retval < 0) {
-		if (errno == ENOENT)
-			return 0;
-		return (enforce) ? -1 : 0;
+	retval = lstat(ಮಾರ್ಗ, &st);
+	ಆದರೆ (retval < 0) {
+		ಆದರೆ (errno == ENOENT)
+			ಹಿಂತಿರುಗಿ 0;
+		ಹಿಂತಿರುಗಿ (enforce) ? -1 : 0;
 	}
 
 	/* lookup the context */
-	retval = selabel_lookup_raw(hnd, &con, path, st.st_mode);
-	if (retval < 0) {
-		if (errno == ENOENT)
-			return 0;
-		return (enforce) ? -1 : 0;
+	retval = selabel_lookup_raw(hnd, &con, ಮಾರ್ಗ, st.st_mode);
+	ಆದರೆ (retval < 0) {
+		ಆದರೆ (errno == ENOENT)
+			ಹಿಂತಿರುಗಿ 0;
+		ಹಿಂತಿರುಗಿ (enforce) ? -1 : 0;
 	}
 
 	/* apply the context */
-	retval = lsetfilecon(path, con);
+	retval = lsetfilecon(ಮಾರ್ಗ, con);
 	freecon(con);
-	if (retval < 0) {
-		if (errno == ENOENT)
-			return 0;
-		if (errno == ENOTSUP)
-			return 0;
-		return (enforce) ? -1 : 0;
+	ಆದರೆ (retval < 0) {
+		ಆದರೆ (errno == ENOENT)
+			ಹಿಂತಿರುಗಿ 0;
+		ಆದರೆ (errno == ENOTSUP)
+			ಹಿಂತಿರುಗಿ 0;
+		ಹಿಂತಿರುಗಿ (enforce) ? -1 : 0;
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /*
  * Open the label handle
  * returns 1 on success, 0 if no selinux, negative on error
  */
-int selinux_util_open(void)
+ಪೂರ್ಣಾಂಕ selinux_util_open(ಶೂನ್ಯ)
 {
-	int retval = 0;
+	ಪೂರ್ಣಾಂಕ retval = 0;
 
 	retval = is_selinux_enabled();
-	if (retval <= 0)
-		return retval;
+	ಆದರೆ (retval <= 0)
+		ಹಿಂತಿರುಗಿ retval;
 
-	hnd = selabel_open(SELABEL_CTX_FILE, NULL, 0);
-	if (!hnd)
-		return -2;
+	hnd = selabel_open(SELABEL_CTX_FILE, ಖಾಲಿ, 0);
+	ಆದರೆ (!hnd)
+		ಹಿಂತಿರುಗಿ -2;
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
 /*
  * Close the label handle
  * returns 1 on success, 0 if no selinux, negative on error
  */
-int selinux_util_close(void)
+ಪೂರ್ಣಾಂಕ selinux_util_close(ಶೂನ್ಯ)
 {
-	int retval = 0;
+	ಪೂರ್ಣಾಂಕ retval = 0;
 
 	retval = is_selinux_enabled();
-	if (retval <= 0)
-		return retval;
+	ಆದರೆ (retval <= 0)
+		ಹಿಂತಿರುಗಿ retval;
 
-	if (hnd) {
+	ಆದರೆ (hnd) {
 		selabel_close(hnd);
-		hnd = NULL;
+		hnd = ಖಾಲಿ;
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /*
@@ -149,268 +149,268 @@ int selinux_util_close(void)
  * We ask for the password to make sure it is intended vs run by malicious software.
  * Actual authorization is covered by the policy itself.
  */
-static int check_password(char *username)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_password(ಅಕ್ಷರ *username)
 {
-	int ret = 1;
-#ifdef HAVE_PAM
+	ಪೂರ್ಣಾಂಕ ret = 1;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
 	pam_handle_t *pamh;
-	int pam_err = 0;
-	const struct pam_conv pconv = {
+	ಪೂರ್ಣಾಂಕ pam_err = 0;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ pam_conv pconv = {
 		misc_conv,
-		NULL
+		ಖಾಲಿ
 	};
 
-	pam_err = pam_start(PAM_SERVICE_NAME, username, &pconv, &pamh);
-	if (pam_err != PAM_SUCCESS) {
+	pam_err = pam_ಆರಂಭ(PAM_SERVICE_NAME, username, &pconv, &pamh);
+	ಆದರೆ (pam_err != PAM_SUCCESS) {
 		ret = -1;
-		goto outpam;
+		ಹೋಗು outpam;
 	}
 
 	pam_err = pam_authenticate(pamh, PAM_DISALLOW_NULL_AUTHTOK);
-	if (pam_err != PAM_SUCCESS) {
+	ಆದರೆ (pam_err != PAM_SUCCESS) {
 		ret = -1;
-		goto outpam;
+		ಹೋಗು outpam;
 	}
 
 	ret = 0;
 outpam:
-	pam_end(pamh, pam_err);
-	pamh = NULL;
+	pam_ಕೊನೆ(pamh, pam_err);
+	pamh = ಖಾಲಿ;
 
-#else /* authenticating via /etc/shadow instead */
-	struct spwd *spw;
-	char *password;
-	char *attempt;
+#ಇಲ್ಲದಿದ್ದರೆ /* authenticating via /etc/shadow instead */
+	ರಚನೆ spwd *spw;
+	ಅಕ್ಷರ *password;
+	ಅಕ್ಷರ *attempt;
 
 	spw = getspnam(username);
-	if (!spw) {
+	ಆದರೆ (!spw) {
 		eerror("Failed to read shadow entry");
 		ret = -1;
-		goto outshadow;
+		ಹೋಗು outshadow;
 	}
 
 	attempt = getpass(PASSWORD_PROMPT);
-	if (!attempt) {
+	ಆದರೆ (!attempt) {
 		ret = -1;
-		goto outshadow;
+		ಹೋಗು outshadow;
 	}
 
-	if (*spw->sp_pwdp == '\0' && *attempt == '\0') {
+	ಆದರೆ (*spw->sp_pwdp == '\0' && *attempt == '\0') {
 		ret = -1;
-		goto outshadow;
+		ಹೋಗು outshadow;
 	}
 
 	/* salt must be at least two characters long */
-	if (!(spw->sp_pwdp[0] && spw->sp_pwdp[1])) {
+	ಆದರೆ (!(spw->sp_pwdp[0] && spw->sp_pwdp[1])) {
 		ret = -1;
-		goto outshadow;
+		ಹೋಗು outshadow;
 	}
 
 	/* encrypt the password attempt */
 	password = crypt(attempt, spw->sp_pwdp);
 
-	if (password && strcmp(password, spw->sp_pwdp) == 0)
+	ಆದರೆ (password && strcmp(password, spw->sp_pwdp) == 0)
 		ret = 0;
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		ret = -1;
 outshadow:
-#endif
-	return ret;
+#ಆದರೆ_ಅಂತ್ಯ
+	ಹಿಂತಿರುಗಿ ret;
 }
 
 /* Authenticates the user, returns 0 on success, 1 on fail */
-static int check_auth()
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_auth()
 {
-	struct passwd *pw;
+	ರಚನೆ passwd *pw;
 	uid_t uid;
 
-#ifdef HAVE_AUDIT
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_AUDIT
 	uid = audit_getloginuid();
-	if (uid == (uid_t) -1)
+	ಆದರೆ (uid == (uid_t) -1)
 		uid = getuid();
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 	uid = getuid();
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 	pw = getpwuid(uid);
-	if (!pw) {
+	ಆದರೆ (!pw) {
 		eerror("cannot find your entry in the passwd file.");
-		return (-1);
+		ಹಿಂತಿರುಗಿ (-1);
 	}
 
-	printf("Authenticating %s.\n", pw->pw_name);
+	ಬರೆ("Authenticating %s.\n", pw->pw_name);
 
 	/* do the actual check */
-	if (check_password(pw->pw_name) == 0) {
-		return 0;
+	ಆದರೆ (check_password(pw->pw_name) == 0) {
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
 	eerrorx("Authentication failed for %s", pw->pw_name);
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
 /*
  * Read the context from the given context file. context must be free'd by the user.
  */
-static int read_context_file(const char *filename, char **context)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ read_context_file(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename, ಅಕ್ಷರ **context)
 {
-	int ret = -1;
+	ಪೂರ್ಣಾಂಕ ret = -1;
 	FILE *fp;
-	char *filepath = NULL;
-	char *line = NULL;
-	char *p;
-	char *p2;
+	ಅಕ್ಷರ *filepath = ಖಾಲಿ;
+	ಅಕ್ಷರ *ಸಾಲು = ಖಾಲಿ;
+	ಅಕ್ಷರ *p;
+	ಅಕ್ಷರ *p2;
 	size_t len = 0;
 
-	xasprintf(&filepath, "%s/%s", selinux_contexts_path(), filename);
+	xasprintf(&filepath, "%s/%s", selinux_contexts_ಮಾರ್ಗ(), filename);
 
 	fp = fopen(filepath, "r");
-	if (fp == NULL) {
+	ಆದರೆ (fp == ಖಾಲಿ) {
 		eerror("Failed to open context file: %s", filename);
-		free(filepath);
-		return -1;
+		ಬಿಡುಗಡೆ(filepath);
+		ಹಿಂತಿರುಗಿ -1;
 	}
 
-	while (xgetline(&line, &len, fp) != -1) {
+	ಆಗ (xgetline(&ಸಾಲು, &len, fp) != -1) {
 		/* cut off spaces before the string */
-		p = line;
-		while (isspace(*p) && *p != '\0')
+		p = ಸಾಲು;
+		ಆಗ (ಖಾಲಿಯೇ(*p) && *p != '\0')
 			p++;
 
 		/* empty string, skip */
-		if (*p == '\0')
-			continue;
+		ಆದರೆ (*p == '\0')
+			ಮುಂದುವರಿ;
 
 		/* cut off spaces after the string */
 		p2 = p;
-		while (!isspace(*p2) && *p2 != '\0')
+		ಆಗ (!ಖಾಲಿಯೇ(*p2) && *p2 != '\0')
 			p2++;
 		*p2 = '\0';
 
 		*context = xstrdup(p);
 		ret = 0;
-		break;
+		ನಿಲ್ಲಿಸು;
 	}
 
-	free(line);
-	free(filepath);
+	ಬಿಡುಗಡೆ(ಸಾಲು);
+	ಬಿಡುಗಡೆ(filepath);
 	fclose(fp);
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static int read_run_init_context(char **context)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ read_ಸತತ_init_context(ಅಕ್ಷರ **context)
 {
-	int ret = -1;
+	ಪೂರ್ಣಾಂಕ ret = -1;
 	RC_STRINGLIST *list;
-	char *value = NULL;
+	ಅಕ್ಷರ *ಮೌಲ್ಯ = ಖಾಲಿ;
 
-	list = rc_config_list(selinux_openrc_contexts_path());
-	if (list == NULL)
-		return ret;
+	list = rc_config_list(selinux_openrc_contexts_ಮಾರ್ಗ());
+	ಆದರೆ (list == ಖಾಲಿ)
+		ಹಿಂತಿರುಗಿ ret;
 
-	value = rc_config_value(list, "run_init");
-	if (value != NULL && strlen(value) > 0) {
-		*context = xstrdup(value);
+	ಮೌಲ್ಯ = rc_config_ಮೌಲ್ಯ(list, "run_init");
+	ಆದರೆ (ಮೌಲ್ಯ != ಖಾಲಿ && ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಮೌಲ್ಯ) > 0) {
+		*context = xstrdup(ಮೌಲ್ಯ);
 		ret = 0;
 	}
 
 	rc_stringlist_free(list);
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-void selinux_setup(char **argv)
+ಶೂನ್ಯ selinux_ಸಿದ್ಧತೆ(ಅಕ್ಷರ **argv)
 {
-	char *new_context = NULL;
-	char *curr_context = NULL;
+	ಅಕ್ಷರ *new_context = ಖಾಲಿ;
+	ಅಕ್ಷರ *curr_context = ಖಾಲಿ;
 	context_t curr_con;
-	char *curr_t = NULL;
-	char *run_init_t = NULL;
+	ಅಕ್ಷರ *curr_t = ಖಾಲಿ;
+	ಅಕ್ಷರ *ಸತತ_init_t = ಖಾಲಿ;
 
 	/* Return, if selinux is disabled. */
-	if (is_selinux_enabled() < 1) {
-		return;
+	ಆದರೆ (is_selinux_enabled() < 1) {
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	if (read_run_init_context(&run_init_t) != 0) {
+	ಆದರೆ (read_ಸತತ_init_context(&ಸತತ_init_t) != 0) {
 		/* assume a reasonable default, rather than bailing out */
-		run_init_t = xstrdup("run_init_t");
-		ewarn("Assuming SELinux run_init type is %s", run_init_t);
+		ಸತತ_init_t = xstrdup("run_init_t");
+		ewarn("Assuming SELinux run_init type is %s", ಸತತ_init_t);
 	}
 
 	/* Get our current context. */
-	if (getcon(&curr_context) < 0) {
-		if (errno == ENOENT) {
+	ಆದರೆ (getcon(&curr_context) < 0) {
+		ಆದರೆ (errno == ENOENT) {
 			/* should only hit this if proc is not mounted.  this
 			 * happens on Gentoo right after init starts, when
 			 * the init script processing starts.
 			 */
-			goto out;
-		} else {
+			ಹೋಗು ಹೊರಹೋಗು;
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			perror("getcon");
-			exit(1);
+			ನಿರ್ಗಮಿಸು(1);
 		}
 	}
 
 	/* extract the type from the context */
 	curr_con = context_new(curr_context);
-	if (!curr_con) {
-		free(curr_context);
-		goto out;
+	ಆದರೆ (!curr_con) {
+		ಬಿಡುಗಡೆ(curr_context);
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
 	curr_t = xstrdup(context_type_get(curr_con));
-	if (!curr_t) {
+	ಆದರೆ (!curr_t) {
 		context_free(curr_con);
-		free(curr_context);
-		goto out;
+		ಬಿಡುಗಡೆ(curr_context);
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
 	/* dont need them anymore so free() now */
 	context_free(curr_con);
-	free(curr_context);
+	ಬಿಡುಗಡೆ(curr_context);
 
 	/* if we are not in the run_init domain, we should not do anything */
-	if (strncmp(run_init_t, curr_t, strlen(run_init_t)) != 0) {
-		goto out;
+	ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(ಸತತ_init_t, curr_t, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಸತತ_init_t)) != 0) {
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
-	free(curr_t);
-	free(run_init_t);
+	ಬಿಡುಗಡೆ(curr_t);
+	ಬಿಡುಗಡೆ(ಸತತ_init_t);
 
-	if (check_auth() != 0) {
+	ಆದರೆ (check_auth() != 0) {
 		eerrorx("Authentication failed.");
 	}
 
 	/* Get the context for the script to be run in. */
-	if (read_context_file(INITRC_FILE, &new_context) != 0) {
+	ಆದರೆ (read_context_file(INITRC_FILE, &new_context) != 0) {
 		/* assume a reasonable default, rather than bailing out */
 		new_context = xstrdup("system_u:system_r:initrc_t");
 		ewarn("Assuming SELinux initrc context is %s", new_context);
 	}
 
 	/* Set the new context */
-	if (setexeccon(new_context) < 0) {
+	ಆದರೆ (setexeccon(new_context) < 0) {
 		eerrorx("Could not set SELinux exec context to %s.", new_context);
 	}
 
-	free(new_context);
+	ಬಿಡುಗಡೆ(new_context);
 
 	/*
 	 * exec will recycle ptys so try and use open_init_pty if it exists
 	 * which will open the pty with initrc_devpts_t, if it doesn't exist,
 	 * fall back to plain exec
 	 */
-	if (access("/usr/sbin/open_init_pty", X_OK) == 0) {
-		if (execvp("/usr/sbin/open_init_pty", argv)) {
+	ಆದರೆ (access("/usr/sbin/open_init_pty", X_OK) == 0) {
+		ಆದರೆ (execvp("/usr/sbin/open_init_pty", argv)) {
 			perror("execvp");
-			exit(-1);
+			ನಿರ್ಗಮಿಸು(-1);
 		}
-	} else if (execvp(argv[1], argv + 1)) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (execvp(argv[1], argv + 1)) {
 		perror("execvp");
-		exit(-1);
+		ನಿರ್ಗಮಿಸು(-1);
 	}
 
-out:
-	free(run_init_t);
-	free(curr_t);
+ಹೊರಹೋಗು:
+	ಬಿಡುಗಡೆ(ಸತತ_init_t);
+	ಬಿಡುಗಡೆ(curr_t);
 }

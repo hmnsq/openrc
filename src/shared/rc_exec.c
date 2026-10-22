@@ -10,170 +10,170 @@
  * except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <signal.h>
+#ಅನ್ತರ್ಭಾವ <sys/wait.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#include "rc_exec.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "rc_exec.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
-static void checked_close(int fd)
+ಸ್ಥಿರ ಶೂನ್ಯ checked_close(ಪೂರ್ಣಾಂಕ fd)
 {
-	if (fd >= 0)
+	ಆದರೆ (fd >= 0)
 		close(fd);
 }
 
-static int devnull(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ devnull(ಶೂನ್ಯ)
 {
-	static int devnullfd = -1;
-	if (devnullfd < 0)
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ devnullfd = -1;
+	ಆದರೆ (devnullfd < 0)
 		devnullfd = open("/dev/null", O_RDWR | O_CLOEXEC);
-	if (devnullfd < 0) {
+	ಆದರೆ (devnullfd < 0) {
 		fprintf(stderr, "Failed to open /dev/null: %s", strerror(errno));
 		_exit(1);
 	}
-	return devnullfd;
+	ಹಿಂತಿರುಗಿ devnullfd;
 }
 
-struct exec_args exec_init(const char **argv)
+ರಚನೆ exec_ವಾದಗಳು exec_init(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv)
 {
-	struct exec_args args = {0};
-	args.argv = argv;
-	args.redirect_stdin  = EXEC_NO_REDIRECT;
-	args.redirect_stdout = EXEC_NO_REDIRECT;
-	args.redirect_stderr = EXEC_NO_REDIRECT;
-	args.uid = (uid_t)-1;
-	args.gid = (gid_t)-1;
-	return args;
+	ರಚನೆ exec_ವಾದಗಳು ವಾದಗಳು = {0};
+	ವಾದಗಳು.argv = argv;
+	ವಾದಗಳು.redirect_stdin  = EXEC_NO_REDIRECT;
+	ವಾದಗಳು.redirect_stdout = EXEC_NO_REDIRECT;
+	ವಾದಗಳು.redirect_stderr = EXEC_NO_REDIRECT;
+	ವಾದಗಳು.uid = (uid_t)-1;
+	ವಾದಗಳು.gid = (gid_t)-1;
+	ಹಿಂತಿರುಗಿ ವಾದಗಳು;
 }
 
-struct exec_result do_exec(struct exec_args *args)
+ರಚನೆ exec_ಫಲಿತಾಂಶ do_exec(ರಚನೆ exec_ವಾದಗಳು *ವಾದಗಳು)
 {
-	struct exec_result res = { .pid = -1 };
-	sigset_t full, old;
-	int saved_errno, err, n;
-	int execpipe[2] = {-1, -1};
-	int stdin_pipe[2] = {-1, -1};
-	int stdout_pipe[2] = {-1, -1};
-	int stderr_pipe[2] = {-1, -1};
-	const char *cmd = args->cmd ? args->cmd : args->argv[0];
+	ರಚನೆ exec_ಫಲಿತಾಂಶ res = { .pid = -1 };
+	sigset_t ತುಂಬಿದ, old;
+	ಪೂರ್ಣಾಂಕ saved_errno, err, n;
+	ಪೂರ್ಣಾಂಕ execpipe[2] = {-1, -1};
+	ಪೂರ್ಣಾಂಕ stdin_pipe[2] = {-1, -1};
+	ಪೂರ್ಣಾಂಕ stdout_pipe[2] = {-1, -1};
+	ಪೂರ್ಣಾಂಕ stderr_pipe[2] = {-1, -1};
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *cmd = ವಾದಗಳು->cmd ? ವಾದಗಳು->cmd : ವಾದಗಳು->argv[0];
 
-	if (pipe2(execpipe, O_CLOEXEC) < 0)
-		goto exit;
-	if (args->redirect_stdin == EXEC_MKPIPE) {
-		if (pipe2(stdin_pipe, O_CLOEXEC) < 0)
-			goto exit;
-		args->redirect_stdin = stdin_pipe[0];
+	ಆದರೆ (pipe2(execpipe, O_CLOEXEC) < 0)
+		ಹೋಗು ನಿರ್ಗಮಿಸು;
+	ಆದರೆ (ವಾದಗಳು->redirect_stdin == EXEC_MKPIPE) {
+		ಆದರೆ (pipe2(stdin_pipe, O_CLOEXEC) < 0)
+			ಹೋಗು ನಿರ್ಗಮಿಸು;
+		ವಾದಗಳು->redirect_stdin = stdin_pipe[0];
 	}
-	if (args->redirect_stdout == EXEC_MKPIPE) {
-		if (pipe2(stdout_pipe, O_CLOEXEC) < 0)
-			goto exit;
-		args->redirect_stdout = stdout_pipe[1];
+	ಆದರೆ (ವಾದಗಳು->redirect_stdout == EXEC_MKPIPE) {
+		ಆದರೆ (pipe2(stdout_pipe, O_CLOEXEC) < 0)
+			ಹೋಗು ನಿರ್ಗಮಿಸು;
+		ವಾದಗಳು->redirect_stdout = stdout_pipe[1];
 	}
-	if (args->redirect_stderr == EXEC_MKPIPE) {
-		if (pipe2(stderr_pipe, O_CLOEXEC) < 0)
-			goto exit;
-		args->redirect_stderr = stderr_pipe[1];
+	ಆದರೆ (ವಾದಗಳು->redirect_stderr == EXEC_MKPIPE) {
+		ಆದರೆ (pipe2(stderr_pipe, O_CLOEXEC) < 0)
+			ಹೋಗು ನಿರ್ಗಮಿಸು;
+		ವಾದಗಳು->redirect_stderr = stderr_pipe[1];
 	}
 
-	if (args->redirect_stdin == EXEC_DEVNULL)
-		args->redirect_stdin = devnull();
-	if (args->redirect_stdout == EXEC_DEVNULL)
-		args->redirect_stdout = devnull();
-	if (args->redirect_stderr == EXEC_DEVNULL)
-		args->redirect_stderr = devnull();
+	ಆದರೆ (ವಾದಗಳು->redirect_stdin == EXEC_DEVNULL)
+		ವಾದಗಳು->redirect_stdin = devnull();
+	ಆದರೆ (ವಾದಗಳು->redirect_stdout == EXEC_DEVNULL)
+		ವಾದಗಳು->redirect_stdout = devnull();
+	ಆದರೆ (ವಾದಗಳು->redirect_stderr == EXEC_DEVNULL)
+		ವಾದಗಳು->redirect_stderr = devnull();
 
-	sigfillset(&full);
-	sigprocmask(SIG_SETMASK, &full, &old);
+	sigfillset(&ತುಂಬಿದ);
+	sigprocmask(SIG_SETMASK, &ತುಂಬಿದ, &old);
 	res.pid = fork();
 
-	if (res.pid < 0) {
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		goto exit;
-	} else if (res.pid == 0) {
-		/* child */
-		if (args->redirect_stdin != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stdin, STDIN_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stdout != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stdout, STDOUT_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stderr != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stderr, STDERR_FILENO) < 0)
-			goto child_err;
-		if (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
-			goto child_err;
-		if (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
-			goto child_err;
-		if (args->setsid && setsid() < 0)
-			goto child_err;
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		execvp(cmd, UNCONST(args->argv));
-child_err:
+	ಆದರೆ (res.pid < 0) {
+		sigprocmask(SIG_SETMASK, &old, ಖಾಲಿ);
+		ಹೋಗು ನಿರ್ಗಮಿಸು;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (res.pid == 0) {
+		/*ಮಗು*/
+		ಆದರೆ (ವಾದಗಳು->redirect_stdin != EXEC_NO_REDIRECT &&
+		    dup2(ವಾದಗಳು->redirect_stdin, STDIN_FILENO) < 0)
+			ಹೋಗು ಮಗು_err;
+		ಆದರೆ (ವಾದಗಳು->redirect_stdout != EXEC_NO_REDIRECT &&
+		    dup2(ವಾದಗಳು->redirect_stdout, STDOUT_FILENO) < 0)
+			ಹೋಗು ಮಗು_err;
+		ಆದರೆ (ವಾದಗಳು->redirect_stderr != EXEC_NO_REDIRECT &&
+		    dup2(ವಾದಗಳು->redirect_stderr, STDERR_FILENO) < 0)
+			ಹೋಗು ಮಗು_err;
+		ಆದರೆ (ವಾದಗಳು->gid != (gid_t)-1 && setgid(ವಾದಗಳು->gid) < 0)
+			ಹೋಗು ಮಗು_err;
+		ಆದರೆ (ವಾದಗಳು->uid != (uid_t)-1 && setuid(ವಾದಗಳು->uid) < 0)
+			ಹೋಗು ಮಗು_err;
+		ಆದರೆ (ವಾದಗಳು->setsid && setsid() < 0)
+			ಹೋಗು ಮಗು_err;
+		sigprocmask(SIG_SETMASK, &old, ಖಾಲಿ);
+		execvp(cmd, UNCONST(ವಾದಗಳು->argv));
+ಮಗು_err:
 		saved_errno = errno;
-		write(execpipe[1], &saved_errno, sizeof saved_errno);
+		ಲಿಖ(execpipe[1], &saved_errno, ಗಾತ್ರ saved_errno);
 		_exit(1);
-	} else {
-		/* parent */
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		/*ಪೋಷಕ*/
 		close(execpipe[1]);
 		execpipe[1] = -1;
-		n = read(execpipe[0], &err, sizeof err);
-		if (n != 0) {
+		n = ಪಠ(execpipe[0], &err, ಗಾತ್ರ err);
+		ಆದರೆ (n != 0) {
 			/* exec failed, reap the child and cleanup */
-			waitpid(res.pid, NULL, 0); /* do we care about waitpid failures? */
+			waitpid(res.pid, ಖಾಲಿ, 0); /* do we care about waitpid failures? */
 			res.pid = -1;
 		}
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		if (res.pid < 0) {
-			errno = (n == sizeof err) ? err : EINVAL;
-			goto exit;
+		sigprocmask(SIG_SETMASK, &old, ಖಾಲಿ);
+		ಆದರೆ (res.pid < 0) {
+			errno = (n == ಗಾತ್ರ err) ? err : EINVAL;
+			ಹೋಗು ನಿರ್ಗಮಿಸು;
 		}
 
-		if (stdin_pipe[0] >= 0) {
+		ಆದರೆ (stdin_pipe[0] >= 0) {
 			res.proc_stdin = stdin_pipe[1];
 			stdin_pipe[1] = -1; /* to avoid closing it below */
 		}
-		if (stdout_pipe[0] >= 0) {
+		ಆದರೆ (stdout_pipe[0] >= 0) {
 			res.proc_stdout = stdout_pipe[0];
 			stdout_pipe[0] = -1;
 		}
-		if (stderr_pipe[0] >= 0) {
+		ಆದರೆ (stderr_pipe[0] >= 0) {
 			res.proc_stderr = stderr_pipe[0];
 			stderr_pipe[0] = -1;
 		}
 	}
 
-exit:
+ನಿರ್ಗಮಿಸು:
 	saved_errno = errno;
 	checked_close(execpipe[0]); checked_close(execpipe[1]);
 	checked_close(stdin_pipe[0]); checked_close(stdin_pipe[1]);
 	checked_close(stdout_pipe[0]); checked_close(stdout_pipe[1]);
 	checked_close(stderr_pipe[0]); checked_close(stderr_pipe[1]);
 	errno = saved_errno;
-	return res;
+	ಹಿಂತಿರುಗಿ res;
 }
 
-int rc_waitpid(pid_t pid)
+ಪೂರ್ಣಾಂಕ rc_waitpid(pid_t pid)
 {
-	int status;
-	while (waitpid(pid, &status, 0) == -1) {
-		if (errno != EINTR) {
-			status = -1;
-			break;
+	ಪೂರ್ಣಾಂಕ ಸ್ಥಿತಿ_2;
+	ಆಗ (waitpid(pid, &ಸ್ಥಿತಿ_2, 0) == -1) {
+		ಆದರೆ (errno != EINTR) {
+			ಸ್ಥಿತಿ_2 = -1;
+			ನಿಲ್ಲಿಸು;
 		}
 	}
-	return status;
+	ಹಿಂತಿರುಗಿ ಸ್ಥಿತಿ_2;
 }
 
-int rc_pipe_command(const char *cmd, int devnullfd)
+ಪೂರ್ಣಾಂಕ rc_pipe_command(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *cmd, ಪೂರ್ಣಾಂಕ devnullfd)
 {
-	const char *argv[] = { "/bin/sh", "-c", cmd, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
-	args.redirect_stdin = EXEC_MKPIPE;
-	args.redirect_stdout = args.redirect_stderr = devnullfd;
-	res = do_exec(&args);
-	return (res.pid > 0) ? res.proc_stdin : -1;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *argv[] = { "/bin/sh", "-c", cmd, ಖಾಲಿ };
+	ರಚನೆ exec_ಫಲಿತಾಂಶ res;
+	ರಚನೆ exec_ವಾದಗಳು ವಾದಗಳು = exec_init(argv);
+	ವಾದಗಳು.redirect_stdin = EXEC_MKPIPE;
+	ವಾದಗಳು.redirect_stdout = ವಾದಗಳು.redirect_stderr = devnullfd;
+	res = do_exec(&ವಾದಗಳು);
+	ಹಿಂತಿರುಗಿ (res.pid > 0) ? res.proc_stdin : -1;
 }

@@ -15,39 +15,39 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <getopt.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "_usage.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "queue.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "_usage.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "cdDe:ilr:INsSZ" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "debug",     0, NULL, 'd' },
-	{ "nodeps",     0, NULL, 'D' },
-	{ "exists",   1, NULL, 'e' },
-	{ "ifcrashed", 0, NULL, 'c' },
-	{ "ifexists", 0, NULL, 'i' },
-	{ "ifinactive", 0, NULL, 'I' },
-	{ "ifnotstarted", 0, NULL, 'N' },
-	{ "ifstarted", 0, NULL, 's' },
-	{ "ifstopped", 0, NULL, 'S' },
-	{ "list",     0, NULL, 'l' },
-	{ "resolve",  1, NULL, 'r' },
-	{ "dry-run",     0, NULL, 'Z' },
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet = ಖಾಲಿ;
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *extraopts = ಖಾಲಿ;
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ getoptstring[] = "cdDe:ilr:INsSZ" getoptstring_COMMON;
+ಸ್ಥಿರಾಂಕ ರಚನೆ option longopts[] = {
+	{ "debug",     0, ಖಾಲಿ, 'd' },
+	{ "nodeps",     0, ಖಾಲಿ, 'D' },
+	{ "exists",   1, ಖಾಲಿ, 'e' },
+	{ "ifcrashed", 0, ಖಾಲಿ, 'c' },
+	{ "ifexists", 0, ಖಾಲಿ, 'i' },
+	{ "ifinactive", 0, ಖಾಲಿ, 'I' },
+	{ "ifnotstarted", 0, ಖಾಲಿ, 'N' },
+	{ "ifstarted", 0, ಖಾಲಿ, 's' },
+	{ "ifstopped", 0, ಖಾಲಿ, 'S' },
+	{ "list",     0, ಖಾಲಿ, 'l' },
+	{ "resolve",  1, ಖಾಲಿ, 'r' },
+	{ "dry-run",     0, ಖಾಲಿ, 'Z' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ longopts_help[] = {
 	"set xtrace when running the command",
 	"ignore dependencies",
 	"tests if the service exists or not",
@@ -62,16 +62,16 @@ const char * const longopts_help[] = {
 	"dry run (show what would happen)",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *usagestring = ""
 	"Usage: rc-service [options] [-i] <service> <cmd>...\n"
 	"   or: rc-service [options] -e <service>\n"
 	"   or: rc-service [options] -l\n"
 	"   or: rc-service [options] -r <service>";
 
-int main(int argc, char **argv)
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ **argv)
 {
-	int opt;
-	char *service;
+	ಪೂರ್ಣಾಂಕ opt;
+	ಅಕ್ಷರ *service;
 	RC_STRINGLIST *list;
 	RC_STRING *s;
 	RC_SERVICE state;
@@ -86,61 +86,61 @@ int main(int argc, char **argv)
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ಆಗ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (ಪೂರ್ಣಾಂಕ *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'd':
+		ಆಯ್ಕೆ (opt) {
+		ಸ್ಥಿತಿ 'd':
 			setenv("RC_DEBUG", "yes", 1);
-			break;
-		case 'D':
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'D':
 			setenv("RC_NODEPS", "yes", 1);
-			break;
-		case 'e':
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'e':
 			service = rc_service_resolve(optarg);
 			opt = service ? EXIT_SUCCESS : EXIT_FAILURE;
-			free(service);
-			return opt;
+			ಬಿಡುಗಡೆ(service);
+			ಹಿಂತಿರುಗಿ opt;
 			/* NOTREACHED */
-		case 'c':
+		ಸ್ಥಿತಿ 'c':
 			if_crashed = true;
-			break;
-		case 'i':
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'i':
 			if_exists = true;
-			break;
-		case 'I':
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'I':
 			if_inactive = true;
-			break;
-		case 'N':
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'N':
 			if_notstarted = true;
-			break;
-		case 'l':
-			list = rc_services_in_runlevel(NULL);
-			if (TAILQ_FIRST(list) == NULL)
-				return EXIT_FAILURE;
-			rc_stringlist_sort(&list);
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'l':
+			list = rc_services_ಒಳ_runlevel(ಖಾಲಿ);
+			ಆದರೆ (TAILQ_ಮೊದಲ(list) == ಖಾಲಿ)
+				ಹಿಂತಿರುಗಿ EXIT_FAILURE;
+			rc_stringlist_ವಿಂಗಡಿಸು(&list);
 			TAILQ_FOREACH(s, list, entries)
-			    printf("%s\n", s->value);
+			    ಬರೆ("%s\n", s->ಮೌಲ್ಯ);
 			rc_stringlist_free(list);
-			return EXIT_SUCCESS;
+			ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 			/* NOTREACHED */
-		case 'r':
+		ಸ್ಥಿತಿ 'r':
 			service = rc_service_resolve(optarg);
-			if (service == NULL)
-				return EXIT_FAILURE;
-			printf("%s\n", service);
-			free(service);
-			return EXIT_SUCCESS;
+			ಆದರೆ (service == ಖಾಲಿ)
+				ಹಿಂತಿರುಗಿ EXIT_FAILURE;
+			ಬರೆ("%s\n", service);
+			ಬಿಡುಗಡೆ(service);
+			ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 			/* NOTREACHED */
-		case 's':
+		ಸ್ಥಿತಿ 's':
 			if_started = true;
-			break;
-		case 'S':
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'S':
 			if_stopped = true;
-			break;
-		case 'Z':
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'Z':
 			setenv("IN_DRYRUN", "yes", 1);
-			break;
+			ನಿಲ್ಲಿಸು;
 
 		case_RC_COMMON_GETOPT
 		}
@@ -148,24 +148,24 @@ int main(int argc, char **argv)
 
 	argc -= optind;
 	argv += optind;
-	if (*argv == NULL)
+	ಆದರೆ (*argv == ಖಾಲಿ)
 		eerrorx("%s: you need to specify a service", applet);
-	if ((service = rc_service_resolve(*argv)) == NULL) {
-		if (if_exists)
-			return 0;
+	ಆದರೆ ((service = rc_service_resolve(*argv)) == ಖಾಲಿ) {
+		ಆದರೆ (if_exists)
+			ಹಿಂತಿರುಗಿ 0;
 		eerrorx("%s: service `%s' does not exist", applet, *argv);
 	}
 	state = rc_service_state(*argv);
-	if (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
-		return 0;
-	if (if_inactive && !(state & RC_SERVICE_INACTIVE))
-		return 0;
-	if (if_notstarted && (state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_started && !(state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_stopped && !(state & RC_SERVICE_STOPPED))
-		return 0;
+	ಆದರೆ (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
+		ಹಿಂತಿರುಗಿ 0;
+	ಆದರೆ (if_inactive && !(state & RC_SERVICE_INACTIVE))
+		ಹಿಂತಿರುಗಿ 0;
+	ಆದರೆ (if_notstarted && (state & RC_SERVICE_STARTED))
+		ಹಿಂತಿರುಗಿ 0;
+	ಆದರೆ (if_started && !(state & RC_SERVICE_STARTED))
+		ಹಿಂತಿರುಗಿ 0;
+	ಆದರೆ (if_stopped && !(state & RC_SERVICE_STOPPED))
+		ಹಿಂತಿರುಗಿ 0;
 	env_filter();
 	env_config();
 	*argv = service;

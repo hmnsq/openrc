@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
 
-int main(int argc, char **argv)
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ **argv)
 {
-	int i;
-	char *p;
-	int c;
+	ಪೂರ್ಣಾಂಕ i;
+	ಅಕ್ಷರ *p;
+	ಪೂರ್ಣಾಂಕ c;
 
-	for (i = 1; i < argc; i++) {
+	ಗಾಗಿ (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
-			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ಆದರೆ (i != 1)
+			ಅಕ್ಷರ_ಬರೆ(' ');
+		ಆಗ (*p) {
+			c = (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ)*p++;
+			ಆದರೆ (!ಅಕ್ಷರವೇ_ಅಂಕಿಯೇ(c))
 				c = '_';
-			putchar(c);
+			ಅಕ್ಷರ_ಬರೆ(c);
 		}
 	}
-	putchar('\n');
-	return EXIT_SUCCESS;
+	ಅಕ್ಷರ_ಬರೆ('\n');
+	ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 }

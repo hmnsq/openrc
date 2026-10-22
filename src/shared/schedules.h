@@ -10,20 +10,20 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __RC_SCHEDULES_H
-#define __RC_SCHEDULES_H
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ __RC_SCHEDULES_H
+#ವ್ಯಾಖ್ಯಾನಿಸು __RC_SCHEDULES_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
 
-void free_schedulelist(void);
-int parse_signal(const char *applet, const char *sig);
-void parse_schedule(const char *applet, const char *string, int timeout);
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-		pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet);
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+ಶೂನ್ಯ free_schedulelist(ಶೂನ್ಯ);
+ಪೂರ್ಣಾಂಕ parse_signal(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *sig);
+ಶೂನ್ಯ parse_ವೇಳಾಪಟ್ಟಿ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *string, ಪೂರ್ಣಾಂಕ timeout);
+ಪೂರ್ಣಾಂಕ do_stop(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *exec, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *argv,
+		pid_t pid, uid_t uid, ಪೂರ್ಣಾಂಕ sig, bool group, bool test, bool quiet);
+ಪೂರ್ಣಾಂಕ ಸತತ_stop_ವೇಳಾಪಟ್ಟಿ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *exec, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *argv,
 		pid_t pid, uid_t uid, bool group,
-		bool test, bool progress, bool quiet);
+		bool test, bool ಪ್ರಗತಿ, bool quiet);
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

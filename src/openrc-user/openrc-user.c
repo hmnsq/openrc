@@ -1,101 +1,101 @@
-#include <einfo.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <syslog.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <spawn.h>
+#ಅನ್ತರ್ಭಾವ <einfo.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <grp.h>
+#ಅನ್ತರ್ಭಾವ <pwd.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/wait.h>
+#ಅನ್ತರ್ಭಾವ <syslog.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಅನ್ತರ್ಭಾವ <signal.h>
+#ಅನ್ತರ್ಭಾವ <spawn.h>
 
-#ifdef HAVE_PAM
-#include <security/pam_appl.h>
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
+#ಅನ್ತರ್ಭಾವ <security/pam_appl.h>
+#ಆದರೆ_ಅಂತ್ಯ
 
-#define USER_SH RC_LIBEXECDIR "/sh/openrc-user.sh "
+#ವ್ಯಾಖ್ಯಾನಿಸು USER_SH RC_LIBEXECDIR "/sh/openrc-user.sh "
 
-#include "helpers.h"
-#include "rc.h"
-#include "rc_exec.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "rc_exec.h"
 
-static bool valid_shell(const char *shell) {
+ಸ್ಥಿರ bool valid_shell(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *shell) {
 	FILE *fp = fopen(RC_SYSCONFDIR "/shells", "r");
 	bool ret = false;
-	char *line = NULL;
-	size_t size;
+	ಅಕ್ಷರ *ಸಾಲು = ಖಾಲಿ;
+	size_t ಗಾತ್ರ_2;
 
-	if (!fp)
-		return true;
+	ಆದರೆ (!fp)
+		ಹಿಂತಿರುಗಿ true;
 
-	while (xgetline(&line, &size, fp) != -1) {
-		if (line[0] == '#')
-			continue;
-		if (strcmp(line, shell) == 0) {
+	ಆಗ (xgetline(&ಸಾಲು, &ಗಾತ್ರ_2, fp) != -1) {
+		ಆದರೆ (ಸಾಲು[0] == '#')
+			ಮುಂದುವರಿ;
+		ಆದರೆ (strcmp(ಸಾಲು, shell) == 0) {
 			ret = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
 	}
 
-	free(line);
-	return ret;
+	ಬಿಡುಗಡೆ(ಸಾಲು);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
-	char *argv0;
-	const char *argv[] = {
-		NULL /* replaced below */, "-c",
-		start ? USER_SH "start" : USER_SH "stop", NULL
+ಸ್ಥಿರ bool spawn_openrc(uid_t uid, gid_t gid, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *shell, bool ಆರಂಭ) {
+	ಅಕ್ಷರ *argv0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *argv[] = {
+		ಖಾಲಿ /* replaced below */, "-c",
+		ಆರಂಭ ? USER_SH "start" : USER_SH "stop", ಖಾಲಿ
 	};
-	struct exec_result res;
-	struct exec_args args;
+	ರಚನೆ exec_ಫಲಿತಾಂಶ res;
+	ರಚನೆ exec_ವಾದಗಳು ವಾದಗಳು;
 
 	/* shell might be a multicall binary, e.g busybox.
 	 * so setting argv[0] to "-" might not work */
 	xasprintf(&argv0, "-%s", valid_shell(shell) ? shell : "/bin/sh");
 	argv[0] = argv0;
-	args = exec_init(argv);
-	args.cmd = shell;
-	args.uid = uid;
-	args.gid = gid;
-	args.redirect_stdout = 3;
-	res = do_exec(&args);
-	free(argv0);
-	if (res.pid < 0) {
+	ವಾದಗಳು = exec_init(argv);
+	ವಾದಗಳು.cmd = shell;
+	ವಾದಗಳು.uid = uid;
+	ವಾದಗಳು.gid = gid;
+	ವಾದಗಳು.redirect_stdout = 3;
+	res = do_exec(&ವಾದಗಳು);
+	ಬಿಡುಗಡೆ(argv0);
+	ಆದರೆ (res.pid < 0) {
 		elog(LOG_ERR, "do_exec: %s", strerror(errno));
-		return false;
+		ಹಿಂತಿರುಗಿ false;
 	}
-	return rc_waitpid(res.pid) == 0;
+	ಹಿಂತಿರುಗಿ rc_waitpid(res.pid) == 0;
 }
 
-int main(int argc, char **argv) {
-	const struct passwd *user;
-	char *log, *shell;
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ **argv) {
+	ಸ್ಥಿರಾಂಕ ರಚನೆ passwd *user;
+	ಅಕ್ಷರ *ಲಘುಗಣಕ, *shell;
 	sigset_t sigmask;
-	int sig, ret = 0;
+	ಪೂರ್ಣಾಂಕ sig, ret = 0;
 	uid_t uid;
 	gid_t gid;
-#ifdef HAVE_PAM
-	struct pam_conv conv = { NULL, NULL };
-	pam_handle_t *pamh = NULL;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
+	ರಚನೆ pam_conv conv = { ಖಾಲಿ, ಖಾಲಿ };
+	pam_handle_t *pamh = ಖಾಲಿ;
 	bool pam_session = false;
-	int rc;
-#endif
+	ಪೂರ್ಣಾಂಕ rc;
+#ಆದರೆ_ಅಂತ್ಯ
 
 	setenv("EINFO_LOG", "openrc-user", true);
 
-	if (argc != 2) {
+	ಆದರೆ (argc != 2) {
 		elog(LOG_ERR, "Invalid usage. %s <username>", argv[0]);
-		return -1;
+		ಹಿಂತಿರುಗಿ -1;
 	}
 	/* We can't rely on the supervisor to drop perms since
 	 * pam modules might need root perms. */
-	if (!(user = getpwnam(argv[1]))) {
+	ಆದರೆ (!(user = getpwnam(argv[1]))) {
 		elog(LOG_ERR, "Invalid username %s.", argv[1]);
-		return -1;
+		ಹಿಂತಿರುಗಿ -1;
 	}
 
 	/* sssd's pam module wrongly calls getpwnam, meaning
@@ -112,56 +112,56 @@ int main(int argc, char **argv) {
 
 	initgroups(user->pw_name, user->pw_gid);
 
-	xasprintf(&log, "openrc-user.%s", user->pw_name);
-	setenv("EINFO_LOG", log, true);
-	free(log);
+	xasprintf(&ಲಘುಗಣಕ, "openrc-user.%s", user->pw_name);
+	setenv("EINFO_LOG", ಲಘುಗಣಕ, true);
+	ಬಿಡುಗಡೆ(ಲಘುಗಣಕ);
 
-#ifdef HAVE_PAM
-	if ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
+	ಆದರೆ ((rc = pam_ಆರಂಭ("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to start pam: %s", pam_strerror(pamh, rc));
-	else if ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to open session: %s", pam_strerror(pamh, rc));
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		pam_session = true;
 
-	for (char **env = pam_getenvlist(pamh); env && *env; env++) {
-		if (strchr(*env, '='))
+	ಗಾಗಿ (ಅಕ್ಷರ **env = pam_getenvlist(pamh); env && *env; env++) {
+		ಆದರೆ (strchr(*env, '='))
 			putenv(xstrdup(*env));
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			unsetenv(*env);
 	}
 
-	if (!pam_session && pamh) {
-		pam_end(pamh, rc);
-		pamh = NULL;
+	ಆದರೆ (!pam_session && pamh) {
+		pam_ಕೊನೆ(pamh, rc);
+		pamh = ಖಾಲಿ;
 	}
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-	if (!spawn_openrc(uid, gid, shell, true)) {
+	ಆದರೆ (!spawn_openrc(uid, gid, shell, true)) {
 		ret = -1;
-		goto out;
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
 	sigfillset(&sigmask);
-	sigprocmask(SIG_SETMASK, &sigmask, NULL);
+	sigprocmask(SIG_SETMASK, &sigmask, ಖಾಲಿ);
 
 	sigemptyset(&sigmask);
 	sigaddset(&sigmask, SIGTERM);
 
 	sigwait(&sigmask, &sig);
 
-	if (!spawn_openrc(uid, gid, shell, false))
+	ಆದರೆ (!spawn_openrc(uid, gid, shell, false))
 		ret = -1;
 
-out:
-#ifdef HAVE_PAM
-	if (pamh) {
-		if ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+ಹೊರಹೋಗು:
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
+	ಆದರೆ (pamh) {
+		ಆದರೆ ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 			elog(LOG_ERR, "Failed to close session: %s", pam_strerror(pamh, rc));
-		pam_end(pamh, rc);
+		pam_ಕೊನೆ(pamh, rc);
 	}
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-	free(shell);
-	return ret;
+	ಬಿಡುಗಡೆ(shell);
+	ಹಿಂತಿರುಗಿ ret;
 }

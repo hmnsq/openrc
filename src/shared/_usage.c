@@ -10,80 +10,80 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "_usage.h"
+#ಅನ್ತರ್ಭಾವ "version.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
 
-void set_quiet_options(void)
+ಶೂನ್ಯ ಗಣ_quiet_options(ಶೂನ್ಯ)
 {
-	static int qcount = 0;
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	ಆಯ್ಕೆ (qcount) {
+	ಸ್ಥಿತಿ 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		ನಿಲ್ಲಿಸು;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN ಶೂನ್ಯ show_ಆವೃತ್ತಿ(ಶೂನ್ಯ)
 {
-	const char *systype = NULL;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *systype = ಖಾಲಿ;
 
-	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
-		printf(" [%s]", systype);
-	printf(") %s", VERSION);
-#ifdef BRANDING
-	printf(" (%s)", BRANDING);
-#endif
-	printf("\n");
-	exit(EXIT_SUCCESS);
+	ಬರೆ("%s (OpenRC", applet);
+	ಆದರೆ ((systype = rc_sys()))
+		ಬರೆ(" [%s]", systype);
+	ಬರೆ(") %s", ಆವೃತ್ತಿ);
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ BRANDING
+	ಬರೆ(" (%s)", BRANDING);
+#ಆದರೆ_ಅಂತ್ಯ
+	ಬರೆ("\n");
+	ನಿರ್ಗಮಿಸು(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN ಶೂನ್ಯ usage(ಪೂರ್ಣಾಂಕ exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ has_arg[] = { "", "<arg>", "[arg]" };
+	ಪೂರ್ಣಾಂಕ i;
+	ಪೂರ್ಣಾಂಕ len;
+	ಅಕ್ಷರ *lo;
+	ಅಕ್ಷರ *p;
+	ಅಕ್ಷರ *token;
+	ಅಕ್ಷರ val[4] = "-?,";
 
-	if (usagestring)
-		printf("%s", usagestring);
-	else
-		printf("Usage: %s [options] ", applet);
+	ಆದರೆ (usagestring)
+		ಬರೆ("%s", usagestring);
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಬರೆ("Usage: %s [options] ", applet);
 
-	if (extraopts)
-		printf("%s", extraopts);
+	ಆದರೆ (extraopts)
+		ಬರೆ("%s", extraopts);
 
-	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	ಬರೆ("\n\nOptions: [ %s ]\n", getoptstring);
+	ಗಾಗಿ (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
-		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
+		len = ಬರೆ("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		ಆಗ ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
-				printf("%*s", len, "");
+			ಆದರೆ (len > 0)
+				ಬರೆ("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		ಬಿಡುಗಡೆ(lo);
 	}
-	exit(exit_status);
+	ನಿರ್ಗಮಿಸು(exit_status);
 }

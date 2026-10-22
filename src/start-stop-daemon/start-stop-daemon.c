@@ -19,71 +19,71 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#define ONE_MS           1000000
+#ವ್ಯಾಖ್ಯಾನಿಸು ONE_MS           1000000
 
-#if defined(__linux__) && !defined(_GNU_SOURCE)
+#ಆದರೆ defined(__linux__) && !defined(GNU_ಮೂಲ)
 /* For extra SCHED_* defines. */
-# define _GNU_SOURCE
-#endif
+# define GNU_ಮೂಲ
+#ಆದರೆ_ಅಂತ್ಯ
 
-#include <errno.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <limits.h>
-#include <inttypes.h>
-#include <grp.h>
-#include <pthread.h>
-#include <pwd.h>
-#include <sched.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <sys/ioctl.h>
-#include <sys/resource.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <inttypes.h>
-#include <sys/wait.h>
-#ifdef __linux__
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <getopt.h>
+#ಅನ್ತರ್ಭಾವ <limits.h>
+#ಅನ್ತರ್ಭಾವ <inttypes.h>
+#ಅನ್ತರ್ಭಾವ <grp.h>
+#ಅನ್ತರ್ಭಾವ <pthread.h>
+#ಅನ್ತರ್ಭಾವ <pwd.h>
+#ಅನ್ತರ್ಭಾವ <sched.h>
+#ಅನ್ತರ್ಭಾವ <signal.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <stddef.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <syslog.h>
+#ಅನ್ತರ್ಭಾವ <sys/ioctl.h>
+#ಅನ್ತರ್ಭಾವ <sys/resource.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <sys/time.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <inttypes.h>
+#ಅನ್ತರ್ಭಾವ <sys/wait.h>
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
 # include <sys/syscall.h> /* For io priority */
 # include <sys/prctl.h> /* For prctl */
-#endif
-#include <termios.h>
-#include <time.h>
-#include <unistd.h>
+#ಆದರೆ_ಅಂತ್ಯ
+#ಅನ್ತರ್ಭಾವ <termios.h>
+#ಅನ್ತರ್ಭಾವ <time.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#ifdef HAVE_PAM
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
 # include <security/pam_appl.h>
 
 /* We are not supporting authentication conversations */
-static struct pam_conv conv = { NULL, NULL};
-#endif
+ಸ್ಥಿರ ರಚನೆ pam_conv conv = { ಖಾಲಿ, ಖಾಲಿ};
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef __linux__
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
 # include <sys/capability.h>
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "rc_exec.h"
-#include "schedules.h"
-#include "_usage.h"
-#include "helpers.h"
+#ಅನ್ತರ್ಭಾವ "einfo.h"
+#ಅನ್ತರ್ಭಾವ "queue.h"
+#ಅನ್ತರ್ಭಾವ "rc.h"
+#ಅನ್ತರ್ಭಾವ "misc.h"
+#ಅನ್ತರ್ಭಾವ "rc_exec.h"
+#ಅನ್ತರ್ಭಾವ "schedules.h"
+#ಅನ್ತರ್ಭಾವ "_usage.h"
+#ಅನ್ತರ್ಭಾವ "helpers.h"
 
 /* Use long option value that is out of range for 8 bit getopt values.
  * The exact enum value is internal and can freely change, so we keep the
  * options sorted.
  */
-enum {
+ಎಣಿಕೆ {
   /* This has to come first so following values stay in the 0x100+ range. */
-  LONGOPT_BASE = 0x100,
+  LONGOPT_ತಳ = 0x100,
 
   LONGOPT_CAPABILITIES,
   LONGOPT_OOM_SCORE_ADJ,
@@ -94,51 +94,51 @@ enum {
   LONGOPT_NOTIFY,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "I:KN:PR:Sa:bc:d:e:Gg:ik:mn:op:s:tu:r:w:x:0:1:2:3:4:" \
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *applet = ಖಾಲಿ;
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *extraopts = ಖಾಲಿ;
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ getoptstring[] = "I:KN:PR:Sa:bc:d:e:Gg:ik:mn:op:s:tu:r:w:x:0:1:2:3:4:" \
 	getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "capabilities", 1, NULL, LONGOPT_CAPABILITIES},
-	{ "secbits",      1, NULL, LONGOPT_SECBITS},
-	{ "no-new-privs", 0, NULL, LONGOPT_NO_NEW_PRIVS},
-	{ "ionice",       1, NULL, 'I'},
-	{ "stop",         0, NULL, 'K'},
-	{ "nicelevel",    1, NULL, 'N'},
-	{ "oom-score-adj",1, NULL, LONGOPT_OOM_SCORE_ADJ},
-	{ "retry",        1, NULL, 'R'},
-	{ "start",        0, NULL, 'S'},
-	{ "startas",      1, NULL, 'a'},
-	{ "background",   0, NULL, 'b'},
-	{ "chuid",        1, NULL, 'c'},
-	{ "chdir",        1, NULL, 'd'},
-	{ "env",          1, NULL, 'e'},
-	{ "umask",        1, NULL, 'k'},
-	{ "group",        1, NULL, 'g'},
-	{ "stop-group",   0, NULL, 'G'},
-	{ "interpreted",  0, NULL, 'i'},
-	{ "make-pidfile", 0, NULL, 'm'},
-	{ "name",         1, NULL, 'n'},
-	{ "oknodo",       0, NULL, 'o'},
-	{ "pidfile",      1, NULL, 'p'},
-	{ "signal",       1, NULL, 's'},
-	{ "test",         0, NULL, 't'},
-	{ "user",         1, NULL, 'u'},
-	{ "chroot",       1, NULL, 'r'},
-	{ "wait",         1, NULL, 'w'},
-	{ "exec",         1, NULL, 'x'},
-	{ "stdin",        1, NULL, '0'},
-	{ "stdout",       1, NULL, '1'},
-	{ "stderr",       1, NULL, '2'},
-	{ "stdout-logger",1, NULL, '3'},
-	{ "stderr-logger",1, NULL, '4'},
-	{ "progress",     0, NULL, 'P'},
-	{ "scheduler",    1, NULL, LONGOPT_SCHEDULER},
-	{ "scheduler-priority",    1, NULL, LONGOPT_SCHEDULER_PRIO},
-	{ "notify",        1, NULL, LONGOPT_NOTIFY},
+ಸ್ಥಿರಾಂಕ ರಚನೆ option longopts[] = {
+	{ "capabilities", 1, ಖಾಲಿ, LONGOPT_CAPABILITIES},
+	{ "secbits",      1, ಖಾಲಿ, LONGOPT_SECBITS},
+	{ "no-new-privs", 0, ಖಾಲಿ, LONGOPT_NO_NEW_PRIVS},
+	{ "ionice",       1, ಖಾಲಿ, 'I'},
+	{ "stop",         0, ಖಾಲಿ, 'K'},
+	{ "nicelevel",    1, ಖಾಲಿ, 'N'},
+	{ "oom-score-adj",1, ಖಾಲಿ, LONGOPT_OOM_SCORE_ADJ},
+	{ "retry",        1, ಖಾಲಿ, 'R'},
+	{ "start",        0, ಖಾಲಿ, 'S'},
+	{ "startas",      1, ಖಾಲಿ, 'a'},
+	{ "background",   0, ಖಾಲಿ, 'b'},
+	{ "chuid",        1, ಖಾಲಿ, 'c'},
+	{ "chdir",        1, ಖಾಲಿ, 'd'},
+	{ "env",          1, ಖಾಲಿ, 'e'},
+	{ "umask",        1, ಖಾಲಿ, 'k'},
+	{ "group",        1, ಖಾಲಿ, 'g'},
+	{ "stop-group",   0, ಖಾಲಿ, 'G'},
+	{ "interpreted",  0, ಖಾಲಿ, 'i'},
+	{ "make-pidfile", 0, ಖಾಲಿ, 'm'},
+	{ "name",         1, ಖಾಲಿ, 'n'},
+	{ "oknodo",       0, ಖಾಲಿ, 'o'},
+	{ "pidfile",      1, ಖಾಲಿ, 'p'},
+	{ "signal",       1, ಖಾಲಿ, 's'},
+	{ "test",         0, ಖಾಲಿ, 't'},
+	{ "user",         1, ಖಾಲಿ, 'u'},
+	{ "chroot",       1, ಖಾಲಿ, 'r'},
+	{ "wait",         1, ಖಾಲಿ, 'w'},
+	{ "exec",         1, ಖಾಲಿ, 'x'},
+	{ "stdin",        1, ಖಾಲಿ, '0'},
+	{ "stdout",       1, ಖಾಲಿ, '1'},
+	{ "stderr",       1, ಖಾಲಿ, '2'},
+	{ "stdout-logger",1, ಖಾಲಿ, '3'},
+	{ "stderr-logger",1, ಖಾಲಿ, '4'},
+	{ "progress",     0, ಖಾಲಿ, 'P'},
+	{ "scheduler",    1, ಖಾಲಿ, LONGOPT_SCHEDULER},
+	{ "scheduler-priority",    1, ಖಾಲಿ, LONGOPT_SCHEDULER_PRIO},
+	{ "notify",        1, ಖಾಲಿ, LONGOPT_NOTIFY},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ longopts_help[] = {
 	"Set the inheritable, ambient and bounding capabilities",
 	"Set the security-bits for the program",
 	"Set the No New Privs flag for the program",
@@ -178,72 +178,72 @@ const char * const longopts_help[] = {
 	"Configures experimental notification behaviour",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *usagestring = ಖಾಲಿ;
 
-static char **nav;
+ಸ್ಥಿರ ಅಕ್ಷರ **nav;
 
-static char *changeuser, *ch_root, *ch_dir;
+ಸ್ಥಿರ ಅಕ್ಷರ *changeuser, *ch_ಬೇರು, *ch_dir;
 
-extern char **environ;
+ಬಾಹ್ಯ ಅಕ್ಷರ **environ;
 
-#if !defined(SYS_ioprio_set) && defined(__NR_ioprio_set)
+#ಆದರೆ !defined(SYS_ioprio_set) && defined(__NR_ioprio_set)
 # define SYS_ioprio_set __NR_ioprio_set
-#endif
-#if !defined(__DragonFly__)
-static inline int ioprio_set(int which RC_UNUSED,
-			     int who RC_UNUSED,
-			     int ioprio RC_UNUSED)
+#ಆದರೆ_ಅಂತ್ಯ
+#ಆದರೆ !defined(__DragonFly__)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಪೂರ್ಣಾಂಕ ioprio_ಗಣ(ಪೂರ್ಣಾಂಕ which RC_ಬಳಸದ,
+			     ಪೂರ್ಣಾಂಕ who RC_ಬಳಸದ,
+			     ಪೂರ್ಣಾಂಕ ioprio RC_ಬಳಸದ)
 {
-#ifdef SYS_ioprio_set
-	return syscall(SYS_ioprio_set, which, who, ioprio);
-#else
-	return 0;
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ SYS_ioprio_set
+	ಹಿಂತಿರುಗಿ syscall(SYS_ioprio_set, which, who, ioprio);
+#ಇಲ್ಲದಿದ್ದರೆ
+	ಹಿಂತಿರುಗಿ 0;
+#ಆದರೆ_ಅಂತ್ಯ
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-static void
-cleanup(void)
+ಸ್ಥಿರ ಶೂನ್ಯ
+cleanup(ಶೂನ್ಯ)
 {
-	free(changeuser);
-	free(nav);
+	ಬಿಡುಗಡೆ(changeuser);
+	ಬಿಡುಗಡೆ(nav);
 	free_schedulelist();
 }
 
-static void
-handle_signal(int sig)
+ಸ್ಥಿರ ಶೂನ್ಯ
+handle_signal(ಪೂರ್ಣಾಂಕ sig)
 {
-	int status;
-	int serrno = errno;
-	const char *signame = NULL;
+	ಪೂರ್ಣಾಂಕ ಸ್ಥಿತಿ_2;
+	ಪೂರ್ಣಾಂಕ serrno = errno;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *signame = ಖಾಲಿ;
 
-	switch (sig) {
-	case SIGINT:
-		if (!signame)
+	ಆಯ್ಕೆ (sig) {
+	ಸ್ಥಿತಿ SIGINT:
+		ಆದರೆ (!signame)
 			signame = "SIGINT";
 		/* FALLTHROUGH */
-	case SIGTERM:
-		if (!signame)
+	ಸ್ಥಿತಿ SIGTERM:
+		ಆದರೆ (!signame)
 			signame = "SIGTERM";
 		/* FALLTHROUGH */
-	case SIGQUIT:
-		if (!signame)
+	ಸ್ಥಿತಿ SIGQUIT:
+		ಆದರೆ (!signame)
 			signame = "SIGQUIT";
 		eerrorx("%s: caught %s, aborting", applet, signame);
 		/* NOTREACHED */
 
-	case SIGCHLD:
-		for (;;) {
-			if (waitpid(-1, &status, WNOHANG) < 0) {
-				if (errno != ECHILD)
+	ಸ್ಥಿತಿ SIGCHLD:
+		ಗಾಗಿ (;;) {
+			ಆದರೆ (waitpid(-1, &ಸ್ಥಿತಿ_2, WNOHANG) < 0) {
+				ಆದರೆ (errno != ECHILD)
 					eerror("%s: waitpid: %s",
 					    applet, strerror(errno));
-				break;
+				ನಿಲ್ಲಿಸು;
 			}
 		}
-		break;
+		ನಿಲ್ಲಿಸು;
 
-	default:
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		eerror("%s: caught unknown signal %d", applet, sig);
 	}
 
@@ -251,397 +251,397 @@ handle_signal(int sig)
 	errno = serrno;
 }
 
-static char *
-expand_home(const char *home, const char *path)
+ಸ್ಥಿರ ಅಕ್ಷರ *
+expand_home(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *home, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	char *opath, *ppath, *p, *nh;
-	struct passwd *pw;
+	ಅಕ್ಷರ *opath, *ppath, *p, *nh;
+	ರಚನೆ passwd *pw;
 
-	if (!path || *path != '~')
-		return xstrdup(path);
+	ಆದರೆ (!ಮಾರ್ಗ || *ಮಾರ್ಗ != '~')
+		ಹಿಂತಿರುಗಿ xstrdup(ಮಾರ್ಗ);
 
-	opath = ppath = xstrdup(path);
-	if (ppath[1] != '/' && ppath[1] != '\0') {
+	opath = ppath = xstrdup(ಮಾರ್ಗ);
+	ಆದರೆ (ppath[1] != '/' && ppath[1] != '\0') {
 		p = strchr(ppath + 1, '/');
-		if (p)
+		ಆದರೆ (p)
 			*p = '\0';
 		pw = getpwnam(ppath + 1);
-		if (pw) {
+		ಆದರೆ (pw) {
 			home = pw->pw_dir;
 			ppath = p;
-			if (ppath)
+			ಆದರೆ (ppath)
 				*ppath = '/';
-		} else
-			home = NULL;
-	} else
+		} ಇಲ್ಲದಿದ್ದರೆ
+			home = ಖಾಲಿ;
+	} ಇಲ್ಲದಿದ್ದರೆ
 		ppath++;
 
-	if (!home) {
-	free(opath);
-		return xstrdup(path);
+	ಆದರೆ (!home) {
+	ಬಿಡುಗಡೆ(opath);
+		ಹಿಂತಿರುಗಿ xstrdup(ಮಾರ್ಗ);
 	}
-	if (!ppath) {
-		free(opath);
-		return xstrdup(home);
+	ಆದರೆ (!ppath) {
+		ಬಿಡುಗಡೆ(opath);
+		ಹಿಂತಿರುಗಿ xstrdup(home);
 	}
 
 	xasprintf(&nh, "%s%s", home, ppath);
-	free(opath);
-	return nh;
+	ಬಿಡುಗಡೆ(opath);
+	ಹಿಂತಿರುಗಿ nh;
 }
 
-int main(int argc, char **argv)
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ **argv)
 {
-	int devnull_fd = -1;
-#ifdef TIOCNOTTY
-	int tty_fd = -1;
-#endif
+	ಪೂರ್ಣಾಂಕ devnull_fd = -1;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TIOCNOTTY
+	ಪೂರ್ಣಾಂಕ tty_fd = -1;
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef HAVE_PAM
-	pam_handle_t *pamh = NULL;
-	int pamr;
-	const char *const *pamenv = NULL;
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
+	pam_handle_t *pamh = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ pamr;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *pamenv = ಖಾಲಿ;
+#ಆದರೆ_ಅಂತ್ಯ
 
-	int opt;
-	size_t size = 0;
-	bool start = false;
+	ಪೂರ್ಣಾಂಕ opt;
+	size_t ಗಾತ್ರ_2 = 0;
+	bool ಆರಂಭ = false;
 	bool stop = false;
 	bool oknodo = false;
 	bool test = false;
-	char *exec = NULL;
-	char *startas = NULL;
-	char *name = NULL;
-	char *pidfile = NULL;
-	char *retry = NULL;
-	int sig = -1;
-	int nicelevel = INT_MIN, ionicec = -1, ioniced = 0;
-	int oom_score_adj = INT_MIN;
+	ಅಕ್ಷರ *exec = ಖಾಲಿ;
+	ಅಕ್ಷರ *startas = ಖಾಲಿ;
+	ಅಕ್ಷರ *name = ಖಾಲಿ;
+	ಅಕ್ಷರ *pidfile = ಖಾಲಿ;
+	ಅಕ್ಷರ *retry = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ sig = -1;
+	ಪೂರ್ಣಾಂಕ nicelevel = INT_MIN, ionicec = -1, ioniced = 0;
+	ಪೂರ್ಣಾಂಕ oom_score_adj = INT_MIN;
 	bool background = false;
 	bool makepidfile = false;
 	bool interpreted = false;
-	bool progress = false;
+	bool ಪ್ರಗತಿ = false;
 	uid_t uid = 0;
 	gid_t gid = 0;
-	char *home = NULL;
-	int tid = 0;
-	char *redirect_stdin = NULL;
-	char *redirect_stderr = NULL;
-	char *redirect_stdout = NULL;
-	char *stderr_process = NULL;
-	char *stdout_process = NULL;
-	int stdin_fd;
-	int stdout_fd;
-	int stderr_fd;
+	ಅಕ್ಷರ *home = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ tid = 0;
+	ಅಕ್ಷರ *redirect_stdin = ಖಾಲಿ;
+	ಅಕ್ಷರ *redirect_stderr = ಖಾಲಿ;
+	ಅಕ್ಷರ *redirect_stdout = ಖಾಲಿ;
+	ಅಕ್ಷರ *stderr_process = ಖಾಲಿ;
+	ಅಕ್ಷರ *stdout_process = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ stdin_fd;
+	ಪೂರ್ಣಾಂಕ stdout_fd;
+	ಪೂರ್ಣಾಂಕ stderr_fd;
 	pid_t pid, spid;
 	RC_PIDLIST *pids;
-	int i;
-	char *svcname = getenv("RC_SVCNAME");
+	ಪೂರ್ಣಾಂಕ i;
+	ಅಕ್ಷರ *svcname = getenv("RC_SVCNAME");
 	RC_STRINGLIST *env_list;
 	RC_STRING *env;
-	char *tmp, *newpath, *np;
-	char *p;
-	char *token;
-	char *exec_file = NULL;
-	struct passwd *pw;
-	struct group *gr;
+	ಅಕ್ಷರ *tmp, *newpath, *np;
+	ಅಕ್ಷರ *p;
+	ಅಕ್ಷರ *token;
+	ಅಕ್ಷರ *exec_file = ಖಾಲಿ;
+	ರಚನೆ passwd *pw;
+	ರಚನೆ group *gr;
 	bool stopgroup = false;
-	char *line = NULL;
+	ಅಕ್ಷರ *ಸಾಲು = ಖಾಲಿ;
 	FILE *fp;
 	size_t len;
 	mode_t numask = 022;
-	char **margv;
-	unsigned int start_wait = 0;
-	const char *scheduler = NULL;
-	int sched_prio = -1;
-#ifdef __linux__
-	cap_iab_t cap_iab = NULL;
-	unsigned secbits = 0;
-#endif
-#ifdef PR_SET_NO_NEW_PRIVS
+	ಅಕ್ಷರ **margv;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ಆರಂಭ_wait = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *scheduler = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ sched_prio = -1;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
+	cap_iab_t cap_iab = ಖಾಲಿ;
+	ಚಿಹ್ನೆರಹಿತ secbits = 0;
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ PR_ಗಣ_NO_NEW_PRIVS
 	bool no_new_privs = false;
-#endif
-	int pipefd[2];
-	char readbuf[1];
+#ಆದರೆ_ಅಂತ್ಯ
+	ಪೂರ್ಣಾಂಕ pipefd[2];
+	ಅಕ್ಷರ readbuf[1];
 	ssize_t ss;
-	struct notify notify = {0};
-	int ret = EXIT_SUCCESS;
+	ರಚನೆ notify notify = {0};
+	ಪೂರ್ಣಾಂಕ ret = EXIT_SUCCESS;
 
 	applet = basename_c(argv[0]);
 	atexit(cleanup);
 
-	signal_setup(SIGINT, handle_signal);
-	signal_setup(SIGQUIT, handle_signal);
-	signal_setup(SIGTERM, handle_signal);
+	signal_ಸಿದ್ಧತೆ(SIGINT, handle_signal);
+	signal_ಸಿದ್ಧತೆ(SIGQUIT, handle_signal);
+	signal_ಸಿದ್ಧತೆ(SIGTERM, handle_signal);
 
 	openlog(applet, LOG_PID, LOG_DAEMON);
 
-	if ((tmp = getenv("SSD_NICELEVEL")))
-		if (sscanf(tmp, "%d", &nicelevel) != 1)
+	ಆದರೆ ((tmp = getenv("SSD_NICELEVEL")))
+		ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(tmp, "%d", &nicelevel) != 1)
 			eerror("%s: invalid nice level `%s' (SSD_NICELEVEL)",
 			    applet, tmp);
-	if ((tmp = getenv("SSD_IONICELEVEL"))) {
-		int n = sscanf(tmp, "%d:%d", &ionicec, &ioniced);
-		if (n != 1 && n != 2)
+	ಆದರೆ ((tmp = getenv("SSD_IONICELEVEL"))) {
+		ಪೂರ್ಣಾಂಕ n = ಅಕ್ಷರಸರಣಿ_ಓದು(tmp, "%d:%d", &ionicec, &ioniced);
+		ಆದರೆ (n != 1 && n != 2)
 			eerror("%s: invalid ionice level `%s' (SSD_IONICELEVEL)",
 			    applet, tmp);
-		if (ionicec == 0)
+		ಆದರೆ (ionicec == 0)
 			ioniced = 0;
-		else if (ionicec == 3)
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ionicec == 3)
 			ioniced = 7;
 		ionicec <<= 13; /* class shift */
 	}
-	if ((tmp = getenv("SSD_OOM_SCORE_ADJ")))
-		if (sscanf(tmp, "%d", &oom_score_adj) != 1)
+	ಆದರೆ ((tmp = getenv("SSD_OOM_SCORE_ADJ")))
+		ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(tmp, "%d", &oom_score_adj) != 1)
 			eerror("%s: invalid oom_score_adj `%s' (SSD_OOM_SCORE_ADJ)",
 			    applet, tmp);
 
 	/* Get our user name and initial dir */
 	p = getenv("USER");
 	home = getenv("HOME");
-	if (home == NULL || p == NULL) {
+	ಆದರೆ (home == ಖಾಲಿ || p == ಖಾಲಿ) {
 		pw = getpwuid(getuid());
-		if (pw != NULL) {
-			if (p == NULL)
+		ಆದರೆ (pw != ಖಾಲಿ) {
+			ಆದರೆ (p == ಖಾಲಿ)
 				setenv("USER", pw->pw_name, 1);
-			if (home == NULL) {
+			ಆದರೆ (home == ಖಾಲಿ) {
 				setenv("HOME", pw->pw_dir, 1);
 				home = pw->pw_dir;
 			}
 		}
 	}
 
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts,
-		    (int *) 0)) != -1)
-		switch (opt) {
-		case LONGOPT_CAPABILITIES:
-#ifdef __linux__
-			cap_iab = cap_iab_from_text(optarg);
-			if (cap_iab == NULL)
+	ಆಗ ((opt = getopt_long(argc, argv, getoptstring, longopts,
+		    (ಪೂರ್ಣಾಂಕ *) 0)) != -1)
+		ಆಯ್ಕೆ (opt) {
+		ಸ್ಥಿತಿ LONGOPT_CAPABILITIES:
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
+			cap_iab = cap_iab_from_ಪಠ್ಯ(optarg);
+			ಆದರೆ (cap_iab == ಖಾಲಿ)
 				eerrorx("Could not parse iab: %s", strerror(errno));
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 			eerrorx("Capabilities support not enabled");
-#endif
-			break;
+#ಆದರೆ_ಅಂತ್ಯ
+			ನಿಲ್ಲಿಸು;
 
-		case LONGOPT_SECBITS:
-#ifdef __linux__
-			if (*optarg == '\0')
+		ಸ್ಥಿತಿ LONGOPT_SECBITS:
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
+			ಆದರೆ (*optarg == '\0')
 				eerrorx("Secbits are empty");
 
-			tmp = NULL;
+			tmp = ಖಾಲಿ;
 			secbits = strtoul(optarg, &tmp, 0);
-			if (*tmp != '\0')
+			ಆದರೆ (*tmp != '\0')
 				eerrorx("Could not parse secbits: invalid char %c", *tmp);
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 			eerrorx("Capabilities support not enabled");
-#endif
-			break;
+#ಆದರೆ_ಅಂತ್ಯ
+			ನಿಲ್ಲಿಸು;
 
-		case LONGOPT_NO_NEW_PRIVS:
-#ifdef PR_SET_NO_NEW_PRIVS
+		ಸ್ಥಿತಿ LONGOPT_NO_NEW_PRIVS:
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ PR_ಗಣ_NO_NEW_PRIVS
 			no_new_privs = true;
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 			eerrorx("The No New Privs flag is only supported by Linux (since 3.5)");
-#endif
-			break;
+#ಆದರೆ_ಅಂತ್ಯ
+			ನಿಲ್ಲಿಸು;
 
-		case 'I': /* --ionice */
-			if (sscanf(optarg, "%d:%d", &ionicec, &ioniced) == 0)
+		ಸ್ಥಿತಿ 'I': /* --ionice */
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(optarg, "%d:%d", &ionicec, &ioniced) == 0)
 				eerrorx("%s: invalid ionice `%s'",
 				    applet, optarg);
-			if (ionicec == 0)
+			ಆದರೆ (ionicec == 0)
 				ioniced = 0;
-			else if (ionicec == 3)
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ionicec == 3)
 				ioniced = 7;
 			ionicec <<= 13; /* class shift */
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'K':  /* --stop */
+		ಸ್ಥಿತಿ 'K':  /* --stop */
 			stop = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'G':  /* --stop-group */
+		ಸ್ಥಿತಿ 'G':  /* --stop-group */
 			stopgroup = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'N':  /* --nice */
-			if (sscanf(optarg, "%d", &nicelevel) != 1)
+		ಸ್ಥಿತಿ 'N':  /* --nice */
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(optarg, "%d", &nicelevel) != 1)
 				eerrorx("%s: invalid nice level `%s'",
 				    applet, optarg);
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case LONGOPT_OOM_SCORE_ADJ: /* --oom-score-adj */
-			if (sscanf(optarg, "%d", &oom_score_adj) != 1)
+		ಸ್ಥಿತಿ LONGOPT_OOM_SCORE_ADJ: /* --oom-score-adj */
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(optarg, "%d", &oom_score_adj) != 1)
 				eerrorx("%s: invalid oom-score-adj `%s'",
 				    applet, optarg);
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'P':  /* --progress */
-			progress = true;
-			break;
+		ಸ್ಥಿತಿ 'P':  /* --progress */
+			ಪ್ರಗತಿ = true;
+			ನಿಲ್ಲಿಸು;
 
-		case 'R':  /* --retry <schedule>|<timeout> */
+		ಸ್ಥಿತಿ 'R':  /* --retry <schedule>|<timeout> */
 			retry = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'S':  /* --start */
-			start = true;
-			break;
+		ಸ್ಥಿತಿ 'S':  /* --start */
+			ಆರಂಭ = true;
+			ನಿಲ್ಲಿಸು;
 
-		case 'b':  /* --background */
+		ಸ್ಥಿತಿ 'b':  /* --background */
 			background = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'c':  /* --chuid <username>|<uid> */
+		ಸ್ಥಿತಿ 'c':  /* --chuid <username>|<uid> */
 			/* DEPRECATED */
 			ewarn("WARNING: -c/--chuid is deprecated and will be removed in the future, please use -u/--user instead");
 			/* falls through */
-		case 'u':  /* --user <username>|<uid> */
+		ಸ್ಥಿತಿ 'u':  /* --user <username>|<uid> */
 		{
-			char dummy[2];
+			ಅಕ್ಷರ dummy[2];
 			p = optarg;
 			tmp = strsep(&p, ":");
 			changeuser = xstrdup(tmp);
-			if (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(tmp, "%d%1s", &tid, dummy) != 1)
 				pw = getpwnam(tmp);
-			else
+			ಇಲ್ಲದಿದ್ದರೆ
 				pw = getpwuid((uid_t)tid);
 
-			if (pw == NULL)
+			ಆದರೆ (pw == ಖಾಲಿ)
 				eerrorx("%s: user `%s' not found",
 				    applet, tmp);
 			uid = pw->pw_uid;
 			home = pw->pw_dir;
 			unsetenv("HOME");
-			if (pw->pw_dir)
+			ಆದರೆ (pw->pw_dir)
 				setenv("HOME", pw->pw_dir, 1);
 			unsetenv("USER");
-			if (pw->pw_name)
+			ಆದರೆ (pw->pw_name)
 				setenv("USER", pw->pw_name, 1);
-			if (gid == 0)
+			ಆದರೆ (gid == 0)
 				gid = pw->pw_gid;
 
-			if (p) {
+			ಆದರೆ (p) {
 				tmp = strsep (&p, ":");
-				if (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
+				ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(tmp, "%d%1s", &tid, dummy) != 1)
 					gr = getgrnam(tmp);
-				else
+				ಇಲ್ಲದಿದ್ದರೆ
 					gr = getgrgid((gid_t) tid);
 
-				if (gr == NULL)
+				ಆದರೆ (gr == ಖಾಲಿ)
 					eerrorx("%s: group `%s'"
 					    " not found",
 					    applet, tmp);
 				gid = gr->gr_gid;
 			}
 		}
-		break;
+		ನಿಲ್ಲಿಸು;
 
-		case 'd':  /* --chdir /new/dir */
+		ಸ್ಥಿತಿ 'd':  /* --chdir /new/dir */
 			ch_dir = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'e': /* --env */
+		ಸ್ಥಿತಿ 'e': /* --env */
 			putenv(optarg);
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'g':  /* --group <group>|<gid> */
-			if (sscanf(optarg, "%d", &tid) != 1)
+		ಸ್ಥಿತಿ 'g':  /* --group <group>|<gid> */
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(optarg, "%d", &tid) != 1)
 				gr = getgrnam(optarg);
-			else
+			ಇಲ್ಲದಿದ್ದರೆ
 				gr = getgrgid((gid_t)tid);
-			if (gr == NULL)
+			ಆದರೆ (gr == ಖಾಲಿ)
 				eerrorx("%s: group `%s' not found",
 				    applet, optarg);
 			gid = gr->gr_gid;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'i': /* --interpreted */
+		ಸ್ಥಿತಿ 'i': /* --interpreted */
 			interpreted = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'k':
-			if (parse_mode(&numask, optarg))
+		ಸ್ಥಿತಿ 'k':
+			ಆದರೆ (parse_ಬಹುಲಕ(&numask, optarg))
 				eerrorx("%s: invalid mode `%s'",
 				    applet, optarg);
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'm':  /* --make-pidfile */
+		ಸ್ಥಿತಿ 'm':  /* --make-pidfile */
 			makepidfile = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'n':  /* --name <process-name> */
+		ಸ್ಥಿತಿ 'n':  /* --name <process-name> */
 			name = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'o':  /* --oknodo */
+		ಸ್ಥಿತಿ 'o':  /* --oknodo */
 			/* DEPRECATED */
 			ewarn("WARNING: -o/--oknodo is deprecated and will be removed in the future");
 			oknodo = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'p':  /* --pidfile <pid-file> */
+		ಸ್ಥಿತಿ 'p':  /* --pidfile <pid-file> */
 			pidfile = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 's':  /* --signal <signal> */
+		ಸ್ಥಿತಿ 's':  /* --signal <signal> */
 			sig = parse_signal(applet, optarg);
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 't':  /* --test */
+		ಸ್ಥಿತಿ 't':  /* --test */
 			test = true;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case 'r':  /* --chroot /new/root */
-			ch_root = optarg;
-			break;
+		ಸ್ಥಿತಿ 'r':  /* --chroot /new/root */
+			ch_ಬೇರು = optarg;
+			ನಿಲ್ಲಿಸು;
 
-		case 'a': /* --startas <name> */
+		ಸ್ಥಿತಿ 'a': /* --startas <name> */
 			/* DEPRECATED */
 			ewarn("WARNING: -a/--startas is deprecated and will be removed in the future, please use -x/--exec or -n/--name instead");
 			startas = optarg;
-			break;
-		case 'w':
-			if (sscanf(optarg, "%u", &start_wait) != 1)
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'w':
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(optarg, "%u", &ಆರಂಭ_wait) != 1)
 				eerrorx("%s: `%s' not a number",
 				    applet, optarg);
-			break;
-		case 'x':  /* --exec <executable> */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'x':  /* --exec <executable> */
 			exec = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case '0':   /* --stdin /path/to/stdin.input-file */
+		ಸ್ಥಿತಿ '0':   /* --stdin /path/to/stdin.input-file */
 			redirect_stdin = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case '1':   /* --stdout /path/to/stdout.lgfile */
+		ಸ್ಥಿತಿ '1':   /* --stdout /path/to/stdout.lgfile */
 			redirect_stdout = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case '2':  /* --stderr /path/to/stderr.logfile */
+		ಸ್ಥಿತಿ '2':  /* --stderr /path/to/stderr.logfile */
 			redirect_stderr = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case '3':   /* --stdout-logger "command to run for stdout logging" */
+		ಸ್ಥಿತಿ '3':   /* --stdout-logger "command to run for stdout logging" */
 			stdout_process = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case '4':  /* --stderr-logger "command to run for stderr logging" */
+		ಸ್ಥಿತಿ '4':  /* --stderr-logger "command to run for stderr logging" */
 			stderr_process = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case LONGOPT_SCHEDULER: /* --scheduler "Process scheduler policy" */
+		ಸ್ಥಿತಿ LONGOPT_SCHEDULER: /* --scheduler "Process scheduler policy" */
 			scheduler = optarg;
-			break;
+			ನಿಲ್ಲಿಸು;
 
-		case LONGOPT_SCHEDULER_PRIO: /* --scheduler-priority "Process scheduler priority" */
-			sscanf(optarg, "%d", &sched_prio);
-			break;
+		ಸ್ಥಿತಿ LONGOPT_SCHEDULER_PRIO: /* --scheduler-priority "Process scheduler priority" */
+			ಅಕ್ಷರಸರಣಿ_ಓದು(optarg, "%d", &sched_prio);
+			ನಿಲ್ಲಿಸು;
 
-		case LONGOPT_NOTIFY:
+		ಸ್ಥಿತಿ LONGOPT_NOTIFY:
 			notify = notify_parse(svcname ? svcname : applet, optarg);
-			break;
+			ನಿಲ್ಲಿಸು;
 
 		case_RC_COMMON_GETOPT
 		}
@@ -652,7 +652,7 @@ int main(int argc, char **argv)
 
 	/* Allow start-stop-daemon --signal HUP --exec /usr/sbin/dnsmasq
 	 * instead of forcing --stop --oknodo as well */
-	if (!start &&
+	ಆದರೆ (!ಆರಂಭ &&
 	    !stop &&
 	    sig != SIGINT &&
 	    sig != SIGTERM &&
@@ -660,250 +660,250 @@ int main(int argc, char **argv)
 	    sig != SIGKILL)
 		oknodo = true;
 
-	if (!exec)
+	ಆದರೆ (!exec)
 		exec = startas;
-	else if (!name)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!name)
 		name = startas;
 
-	if (!exec) {
+	ಆದರೆ (!exec) {
 		exec = *argv;
-		if (!exec)
+		ಆದರೆ (!exec)
 			exec = name;
-		if (name && start)
+		ಆದರೆ (name && ಆರಂಭ)
 			*argv = name;
-	} else if (name) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (name) {
 		*--argv = name;
 		++argc;
-	} else if (exec) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (exec) {
 		*--argv = exec;
 		++argc;
 	};
 
-	if (stop || sig != -1) {
-		if (sig == -1)
+	ಆದರೆ (stop || sig != -1) {
+		ಆದರೆ (sig == -1)
 			sig = SIGTERM;
-		if (!*argv && !pidfile && !name && !uid)
+		ಆದರೆ (!*argv && !pidfile && !name && !uid)
 			eerrorx("%s: --stop needs --exec, --pidfile,"
 			    " --name or --user", applet);
-		if (background)
+		ಆದರೆ (background)
 			eerrorx("%s: --background is only relevant with"
 			    " --start", applet);
-		if (makepidfile)
+		ಆದರೆ (makepidfile)
 			eerrorx("%s: --make-pidfile is only relevant with"
 			    " --start", applet);
-		if (redirect_stdout || redirect_stderr)
+		ಆದರೆ (redirect_stdout || redirect_stderr)
 			eerrorx("%s: --stdout and --stderr are only relevant"
 			    " with --start", applet);
-		if (stdout_process || stderr_process)
+		ಆದರೆ (stdout_process || stderr_process)
 			eerrorx("%s: --stdout-logger and --stderr-logger are only relevant"
 			    " with --start", applet);
-		if (start_wait)
+		ಆದರೆ (ಆರಂಭ_wait)
 			ewarn("using --wait with --stop has no effect,"
 			    " use --retry instead");
-	} else {
-		if (!exec)
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (!exec)
 			eerrorx("%s: nothing to start", applet);
-		if (makepidfile && !pidfile)
+		ಆದರೆ (makepidfile && !pidfile)
 			eerrorx("%s: --make-pidfile is only relevant with"
 			    " --pidfile", applet);
-		if ((redirect_stdout || redirect_stderr) && !background)
+		ಆದರೆ ((redirect_stdout || redirect_stderr) && !background)
 			eerrorx("%s: --stdout and --stderr are only relevant"
 			    " with --background", applet);
-		if ((stdout_process || stderr_process) && !background)
+		ಆದರೆ ((stdout_process || stderr_process) && !background)
 			eerrorx("%s: --stdout-logger and --stderr-logger are only relevant"
 			    " with --background", applet);
-		if (redirect_stdout && stdout_process)
+		ಆದರೆ (redirect_stdout && stdout_process)
 			eerrorx("%s: do not use --stdout and --stdout-logger together",
 					applet);
-		if (redirect_stderr && stderr_process)
+		ಆದರೆ (redirect_stderr && stderr_process)
 			eerrorx("%s: do not use --stderr and --stderr-logger together",
 					applet);
 	}
 
 	/* Expand ~ */
-	if (ch_dir && *ch_dir == '~')
+	ಆದರೆ (ch_dir && *ch_dir == '~')
 		ch_dir = expand_home(home, ch_dir);
-	if (ch_root && *ch_root == '~')
-		ch_root = expand_home(home, ch_root);
-	if (exec) {
-		if (*exec == '~')
+	ಆದರೆ (ch_ಬೇರು && *ch_ಬೇರು == '~')
+		ch_ಬೇರು = expand_home(home, ch_ಬೇರು);
+	ಆದರೆ (exec) {
+		ಆದರೆ (*exec == '~')
 			exec = expand_home(home, exec);
 
 		/* Validate that the binary exists if we are starting */
-		if (*exec == '/' || *exec == '.') {
+		ಆದರೆ (*exec == '/' || *exec == '.') {
 			/* Full or relative path */
-			if (ch_root)
-				xasprintf(&exec_file, "%s/%s", ch_root, exec);
-			else
+			ಆದರೆ (ch_ಬೇರು)
+				xasprintf(&exec_file, "%s/%s", ch_ಬೇರು, exec);
+			ಇಲ್ಲದಿದ್ದರೆ
 				xasprintf(&exec_file, "%s", exec);
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			/* Something in $PATH */
 			p = tmp = xstrdup(getenv("PATH"));
-			exec_file = NULL;
-			while ((token = strsep(&p, ":"))) {
-				if (ch_root)
-					xasprintf(&exec_file, "%s/%s/%s", ch_root, token, exec);
-				else
+			exec_file = ಖಾಲಿ;
+			ಆಗ ((token = strsep(&p, ":"))) {
+				ಆದರೆ (ch_ಬೇರು)
+					xasprintf(&exec_file, "%s/%s/%s", ch_ಬೇರು, token, exec);
+				ಇಲ್ಲದಿದ್ದರೆ
 					xasprintf(&exec_file, "%s/%s", token, exec);
-				if (exec_file && access(exec_file, F_OK) == 0)
-					break;
-				free(exec_file);
-				exec_file = NULL;
+				ಆದರೆ (exec_file && access(exec_file, F_OK) == 0)
+					ನಿಲ್ಲಿಸು;
+				ಬಿಡುಗಡೆ(exec_file);
+				exec_file = ಖಾಲಿ;
 			}
-			free(tmp);
+			ಬಿಡುಗಡೆ(tmp);
 		}
 	}
-	if (start && access(exec_file, F_OK) != 0) {
+	ಆದರೆ (ಆರಂಭ && access(exec_file, F_OK) != 0) {
 		eerror("%s: %s does not exist", applet,
 		    exec_file ? exec_file : exec);
-		free(exec_file);
-		exit(EXIT_FAILURE);
+		ಬಿಡುಗಡೆ(exec_file);
+		ನಿರ್ಗಮಿಸು(EXIT_FAILURE);
 	}
-	if (start && retry)
+	ಆದರೆ (ಆರಂಭ && retry)
 		ewarn("using --retry with --start has no effect,"
 		    " use --wait instead");
 
 	/* If we don't have a pidfile we should check if it's interpreted
 	 * or not. If it we, we need to pass the interpreter through
 	 * to our daemon calls to find it correctly. */
-	if (interpreted && !pidfile) {
+	ಆದರೆ (interpreted && !pidfile) {
 		fp = fopen(exec_file, "r");
-		if (fp) {
-			line = NULL;
-			if (xgetline(&line, &size, fp) == -1)
+		ಆದರೆ (fp) {
+			ಸಾಲು = ಖಾಲಿ;
+			ಆದರೆ (xgetline(&ಸಾಲು, &ಗಾತ್ರ_2, fp) == -1)
 				eerrorx("%s: %s", applet, strerror(errno));
-			p = line;
+			p = ಸಾಲು;
 			fclose(fp);
-			if (p != NULL && line[0] == '#' && line[1] == '!') {
-				p = line + 2;
+			ಆದರೆ (p != ಖಾಲಿ && ಸಾಲು[0] == '#' && ಸಾಲು[1] == '!') {
+				p = ಸಾಲು + 2;
 				/* Strip leading spaces */
-				while (*p == ' ' || *p == '\t')
+				ಆಗ (*p == ' ' || *p == '\t')
 					p++;
 				token = strsep(&p, " ");
-				free(exec_file);
+				ಬಿಡುಗಡೆ(exec_file);
 				xasprintf(&exec_file, "%s", token);
 				opt = 0;
-				for (nav = argv; *nav; nav++)
+				ಗಾಗಿ (nav = argv; *nav; nav++)
 					opt++;
-				nav = xmalloc(sizeof(char *) * (opt + 3));
+				nav = xmalloc(ಗಾತ್ರ(ಅಕ್ಷರ *) * (opt + 3));
 				nav[0] = exec_file;
 				len = 1;
-				if (p)
+				ಆದರೆ (p)
 					nav[len++] = p;
-				for (i = 0; i < opt; i++)
+				ಗಾಗಿ (i = 0; i < opt; i++)
 					nav[i + len] = argv[i];
-				nav[i + len] = NULL;
+				nav[i + len] = ಖಾಲಿ;
 			}
 		}
 	}
 	margv = nav ? nav : argv;
 
-	if (stop || sig != -1) {
-		if (sig == -1)
+	ಆದರೆ (stop || sig != -1) {
+		ಆದರೆ (sig == -1)
 			sig = SIGTERM;
-		if (!stop)
+		ಆದರೆ (!stop)
 			oknodo = true;
-		if (retry)
-			parse_schedule(applet, retry, sig);
-		else if (test || oknodo)
-			parse_schedule(applet, "0", sig);
-		else
-			parse_schedule(applet, NULL, sig);
-		if (pidfile) {
+		ಆದರೆ (retry)
+			parse_ವೇಳಾಪಟ್ಟಿ(applet, retry, sig);
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (test || oknodo)
+			parse_ವೇಳಾಪಟ್ಟಿ(applet, "0", sig);
+		ಇಲ್ಲದಿದ್ದರೆ
+			parse_ವೇಳಾಪಟ್ಟಿ(applet, ಖಾಲಿ, sig);
+		ಆದರೆ (pidfile) {
 			pid = get_pid(applet, pidfile);
-			if (pid == -1 && errno != ENOENT)
-				exit(EXIT_FAILURE);
-		} else {
+			ಆದರೆ (pid == -1 && errno != ENOENT)
+				ನಿರ್ಗಮಿಸು(EXIT_FAILURE);
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			pid = 0;
 		}
-		i = run_stop_schedule(applet, exec, (const char *const *)margv,
-		    pid, uid, stopgroup, test, progress, false);
+		i = ಸತತ_stop_ವೇಳಾಪಟ್ಟಿ(applet, exec, (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *)margv,
+		    pid, uid, stopgroup, test, ಪ್ರಗತಿ, false);
 
-		if (i < 0)
+		ಆದರೆ (i < 0)
 			/* We failed to stop something */
-			exit(EXIT_FAILURE);
-		if (test || oknodo)
-			return i > 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+			ನಿರ್ಗಮಿಸು(EXIT_FAILURE);
+		ಆದರೆ (test || oknodo)
+			ಹಿಂತಿರುಗಿ i > 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 
 		/* Even if we have not actually killed anything, we should
 		 * remove information about it as it may have unexpectedly
 		 * crashed out. We should also return success as the end
 		 * result would be the same. */
-		if (pidfile)
+		ಆದರೆ (pidfile)
 			unlink(pidfile);
-		if (svcname)
-			rc_service_daemon_set(svcname, exec,
-			    (const char *const *)argv,
+		ಆದರೆ (svcname)
+			rc_service_daemon_ಗಣ(svcname, exec,
+			    (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *)argv,
 			    pidfile, false);
-		exit(EXIT_SUCCESS);
+		ನಿರ್ಗಮಿಸು(EXIT_SUCCESS);
 	}
 
-	if (pidfile)
+	ಆದರೆ (pidfile)
 		pid = get_pid(applet, pidfile);
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		pid = 0;
 
-	if (pid)
-		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
-		pids = rc_find_pids(exec, (const char * const *) argv, uid, 0);
-	if (pids)
+	ಆದರೆ (pid)
+		pids = rc_ಕಂಡುಹಿಡಿ_pids(ಖಾಲಿ, ಖಾಲಿ, 0, pid);
+	ಇಲ್ಲದಿದ್ದರೆ
+		pids = rc_ಕಂಡುಹಿಡಿ_pids(exec, (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ *) argv, uid, 0);
+	ಆದರೆ (pids)
 		eerrorx("%s: %s is already running", applet, exec);
 
-	free(pids);
-	if (test) {
-		if (rc_yesno(getenv("EINFO_QUIET")))
-			exit (EXIT_SUCCESS);
+	ಬಿಡುಗಡೆ(pids);
+	ಆದರೆ (test) {
+		ಆದರೆ (rc_yesno(getenv("EINFO_QUIET")))
+			ನಿರ್ಗಮಿಸು (EXIT_SUCCESS);
 
 		einfon("Would start");
-		while (argc-- > 0)
-			printf(" %s", *argv++);
-		printf("\n");
+		ಆಗ (argc-- > 0)
+			ಬರೆ(" %s", *argv++);
+		ಬರೆ("\n");
 		eindent();
-		if (uid != 0)
+		ಆದರೆ (uid != 0)
 			einfo("as user id %"PRIuMAX, (uintmax_t)uid);
-		if (gid != 0)
+		ಆದರೆ (gid != 0)
 			einfo("as group id %"PRIuMAX, (uintmax_t)gid);
-		if (ch_root)
-			einfo("in root `%s'", ch_root);
-		if (ch_dir)
+		ಆದರೆ (ch_ಬೇರು)
+			einfo("in root `%s'", ch_ಬೇರು);
+		ಆದರೆ (ch_dir)
 			einfo("in dir `%s'", ch_dir);
-		if (nicelevel != 0)
+		ಆದರೆ (nicelevel != 0)
 			einfo("with a priority of %d", nicelevel);
-		if (name)
+		ಆದರೆ (name)
 			einfo ("with a process name of %s", name);
 		eoutdent();
-		exit(EXIT_SUCCESS);
+		ನಿರ್ಗಮಿಸು(EXIT_SUCCESS);
 	}
 
 	ebeginv("Detaching to start `%s'", exec);
 	eindentv();
 
 	/* Remove existing pidfile */
-	if (pidfile)
+	ಆದರೆ (pidfile)
 		unlink(pidfile);
 
-	if (background)
-		signal_setup(SIGCHLD, handle_signal);
+	ಆದರೆ (background)
+		signal_ಸಿದ್ಧತೆ(SIGCHLD, handle_signal);
 
 	/* Use a pipe to sync the parent/child processes. */
-	if (pipe2(pipefd, O_CLOEXEC) == -1)
+	ಆದರೆ (pipe2(pipefd, O_CLOEXEC) == -1)
 		eerrorx("%s: pipe2: %s", applet, strerror(errno));
 
-	if ((pid = fork()) == -1)
+	ಆದರೆ ((pid = fork()) == -1)
 		eerrorx("%s: fork: %s", applet, strerror(errno));
 
 	/* Child process - lets go! */
-	if (pid == 0) {
-		gid_t group_buf[32], *group_list = group_buf;
-		int group_count = ARRAY_SIZE(group_buf);
+	ಆದರೆ (pid == 0) {
+		gid_t ಗುಂಪು_buf[32], *ಗುಂಪು_list = ಗುಂಪು_buf;
+		ಪೂರ್ಣಾಂಕ ಗುಂಪು_ಎಣಿಕೆ = ARRAY_ಗಾತ್ರ(ಗುಂಪು_buf);
 		pid_t mypid = getpid();
 		close(pipefd[0]); /* Close the read end of the pipe. */
 		umask(numask);
 
-#ifdef TIOCNOTTY
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TIOCNOTTY
 		tty_fd = open("/dev/tty", O_RDWR);
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 		devnull_fd = open("/dev/null", O_RDWR);
 
@@ -911,69 +911,69 @@ int main(int argc, char **argv)
 		 * but after opening tty_fd. */
 		setsid();
 
-		if (nicelevel != INT_MIN) {
-			if (setpriority(PRIO_PROCESS, mypid, nicelevel) == -1)
+		ಆದರೆ (nicelevel != INT_MIN) {
+			ಆದರೆ (setpriority(PRIO_PROCESS, mypid, nicelevel) == -1)
 				eerrorx("%s: setpriority %d: %s",
 				    applet, nicelevel,
 				    strerror(errno));
 			/* Open in "r+" mode to avoid creating if non-existent. */
 			fp = fopen("/proc/self/autogroup", "r+");
-			if (fp) {
+			ಆದರೆ (fp) {
 				fprintf(fp, "%d\n", nicelevel);
 				fclose(fp);
-			} else if (errno != ENOENT)
+			} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (errno != ENOENT)
 				eerrorx("%s: autogroup nice %d: %s", applet,
 				    nicelevel, strerror(errno));
 		}
 
-		if (ionicec != -1 &&
-		    ioprio_set(1, mypid, ionicec | ioniced) == -1)
+		ಆದರೆ (ionicec != -1 &&
+		    ioprio_ಗಣ(1, mypid, ionicec | ioniced) == -1)
 			eerrorx("%s: ioprio_set %d %d: %s", applet,
 			    ionicec, ioniced, strerror(errno));
 
-		if (oom_score_adj != INT_MIN) {
+		ಆದರೆ (oom_score_adj != INT_MIN) {
 			fp = fopen("/proc/self/oom_score_adj", "w");
-			if (!fp)
+			ಆದರೆ (!fp)
 				eerrorx("%s: oom_score_adj %d: %s", applet,
 				    oom_score_adj, strerror(errno));
 			fprintf(fp, "%d\n", oom_score_adj);
 			fclose(fp);
 		}
 
-#ifdef HAVE_PAM
-		if (changeuser != NULL) {
-			pamr = pam_start("start-stop-daemon",
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
+		ಆದರೆ (changeuser != ಖಾಲಿ) {
+			pamr = pam_ಆರಂಭ("start-stop-daemon",
 			    changeuser, &conv, &pamh);
 
-			if (pamr == PAM_SUCCESS)
+			ಆದರೆ (pamr == PAM_SUCCESS)
 				pamr = pam_acct_mgmt(pamh, PAM_SILENT);
-			if (pamr == PAM_SUCCESS)
+			ಆದರೆ (pamr == PAM_SUCCESS)
 				pamr = pam_open_session(pamh, PAM_SILENT);
-			if (pamr != PAM_SUCCESS)
+			ಆದರೆ (pamr != PAM_SUCCESS)
 				eerrorx("%s: pam error: %s",
 					applet, pam_strerror(pamh, pamr));
 		}
-#endif
-		if (changeuser && getgrouplist(changeuser, gid, group_list, &group_count) < 0) {
-			group_list = xmalloc(group_count * sizeof(*group_list));
-			if (getgrouplist(changeuser, gid, group_list, &group_count) < 0)
+#ಆದರೆ_ಅಂತ್ಯ
+		ಆದರೆ (changeuser && getgrouplist(changeuser, gid, ಗುಂಪು_list, &ಗುಂಪು_ಎಣಿಕೆ) < 0) {
+			ಗುಂಪು_list = xmalloc(ಗುಂಪು_ಎಣಿಕೆ * ಗಾತ್ರ(*ಗುಂಪು_list));
+			ಆದರೆ (getgrouplist(changeuser, gid, ಗುಂಪು_list, &ಗುಂಪು_ಎಣಿಕೆ) < 0)
 				eerrorx("%s: getgrouplist(%s, %"PRIuMAX")", applet, changeuser, (uintmax_t)gid);
 		}
 
 		/* Close any fd's to the passwd database */
 		endpwent();
 
-		if (ch_root && chroot(ch_root) < 0)
+		ಆದರೆ (ch_ಬೇರು && chroot(ch_ಬೇರು) < 0)
 			eerrorx("%s: chroot `%s': %s",
-			    applet, ch_root, strerror(errno));
+			    applet, ch_ಬೇರು, strerror(errno));
 
-		if (ch_dir && chdir(ch_dir) < 0)
+		ಆದರೆ (ch_dir && chdir(ch_dir) < 0)
 			eerrorx("%s: chdir `%s': %s",
 			    applet, ch_dir, strerror(errno));
 
-		if (makepidfile && pidfile) {
+		ಆದರೆ (makepidfile && pidfile) {
 			fp = fopen(pidfile, "w");
-			if (!fp)
+			ಆದರೆ (!fp)
 				eerrorx("%s: fopen `%s': %s", applet, pidfile,
 				    strerror(errno));
 			fprintf(fp, "%d\n", mypid);
@@ -981,102 +981,102 @@ int main(int argc, char **argv)
 		}
 
 
-		if (gid && setgid(gid))
+		ಆದರೆ (gid && setgid(gid))
 			eerrorx("%s: unable to set groupid to %"PRIuMAX,
 			    applet, (uintmax_t)gid);
-		if (changeuser && setgroups(group_count, group_list))
+		ಆದರೆ (changeuser && setgroups(ಗುಂಪು_ಎಣಿಕೆ, ಗುಂಪು_list))
 			eerrorx("%s: setgroups() failed", applet);
-		if (group_list != group_buf)
-			free(group_list);
-#ifdef __linux__
-		if (uid && cap_setuid(uid))
-#else
-		if (uid && setuid(uid))
-#endif
+		ಆದರೆ (ಗುಂಪು_list != ಗುಂಪು_buf)
+			ಬಿಡುಗಡೆ(ಗುಂಪು_list);
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
+		ಆದರೆ (uid && cap_setuid(uid))
+#ಇಲ್ಲದಿದ್ದರೆ
+		ಆದರೆ (uid && setuid(uid))
+#ಆದರೆ_ಅಂತ್ಯ
 			eerrorx ("%s: unable to set userid to %"PRIuMAX,
 			    applet, (uintmax_t)uid);
 
-#ifdef __linux__
-		if (cap_iab != NULL) {
-			i = cap_iab_set_proc(cap_iab);
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __linux__
+		ಆದರೆ (cap_iab != ಖಾಲಿ) {
+			i = cap_iab_ಗಣ_proc(cap_iab);
 
-			if (cap_free(cap_iab) != 0)
+			ಆದರೆ (cap_free(cap_iab) != 0)
 				eerrorx("Could not releasable memory: %s", strerror(errno));
 
-			if (i != 0)
+			ಆದರೆ (i != 0)
 				eerrorx("Could not set iab: %s", strerror(errno));
 		}
 
-		if (secbits != 0) {
-			if (cap_set_secbits(secbits) < 0)
+		ಆದರೆ (secbits != 0) {
+			ಆದರೆ (cap_ಗಣ_secbits(secbits) < 0)
 				eerrorx("Could not set securebits to 0x%x: %s", secbits, strerror(errno));
 		}
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef PR_SET_NO_NEW_PRIVS
-		if (no_new_privs) {
-			if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1)
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ PR_ಗಣ_NO_NEW_PRIVS
+		ಆದರೆ (no_new_privs) {
+			ಆದರೆ (prctl(PR_ಗಣ_NO_NEW_PRIVS, 1, 0, 0, 0) == -1)
 				eerrorx("Could not set No New Privs flag: %s", strerror(errno));
 		}
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-#ifdef TIOCNOTTY
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TIOCNOTTY
 		ioctl(tty_fd, TIOCNOTTY, 0);
 		close(tty_fd);
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 		/* Clean the environment of any RC_ variables */
 		env_list = rc_stringlist_new();
 		i = 0;
-		while (environ[i])
-			rc_stringlist_add(env_list, environ[i++]);
+		ಆಗ (environ[i])
+			rc_stringlist_ಕೂಡಿಸು(env_list, environ[i++]);
 
-#ifdef HAVE_PAM
-		if (changeuser != NULL) {
-			pamenv = (const char *const *)pam_getenvlist(pamh);
-			if (pamenv) {
-				while (*pamenv) {
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
+		ಆದರೆ (changeuser != ಖಾಲಿ) {
+			pamenv = (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *)pam_getenvlist(pamh);
+			ಆದರೆ (pamenv) {
+				ಆಗ (*pamenv) {
 					/* Don't add strings unless they set a var */
-					if (strchr(*pamenv, '='))
+					ಆದರೆ (strchr(*pamenv, '='))
 						putenv(xstrdup(*pamenv));
-					else
+					ಇಲ್ಲದಿದ್ದರೆ
 						unsetenv(*pamenv);
 					pamenv++;
 				}
 			}
 		}
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 		unsetenv("SVCNAME");
 		TAILQ_FOREACH(env, env_list, entries) {
-			if (strncmp(env->value, "RC_", 3) == 0
-					|| strncmp(env->value, "SSD_", 4) == 0
-					|| strncmp(env->value, "EINFO_", 6) == 0) {
-				*strchr(env->value, '=') = '\0';
-				unsetenv(env->value);
+			ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(env->ಮೌಲ್ಯ, "RC_", 3) == 0
+					|| ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(env->ಮೌಲ್ಯ, "SSD_", 4) == 0
+					|| ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(env->ಮೌಲ್ಯ, "EINFO_", 6) == 0) {
+				*strchr(env->ಮೌಲ್ಯ, '=') = '\0';
+				unsetenv(env->ಮೌಲ್ಯ);
 			}
 		}
 		rc_stringlist_free(env_list);
 
 		/* For the path, remove the rcscript bin dir from it */
-		if ((token = getenv("PATH"))) {
-			len = strlen(token);
+		ಆದರೆ ((token = getenv("PATH"))) {
+			len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(token);
 			newpath = np = xmalloc(len + 1);
-			while (token && *token) {
+			ಆಗ (token && *token) {
 				p = strchr(token, ':');
-				if (p) {
+				ಆದರೆ (p) {
 					*p++ = '\0';
-					while (*p == ':')
+					ಆಗ (*p == ':')
 						p++;
 				}
-				if (strcmp(token, RC_LIBEXECDIR "/bin") != 0 &&
+				ಆದರೆ (strcmp(token, RC_LIBEXECDIR "/bin") != 0 &&
 				    strcmp(token, RC_LIBEXECDIR "/sbin") != 0)
 				{
-					len = strlen(token);
-					if (np != newpath)
+					len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(token);
+					ಆದರೆ (np != newpath)
 						*np++ = ':';
-					memcpy(np, token, len);
+					ಸ್ಮರಣೆ_ನಕಲು(np, token, len);
 					np += len;
 				}
 				token = p;
@@ -1089,108 +1089,108 @@ int main(int argc, char **argv)
 		stdin_fd = devnull_fd;
 		stdout_fd = devnull_fd;
 		stderr_fd = devnull_fd;
-		if (redirect_stdin) {
-			if ((stdin_fd = xopen_nonblock(redirect_stdin,
+		ಆದರೆ (redirect_stdin) {
+			ಆದರೆ ((stdin_fd = xopen_nonblock(redirect_stdin,
 				    O_RDONLY, 0)) == -1)
 				eerrorx("%s: unable to redirect the input file"
 				    " for stdin `%s': %s",
 				    applet, redirect_stdin, strerror(errno));
 		}
-		if (redirect_stdout) {
-			if ((stdout_fd = xopen_nonblock(redirect_stdout,
+		ಆದರೆ (redirect_stdout) {
+			ಆದರೆ ((stdout_fd = xopen_nonblock(redirect_stdout,
 				    O_WRONLY | O_CREAT | O_APPEND,
 				    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)) == -1)
 				eerrorx("%s: unable to redirect the logfile"
 				    " for stdout `%s': %s",
 				    applet, redirect_stdout, strerror(errno));
-		}else if (stdout_process) {
+		}ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (stdout_process) {
 			stdout_fd = rc_pipe_command(stdout_process, devnull_fd);
-			if (stdout_fd == -1)
+			ಆದರೆ (stdout_fd == -1)
 				eerrorx("%s: unable to open the logging process"
 				    " for stdout `%s': %s",
 				    applet, stdout_process, strerror(errno));
 		}
-		if (redirect_stderr) {
-			if ((stderr_fd = xopen_nonblock(redirect_stderr,
+		ಆದರೆ (redirect_stderr) {
+			ಆದರೆ ((stderr_fd = xopen_nonblock(redirect_stderr,
 				    O_WRONLY | O_CREAT | O_APPEND,
 				    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)) == -1)
 				eerrorx("%s: unable to redirect the logfile"
 				    " for stderr `%s': %s",
 				    applet, redirect_stderr, strerror(errno));
-		}else if (stderr_process) {
+		}ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (stderr_process) {
 			stderr_fd = rc_pipe_command(stderr_process, devnull_fd);
-			if (stderr_fd == -1)
+			ಆದರೆ (stderr_fd == -1)
 				eerrorx("%s: unable to open the logging process"
 				    " for stderr `%s': %s",
 				    applet, stderr_process, strerror(errno));
 		}
 
-		if (background)
+		ಆದರೆ (background)
 			dup2(stdin_fd, STDIN_FILENO);
-		if (background || redirect_stdout || stdout_process
+		ಆದರೆ (background || redirect_stdout || stdout_process
 				|| rc_yesno(getenv("EINFO_QUIET")))
 			dup2(stdout_fd, STDOUT_FILENO);
-		if (background || redirect_stderr || stderr_process
+		ಆದರೆ (background || redirect_stderr || stderr_process
 				|| rc_yesno(getenv("EINFO_QUIET")))
 			dup2(stderr_fd, STDERR_FILENO);
 
 		cloexec_fds_from(3); /* FIXME: this is problematic, see right below */
 
-		if (notify.type == NOTIFY_FD) {
-			if (close(notify.pipe[0]) == -1)
+		ಆದರೆ (notify.type == NOTIFY_FD) {
+			ಆದರೆ (close(notify.pipe[0]) == -1)
 				eerrorx("%s: failed to close notify pipe[0]: %s", applet, strerror(errno));
-			if (dup2(notify.pipe[1], notify.fd) == -1)
+			ಆದರೆ (dup2(notify.pipe[1], notify.fd) == -1)
 				eerrorx("%s: failed to initialize notify fd: %s", applet, strerror(errno));
 
 			/* if notify.pipe[1] == notify.fd then the FD_CLOEXEC flag is not cleared by dup2,
 			   leading to failure. The workaround here is to clear it manually, but the
 			   real fix is that we should never close/cloexec fds in bulk like this */
-			if (notify.pipe[1] == notify.fd) {
-				int flags = fcntl(notify.fd, F_GETFD, 0);
-				if (flags == -1)
+			ಆದರೆ (notify.pipe[1] == notify.fd) {
+				ಪೂರ್ಣಾಂಕ flags = fcntl(notify.fd, F_GETFD, 0);
+				ಆದರೆ (flags == -1)
 					eerrorx("%s: failed to get flags for notify fd: %s", applet, strerror(errno));
-				if (fcntl(notify.fd, F_SETFD, flags & ~FD_CLOEXEC) == -1)
+				ಆದರೆ (fcntl(notify.fd, F_SETFD, flags & ~FD_CLOEXEC) == -1)
 					eerrorx("%s: failed to set flags for notify fd: %s", applet, strerror(errno));
 			}
 
 		}
 
-		if (scheduler != NULL) {
-			int scheduler_index;
-			struct sched_param sched =  {.sched_priority = sched_prio};
-			if (strcmp(scheduler, "fifo") == 0)
-				scheduler_index = SCHED_FIFO;
-			else if (strcmp(scheduler, "rr") == 0)
-				scheduler_index = SCHED_RR;
-			else if (strcmp(scheduler, "other") == 0)
-				scheduler_index = SCHED_OTHER;
-#ifdef SCHED_BATCH
-			else if (strcmp(scheduler, "batch") == 0)
-				scheduler_index = SCHED_BATCH;
-#endif
-#ifdef SCHED_IDLE
-			else if (strcmp(scheduler, "idle") == 0)
-				scheduler_index = SCHED_IDLE;
-#endif
-			else if (sscanf(scheduler, "%d", &scheduler_index) != 1)
+		ಆದರೆ (scheduler != ಖಾಲಿ) {
+			ಪೂರ್ಣಾಂಕ scheduler_ಸೂಚ್ಯಂಕ;
+			ರಚನೆ sched_param sched =  {.sched_priority = sched_prio};
+			ಆದರೆ (strcmp(scheduler, "fifo") == 0)
+				scheduler_ಸೂಚ್ಯಂಕ = SCHED_FIFO;
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strcmp(scheduler, "rr") == 0)
+				scheduler_ಸೂಚ್ಯಂಕ = SCHED_RR;
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strcmp(scheduler, "other") == 0)
+				scheduler_ಸೂಚ್ಯಂಕ = SCHED_OTHER;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ SCHED_BATCH
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strcmp(scheduler, "batch") == 0)
+				scheduler_ಸೂಚ್ಯಂಕ = SCHED_BATCH;
+#ಆದರೆ_ಅಂತ್ಯ
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ SCHED_IDLE
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strcmp(scheduler, "idle") == 0)
+				scheduler_ಸೂಚ್ಯಂಕ = SCHED_IDLE;
+#ಆದರೆ_ಅಂತ್ಯ
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(scheduler, "%d", &scheduler_ಸೂಚ್ಯಂಕ) != 1)
 				eerrorx("Unknown scheduler: %s", scheduler);
 
-			if (sched_prio == -1)
-				sched.sched_priority = sched_get_priority_min(scheduler_index);
+			ಆದರೆ (sched_prio == -1)
+				sched.sched_priority = sched_get_priority_min(scheduler_ಸೂಚ್ಯಂಕ);
 
-			if (pthread_setschedparam(pthread_self(), scheduler_index, &sched))
+			ಆದರೆ (pthread_setschedparam(pthread_self(), scheduler_ಸೂಚ್ಯಂಕ, &sched))
 				eerrorx("Failed to set scheduler: %s", strerror(errno));
-		} else if (sched_prio != -1) {
-			const struct sched_param sched =  {.sched_priority = sched_prio};
-			if (sched_setparam(mypid, &sched))
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (sched_prio != -1) {
+			ಸ್ಥಿರಾಂಕ ರಚನೆ sched_param sched =  {.sched_priority = sched_prio};
+			ಆದರೆ (sched_setparam(mypid, &sched))
 				eerrorx("Failed to set scheduler parameters: %s", strerror(errno));
 		}
 
 		execvp(exec, argv);
-#ifdef HAVE_PAM
-		if (changeuser != NULL && pamr == PAM_SUCCESS)
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_PAM
+		ಆದರೆ (changeuser != ಖಾಲಿ && pamr == PAM_SUCCESS)
 			pam_close_session(pamh, PAM_SILENT);
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 		eerrorx("%s: failed to exec `%s': %s",
 		    applet, exec,strerror(errno));
 	}
@@ -1201,87 +1201,87 @@ int main(int argc, char **argv)
 
 	/* The child never writes to the pipe, so this read will block until
 	 * the child calls exec or exits. */
-	while ((ss = read(pipefd[0], readbuf, 1)) == -1 && errno == EINTR);
-	if (ss == -1)
+	ಆಗ ((ss = ಪಠ(pipefd[0], readbuf, 1)) == -1 && errno == EINTR);
+	ಆದರೆ (ss == -1)
 		eerrorx("%s: failed to read from pipe: %s",
 			applet, strerror(errno));
 
 	close(pipefd[0]);
 
-	if (!background) {
+	ಆದರೆ (!background) {
 		/* As we're not backgrounding the process, wait for our pid
 		 * to return */
 		i = 0;
 		spid = pid;
 
-		do {
+		ಮಾಡು {
 			pid = waitpid(spid, &i, 0);
-			if (pid < 1) {
+			ಆದರೆ (pid < 1) {
 				eerror("waitpid %d: %s",
 				    spid, strerror(errno));
-				return -1;
+				ಹಿಂತಿರುಗಿ -1;
 			}
-		} while (!WIFEXITED(i) && !WIFSIGNALED(i));
-		if (!WIFEXITED(i) || WEXITSTATUS(i) != 0) {
+		} ಆಗ (!WIFEXITED(i) && !WIFSIGNALED(i));
+		ಆದರೆ (!WIFEXITED(i) || WEXITSTATUS(i) != 0) {
 			eerror("%s: failed to start `%s'", applet, exec);
-			exit(EXIT_FAILURE);
+			ನಿರ್ಗಮಿಸು(EXIT_FAILURE);
 		}
 		pid = spid;
 	}
 
 	/* Wait a little bit and check that process is still running
 	   We do this as some badly written daemons fork and then barf */
-	if (start_wait == 0 &&
+	ಆದರೆ (ಆರಂಭ_wait == 0 &&
 	    ((p = getenv("SSD_STARTWAIT")) ||
-		(p = rc_conf_value("rc_start_wait"))))
+		(p = rc_conf_ಮೌಲ್ಯ("rc_start_wait"))))
 	{
-		if (sscanf(p, "%u", &start_wait) != 1)
-			start_wait = 0;
+		ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಓದು(p, "%u", &ಆರಂಭ_wait) != 1)
+			ಆರಂಭ_wait = 0;
 	}
 
-	if (notify.type != NOTIFY_NONE) {
-		if (!notify_wait(applet, notify))
+	ಆದರೆ (notify.type != NOTIFY_NONE) {
+		ಆದರೆ (!notify_wait(applet, notify))
 			ret = EXIT_FAILURE;
-	} else if (start_wait > 0) {
-		struct timespec ts;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಆರಂಭ_wait > 0) {
+		ರಚನೆ timespec ts;
 		bool alive = false;
 
-		ts.tv_sec = start_wait / 1000;
-		ts.tv_nsec = (start_wait % 1000) * ONE_MS;
-		if (nanosleep(&ts, NULL) == -1) {
-			if (errno != EINTR) {
+		ts.tv_sec = ಆರಂಭ_wait / 1000;
+		ts.tv_nsec = (ಆರಂಭ_wait % 1000) * ONE_MS;
+		ಆದರೆ (nanosleep(&ts, ಖಾಲಿ) == -1) {
+			ಆದರೆ (errno != EINTR) {
 				eerror("%s: nanosleep: %s",
 				    applet, strerror(errno));
-				return 0;
+				ಹಿಂತಿರುಗಿ 0;
 			}
 		}
-		if (background) {
-			if (kill(pid, 0) == 0)
+		ಆದರೆ (background) {
+			ಆದರೆ (kill(pid, 0) == 0)
 				alive = true;
-		} else {
-			if (pidfile) {
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಆದರೆ (pidfile) {
 				pid = get_pid(applet, pidfile);
-				if (pid == -1) {
+				ಆದರೆ (pid == -1) {
 					eerrorx("%s: did not "
 					    "create a valid"
 					    " pid in `%s'",
 					    applet, pidfile);
 				}
-			} else
+			} ಇಲ್ಲದಿದ್ದರೆ
 				pid = 0;
-			if (do_stop(applet, exec, (const char *const *)margv,
+			ಆದರೆ (do_stop(applet, exec, (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *)margv,
 				pid, uid, 0, false, test, false) > 0)
 				alive = true;
 		}
 
-		if (!alive)
+		ಆದರೆ (!alive)
 			eerrorx("%s: %s died", applet, exec);
 	}
 
-	if (svcname)
-		rc_service_daemon_set(svcname, exec,
-		    (const char *const *)margv, pidfile, true);
+	ಆದರೆ (svcname)
+		rc_service_daemon_ಗಣ(svcname, exec,
+		    (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *)margv, pidfile, true);
 
-	exit(ret);
+	ನಿರ್ಗಮಿಸು(ret);
 	/* NOTREACHED */
 }

@@ -15,13 +15,13 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __RC_WTMP_H__
-#define __RC_WTMP_H__
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ __RC_WTMP_H__
+#ವ್ಯಾಖ್ಯಾನಿಸು __RC_WTMP_H__
 
-#include <utmp.h>
-#include <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <utmp.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
 
-void log_wtmp(const char *user, const char *id, pid_t pid, int type,
-		const char *line);
+ಶೂನ್ಯ log_wtmp(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *user, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *id, pid_t pid, ಪೂರ್ಣಾಂಕ type,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಾಲು);
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

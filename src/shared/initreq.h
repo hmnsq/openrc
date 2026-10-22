@@ -14,8 +14,8 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef _INITREQ_H
-#define _INITREQ_H
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ _INITREQ_H
+#ವ್ಯಾಖ್ಯಾನಿಸು _INITREQ_H
 
 /*
  * The #defines and structures below are taken from initreq.h in
@@ -23,29 +23,29 @@
  * it.
  */
 
-#define INIT_MAGIC 0x03091969
-#define INIT_CMD_START		0
-#define INIT_CMD_RUNLVL		1
-#define INIT_CMD_POWERFAIL	2
-#define INIT_CMD_POWERFAILNOW	3
-#define INIT_CMD_POWEROK	4
-#define INIT_CMD_BSD		5
-#define INIT_CMD_SETENV		6
-#define INIT_CMD_UNSETENV	7
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_MAGIC 0x03091969
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_CMD_ಆರಂಭ		0
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_CMD_RUNLVL		1
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_CMD_POWERFAIL	2
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_CMD_POWERFAILNOW	3
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_CMD_POWEROK	4
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_CMD_BSD		5
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_CMD_SETENV		6
+#ವ್ಯಾಖ್ಯಾನಿಸು INIT_CMD_UNSETENV	7
 
 /*
  *	This is what BSD 4.4 uses when talking to init.
  *	Linux doesn't use this right now.
  */
-struct init_request_bsd {
-	char	gen_id[8];		/* Beats me.. telnetd uses "fe" */
-	char	tty_id[16];		/* Tty name minus /dev/tty      */
-	char	host[64];	/* Hostname                     */
-	char	term_type[16];		/* Terminal type                */
-	int	signal;			/* Signal to send               */
-	int	pid;			/* Process to send to           */
-	char	exec_name[128];	        /* Program to execute           */
-	char	reserved[128];		/* For future expansion.        */
+ರಚನೆ init_request_bsd {
+	ಅಕ್ಷರ	gen_id[8];		/* Beats me.. telnetd uses "fe" */
+	ಅಕ್ಷರ	tty_id[16];		/* Tty name minus /dev/tty      */
+	ಅಕ್ಷರ	host[64];	/* Hostname                     */
+	ಅಕ್ಷರ	ಪದ_type[16];		/* Terminal type                */
+	ಪೂರ್ಣಾಂಕ	ಸಂಕೇತ;			/* Signal to send               */
+	ಪೂರ್ಣಾಂಕ	pid;			/* Process to send to           */
+	ಅಕ್ಷರ	exec_name[128];	        /* Program to execute           */
+	ಅಕ್ಷರ	reserved[128];		/* For future expansion.        */
 };
 
 /*
@@ -55,15 +55,15 @@ struct init_request_bsd {
  *	The weird sizes are because init expects the whole
  *	struct to be 384 bytes.
  */
-struct init_request {
-	int	magic;			/* Magic number                 */
-	int	cmd;			/* What kind of request         */
-	int	runlevel;		/* Runlevel to change to        */
-	int	sleeptime;		/* Time between TERM and KILL   */
-	union {
-		struct init_request_bsd	bsd;
-		char			data[368];
+ರಚನೆ init_request {
+	ಪೂರ್ಣಾಂಕ	magic;			/* Magic number                 */
+	ಪೂರ್ಣಾಂಕ	cmd;			/* What kind of request         */
+	ಪೂರ್ಣಾಂಕ	runlevel;		/* Runlevel to change to        */
+	ಪೂರ್ಣಾಂಕ	sleeptime;		/* Time between TERM and KILL   */
+	ಒಕ್ಕೂಟ {
+		ರಚನೆ init_request_bsd	bsd;
+		ಅಕ್ಷರ			ದತ್ತಾಂಶ[368];
 	} i;
 };
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
