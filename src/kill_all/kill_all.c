@@ -16,127 +16,127 @@
  */
 
 
-#include <dirent.h>
-#include <errno.h>
-#include <getopt.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdbool.h>
+#अन्तर्भाव <dirent.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <getopt.h>
+#अन्तर्भाव <signal.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <syslog.h>
+#अन्तर्भाव <unistd.h>
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <sys/wait.h>
+#अन्तर्भाव <stdbool.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "_usage.h"
-#include "helpers.h"
+#अन्तर्भाव "einfo.h"
+#अन्तर्भाव "rc.h"
+#अन्तर्भाव "rc_exec.h"
+#अन्तर्भाव "_usage.h"
+#अन्तर्भाव "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = "[signal number]";
-const char getoptstring[] = "do:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "dry-run",        0, NULL, 'd' },
-	{ "omit",        1, NULL, 'o' },
+ध्रुव वर्ण *applet = रिक्त;
+ध्रुव वर्ण *extraopts = "[signal number]";
+ध्रुव वर्ण getoptstring[] = "do:" getoptstring_COMMON;
+ध्रुव संरचना option longopts[] = {
+	{ "dry-run",        0, रिक्त, 'd' },
+	{ "omit",        1, रिक्त, 'o' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ध्रुव वर्ण * ध्रुव longopts_help[] = {
 	"print what would be done",
 	"omit this pid (can be repeated)",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ध्रुव वर्ण *usagestring = रिक्त;
 
-static int mount_proc(void)
+स्थिर पूर्णाङ्क mount_proc(शून्य)
 {
 	pid_t rc;
-	int status;
-	const char *argv[] = { "mount", "-t", "proc", "proc", "/proc", NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	पूर्णाङ्क status;
+	ध्रुव वर्ण *argv[] = { "mount", "-t", "proc", "proc", "/proc", रिक्त };
+	संरचना exec_result res;
+	संरचना exec_args args = exec_init(argv);
 
-	if (access("/proc/version", F_OK) == 0)
-		return 0;
+	सचे (access("/proc/version", F_OK) == 0)
+		पटिनिवत्त 0;
 
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	सचे (res.pid < 0) {
 		syslog(LOG_ERR, "Failed to execute mount");
-		return -1;
+		पटिनिवत्त -1;
 	}
-	while ((rc = wait(&status)) != res.pid)
-		if (rc < 0 && errno == ECHILD)
-			break;
-	if (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	याव ((rc = wait(&status)) != res.pid)
+		सचे (rc < 0 && errno == ECHILD)
+			भङ्ग;
+	सचे (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
 		syslog(LOG_ERR, "mount returned non-zero exit status");
 
-	if (access("/proc/version", F_OK) != 0) {
+	सचे (access("/proc/version", F_OK) != 0) {
 		syslog(LOG_ERR, "Could not mount /proc");
-		return -1;
+		पटिनिवत्त -1;
 	}
-	return 0;
+	पटिनिवत्त 0;
 }
 
-static bool is_user_process(pid_t pid)
+स्थिर bool is_user_process(pid_t pid)
 {
-	char *buf = NULL;
+	वर्ण *buf = रिक्त;
 	FILE *fp;
-	char *path = NULL;
+	वर्ण *path = रिक्त;
 	pid_t temp_pid;
 	size_t size;
 	bool user_process = true;
 
-	while (pid >0 && user_process) {
-		if (pid == 2) {
+	याव (pid >0 && user_process) {
+		सचे (pid == 2) {
 			user_process = false;
-			continue;
+			अनुवर्त;
 		}
 		xasprintf(&path, "/proc/%d/status", pid);
 		fp = fopen(path, "r");
-		free(path);
+		मुक्त(path);
 		/*
 		 * if we could not open the file, the process disappeared, which
 		 * leaves us no way to determine for sure whether it was a user
 		 * process or kernel thread, so we say it is a kernel thread to
 		 * avoid accidentally killing it.
 		 */
-		if (!fp) {
+		सचे (!fp) {
 			user_process = false;
-			continue;
+			अनुवर्त;
 		}
 		temp_pid = -1;
-		while (!feof(fp)) {
-			buf = NULL;
-			if (xgetline(&buf, &size, fp) != -1) {
+		याव (!feof(fp)) {
+			buf = रिक्त;
+			सचे (xgetline(&buf, &size, fp) != -1) {
 				sscanf(buf, "PPid: %d", &temp_pid);
-				free(buf);
-			} else {
-				free(buf);
-				break;
+				मुक्त(buf);
+			} अञ्ञथा {
+				मुक्त(buf);
+				भङ्ग;
 			}
 		}
 		fclose(fp);
-		if (temp_pid == -1) {
+		सचे (temp_pid == -1) {
 			syslog(LOG_ERR, "Unable to read pid from /proc/%d/status", pid);
 			user_process = false;
-			continue;
+			अनुवर्त;
 		}
 		pid = temp_pid;
 	}
-	return user_process;
+	पटिनिवत्त user_process;
 }
 
-static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
+स्थिर पूर्णाङ्क signal_processes(पूर्णाङ्क sig, RC_STRINGLIST *omits, bool dryrun)
 {
 	sigset_t signals;
 	sigset_t oldsigs;
 	DIR *dir;
-	struct dirent	*d;
-	char *buf = NULL;
+	संरचना dirent	*d;
+	वर्ण *buf = रिक्त;
 	pid_t pid;
-	int sendcount = 0;
+	पूर्णाङ्क sendcount = 0;
 
 	kill(-1, SIGSTOP);
 	sigfillset(&signals);
@@ -147,96 +147,96 @@ static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
 	 * CWD must be /proc to avoid problems if / is affected by the killing
 	 * (i.e. depends on fuse).
 	 */
-	if (chdir("/proc") == -1) {
+	सचे (chdir("/proc") == -1) {
 		syslog(LOG_ERR, "chdir /proc failed");
-		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+		sigprocmask(SIG_SETMASK, &oldsigs, रिक्त);
 		kill(-1, SIGCONT);
-		return -1;
+		पटिनिवत्त -1;
 	}
 	dir = opendir(".");
-	if (!dir) {
+	सचे (!dir) {
 		syslog(LOG_ERR, "cannot opendir(/proc)");
-		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+		sigprocmask(SIG_SETMASK, &oldsigs, रिक्त);
 		kill(-1, SIGCONT);
-		return -1;
+		पटिनिवत्त -1;
 	}
 
 	/* Walk through the directory. */
-	while ((d = readdir(dir)) != NULL) {
+	याव ((d = readdir(dir)) != रिक्त) {
 		/* Is this a process? */
 		pid = (pid_t) atoi(d->d_name);
-		if (pid == 0)
-			continue;
+		सचे (pid == 0)
+			अनुवर्त;
 
 		/* Is this a process we have been requested to omit? */
-		if (buf) {
-			free(buf);
-			buf = NULL;
+		सचे (buf) {
+			मुक्त(buf);
+			buf = रिक्त;
 		}
 		xasprintf(&buf, "%d", pid);
-		if (rc_stringlist_find(omits, buf))
-			continue;
+		सचे (rc_stringlist_find(omits, buf))
+			अनुवर्त;
 
 		/* Is this process in our session? */
-		if (getsid(getpid()) == getsid(pid))
-			continue;
+		सचे (getsid(getpid()) == getsid(pid))
+			अनुवर्त;
 
 		/* Is this a kernel thread? */
-		if (!is_user_process(pid))
-			continue;
+		सचे (!is_user_process(pid))
+			अनुवर्त;
 
-		if (dryrun)
+		सचे (dryrun)
 			einfo("Would send signal %d to process %d", sig, pid);
-		else if (kill(pid, sig) == 0)
+		अञ्ञथा सचे (kill(pid, sig) == 0)
 			sendcount++;
 	}
 	closedir(dir);
-	sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+	sigprocmask(SIG_SETMASK, &oldsigs, रिक्त);
 	kill(-1, SIGCONT);
-	return sendcount;
+	पटिनिवत्त sendcount;
 }
 
-int main(int argc, char **argv)
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण **argv)
 {
-	char *arg = NULL;
-	int opt;
+	वर्ण *arg = रिक्त;
+	पूर्णाङ्क opt;
 	bool dryrun = false;
 	RC_STRINGLIST *omits = rc_stringlist_new();
-	int sig = SIGKILL;
-	char *here;
-	char *token;
+	पूर्णाङ्क sig = SIGKILL;
+	वर्ण *here;
+	वर्ण *token;
 
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
 	rc_stringlist_addu(omits, "1");
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	याव ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (पूर्णाङ्क *) 0)) != -1)
 	{
-		switch (opt) {
-			case 'd':
+		विकल्प (opt) {
+			पक्ष 'd':
 				dryrun = true;
-				break;
-			case 'o':
+				भङ्ग;
+			पक्ष 'o':
 				here = optarg;
-				while ((token = strsep(&here, ",;:"))) {
-					if ((pid_t) atoi(token) > 0)
+				याव ((token = strsep(&here, ",;:"))) {
+					सचे ((pid_t) atoi(token) > 0)
 						rc_stringlist_addu(omits, token);
-					else {
+					अञ्ञथा {
 						eerror("Invalid omit pid value %s", token);
 						usage(EXIT_FAILURE);
 					}
 				}
-				break;
+				भङ्ग;
 			case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (argc > optind) {
+	सचे (argc > optind) {
 	arg = argv[optind];
 	sig = atoi(arg);
-	if (sig <= 0 || sig > 31) {
+	सचे (sig <= 0 || sig > 31) {
 		rc_stringlist_free(omits);
 		eerror("Invalid signal %s", arg);
 		usage(EXIT_FAILURE);
@@ -244,11 +244,11 @@ int main(int argc, char **argv)
 	}
 
 	openlog(applet, LOG_CONS|LOG_PID, LOG_DAEMON);
-	if (mount_proc() != 0) {
+	सचे (mount_proc() != 0) {
 		rc_stringlist_free(omits);
 		eerrorx("Unable to mount /proc file system");
 	}
 	signal_processes(sig, omits, dryrun);
 	rc_stringlist_free(omits);
-	return 0;
+	पटिनिवत्त 0;
 }

@@ -10,38 +10,38 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#अन्तर्भाव "rc.h"
+#अन्तर्भाव "_usage.h"
+#अन्तर्भाव "version.h"
+#अन्तर्भाव "helpers.h"
 
 
-void set_quiet_options(void)
+शून्य set_quiet_options(शून्य)
 {
-	static int qcount = 0;
+	स्थिर पूर्णाङ्क qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	विकल्प (qcount) {
+	पक्ष 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		भङ्ग;
+	पक्ष 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		भङ्ग;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN शून्य show_version(शून्य)
 {
-	const char *systype = NULL;
+	ध्रुव वर्ण *systype = रिक्त;
 
 	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
+	सचे ((systype = rc_sys()))
 		printf(" [%s]", systype);
 	printf(") %s", VERSION);
 #ifdef BRANDING
@@ -51,39 +51,39 @@ RC_NORETURN void show_version(void)
 	exit(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN शून्य usage(पूर्णाङ्क exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	ध्रुव वर्ण * ध्रुव has_arg[] = { "", "<arg>", "[arg]" };
+	पूर्णाङ्क i;
+	पूर्णाङ्क len;
+	वर्ण *lo;
+	वर्ण *p;
+	वर्ण *token;
+	वर्ण val[4] = "-?,";
 
-	if (usagestring)
+	सचे (usagestring)
 		printf("%s", usagestring);
-	else
+	अञ्ञथा
 		printf("Usage: %s [options] ", applet);
 
-	if (extraopts)
+	सचे (extraopts)
 		printf("%s", extraopts);
 
 	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	अत्थाय (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
 		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		याव ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
+			सचे (len > 0)
 				printf("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		मुक्त(lo);
 	}
 	exit(exit_status);
 }

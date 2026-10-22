@@ -15,105 +15,105 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <dirent.h>
+#अन्तर्भाव <fcntl.h>
+#अन्तर्भाव <limits.h>
+#अन्तर्भाव <signal.h>
+#अन्तर्भाव <stdbool.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#अन्तर्भाव "queue.h"
+#अन्तर्भाव "librc.h"
+#अन्तर्भाव "helpers.h"
 
-#if defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#सचे defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
-static bool
-pid_is_exec(pid_t pid, const char *exec)
+स्थिर bool
+pid_is_exec(pid_t pid, ध्रुव वर्ण *exec)
 {
-	char *buffer = NULL;
+	वर्ण *buffer = रिक्त;
 	FILE *fp;
-	int c;
+	पूर्णाङ्क c;
 	bool retval = false;
 
 	exec = basename_c(exec);
 	xasprintf(&buffer, "/proc/%d/stat", pid);
-	if ((fp = fopen(buffer, "r"))) {
-		while ((c = getc(fp)) != EOF && c != '(')
+	सचे ((fp = fopen(buffer, "r"))) {
+		याव ((c = getc(fp)) != EOF && c != '(')
 			;
-		if (c == '(') {
-			while ((c = getc(fp)) != EOF && c == *exec)
+		सचे (c == '(') {
+			याव ((c = getc(fp)) != EOF && c == *exec)
 				exec++;
-			if (c == ')' && *exec == '\0')
+			सचे (c == ')' && *exec == '\0')
 				retval = true;
 		}
 		fclose(fp);
 	}
-	free(buffer);
-	return retval;
+	मुक्त(buffer);
+	पटिनिवत्त retval;
 }
 
-static bool
-pid_is_argv(pid_t pid, const char *const *argv)
+स्थिर bool
+pid_is_argv(pid_t pid, ध्रुव वर्ण *ध्रुव *argv)
 {
-	char *cmdline = NULL;
-	int fd;
-	char buffer[PATH_MAX];
-	char *p;
+	वर्ण *cmdline = रिक्त;
+	पूर्णाङ्क fd;
+	वर्ण buffer[PATH_MAX];
+	वर्ण *p;
 	ssize_t bytes;
 
 	xasprintf(&cmdline, "/proc/%u/cmdline", pid);
-	if ((fd = open(cmdline, O_RDONLY)) < 0) {
-		free(cmdline);
-		return false;
+	सचे ((fd = open(cmdline, O_RDONLY)) < 0) {
+		मुक्त(cmdline);
+		पटिनिवत्त false;
 	}
-	bytes = read(fd, buffer, sizeof(buffer) - 1);
+	bytes = पठ(fd, buffer, परिमाण(buffer) - 1);
 	close(fd);
-	free(cmdline);
-	if (bytes == -1)
-		return false;
+	मुक्त(cmdline);
+	सचे (bytes == -1)
+		पटिनिवत्त false;
 
 	buffer[bytes] = '\0';
 	p = buffer;
-	while (*argv) {
-		if ((unsigned)(p - buffer) >= sizeof(buffer))
-			return false;
-		if (strcmp(*argv, p) != 0)
-			return false;
+	याव (*argv) {
+		सचे ((unsigned)(p - buffer) >= परिमाण(buffer))
+			पटिनिवत्त false;
+		सचे (strcmp(*argv, p) != 0)
+			पटिनिवत्त false;
 		argv++;
 		p += strlen(p) + 1;
 	}
-	return true;
+	पटिनिवत्त true;
 }
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(ध्रुव वर्ण *exec, ध्रुव वर्ण *ध्रुव *argv, uid_t uid, pid_t pid)
 {
 	DIR *procdir;
-	struct dirent *entry;
+	संरचना dirent *entry;
 	FILE *fp;
-	int rc;
+	पूर्णाङ्क rc;
 	bool container_pid = false;
 	bool openvz_host = false;
-	char *line = NULL;
-	char my_ns[30] = {0};
-	char proc_ns[30] = {0};
+	वर्ण *पङ्क्तिः = रिक्त;
+	वर्ण my_ns[30] = {0};
+	वर्ण proc_ns[30] = {0};
 	size_t len = 0;
 	pid_t p;
-	char *buffer = NULL;
-	struct stat sb;
+	वर्ण *buffer = रिक्त;
+	संरचना stat sb;
 	pid_t openrc_pid = 0;
-	char *pp;
-	RC_PIDLIST *pids = NULL;
+	वर्ण *pp;
+	RC_PIDLIST *pids = रिक्त;
 	RC_PID *pi;
 
-	if ((procdir = opendir("/proc")) == NULL)
-		return NULL;
+	सचे ((procdir = opendir("/proc")) == रिक्त)
+		पटिनिवत्त रिक्त;
 
 	/*
 	  We never match RC_OPENRC_PID if present so we avoid the below
@@ -126,8 +126,8 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	  nasty
 	*/
 
-	if ((pp = getenv("RC_OPENRC_PID"))) {
-		if (sscanf(pp, "%d", &openrc_pid) != 1)
+	सचे ((pp = getenv("RC_OPENRC_PID"))) {
+		सचे (sscanf(pp, "%d", &openrc_pid) != 1)
 			openrc_pid = 0;
 	}
 
@@ -137,98 +137,98 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	from our list of pids.
 	*/
 
-	if ((fp = fopen("/proc/self/status", "r"))) {
-		while (xgetline(&line, &len, fp) != -1) {
-			if (strncmp(line, "envID:\t0", 8) == 0) {
+	सचे ((fp = fopen("/proc/self/status", "r"))) {
+		याव (xgetline(&पङ्क्तिः, &len, fp) != -1) {
+			सचे (strncmp(पङ्क्तिः, "envID:\t0", 8) == 0) {
 				openvz_host = true;
-				break;
+				भङ्ग;
 			}
 		}
 		fclose(fp);
 	}
 
-	if ((rc = readlink("/proc/self/ns/pid", my_ns, sizeof(my_ns)-1)) <= 0)
+	सचे ((rc = readlink("/proc/self/ns/pid", my_ns, परिमाण(my_ns)-1)) <= 0)
 		my_ns[0] = '\0';
 
-	while ((entry = readdir(procdir)) != NULL) {
-		if (sscanf(entry->d_name, "%d", &p) != 1)
-			continue;
-		if (openrc_pid != 0 && openrc_pid == p)
-			continue;
-		if (pid != 0 && pid != p)
-			continue;
+	याव ((entry = readdir(procdir)) != रिक्त) {
+		सचे (sscanf(entry->d_name, "%d", &p) != 1)
+			अनुवर्त;
+		सचे (openrc_pid != 0 && openrc_pid == p)
+			अनुवर्त;
+		सचे (pid != 0 && pid != p)
+			अनुवर्त;
 		xasprintf(&buffer, "/proc/%d/ns/pid", p);
-		if ((rc = readlink(buffer, proc_ns, sizeof(proc_ns)-1)) <= 0)
+		सचे ((rc = readlink(buffer, proc_ns, परिमाण(proc_ns)-1)) <= 0)
 			proc_ns[0] = '\0';
-		free(buffer);
-		if (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
-			continue;
-		if (uid) {
+		मुक्त(buffer);
+		सचे (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
+			अनुवर्त;
+		सचे (uid) {
 			xasprintf(&buffer, "/proc/%d", p);
-			if (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
-				free(buffer);
-				continue;
+			सचे (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
+				मुक्त(buffer);
+				अनुवर्त;
 			}
-			free(buffer);
+			मुक्त(buffer);
 		}
-		if (exec && !pid_is_exec(p, exec))
-			continue;
-		if (argv &&
-		    !pid_is_argv(p, (const char *const *)argv))
-			continue;
+		सचे (exec && !pid_is_exec(p, exec))
+			अनुवर्त;
+		सचे (argv &&
+		    !pid_is_argv(p, (ध्रुव वर्ण *ध्रुव *)argv))
+			अनुवर्त;
 		/* If this is an OpenVZ host, filter out container processes */
-		if (openvz_host) {
+		सचे (openvz_host) {
 			xasprintf(&buffer, "/proc/%d/status", p);
 			fp = fopen(buffer, "r");
-			free(buffer);
-			if (!fp)
-				continue;
-			while (xgetline(&line, &len, fp) != -1) {
-				if (strncmp(line, "envID:", 6) == 0) {
-					container_pid = !(strncmp(line, "envID:\t0", 8) == 0);
-					break;
+			मुक्त(buffer);
+			सचे (!fp)
+				अनुवर्त;
+			याव (xgetline(&पङ्क्तिः, &len, fp) != -1) {
+				सचे (strncmp(पङ्क्तिः, "envID:", 6) == 0) {
+					container_pid = !(strncmp(पङ्क्तिः, "envID:\t0", 8) == 0);
+					भङ्ग;
 				}
 			}
 			fclose(fp);
 		}
-		if (container_pid)
-			continue;
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		सचे (container_pid)
+			अनुवर्त;
+		सचे (!pids) {
+			pids = xmalloc(परिमाण(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(परिमाण(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_निवेशय_HEAD(pids, pi, entries);
 	}
-	if (line != NULL)
-		free(line);
+	सचे (पङ्क्तिः != रिक्त)
+		मुक्त(पङ्क्तिः);
 	closedir(procdir);
-	return pids;
+	पटिनिवत्त pids;
 }
 
-#elif BSD
+#नोचेद्यदि BSD
 
-# if defined(__NetBSD__) || defined(__OpenBSD__)
+# सचे defined(__NetBSD__) || defined(__OpenBSD__)
 #  define _KVM_GETPROC2
 #  define _KINFO_PROC kinfo_proc2
 #  define _KVM_GETARGV kvm_getargv2
 #  define _GET_KINFO_UID(kp) (kp.p_ruid)
 #  define _GET_KINFO_COMM(kp) (kp.p_comm)
 #  define _GET_KINFO_PID(kp) (kp.p_pid)
-#  define _KVM_PATH NULL
+#  define _KVM_PATH रिक्त
 #  define _KVM_FLAGS KVM_NO_FILES
-# else
+# अञ्ञथा
 #  ifndef KERN_PROC_PROC
 #    define KERN_PROC_PROC KERN_PROC_ALL
 #  endif
 #  define _KINFO_PROC kinfo_proc
 #  define _KVM_GETARGV kvm_getargv
-#  if defined(__DragonFly__)
+#  सचे defined(__DragonFly__)
 #    define _GET_KINFO_UID(kp) (kp.kp_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.kp_comm)
 #    define _GET_KINFO_PID(kp) (kp.kp_pid)
-#  else
+#  अञ्ञथा
 #    define _GET_KINFO_UID(kp) (kp.ki_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.ki_comm)
 #    define _GET_KINFO_PID(kp) (kp.ki_pid)
@@ -238,194 +238,194 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 # endif
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(ध्रुव वर्ण *exec, ध्रुव वर्ण *ध्रुव *argv, uid_t uid, pid_t pid)
 {
-	static kvm_t *kd = NULL;
-	char errbuf[_POSIX2_LINE_MAX];
-	struct _KINFO_PROC *kp;
-	int i;
-	int processes = 0;
-	int pargc = 0;
-	char **pargv;
-	RC_PIDLIST *pids = NULL;
+	स्थिर kvm_t *kd = रिक्त;
+	वर्ण errbuf[_POSIX2_LINE_MAX];
+	संरचना _KINFO_PROC *kp;
+	पूर्णाङ्क i;
+	पूर्णाङ्क processes = 0;
+	पूर्णाङ्क pargc = 0;
+	वर्ण **pargv;
+	RC_PIDLIST *pids = रिक्त;
 	RC_PID *pi;
 	pid_t p;
-	const char *const *arg;
-	int match;
+	ध्रुव वर्ण *ध्रुव *arg;
+	पूर्णाङ्क match;
 
-	if ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
-		    NULL, _KVM_FLAGS, errbuf)) == NULL)
+	सचे ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
+		    रिक्त, _KVM_FLAGS, errbuf)) == रिक्त)
 	{
 		fprintf(stderr, "kvm_open: %s\n", errbuf);
-		return NULL;
+		पटिनिवत्त रिक्त;
 	}
 
 #ifdef _KVM_GETPROC2
-	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(*kp), &processes);
-#else
+	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, परिमाण(*kp), &processes);
+#अञ्ञथा
 	kp = kvm_getprocs(kd, KERN_PROC_PROC, 0, &processes);
 #endif
-	if ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
+	सचे ((kp == रिक्त && processes > 0) || (kp != रिक्त && processes < 0)) {
 		fprintf(stderr, "kvm_getprocs: %s\n", kvm_geterr(kd));
 		kvm_close(kd);
-		return NULL;
+		पटिनिवत्त रिक्त;
 	}
 
-	if (exec)
+	सचे (exec)
 		exec = basename_c(exec);
-	for (i = 0; i < processes; i++) {
+	अत्थाय (i = 0; i < processes; i++) {
 		p = _GET_KINFO_PID(kp[i]);
-		if (pid != 0 && pid != p)
-			continue;
-		if (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
-			continue;
-		if (exec) {
-			if (!_GET_KINFO_COMM(kp[i]) ||
+		सचे (pid != 0 && pid != p)
+			अनुवर्त;
+		सचे (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
+			अनुवर्त;
+		सचे (exec) {
+			सचे (!_GET_KINFO_COMM(kp[i]) ||
 			    strcmp(exec, _GET_KINFO_COMM(kp[i])) != 0)
-				continue;
+				अनुवर्त;
 		}
-		if (argv && *argv) {
+		सचे (argv && *argv) {
 			pargv = _KVM_GETARGV(kd, &kp[i], pargc);
-			if (!pargv || !*pargv)
-				continue;
+			सचे (!pargv || !*pargv)
+				अनुवर्त;
 			arg = argv;
 			match = 1;
-			while (*arg && *pargv)
-				if (strcmp(*arg++, *pargv++) != 0) {
+			याव (*arg && *pargv)
+				सचे (strcmp(*arg++, *pargv++) != 0) {
 					match = 0;
-					break;
+					भङ्ग;
 				}
-			if (!match)
-				continue;
+			सचे (!match)
+				अनुवर्त;
 		}
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		सचे (!pids) {
+			pids = xmalloc(परिमाण(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(परिमाण(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_निवेशय_HEAD(pids, pi, entries);
 	}
 	kvm_close(kd);
 
-	return pids;
+	पटिनिवत्त pids;
 }
 
-#else
+#अञ्ञथा
 #  error "Platform not supported!"
 #endif
 
-static bool
-_match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
+स्थिर bool
+_match_daemon(ध्रुव वर्ण *svcname, ध्रुव वर्ण *instance, RC_STRINGLIST *match)
 {
-	char *line = NULL;
+	वर्ण *पङ्क्तिः = रिक्त;
 	size_t len = 0;
 	FILE *fp;
 	RC_STRING *m;
-	char *daemon;
+	वर्ण *daemon;
 
 	xasprintf(&daemon, "%s/%s", svcname, instance);
 	fp = do_fopenat(rc_dirfd(RC_DIR_DAEMONS), daemon, O_RDONLY);
-	free(daemon);
+	मुक्त(daemon);
 
-	if (!fp)
-		return false;
+	सचे (!fp)
+		पटिनिवत्त false;
 
-	while (xgetline(&line, &len, fp) != -1) {
+	याव (xgetline(&पङ्क्तिः, &len, fp) != -1) {
 		TAILQ_FOREACH(m, match, entries)
-		    if (strcmp(line, m->value) == 0) {
+		    सचे (strcmp(पङ्क्तिः, m->मानम्) == 0) {
 			    TAILQ_REMOVE(match, m, entries);
-			    break;
+			    भङ्ग;
 		    }
-		if (!TAILQ_FIRST(match))
-			break;
+		सचे (!TAILQ_FIRST(match))
+			भङ्ग;
 	}
 	fclose(fp);
-	free(line);
-	if (TAILQ_FIRST(match))
-		return false;
-	return true;
+	मुक्त(पङ्क्तिः);
+	सचे (TAILQ_FIRST(match))
+		पटिनिवत्त false;
+	पटिनिवत्त true;
 }
 
-static RC_STRINGLIST *
-_match_list(const char *exec, const char *const *argv, const char *pidfile)
+स्थिर RC_STRINGLIST *
+_match_list(ध्रुव वर्ण *exec, ध्रुव वर्ण *ध्रुव *argv, ध्रुव वर्ण *pidfile)
 {
 	RC_STRINGLIST *match = rc_stringlist_new();
-	int i = 0;
-	char *m;
+	पूर्णाङ्क i = 0;
+	वर्ण *m;
 
-	if (exec) {
+	सचे (exec) {
 		xasprintf(&m, "exec=%s", exec);
 		rc_stringlist_add(match, m);
-		free(m);
+		मुक्त(m);
 	}
 
-	while (argv && argv[i]) {
+	याव (argv && argv[i]) {
 		xasprintf(&m, "argv_0=%s", argv[i++]);
 		rc_stringlist_add(match, m);
-		free(m);
+		मुक्त(m);
 	}
 
-	if (pidfile) {
+	सचे (pidfile) {
 		xasprintf(&m, "pidfile=%s", pidfile);
 		rc_stringlist_add(match, m);
-		free(m);
+		मुक्त(m);
 	}
 
-	return match;
+	पटिनिवत्त match;
 }
 
 bool
-rc_service_daemon_set(const char *service, const char *exec,
-    const char *const *argv,
-    const char *pidfile, bool started)
+rc_service_daemon_set(ध्रुव वर्ण *service, ध्रुव वर्ण *exec,
+    ध्रुव वर्ण *ध्रुव *argv,
+    ध्रुव वर्ण *pidfile, bool started)
 {
-	char *file = NULL;
-	int nfiles = 0;
-	char oldfile[PATH_MAX] = { '\0' };
+	वर्ण *file = रिक्त;
+	पूर्णाङ्क nfiles = 0;
+	वर्ण oldfile[PATH_MAX] = { '\0' };
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	संरचना dirent *d;
 	RC_STRINGLIST *match, *renamelist;
-	int i = 0;
+	पूर्णाङ्क i = 0;
 	FILE *fp;
-	const char *base = basename_c(service);
+	ध्रुव वर्ण *base = basename_c(service);
 
-	if (!exec && !pidfile) {
+	सचे (!exec && !pidfile) {
 		errno = EINVAL;
-		return false;
+		पटिनिवत्त false;
 	}
 
 	/* Regardless, erase any existing daemon info */
-	if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+	सचे ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
 		match = _match_list(exec, argv, pidfile);
 		renamelist = rc_stringlist_new();
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
+		याव ((d = readdir(dp))) {
+			सचे (d->d_name[0] == '.')
+				अनुवर्त;
 
 			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), base, d->d_name);
-			if (rc_stringlist_find(renamelist, file)) {
-				free(file);
-				continue;
+			सचे (rc_stringlist_find(renamelist, file)) {
+				मुक्त(file);
+				अनुवर्त;
 			}
 
 			nfiles++;
 
-			if (!*oldfile) {
-				if (_match_daemon(base, d->d_name, match)) {
+			सचे (!*oldfile) {
+				सचे (_match_daemon(base, d->d_name, match)) {
 					unlink(file);
-					strlcpy(oldfile, file, sizeof(oldfile));
+					strlcpy(oldfile, file, परिमाण(oldfile));
 					nfiles--;
 				}
-			} else {
+			} अञ्ञथा {
 				rename(file, oldfile);
-				strlcpy(oldfile, file, sizeof(oldfile));
+				strlcpy(oldfile, file, परिमाण(oldfile));
 				/* Add renamed file to renamelist, as this new file name could
 				 * be read again from readdir() */
 				rc_stringlist_add(renamelist, oldfile);
 			}
-			free(file);
+			मुक्त(file);
 		}
 		closedir(dp);
 		rc_stringlist_free(match);
@@ -433,209 +433,209 @@ rc_service_daemon_set(const char *service, const char *exec,
 	}
 
 	/* Now store our daemon info */
-	if (!started)
-		return true;
+	सचे (!started)
+		पटिनिवत्त true;
 
-	if (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
+	सचे (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
 		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), base, nfiles + 1);
-		if ((fp = fopen(file, "w"))) {
+		सचे ((fp = fopen(file, "w"))) {
 			fprintf(fp, "exec=");
-			if (exec)
+			सचे (exec)
 				fprintf(fp, "%s", exec);
-			while (argv && argv[i]) {
+			याव (argv && argv[i]) {
 				fprintf(fp, "\nargv_%d=%s", i, argv[i]);
 				i++;
 			}
 			fprintf(fp, "\npidfile=");
-			if (pidfile)
+			सचे (pidfile)
 				fprintf(fp, "%s", pidfile);
 			fprintf(fp, "\n");
 			fclose(fp);
 			retval = true;
 		}
-		free(file);
+		मुक्त(file);
 	}
 
-	return retval;
+	पटिनिवत्त retval;
 }
 
 bool
-rc_service_started_daemon(const char *service,
-    const char *exec, const char *const *argv, int indx)
+rc_service_started_daemon(ध्रुव वर्ण *service,
+    ध्रुव वर्ण *exec, ध्रुव वर्ण *ध्रुव *argv, पूर्णाङ्क indx)
 {
-	const char *base = basename_c(service);
-	char *file = NULL;
+	ध्रुव वर्ण *base = basename_c(service);
+	वर्ण *file = रिक्त;
 	RC_STRINGLIST *match;
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	संरचना dirent *d;
 
-	if (!service || !exec)
-		return false;
+	सचे (!service || !exec)
+		पटिनिवत्त false;
 
-	match = _match_list(exec, argv, NULL);
+	match = _match_list(exec, argv, रिक्त);
 
-	if (indx > 0) {
+	सचे (indx > 0) {
 		xasprintf(&file, "%03d", indx);
 		retval = _match_daemon(base, file, match);
-		free(file);
-	} else if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
-			if ((retval = _match_daemon(base, d->d_name, match)))
-				break;
+		मुक्त(file);
+	} अञ्ञथा सचे ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+		याव ((d = readdir(dp))) {
+			सचे (d->d_name[0] == '.')
+				अनुवर्त;
+			सचे ((retval = _match_daemon(base, d->d_name, match)))
+				भङ्ग;
 		}
 		closedir(dp);
 	}
 
 	rc_stringlist_free(match);
-	return retval;
+	पटिनिवत्त retval;
 }
 
 bool
-rc_service_daemons_crashed(const char *service)
+rc_service_daemons_crashed(ध्रुव वर्ण *service)
 {
 	DIR *dp;
-	struct dirent *d;
+	संरचना dirent *d;
 	FILE *fp;
-	char *line = NULL;
+	वर्ण *पङ्क्तिः = रिक्त;
 	size_t len = 0;
-	char **argv = NULL;
-	char *exec = NULL;
-	char *name = NULL;
-	char *pidfile = NULL;
+	वर्ण **argv = रिक्त;
+	वर्ण *exec = रिक्त;
+	वर्ण *name = रिक्त;
+	वर्ण *pidfile = रिक्त;
 	pid_t pid = 0;
 	RC_PIDLIST *pids;
 	RC_PID *p1;
 	RC_PID *p2;
-	char *p;
-	char *token;
+	वर्ण *p;
+	वर्ण *token;
 	bool retval = false;
-	RC_STRINGLIST *list = NULL;
+	RC_STRINGLIST *list = रिक्त;
 	RC_STRING *s;
 	size_t i;
-	char *ch_root;
-	char *spidfile;
+	वर्ण *ch_मूलम्;
+	वर्ण *spidfile;
 
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
-		return false;
+	सचे (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
+		पटिनिवत्त false;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	याव ((d = readdir(dp))) {
+		सचे (d->d_name[0] == '.')
+			अनुवर्त;
 
-		if (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
-			break;
+		सचे (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
+			भङ्ग;
 
-		while (xgetline(&line, &len, fp) != -1) {
-			p = line;
-			if ((token = strsep(&p, "=")) == NULL || !p)
-				continue;
+		याव (xgetline(&पङ्क्तिः, &len, fp) != -1) {
+			p = पङ्क्तिः;
+			सचे ((token = strsep(&p, "=")) == रिक्त || !p)
+				अनुवर्त;
 
-			if (!*p)
-				continue;
+			सचे (!*p)
+				अनुवर्त;
 
-			if (strcmp(token, "exec") == 0) {
-				if (exec)
-					free(exec);
+			सचे (strcmp(token, "exec") == 0) {
+				सचे (exec)
+					मुक्त(exec);
 				exec = xstrdup(p);
-			} else if (strncmp(token, "argv_", 5) == 0) {
-				if (!list)
+			} अञ्ञथा सचे (strncmp(token, "argv_", 5) == 0) {
+				सचे (!list)
 					list = rc_stringlist_new();
 				rc_stringlist_add(list, p);
-			} else if (strcmp(token, "name") == 0) {
-				if (name)
-					free(name);
+			} अञ्ञथा सचे (strcmp(token, "name") == 0) {
+				सचे (name)
+					मुक्त(name);
 				name = xstrdup(p);
-			} else if (strcmp(token, "pidfile") == 0) {
+			} अञ्ञथा सचे (strcmp(token, "pidfile") == 0) {
 				pidfile = xstrdup(p);
-				break;
+				भङ्ग;
 			}
 		}
 		fclose(fp);
 
-		ch_root = rc_service_value_get(basename_c(service), "chroot");
+		ch_मूलम् = rc_service_मानम्_get(basename_c(service), "chroot");
 		spidfile = pidfile;
-		if (ch_root && pidfile) {
-			xasprintf(&spidfile, "%s%s", ch_root, pidfile);
-			free(pidfile);
+		सचे (ch_मूलम् && pidfile) {
+			xasprintf(&spidfile, "%s%s", ch_मूलम्, pidfile);
+			मुक्त(pidfile);
 			pidfile = spidfile;
 		}
 
 		pid = 0;
-		if (pidfile) {
+		सचे (pidfile) {
 			retval = true;
-			if ((fp = fopen(pidfile, "r"))) {
-				if (fscanf(fp, "%d", &pid) == 1)
+			सचे ((fp = fopen(pidfile, "r"))) {
+				सचे (fscanf(fp, "%d", &pid) == 1)
 					retval = false;
 				fclose(fp);
 			}
-			free(pidfile);
-			pidfile = NULL;
+			मुक्त(pidfile);
+			pidfile = रिक्त;
 
 			/* We have the pid, so no need to match
 			   on exec or name */
-			free(exec);
-			exec = NULL;
-			free(name);
-			name = NULL;
-		} else {
-			if (exec) {
-				if (!list)
+			मुक्त(exec);
+			exec = रिक्त;
+			मुक्त(name);
+			name = रिक्त;
+		} अञ्ञथा {
+			सचे (exec) {
+				सचे (!list)
 					list = rc_stringlist_new();
-				if (!TAILQ_FIRST(list))
+				सचे (!TAILQ_FIRST(list))
 					rc_stringlist_add(list, exec);
 
-				free(exec);
-				exec = NULL;
+				मुक्त(exec);
+				exec = रिक्त;
 			}
 
-			if (list) {
+			सचे (list) {
 				/* We need to flatten our linked list
 				   into an array */
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    i++;
-				argv = xmalloc(sizeof(char *) * (i + 1));
+				argv = xmalloc(परिमाण(वर्ण *) * (i + 1));
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
-				    argv[i++] = s->value;
-				argv[i] = NULL;
+				    argv[i++] = s->मानम्;
+				argv[i] = रिक्त;
 			}
 		}
 
-		if (!retval) {
-			if (pid != 0) {
-				if (kill(pid, 0) == -1 && errno == ESRCH)
+		सचे (!retval) {
+			सचे (pid != 0) {
+				सचे (kill(pid, 0) == -1 && errno == ESRCH)
 					retval = true;
-			} else if ((pids = rc_find_pids(exec,
-				    (const char *const *)argv,
+			} अञ्ञथा सचे ((pids = rc_find_pids(exec,
+				    (ध्रुव वर्ण *ध्रुव *)argv,
 				    0, pid)))
 			{
 				p1 = LIST_FIRST(pids);
-				while (p1) {
+				याव (p1) {
 					p2 = LIST_NEXT(p1, entries);
-					free(p1);
+					मुक्त(p1);
 					p1 = p2;
 				}
-				free(pids);
-			} else
+				मुक्त(pids);
+			} अञ्ञथा
 				retval = true;
 		}
 		rc_stringlist_free(list);
-		list = NULL;
-		free(argv);
-		argv = NULL;
-		free(exec);
-		exec = NULL;
-		free(name);
-		name = NULL;
-		if (retval)
-			break;
+		list = रिक्त;
+		मुक्त(argv);
+		argv = रिक्त;
+		मुक्त(exec);
+		exec = रिक्त;
+		मुक्त(name);
+		name = रिक्त;
+		सचे (retval)
+			भङ्ग;
 	}
 	closedir(dp);
-	free(line);
+	मुक्त(पङ्क्तिः);
 
-	return retval;
+	पटिनिवत्त retval;
 }

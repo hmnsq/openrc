@@ -10,25 +10,25 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <signal.h>
+#अन्तर्भाव <string.h>
 
-#include "einfo.h"
+#अन्तर्भाव "einfo.h"
 
-int main(void)
+पूर्णाङ्क main(शून्य)
 {
-	const char *p = getenv("RC_PID");
-	int pid;
+	ध्रुव वर्ण *p = getenv("RC_PID");
+	पूर्णाङ्क pid;
 
-	if (p && sscanf(p, "%d", &pid) == 1) {
-		if (kill(pid, SIGUSR1) != 0)
+	सचे (p && sscanf(p, "%d", &pid) == 1) {
+		सचे (kill(pid, SIGUSR1) != 0)
 			eerrorx("rc-abort: failed to signal parent %d: %s",
 			    pid, strerror(errno));
-		return EXIT_SUCCESS;
+		पटिनिवत्त EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	पटिनिवत्त EXIT_FAILURE;
 }

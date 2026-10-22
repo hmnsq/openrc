@@ -12,58 +12,58 @@
 
 #define SYSLOG_NAMES
 
-#include <sys/time.h>
-#include <errno.h>
-#include <ctype.h>
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <strings.h>
+#अन्तर्भाव <sys/time.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <inttypes.h>
+#अन्तर्भाव <stddef.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <syslog.h>
+#अन्तर्भाव <time.h>
+#अन्तर्भाव <strings.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#अन्तर्भाव "einfo.h"
+#अन्तर्भाव "helpers.h"
 
 /* usecs to wait while we poll the file existence  */
 #define WAIT_INTERVAL	20000000
 
-const char *applet = NULL;
+ध्रुव वर्ण *applet = रिक्त;
 
-static int syslog_decode(char *name, const CODE *codetab)
+स्थिर पूर्णाङ्क syslog_decode(वर्ण *name, ध्रुव CODE *codetab)
 {
-	const CODE *c;
+	ध्रुव CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	सचे (isdigit((unsigned वर्ण)*name))
+		पटिनिवत्त atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	अत्थाय (c = codetab; c->c_name; c++)
+		सचे (!strcasecmp(name, c->c_name))
+			पटिनिवत्त c->c_val;
 
-	return -1;
+	पटिनिवत्त -1;
 }
 
-int main(int argc, char **argv)
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	पूर्णाङ्क retval = EXIT_SUCCESS;
+	पूर्णाङ्क i;
 	size_t l = 0;
-	char *message = NULL;
-	char *p;
-	int level = 0;
-	struct timespec ts;
-	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	वर्ण *message = रिक्त;
+	वर्ण *p;
+	पूर्णाङ्क level = 0;
+	संरचना timespec ts;
+	संरचना timeval stop, now;
+	पूर्णाङ्क (*e) (ध्रुव वर्ण *, ...) EINFO_PRINTF(1, 2) = रिक्त;
+	पूर्णाङ्क (*ee) (पूर्णाङ्क, ध्रुव वर्ण *, ...) EINFO_PRINTF(2, 3) = रिक्त;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
+	सचे (strcmp(applet, "eval_ecolors") == 0) {
 		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
@@ -74,31 +74,31 @@ int main(int argc, char **argv)
 		exit(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	सचे (argc > 0) {
+		सचे (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (पूर्णाङ्क)strtoimax(argv[0], &p, 0);
+			सचे (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			सचे (errno)
 				retval = EXIT_FAILURE;
-			else {
+			अञ्ञथा {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} अञ्ञथा सचे (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			सचे (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			सचे (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,110 +109,110 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	सचे (strcmp(applet, "ewaitfile") == 0) {
+		सचे (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		सचे (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
-		gettimeofday(&stop, NULL);
+		gettimeofday(&stop, रिक्त);
 		/* retval stores the timeout */
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		अत्थाय (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
-					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
-				gettimeofday(&now, NULL);
-				if (retval <= 0)
-					continue;
-				if (timercmp(&now, &stop, <))
-					continue;
+			अत्थाय (;;) {
+				सचे (access(argv[i], F_OK) == 0)
+					भङ्ग;
+				सचे (nanosleep(&ts, रिक्त) == -1)
+					पटिनिवत्त EXIT_FAILURE;
+				gettimeofday(&now, रिक्त);
+				सचे (retval <= 0)
+					अनुवर्त;
+				सचे (timercmp(&now, &stop, <))
+					अनुवर्त;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				पटिनिवत्त EXIT_FAILURE;
 			}
-			eendv(EXIT_SUCCESS, NULL);
+			eendv(EXIT_SUCCESS, रिक्त);
 		}
-		return EXIT_SUCCESS;
+		पटिनिवत्त EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
+	सचे (argc > 0) {
 		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+		अत्थाय (i = 0; i < argc; i++) {
+			सचे (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	सचे (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	अञ्ञथा सचे (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	अञ्ञथा सचे (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	अञ्ञथा सचे (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	अञ्ञथा सचे (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} अञ्ञथा सचे (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} अञ्ञथा सचे (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	अञ्ञथा सचे (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	अञ्ञथा सचे (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
+	अञ्ञथा सचे (strcmp(applet, "esyslog") == 0) {
 		elog(retval, "%s", message);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} अञ्ञथा सचे (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	अञ्ञथा सचे (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	अञ्ञथा सचे (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	अञ्ञथा सचे (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	अञ्ञथा सचे (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	अञ्ञथा सचे (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	अञ्ञथा सचे (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	अञ्ञथा सचे (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	अञ्ञथा सचे (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	अञ्ञथा सचे (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	अञ्ञथा सचे (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	अञ्ञथा {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
+	सचे (message) {
+		सचे (e)
 			e("%s", message);
-		else if (ee)
+		अञ्ञथा सचे (ee)
 			ee(retval, "%s", message);
-	} else {
-		if (e)
-			e(NULL);
-		else if (ee)
-			ee(retval, NULL);
+	} अञ्ञथा {
+		सचे (e)
+			e(रिक्त);
+		अञ्ञथा सचे (ee)
+			ee(retval, रिक्त);
 	}
 
-	free(message);
-	return retval;
+	मुक्त(message);
+	पटिनिवत्त retval;
 }

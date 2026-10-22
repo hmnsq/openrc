@@ -15,88 +15,88 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <fcntl.h>
+#अन्तर्भाव <stddef.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <unistd.h>
 
-#include "einfo.h"
-#include "initreq.h"
-#include "sysvinit.h"
+#अन्तर्भाव "einfo.h"
+#अन्तर्भाव "initreq.h"
+#अन्तर्भाव "sysvinit.h"
 
-static void sysvinit_send_cmd(struct init_request *request)
+स्थिर शून्य sysvinit_send_cmd(संरचना init_request *request)
 {
-	int fd;
-	char *p;
+	पूर्णाङ्क fd;
+	वर्ण *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	सचे (fd < 0) {
+		सचे (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		पटिनिवत्त;
 	}
-	p = (char *) request;
-	bytes = sizeof(*request);
-	do {
-		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
-				continue;
+	p = (वर्ण *) request;
+	bytes = परिमाण(*request);
+	करोहि {
+		r = लिख(fd, p, bytes);
+		सचे (r < 0) {
+			सचे ((errno == EAGAIN) || (errno == EINTR))
+				अनुवर्त;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			पटिनिवत्त;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} याव (bytes > 0);
 }
 
-void sysvinit_runlevel(char rl)
+शून्य sysvinit_runlevel(वर्ण rl)
 {
-	struct init_request request;
+	संरचना init_request request;
 
-	if (!rl)
-		return;
+	सचे (!rl)
+		पटिनिवत्त;
 
-	request = (struct init_request) {
+	request = (संरचना init_request) {
 		.magic = INIT_MAGIC,
 		.sleeptime = 0,
 		.cmd = INIT_CMD_RUNLVL,
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		पटिनिवत्त;
 }
 
 /*
  *	Set environment variables in the init process.
  */
-void sysvinit_setenv(const char *name, const char *value)
+शून्य sysvinit_setenv(ध्रुव वर्ण *name, ध्रुव वर्ण *मानम्)
 {
-	struct init_request	request;
+	संरचना init_request	request;
 	size_t nl;
 	size_t vl;
 
-	memset(&request, 0, sizeof(request));
+	memset(&request, 0, परिमाण(request));
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
-		vl = strlen(value);
-else
+	सचे (मानम्)
+		vl = strlen(मानम्);
+अञ्ञथा
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	सचे (nl + vl + 3 >= (पूर्णाङ्क)परिमाण(request.i.data))
+		पटिनिवत्त;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	सचे (मानम्) {
 		request.i.data[nl] = '=';
-		memcpy(request.i.data + nl + 1, value, vl);
+		memcpy(request.i.data + nl + 1, मानम्, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	पटिनिवत्त;
 }

@@ -10,20 +10,20 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <getopt.h>
-#include <stdlib.h>
-#include "librc.h"
+#अन्तर्भाव <getopt.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव "librc.h"
 
 #define getoptstring_COMMON "ChqVvU"
 
 #define longopts_COMMON							      \
-	{ "help",           0, NULL, 'h'},				      \
-	{ "nocolor",        0, NULL, 'C'},				      \
-	{ "version",        0, NULL, 'V'},				      \
-	{ "verbose",        0, NULL, 'v'},				      \
-	{ "quiet",          0, NULL, 'q'},				      \
-	{ "user",           0, NULL, 'U'},				      \
-	{ NULL,             0, NULL,  0 }
+	{ "help",           0, रिक्त, 'h'},				      \
+	{ "nocolor",        0, रिक्त, 'C'},				      \
+	{ "version",        0, रिक्त, 'V'},				      \
+	{ "verbose",        0, रिक्त, 'v'},				      \
+	{ "quiet",          0, रिक्त, 'q'},				      \
+	{ "user",           0, रिक्त, 'U'},				      \
+	{ रिक्त,             0, रिक्त,  0 }
 
 #define longopts_help_COMMON						      \
 	"Display this help output",					      \
@@ -35,28 +35,28 @@
 
 #define case_RC_COMMON_getopt_case_C  setenv ("EINFO_COLOR", "NO", 1);
 #define case_RC_COMMON_getopt_case_h  usage (EXIT_SUCCESS);
-#define case_RC_COMMON_getopt_case_V  if (argc == 2) show_version();
+#define case_RC_COMMON_getopt_case_V  सचे (argc == 2) show_version();
 #define case_RC_COMMON_getopt_case_v  setenv ("EINFO_VERBOSE", "YES", 1);
 #define case_RC_COMMON_getopt_case_q  set_quiet_options();
 #define case_RC_COMMON_getopt_case_U  rc_set_user();
 #define case_RC_COMMON_getopt_default usage (EXIT_FAILURE);
 
 #define case_RC_COMMON_GETOPT						      \
-	case 'C': case_RC_COMMON_getopt_case_C; break;			      \
-	case 'h': case_RC_COMMON_getopt_case_h; break;			      \
-	case 'V': case_RC_COMMON_getopt_case_V; break;			      \
-	case 'v': case_RC_COMMON_getopt_case_v; break;			      \
-	case 'q': case_RC_COMMON_getopt_case_q; break;			      \
-	case 'U': case_RC_COMMON_getopt_case_U; break;			      \
-	default:  case_RC_COMMON_getopt_default; break;
+	पक्ष 'C': case_RC_COMMON_getopt_case_C; भङ्ग;			      \
+	पक्ष 'h': case_RC_COMMON_getopt_case_h; भङ्ग;			      \
+	पक्ष 'V': case_RC_COMMON_getopt_case_V; भङ्ग;			      \
+	पक्ष 'v': case_RC_COMMON_getopt_case_v; भङ्ग;			      \
+	पक्ष 'q': case_RC_COMMON_getopt_case_q; भङ्ग;			      \
+	पक्ष 'U': case_RC_COMMON_getopt_case_U; भङ्ग;			      \
+	स्वभाव:  case_RC_COMMON_getopt_default; भङ्ग;
 
-extern const char *applet;
-extern const char *extraopts;
-extern const char getoptstring[];
-extern const struct option longopts[];
-extern const char * const longopts_help[];
-extern const char *usagestring;
+बाह्य ध्रुव वर्ण *applet;
+बाह्य ध्रुव वर्ण *extraopts;
+बाह्य ध्रुव वर्ण getoptstring[];
+बाह्य ध्रुव संरचना option longopts[];
+बाह्य ध्रुव वर्ण * ध्रुव longopts_help[];
+बाह्य ध्रुव वर्ण *usagestring;
 
-void set_quiet_options(void);
-void show_version(void);
-void usage(int exit_status);
+शून्य set_quiet_options(शून्य);
+शून्य show_version(शून्य);
+शून्य usage(पूर्णाङ्क exit_status);
