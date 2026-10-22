@@ -10,45 +10,45 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/types.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/types.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "misc.h"
+#అన్తర్భావ "helpers.h"
 
-const char *applet = NULL;
+స్థిరరాశి అక్షరం *applet = ఖాళీ;
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
 	bool ok = false;
-	char *svcname = getenv("RC_SVCNAME");
-	char *service = NULL;
-	char *openrc_pid;
+	అక్షరం *svcname = getenv("RC_SVCNAME");
+	అక్షరం *service = ఖాళీ;
+	అక్షరం *openrc_pid;
 	/* char *mtime; */
 	pid_t pid;
-	RC_SERVICE bit;
+	RC_SERVICE బిట్టు;
 	/* size_t l; */
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	ఒకవేళ (argc > 1)
 		service = argv[1];
-	else
+	లేకపోతే
 		service = svcname;
 
-	if (service == NULL || *service == '\0')
+	ఒకవేళ (service == ఖాళీ || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
-	if (!strncmp(applet, "mark_", 5) &&
-	    (bit = lookup_service_state(applet + 5)))
-		ok = rc_service_mark(service, bit);
-	else
+	ఒకవేళ (!అక్షరశ్రేణి_పోలిక(applet, "mark_", 5) &&
+	    (బిట్టు = lookup_service_state(applet + 5)))
+		ok = rc_service_mark(service, బిట్టు);
+	లేకపోతే
 		eerrorx("%s: unknown applet", applet);
 
 	/* If we're marking ourselves then we need to inform our parent
@@ -60,10 +60,10 @@ int main(int argc, char **argv)
 	 * See 20120424041423.GA23657@odin.qasl.de (Tue, 24 Apr 2012 06:14:23 +0200,
 	 * openrc@gentoo.org).
 	 */
-	if (ok && svcname && strcmp(svcname, service) == 0) {
+	ఒకవేళ (ok && svcname && strcmp(svcname, service) == 0) {
 		openrc_pid = getenv("RC_OPENRC_PID");
-		if (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
-			if (kill(pid, SIGUSR1) != 0)
+		ఒకవేళ (openrc_pid && అక్షరశ్రేణి_చదువు(openrc_pid, "%d", &pid) == 1)
+			ఒకవేళ (kill(pid, SIGUSR1) != 0)
 				eerror("%s: failed to signal parent %d: %s",
 				    applet, pid, strerror(errno));
 
@@ -81,5 +81,5 @@ int main(int argc, char **argv)
 		*/
 	}
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	తిరిగి ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

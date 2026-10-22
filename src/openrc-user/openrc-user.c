@@ -1,101 +1,101 @@
-#include <einfo.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <syslog.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <spawn.h>
+#అన్తర్భావ <einfo.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <grp.h>
+#అన్తర్భావ <pwd.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/wait.h>
+#అన్తర్భావ <syslog.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <spawn.h>
 
-#ifdef HAVE_PAM
-#include <security/pam_appl.h>
-#endif
+#నిర్వచితమైతే HAVE_PAM
+#అన్తర్భావ <security/pam_appl.h>
+#అయితే_ముగింపు
 
-#define USER_SH RC_LIBEXECDIR "/sh/openrc-user.sh "
+#నిర్వచించు USER_SH RC_LIBEXECDIR "/sh/openrc-user.sh "
 
-#include "helpers.h"
-#include "rc.h"
-#include "rc_exec.h"
+#అన్తర్భావ "helpers.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "rc_exec.h"
 
-static bool valid_shell(const char *shell) {
+స్థిర bool valid_shell(స్థిరరాశి అక్షరం *shell) {
 	FILE *fp = fopen(RC_SYSCONFDIR "/shells", "r");
 	bool ret = false;
-	char *line = NULL;
-	size_t size;
+	అక్షరం *పంక్తి = ఖాళీ;
+	size_t కొలత;
 
-	if (!fp)
-		return true;
+	ఒకవేళ (!fp)
+		తిరిగి true;
 
-	while (xgetline(&line, &size, fp) != -1) {
-		if (line[0] == '#')
-			continue;
-		if (strcmp(line, shell) == 0) {
+	అయితే (xgetline(&పంక్తి, &కొలత, fp) != -1) {
+		ఒకవేళ (పంక్తి[0] == '#')
+			కొనసాగు;
+		ఒకవేళ (strcmp(పంక్తి, shell) == 0) {
 			ret = true;
-			break;
+			ఆపు;
 		}
 	}
 
-	free(line);
-	return ret;
+	విడుదల(పంక్తి);
+	తిరిగి ret;
 }
 
-static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
-	char *argv0;
-	const char *argv[] = {
-		NULL /* replaced below */, "-c",
-		start ? USER_SH "start" : USER_SH "stop", NULL
+స్థిర bool spawn_openrc(uid_t uid, gid_t gid, స్థిరరాశి అక్షరం *shell, bool ప్రారంభం) {
+	అక్షరం *argv0;
+	స్థిరరాశి అక్షరం *argv[] = {
+		ఖాళీ /* replaced below */, "-c",
+		ప్రారంభం ? USER_SH "start" : USER_SH "stop", ఖాళీ
 	};
-	struct exec_result res;
-	struct exec_args args;
+	నిర్మాణం exec_ఫలితం res;
+	నిర్మాణం exec_వాదనలు వాదనలు;
 
 	/* shell might be a multicall binary, e.g busybox.
 	 * so setting argv[0] to "-" might not work */
 	xasprintf(&argv0, "-%s", valid_shell(shell) ? shell : "/bin/sh");
 	argv[0] = argv0;
-	args = exec_init(argv);
-	args.cmd = shell;
-	args.uid = uid;
-	args.gid = gid;
-	args.redirect_stdout = 3;
-	res = do_exec(&args);
-	free(argv0);
-	if (res.pid < 0) {
+	వాదనలు = exec_init(argv);
+	వాదనలు.cmd = shell;
+	వాదనలు.uid = uid;
+	వాదనలు.gid = gid;
+	వాదనలు.redirect_stdout = 3;
+	res = do_exec(&వాదనలు);
+	విడుదల(argv0);
+	ఒకవేళ (res.pid < 0) {
 		elog(LOG_ERR, "do_exec: %s", strerror(errno));
-		return false;
+		తిరిగి false;
 	}
-	return rc_waitpid(res.pid) == 0;
+	తిరిగి rc_waitpid(res.pid) == 0;
 }
 
-int main(int argc, char **argv) {
-	const struct passwd *user;
-	char *log, *shell;
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv) {
+	స్థిరరాశి నిర్మాణం passwd *user;
+	అక్షరం *సంవర్గమానం, *shell;
 	sigset_t sigmask;
-	int sig, ret = 0;
+	పూర్ణాంకం sig, ret = 0;
 	uid_t uid;
 	gid_t gid;
-#ifdef HAVE_PAM
-	struct pam_conv conv = { NULL, NULL };
-	pam_handle_t *pamh = NULL;
+#నిర్వచితమైతే HAVE_PAM
+	నిర్మాణం pam_conv conv = { ఖాళీ, ఖాళీ };
+	pam_handle_t *pamh = ఖాళీ;
 	bool pam_session = false;
-	int rc;
-#endif
+	పూర్ణాంకం rc;
+#అయితే_ముగింపు
 
 	setenv("EINFO_LOG", "openrc-user", true);
 
-	if (argc != 2) {
+	ఒకవేళ (argc != 2) {
 		elog(LOG_ERR, "Invalid usage. %s <username>", argv[0]);
-		return -1;
+		తిరిగి -1;
 	}
 	/* We can't rely on the supervisor to drop perms since
 	 * pam modules might need root perms. */
-	if (!(user = getpwnam(argv[1]))) {
+	ఒకవేళ (!(user = getpwnam(argv[1]))) {
 		elog(LOG_ERR, "Invalid username %s.", argv[1]);
-		return -1;
+		తిరిగి -1;
 	}
 
 	/* sssd's pam module wrongly calls getpwnam, meaning
@@ -112,56 +112,56 @@ int main(int argc, char **argv) {
 
 	initgroups(user->pw_name, user->pw_gid);
 
-	xasprintf(&log, "openrc-user.%s", user->pw_name);
-	setenv("EINFO_LOG", log, true);
-	free(log);
+	xasprintf(&సంవర్గమానం, "openrc-user.%s", user->pw_name);
+	setenv("EINFO_LOG", సంవర్గమానం, true);
+	విడుదల(సంవర్గమానం);
 
-#ifdef HAVE_PAM
-	if ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
+#నిర్వచితమైతే HAVE_PAM
+	ఒకవేళ ((rc = pam_ప్రారంభం("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to start pam: %s", pam_strerror(pamh, rc));
-	else if ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	లేకపోతే ఒకవేళ ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to open session: %s", pam_strerror(pamh, rc));
-	else
+	లేకపోతే
 		pam_session = true;
 
-	for (char **env = pam_getenvlist(pamh); env && *env; env++) {
-		if (strchr(*env, '='))
+	కొరకు (అక్షరం **env = pam_getenvlist(pamh); env && *env; env++) {
+		ఒకవేళ (strchr(*env, '='))
 			putenv(xstrdup(*env));
-		else
+		లేకపోతే
 			unsetenv(*env);
 	}
 
-	if (!pam_session && pamh) {
-		pam_end(pamh, rc);
-		pamh = NULL;
+	ఒకవేళ (!pam_session && pamh) {
+		pam_చివర(pamh, rc);
+		pamh = ఖాళీ;
 	}
-#endif
+#అయితే_ముగింపు
 
-	if (!spawn_openrc(uid, gid, shell, true)) {
+	ఒకవేళ (!spawn_openrc(uid, gid, shell, true)) {
 		ret = -1;
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
 	sigfillset(&sigmask);
-	sigprocmask(SIG_SETMASK, &sigmask, NULL);
+	sigprocmask(SIG_SETMASK, &sigmask, ఖాళీ);
 
 	sigemptyset(&sigmask);
 	sigaddset(&sigmask, SIGTERM);
 
 	sigwait(&sigmask, &sig);
 
-	if (!spawn_openrc(uid, gid, shell, false))
+	ఒకవేళ (!spawn_openrc(uid, gid, shell, false))
 		ret = -1;
 
-out:
-#ifdef HAVE_PAM
-	if (pamh) {
-		if ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+బహిర్గతం:
+#నిర్వచితమైతే HAVE_PAM
+	ఒకవేళ (pamh) {
+		ఒకవేళ ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 			elog(LOG_ERR, "Failed to close session: %s", pam_strerror(pamh, rc));
-		pam_end(pamh, rc);
+		pam_చివర(pamh, rc);
 	}
-#endif
+#అయితే_ముగింపు
 
-	free(shell);
-	return ret;
+	విడుదల(shell);
+	తిరిగి ret;
 }

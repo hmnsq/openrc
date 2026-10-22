@@ -10,59 +10,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "misc.h"
+#అన్తర్భావ "helpers.h"
 
-const char *applet = NULL;
+స్థిరరాశి అక్షరం *applet = ఖాళీ;
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
-	RC_SERVICE state, bit;
+	అక్షరం *service;
+	అక్షరం *exec;
+	పూర్ణాంకం idx = 0;
+	RC_SERVICE state, బిట్టు;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	ఒకవేళ (argc > 1)
 		service = argv[1];
-	else
+	లేకపోతే
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	ఒకవేళ (service == ఖాళీ || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
-	bit = lookup_service_state(applet);
-	if (bit) {
-		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	బిట్టు = lookup_service_state(applet);
+	ఒకవేళ (బిట్టు) {
+		ok = (state & బిట్టు);
+	} లేకపోతే ఒకవేళ (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		ఒకవేళ (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
-			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+			అక్షరశ్రేణి_చదువు(argv[3], "%d", &idx);
+		} లేకపోతే ఒకవేళ (argc == 3) {
+			ఒకవేళ (అక్షరశ్రేణి_చదువు(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
-		ok = rc_service_started_daemon(service, exec, NULL, idx);
+		ok = rc_service_started_daemon(service, exec, ఖాళీ, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} లేకపోతే ఒకవేళ (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} లేకపోతే
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	తిరిగి ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

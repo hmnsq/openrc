@@ -15,87 +15,87 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <syslog.h>
-#include <unistd.h>
+#అన్తర్భావ <sys/ioctl.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <inttypes.h>
+#అన్తర్భావ <stdarg.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stddef.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <strings.h>
+#అన్తర్భావ <syslog.h>
+#అన్తర్భావ <unistd.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "helpers.h"
 
 /* In case we cannot work out how many columns from ioctl, supply a default */
-#define DEFAULT_COLS		 80
+#నిర్వచించు DEFAULT_నిలువుల_సంఖ్య		 80
 
-#define OK			"ok"
-#define NOT_OK			"!!"
+#నిర్వచించు OK			"ok"
+#నిర్వచించు NOT_OK			"!!"
 
 /* Number of spaces for an indent */
-#define INDENT_WIDTH		2
+#నిర్వచించు INDENT_వెడల్పు		2
 
 /* How wide can the indent go? */
-#define INDENT_MAX		40
+#నిర్వచించు INDENT_MAX		40
 
 /* Default colours */
-#define GOOD                    2
-#define WARN                    3
-#define BAD                     1
-#define HILITE                  6
-#define BRACKET                 4
+#నిర్వచించు GOOD                    2
+#నిర్వచించు WARN                    3
+#నిర్వచించు BAD                     1
+#నిర్వచించు HILITE                  6
+#నిర్వచించు BRACKET                 4
 
 /* ANSI escape codes which mimic termcap */
-#define AF "\033[3%dm"
-#define CE "\033[K"
-#define CH "\033[%dC"
-#define MD "\033[1m"
-#define ME "\033[m"
-#define UP "\033[A"
+#నిర్వచించు AF "\033[3%dm"
+#నిర్వచించు CE "\033[K"
+#నిర్వచించు CH "\033[%dC"
+#నిర్వచించు MD "\033[1m"
+#నిర్వచించు ME "\033[m"
+#నిర్వచించు పైకి "\033[A"
 
-#define _GET_CAP(_d, _c) strlcpy(_d, tgoto(_c, 0, 0), sizeof(_d));
-#define _ASSIGN_CAP(_v) do {						      \
+#నిర్వచించు _GET_CAP(_d, _c) strlcpy(_d, tgoto(_c, 0, 0), పరిమాణం(_d));
+#నిర్వచించు కేటాయించు_CAP(_v) చేయి {						      \
 		_v = p;							      \
-		p += strlcpy(p, tmp, sizeof(ebuffer) - (p - ebuffer)) + 1;    \
-	} while (0)
+		p += strlcpy(p, tmp, పరిమాణం(ebuffer) - (p - ebuffer)) + 1;    \
+	} అయితే (0)
 
 /* A pointer to a string to prefix to einfo/ewarn/eerror messages */
-static const char *_eprefix = NULL;
+స్థిర స్థిరరాశి అక్షరం *_eprefix = ఖాళీ;
 
 /* Buffers and structures to hold the final colours */
-static char ebuffer[100];
-struct ecolor {
+స్థిర అక్షరం ebuffer[100];
+నిర్మాణం ecolor {
 	ECOLOR color;
-	int def;
-	const char *name;
+	పూర్ణాంకం def;
+	స్థిరరాశి అక్షరం *name;
 };
-static char nullstr = '\0';
+స్థిర అక్షరం nullstr = '\0';
 
-static const struct ecolor ecolors[] = {
+స్థిర స్థిరరాశి నిర్మాణం ecolor ecolors[] = {
 	{ ECOLOR_GOOD,    GOOD,    "good"    },
 	{ ECOLOR_WARN,    WARN,    "warn"    },
 	{ ECOLOR_BAD,     BAD,     "bad"     },
 	{ ECOLOR_HILITE,  HILITE,  "hilite"  },
 	{ ECOLOR_BRACKET, BRACKET, "bracket" },
-	{ ECOLOR_NORMAL,  0,       NULL      },
+	{ ECOLOR_సాధారణ,  0,       ఖాళీ      },
 };
-static const char *ecolors_str[ARRAY_SIZE(ecolors)];
+స్థిర స్థిరరాశి అక్షరం *ecolors_str[ARRAY_కొలత(ecolors)];
 
-static char *flush = NULL;
-static char *up = NULL;
-static char *goto_column = NULL;
+స్థిర అక్షరం *flush = ఖాళీ;
+స్థిర అక్షరం *పైకి_2 = ఖాళీ;
+స్థిర అక్షరం *goto_స్తంభం = ఖాళీ;
 
-static const char *term = NULL;
-static bool term_is_cons25 = false;
+స్థిర స్థిరరాశి అక్షరం *పదం = ఖాళీ;
+స్థిర bool పదం_is_cons25 = false;
 
 /* Hardcoded list of colour capable terms
  * Only terminals without "color" in the name need to be explicitly listed */
-static const char *const color_terms[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి color_terms[] = {
 	"Eterm",
 	"alacritty",
 	"ansi",
@@ -136,28 +136,28 @@ static const char *const color_terms[] = {
 	"xterm-debian",
 	"xterm-kitty",
     "xterm-ghostty",
-	NULL
+	ఖాళీ
 };
 
-#ifndef HAVE_STRLCPY
-static size_t
-strlcat(char *dst, const char *src, size_t size)
+#నిర్వచితం_కాకపోతే HAVE_STRLCPY
+స్థిర size_t
+strlcat(అక్షరం *dst, స్థిరరాశి అక్షరం *src, size_t కొలత)
 {
-	char *d = dst;
-	const char *s = src;
-	size_t src_n = size;
+	అక్షరం *d = dst;
+	స్థిరరాశి అక్షరం *s = src;
+	size_t src_n = కొలత;
 	size_t dst_n;
 
-	while (src_n-- != 0 && *d != '\0')
+	అయితే (src_n-- != 0 && *d != '\0')
 		d++;
 	dst_n = d - dst;
-	src_n = size - dst_n;
+	src_n = కొలత - dst_n;
 
-	if (src_n == 0)
-		return dst_n + strlen(src);
+	ఒకవేళ (src_n == 0)
+		తిరిగి dst_n + అక్షరశ్రేణి_పొడవు(src);
 
-	while (*s != '\0') {
-		if (src_n != 1) {
+	అయితే (*s != '\0') {
+		ఒకవేళ (src_n != 1) {
 			*d++ = *s;
 			src_n--;
 		}
@@ -165,278 +165,278 @@ strlcat(char *dst, const char *src, size_t size)
 	}
 	*d = '\0';
 
-	return dst_n + (s - src);
+	తిరిగి dst_n + (s - src);
 }
-#endif
+#అయితే_ముగింపు
 
-static bool
-yesno(const char *value)
+స్థిర bool
+yesno(స్థిరరాశి అక్షరం *విలువ)
 {
-	if (!value) {
+	ఒకవేళ (!విలువ) {
 		errno = ENOENT;
-		return false;
+		తిరిగి false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "on") == 0 ||
-	    strcasecmp(value, "1") == 0)
-		return true;
+	ఒకవేళ (strcasecmp(విలువ, "yes") == 0 ||
+	    strcasecmp(విలువ, "y") == 0 ||
+	    strcasecmp(విలువ, "true") == 0 ||
+	    strcasecmp(విలువ, "on") == 0 ||
+	    strcasecmp(విలువ, "1") == 0)
+		తిరిగి true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "off") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	ఒకవేళ (strcasecmp(విలువ, "no") != 0 &&
+	    strcasecmp(విలువ, "n") != 0 &&
+	    strcasecmp(విలువ, "false") != 0 &&
+	    strcasecmp(విలువ, "off") != 0 &&
+	    strcasecmp(విలువ, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	తిరిగి false;
 }
 
-static bool
-noyes(const char *value)
+స్థిర bool
+noyes(స్థిరరాశి అక్షరం *విలువ)
 {
-	int serrno = errno;
+	పూర్ణాంకం serrno = errno;
 	bool retval;
 
 	errno = 0;
-	retval = yesno(value);
-	if (errno == 0) {
+	retval = yesno(విలువ);
+	ఒకవేళ (errno == 0) {
 		retval = !retval;
 		errno = serrno;
 	}
 
-	return retval;
+	తిరిగి retval;
 }
 
-static bool
-is_quiet(void)
+స్థిర bool
+is_quiet(శూన్య)
 {
-	return yesno(getenv("EINFO_QUIET"));
+	తిరిగి yesno(getenv("EINFO_QUIET"));
 }
 
-static bool
-is_really_quiet(void)
+స్థిర bool
+is_really_quiet(శూన్య)
 {
-	return yesno(getenv("EERROR_QUIET"));
+	తిరిగి yesno(getenv("EERROR_QUIET"));
 }
 
-static bool
-is_verbose(void)
+స్థిర bool
+is_verbose(శూన్య)
 {
-	return yesno(getenv ("EINFO_VERBOSE"));
+	తిరిగి yesno(getenv ("EINFO_VERBOSE"));
 }
 
 /* Fake tgoto call - very crapy, but works for our needs */
-static char *
-tgoto(const char *cap, int col, int line)
+స్థిర అక్షరం *
+tgoto(స్థిరరాశి అక్షరం *cap, పూర్ణాంకం నిలువు, పూర్ణాంకం పంక్తి)
 {
-	static char buf[20];
-	char *p, *e, c, dbuf[6];
-	int oncol = 0, which = line, i;
+	స్థిర అక్షరం buf[20];
+	అక్షరం *p, *e, c, dbuf[6];
+	పూర్ణాంకం oncol = 0, which = పంక్తి, i;
 
 	p = buf;
-	e = p + sizeof(buf);
-	while ((c = *cap++)) {
-		if (c != '%' || ((c = *cap++) == '%')) {
+	e = p + పరిమాణం(buf);
+	అయితే ((c = *cap++)) {
+		ఒకవేళ (c != '%' || ((c = *cap++) == '%')) {
 			*p++ = c;
-			if (p >= e) {
+			ఒకవేళ (p >= e) {
 				errno = E2BIG;
-				return NULL;
+				తిరిగి ఖాళీ;
 			}
-			continue;
+			కొనసాగు;
 		}
-		switch (c) {
-		case '3':
-		case '2':
-		case 'd':
+		ఎంపిక (c) {
+		స్థితి '3':
+		స్థితి '2':
+		స్థితి 'd':
 			i = 0;
-			do
+			చేయి
 				dbuf[i++] = which % 10 | '0';
-			while ((which /= 10));
-			if (c != 'd') {
+			అయితే ((which /= 10));
+			ఒకవేళ (c != 'd') {
 				c -= '0';
-				if (i > c) {
+				ఒకవేళ (i > c) {
 					errno = EINVAL;
-					return NULL;
+					తిరిగి ఖాళీ;
 				}
-				while (i < c)
+				అయితే (i < c)
 					dbuf[i++] = '0';
 			}
-			if (p + i >= e) {
+			ఒకవేళ (p + i >= e) {
 				errno = E2BIG;
-				return NULL;
+				తిరిగి ఖాళీ;
 			}
-			do
+			చేయి
 				*p++ = dbuf[--i];
-			while (i);
-			break;
-		case 'r':
+			అయితే (i);
+			ఆపు;
+		స్థితి 'r':
 			oncol = 0;
-			break;
-		case 'i':
-			col++;
-			line++;
+			ఆపు;
+		స్థితి 'i':
+			నిలువు++;
+			పంక్తి++;
 			which++;
-			continue;
-		default:
+			కొనసాగు;
+		అప్రమేయ:
 			errno = EINVAL;
-			return NULL;
+			తిరిగి ఖాళీ;
 		}
 
 		oncol = 1 - oncol;
-		which = oncol ? col : line;
+		which = oncol ? నిలువు : పంక్తి;
 	}
 	*p = '\0';
-	return buf;
+	తిరిగి buf;
 }
 
-static bool
-colour_terminal(FILE * EINFO_RESTRICT f)
+స్థిర bool
+రంగు_terminal(FILE * EINFO_RESTRICT f)
 {
-	static int in_colour = -1;
-	char *e, *ee, *end, *d, *p;
-	int c;
-	const char *_af = NULL, *_ce = NULL, *_ch = NULL;
-	const char *_md = NULL, *_me = NULL, *_up = NULL;
-	const char *bold;
-	char tmp[100];
-	unsigned int i = 0;
+	స్థిర పూర్ణాంకం లోపల_రంగు = -1;
+	అక్షరం *e, *ee, *చివర, *d, *p;
+	పూర్ణాంకం c;
+	స్థిరరాశి అక్షరం *_af = ఖాళీ, *_ce = ఖాళీ, *_ch = ఖాళీ;
+	స్థిరరాశి అక్షరం *_md = ఖాళీ, *_me = ఖాళీ, *పైకి_3 = ఖాళీ;
+	స్థిరరాశి అక్షరం *bold;
+	అక్షరం tmp[100];
+	గుర్తులేని పూర్ణాంకం i = 0;
 
-	if (f && !isatty(fileno(f)))
-		return false;
+	ఒకవేళ (f && !isatty(fileno(f)))
+		తిరిగి false;
 
-	if (noyes(getenv("EINFO_COLOR")))
-		return false;
+	ఒకవేళ (noyes(getenv("EINFO_COLOR")))
+		తిరిగి false;
 
-	if (in_colour == 0)
-		return false;
-	if (in_colour == 1)
-		return true;
+	ఒకవేళ (లోపల_రంగు == 0)
+		తిరిగి false;
+	ఒకవేళ (లోపల_రంగు == 1)
+		తిరిగి true;
 
-	term_is_cons25 = false;
-	if (!term) {
-		term = getenv("TERM");
-		if (!term)
-			return false;
+	పదం_is_cons25 = false;
+	ఒకవేళ (!పదం) {
+		పదం = getenv("TERM");
+		ఒకవేళ (!పదం)
+			తిరిగి false;
 	}
-	if (strcmp(term, "cons25") == 0)
-		term_is_cons25 = true;
+	ఒకవేళ (strcmp(పదం, "cons25") == 0)
+		పదం_is_cons25 = true;
 
-	if (strstr(term, "color"))
-		in_colour = 1;
+	ఒకవేళ (అక్షరశ్రేణి_శోధన(పదం, "color"))
+		లోపల_రంగు = 1;
 
-	while (color_terms[i] && in_colour != 1) {
-		if (strcmp(color_terms[i], term) == 0) {
-			in_colour = 1;
+	అయితే (color_terms[i] && లోపల_రంగు != 1) {
+		ఒకవేళ (strcmp(color_terms[i], పదం) == 0) {
+			లోపల_రంగు = 1;
 		}
 		i++;
 	}
 
-	if (in_colour != 1) {
-		in_colour = 0;
-		return false;
+	ఒకవేళ (లోపల_రంగు != 1) {
+		లోపల_రంగు = 0;
+		తిరిగి false;
 	}
 
-	if (!_af)
+	ఒకవేళ (!_af)
 		_af = AF;
-	if (!_ce)
+	ఒకవేళ (!_ce)
 		_ce = CE;
-	if (!_ch)
+	ఒకవేళ (!_ch)
 		_ch = CH;
-	if (!_md)
+	ఒకవేళ (!_md)
 		_md = MD;
-	if (!_me)
+	ఒకవేళ (!_me)
 		_me = ME;
-	if (!_up)
-		_up = UP;
+	ఒకవేళ (!పైకి_3)
+		పైకి_3 = పైకి;
 
 	/* Now setup our colours */
 	p = ebuffer;
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i) {
+	కొరకు (i = 0; i < ARRAY_కొలత(ecolors); ++i) {
 		tmp[0] = '\0';
-		if (ecolors[i].name) {
+		ఒకవేళ (ecolors[i].name) {
 			bold = _md;
 			c = ecolors[i].def;
 
 			/* See if the user wants to override the colour
 			 * We use a :col;bold: format like 2;1: for bold green
 			 * and 1;0: for a normal red */
-			if ((e = getenv("EINFO_COLOR"))) {
-				ee = strstr(e, ecolors[i].name);
-				if (ee)
-					ee += strlen(ecolors[i].name);
+			ఒకవేళ ((e = getenv("EINFO_COLOR"))) {
+				ee = అక్షరశ్రేణి_శోధన(e, ecolors[i].name);
+				ఒకవేళ (ee)
+					ee += అక్షరశ్రేణి_పొడవు(ecolors[i].name);
 
-				if (ee && *ee == '=') {
+				ఒకవేళ (ee && *ee == '=') {
 					d = strdup(ee + 1);
-					if (d) {
-						end = strchr(d, ':');
-						if (end)
-							*end = '\0';
+					ఒకవేళ (d) {
+						చివర = strchr(d, ':');
+						ఒకవేళ (చివర)
+							*చివర = '\0';
 						c = atoi(d);
-						end = strchr(d, ';');
-						if (end && *++end == '0')
+						చివర = strchr(d, ';');
+						ఒకవేళ (చివర && *++చివర == '0')
 							bold = _me;
-						free(d);
+						విడుదల(d);
 					}
 				}
 			}
-			strlcpy(tmp, tgoto(bold, 0, 0), sizeof(tmp));
-			strlcat(tmp, tgoto(_af, 0, c & 0x07), sizeof(tmp));
-		} else
+			strlcpy(tmp, tgoto(bold, 0, 0), పరిమాణం(tmp));
+			strlcat(tmp, tgoto(_af, 0, c & 0x07), పరిమాణం(tmp));
+		} లేకపోతే
 			_GET_CAP(tmp, _me);
 
-		if (tmp[0])
-			_ASSIGN_CAP(ecolors_str[i]);
-		else
+		ఒకవేళ (tmp[0])
+			కేటాయించు_CAP(ecolors_str[i]);
+		లేకపోతే
 			ecolors_str[i] = &nullstr;
 	}
 
 	_GET_CAP(tmp, _ce);
-	_ASSIGN_CAP(flush);
-	_GET_CAP(tmp, _up);
-	_ASSIGN_CAP(up);
-	strlcpy(tmp, _ch, sizeof(tmp));
-	_ASSIGN_CAP(goto_column);
+	కేటాయించు_CAP(flush);
+	_GET_CAP(tmp, పైకి_3);
+	కేటాయించు_CAP(పైకి_2);
+	strlcpy(tmp, _ch, పరిమాణం(tmp));
+	కేటాయించు_CAP(goto_స్తంభం);
 
-	in_colour = 1;
-	return true;
+	లోపల_రంగు = 1;
+	తిరిగి true;
 }
 
-static int
-get_term_columns(FILE * EINFO_RESTRICT stream)
+స్థిర పూర్ణాంకం
+get_పదం_columns(FILE * EINFO_RESTRICT ప్రవాహం)
 {
-	struct winsize ws;
-	char *env = getenv("COLUMNS");
-	char *p;
-	int i;
+	నిర్మాణం winsize ws;
+	అక్షరం *env = getenv("COLUMNS");
+	అక్షరం *p;
+	పూర్ణాంకం i;
 
-	if (env) {
+	ఒకవేళ (env) {
 		i = strtoimax(env, &p, 10);
-		if (!*p)
-			return i;
+		ఒకవేళ (!*p)
+			తిరిగి i;
 	}
 
-	if (ioctl(fileno(stream), TIOCGWINSZ, &ws) == 0)
-		return ws.ws_col;
+	ఒకవేళ (ioctl(fileno(ప్రవాహం), TIOCGWINSZ, &ws) == 0)
+		తిరిగి ws.ws_col;
 
-	return DEFAULT_COLS;
+	తిరిగి DEFAULT_నిలువుల_సంఖ్య;
 }
 
-void
-eprefix(const char *EINFO_RESTRICT prefix)
+శూన్య
+eprefix(స్థిరరాశి అక్షరం *EINFO_RESTRICT ఉపసర్గ)
 {
-	_eprefix = prefix;
+	_eprefix = ఉపసర్గ;
 }
 
-static void EINFO_PRINTF(2, 0)
-elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
+స్థిర శూన్య EINFO_PRINTF(2, 0)
+elogv(పూర్ణాంకం level, స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, va_list ap)
 {
-	char *e = getenv("EINFO_LOG");
+	అక్షరం *e = getenv("EINFO_LOG");
 	va_list apc;
 
-	if (fmt && e) {
+	ఒకవేళ (fmt && e) {
 		closelog();
 		openlog(e, LOG_PID, LOG_DAEMON);
 		va_copy(apc, ap);
@@ -446,8 +446,8 @@ elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
 	}
 }
 
-void
-elog(int level, const char *EINFO_RESTRICT fmt, ...)
+శూన్య
+elog(పూర్ణాంకం level, స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
@@ -456,489 +456,489 @@ elog(int level, const char *EINFO_RESTRICT fmt, ...)
 	va_end(ap);
 }
 
-static int
-_eindent(FILE * EINFO_RESTRICT stream)
+స్థిర పూర్ణాంకం
+_eindent(FILE * EINFO_RESTRICT ప్రవాహం)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	అక్షరం *env = getenv("EINFO_INDENT");
+	పూర్ణాంకం amount = 0;
 
-	if (env) {
+	ఒకవేళ (env) {
 		errno = 0;
-		amount = strtoimax(env, NULL, 0);
-		if (errno != 0 || amount < 0)
+		amount = strtoimax(env, ఖాళీ, 0);
+		ఒకవేళ (errno != 0 || amount < 0)
 			amount = 0;
-		else if (amount > INDENT_MAX)
+		లేకపోతే ఒకవేళ (amount > INDENT_MAX)
 			amount = INDENT_MAX;
 	}
 
-	return fprintf(stream, "%*s", amount, "");
+	తిరిగి fprintf(ప్రవాహం, "%*s", amount, "");
 }
 
-static const char *
+స్థిర స్థిరరాశి అక్షరం *
 _ecolor(FILE * EINFO_RESTRICT f, ECOLOR color)
 {
-	unsigned int i;
+	గుర్తులేని పూర్ణాంకం i;
 
-	if (!colour_terminal(f))
-		return "";
+	ఒకవేళ (!రంగు_terminal(f))
+		తిరిగి "";
 
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i)
-		if (ecolors[i].color == color)
-			return ecolors_str[i];
-	return "";
+	కొరకు (i = 0; i < ARRAY_కొలత(ecolors); ++i)
+		ఒకవేళ (ecolors[i].color == color)
+			తిరిగి ecolors_str[i];
+	తిరిగి "";
 }
 
-const char *
+స్థిరరాశి అక్షరం *
 ecolor(ECOLOR color)
 {
 	FILE *f = stdout;
 
 	/* Try and guess a valid tty */
-	if (!isatty(fileno(f))) {
+	ఒకవేళ (!isatty(fileno(f))) {
 		f = stderr;
-		if (!isatty(fileno(f))) {
+		ఒకవేళ (!isatty(fileno(f))) {
 			f = stdin;
-			if (!isatty(fileno(f)))
-				f = NULL;
+			ఒకవేళ (!isatty(fileno(f)))
+				f = ఖాళీ;
 		}
 	}
 
-	return _ecolor(f, color);
+	తిరిగి _ecolor(f, color);
 }
 
-#define LASTCMD(_cmd) {							      \
+#నిర్వచించు LASTCMD(_cmd) {							      \
 		unsetenv("EINFO_LASTCMD");				      \
 		setenv("EINFO_LASTCMD", _cmd, 1);			      \
 	}
 
-static int EINFO_PRINTF(3, 0)
-	_einfo(FILE *f, ECOLOR color, const char *EINFO_RESTRICT fmt, va_list va)
+స్థిర పూర్ణాంకం EINFO_PRINTF(3, 0)
+	_einfo(FILE *f, ECOLOR color, స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, va_list va)
 {
-	int retval = 0;
-	char *last = getenv("EINFO_LASTCMD");
+	పూర్ణాంకం retval = 0;
+	అక్షరం *చివరి = getenv("EINFO_LASTCMD");
 	va_list ap;
 
-	if (last &&
-	    *last &&
-	    !colour_terminal(f) &&
-	    strcmp(last, "ewarn") != 0 &&
-	    last[strlen(last) - 1] == 'n')
+	ఒకవేళ (చివరి &&
+	    *చివరి &&
+	    !రంగు_terminal(f) &&
+	    strcmp(చివరి, "ewarn") != 0 &&
+	    చివరి[అక్షరశ్రేణి_పొడవు(చివరి) - 1] == 'n')
 		fprintf(f, "\n");
-	if (_eprefix)
-		fprintf(f, "%s%s%s|", _ecolor(f, color), _eprefix, _ecolor(f, ECOLOR_NORMAL));
-	fprintf(f, " %s*%s ", _ecolor(f, color), _ecolor(f, ECOLOR_NORMAL));
+	ఒకవేళ (_eprefix)
+		fprintf(f, "%s%s%s|", _ecolor(f, color), _eprefix, _ecolor(f, ECOLOR_సాధారణ));
+	fprintf(f, " %s*%s ", _ecolor(f, color), _ecolor(f, ECOLOR_సాధారణ));
 	retval += _eindent(f);
 	va_copy(ap, va);
 	retval += vfprintf(f, fmt, ap) + 3;
 	va_end(ap); \
-	if (colour_terminal(f))
+	ఒకవేళ (రంగు_terminal(f))
 		fprintf(f, "%s", flush);
-	return retval;
+	తిరిగి retval;
 }
 
-#define _einfovn(fmt, ap) _einfo(stdout, ECOLOR_GOOD, fmt, ap)
-#define _ewarnvn(fmt, ap) _einfo(stderr, ECOLOR_WARN, fmt, ap)
-#define _eerrorvn(fmt, ap) _einfo(stderr, ECOLOR_BAD, fmt, ap)
+#నిర్వచించు _einfovn(fmt, ap) _einfo(stdout, ECOLOR_GOOD, fmt, ap)
+#నిర్వచించు _ewarnvn(fmt, ap) _einfo(stderr, ECOLOR_WARN, fmt, ap)
+#నిర్వచించు _eerrorvn(fmt, ap) _einfo(stderr, ECOLOR_BAD, fmt, ap)
 
-int
-einfon(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+einfon(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	ఒకవేళ (!fmt || is_quiet())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfon");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-ewarnn(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+ewarnn(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	ఒకవేళ (!fmt || is_quiet())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnn");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-eerrorn(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+eerrorn(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	ఒకవేళ (!fmt || is_really_quiet())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("errorn");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-einfo(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+einfo(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	ఒకవేళ (!fmt || is_quiet())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
-	retval += printf("\n");
+	retval += రాయి("\n");
 	va_end(ap);
 	LASTCMD("einfo");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-ewarn(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+ewarn(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	ఒకవేళ (!fmt || is_quiet())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	elogv(LOG_WARNING, fmt, ap);
 	retval = _ewarnvn(fmt, ap);
 	retval += fprintf(stderr, "\n");
 	va_end(ap);
 	LASTCMD("ewarn");
-	return retval;
+	తిరిగి retval;
 }
 
-void
-ewarnx(const char *EINFO_RESTRICT fmt, ...)
+శూన్య
+ewarnx(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_quiet()) {
+	ఒకవేళ (fmt && !is_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_WARNING, fmt, ap);
 		_ewarnvn(fmt, ap);
 		va_end(ap);
 		fprintf(stderr, "\n");
 	}
-	exit(EXIT_FAILURE);
+	నిష్క్రమించు(EXIT_FAILURE);
 }
 
-int
-eerror(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+eerror(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	ఒకవేళ (!fmt || is_really_quiet())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	elogv(LOG_ERR, fmt, ap);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	retval += fprintf(stderr, "\n");
 	LASTCMD("eerror");
-	return retval;
+	తిరిగి retval;
 }
 
-void
-eerrorx(const char *EINFO_RESTRICT fmt, ...)
+శూన్య
+eerrorx(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_really_quiet()) {
+	ఒకవేళ (fmt && !is_really_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_ERR, fmt, ap);
 		_eerrorvn(fmt, ap);
 		va_end(ap);
 		fprintf(stderr, "\n");
 	}
-	exit(EXIT_FAILURE);
+	నిష్క్రమించు(EXIT_FAILURE);
 }
 
-int
-ebegin(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+ebegin(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	ఒకవేళ (!fmt || is_quiet())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
-	retval += printf(" ...");
-	if (colour_terminal(stdout))
-		retval += printf("\n");
+	retval += రాయి(" ...");
+	ఒకవేళ (రంగు_terminal(stdout))
+		retval += రాయి("\n");
 	LASTCMD("ebegin");
-	return retval;
+	తిరిగి retval;
 }
 
-static void
-_eend(FILE * EINFO_RESTRICT fp, int col, ECOLOR color, const char *msg)
+స్థిర శూన్య
+_eend(FILE * EINFO_RESTRICT fp, పూర్ణాంకం నిలువు, ECOLOR color, స్థిరరాశి అక్షరం *సందేశం_2)
 {
-	int i;
-	int cols;
+	పూర్ణాంకం i;
+	పూర్ణాంకం నిలువుల_సంఖ్య;
 
-	if (!msg)
-		return;
+	ఒకవేళ (!సందేశం_2)
+		తిరిగి;
 
-	cols = get_term_columns(fp) - (strlen(msg) + 5);
+	నిలువుల_సంఖ్య = get_పదం_columns(fp) - (అక్షరశ్రేణి_పొడవు(సందేశం_2) + 5);
 
 	/* cons25 is special - we need to remove one char, otherwise things
 	 * do not align properly at all. */
-	if (!term) {
-		term = getenv("TERM");
-		if (term && strcmp(term, "cons25") == 0)
-			term_is_cons25 = true;
-		else
-			term_is_cons25 = false;
+	ఒకవేళ (!పదం) {
+		పదం = getenv("TERM");
+		ఒకవేళ (పదం && strcmp(పదం, "cons25") == 0)
+			పదం_is_cons25 = true;
+		లేకపోతే
+			పదం_is_cons25 = false;
 	}
-	if (term_is_cons25)
-		cols--;
+	ఒకవేళ (పదం_is_cons25)
+		నిలువుల_సంఖ్య--;
 
-	if (cols > 0 && colour_terminal(fp)) {
-		fprintf(fp, "%s%s %s[%s %s %s]%s\n", up, tgoto(goto_column, 0, cols),
-		    ecolor(ECOLOR_BRACKET), ecolor(color), msg,
-		    ecolor(ECOLOR_BRACKET), ecolor(ECOLOR_NORMAL));
-	} else {
-		if (col > 0)
-			for (i = 0; i < cols - col; i++)
+	ఒకవేళ (నిలువుల_సంఖ్య > 0 && రంగు_terminal(fp)) {
+		fprintf(fp, "%s%s %s[%s %s %s]%s\n", పైకి_2, tgoto(goto_స్తంభం, 0, నిలువుల_సంఖ్య),
+		    ecolor(ECOLOR_BRACKET), ecolor(color), సందేశం_2,
+		    ecolor(ECOLOR_BRACKET), ecolor(ECOLOR_సాధారణ));
+	} లేకపోతే {
+		ఒకవేళ (నిలువు > 0)
+			కొరకు (i = 0; i < నిలువుల_సంఖ్య - నిలువు; i++)
 				fprintf(fp, " ");
-		fprintf(fp, " [ %s ]\n", msg);
+		fprintf(fp, " [ %s ]\n", సందేశం_2);
 	}
 }
 
-static int EINFO_PRINTF(3, 0)
-_do_eend(const char *cmd, int retval,
-    const char *EINFO_RESTRICT fmt, va_list ap)
+స్థిర పూర్ణాంకం EINFO_PRINTF(3, 0)
+_do_eend(స్థిరరాశి అక్షరం *cmd, పూర్ణాంకం retval,
+    స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, va_list ap)
 {
-	int col = 0;
+	పూర్ణాంకం నిలువు = 0;
 	FILE *fp = stdout;
 	va_list apc;
 
-	if (fmt && *fmt != '\0' && retval != 0) {
+	ఒకవేళ (fmt && *fmt != '\0' && retval != 0) {
 		fp = stderr;
 		va_copy(apc, ap);
-		if (strcmp(cmd, "ewend") == 0)
-			col = _ewarnvn(fmt, apc);
-		else
-			col = _eerrorvn(fmt, apc);
-		col += fprintf(fp, "\n");
+		ఒకవేళ (strcmp(cmd, "ewend") == 0)
+			నిలువు = _ewarnvn(fmt, apc);
+		లేకపోతే
+			నిలువు = _eerrorvn(fmt, apc);
+		నిలువు += fprintf(fp, "\n");
 		va_end(apc);
 	}
-	_eend(fp, col,
+	_eend(fp, నిలువు,
 	    retval == 0 ? ECOLOR_GOOD : ECOLOR_BAD,
 	    retval == 0 ? OK : NOT_OK);
-	return retval;
+	తిరిగి retval;
 }
 
-int
-eend(int retval, const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+eend(పూర్ణాంకం retval, స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	ఒకవేళ (is_quiet())
+		తిరిగి retval;
 	va_start(ap, fmt);
 	_do_eend("eend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eend");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-ewend(int retval, const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+ewend(పూర్ణాంకం retval, స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	ఒకవేళ (is_quiet())
+		తిరిగి retval;
 	va_start(ap, fmt);
 	_do_eend("ewend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewend");
-	return retval;
+	తిరిగి retval;
 }
 
-void
-ebracket(int col, ECOLOR color, const char *msg)
+శూన్య
+ebracket(పూర్ణాంకం నిలువు, ECOLOR color, స్థిరరాశి అక్షరం *సందేశం_2)
 {
-	_eend(stdout, col, color, msg);
+	_eend(stdout, నిలువు, color, సందేశం_2);
 }
 
-void
-eindent(void)
+శూన్య
+eindent(శూన్య)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
-	char *num;
+	అక్షరం *env = getenv("EINFO_INDENT");
+	పూర్ణాంకం amount = 0;
+	అక్షరం *అంకె;
 
-	if (env) {
+	ఒకవేళ (env) {
 		errno = 0;
-		amount = strtoimax(env, NULL, 0);
-		if (errno != 0)
+		amount = strtoimax(env, ఖాళీ, 0);
+		ఒకవేళ (errno != 0)
 			amount = 0;
 	}
-	amount += INDENT_WIDTH;
-	xasprintf(&num, "%08d", amount);
-	setenv("EINFO_INDENT", num, 1);
-	free(num);
+	amount += INDENT_వెడల్పు;
+	xasprintf(&అంకె, "%08d", amount);
+	setenv("EINFO_INDENT", అంకె, 1);
+	విడుదల(అంకె);
 }
 
-void eoutdent(void)
+శూన్య eoutdent(శూన్య)
 {
-	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
-	char *num = NULL;
-	int serrno = errno;
+	అక్షరం *env = getenv("EINFO_INDENT");
+	పూర్ణాంకం amount = 0;
+	అక్షరం *అంకె = ఖాళీ;
+	పూర్ణాంకం serrno = errno;
 
-	if (!env)
-		return;
+	ఒకవేళ (!env)
+		తిరిగి;
 	errno = 0;
-	amount = strtoimax(env, NULL, 0);
-	if (errno != 0)
+	amount = strtoimax(env, ఖాళీ, 0);
+	ఒకవేళ (errno != 0)
 		amount = 0;
-	else
-		amount -= INDENT_WIDTH;
-	if (amount <= 0)
+	లేకపోతే
+		amount -= INDENT_వెడల్పు;
+	ఒకవేళ (amount <= 0)
 		unsetenv("EINFO_INDENT");
-	else {
-		xasprintf(&num, "%08d", amount);
-		setenv("EINFO_INDENT", num, 1);
-		free(num);
+	లేకపోతే {
+		xasprintf(&అంకె, "%08d", amount);
+		setenv("EINFO_INDENT", అంకె, 1);
+		విడుదల(అంకె);
 	}
 	errno = serrno;
 }
 
-int
-einfovn(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+einfovn(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	ఒకవేళ (!fmt || !is_verbose())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfovn");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-ewarnvn(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+ewarnvn(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	ఒకవేళ (!fmt || !is_verbose())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnvn");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-einfov(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+einfov(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	ఒకవేళ (!fmt || !is_verbose())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
-	retval += printf("\n");
+	retval += రాయి("\n");
 	va_end(ap);
 	LASTCMD("einfov");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-ewarnv(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+ewarnv(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	ఒకవేళ (!fmt || !is_verbose())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
-	retval += printf("\n");
+	retval += రాయి("\n");
 	va_end(ap);
 	LASTCMD("ewarnv");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-ebeginv(const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+ebeginv(స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	పూర్ణాంకం retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	ఒకవేళ (!fmt || !is_verbose())
+		తిరిగి 0;
 
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
-	retval += printf(" ...");
-	if (colour_terminal(stdout))
-		retval += printf("\n");
+	retval += రాయి(" ...");
+	ఒకవేళ (రంగు_terminal(stdout))
+		retval += రాయి("\n");
 	va_end(ap);
 	LASTCMD("ebeginv");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-eendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+eendv(పూర్ణాంకం retval, స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	ఒకవేళ (!is_verbose())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	_do_eend("eendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eendv");
-	return retval;
+	తిరిగి retval;
 }
 
-int
-ewendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+పూర్ణాంకం
+ewendv(పూర్ణాంకం retval, స్థిరరాశి అక్షరం *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	ఒకవేళ (!is_verbose())
+		తిరిగి 0;
 	va_start(ap, fmt);
 	_do_eend("ewendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewendv");
-	return retval;
+	తిరిగి retval;
 }
 
-void
-eindentv(void)
+శూన్య
+eindentv(శూన్య)
 {
-	if (is_verbose())
+	ఒకవేళ (is_verbose())
 		eindent();
 }
 
-void
-eoutdentv(void)
+శూన్య
+eoutdentv(శూన్య)
 {
-	if (is_verbose())
+	ఒకవేళ (is_verbose())
 		eoutdent();
 }

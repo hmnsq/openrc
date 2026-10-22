@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	int i;
-	char *p;
-	int c;
+	పూర్ణాంకం i;
+	అక్షరం *p;
+	పూర్ణాంకం c;
 
-	for (i = 1; i < argc; i++) {
+	కొరకు (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
-			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ఒకవేళ (i != 1)
+			అక్షరం_రాయి(' ');
+		అయితే (*p) {
+			c = (గుర్తులేని అక్షరం)*p++;
+			ఒకవేళ (!అక్షరమా_అంకెనా(c))
 				c = '_';
-			putchar(c);
+			అక్షరం_రాయి(c);
 		}
 	}
-	putchar('\n');
-	return EXIT_SUCCESS;
+	అక్షరం_రాయి('\n');
+	తిరిగి EXIT_SUCCESS;
 }

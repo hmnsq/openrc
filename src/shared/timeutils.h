@@ -9,33 +9,33 @@
  * This file may not be copied, modified, propagated, or distributed
  * except according to the terms contained in the LICENSE file.
  */
-#ifndef RC_TIMEUTILS_H
-#define RC_TIMEUTILS_H
+#నిర్వచితం_కాకపోతే RC_TIMEUTILS_H
+#నిర్వచించు RC_TIMEUTILS_H
 
-#include <stdint.h>
-#include <time.h>
+#అన్తర్భావ <stdint.h>
+#అన్తర్భావ <time.h>
 
 /*
  * A couple helper utilities to deal with monotonic clock at milliseconds
  * resolution.
  */
 
-enum tm_sleep_flags {
+గణన tm_sleep_flags {
 	TM_NO_EINTR = 1 << 0,
 };
 
-int64_t tm_now(void);
+int64_t tm_now(శూన్య);
 /* returns 0 on success, amount of time remaining on failure.
  * if TM_NO_EINTR is specified in flags, it will restart the sleep if it was
  * failed due to EINTR.
  */
-int64_t tm_sleep(int64_t, enum tm_sleep_flags);
+int64_t tm_sleep(int64_t, గణన tm_sleep_flags);
 /* parse a integer followed by an optional time unit (e.g "sec", "ms").
  * returns negative on failure
  */
-int64_t parse_duration(const char *duration);
+int64_t parse_duration(స్థిరరాశి అక్షరం *duration);
 
-#define TM_MS(N)   ((N) * INT64_C(1))
-#define TM_SEC(N)  ((N) * INT64_C(1000))
+#నిర్వచించు TM_MS(N)   ((N) * INT64_C(1))
+#నిర్వచించు TM_SEC(N)  ((N) * INT64_C(1000))
 
-#endif
+#అయితే_ముగింపు

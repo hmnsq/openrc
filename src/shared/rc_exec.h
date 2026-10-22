@@ -9,11 +9,11 @@
  * This file may not be copied, modified, propagated, or distributed
  * except according to the terms contained in the LICENSE file.
  */
-#ifndef RC_EXEC_H
-#define RC_EXEC_H
+#నిర్వచితం_కాకపోతే RC_EXEC_H
+#నిర్వచించు RC_EXEC_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <sys/types.h>
 
 /*
  * goal of this api is to provide a convenient and centralized way to do most
@@ -22,7 +22,7 @@
  * here instead of ad-hoc coding fork+exec yourself.
  */
 
-enum {
+గణన {
 	/* default */
 	EXEC_NO_REDIRECT = -1,
 	/* make a pipe and redirect to it */
@@ -31,30 +31,30 @@ enum {
 	EXEC_DEVNULL = -3,
 };
 
-struct exec_args {
-	const char **argv;
-	const char *cmd;  /* if NULL, argv[0] is used */
-	int redirect_stdin;
-	int redirect_stdout;
-	int redirect_stderr;
+నిర్మాణం exec_వాదనలు {
+	స్థిరరాశి అక్షరం **argv;
+	స్థిరరాశి అక్షరం *cmd;  /* if NULL, argv[0] is used */
+	పూర్ణాంకం redirect_stdin;
+	పూర్ణాంకం redirect_stdout;
+	పూర్ణాంకం redirect_stderr;
 	uid_t uid;
 	gid_t gid;
 	bool setsid : 1;
 };
 
-struct exec_result {
+నిర్మాణం exec_ఫలితం {
 	pid_t pid;
 	/* returned in case of RC_EXEC_MKPIPE */
-	int proc_stdin;
-	int proc_stdout;
-	int proc_stderr;
+	పూర్ణాంకం proc_stdin;
+	పూర్ణాంకం proc_stdout;
+	పూర్ణాంకం proc_stderr;
 };
 
-struct exec_args exec_init(const char **argv);
-struct exec_result do_exec(struct exec_args *args);
+నిర్మాణం exec_వాదనలు exec_init(స్థిరరాశి అక్షరం **argv);
+నిర్మాణం exec_ఫలితం do_exec(నిర్మాణం exec_వాదనలు *వాదనలు);
 
 /* some exec related helplers */
-int rc_waitpid(pid_t pid);
-int rc_pipe_command(const char *cmd, int devnullfd);
+పూర్ణాంకం rc_waitpid(pid_t pid);
+పూర్ణాంకం rc_pipe_command(స్థిరరాశి అక్షరం *cmd, పూర్ణాంకం devnullfd);
 
-#endif
+#అయితే_ముగింపు

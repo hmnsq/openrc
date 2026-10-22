@@ -10,22 +10,22 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#అన్తర్భావ <stdlib.h>
 
-#include "rc.h"
+#అన్తర్భావ "rc.h"
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc < 3)
+		తిరిగి EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	కొరకు (i = 2; i < argc; ++i)
+		ఒకవేళ (!rc_newer_than(argv[1], argv[i], ఖాళీ, ఖాళీ))
+			తిరిగి EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	తిరిగి EXIT_FAILURE;
 }

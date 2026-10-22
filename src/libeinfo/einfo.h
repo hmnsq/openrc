@@ -10,35 +10,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __EINFO_H__
-#define __EINFO_H__
+#నిర్వచితం_కాకపోతే __EINFO_H__
+#నిర్వచించు __EINFO_H__
 
-#define EINFO_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
-#define EINFO_XPRINTF(a, b) __attribute__((__noreturn__, __format__(__printf__, a, b)))
+#నిర్వచించు EINFO_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
+#నిర్వచించు EINFO_XPRINTF(a, b) __attribute__((__noreturn__, __format__(__printf__, a, b)))
 
-#include <sys/types.h>
-#include <stdbool.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <stdbool.h>
 
 /* Although OpenRC requires C99, linking to us should not. */
-#ifdef restrict
-# define EINFO_RESTRICT restrict
-#else
+#నిర్వచితమైతే పరిమిత
+# define EINFO_RESTRICT పరిమిత
+#లేకపోతే
 # ifdef __restrict
 #  define EINFO_RESTRICT __restrict
-# else
+# లేకపోతే
 #  define EINFO_RESTRICT
 # endif
-#endif
+#అయితే_ముగింపు
 
 /* __BEGIN_DECLS */
-#ifdef __cplusplus
-extern "C" {
-#endif
+#నిర్వచితమైతే __cplusplus
+బాహ్య "C" {
+#అయితే_ముగింపు
 
 /*! @brief Color types to use */
-typedef enum
+రకనిర్వచనం గణన
 {
-	ECOLOR_NORMAL	= 1,
+	ECOLOR_సాధారణ	= 1,
 	ECOLOR_GOOD	= 2,
 	ECOLOR_WARN	= 3,
 	ECOLOR_BAD	= 4,
@@ -47,10 +47,10 @@ typedef enum
 } ECOLOR;
 
 /*! @brief Returns the ASCII code for the color */
-const char *ecolor(ECOLOR);
+స్థిరరాశి అక్షరం *ecolor(ECOLOR);
 
 /*! @brief Writes to syslog. */
-void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+శూన్య elog(పూర్ణాంకం, స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 
 /*!
  * @brief Display informational messages.
@@ -69,22 +69,22 @@ void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  * The x suffix means function will exit() returning failure.
  */
 /*@{*/
-int einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void ewarnx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
-int eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void eerrorx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+పూర్ణాంకం einfon(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం ewarnn(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం eerrorn(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం einfo(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం ewarn(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+శూన్య ewarnx(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+పూర్ణాంకం eerror(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+శూన్య eerrorx(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
 
-int einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం einfovn(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం ewarnvn(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం ebeginvn(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం eendvn(పూర్ణాంకం, స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+పూర్ణాంకం ewendvn(పూర్ణాంకం, స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+పూర్ణాంకం einfov(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం ewarnv(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup ebegin
@@ -92,8 +92,8 @@ int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * Similar to einfo, but we add ... to the end of the message */
 /*@{*/
-int ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం ebeginv(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+పూర్ణాంకం ebegin(స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup eend
@@ -105,12 +105,12 @@ int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * ebracket allows you to specify the position, color and message */
 /*@{*/
-int eend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-void ebracket(int, ECOLOR, const char * EINFO_RESTRICT);
+పూర్ణాంకం eend(పూర్ణాంకం, స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+పూర్ణాంకం ewend(పూర్ణాంకం, స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+శూన్య ebracket(పూర్ణాంకం, ECOLOR, స్థిరరాశి అక్షరం * EINFO_RESTRICT);
 
-int eendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+పూర్ణాంకం eendv(పూర్ణాంకం, స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+పూర్ణాంకం ewendv(పూర్ణాంకం, స్థిరరాశి అక్షరం * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 /*@}*/
 
 /*! @ingroup eindent
@@ -118,17 +118,17 @@ int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  *
  * For each indent you should outdent when done */
 /*@{*/
-void eindent(void);
-void eoutdent(void);
-void eindentv(void);
-void eoutdentv(void);
+శూన్య eindent(శూన్య);
+శూన్య eoutdent(శూన్య);
+శూన్య eindentv(శూన్య);
+శూన్య eoutdentv(శూన్య);
 
 /*! @brief Prefix each einfo line with something */
-void eprefix(const char * EINFO_RESTRICT);
+శూన్య eprefix(స్థిరరాశి అక్షరం * EINFO_RESTRICT);
 
 /* __END_DECLS */
-#ifdef __cplusplus
+#నిర్వచితమైతే __cplusplus
 }
-#endif
+#అయితే_ముగింపు
 
-#endif
+#అయితే_ముగింపు

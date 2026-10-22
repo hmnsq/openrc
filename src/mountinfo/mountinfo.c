@@ -15,65 +15,65 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#if defined(__DragonFly__) || defined(__FreeBSD__)
+#ఒకవేళ defined(__DragonFly__) || defined(__FreeBSD__)
 #  include <sys/ucred.h>
 #  include <sys/mount.h>
 
 #  define F_FLAGS f_flags
-#elif defined(__NetBSD__)
+#లేదావేళ defined(__NetBSD__)
 #  include <sys/mount.h>
 
 #  define statfs statvfs
 #  define F_FLAGS f_flag
-#elif defined(BSD) && !defined(__GNU__)
+#లేదావేళ defined(BSD) && !defined(__GNU__)
 #  include <sys/statvfs.h>
 
 #  define statfs statvfs
 #  define F_FLAGS f_flag
-#elif defined(__linux__) || (defined(__FreeBSD_kernel__) && \
+#లేదావేళ defined(__linux__) || (defined(__FreeBSD_kernel__) && \
 	defined(__GLIBC__)) || defined(__GNU__)
 #  include <mntent.h>
-#endif
+#అయితే_ముగింపు
 
-#include <errno.h>
-#include <getopt.h>
-#include <regex.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <getopt.h>
+#అన్తర్భావ <regex.h>
+#అన్తర్భావ <stddef.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdint.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "timeutils.h"
-#include "_usage.h"
-#include "helpers.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "queue.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "rc_exec.h"
+#అన్తర్భావ "timeutils.h"
+#అన్తర్భావ "_usage.h"
+#అన్తర్భావ "helpers.h"
 
-const char *applet = NULL;
-const char *procmounts = "/proc/mounts";
-const char *extraopts = "[mount1] [mount2] ...";
-const char getoptstring[] = "f:F:n:N:o:O:p:P:iste:E:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "fstype-regex",        1, NULL, 'f'},
-	{ "skip-fstype-regex",   1, NULL, 'F'},
-	{ "node-regex",          1, NULL, 'n'},
-	{ "skip-node-regex",     1, NULL, 'N'},
-	{ "options-regex",       1, NULL, 'o'},
-	{ "skip-options-regex",  1, NULL, 'O'},
-	{ "point-regex",         1, NULL, 'p'},
-	{ "skip-point-regex",    1, NULL, 'P'},
-	{ "options",             0, NULL, 'i'},
-	{ "fstype",              0, NULL, 's'},
-	{ "node",                0, NULL, 't'},
-	{ "netdev",              0, NULL, 'e'},
-	{ "nonetdev",            0, NULL, 'E'},
+స్థిరరాశి అక్షరం *applet = ఖాళీ;
+స్థిరరాశి అక్షరం *procmounts = "/proc/mounts";
+స్థిరరాశి అక్షరం *extraopts = "[mount1] [mount2] ...";
+స్థిరరాశి అక్షరం getoptstring[] = "f:F:n:N:o:O:p:P:iste:E:" getoptstring_COMMON;
+స్థిరరాశి నిర్మాణం option longopts[] = {
+	{ "fstype-regex",        1, ఖాళీ, 'f'},
+	{ "skip-fstype-regex",   1, ఖాళీ, 'F'},
+	{ "node-regex",          1, ఖాళీ, 'n'},
+	{ "skip-node-regex",     1, ఖాళీ, 'N'},
+	{ "options-regex",       1, ఖాళీ, 'o'},
+	{ "skip-options-regex",  1, ఖాళీ, 'O'},
+	{ "point-regex",         1, ఖాళీ, 'p'},
+	{ "skip-point-regex",    1, ఖాళీ, 'P'},
+	{ "options",             0, ఖాళీ, 'i'},
+	{ "fstype",              0, ఖాళీ, 's'},
+	{ "node",                0, ఖాళీ, 't'},
+	{ "netdev",              0, ఖాళీ, 'e'},
+	{ "nonetdev",            0, ఖాళీ, 'E'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+స్థిరరాశి అక్షరం * స్థిరరాశి longopts_help[] = {
 	"fstype regex to find",
 	"fstype regex to skip",
 	"node regex to find",
@@ -89,44 +89,44 @@ const char * const longopts_help[] = {
 	"is it not a network device",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+స్థిరరాశి అక్షరం *usagestring = ఖాళీ;
 
-#define UMOUNT_ARGS_MAX 16
-#define RUN_MAX 32
-#define TRY_MAX 3
-#define TRY_DELAY_MS 1000
+#నిర్వచించు UMOUNT_వాదనలు_MAX 16
+#నిర్వచించు నిరంతరం_MAX 32
+#నిర్వచించు TRY_MAX 3
+#నిర్వచించు TRY_DELAY_MS 1000
 
-struct run_queue {
-	const char *mntpath;
-	int64_t last_exec_time;
-	int64_t fuser_exec_time;
+నిర్మాణం నిరంతరం_వరుస {
+	స్థిరరాశి అక్షరం *mntpath;
+	int64_t చివరి_exec_సమయం;
+	int64_t fuser_exec_సమయం;
 	pid_t pid;
 	pid_t fuser_pid;
-	int try_count;
-	int fuser_stdoutfd;
+	పూర్ణాంకం try_లెక్క;
+	పూర్ణాంకం fuser_stdoutfd;
 };
 
-typedef enum {
+రకనిర్వచనం గణన {
 	mount_from,
-	mount_to,
+	mount_గమ్యం,
 	mount_fstype,
 	mount_options
 } mount_type;
 
-typedef enum {
+రకనిర్వచనం గణన {
 	net_ignore,
 	net_yes,
 	net_no
 } net_opts;
 
-struct args;
-typedef int process_func_t(RC_STRINGLIST *, struct args *,
-    char *, char *, char *, char *, int);
+నిర్మాణం వాదనలు;
+రకనిర్వచనం పూర్ణాంకం process_func_t(RC_STRINGLIST *, నిర్మాణం వాదనలు *,
+    అక్షరం *, అక్షరం *, అక్షరం *, అక్షరం *, పూర్ణాంకం);
 
-struct args {
+నిర్మాణం వాదనలు {
 	process_func_t *process;
-	regex_t *node_regex;
-	regex_t *skip_node_regex;
+	regex_t *కణుపు_regex;
+	regex_t *skip_కణుపు_regex;
 	regex_t *fstype_regex;
 	regex_t *skip_fstype_regex;
 	regex_t *options_regex;
@@ -134,101 +134,101 @@ struct args {
 	RC_STRINGLIST *mounts;
 	mount_type mount_type;
 	net_opts netdev;
-	const char *check_mntpath;
+	స్థిరరాశి అక్షరం *check_mntpath;
 };
 
-static int
-process_mount(RC_STRINGLIST *list, struct args *args,
-    char *from, char *to, char *fstype, char *options,
-    int netdev)
+స్థిర పూర్ణాంకం
+process_mount(RC_STRINGLIST *list, నిర్మాణం వాదనలు *వాదనలు,
+    అక్షరం *from, అక్షరం *గమ్యం, అక్షరం *fstype, అక్షరం *options,
+    పూర్ణాంకం netdev)
 {
-	char *p;
+	అక్షరం *p;
 	RC_STRING *s;
 
 	errno = ENOENT;
 
-#ifdef __linux__
+#నిర్వచితమైతే __linux__
 	/* Skip the really silly rootfs */
-	if (strcmp(fstype, "rootfs") == 0)
-		return -1;
-#endif
+	ఒకవేళ (strcmp(fstype, "rootfs") == 0)
+		తిరిగి -1;
+#అయితే_ముగింపు
 
-	if (args->netdev == net_yes &&
-	    (netdev != -1 || TAILQ_FIRST(args->mounts)))
+	ఒకవేళ (వాదనలు->netdev == net_yes &&
+	    (netdev != -1 || TAILQ_మొదటి(వాదనలు->mounts)))
 	{
-		if (netdev != 0)
-			return 1;
-	} else if (args->netdev == net_no &&
-	    (netdev != -1 || TAILQ_FIRST(args->mounts)))
+		ఒకవేళ (netdev != 0)
+			తిరిగి 1;
+	} లేకపోతే ఒకవేళ (వాదనలు->netdev == net_no &&
+	    (netdev != -1 || TAILQ_మొదటి(వాదనలు->mounts)))
 	{
-		if (netdev != 1)
-			return 1;
-	} else {
-		if (args->node_regex &&
-		    regexec(args->node_regex, from, 0, NULL, 0) != 0)
-			return 1;
-		if (args->skip_node_regex &&
-		    regexec(args->skip_node_regex, from, 0, NULL, 0) == 0)
-			return 1;
+		ఒకవేళ (netdev != 1)
+			తిరిగి 1;
+	} లేకపోతే {
+		ఒకవేళ (వాదనలు->కణుపు_regex &&
+		    regexec(వాదనలు->కణుపు_regex, from, 0, ఖాళీ, 0) != 0)
+			తిరిగి 1;
+		ఒకవేళ (వాదనలు->skip_కణుపు_regex &&
+		    regexec(వాదనలు->skip_కణుపు_regex, from, 0, ఖాళీ, 0) == 0)
+			తిరిగి 1;
 
-		if (args->fstype_regex &&
-		    regexec(args->fstype_regex, fstype, 0, NULL, 0) != 0)
-			return -1;
-		if (args->skip_fstype_regex &&
-		    regexec(args->skip_fstype_regex, fstype, 0, NULL, 0) == 0)
-			return -1;
+		ఒకవేళ (వాదనలు->fstype_regex &&
+		    regexec(వాదనలు->fstype_regex, fstype, 0, ఖాళీ, 0) != 0)
+			తిరిగి -1;
+		ఒకవేళ (వాదనలు->skip_fstype_regex &&
+		    regexec(వాదనలు->skip_fstype_regex, fstype, 0, ఖాళీ, 0) == 0)
+			తిరిగి -1;
 
-		if (args->options_regex &&
-		    regexec(args->options_regex, options, 0, NULL, 0) != 0)
-			return -1;
-		if (args->skip_options_regex &&
-		    regexec(args->skip_options_regex, options, 0, NULL, 0) == 0)
-			return -1;
+		ఒకవేళ (వాదనలు->options_regex &&
+		    regexec(వాదనలు->options_regex, options, 0, ఖాళీ, 0) != 0)
+			తిరిగి -1;
+		ఒకవేళ (వాదనలు->skip_options_regex &&
+		    regexec(వాదనలు->skip_options_regex, options, 0, ఖాళీ, 0) == 0)
+			తిరిగి -1;
 	}
 
-	if (TAILQ_FIRST(args->mounts)) {
-		TAILQ_FOREACH(s, args->mounts, entries)
-		    if (strcmp(s->value, to) == 0)
-			    break;
-		if (!s)
-			return -1;
+	ఒకవేళ (TAILQ_మొదటి(వాదనలు->mounts)) {
+		TAILQ_FOREACH(s, వాదనలు->mounts, entries)
+		    ఒకవేళ (strcmp(s->విలువ, గమ్యం) == 0)
+			    ఆపు;
+		ఒకవేళ (!s)
+			తిరిగి -1;
 	}
 
-	switch (args->mount_type) {
-	case mount_from:
+	ఎంపిక (వాదనలు->mount_type) {
+	స్థితి mount_from:
 		p = from;
-		break;
-	case mount_to:
-		p = to;
-		break;
-	case mount_fstype:
+		ఆపు;
+	స్థితి mount_గమ్యం:
+		p = గమ్యం;
+		ఆపు;
+	స్థితి mount_fstype:
 		p = fstype;
-		break;
-	case mount_options:
+		ఆపు;
+	స్థితి mount_options:
 		p = options;
-		break;
-	default:
-		p = NULL;
+		ఆపు;
+	అప్రమేయ:
+		p = ఖాళీ;
 		errno = EINVAL;
-		break;
+		ఆపు;
 	}
 
-	if (p) {
+	ఒకవేళ (p) {
 		errno = 0;
-		rc_stringlist_add(list, p);
-		return 0;
+		rc_stringlist_కూడు(list, p);
+		తిరిగి 0;
 	}
 
-	return -1;
+	తిరిగి -1;
 }
 
-#if defined(BSD) && !defined(__GNU__)
+#ఒకవేళ defined(BSD) && !defined(__GNU__)
 
 /* Translate the mounted options to english
  * This is taken directly from FreeBSD mount.c */
-static struct opt {
-	int o_opt;
-	const char *o_name;
+స్థిర నిర్మాణం opt {
+	పూర్ణాంకం o_opt;
+	స్థిరరాశి అక్షరం *o_name;
 } optnames[] = {
 	{ MNT_ASYNC,        "asynchronous" },
 	{ MNT_EXPORTED,     "NFS exported" },
@@ -236,486 +236,486 @@ static struct opt {
 	{ MNT_NOATIME,      "noatime" },
 	{ MNT_NOEXEC,       "noexec" },
 	{ MNT_NOSUID,       "nosuid" },
-#ifdef MNT_NOSYMFOLLOW
+#నిర్వచితమైతే MNT_NOSYMFOLLOW
 	{ MNT_NOSYMFOLLOW,  "nosymfollow" },
-#endif
+#అయితే_ముగింపు
 	{ MNT_QUOTA,        "with quotas" },
 	{ MNT_RDONLY,       "read-only" },
 	{ MNT_SYNCHRONOUS,  "synchronous" },
 	{ MNT_UNION,        "union" },
-#ifdef MNT_NOCLUSTERR
+#నిర్వచితమైతే MNT_NOCLUSTERR
 	{ MNT_NOCLUSTERR,   "noclusterr" },
-#endif
-#ifdef MNT_NOCLUSTERW
+#అయితే_ముగింపు
+#నిర్వచితమైతే MNT_NOCLUSTERW
 	{ MNT_NOCLUSTERW,   "noclusterw" },
-#endif
-#ifdef MNT_SUIDDIR
+#అయితే_ముగింపు
+#నిర్వచితమైతే MNT_SUIDDIR
 	{ MNT_SUIDDIR,      "suiddir" },
-#endif
+#అయితే_ముగింపు
 	{ MNT_SOFTDEP,      "soft-updates" },
-#ifdef MNT_MULTILABEL
+#నిర్వచితమైతే MNT_MULTILABEL
 	{ MNT_MULTILABEL,   "multilabel" },
-#endif
-#ifdef MNT_ACLS
+#అయితే_ముగింపు
+#నిర్వచితమైతే MNT_ACLS
 	{ MNT_ACLS,         "acls" },
-#endif
-#ifdef MNT_GJOURNAL
+#అయితే_ముగింపు
+#నిర్వచితమైతే MNT_GJOURNAL
 	{ MNT_GJOURNAL,     "gjournal" },
-#endif
-	{ 0, NULL }
+#అయితే_ముగింపు
+	{ 0, ఖాళీ }
 };
 
-static RC_STRINGLIST *
-find_mounts(struct args *args, size_t *num_mounts)
+స్థిర RC_STRINGLIST *
+కనుగొను_mounts(నిర్మాణం వాదనలు *వాదనలు, size_t *అంకె_mounts)
 {
-	struct statfs *mnts;
-	int nmnts;
-	int i;
+	నిర్మాణం statfs *mnts;
+	పూర్ణాంకం nmnts;
+	పూర్ణాంకం i;
 	RC_STRINGLIST *list;
-	char *options = NULL;
+	అక్షరం *options = ఖాళీ;
 	uint64_t flags;
-	struct opt *o;
-	int netdev;
-	char *tmp;
+	నిర్మాణం opt *o;
+	పూర్ణాంకం netdev;
+	అక్షరం *tmp;
 
-	if ((nmnts = getmntinfo(&mnts, MNT_NOWAIT)) == 0)
+	ఒకవేళ ((nmnts = getmntinfo(&mnts, MNT_NOWAIT)) == 0)
 		eerrorx("getmntinfo: %s", strerror (errno));
 
 	list = rc_stringlist_new();
-	for (i = 0; i < nmnts; i++) {
+	కొరకు (i = 0; i < nmnts; i++) {
 		netdev = 0;
 		flags = mnts[i].F_FLAGS & MNT_VISFLAGMASK;
-		for (o = optnames; flags && o->o_opt; o++) {
-			if (flags & o->o_opt) {
-				if (o->o_opt == MNT_LOCAL)
+		కొరకు (o = optnames; flags && o->o_opt; o++) {
+			ఒకవేళ (flags & o->o_opt) {
+				ఒకవేళ (o->o_opt == MNT_LOCAL)
 					netdev = 1;
-				if (!options)
+				ఒకవేళ (!options)
 					options = xstrdup(o->o_name);
-				else {
+				లేకపోతే {
 					xasprintf(&tmp, "%s,%s", options, o->o_name);
-					free(options);
+					విడుదల(options);
 					options = tmp;
 				}
 			}
 			flags &= ~o->o_opt;
 		}
 
-		*num_mounts += 0 == args->process(list, args,
+		*అంకె_mounts += 0 == వాదనలు->process(list, వాదనలు,
 		    mnts[i].f_mntfromname,
 		    mnts[i].f_mntonname,
 		    mnts[i].f_fstypename,
 		    options,
 		    netdev);
 
-		free(options);
-		options = NULL;
+		విడుదల(options);
+		options = ఖాళీ;
 	}
 
-	return list;
+	తిరిగి list;
 }
 
-#elif defined(__linux__) || (defined(__FreeBSD_kernel__) && \
+#లేదావేళ defined(__linux__) || (defined(__FreeBSD_kernel__) && \
 	defined(__GLIBC__)) || defined(__GNU__)
-static struct mntent *
-getmntfile(const char *file)
+స్థిర నిర్మాణం mntent *
+getmntfile(స్థిరరాశి అక్షరం *file)
 {
-	struct mntent *ent = NULL;
+	నిర్మాణం mntent *ent = ఖాళీ;
 	FILE *fp;
 
-	if (!(fp = setmntent("/etc/fstab", "r")))
-		return NULL;
-	while ((ent = getmntent(fp)))
-		if (strcmp(file, ent->mnt_dir) == 0)
-			break;
+	ఒకవేళ (!(fp = setmntent("/etc/fstab", "r")))
+		తిరిగి ఖాళీ;
+	అయితే ((ent = getmntent(fp)))
+		ఒకవేళ (strcmp(file, ent->mnt_dir) == 0)
+			ఆపు;
 	endmntent(fp);
 
-	return ent;
+	తిరిగి ent;
 }
 
-static RC_STRINGLIST *
-find_mounts(struct args *args, size_t *num_mounts)
+స్థిర RC_STRINGLIST *
+కనుగొను_mounts(నిర్మాణం వాదనలు *వాదనలు, size_t *అంకె_mounts)
 {
 	FILE *fp;
-	char *buffer;
-	size_t size;
-	char *p;
-	char *from;
-	char *to;
-	char *fst;
-	char *opts;
-	struct mntent *ent;
-	int netdev;
+	అక్షరం *బఫరు;
+	size_t కొలత;
+	అక్షరం *p;
+	అక్షరం *from;
+	అక్షరం *గమ్యం;
+	అక్షరం *fst;
+	అక్షరం *opts;
+	నిర్మాణం mntent *ent;
+	పూర్ణాంకం netdev;
 	RC_STRINGLIST *list;
 
-	if ((fp = fopen(procmounts, "r")) == NULL)
+	ఒకవేళ ((fp = fopen(procmounts, "r")) == ఖాళీ)
 		eerrorx("getmntinfo: %s", strerror(errno));
 
 	list = rc_stringlist_new();
 
-	buffer = NULL;
-	while (xgetline(&buffer, &size, fp) != -1) {
+	బఫరు = ఖాళీ;
+	అయితే (xgetline(&బఫరు, &కొలత, fp) != -1) {
 		netdev = -1;
-		p = buffer;
+		p = బఫరు;
 		from = strsep(&p, " ");
-		to = strsep(&p, " ");
+		గమ్యం = strsep(&p, " ");
 		fst = strsep(&p, " ");
 		opts = strsep(&p, " ");
 
-		if ((ent = getmntfile(to))) {
-			if (strstr(ent->mnt_opts, "_netdev"))
+		ఒకవేళ ((ent = getmntfile(గమ్యం))) {
+			ఒకవేళ (అక్షరశ్రేణి_శోధన(ent->mnt_opts, "_netdev"))
 				netdev = 0;
-			else
+			లేకపోతే
 				netdev = 1;
 		}
 
-		*num_mounts += 0 == args->process(list, args,
-			from, to, fst, opts, netdev);
+		*అంకె_mounts += 0 == వాదనలు->process(list, వాదనలు,
+			from, గమ్యం, fst, opts, netdev);
 
-		free(buffer);
-		buffer = NULL;
+		విడుదల(బఫరు);
+		బఫరు = ఖాళీ;
 	}
-	free(buffer);
+	విడుదల(బఫరు);
 	fclose(fp);
 
-	return list;
+	తిరిగి list;
 }
 
-#else
+#లేకపోతే
 #  error "Operating system not supported!"
-#endif
+#అయితే_ముగింపు
 
-static int is_prefix(const char *needle, const char *hay)
+స్థిర పూర్ణాంకం is_ఉపసర్గ(స్థిరరాశి అక్షరం *needle, స్థిరరాశి అక్షరం *hay)
 {
-	size_t nlen = strlen(needle);
-	if (strncmp(needle, hay, nlen) == 0 && hay[nlen] == '/')
-		return true;
-	return false;
+	size_t nlen = అక్షరశ్రేణి_పొడవు(needle);
+	ఒకవేళ (అక్షరశ్రేణి_పోలిక(needle, hay, nlen) == 0 && hay[nlen] == '/')
+		తిరిగి true;
+	తిరిగి false;
 }
 
-static char *unescape_octal(char *beg)
+స్థిర అక్షరం *unescape_octal(అక్షరం *beg)
 {
-	int n, i;
-	char *w = beg, *r = beg;
-	while (*r) {
-		if (*r != '\\' || *++r == '\\') {
+	పూర్ణాంకం n, i;
+	అక్షరం *w = beg, *r = beg;
+	అయితే (*r) {
+		ఒకవేళ (*r != '\\' || *++r == '\\') {
 			*w++ = *r++;
-		} else {
+		} లేకపోతే {
 			/* octal. should have at least 3 bytes,
 			 * but don't choke on malformed input
 			 */
-			for (i = n = 0; i < 3; ++i) {
-				if (*r >= '0' && *r <= '7') {
+			కొరకు (i = n = 0; i < 3; ++i) {
+				ఒకవేళ (*r >= '0' && *r <= '7') {
 					n <<= 3;
 					n |= *r++ - '0';
-				} else {
-					break;
+				} లేకపోతే {
+					ఆపు;
 				}
 			}
-			if (n)
+			ఒకవేళ (n)
 				*w++ = n;
 		}
 	}
 	*w = '\0';
-	return beg;
+	తిరిగి beg;
 }
 
-static int check_is_mounted(RC_STRINGLIST *list RC_UNUSED, struct args *args,
-    char *from RC_UNUSED, char *to, char *fstype RC_UNUSED,
-    char *options RC_UNUSED, int netdev RC_UNUSED)
+స్థిర పూర్ణాంకం check_is_mounted(RC_STRINGLIST *list RC_వాడని, నిర్మాణం వాదనలు *వాదనలు,
+    అక్షరం *from RC_వాడని, అక్షరం *గమ్యం, అక్షరం *fstype RC_వాడని,
+    అక్షరం *options RC_వాడని, పూర్ణాంకం netdev RC_వాడని)
 {
-	return strcmp(args->check_mntpath, unescape_octal(to)) == 0 ? 0 : -1;
+	తిరిగి strcmp(వాదనలు->check_mntpath, unescape_octal(గమ్యం)) == 0 ? 0 : -1;
 }
 
-static int is_mounted(const char *mntpath)
+స్థిర పూర్ణాంకం is_mounted(స్థిరరాశి అక్షరం *mntpath)
 {
-	size_t num_mounts = 0;
-	struct args args = { .process = check_is_mounted, .check_mntpath = mntpath };
-	RC_STRINGLIST *l = find_mounts(&args, &num_mounts);
+	size_t అంకె_mounts = 0;
+	నిర్మాణం వాదనలు వాదనలు = { .process = check_is_mounted, .check_mntpath = mntpath };
+	RC_STRINGLIST *l = కనుగొను_mounts(&వాదనలు, &అంకె_mounts);
 	rc_stringlist_free(l);
-	return num_mounts > 0;
+	తిరిగి అంకె_mounts > 0;
 }
 
-static pid_t run_umount(const char *mntpath,
-	const char **umount_args, int umount_args_num)
+స్థిర pid_t నిరంతరం_umount(స్థిరరాశి అక్షరం *mntpath,
+	స్థిరరాశి అక్షరం **umount_వాదనలు, పూర్ణాంకం umount_వాదనలు_అంకె)
 {
-	struct exec_args args;
-	struct exec_result res;
-	const char *argv[UMOUNT_ARGS_MAX + 3];
-	int k, i = 0;
+	నిర్మాణం exec_వాదనలు వాదనలు;
+	నిర్మాణం exec_ఫలితం res;
+	స్థిరరాశి అక్షరం *argv[UMOUNT_వాదనలు_MAX + 3];
+	పూర్ణాంకం k, i = 0;
 
 	argv[i++] = "umount";
-	for (k = 0; k < umount_args_num; ++k)
-		argv[i++] = umount_args[k];
+	కొరకు (k = 0; k < umount_వాదనలు_అంకె; ++k)
+		argv[i++] = umount_వాదనలు[k];
 	argv[i++] = mntpath;
-	argv[i++] = NULL;
+	argv[i++] = ఖాళీ;
 
-	args = exec_init(argv);
-	args.redirect_stdout = args.redirect_stderr = EXEC_DEVNULL;
-	res = do_exec(&args);
-	if (res.pid < 0)
+	వాదనలు = exec_init(argv);
+	వాదనలు.redirect_stdout = వాదనలు.redirect_stderr = EXEC_DEVNULL;
+	res = do_exec(&వాదనలు);
+	ఒకవేళ (res.pid < 0)
 		eerrorx("%s: failed to run umount: %s", applet, strerror(errno));
-	return res.pid;
+	తిరిగి res.pid;
 }
 
-static void fuser_run(struct run_queue *rp, const char *fuser_opt)
+స్థిర శూన్య fuser_నిరంతరం(నిర్మాణం నిరంతరం_వరుస *rp, స్థిరరాశి అక్షరం *fuser_opt)
 {
-	static int fuser_exec_failed = 0;
-	const char *argv[] = { "fuser", fuser_opt, rp->mntpath, NULL };
-	struct exec_result res;
-	struct exec_args args;
+	స్థిర పూర్ణాంకం fuser_exec_failed = 0;
+	స్థిరరాశి అక్షరం *argv[] = { "fuser", fuser_opt, rp->mntpath, ఖాళీ };
+	నిర్మాణం exec_ఫలితం res;
+	నిర్మాణం exec_వాదనలు వాదనలు;
 
 	/* if exec failed, fuser likely doesn't exist. so don't retry */
-	if (fuser_exec_failed)
-		return;
+	ఒకవేళ (fuser_exec_failed)
+		తిరిగి;
 
-	args = exec_init(argv);
-	args.redirect_stdout = EXEC_MKPIPE;
-	args.redirect_stderr = EXEC_DEVNULL;
-	res = do_exec(&args);
-	if (res.pid < 0) {
+	వాదనలు = exec_init(argv);
+	వాదనలు.redirect_stdout = EXEC_MKPIPE;
+	వాదనలు.redirect_stderr = EXEC_DEVNULL;
+	res = do_exec(&వాదనలు);
+	ఒకవేళ (res.pid < 0) {
 		fuser_exec_failed = 1;
-	} else {
+	} లేకపోతే {
 		rp->fuser_pid = res.pid;
 		rp->fuser_stdoutfd = res.proc_stdout;
-		rp->fuser_exec_time = tm_now();
+		rp->fuser_exec_సమయం = tm_now();
 	}
 }
 
-static int fuser_decide(struct run_queue *rp,
-	const char *fuser_opt, const char *fuser_kill_prefix)
+స్థిర పూర్ణాంకం fuser_decide(నిర్మాణం నిరంతరం_వరుస *rp,
+	స్థిరరాశి అక్షరం *fuser_opt, స్థిరరాశి అక్షరం *fuser_kill_ఉపసర్గ)
 {
-	static bool has_rc_pid = false;
-	static char *rc_pid;
-	char buf[1<<12];
-	char selfpid[64];
-	int read_maybe_truncated;
+	స్థిర bool has_rc_pid = false;
+	స్థిర అక్షరం *rc_pid;
+	అక్షరం buf[1<<12];
+	అక్షరం selfpid[64];
+	పూర్ణాంకం read_maybe_truncated;
 	ssize_t n;
 
-	if (rp->fuser_stdoutfd < 0)
-		return 0;
+	ఒకవేళ (rp->fuser_stdoutfd < 0)
+		తిరిగి 0;
 
 	buf[0] = ' ';
-	n = read(rp->fuser_stdoutfd, buf + 1, sizeof buf - 3);
+	n = పఠ(rp->fuser_stdoutfd, buf + 1, పరిమాణం buf - 3);
 	close(rp->fuser_stdoutfd);
 	rp->fuser_stdoutfd = -1;
-	read_maybe_truncated = (n == sizeof buf - 3);
-	if (n < 0 || read_maybe_truncated)
-		return 0;
-	while (n > 0 && buf[n] == '\n')
+	read_maybe_truncated = (n == పరిమాణం buf - 3);
+	ఒకవేళ (n < 0 || read_maybe_truncated)
+		తిరిగి 0;
+	అయితే (n > 0 && buf[n] == '\n')
 		--n;
 	buf[n+1] = ' ';
 	buf[n+2] = '\0';
-	snprintf(selfpid, sizeof selfpid, " %lld ", (long long)getpid());
+	snprintf(selfpid, పరిమాణం selfpid, " %lld ", (దీర్ఘ దీర్ఘ)getpid());
 
-	if (!has_rc_pid) {
+	ఒకవేళ (!has_rc_pid) {
 		rc_pid = getenv("RC_PID");
 		has_rc_pid = true;
 	}
 
-	if (strstr(buf, selfpid) || (rc_pid && strstr(buf, rc_pid))) {
+	ఒకవేళ (అక్షరశ్రేణి_శోధన(buf, selfpid) || (rc_pid && అక్షరశ్రేణి_శోధన(buf, rc_pid))) {
 		/* lets not kill ourselves */
 		eerror("Unmounting %s failed because we are using it", rp->mntpath);
-		return -1;
-	} else if (strcmp(buf, "  ") == 0) {
-		if (rp->try_count >= TRY_MAX) {
+		తిరిగి -1;
+	} లేకపోతే ఒకవేళ (strcmp(buf, "  ") == 0) {
+		ఒకవేళ (rp->try_లెక్క >= TRY_MAX) {
 			eerror("Unmounting %s failed but fuser finds no one using it", rp->mntpath);
-			return -1;
+			తిరిగి -1;
 		}
 		/* it's possible that whatever was using the mount stopped
 		 * using it now, so allow 1 more retry */
-		rp->try_count = TRY_MAX;
-		return 0;
-	} else {
-		char sig[32];
-		const char *argv[] = {
-			"fuser", sig, "-k", fuser_opt, rp->mntpath, NULL
+		rp->try_లెక్క = TRY_MAX;
+		తిరిగి 0;
+	} లేకపోతే {
+		అక్షరం sig[32];
+		స్థిరరాశి అక్షరం *argv[] = {
+			"fuser", sig, "-k", fuser_opt, rp->mntpath, ఖాళీ
 		};
-		struct exec_result res;
-		struct exec_args args = exec_init(argv);
-		args.redirect_stdout = args.redirect_stderr = EXEC_DEVNULL;
-		snprintf(sig, sizeof sig, "%s%s", fuser_kill_prefix,
-			rp->try_count == TRY_MAX ? "KILL" : "TERM");
-		res = do_exec(&args);
-		if (res.pid > 0)
+		నిర్మాణం exec_ఫలితం res;
+		నిర్మాణం exec_వాదనలు వాదనలు = exec_init(argv);
+		వాదనలు.redirect_stdout = వాదనలు.redirect_stderr = EXEC_DEVNULL;
+		snprintf(sig, పరిమాణం sig, "%s%s", fuser_kill_ఉపసర్గ,
+			rp->try_లెక్క == TRY_MAX ? "KILL" : "TERM");
+		res = do_exec(&వాదనలు);
+		ఒకవేళ (res.pid > 0)
 			rc_waitpid(res.pid);
-		return 0;
+		తిరిగి 0;
 	}
 }
 
-static regex_t *
-get_regex(const char *string)
+స్థిర regex_t *
+get_regex(స్థిరరాశి అక్షరం *string)
 {
-	regex_t *reg = xmalloc(sizeof (*reg));
-	int result;
-	char buffer[256];
+	regex_t *reg = xmalloc(పరిమాణం (*reg));
+	పూర్ణాంకం ఫలితం;
+	అక్షరం బఫరు[256];
 
-	if ((result = regcomp(reg, string, REG_EXTENDED | REG_NOSUB)) != 0)
+	ఒకవేళ ((ఫలితం = regcomp(reg, string, REG_EXTENDED | REG_NOSUB)) != 0)
 	{
-		regerror(result, reg, buffer, sizeof(buffer));
-		eerrorx("%s: invalid regex `%s'", applet, buffer);
+		regerror(ఫలితం, reg, బఫరు, పరిమాణం(బఫరు));
+		eerrorx("%s: invalid regex `%s'", applet, బఫరు);
 	}
 
-	return reg;
+	తిరిగి reg;
 }
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	struct args args;
-	regex_t *point_regex = NULL;
-	regex_t *skip_point_regex = NULL;
+	నిర్మాణం వాదనలు వాదనలు;
+	regex_t *బిందువు_regex = ఖాళీ;
+	regex_t *skip_బిందువు_regex = ఖాళీ;
 	RC_STRINGLIST *nodes;
 	RC_STRING *s;
-	char *real_path = NULL;
-	int opt;
-	int result;
-	char *this_path, *argv0;
-	const char *tmps;
-	const char *fuser_opt, *fuser_kill_prefix;
-	size_t num_mounts = 0;
-	size_t unmount_index;
-	int doing_unmount = 0;
+	అక్షరం *real_మార్గం = ఖాళీ;
+	పూర్ణాంకం opt;
+	పూర్ణాంకం ఫలితం;
+	అక్షరం *this_మార్గం, *argv0;
+	స్థిరరాశి అక్షరం *tmps;
+	స్థిరరాశి అక్షరం *fuser_opt, *fuser_kill_ఉపసర్గ;
+	size_t అంకె_mounts = 0;
+	size_t unmount_సూచీ;
+	పూర్ణాంకం doing_unmount = 0;
 	pid_t pid;
-	int status, flags;
-	int64_t tmp, next_retry, now;
+	పూర్ణాంకం స్థితి_2, flags;
+	int64_t tmp, తదుపరి_retry, now;
 	int64_t rc_fuser_timeout = -1;
-	const char *umount_args[UMOUNT_ARGS_MAX];
-	int umount_args_num = 0;
-	const char **mounts = NULL;
-	struct run_queue running[RUN_MAX] = {0};
-	struct run_queue *rp;
-	size_t num_running = 0, num_waiting = 0;
-	enum { STATE_RUN, STATE_REAP, STATE_RETRY, STATE_END } state;
+	స్థిరరాశి అక్షరం *umount_వాదనలు[UMOUNT_వాదనలు_MAX];
+	పూర్ణాంకం umount_వాదనలు_అంకె = 0;
+	స్థిరరాశి అక్షరం **mounts = ఖాళీ;
+	నిర్మాణం నిరంతరం_వరుస running[నిరంతరం_MAX] = {0};
+	నిర్మాణం నిరంతరం_వరుస *rp;
+	size_t అంకె_running = 0, అంకె_నిరీక్షణ = 0;
+	గణన { STATE_నిరంతరం, STATE_REAP, STATE_RETRY, STATE_చివర } state;
 
-#define DO_REG(_var)							      \
-	if (_var) free(_var);						      \
+#నిర్వచించు DO_REG(_var)							      \
+	ఒకవేళ (_var) విడుదల(_var);						      \
 	_var = get_regex(optarg);
-#define REG_FREE(_var)							      \
-	if (_var) { regfree(_var); free(_var); }
+#నిర్వచించు REG_FREE(_var)							      \
+	ఒకవేళ (_var) { regfree(_var); విడుదల(_var); }
 
 	argv0 = argv[0];
 	applet = basename_c(argv[0]);
-	memset (&args, 0, sizeof(args));
-	args.mount_type = mount_to;
-	args.netdev = net_ignore;
-	args.mounts = rc_stringlist_new();
-	args.process = process_mount;
+	memset (&వాదనలు, 0, పరిమాణం(వాదనలు));
+	వాదనలు.mount_type = mount_గమ్యం;
+	వాదనలు.netdev = net_ignore;
+	వాదనలు.mounts = rc_stringlist_new();
+	వాదనలు.process = process_mount;
 
-	if (strcmp(applet, "do_unmount") == 0) {
+	ఒకవేళ (strcmp(applet, "do_unmount") == 0) {
 		doing_unmount = 1;
-		while (argv[1]) {
+		అయితే (argv[1]) {
 			/* shift over */
 			tmps = argv[1];
 			argv[1] = argv0;
 			++argv;
 			--argc;
 
-			if (strcmp(tmps, "--") == 0)
-				break;
-			if (umount_args_num >= (int)ARRAY_SIZE(umount_args))
+			ఒకవేళ (strcmp(tmps, "--") == 0)
+				ఆపు;
+			ఒకవేళ (umount_వాదనలు_అంకె >= (పూర్ణాంకం)ARRAY_కొలత(umount_వాదనలు))
 				eerrorx("%s: Too many umount arguments", applet);
-			umount_args[umount_args_num++] = tmps;
+			umount_వాదనలు[umount_వాదనలు_అంకె++] = tmps;
 		}
 
-		tmps = rc_conf_value("rc_fuser_timeout");
-		if (tmps && (rc_fuser_timeout = parse_duration(tmps)) < 0)
+		tmps = rc_conf_విలువ("rc_fuser_timeout");
+		ఒకవేళ (tmps && (rc_fuser_timeout = parse_duration(tmps)) < 0)
 			ewarn("%s: Invalid rc_fuser_timeout value: `%s`. "
 				"Defaulting to 20", applet, tmps);
-		if (rc_fuser_timeout < 0)
+		ఒకవేళ (rc_fuser_timeout < 0)
 			rc_fuser_timeout = 20 * 1000;
 
 		tmps = getenv("RC_UNAME");
-		if (!tmps || strcmp(tmps, "Linux") == 0) {
+		ఒకవేళ (!tmps || strcmp(tmps, "Linux") == 0) {
 			fuser_opt = "-m";
-			fuser_kill_prefix = "-";
-		} else {
+			fuser_kill_ఉపసర్గ = "-";
+		} లేకపోతే {
 			fuser_opt = "-cm";
-			fuser_kill_prefix = "-s";
+			fuser_kill_ఉపసర్గ = "-s";
 		}
 	}
 
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	అయితే ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (పూర్ణాంకం *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'e':
-			args.netdev = net_yes;
-			break;
-		case 'E':
-			args.netdev = net_no;
-			break;
-		case 'f':
-			DO_REG(args.fstype_regex);
-			break;
-		case 'F':
-			DO_REG(args.skip_fstype_regex);
-			break;
-		case 'n':
-			DO_REG(args.node_regex);
-			break;
-		case 'N':
-			DO_REG(args.skip_node_regex);
-			break;
-		case 'o':
-			DO_REG(args.options_regex);
-			break;
-		case 'O':
-			DO_REG(args.skip_options_regex);
-			break;
-		case 'p':
-			DO_REG(point_regex);
-			break;
-		case 'P':
-			DO_REG(skip_point_regex);
-			break;
-		case 'i':
-			args.mount_type = mount_options;
-			break;
-		case 's':
-			args.mount_type = mount_fstype;
-			break;
-		case 't':
-			args.mount_type = mount_from;
-			break;
+		ఎంపిక (opt) {
+		స్థితి 'e':
+			వాదనలు.netdev = net_yes;
+			ఆపు;
+		స్థితి 'E':
+			వాదనలు.netdev = net_no;
+			ఆపు;
+		స్థితి 'f':
+			DO_REG(వాదనలు.fstype_regex);
+			ఆపు;
+		స్థితి 'F':
+			DO_REG(వాదనలు.skip_fstype_regex);
+			ఆపు;
+		స్థితి 'n':
+			DO_REG(వాదనలు.కణుపు_regex);
+			ఆపు;
+		స్థితి 'N':
+			DO_REG(వాదనలు.skip_కణుపు_regex);
+			ఆపు;
+		స్థితి 'o':
+			DO_REG(వాదనలు.options_regex);
+			ఆపు;
+		స్థితి 'O':
+			DO_REG(వాదనలు.skip_options_regex);
+			ఆపు;
+		స్థితి 'p':
+			DO_REG(బిందువు_regex);
+			ఆపు;
+		స్థితి 'P':
+			DO_REG(skip_బిందువు_regex);
+			ఆపు;
+		స్థితి 'i':
+			వాదనలు.mount_type = mount_options;
+			ఆపు;
+		స్థితి 's':
+			వాదనలు.mount_type = mount_fstype;
+			ఆపు;
+		స్థితి 't':
+			వాదనలు.mount_type = mount_from;
+			ఆపు;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	while (optind < argc) {
-		if (argv[optind][0] != '/')
+	అయితే (optind < argc) {
+		ఒకవేళ (argv[optind][0] != '/')
 			eerrorx("%s: `%s' is not a mount point",
 			    argv[0], argv[optind]);
-		this_path = argv[optind++];
-		real_path = realpath(this_path, NULL);
-		if (real_path)
-			this_path = real_path;
-		rc_stringlist_add(args.mounts, this_path);
-		free(real_path);
-		real_path = NULL;
+		this_మార్గం = argv[optind++];
+		real_మార్గం = realpath(this_మార్గం, ఖాళీ);
+		ఒకవేళ (real_మార్గం)
+			this_మార్గం = real_మార్గం;
+		rc_stringlist_కూడు(వాదనలు.mounts, this_మార్గం);
+		విడుదల(real_మార్గం);
+		real_మార్గం = ఖాళీ;
 	}
-	nodes = find_mounts(&args, &num_mounts);
-	rc_stringlist_free(args.mounts);
+	nodes = కనుగొను_mounts(&వాదనలు, &అంకె_mounts);
+	rc_stringlist_free(వాదనలు.mounts);
 
-	if (doing_unmount)
-		mounts = xmalloc(num_mounts * sizeof(*mounts));
-	num_mounts = 0;
-	result = EXIT_FAILURE;
+	ఒకవేళ (doing_unmount)
+		mounts = xmalloc(అంకె_mounts * పరిమాణం(*mounts));
+	అంకె_mounts = 0;
+	ఫలితం = EXIT_FAILURE;
 	/* We should report the mounts in reverse order to ease unmounting */
-	TAILQ_FOREACH_REVERSE(s, nodes, rc_stringlist, entries) {
-		if (point_regex &&
-		    regexec(point_regex, s->value, 0, NULL, 0) != 0)
-			continue;
-		if (skip_point_regex &&
-		    regexec(skip_point_regex, s->value, 0, NULL, 0) == 0)
-			continue;
-		if (doing_unmount)
-			mounts[num_mounts++] = unescape_octal(s->value);
-		else if (!rc_yesno(getenv("EINFO_QUIET")))
-			printf("%s\n", s->value);
-		result = EXIT_SUCCESS;
+	TAILQ_FOREACH_తిరగేయి(s, nodes, rc_stringlist, entries) {
+		ఒకవేళ (బిందువు_regex &&
+		    regexec(బిందువు_regex, s->విలువ, 0, ఖాళీ, 0) != 0)
+			కొనసాగు;
+		ఒకవేళ (skip_బిందువు_regex &&
+		    regexec(skip_బిందువు_regex, s->విలువ, 0, ఖాళీ, 0) == 0)
+			కొనసాగు;
+		ఒకవేళ (doing_unmount)
+			mounts[అంకె_mounts++] = unescape_octal(s->విలువ);
+		లేకపోతే ఒకవేళ (!rc_yesno(getenv("EINFO_QUIET")))
+			రాయి("%s\n", s->విలువ);
+		ఫలితం = EXIT_SUCCESS;
 	}
-	if (!doing_unmount)
-		goto exit;
+	ఒకవేళ (!doing_unmount)
+		వెళ్ళు నిష్క్రమించు;
 
 	/* STATE_RUN:
 	 * can unmount => stays in STATE_RUN
@@ -738,134 +738,134 @@ int main(int argc, char **argv)
 	 *    and nothing to run either => STATE_END
 	 *    otherwise => STATE_RUN
 	 */
-	result = EXIT_SUCCESS;
-	state = STATE_RUN;
-	while (state != STATE_END) switch (state) {
-	case STATE_RUN:
-		for (unmount_index = 0; unmount_index < num_mounts; ++unmount_index) {
-			const char *candidate = mounts[unmount_index];
-			int safe_to_unmount = 1;
-			for (size_t k = 0; safe_to_unmount && k < num_running; ++k)
-				safe_to_unmount = !is_prefix(candidate, running[k].mntpath);
-			for (size_t k = 0; safe_to_unmount && k < num_mounts; ++k)
-				safe_to_unmount = !is_prefix(candidate, mounts[k]);
-			if (!safe_to_unmount)
-				continue;
-			if (!is_mounted(candidate)) {
+	ఫలితం = EXIT_SUCCESS;
+	state = STATE_నిరంతరం;
+	అయితే (state != STATE_చివర) ఎంపిక (state) {
+	స్థితి STATE_నిరంతరం:
+		కొరకు (unmount_సూచీ = 0; unmount_సూచీ < అంకె_mounts; ++unmount_సూచీ) {
+			స్థిరరాశి అక్షరం *candidate = mounts[unmount_సూచీ];
+			పూర్ణాంకం సురక్షిత_గమ్యం_unmount = 1;
+			కొరకు (size_t k = 0; సురక్షిత_గమ్యం_unmount && k < అంకె_running; ++k)
+				సురక్షిత_గమ్యం_unmount = !is_ఉపసర్గ(candidate, running[k].mntpath);
+			కొరకు (size_t k = 0; సురక్షిత_గమ్యం_unmount && k < అంకె_mounts; ++k)
+				సురక్షిత_గమ్యం_unmount = !is_ఉపసర్గ(candidate, mounts[k]);
+			ఒకవేళ (!సురక్షిత_గమ్యం_unmount)
+				కొనసాగు;
+			ఒకవేళ (!is_mounted(candidate)) {
 				/* probably a shared mount and got unmounted, remove */
-				mounts[unmount_index--] = mounts[--num_mounts];
-			} else {
-				break;
+				mounts[unmount_సూచీ--] = mounts[--అంకె_mounts];
+			} లేకపోతే {
+				ఆపు;
 			}
 		}
-		if (num_running == RUN_MAX || unmount_index >= num_mounts) {
+		ఒకవేళ (అంకె_running == నిరంతరం_MAX || unmount_సూచీ >= అంకె_mounts) {
 			state = STATE_REAP;
-			break;
+			ఆపు;
 		}
-		rp = running + num_running++;
-		rp->mntpath = mounts[unmount_index];
-		rp->last_exec_time = tm_now();
-		rp->try_count = 0;
-		rp->pid = run_umount(rp->mntpath, umount_args, umount_args_num);
+		rp = running + అంకె_running++;
+		rp->mntpath = mounts[unmount_సూచీ];
+		rp->చివరి_exec_సమయం = tm_now();
+		rp->try_లెక్క = 0;
+		rp->pid = నిరంతరం_umount(rp->mntpath, umount_వాదనలు, umount_వాదనలు_అంకె);
 		rp->fuser_pid = -1;
 		rp->fuser_stdoutfd = -1;
-		rp->fuser_exec_time = -1;
-		mounts[unmount_index] = mounts[--num_mounts];
-		break;
-	case STATE_REAP:
-		flags = (num_waiting > 0) ? WNOHANG : 0;
-		pid = waitpid(-1, &status, flags);
-		rp = NULL;
-		for (size_t i = 0; i < num_running; ++i) {
+		rp->fuser_exec_సమయం = -1;
+		mounts[unmount_సూచీ] = mounts[--అంకె_mounts];
+		ఆపు;
+	స్థితి STATE_REAP:
+		flags = (అంకె_నిరీక్షణ > 0) ? WNOHANG : 0;
+		pid = waitpid(-1, &స్థితి_2, flags);
+		rp = ఖాళీ;
+		కొరకు (size_t i = 0; i < అంకె_running; ++i) {
 			rp = running + i;
-			if (rp->fuser_pid == pid)
+			ఒకవేళ (rp->fuser_pid == pid)
 				rp->fuser_pid = -1;
-			if (rp->pid == pid && pid > 0)
-				break;
-			rp = NULL;
+			ఒకవేళ (rp->pid == pid && pid > 0)
+				ఆపు;
+			rp = ఖాళీ;
 		}
-		if (rp) {
-			if ((WIFEXITED(status) && WEXITSTATUS(status) == 0) ||
+		ఒకవేళ (rp) {
+			ఒకవేళ ((WIFEXITED(స్థితి_2) && WEXITSTATUS(స్థితి_2) == 0) ||
 			    !is_mounted(rp->mntpath)) {
 				einfo("Unmounted %s", rp->mntpath);
-				*rp = running[--num_running];
-				state = STATE_RUN;
-			} else if (rp->try_count >= TRY_MAX) {
+				*rp = running[--అంకె_running];
+				state = STATE_నిరంతరం;
+			} లేకపోతే ఒకవేళ (rp->try_లెక్క >= TRY_MAX) {
 				eerror("Failed to unmount %s", rp->mntpath);
-				*rp = running[--num_running];
-				result = EXIT_FAILURE;
-			} else { /* put into waiting queue */
+				*rp = running[--అంకె_running];
+				ఫలితం = EXIT_FAILURE;
+			} లేకపోతే { /* put into waiting queue */
 				rp->pid = -1;
-				rp->try_count += 1;
-				num_waiting += 1;
-				fuser_run(rp, fuser_opt);
+				rp->try_లెక్క += 1;
+				అంకె_నిరీక్షణ += 1;
+				fuser_నిరంతరం(rp, fuser_opt);
 			}
-		} else {
+		} లేకపోతే {
 			state = STATE_RETRY;
 		}
-		break;
-	case STATE_RETRY:
-		rp = NULL;
-		next_retry = INT64_MAX;
-		for (size_t i = 0; i < num_running; ++i) {
-			if (running[i].pid > 0)
-				continue;
-			if (running[i].fuser_pid > 0)
-				tmp = running[i].fuser_exec_time + rc_fuser_timeout;
-			else
-				tmp = running[i].last_exec_time + TRY_DELAY_MS;
-			if (tmp < next_retry) {
+		ఆపు;
+	స్థితి STATE_RETRY:
+		rp = ఖాళీ;
+		తదుపరి_retry = INT64_MAX;
+		కొరకు (size_t i = 0; i < అంకె_running; ++i) {
+			ఒకవేళ (running[i].pid > 0)
+				కొనసాగు;
+			ఒకవేళ (running[i].fuser_pid > 0)
+				tmp = running[i].fuser_exec_సమయం + rc_fuser_timeout;
+			లేకపోతే
+				tmp = running[i].చివరి_exec_సమయం + TRY_DELAY_MS;
+			ఒకవేళ (tmp < తదుపరి_retry) {
 				rp = running + i;
-				next_retry = tmp;
+				తదుపరి_retry = tmp;
 			}
 		}
-		if (!rp) {
-			state = (num_mounts > 0) ? STATE_RUN : STATE_END;
-			break;
+		ఒకవేళ (!rp) {
+			state = (అంకె_mounts > 0) ? STATE_నిరంతరం : STATE_చివర;
+			ఆపు;
 		}
 		now = tm_now();
-		if ((rp->pid > 0 || rp->fuser_pid > 0) && next_retry > now) {
-			int64_t sleep_for = next_retry - now;
+		ఒకవేళ ((rp->pid > 0 || rp->fuser_pid > 0) && తదుపరి_retry > now) {
+			int64_t sleep_for = తదుపరి_retry - now;
 			/* a child may become available for reaping *before* we
 			 * enter sleep. cap the timeout to stay responsive. */
-			if (sleep_for > 500)
+			ఒకవేళ (sleep_for > 500)
 				sleep_for = 500;
 			tm_sleep(sleep_for, 0);
 			state = STATE_REAP;
 			now = tm_now();
 		}
-		if ((rp->pid == -1 && rp->fuser_pid == -1) || next_retry <= now) {
-			if (rp->fuser_pid > 0) {
+		ఒకవేళ ((rp->pid == -1 && rp->fuser_pid == -1) || తదుపరి_retry <= now) {
+			ఒకవేళ (rp->fuser_pid > 0) {
 				kill(rp->fuser_pid, SIGKILL);
-				waitpid(rp->fuser_pid, NULL, 0);
+				waitpid(rp->fuser_pid, ఖాళీ, 0);
 				rp->fuser_pid = -1;
 			}
-			if (fuser_decide(rp, fuser_opt, fuser_kill_prefix) < 0) { /* abort */
-				*rp = running[--num_running];
-				result = EXIT_FAILURE;
-			} else { /* retry */
-				rp->last_exec_time = tm_now();
-				rp->pid = run_umount(rp->mntpath,
-					umount_args, umount_args_num);
+			ఒకవేళ (fuser_decide(rp, fuser_opt, fuser_kill_ఉపసర్గ) < 0) { /* abort */
+				*rp = running[--అంకె_running];
+				ఫలితం = EXIT_FAILURE;
+			} లేకపోతే { /* retry */
+				rp->చివరి_exec_సమయం = tm_now();
+				rp->pid = నిరంతరం_umount(rp->mntpath,
+					umount_వాదనలు, umount_వాదనలు_అంకె);
 			}
-			num_waiting -= 1;
+			అంకె_నిరీక్షణ -= 1;
 			state = STATE_REAP;
 		}
-		break;
-	default: break;
+		ఆపు;
+	అప్రమేయ: ఆపు;
 	}
 
-exit:
-	free(mounts);
+నిష్క్రమించు:
+	విడుదల(mounts);
 	rc_stringlist_free(nodes);
-	REG_FREE(args.fstype_regex);
-	REG_FREE(args.skip_fstype_regex);
-	REG_FREE(args.node_regex);
-	REG_FREE(args.skip_node_regex);
-	REG_FREE(args.options_regex);
-	REG_FREE(args.skip_options_regex);
-	REG_FREE(point_regex);
-	REG_FREE(skip_point_regex);
+	REG_FREE(వాదనలు.fstype_regex);
+	REG_FREE(వాదనలు.skip_fstype_regex);
+	REG_FREE(వాదనలు.కణుపు_regex);
+	REG_FREE(వాదనలు.skip_కణుపు_regex);
+	REG_FREE(వాదనలు.options_regex);
+	REG_FREE(వాదనలు.skip_options_regex);
+	REG_FREE(బిందువు_regex);
+	REG_FREE(skip_బిందువు_regex);
 
-	return result;
+	తిరిగి ఫలితం;
 }

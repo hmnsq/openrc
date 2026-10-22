@@ -15,124 +15,124 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __HELPERS_H__
-#define __HELPERS_H__
+#నిర్వచితం_కాకపోతే __HELPERS_H__
+#నిర్వచించు __HELPERS_H__
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+#అన్తర్భావ <stdarg.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stddef.h>
+#అన్తర్భావ <stdint.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <dirent.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#నిర్వచించు ERRX చేయి { fprintf (stderr, "out of memory\n"); నిష్క్రమించు (1); } అయితే (0)
 
-#define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
+#నిర్వచించు UNCONST(a)		((శూన్య *)(uintptr_t)(స్థిరరాశి శూన్య *)(a))
 
-#define RC_UNUSED __attribute__((__unused__))
-#define RC_NORETURN __attribute__((__noreturn__))
-#define RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
+#నిర్వచించు RC_వాడని __attribute__((__unused__))
+#నిర్వచించు RC_NORETURN __attribute__((__noreturn__))
+#నిర్వచించు RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#నిర్వచించు ARRAY_కొలత(a) (పరిమాణం(a) / పరిమాణం((a)[0]))
 
-#ifndef HAVE_STRLCPY
-#    define strlcpy(dst, src, size) snprintf(dst, size, "%s", src)
-#endif
+#నిర్వచితం_కాకపోతే HAVE_STRLCPY
+#    define strlcpy(dst, src, కొలత) snprintf(dst, కొలత, "%s", src)
+#అయితే_ముగింపు
 
-#ifndef timespecsub
-#define	timespecsub(tsp, usp, vsp)					      \
-	do {								      \
+#నిర్వచితం_కాకపోతే timespecsub
+#నిర్వచించు	timespecsub(tsp, usp, vsp)					      \
+	చేయి {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		ఒకవేళ ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
-#endif
+	} అయితే (/* CONSTCOND */ 0)
+#అయితే_ముగింపు
 
-RC_UNUSED static void *xmalloc (size_t size)
+RC_వాడని స్థిర శూన్య *xmalloc (size_t కొలత)
 {
-	void *value = malloc(size);
+	శూన్య *విలువ = జ్ఞాపకం_ఇవ్వు(కొలత);
 
-	if (value)
-		return (value);
+	ఒకవేళ (విలువ)
+		తిరిగి (విలువ);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static void *xrealloc(void *ptr, size_t size)
+RC_వాడని స్థిర శూన్య *xrealloc(శూన్య *ptr, size_t కొలత)
 {
-	void *value = realloc(ptr, size);
+	శూన్య *విలువ = realloc(ptr, కొలత);
 
-	if (value)
-		return (value);
+	ఒకవేళ (విలువ)
+		తిరిగి (విలువ);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static char *xstrdup(const char *str)
+RC_వాడని స్థిర అక్షరం *xstrdup(స్థిరరాశి అక్షరం *str)
 {
-	char *value;
+	అక్షరం *విలువ;
 
-	if (!str)
-		return (NULL);
+	ఒకవేళ (!str)
+		తిరిగి (ఖాళీ);
 
-	value = strdup(str);
+	విలువ = strdup(str);
 
-	if (value)
-		return (value);
+	ఒకవేళ (విలువ)
+		తిరిగి (విలువ);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
+RC_వాడని స్థిర FILE *xopen_memstream(అక్షరం **ptr, size_t *sizeloc)
 {
 	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	ఒకవేళ (f)
+		తిరిగి f;
 	ERRX;
 }
 
-RC_UNUSED static void xclose_memstream(FILE *f)
+RC_వాడని స్థిర శూన్య xclose_memstream(FILE *f)
 {
 	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	ఒకవేళ (ferror(f) || fclose(f) != 0)
 		ERRX;
 }
 
-#undef ERRX
+#నిర్వచనం_రద్దు ERRX
 
 /*
  * basename_c never modifies the argument. As such, if there is a trailing
  * slash then an empty string is returned.
  */
-RC_UNUSED static const char *basename_c(const char *path)
+RC_వాడని స్థిర స్థిరరాశి అక్షరం *basename_c(స్థిరరాశి అక్షరం *మార్గం)
 {
-	const char *slash = strrchr(path, '/');
+	స్థిరరాశి అక్షరం *slash = strrchr(మార్గం, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	ఒకవేళ (slash)
+		తిరిగి (++slash);
+	తిరిగి (మార్గం);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_వాడని స్థిర FILE *do_fopenat(పూర్ణాంకం dirfd, స్థిరరాశి అక్షరం *pathname, పూర్ణాంకం బహుళకం)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
-	const char *fmode;
+	పూర్ణాంకం fd = openat(dirfd, pathname, బహుళకం, 0666);
+	స్థిరరాశి అక్షరం *fmode;
 	FILE *fp;
 
-	if (fd == -1)
-		return NULL;
+	ఒకవేళ (fd == -1)
+		తిరిగి ఖాళీ;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	ఒకవేళ ((బహుళకం & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	లేకపోతే ఒకవేళ ((బహుళకం & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	లేకపోతే
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
+	ఒకవేళ (!(fp = fdopen(fd, fmode)))
 		close(fd);
-	return fp;
+	తిరిగి fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_వాడని స్థిర DIR *do_opendirat(పూర్ణాంకం dirfd, స్థిరరాశి అక్షరం *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	పూర్ణాంకం fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	ఒకవేళ (fd == -1)
+		తిరిగి ఖాళీ;
 
-	if (!(dp = fdopendir(fd)))
+	ఒకవేళ (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	తిరిగి dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_వాడని స్థిర DIR *do_dopendir(పూర్ణాంకం dirfd)
 {
-	int fd = dup(dirfd);
+	పూర్ణాంకం fd = dup(dirfd);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	ఒకవేళ (fd == -1)
+		తిరిగి ఖాళీ;
 
-	if (!(dp = fdopendir(fd)))
+	ఒకవేళ (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	తిరిగి dp;
 }
 
 /*
@@ -188,12 +188,12 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_వాడని RC_PRINTF(2,3) స్థిర పూర్ణాంకం xasprintf(అక్షరం **strp, స్థిరరాశి అక్షరం *fmt, ...)
 {
 	va_list ap;
-	int len;
-	int memlen;
-	char *ret;
+	పూర్ణాంకం len;
+	పూర్ణాంకం memlen;
+	అక్షరం *ret;
 
 	/*
 	 * Start with a buffer size that should cover the vast majority of uses
@@ -205,7 +205,7 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
 	va_end(ap);
-	if (len >= memlen) {
+	ఒకవేళ (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
@@ -215,86 +215,86 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 		len = vsnprintf(ret, len + 1, fmt, ap);
 		va_end(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	ఒకవేళ (len < 0 || len >= memlen) {
 		/* Give up! */
 		fprintf(stderr, "xasprintf: unable to format a buffer\n");
-		free(ret);
-		exit(1);
+		విడుదల(ret);
+		నిష్క్రమించు(1);
 	}
 	*strp = ret;
-	return len;
+	తిరిగి len;
 }
 
-RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
+RC_వాడని స్థిర ssize_t xgetline(అక్షరం **పరిమిత lineptr, size_t *పరిమిత n, FILE *పరిమిత ప్రవాహం)
 {
-	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	ssize_t ret = getline(lineptr, n, ప్రవాహం);
+	ఒకవేళ (ret <= 0)
+		తిరిగి ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	ఒకవేళ ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	తిరిగి ret;
 }
 
-RC_UNUSED static char *env_findvar(const char *name, char **envp)
+RC_వాడని స్థిర అక్షరం *env_findvar(స్థిరరాశి అక్షరం *name, అక్షరం **envp)
 {
-	size_t len = strlen(name);
+	size_t len = అక్షరశ్రేణి_పొడవు(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	కొరకు (అక్షరం **var = envp; *var; var++)
+		ఒకవేళ (అక్షరశ్రేణి_పోలిక(name, *var, len) == 0 && (*var)[len] == '=')
+			తిరిగి *var;
+	తిరిగి ఖాళీ;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_వాడని స్థిర పూర్ణాంకం xopen_nonblock(స్థిరరాశి అక్షరం *filename, పూర్ణాంకం flags, mode_t బహుళకం)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
+	పూర్ణాంకం fd = open(filename, flags | O_NONBLOCK, బహుళకం);
+	ఒకవేళ (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		పూర్ణాంకం saved_errno = errno;
 		close(fd);
 		fd = -1;
 		errno = saved_errno;
 	}
-	return fd;
+	తిరిగి fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_వాడని స్థిర పూర్ణాంకం open_rwfifo(స్థిరరాశి అక్షరం *మార్గం, bool nonblock)
 {
-	int r, w, err;
+	పూర్ణాంకం r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	ఒకవేళ (mkfifo(మార్గం, 0600) == -1 && errno != EEXIST)
+		తిరిగి -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	ఒకవేళ ((r = open(మార్గం, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		తిరిగి -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+	ఒకవేళ ((w = open(మార్గం, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		err = errno;
-		goto r_err;
+		వెళ్ళు r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+	ఒకవేళ (!nonblock) {
+		పూర్ణాంకం flags = fcntl(r, F_GETFL);
+		ఒకవేళ (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
 			err = errno;
-			goto w_err;
+			వెళ్ళు w_err;
 		}
 	}
 
-	return r;
+	తిరిగి r;
 
 w_err:
 	close(w);
 r_err:
 	close(r);
 	errno = err;
-	return -1;
+	తిరిగి -1;
 }
 
-#endif
+#అయితే_ముగింపు

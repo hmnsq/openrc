@@ -15,135 +15,135 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#అన్తర్భావ "queue.h"
+#అన్తర్భావ "librc.h"
+#అన్తర్భావ "helpers.h"
 
 RC_STRINGLIST *
-rc_stringlist_new(void)
+rc_stringlist_new(శూన్య)
 {
-	RC_STRINGLIST *l = xmalloc(sizeof(*l));
+	RC_STRINGLIST *l = xmalloc(పరిమాణం(*l));
 	TAILQ_INIT(l);
-	return l;
+	తిరిగి l;
 }
 
 RC_STRING *
-rc_stringlist_add(RC_STRINGLIST *list, const char *value)
+rc_stringlist_కూడు(RC_STRINGLIST *list, స్థిరరాశి అక్షరం *విలువ)
 {
-	RC_STRING *s = xmalloc(sizeof(*s));
+	RC_STRING *s = xmalloc(పరిమాణం(*s));
 
-	s->value = xstrdup(value);
-	TAILQ_INSERT_TAIL(list, s, entries);
-	return s;
+	s->విలువ = xstrdup(విలువ);
+	TAILQ_చొప్పించు_తోక(list, s, entries);
+	తిరిగి s;
 }
 
 RC_STRING *
-rc_stringlist_addu(RC_STRINGLIST *list, const char *value)
+rc_stringlist_addu(RC_STRINGLIST *list, స్థిరరాశి అక్షరం *విలువ)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    ఒకవేళ (strcmp(s->విలువ, విలువ) == 0) {
 		    errno = EEXIST;
-		    return NULL;
+		    తిరిగి ఖాళీ;
 	    }
 
-	return rc_stringlist_add(list, value);
+	తిరిగి rc_stringlist_కూడు(list, విలువ);
 }
 
 bool
-rc_stringlist_delete(RC_STRINGLIST *list, const char *value)
+rc_stringlist_delete(RC_STRINGLIST *list, స్థిరరాశి అక్షరం *విలువ)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    ఒకవేళ (strcmp(s->విలువ, విలువ) == 0) {
 		    TAILQ_REMOVE(list, s, entries);
-		    free(s->value);
-		    free(s);
-		    return true;
+		    విడుదల(s->విలువ);
+		    విడుదల(s);
+		    తిరిగి true;
 	    }
 
 	errno = EEXIST;
-	return false;
+	తిరిగి false;
 }
 
 RC_STRING *
-rc_stringlist_find(RC_STRINGLIST *list, const char *value)
+rc_stringlist_కనుగొను(RC_STRINGLIST *list, స్థిరరాశి అక్షరం *విలువ)
 {
 	RC_STRING *s;
 
-	if (list) {
+	ఒకవేళ (list) {
 		TAILQ_FOREACH(s, list, entries)
-		    if (strcmp(s->value, value) == 0)
-			    return s;
+		    ఒకవేళ (strcmp(s->విలువ, విలువ) == 0)
+			    తిరిగి s;
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 RC_STRINGLIST *
-rc_stringlist_split(const char *value, const char *sep)
+rc_stringlist_విభజించు(స్థిరరాశి అక్షరం *విలువ, స్థిరరాశి అక్షరం *sep)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	char *d = xstrdup(value);
-	char *p = d, *token;
+	అక్షరం *d = xstrdup(విలువ);
+	అక్షరం *p = d, *token;
 
-	while ((token = strsep(&p, sep)))
-		rc_stringlist_add(list, token);
-	free(d);
+	అయితే ((token = strsep(&p, sep)))
+		rc_stringlist_కూడు(list, token);
+	విడుదల(d);
 
-	return list;
+	తిరిగి list;
 }
 
-void
-rc_stringlist_sort(RC_STRINGLIST **list)
+శూన్య
+rc_stringlist_క్రమీకరించు(RC_STRINGLIST **list)
 {
 	RC_STRINGLIST *l = *list;
 	RC_STRINGLIST *new = rc_stringlist_new();
 	RC_STRING *s;
 	RC_STRING *sn;
 	RC_STRING *n;
-	RC_STRING *last;
+	RC_STRING *చివరి;
 
-	TAILQ_FOREACH_SAFE(s, l, entries, sn) {
+	TAILQ_FOREACH_సురక్షిత(s, l, entries, sn) {
 		TAILQ_REMOVE(l, s, entries);
-		last = NULL;
+		చివరి = ఖాళీ;
 		TAILQ_FOREACH(n, new, entries) {
-			if (strcmp(s->value, n->value) < 0)
-				break;
-			last = n;
+			ఒకవేళ (strcmp(s->విలువ, n->విలువ) < 0)
+				ఆపు;
+			చివరి = n;
 		}
-		if (last)
-			TAILQ_INSERT_AFTER(new, last, s, entries);
-		else
-			TAILQ_INSERT_HEAD(new, s, entries);
+		ఒకవేళ (చివరి)
+			TAILQ_చొప్పించు_AFTER(new, చివరి, s, entries);
+		లేకపోతే
+			TAILQ_చొప్పించు_తల(new, s, entries);
 	}
 
 	/* Now we've sorted the list, copy across the new head */
-	free(l);
+	విడుదల(l);
 	*list = new;
 }
 
-void
+శూన్య
 rc_stringlist_free(RC_STRINGLIST *list)
 {
 	RC_STRING *s1;
 	RC_STRING *s2;
 
-	if (!list)
-		return;
+	ఒకవేళ (!list)
+		తిరిగి;
 
-	s1 = TAILQ_FIRST(list);
-	while (s1) {
-		s2 = TAILQ_NEXT(s1, entries);
-		free(s1->value);
-		free(s1);
+	s1 = TAILQ_మొదటి(list);
+	అయితే (s1) {
+		s2 = TAILQ_తదుపరి(s1, entries);
+		విడుదల(s1->విలువ);
+		విడుదల(s1);
 		s1 = s2;
 	}
-	free(list);
+	విడుదల(list);
 }

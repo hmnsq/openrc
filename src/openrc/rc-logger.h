@@ -10,17 +10,17 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef RC_LOGGER_H
-#define RC_LOGGER_H
+#నిర్వచితం_కాకపోతే RC_LOGGER_H
+#నిర్వచించు RC_LOGGER_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <sys/types.h>
 
-extern pid_t rc_logger_pid;
-extern int rc_logger_tty;
-extern bool rc_in_logger;
+బాహ్య pid_t rc_logger_pid;
+బాహ్య పూర్ణాంకం rc_logger_tty;
+బాహ్య bool rc_లోపల_logger;
 
-void rc_logger_open(const char *runlevel);
-void rc_logger_close(void);
+శూన్య rc_logger_open(స్థిరరాశి అక్షరం *runlevel);
+శూన్య rc_logger_close(శూన్య);
 
-#endif
+#అయితే_ముగింపు

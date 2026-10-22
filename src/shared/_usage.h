@@ -10,22 +10,22 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <getopt.h>
-#include <stdlib.h>
-#include "librc.h"
+#అన్తర్భావ <getopt.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ "librc.h"
 
-#define getoptstring_COMMON "ChqVvU"
+#నిర్వచించు getoptstring_COMMON "ChqVvU"
 
-#define longopts_COMMON							      \
-	{ "help",           0, NULL, 'h'},				      \
-	{ "nocolor",        0, NULL, 'C'},				      \
-	{ "version",        0, NULL, 'V'},				      \
-	{ "verbose",        0, NULL, 'v'},				      \
-	{ "quiet",          0, NULL, 'q'},				      \
-	{ "user",           0, NULL, 'U'},				      \
-	{ NULL,             0, NULL,  0 }
+#నిర్వచించు longopts_COMMON							      \
+	{ "help",           0, ఖాళీ, 'h'},				      \
+	{ "nocolor",        0, ఖాళీ, 'C'},				      \
+	{ "version",        0, ఖాళీ, 'V'},				      \
+	{ "verbose",        0, ఖాళీ, 'v'},				      \
+	{ "quiet",          0, ఖాళీ, 'q'},				      \
+	{ "user",           0, ఖాళీ, 'U'},				      \
+	{ ఖాళీ,             0, ఖాళీ,  0 }
 
-#define longopts_help_COMMON						      \
+#నిర్వచించు longopts_help_COMMON						      \
 	"Display this help output",					      \
 	"Disable color output",						      \
 	"Display software version",			              \
@@ -33,30 +33,30 @@
 	"Run quietly (repeat to suppress errors)",         \
 	"Run in user mode"
 
-#define case_RC_COMMON_getopt_case_C  setenv ("EINFO_COLOR", "NO", 1);
-#define case_RC_COMMON_getopt_case_h  usage (EXIT_SUCCESS);
-#define case_RC_COMMON_getopt_case_V  if (argc == 2) show_version();
-#define case_RC_COMMON_getopt_case_v  setenv ("EINFO_VERBOSE", "YES", 1);
-#define case_RC_COMMON_getopt_case_q  set_quiet_options();
-#define case_RC_COMMON_getopt_case_U  rc_set_user();
-#define case_RC_COMMON_getopt_default usage (EXIT_FAILURE);
+#నిర్వచించు case_RC_COMMON_getopt_case_C  setenv ("EINFO_COLOR", "NO", 1);
+#నిర్వచించు case_RC_COMMON_getopt_case_h  usage (EXIT_SUCCESS);
+#నిర్వచించు case_RC_COMMON_getopt_case_V  ఒకవేళ (argc == 2) show_సంస్కరణ();
+#నిర్వచించు case_RC_COMMON_getopt_case_v  setenv ("EINFO_VERBOSE", "YES", 1);
+#నిర్వచించు case_RC_COMMON_getopt_case_q  సమితి_quiet_options();
+#నిర్వచించు case_RC_COMMON_getopt_case_U  rc_సమితి_user();
+#నిర్వచించు case_RC_COMMON_getopt_default usage (EXIT_FAILURE);
 
-#define case_RC_COMMON_GETOPT						      \
-	case 'C': case_RC_COMMON_getopt_case_C; break;			      \
-	case 'h': case_RC_COMMON_getopt_case_h; break;			      \
-	case 'V': case_RC_COMMON_getopt_case_V; break;			      \
-	case 'v': case_RC_COMMON_getopt_case_v; break;			      \
-	case 'q': case_RC_COMMON_getopt_case_q; break;			      \
-	case 'U': case_RC_COMMON_getopt_case_U; break;			      \
-	default:  case_RC_COMMON_getopt_default; break;
+#నిర్వచించు case_RC_COMMON_GETOPT						      \
+	స్థితి 'C': case_RC_COMMON_getopt_case_C; ఆపు;			      \
+	స్థితి 'h': case_RC_COMMON_getopt_case_h; ఆపు;			      \
+	స్థితి 'V': case_RC_COMMON_getopt_case_V; ఆపు;			      \
+	స్థితి 'v': case_RC_COMMON_getopt_case_v; ఆపు;			      \
+	స్థితి 'q': case_RC_COMMON_getopt_case_q; ఆపు;			      \
+	స్థితి 'U': case_RC_COMMON_getopt_case_U; ఆపు;			      \
+	అప్రమేయ:  case_RC_COMMON_getopt_default; ఆపు;
 
-extern const char *applet;
-extern const char *extraopts;
-extern const char getoptstring[];
-extern const struct option longopts[];
-extern const char * const longopts_help[];
-extern const char *usagestring;
+బాహ్య స్థిరరాశి అక్షరం *applet;
+బాహ్య స్థిరరాశి అక్షరం *extraopts;
+బాహ్య స్థిరరాశి అక్షరం getoptstring[];
+బాహ్య స్థిరరాశి నిర్మాణం option longopts[];
+బాహ్య స్థిరరాశి అక్షరం * స్థిరరాశి longopts_help[];
+బాహ్య స్థిరరాశి అక్షరం *usagestring;
 
-void set_quiet_options(void);
-void show_version(void);
-void usage(int exit_status);
+శూన్య సమితి_quiet_options(శూన్య);
+శూన్య show_సంస్కరణ(శూన్య);
+శూన్య usage(పూర్ణాంకం exit_status);

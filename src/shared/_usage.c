@@ -10,80 +10,80 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "_usage.h"
+#అన్తర్భావ "version.h"
+#అన్తర్భావ "helpers.h"
 
 
-void set_quiet_options(void)
+శూన్య సమితి_quiet_options(శూన్య)
 {
-	static int qcount = 0;
+	స్థిర పూర్ణాంకం qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	ఎంపిక (qcount) {
+	స్థితి 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		ఆపు;
+	స్థితి 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		ఆపు;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN శూన్య show_సంస్కరణ(శూన్య)
 {
-	const char *systype = NULL;
+	స్థిరరాశి అక్షరం *systype = ఖాళీ;
 
-	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
-		printf(" [%s]", systype);
-	printf(") %s", VERSION);
-#ifdef BRANDING
-	printf(" (%s)", BRANDING);
-#endif
-	printf("\n");
-	exit(EXIT_SUCCESS);
+	రాయి("%s (OpenRC", applet);
+	ఒకవేళ ((systype = rc_sys()))
+		రాయి(" [%s]", systype);
+	రాయి(") %s", సంస్కరణ);
+#నిర్వచితమైతే BRANDING
+	రాయి(" (%s)", BRANDING);
+#అయితే_ముగింపు
+	రాయి("\n");
+	నిష్క్రమించు(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN శూన్య usage(పూర్ణాంకం exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	స్థిరరాశి అక్షరం * స్థిరరాశి has_arg[] = { "", "<arg>", "[arg]" };
+	పూర్ణాంకం i;
+	పూర్ణాంకం len;
+	అక్షరం *lo;
+	అక్షరం *p;
+	అక్షరం *token;
+	అక్షరం val[4] = "-?,";
 
-	if (usagestring)
-		printf("%s", usagestring);
-	else
-		printf("Usage: %s [options] ", applet);
+	ఒకవేళ (usagestring)
+		రాయి("%s", usagestring);
+	లేకపోతే
+		రాయి("Usage: %s [options] ", applet);
 
-	if (extraopts)
-		printf("%s", extraopts);
+	ఒకవేళ (extraopts)
+		రాయి("%s", extraopts);
 
-	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	రాయి("\n\nOptions: [ %s ]\n", getoptstring);
+	కొరకు (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
-		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
+		len = రాయి("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		అయితే ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
-				printf("%*s", len, "");
+			ఒకవేళ (len > 0)
+				రాయి("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		విడుదల(lo);
 	}
-	exit(exit_status);
+	నిష్క్రమించు(exit_status);
 }

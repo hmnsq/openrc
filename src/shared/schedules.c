@@ -16,426 +16,426 @@
  */
 
 /* nano seconds */
-#define POLL_INTERVAL   20000000
-#define WAIT_PIDFILE   500000000
-#define ONE_SECOND    1000000000
-#define ONE_MS           1000000
+#నిర్వచించు POLL_INTERVAL   20000000
+#నిర్వచించు WAIT_PIDFILE   500000000
+#నిర్వచించు ONE_రెండవ    1000000000
+#నిర్వచించు ONE_MS           1000000
 
-#include <ctype.h>
-#include <errno.h>
-#include <signal.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <sys/types.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <stddef.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <syslog.h>
+#అన్తర్భావ <time.h>
+#అన్తర్భావ <sys/types.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "schedules.h"
-#include "helpers.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "queue.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "schedules.h"
+#అన్తర్భావ "helpers.h"
 
-typedef struct scheduleitem {
-	enum {
+రకనిర్వచనం నిర్మాణం scheduleitem {
+	గణన {
 		SC_TIMEOUT,
 		SC_SIGNAL,
 		SC_GOTO,
 		SC_FOREVER,
 	} type;
-	int value;
-	struct scheduleitem *gotoitem;
-	TAILQ_ENTRY(scheduleitem) entries;
+	పూర్ణాంకం విలువ;
+	నిర్మాణం scheduleitem *gotoitem;
+	TAILQ_నమోదు(scheduleitem) entries;
 } SCHEDULEITEM;
 
-static TAILQ_HEAD(, scheduleitem) schedule;
+స్థిర TAILQ_తల(, scheduleitem) కాలపట్టిక;
 
-void free_schedulelist(void)
+శూన్య free_schedulelist(శూన్య)
 {
-	SCHEDULEITEM *s1 = TAILQ_FIRST(&schedule);
+	SCHEDULEITEM *s1 = TAILQ_మొదటి(&కాలపట్టిక);
 	SCHEDULEITEM *s2;
 
-	while (s1) {
-		s2 = TAILQ_NEXT(s1, entries);
-		free(s1);
+	అయితే (s1) {
+		s2 = TAILQ_తదుపరి(s1, entries);
+		విడుదల(s1);
 		s1 = s2;
 	}
-	TAILQ_INIT(&schedule);
+	TAILQ_INIT(&కాలపట్టిక);
 }
 
-int parse_signal(const char *applet, const char *sig)
+పూర్ణాంకం parse_signal(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *sig)
 {
-	typedef struct signalpair
+	రకనిర్వచనం నిర్మాణం signalpair
 	{
-		const char *name;
-		int signal;
+		స్థిరరాశి అక్షరం *name;
+		పూర్ణాంకం సంకేతం;
 	} SIGNALPAIR;
 
-#define signalpair_item(name) { #name, SIG##name },
+#నిర్వచించు signalpair_అంశం(name) { #name, SIG##name },
 
-	static const SIGNALPAIR signallist[] = {
-		signalpair_item(HUP)
-		signalpair_item(INT)
-		signalpair_item(QUIT)
-		signalpair_item(ILL)
-		signalpair_item(TRAP)
-		signalpair_item(ABRT)
-		signalpair_item(BUS)
-		signalpair_item(FPE)
-		signalpair_item(KILL)
-		signalpair_item(USR1)
-		signalpair_item(SEGV)
-		signalpair_item(USR2)
-		signalpair_item(PIPE)
-		signalpair_item(ALRM)
-		signalpair_item(TERM)
-		signalpair_item(CHLD)
-		signalpair_item(CONT)
-		signalpair_item(STOP)
-		signalpair_item(TSTP)
-		signalpair_item(TTIN)
-		signalpair_item(TTOU)
-		signalpair_item(URG)
-		signalpair_item(XCPU)
-		signalpair_item(XFSZ)
-		signalpair_item(VTALRM)
-		signalpair_item(PROF)
-#ifdef SIGWINCH
-		signalpair_item(WINCH)
-#endif
-#ifdef SIGIO
-		signalpair_item(IO)
-#endif
-#ifdef SIGPWR
-		signalpair_item(PWR)
-#endif
-		signalpair_item(SYS)
+	స్థిర స్థిరరాశి SIGNALPAIR signallist[] = {
+		signalpair_అంశం(HUP)
+		signalpair_అంశం(INT)
+		signalpair_అంశం(QUIT)
+		signalpair_అంశం(ILL)
+		signalpair_అంశం(TRAP)
+		signalpair_అంశం(ABRT)
+		signalpair_అంశం(BUS)
+		signalpair_అంశం(FPE)
+		signalpair_అంశం(KILL)
+		signalpair_అంశం(USR1)
+		signalpair_అంశం(SEGV)
+		signalpair_అంశం(USR2)
+		signalpair_అంశం(PIPE)
+		signalpair_అంశం(ALRM)
+		signalpair_అంశం(పదం_2)
+		signalpair_అంశం(CHLD)
+		signalpair_అంశం(CONT)
+		signalpair_అంశం(STOP)
+		signalpair_అంశం(TSTP)
+		signalpair_అంశం(TTIN)
+		signalpair_అంశం(TTOU)
+		signalpair_అంశం(URG)
+		signalpair_అంశం(XCPU)
+		signalpair_అంశం(XFSZ)
+		signalpair_అంశం(VTALRM)
+		signalpair_అంశం(PROF)
+#నిర్వచితమైతే SIGWINCH
+		signalpair_అంశం(WINCH)
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGIO
+		signalpair_అంశం(IO)
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGPWR
+		signalpair_అంశం(PWR)
+#అయితే_ముగింపు
+		signalpair_అంశం(SYS)
 		{ "NULL",	0 },
 	};
 
-	unsigned int i = 0;
-	const char *s;
+	గుర్తులేని పూర్ణాంకం i = 0;
+	స్థిరరాశి అక్షరం *s;
 
-	if (!sig || *sig == '\0')
-		return -1;
+	ఒకవేళ (!sig || *sig == '\0')
+		తిరిగి -1;
 
-	if (sscanf(sig, "%u", &i) == 1) {
-		if (i < NSIG)
-			return i;
+	ఒకవేళ (అక్షరశ్రేణి_చదువు(sig, "%u", &i) == 1) {
+		ఒకవేళ (i < NSIG)
+			తిరిగి i;
 		eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	}
 
-	if (strncmp(sig, "SIG", 3) == 0)
+	ఒకవేళ (అక్షరశ్రేణి_పోలిక(sig, "SIG", 3) == 0)
 		s = sig + 3;
-	else
-		s = NULL;
+	లేకపోతే
+		s = ఖాళీ;
 
-	for (i = 0; i < ARRAY_SIZE(signallist); ++i)
-		if (strcmp(sig, signallist[i].name) == 0 ||
+	కొరకు (i = 0; i < ARRAY_కొలత(signallist); ++i)
+		ఒకవేళ (strcmp(sig, signallist[i].name) == 0 ||
 		    (s && strcmp(s, signallist[i].name) == 0))
-			return signallist[i].signal;
+			తిరిగి signallist[i].సంకేతం;
 
 	eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	/* NOTREACHED */
 }
 
-static SCHEDULEITEM *parse_schedule_item(const char *applet, const char *string)
+స్థిర SCHEDULEITEM *parse_కాలపట్టిక_అంశం(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *string)
 {
-	const char *after_hyph;
-	int sig;
-	SCHEDULEITEM *item = xmalloc(sizeof(*item));
+	స్థిరరాశి అక్షరం *after_hyph;
+	పూర్ణాంకం sig;
+	SCHEDULEITEM *అంశం = xmalloc(పరిమాణం(*అంశం));
 
-	item->value = 0;
-	item->gotoitem = NULL;
-	if (strcmp(string,"forever") == 0)
-		item->type = SC_FOREVER;
-	else if (isdigit((unsigned char)string[0])) {
-		item->type = SC_TIMEOUT;
+	అంశం->విలువ = 0;
+	అంశం->gotoitem = ఖాళీ;
+	ఒకవేళ (strcmp(string,"forever") == 0)
+		అంశం->type = SC_FOREVER;
+	లేకపోతే ఒకవేళ (అంకెనా((గుర్తులేని అక్షరం)string[0])) {
+		అంశం->type = SC_TIMEOUT;
 		errno = 0;
-		if (sscanf(string, "%d", &item->value) != 1)
+		ఒకవేళ (అక్షరశ్రేణి_చదువు(string, "%d", &అంశం->విలువ) != 1)
 			eerrorx("%s: invalid timeout value in schedule '%s'",
 			    applet, string);
-	} else if ((after_hyph = string + (string[0] == '-')) &&
+	} లేకపోతే ఒకవేళ ((after_hyph = string + (string[0] == '-')) &&
 	    ((sig = parse_signal(applet, after_hyph)) != -1))
 	{
-		item->type = SC_SIGNAL;
-		item->value = (int)sig;
-	} else
+		అంశం->type = SC_SIGNAL;
+		అంశం->విలువ = (పూర్ణాంకం)sig;
+	} లేకపోతే
 		eerrorx("%s: invalid schedule item `%s'", applet, string);
 
-	return item;
+	తిరిగి అంశం;
 }
 
-void parse_schedule(const char *applet, const char *string, int timeout)
+శూన్య parse_కాలపట్టిక(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *string, పూర్ణాంకం timeout)
 {
-	char buffer[20];
-	const char *slash;
-	int count = 0;
-	SCHEDULEITEM *repeatat = NULL;
+	అక్షరం బఫరు[20];
+	స్థిరరాశి అక్షరం *slash;
+	పూర్ణాంకం లెక్క = 0;
+	SCHEDULEITEM *repeatat = ఖాళీ;
 	size_t len;
-	SCHEDULEITEM *item;
+	SCHEDULEITEM *అంశం;
 
-	TAILQ_INIT(&schedule);
-	if (string)
-		for (slash = string; *slash; slash++)
-			if (*slash == '/')
-				count++;
+	TAILQ_INIT(&కాలపట్టిక);
+	ఒకవేళ (string)
+		కొరకు (slash = string; *slash; slash++)
+			ఒకవేళ (*slash == '/')
+				లెక్క++;
 
 	free_schedulelist();
 
-	if (count == 0) {
-		item = xmalloc(sizeof(*item));
-		item->type = SC_SIGNAL;
-		item->value = timeout;
-		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+	ఒకవేళ (లెక్క == 0) {
+		అంశం = xmalloc(పరిమాణం(*అంశం));
+		అంశం->type = SC_SIGNAL;
+		అంశం->విలువ = timeout;
+		అంశం->gotoitem = ఖాళీ;
+		TAILQ_చొప్పించు_తోక(&కాలపట్టిక, అంశం, entries);
 
-		item = xmalloc(sizeof(*item));
-		item->type = SC_TIMEOUT;
-		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (string) {
-			if (sscanf(string, "%d", &item->value) != 1)
+		అంశం = xmalloc(పరిమాణం(*అంశం));
+		అంశం->type = SC_TIMEOUT;
+		అంశం->gotoitem = ఖాళీ;
+		TAILQ_చొప్పించు_తోక(&కాలపట్టిక, అంశం, entries);
+		ఒకవేళ (string) {
+			ఒకవేళ (అక్షరశ్రేణి_చదువు(string, "%d", &అంశం->విలువ) != 1)
 				eerrorx("%s: invalid timeout value in schedule '%s'",
 					applet, string);
-		} else
-			item->value = 5;
+		} లేకపోతే
+			అంశం->విలువ = 5;
 
-		return;
+		తిరిగి;
 	}
 
-	while (string != NULL) {
-		if ((slash = strchr(string, '/')))
+	అయితే (string != ఖాళీ) {
+		ఒకవేళ ((slash = strchr(string, '/')))
 			len = slash - string;
-		else
-			len = strlen(string);
+		లేకపోతే
+			len = అక్షరశ్రేణి_పొడవు(string);
 
-		if (len >= (ptrdiff_t)sizeof(buffer))
+		ఒకవేళ (len >= (ptrdiff_t)పరిమాణం(బఫరు))
 			eerrorx("%s: invalid schedule item, far too long",
 			    applet);
 
-		memcpy(buffer, string, len);
-		buffer[len] = 0;
-		string = slash ? slash + 1 : NULL;
+		జ్ఞాపకం_నకలు(బఫరు, string, len);
+		బఫరు[len] = 0;
+		string = slash ? slash + 1 : ఖాళీ;
 
-		item = parse_schedule_item(applet, buffer);
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (item->type == SC_FOREVER) {
-			if (repeatat)
+		అంశం = parse_కాలపట్టిక_అంశం(applet, బఫరు);
+		TAILQ_చొప్పించు_తోక(&కాలపట్టిక, అంశం, entries);
+		ఒకవేళ (అంశం->type == SC_FOREVER) {
+			ఒకవేళ (repeatat)
 				eerrorx("%s: invalid schedule, `forever' "
 				    "appears more than once", applet);
 
-			repeatat = item;
-			continue;
+			repeatat = అంశం;
+			కొనసాగు;
 		}
 	}
 
-	if (repeatat) {
-		item = xmalloc(sizeof(*item));
-		item->type = SC_GOTO;
-		item->value = 0;
-		item->gotoitem = repeatat;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+	ఒకవేళ (repeatat) {
+		అంశం = xmalloc(పరిమాణం(*అంశం));
+		అంశం->type = SC_GOTO;
+		అంశం->విలువ = 0;
+		అంశం->gotoitem = repeatat;
+		TAILQ_చొప్పించు_తోక(&కాలపట్టిక, అంశం, entries);
 	}
 
-	return;
+	తిరిగి;
 }
 
 /* return number of processes killed, -1 on error */
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-    pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet)
+పూర్ణాంకం do_stop(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *exec, స్థిరరాశి అక్షరం *స్థిరరాశి *argv,
+    pid_t pid, uid_t uid, పూర్ణాంకం sig, bool group, bool test, bool quiet)
 {
-	const char *kind = "PID";
+	స్థిరరాశి అక్షరం *రకం = "PID";
 	RC_PIDLIST *pids;
 	RC_PID *pi;
 	RC_PID *np;
 	bool killed;
-	int nkilled = 0;
-	uid_t target;
-	if (group)
-		kind = "GID";
+	పూర్ణాంకం nkilled = 0;
+	uid_t లక్ష్యం;
+	ఒకవేళ (group)
+		రకం = "GID";
 
-	if (pid > 0)
-		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
-		pids = rc_find_pids(exec, argv, uid, 0);
+	ఒకవేళ (pid > 0)
+		pids = rc_కనుగొను_pids(ఖాళీ, ఖాళీ, 0, pid);
+	లేకపోతే
+		pids = rc_కనుగొను_pids(exec, argv, uid, 0);
 
-	if (!pids)
-		return 0;
+	ఒకవేళ (!pids)
+		తిరిగి 0;
 
-	LIST_FOREACH_SAFE(pi, pids, entries, np) {
-		if (test) {
-			einfo("Would send signal %d to %s %d", sig, kind, pi->pid);
+	LIST_FOREACH_సురక్షిత(pi, pids, entries, np) {
+		ఒకవేళ (test) {
+			einfo("Would send signal %d to %s %d", sig, రకం, pi->pid);
 			nkilled++;
-		} else {
-			if (sig) {
-				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, kind, pi->pid);
-				if (!quiet)
-					ebeginv("Sending signal %d to %s %d", sig, kind, pi->pid);
+		} లేకపోతే {
+			ఒకవేళ (sig) {
+				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, రకం, pi->pid);
+				ఒకవేళ (!quiet)
+					ebeginv("Sending signal %d to %s %d", sig, రకం, pi->pid);
 			}
 			errno = 0;
-			if (group)
-				target = -pi->pid;
-			else
-				target = pi->pid;
-			killed = (kill(target, sig) == 0 ||
+			ఒకవేళ (group)
+				లక్ష్యం = -pi->pid;
+			లేకపోతే
+				లక్ష్యం = pi->pid;
+			killed = (kill(లక్ష్యం, sig) == 0 ||
 			    errno == ESRCH ? true : false);
-			if (!quiet)
+			ఒకవేళ (!quiet)
 				eendv(killed ? 0 : 1,
 				"%s: failed to send signal %d to %s %d: %s",
-				applet, sig, kind, pi->pid, strerror(errno));
-			else if (!killed)
+				applet, sig, రకం, pi->pid, strerror(errno));
+			లేకపోతే ఒకవేళ (!killed)
 				syslog(LOG_ERR, "Failed to send signal %d to %s %d: %s",
-						sig, kind, pi->pid, strerror(errno));
-			if (!killed) {
+						sig, రకం, pi->pid, strerror(errno));
+			ఒకవేళ (!killed) {
 				nkilled = -1;
-			} else {
-				if (nkilled != -1)
+			} లేకపోతే {
+				ఒకవేళ (nkilled != -1)
 					nkilled++;
 			}
 		}
-		free(pi);
+		విడుదల(pi);
 	}
 
-	free(pids);
-	return nkilled;
+	విడుదల(pids);
+	తిరిగి nkilled;
 }
 
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+పూర్ణాంకం నిరంతరం_stop_కాలపట్టిక(స్థిరరాశి అక్షరం *applet,
+		స్థిరరాశి అక్షరం *exec, స్థిరరాశి అక్షరం *స్థిరరాశి *argv,
 		pid_t pid, uid_t uid, bool group,
-    bool test, bool progress, bool quiet)
+    bool test, bool పురోగతి, bool quiet)
 {
-	SCHEDULEITEM *item = TAILQ_FIRST(&schedule);
-	int nkilled = 0;
-	int tkilled = 0;
-	int nrunning = 0;
-	long nloops, nsecs;
-	struct timespec ts;
-	const char *const *p;
+	SCHEDULEITEM *అంశం = TAILQ_మొదటి(&కాలపట్టిక);
+	పూర్ణాంకం nkilled = 0;
+	పూర్ణాంకం tkilled = 0;
+	పూర్ణాంకం nrunning = 0;
+	దీర్ఘ nloops, nsecs;
+	నిర్మాణం timespec ts;
+	స్థిరరాశి అక్షరం *స్థిరరాశి *p;
 	bool progressed = false;
 
-	if (!(pid > 0 || exec || uid || (argv && *argv)))
-		return 0;
+	ఒకవేళ (!(pid > 0 || exec || uid || (argv && *argv)))
+		తిరిగి 0;
 
-	if (exec) {
+	ఒకవేళ (exec) {
 		einfov("Will stop %s", exec);
 		syslog(LOG_DEBUG, "Will stop %s", exec);
 	}
-	if (pid > 0) {
-		if (!group) {
+	ఒకవేళ (pid > 0) {
+		ఒకవేళ (!group) {
 			einfov("Will stop PID %d", pid);
 			syslog(LOG_DEBUG, "Will stop PID %d", pid);
-		} else {
+		} లేకపోతే {
 			einfov("Will stop GID %d", pid);
 			syslog(LOG_DEBUG, "Will stop GID %d", pid);
 		}
 	}
-	if (uid) {
+	ఒకవేళ (uid) {
 		einfov("Will stop processes owned by UID %d", uid);
 		syslog(LOG_DEBUG, "Will stop processes owned by UID %d", uid);
 	}
-	if (argv && *argv) {
+	ఒకవేళ (argv && *argv) {
 		einfovn("Will stop processes of `");
-		if (rc_yesno(getenv("EINFO_VERBOSE"))) {
-			for (p = argv; p && *p; p++) {
-				if (p != argv)
-					printf(" ");
-				printf("%s", *p);
+		ఒకవేళ (rc_yesno(getenv("EINFO_VERBOSE"))) {
+			కొరకు (p = argv; p && *p; p++) {
+				ఒకవేళ (p != argv)
+					రాయి(" ");
+				రాయి("%s", *p);
 			}
-			printf("'\n");
+			రాయి("'\n");
 		}
 	}
 
-	while (item) {
-		switch (item->type) {
-		case SC_GOTO:
-			item = item->gotoitem;
-			continue;
+	అయితే (అంశం) {
+		ఎంపిక (అంశం->type) {
+		స్థితి SC_GOTO:
+			అంశం = అంశం->gotoitem;
+			కొనసాగు;
 
-		case SC_SIGNAL:
+		స్థితి SC_SIGNAL:
 			nrunning = 0;
-			nkilled = do_stop(applet, exec, argv, pid, uid, item->value, group,
+			nkilled = do_stop(applet, exec, argv, pid, uid, అంశం->విలువ, group,
 					test, quiet);
-			if (nkilled == 0) {
-				if (tkilled == 0) {
-					if (progressed)
-						printf("\n");
+			ఒకవేళ (nkilled == 0) {
+				ఒకవేళ (tkilled == 0) {
+					ఒకవేళ (progressed)
+						రాయి("\n");
 					eerror("%s: no matching processes found", applet);
 				}
-				return tkilled;
+				తిరిగి tkilled;
 			}
-			else if (nkilled == -1)
-				return 0;
+			లేకపోతే ఒకవేళ (nkilled == -1)
+				తిరిగి 0;
 
 			tkilled += nkilled;
-			break;
-		case SC_FOREVER:
-		case SC_TIMEOUT:
-			if (item->type == SC_TIMEOUT && item->value < 1) {
-				item = NULL;
-				break;
+			ఆపు;
+		స్థితి SC_FOREVER:
+		స్థితి SC_TIMEOUT:
+			ఒకవేళ (అంశం->type == SC_TIMEOUT && అంశం->విలువ < 1) {
+				అంశం = ఖాళీ;
+				ఆపు;
 			}
 
 			ts.tv_sec = 0;
 			ts.tv_nsec = POLL_INTERVAL;
 
-			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
-				for (nloops = 0;
-				     nloops < ONE_SECOND / POLL_INTERVAL;
+			కొరకు (nsecs = 0; అంశం->type == SC_FOREVER || nsecs < అంశం->విలువ; nsecs++) {
+				కొరకు (nloops = 0;
+				     nloops < ONE_రెండవ / POLL_INTERVAL;
 				     nloops++)
 				{
-					if ((nrunning = do_stop(applet, exec, argv,
+					ఒకవేళ ((nrunning = do_stop(applet, exec, argv,
 						    pid, uid, 0, group, test, quiet)) == 0)
-						return 0;
+						తిరిగి 0;
 
 
-					if (nanosleep(&ts, NULL) == -1) {
-						if (progressed) {
-							printf("\n");
+					ఒకవేళ (nanosleep(&ts, ఖాళీ) == -1) {
+						ఒకవేళ (progressed) {
+							రాయి("\n");
 							progressed = false;
 						}
-						if (errno != EINTR) {
+						ఒకవేళ (errno != EINTR) {
 							eerror("%s: nanosleep: %s",
 							    applet, strerror(errno));
-							return 0;
+							తిరిగి 0;
 						}
 					}
 				}
-				if (progress) {
-					printf(".");
+				ఒకవేళ (పురోగతి) {
+					రాయి(".");
 					fflush(stdout);
 					progressed = true;
 				}
 			}
-			break;
-		default:
-			if (progressed) {
-				printf("\n");
+			ఆపు;
+		అప్రమేయ:
+			ఒకవేళ (progressed) {
+				రాయి("\n");
 				progressed = false;
 			}
 			eerror("%s: invalid schedule item `%d'",
-			    applet, item->type);
-			return 0;
+			    applet, అంశం->type);
+			తిరిగి 0;
 		}
 
-		if (item)
-			item = TAILQ_NEXT(item, entries);
+		ఒకవేళ (అంశం)
+			అంశం = TAILQ_తదుపరి(అంశం, entries);
 	}
 
-	if (test || (tkilled > 0 && nrunning == 0))
-		return nkilled;
+	ఒకవేళ (test || (tkilled > 0 && nrunning == 0))
+		తిరిగి nkilled;
 
-	if (progressed)
-		printf("\n");
-	if (!quiet) {
-		if (nrunning == 1)
+	ఒకవేళ (progressed)
+		రాయి("\n");
+	ఒకవేళ (!quiet) {
+		ఒకవేళ (nrunning == 1)
 			eerror("%s: %d process refused to stop", applet, nrunning);
-		else
+		లేకపోతే
 			eerror("%s: %d process(es) refused to stop", applet, nrunning);
 	}
 
-	return -nrunning;
+	తిరిగి -nrunning;
 }

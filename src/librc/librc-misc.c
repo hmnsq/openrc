@@ -15,44 +15,44 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <fnmatch.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <sys/stat.h>
+#అన్తర్భావ <fnmatch.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <dirent.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <strings.h>
+#అన్తర్భావ <sys/stat.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
-#include "misc.h"
+#అన్తర్భావ "queue.h"
+#అన్తర్భావ "librc.h"
+#అన్తర్భావ "helpers.h"
+#అన్తర్భావ "misc.h"
 
 bool
-rc_yesno(const char *value)
+rc_yesno(స్థిరరాశి అక్షరం *విలువ)
 {
-	if (!value) {
+	ఒకవేళ (!విలువ) {
 		errno = ENOENT;
-		return false;
+		తిరిగి false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "1") == 0)
-		return true;
+	ఒకవేళ (strcasecmp(విలువ, "yes") == 0 ||
+	    strcasecmp(విలువ, "y") == 0 ||
+	    strcasecmp(విలువ, "true") == 0 ||
+	    strcasecmp(విలువ, "1") == 0)
+		తిరిగి true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	ఒకవేళ (strcasecmp(విలువ, "no") != 0 &&
+	    strcasecmp(విలువ, "n") != 0 &&
+	    strcasecmp(విలువ, "false") != 0 &&
+	    strcasecmp(విలువ, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	తిరిగి false;
 }
 
 
@@ -63,185 +63,185 @@ rc_yesno(const char *value)
  * Don't forget to free the buffer afterwards!
  */
 bool
-rc_getfile(const char *file, char **buffer, size_t *len)
+rc_getfile(స్థిరరాశి అక్షరం *file, అక్షరం **బఫరు, size_t *len)
 {
 	bool ret = false;
 	FILE *fp;
-	int fd;
-	struct stat st;
-	size_t done, left;
+	పూర్ణాంకం fd;
+	నిర్మాణం stat st;
+	size_t పూర్తి, ఎడమ;
 
 	fp = fopen(file, "re");
-	if (!fp)
-		return false;
+	ఒకవేళ (!fp)
+		తిరిగి false;
 
 	/* assume fileno() never fails */
 	fd = fileno(fp);
 
-	if (fstat(fd, &st))
-		goto finished;
+	ఒకవేళ (fstat(fd, &st))
+		వెళ్ళు ముగిసిన;
 
-	left = st.st_size;
-	*len = left + 1; /* NUL terminator */
-	*buffer = xrealloc(*buffer, *len);
-	while (left) {
-		done = fread(*buffer, sizeof(*buffer[0]), left, fp);
-		if (done == 0 && ferror(fp))
-			goto finished;
-		left -= done;
+	ఎడమ = st.st_size;
+	*len = ఎడమ + 1; /* NUL terminator */
+	*బఫరు = xrealloc(*బఫరు, *len);
+	అయితే (ఎడమ) {
+		పూర్తి = fread(*బఫరు, పరిమాణం(*బఫరు[0]), ఎడమ, fp);
+		ఒకవేళ (పూర్తి == 0 && ferror(fp))
+			వెళ్ళు ముగిసిన;
+		ఎడమ -= పూర్తి;
 	}
 	ret = true;
 
- finished:
-	if (!ret) {
-		free(*buffer);
+ ముగిసిన:
+	ఒకవేళ (!ret) {
+		విడుదల(*బఫరు);
 		*len = 0;
-	} else
-		(*buffer)[*len - 1] = '\0';
+	} లేకపోతే
+		(*బఫరు)[*len - 1] = '\0';
 	fclose(fp);
-	return ret;
+	తిరిగి ret;
 }
 
-char *
-rc_proc_getent(const char *ent RC_UNUSED)
+అక్షరం *
+rc_proc_getent(స్థిరరాశి అక్షరం *ent RC_వాడని)
 {
-#ifdef __linux__
+#నిర్వచితమైతే __linux__
 	FILE *fp;
-	char *proc = NULL, *p, *value = NULL, *save;
+	అక్షరం *proc = ఖాళీ, *p, *విలువ = ఖాళీ, *save;
 	size_t i, len;
 
-	if (!(fp = fopen("/proc/cmdline", "r")))
-		return NULL;
+	ఒకవేళ (!(fp = fopen("/proc/cmdline", "r")))
+		తిరిగి ఖాళీ;
 
 	i = 0;
-	if (xgetline(&proc, &i, fp) == -1)
-		goto out;
+	ఒకవేళ (xgetline(&proc, &i, fp) == -1)
+		వెళ్ళు బహిర్గతం;
 	save = proc;
 
-	len = strlen(ent);
-	while ((p = strsep(&save, " "))) {
-		if (strncmp(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
+	len = అక్షరశ్రేణి_పొడవు(ent);
+	అయితే ((p = strsep(&save, " "))) {
+		ఒకవేళ (అక్షరశ్రేణి_పోలిక(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
 			p += len;
-			if (*p == '=')
+			ఒకవేళ (*p == '=')
 				p++;
-			value = xstrdup(p);
+			విలువ = xstrdup(p);
 		}
 	}
 
-	if (!value)
+	ఒకవేళ (!విలువ)
 		errno = ENOENT;
 
-out:
+బహిర్గతం:
 	fclose(fp);
-	free(proc);
+	విడుదల(proc);
 
-	return value;
-#else
-	return NULL;
-#endif
+	తిరిగి విలువ;
+#లేకపోతే
+	తిరిగి ఖాళీ;
+#అయితే_ముగింపు
 }
 
 RC_STRINGLIST *
-config_list(int dirfd, const char *pathname)
+config_list(పూర్ణాంకం dirfd, స్థిరరాశి అక్షరం *pathname)
 {
 	FILE *fp;
-	char *buffer = NULL;
+	అక్షరం *బఫరు = ఖాళీ;
 	size_t len = 0;
-	char *p;
-	char *token;
+	అక్షరం *p;
+	అక్షరం *token;
 	RC_STRINGLIST *list = rc_stringlist_new();
 
-	if (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
-		return list;
+	ఒకవేళ (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
+		తిరిగి list;
 
-	while (xgetline(&buffer, &len, fp) != -1) {
-		p = buffer;
+	అయితే (xgetline(&బఫరు, &len, fp) != -1) {
+		p = బఫరు;
 		/* Strip leading spaces/tabs */
-		while ((*p == ' ') || (*p == '\t'))
+		అయితే ((*p == ' ') || (*p == '\t'))
 			p++;
 
 		/* Get entry - we do not want comments */
 		token = strsep(&p, "#");
-		if (token && (strlen(token) > 1)) {
+		ఒకవేళ (token && (అక్షరశ్రేణి_పొడవు(token) > 1)) {
 			/* If not variable assignment then skip */
-			if (strchr(token, '=')) {
+			ఒకవేళ (strchr(token, '=')) {
 				/* Strip the newline if present */
-				if (token[strlen(token) - 1] == '\n')
-					token[strlen(token) - 1] = 0;
+				ఒకవేళ (token[అక్షరశ్రేణి_పొడవు(token) - 1] == '\n')
+					token[అక్షరశ్రేణి_పొడవు(token) - 1] = 0;
 
-				rc_stringlist_add(list, token);
+				rc_stringlist_కూడు(list, token);
 			}
 		}
 	}
-	free(buffer);
+	విడుదల(బఫరు);
 	fclose(fp);
 
-	return list;
+	తిరిగి list;
 }
 
 RC_STRINGLIST *
-rc_config_list(const char *file)
+rc_config_list(స్థిరరాశి అక్షరం *file)
 {
-	return config_list(AT_FDCWD, file);
+	తిరిగి config_list(AT_FDCWD, file);
 }
 
-static void rc_config_set_value(RC_STRINGLIST *config, char *value)
+స్థిర శూన్య rc_config_సమితి_విలువ(RC_STRINGLIST *config, అక్షరం *విలువ)
 {
 	RC_STRING *cline;
-	char *entry;
+	అక్షరం *నమోదు_2;
 	size_t i = 0;
-	char *newline;
-	char *p = value;
+	అక్షరం *newline;
+	అక్షరం *p = విలువ;
 	bool replaced;
-	char *token;
+	అక్షరం *token;
 
-	if (!p)
-		return;
-	if (strncmp(p, "export ", 7) == 0)
+	ఒకవేళ (!p)
+		తిరిగి;
+	ఒకవేళ (అక్షరశ్రేణి_పోలిక(p, "export ", 7) == 0)
 		p += 7;
-	if (!(token = strsep(&p, "=")))
-		return;
+	ఒకవేళ (!(token = strsep(&p, "=")))
+		తిరిగి;
 
-	entry = xstrdup(token);
+	నమోదు_2 = xstrdup(token);
 	/* Preserve shell coloring */
-	if (*p == '$')
-		token = value;
-	else
-		do {
+	ఒకవేళ (*p == '$')
+		token = విలువ;
+	లేకపోతే
+		చేయి {
 			/* Bash variables are usually quoted */
 			token = strsep(&p, "\"\'");
-		} while (token && *token == '\0');
+		} అయితే (token && *token == '\0');
 
 	/* Drop a newline if that's all we have */
-	if (token) {
-		i = strlen(token) - 1;
-		if (token[i] == '\n')
+	ఒకవేళ (token) {
+		i = అక్షరశ్రేణి_పొడవు(token) - 1;
+		ఒకవేళ (token[i] == '\n')
 			token[i] = 0;
 
-		xasprintf(&newline, "%s=%s", entry, token);
-	} else {
-		xasprintf(&newline, "%s=", entry);
+		xasprintf(&newline, "%s=%s", నమోదు_2, token);
+	} లేకపోతే {
+		xasprintf(&newline, "%s=", నమోదు_2);
 	}
 
 	replaced = false;
 	/* In shells the last item takes precedence, so we need to remove
 	   any prior values we may already have */
 	TAILQ_FOREACH(cline, config, entries) {
-		i = strlen(entry);
-		if (strncmp(entry, cline->value, i) == 0 && cline->value[i] == '=') {
+		i = అక్షరశ్రేణి_పొడవు(నమోదు_2);
+		ఒకవేళ (అక్షరశ్రేణి_పోలిక(నమోదు_2, cline->విలువ, i) == 0 && cline->విలువ[i] == '=') {
 			/* We have a match now - to save time we directly replace it */
-			free(cline->value);
-			cline->value = newline;
+			విడుదల(cline->విలువ);
+			cline->విలువ = newline;
 			replaced = true;
-			break;
+			ఆపు;
 		}
 	}
 
-	if (!replaced) {
-		rc_stringlist_add(config, newline);
-		free(newline);
+	ఒకవేళ (!replaced) {
+		rc_stringlist_కూడు(config, newline);
+		విడుదల(newline);
 	}
-	free(entry);
+	విడుదల(నమోదు_2);
 }
 
 /*
@@ -250,179 +250,179 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
  * a patch for this on *BSD or tell me how to write the code to do this,
  * any suggestions are welcome.
  */
-static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
+స్థిర RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 {
-#ifdef __linux__
+#నిర్వచితమైతే __linux__
 	RC_STRINGLIST *overrides;
 	RC_STRING *cline, *override, *config_np;
-	char *tmp = NULL;
-	char *value = NULL;
+	అక్షరం *tmp = ఖాళీ;
+	అక్షరం *విలువ = ఖాళీ;
 	size_t varlen = 0;
 
 	overrides = rc_stringlist_new();
 
 	/* A list of variables which may be overridden on the kernel command line */
-	rc_stringlist_add(overrides, "rc_interactive");
-	rc_stringlist_add(overrides, "rc_parallel");
+	rc_stringlist_కూడు(overrides, "rc_interactive");
+	rc_stringlist_కూడు(overrides, "rc_parallel");
 
 	TAILQ_FOREACH(override, overrides, entries) {
-		varlen = strlen(override->value);
-		value = rc_proc_getent(override->value);
+		varlen = అక్షరశ్రేణి_పొడవు(override->విలువ);
+		విలువ = rc_proc_getent(override->విలువ);
 
 		/* No need to continue if there's nothing to override */
-		if (!value) {
-			free(value);
-			continue;
+		ఒకవేళ (!విలువ) {
+			విడుదల(విలువ);
+			కొనసాగు;
 		}
 
-		if (value != NULL) {
-			xasprintf(&tmp, "%s=%s", override->value, value);
+		ఒకవేళ (విలువ != ఖాళీ) {
+			xasprintf(&tmp, "%s=%s", override->విలువ, విలువ);
 		}
 
 		/*
 		 * Whenever necessary remove the old config entry first to prevent
 		 * duplicates
 		 */
-		TAILQ_FOREACH_SAFE(cline, config, entries, config_np) {
-			if (strncmp(override->value, cline->value, varlen) == 0
-				&& cline->value[varlen] == '=') {
-				rc_stringlist_delete(config, cline->value);
-				break;
+		TAILQ_FOREACH_సురక్షిత(cline, config, entries, config_np) {
+			ఒకవేళ (అక్షరశ్రేణి_పోలిక(override->విలువ, cline->విలువ, varlen) == 0
+				&& cline->విలువ[varlen] == '=') {
+				rc_stringlist_delete(config, cline->విలువ);
+				ఆపు;
 			}
 		}
 
 		/* Add the option (var/value) to the current config */
-		rc_stringlist_add(config, tmp);
+		rc_stringlist_కూడు(config, tmp);
 
-		free(tmp);
-		free(value);
+		విడుదల(tmp);
+		విడుదల(విలువ);
 	}
 
 	rc_stringlist_free(overrides);
-#endif
-	return config;
+#అయితే_ముగింపు
+	తిరిగి config;
 }
 
-static void
-rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
+స్థిర శూన్య
+rc_config_directory(RC_STRINGLIST *config, పూర్ణాంకం targetfd, స్థిరరాశి అక్షరం *dir)
 {
 	DIR *dp;
-	struct dirent *d;
+	నిర్మాణం dirent *d;
 	RC_STRINGLIST *rc_conf_d_files;
 	RC_STRING *fname;
 	RC_STRINGLIST *rc_conf_d_list;
-	RC_STRING *line;
+	RC_STRING *పంక్తి;
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return;
+	ఒకవేళ (!(dp = do_opendirat(targetfd, dir)))
+		తిరిగి;
 
 	rc_conf_d_files = rc_stringlist_new();
-	while ((d = readdir(dp)) != NULL) {
-		if (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
+	అయితే ((d = readdir(dp)) != ఖాళీ) {
+		ఒకవేళ (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
 			rc_stringlist_addu(rc_conf_d_files, d->d_name);
 		}
 	}
 
-	rc_stringlist_sort(&rc_conf_d_files);
+	rc_stringlist_క్రమీకరించు(&rc_conf_d_files);
 	TAILQ_FOREACH(fname, rc_conf_d_files, entries) {
-		if (!fname->value)
-			continue;
+		ఒకవేళ (!fname->విలువ)
+			కొనసాగు;
 
-		rc_conf_d_list = config_list(dirfd(dp), fname->value);
-		TAILQ_FOREACH(line, rc_conf_d_list, entries)
-			if (line->value)
-				rc_config_set_value(config, line->value);
+		rc_conf_d_list = config_list(dirfd(dp), fname->విలువ);
+		TAILQ_FOREACH(పంక్తి, rc_conf_d_list, entries)
+			ఒకవేళ (పంక్తి->విలువ)
+				rc_config_సమితి_విలువ(config, పంక్తి->విలువ);
 		rc_stringlist_free(rc_conf_d_list);
 	}
 
 	rc_stringlist_free(rc_conf_d_files);
 	closedir(dp);
 
-	return;
+	తిరిగి;
 }
 
-static RC_STRINGLIST *
-config_load(int dirfd, const char *pathname)
+స్థిర RC_STRINGLIST *
+config_ఎక్కించు(పూర్ణాంకం dirfd, స్థిరరాశి అక్షరం *pathname)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *config;
-	RC_STRING *line;
+	RC_STRING *పంక్తి;
 
 	list = config_list(dirfd, pathname);
 	config = rc_stringlist_new();
-	TAILQ_FOREACH(line, list, entries) {
-		rc_config_set_value(config, line->value);
+	TAILQ_FOREACH(పంక్తి, list, entries) {
+		rc_config_సమితి_విలువ(config, పంక్తి->విలువ);
 	}
 	rc_stringlist_free(list);
 
-	return config;
+	తిరిగి config;
 }
 
 RC_STRINGLIST *
-rc_config_load(const char *file)
+rc_config_ఎక్కించు(స్థిరరాశి అక్షరం *file)
 {
-	return config_load(AT_FDCWD, file);
+	తిరిగి config_ఎక్కించు(AT_FDCWD, file);
 }
 
-char *
-rc_config_value(RC_STRINGLIST *list, const char *entry)
+అక్షరం *
+rc_config_విలువ(RC_STRINGLIST *list, స్థిరరాశి అక్షరం *నమోదు_2)
 {
-	RC_STRING *line;
-	char *p;
+	RC_STRING *పంక్తి;
+	అక్షరం *p;
 	size_t len;
 
-	len = strlen(entry);
-	TAILQ_FOREACH(line, list, entries) {
-		p = strchr(line->value, '=');
-		if (p != NULL) {
-			if (strncmp(entry, line->value, len) == 0 && line->value[len] == '=')
-				return ++p;
+	len = అక్షరశ్రేణి_పొడవు(నమోదు_2);
+	TAILQ_FOREACH(పంక్తి, list, entries) {
+		p = strchr(పంక్తి->విలువ, '=');
+		ఒకవేళ (p != ఖాళీ) {
+			ఒకవేళ (అక్షరశ్రేణి_పోలిక(నమోదు_2, పంక్తి->విలువ, len) == 0 && పంక్తి->విలువ[len] == '=')
+				తిరిగి ++p;
 		}
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 /* Global for caching the strings loaded from rc.conf to avoid reparsing for
  * each rc_conf_value call */
-static RC_STRINGLIST *rc_conf = NULL;
+స్థిర RC_STRINGLIST *rc_conf = ఖాళీ;
 
-static void
-_free_rc_conf(void)
+స్థిర శూన్య
+_free_rc_conf(శూన్య)
 {
 	rc_stringlist_free(rc_conf);
 }
 
-static void
-rc_conf_append(int dirfd)
+స్థిర శూన్య
+rc_conf_append(పూర్ణాంకం dirfd)
 {
-	RC_STRINGLIST *conf = config_load(dirfd, "rc.conf");
+	RC_STRINGLIST *conf = config_ఎక్కించు(dirfd, "rc.conf");
 	TAILQ_CONCAT(rc_conf, conf, entries);
 	rc_stringlist_free(conf);
 }
 
-char *
-rc_conf_value(const char *setting)
+అక్షరం *
+rc_conf_విలువ(స్థిరరాశి అక్షరం *setting)
 {
-	const int *dirfds;
-	size_t dir_count = rc_scriptdirfds(&dirfds);
+	స్థిరరాశి పూర్ణాంకం *dirfds;
+	size_t dir_లెక్క = rc_scriptdirfds(&dirfds);
 	RC_STRING *s;
 
-	if (rc_conf)
-		return rc_config_value(rc_conf, setting);
+	ఒకవేళ (rc_conf)
+		తిరిగి rc_config_విలువ(rc_conf, setting);
 
 	rc_conf = rc_stringlist_new();
 	atexit(_free_rc_conf);
 
-	for (size_t i = 0; i < dir_count; i++) {
+	కొరకు (size_t i = 0; i < dir_లెక్క; i++) {
 		/* load configs in reverse order, so earlier entries override later ones */
-		size_t idx = dir_count - 1 - i;
+		size_t idx = dir_లెక్క - 1 - i;
 		rc_conf_append(dirfds[idx]);
 		rc_config_directory(rc_conf, dirfds[idx], "rc.conf.d");
 	}
 
 	/* Support old configs. */
-	if (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
-		RC_STRINGLIST *old_conf = config_load(AT_FDCWD, RC_CONF_OLD);
+	ఒకవేళ (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
+		RC_STRINGLIST *old_conf = config_ఎక్కించు(AT_FDCWD, RC_CONF_OLD);
 		TAILQ_CONCAT(rc_conf, old_conf, entries);
 		rc_stringlist_free(old_conf);
 	}
@@ -431,13 +431,13 @@ rc_conf_value(const char *setting)
 
 	/* Convert old uppercase to lowercase */
 	TAILQ_FOREACH(s, rc_conf, entries) {
-		char *p = s->value;
-		while (p && *p && *p != '=') {
-			if (isupper((unsigned char)*p))
-				*p = tolower((unsigned char)*p);
+		అక్షరం *p = s->విలువ;
+		అయితే (p && *p && *p != '=') {
+			ఒకవేళ (isupper((గుర్తులేని అక్షరం)*p))
+				*p = tolower((గుర్తులేని అక్షరం)*p);
 			p++;
 		}
 	}
 
-	return rc_config_value(rc_conf, setting);
+	తిరిగి rc_config_విలువ(rc_conf, setting);
 }

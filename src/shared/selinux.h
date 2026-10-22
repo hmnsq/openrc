@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef RC_SELINUX_UTIL_H
-#define RC_SELINUX_UTIL_H
+#నిర్వచితం_కాకపోతే RC_SELINUX_UTIL_H
+#నిర్వచించు RC_SELINUX_UTIL_H
 
-#ifdef HAVE_SELINUX
+#నిర్వచితమైతే HAVE_SELINUX
 
-int selinux_util_open(void);
-int selinux_util_label(const char *path);
-int selinux_util_close(void);
+పూర్ణాంకం selinux_util_open(శూన్య);
+పూర్ణాంకం selinux_util_label(స్థిరరాశి అక్షరం *మార్గం);
+పూర్ణాంకం selinux_util_close(శూన్య);
 
-void selinux_setup(char **argv);
+శూన్య selinux_అమరిక(అక్షరం **argv);
 
-#else
+#లేకపోతే
 
 /* always return false for selinux_util_open() */
-#define selinux_util_open() (0)
-#define selinux_util_label(x) do { } while (0)
-#define selinux_util_close() do { } while (0)
+#నిర్వచించు selinux_util_open() (0)
+#నిర్వచించు selinux_util_label(x) చేయి { } అయితే (0)
+#నిర్వచించు selinux_util_close() చేయి { } అయితే (0)
 
-#define selinux_setup(x) do { } while (0)
+#నిర్వచించు selinux_అమరిక(x) చేయి { } అయితే (0)
 
-#endif
+#అయితే_ముగింపు
 
 
-#endif
+#అయితే_ముగింపు

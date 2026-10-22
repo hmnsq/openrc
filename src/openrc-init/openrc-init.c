@@ -18,76 +18,76 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <pwd.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/reboot.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <poll.h>
-#include <utmp.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <pwd.h>
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <time.h>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <sys/reboot.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/wait.h>
+#అన్తర్భావ <poll.h>
+#అన్తర్భావ <utmp.h>
 
-#ifdef HAVE_SELINUX
+#నిర్వచితమైతే HAVE_SELINUX
 #  include <selinux/selinux.h>
-#endif
+#అయితే_ముగింపు
 
-#include "rc.h"
-#include "rc_exec.h"
-#include "wtmp.h"
-#include "helpers.h"
-#include "version.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "rc_exec.h"
+#అన్తర్భావ "wtmp.h"
+#అన్తర్భావ "helpers.h"
+#అన్తర్భావ "version.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#ఒకవేళ defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
-#endif
+#అయితే_ముగింపు
 
-static const char *path_default = "/sbin:/usr/sbin:/bin:/usr/bin";
-static const char *rc_default_runlevel = "default";
-static int sigpipe[2] = { -1, -1 };
-static bool quiet = false;
-static const char *progname;
+స్థిర స్థిరరాశి అక్షరం *మార్గం_default = "/sbin:/usr/sbin:/bin:/usr/bin";
+స్థిర స్థిరరాశి అక్షరం *rc_default_runlevel = "default";
+స్థిర పూర్ణాంకం sigpipe[2] = { -1, -1 };
+స్థిర bool quiet = false;
+స్థిర స్థిరరాశి అక్షరం *progname;
 
-static void do_openrc(const char *runlevel)
+స్థిర శూన్య do_openrc(స్థిరరాశి అక్షరం *runlevel)
 {
-	const char *argv[] = { "openrc", runlevel, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
-	args.setsid = 1;
+	స్థిరరాశి అక్షరం *argv[] = { "openrc", runlevel, ఖాళీ };
+	నిర్మాణం exec_ఫలితం res;
+	నిర్మాణం exec_వాదనలు వాదనలు = exec_init(argv);
+	వాదనలు.setsid = 1;
 
-	if (!quiet)
-		printf("Starting %s runlevel\n", runlevel);
-	res = do_exec(&args);
-	if (res.pid < 0) {
+	ఒకవేళ (!quiet)
+		రాయి("Starting %s runlevel\n", runlevel);
+	res = do_exec(&వాదనలు);
+	ఒకవేళ (res.pid < 0) {
 		perror("do_exec");
-		exit(1);
+		నిష్క్రమించు(1);
 	}
-	while (waitpid(res.pid, NULL, 0) != res.pid)
-		if (errno == ECHILD)
-			break;
+	అయితే (waitpid(res.pid, ఖాళీ, 0) != res.pid)
+		ఒకవేళ (errno == ECHILD)
+			ఆపు;
 }
 
-static void init(const char *default_runlevel)
+స్థిర శూన్య init(స్థిరరాశి అక్షరం *default_runlevel)
 {
-	const char *runlevel = NULL;
+	స్థిరరాశి అక్షరం *runlevel = ఖాళీ;
 	do_openrc("sysinit");
 	do_openrc("boot");
-	if (default_runlevel)
+	ఒకవేళ (default_runlevel)
 		runlevel = default_runlevel;
-	else
-		runlevel = rc_conf_value("rc_default_runlevel");
-	if (!runlevel)
+	లేకపోతే
+		runlevel = rc_conf_విలువ("rc_default_runlevel");
+	ఒకవేళ (!runlevel)
 		runlevel = rc_default_runlevel;
-	if (!rc_runlevel_exists(runlevel)) {
+	ఒకవేళ (!rc_runlevel_exists(runlevel)) {
 		fprintf(stderr, "%s is an invalid runlevel\n", runlevel);
 		runlevel = rc_default_runlevel;
 	}
@@ -95,218 +95,218 @@ static void init(const char *default_runlevel)
 	log_wtmp("reboot", "~~", 0, RUN_LVL, "~~");
 }
 
-static void handle_reexec(void)
+స్థిర శూన్య handle_reexec(శూన్య)
 {
-	execlp(progname, progname, "reexec", NULL);
-	return;
+	execlp(progname, progname, "reexec", ఖాళీ);
+	తిరిగి;
 }
 
-static void handle_shutdown(const char *runlevel, int cmd)
+స్థిర శూన్య handle_shutdown(స్థిరరాశి అక్షరం *runlevel, పూర్ణాంకం cmd)
 {
-	const long ms_to_ns = 1000000L;
-	struct timespec start, now, tmp, remain;
+	స్థిరరాశి దీర్ఘ ms_గమ్యం_ns = 1000000L;
+	నిర్మాణం timespec ప్రారంభం, now, tmp, remain;
 
 	do_openrc(runlevel);
-	if (!quiet)
-		printf("Sending the final TERM signal\n");
+	ఒకవేళ (!quiet)
+		రాయి("Sending the final TERM signal\n");
 	kill(-1, SIGTERM);
-	clock_gettime(CLOCK_MONOTONIC, &start);
+	clock_gettime(CLOCK_MONOTONIC, &ప్రారంభం);
 
 	/* ensure *at least* half a second of grace time before KILL */
 	tmp.tv_sec = 0;
-	tmp.tv_nsec = 500 * ms_to_ns;
-	while (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
+	tmp.tv_nsec = 500 * ms_గమ్యం_ns;
+	అయితే (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
 		tmp = remain;
 
-	for (;;) {
-		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == -1 && errno == ECHILD) {
+	కొరకు (;;) {
+		pid_t pid = waitpid(-1, ఖాళీ, WNOHANG);
+		ఒకవేళ (pid == -1 && errno == ECHILD) {
 			/* all children reaped, safe to exit */
-			break;
+			ఆపు;
 		}
 
 		clock_gettime(CLOCK_MONOTONIC, &now);
-		timespecsub(&now, &start, &tmp);
-		if (tmp.tv_sec >= 3) {
+		timespecsub(&now, &ప్రారంభం, &tmp);
+		ఒకవేళ (tmp.tv_sec >= 3) {
 			/* it's been 3 seconds already, go for the KILL hammer */
-			break;
+			ఆపు;
 		}
 
 		tmp.tv_sec = 0;
-		tmp.tv_nsec = 100 * ms_to_ns;
-		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, NULL);
+		tmp.tv_nsec = 100 * ms_గమ్యం_ns;
+		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, ఖాళీ);
 	}
 
-	if (!quiet)
-		printf("Sending the final KILL signal\n");
+	ఒకవేళ (!quiet)
+		రాయి("Sending the final KILL signal\n");
 	kill(-1, SIGKILL);
 	sync();
 	reboot(cmd);
 	/* reboot normally if kexec fails */
-	if (cmd == RB_KEXEC)
+	ఒకవేళ (cmd == RB_KEXEC)
 		reboot(RB_AUTOBOOT);
 }
 
-static void run_program(const char *prog)
+స్థిర శూన్య నిరంతరం_కార్యక్రమం(స్థిరరాశి అక్షరం *prog)
 {
-	const char *argv[] = { prog, NULL };
-	struct exec_args args = exec_init(argv);
-	struct exec_result res = do_exec(&args);
-	if (res.pid < 0 || rc_waitpid(res.pid) == -1)
+	స్థిరరాశి అక్షరం *argv[] = { prog, ఖాళీ };
+	నిర్మాణం exec_వాదనలు వాదనలు = exec_init(argv);
+	నిర్మాణం exec_ఫలితం res = do_exec(&వాదనలు);
+	ఒకవేళ (res.pid < 0 || rc_waitpid(res.pid) == -1)
 		perror("init");
 }
 
-static void open_shell(void)
+స్థిర శూన్య open_shell(శూన్య)
 {
-	const char *shell;
-	struct passwd *pw;
+	స్థిరరాశి అక్షరం *shell;
+	నిర్మాణం passwd *pw;
 
-#ifdef __linux__
-	const char *sys = rc_sys();
+#నిర్వచితమైతే __linux__
+	స్థిరరాశి అక్షరం *sys = rc_sys();
 
 	/* VSERVER systems cannot really drop to shells */
-	if (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
+	ఒకవేళ (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
 	{
-		execlp("halt", "halt", "-f", (char *) NULL);
+		execlp("halt", "halt", "-f", (అక్షరం *) ఖాళీ);
 		perror("init");
-		return;
+		తిరిగి;
 	}
-#endif
+#అయితే_ముగింపు
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_విలువ("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
-	if (!shell) {
+	ఒకవేళ (!shell) {
 		shell = getenv("SHELL");
-		if (!shell) {
+		ఒకవేళ (!shell) {
 			pw = getpwuid(getuid());
-			if (pw)
+			ఒకవేళ (pw)
 				shell = pw->pw_shell;
-			if (!shell)
+			ఒకవేళ (!shell)
 				shell = "/bin/sh";
 		}
 	}
-	run_program(shell);
+	నిరంతరం_కార్యక్రమం(shell);
 }
 
-static void handle_single(void)
+స్థిర శూన్య handle_single(శూన్య)
 {
 	do_openrc("single");
 	open_shell();
-	init(NULL);
+	init(ఖాళీ);
 }
 
-static void dispatch_signal(int sigfd)
+స్థిర శూన్య dispatch_signal(పూర్ణాంకం sigfd)
 {
-	int sig;
-	ssize_t count = read(sigfd, &sig, sizeof(sig));
+	పూర్ణాంకం sig;
+	ssize_t లెక్క = పఠ(sigfd, &sig, పరిమాణం(sig));
 
-	if (count < 0) {
+	ఒకవేళ (లెక్క < 0) {
 		perror("read(sigpipe)");
-		return;
+		తిరిగి;
 	}
 
-	if (count != sizeof(sig)) {
+	ఒకవేళ (లెక్క != పరిమాణం(sig)) {
 		fputs("bad read from sigpipe\n", stderr);
-		return;
+		తిరిగి;
 	}
 
-	switch (sig) {
-		case SIGINT:
+	ఎంపిక (sig) {
+		స్థితి SIGINT:
 			handle_shutdown("reboot", RB_AUTOBOOT);
-			break;
-		case SIGTERM:
-#ifdef SIGPWR
-		case SIGPWR:
-#endif
+			ఆపు;
+		స్థితి SIGTERM:
+#నిర్వచితమైతే SIGPWR
+		స్థితి SIGPWR:
+#అయితే_ముగింపు
 			handle_shutdown("shutdown", RB_HALT_SYSTEM);
-			break;
-		default:
+			ఆపు;
+		అప్రమేయ:
 			fprintf(stderr, "Unknown signal received, %d\n", sig);
-			break;
+			ఆపు;
 	}
 }
 
-static void dispatch_fifo(int fifo)
+స్థిర శూన్య dispatch_fifo(పూర్ణాంకం fifo)
 {
-	char buf[2048];
-	ssize_t count = read(fifo, buf, sizeof(buf) - 1);
+	అక్షరం buf[2048];
+	ssize_t లెక్క = పఠ(fifo, buf, పరిమాణం(buf) - 1);
 
-	if (count < 0) {
+	ఒకవేళ (లెక్క < 0) {
 		perror("read(fifo)");
-		return;
+		తిరిగి;
 	}
 
-	buf[count] = 0;
+	buf[లెక్క] = 0;
 
-	if (!quiet)
-		printf("PID1: Received \"%s\" from FIFO...\n", buf);
+	ఒకవేళ (!quiet)
+		రాయి("PID1: Received \"%s\" from FIFO...\n", buf);
 
-	if (strcmp(buf, "halt") == 0)
+	ఒకవేళ (strcmp(buf, "halt") == 0)
 		handle_shutdown("shutdown", RB_HALT_SYSTEM);
-	else if (strcmp(buf, "kexec") == 0)
+	లేకపోతే ఒకవేళ (strcmp(buf, "kexec") == 0)
 		handle_shutdown("reboot", RB_KEXEC);
-	else if (strcmp(buf, "poweroff") == 0)
+	లేకపోతే ఒకవేళ (strcmp(buf, "poweroff") == 0)
 		handle_shutdown("shutdown", RB_POWER_OFF);
-	else if (strcmp(buf, "reboot") == 0)
+	లేకపోతే ఒకవేళ (strcmp(buf, "reboot") == 0)
 		handle_shutdown("reboot", RB_AUTOBOOT);
-	else if (strcmp(buf, "reexec") == 0)
+	లేకపోతే ఒకవేళ (strcmp(buf, "reexec") == 0)
 		handle_reexec();
-	else if (strcmp(buf, "single") == 0)
+	లేకపోతే ఒకవేళ (strcmp(buf, "single") == 0)
 		handle_single();
 }
 
-static void signal_handler(int sig)
+స్థిర శూన్య signal_handler(పూర్ణాంకం sig)
 {
-	int saved_errno = errno;
-	write(sigpipe[1], &sig, sizeof(sig));
+	పూర్ణాంకం saved_errno = errno;
+	లిఖ(sigpipe[1], &sig, పరిమాణం(sig));
 	/* ensure the errno doesn't get clobbered in the rare (impossible?)
 	 * case that the write above fails */
 	errno = saved_errno;
 }
 
-static void reap_zombies(int sig RC_UNUSED)
+స్థిర శూన్య reap_zombies(పూర్ణాంకం sig RC_వాడని)
 {
-	char errmsg[] = "waitpid() failed\n";
-	int saved_errno = errno;
+	అక్షరం errmsg[] = "waitpid() failed\n";
+	పూర్ణాంకం saved_errno = errno;
 
-	for (;;) {
-		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == 0)
-			break;
-		else if (pid == -1) {
-			if (errno == ECHILD)
-				break;
-			write(STDERR_FILENO, errmsg, sizeof(errmsg) - 1);
-			continue;
+	కొరకు (;;) {
+		pid_t pid = waitpid(-1, ఖాళీ, WNOHANG);
+		ఒకవేళ (pid == 0)
+			ఆపు;
+		లేకపోతే ఒకవేళ (pid == -1) {
+			ఒకవేళ (errno == ECHILD)
+				ఆపు;
+			లిఖ(STDERR_FILENO, errmsg, పరిమాణం(errmsg) - 1);
+			కొనసాగు;
 		}
 	}
 	errno = saved_errno;
 }
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	char *cmdline_runlevel = NULL;
-	int fifo;
+	అక్షరం *cmdline_runlevel = ఖాళీ;
+	పూర్ణాంకం fifo;
 	bool reexec = false;
-	sigset_t signals;
-	struct sigaction sa;
-#ifdef HAVE_SELINUX
-	int enforce = 0;
-#endif
+	sigset_t సంకేతాలు;
+	నిర్మాణం sigaction sa;
+#నిర్వచితమైతే HAVE_SELINUX
+	పూర్ణాంకం enforce = 0;
+#అయితే_ముగింపు
 
 	progname = argv[0];
 
-	if (getpid() != 1)
-		return 1;
+	ఒకవేళ (getpid() != 1)
+		తిరిగి 1;
 
-#ifdef HAVE_SELINUX
-	if (getenv("SELINUX_INIT") == NULL) {
-		if (is_selinux_enabled() != 1) {
-			if (selinux_init_load_policy(&enforce) == 0) {
+#నిర్వచితమైతే HAVE_SELINUX
+	ఒకవేళ (getenv("SELINUX_INIT") == ఖాళీ) {
+		ఒకవేళ (is_selinux_enabled() != 1) {
+			ఒకవేళ (selinux_init_ఎక్కించు_policy(&enforce) == 0) {
 				setenv("SELINUX_INIT", "YES", 1);
 				execv(argv[0], argv);
-			} else {
-				if (enforce > 0) {
+			} లేకపోతే {
+				ఒకవేళ (enforce > 0) {
 					/*
 					 * SELinux in enforcing mode but load_policy failed
 					 * At this point, we probably can't open /dev/console,
@@ -315,75 +315,75 @@ int main(int argc, char **argv)
 					fprintf(stderr,"Unable to load SELinux Policy.\n");
 					fprintf(stderr,"Machine is  in enforcing mode.\n");
 					fprintf(stderr,"Halting now.\n");
-					exit(1);
+					నిష్క్రమించు(1);
 				}
 			}
 		}
 	}
-#endif
+#అయితే_ముగింపు
 
 	quiet = rc_yesno(getenv("EINFO_QUIET"));
 
-	if (!quiet)
-		printf("OpenRC init version %s starting\n", VERSION);
+	ఒకవేళ (!quiet)
+		రాయి("OpenRC init version %s starting\n", సంస్కరణ);
 
-	if (argc > 1) {
-		if (strcmp(argv[1], "reexec") == 0)
+	ఒకవేళ (argc > 1) {
+		ఒకవేళ (strcmp(argv[1], "reexec") == 0)
 			reexec = true;
-		else
+		లేకపోతే
 			cmdline_runlevel = argv[1];
 	}
 
-	if (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
+	ఒకవేళ (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
 		perror("pipe2");
-		return 1;
+		తిరిగి 1;
 	}
 
 	/* block all signals we do not handle */
-	sigfillset(&signals);
-	sigdelset(&signals, SIGCHLD);
-	sigdelset(&signals, SIGINT);
-	sigdelset(&signals, SIGTERM);
-#ifdef SIGPWR
-	sigdelset(&signals, SIGPWR);
-#endif
-	sigprocmask(SIG_SETMASK, &signals, NULL);
+	sigfillset(&సంకేతాలు);
+	sigdelset(&సంకేతాలు, SIGCHLD);
+	sigdelset(&సంకేతాలు, SIGINT);
+	sigdelset(&సంకేతాలు, SIGTERM);
+#నిర్వచితమైతే SIGPWR
+	sigdelset(&సంకేతాలు, SIGPWR);
+#అయితే_ముగింపు
+	sigprocmask(SIG_SETMASK, &సంకేతాలు, ఖాళీ);
 
 	/* install signal  handler */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, పరిమాణం(sa));
 	sa.sa_handler = reap_zombies;
-	sigaction(SIGCHLD, &sa, NULL);
+	sigaction(SIGCHLD, &sa, ఖాళీ);
 	sa.sa_handler = signal_handler;
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-#ifdef SIGPWR
-	sigaction(SIGPWR, &sa, NULL);
-#endif
+	sigaction(SIGINT, &sa, ఖాళీ);
+	sigaction(SIGTERM, &sa, ఖాళీ);
+#నిర్వచితమైతే SIGPWR
+	sigaction(SIGPWR, &sa, ఖాళీ);
+#అయితే_ముగింపు
 	reboot(RB_DISABLE_CAD);
 
 	/* set default path */
-	setenv("PATH", path_default, 1);
+	setenv("PATH", మార్గం_default, 1);
 
-	if (!reexec)
+	ఒకవేళ (!reexec)
 		init(cmdline_runlevel);
 
-	if ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
+	ఒకవేళ ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
 		perror("open_rwfifo");
 
-	for (;;) {
-		enum { FD_FIFO, FD_SIG, FD_COUNT };
-		struct pollfd pfd[] = {
+	కొరకు (;;) {
+		గణన { FD_FIFO, FD_SIG, FD_లెక్క };
+		నిర్మాణం pollfd pfd[] = {
 			[FD_FIFO] = { .fd = fifo, .events = POLLIN },
 			[FD_SIG] = { .fd = sigpipe[0], .events = POLLIN },
 		};
 
-		poll(pfd, FD_COUNT, -1);
+		poll(pfd, FD_లెక్క, -1);
 
-		if (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
+		ఒకవేళ (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
 			dispatch_signal(sigpipe[0]);
 
-		if (pfd[FD_FIFO].revents & POLLIN)
+		ఒకవేళ (pfd[FD_FIFO].revents & POLLIN)
 			dispatch_fifo(fifo);
 	}
-	return 0;
+	తిరిగి 0;
 }

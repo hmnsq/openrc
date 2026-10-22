@@ -16,48 +16,48 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <getopt.h>
+#అన్తర్భావ <grp.h>
+#అన్తర్భావ <pwd.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <unistd.h>
 
-#include "einfo.h"
-#include "misc.h"
-#include "selinux.h"
-#include "_usage.h"
-#include "helpers.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "misc.h"
+#అన్తర్భావ "selinux.h"
+#అన్తర్భావ "_usage.h"
+#అన్తర్భావ "helpers.h"
 
-typedef enum {
+రకనిర్వచనం గణన {
 	inode_unknown = 0,
 	inode_file = 1,
 	inode_dir = 2,
 	inode_fifo = 3,
 } inode_t;
 
-const char *applet = NULL;
-const char *extraopts ="path1 [path2] [...]";
-const char getoptstring[] = "dDfFpm:o:sW" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "directory",          0, NULL, 'd'},
-	{ "directory-truncate", 0, NULL, 'D'},
-	{ "file",               0, NULL, 'f'},
-	{ "file-truncate",      0, NULL, 'F'},
-	{ "pipe",               0, NULL, 'p'},
-	{ "mode",               1, NULL, 'm'},
-	{ "owner",              1, NULL, 'o'},
-	{ "symlinks",           0, NULL, 's'},
-	{ "writable",           0, NULL, 'W'},
+స్థిరరాశి అక్షరం *applet = ఖాళీ;
+స్థిరరాశి అక్షరం *extraopts ="path1 [path2] [...]";
+స్థిరరాశి అక్షరం getoptstring[] = "dDfFpm:o:sW" getoptstring_COMMON;
+స్థిరరాశి నిర్మాణం option longopts[] = {
+	{ "directory",          0, ఖాళీ, 'd'},
+	{ "directory-truncate", 0, ఖాళీ, 'D'},
+	{ "file",               0, ఖాళీ, 'f'},
+	{ "file-truncate",      0, ఖాళీ, 'F'},
+	{ "pipe",               0, ఖాళీ, 'p'},
+	{ "mode",               1, ఖాళీ, 'm'},
+	{ "owner",              1, ఖాళీ, 'o'},
+	{ "symlinks",           0, ఖాళీ, 's'},
+	{ "writable",           0, ఖాళీ, 'W'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+స్థిరరాశి అక్షరం * స్థిరరాశి longopts_help[] = {
 	"Create a directory if not exists",
 	"Create/empty directory",
 	"Create a file if not exists",
@@ -69,350 +69,350 @@ const char * const longopts_help[] = {
 	"Check whether the path is writable or not",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+స్థిరరాశి అక్షరం *usagestring = ఖాళీ;
 
-static int get_dirfd(char *path, bool symlinks)
+స్థిర పూర్ణాంకం get_dirfd(అక్షరం *మార్గం, bool symlinks)
 {
-	char *ch, *item, *path_dupe, *str, *linkpath = NULL;
-	int components = 0, dirfd, flags = 0, new_dirfd;
+	అక్షరం *ch, *అంశం, *మార్గం_dupe, *str, *linkpath = ఖాళీ;
+	పూర్ణాంకం components = 0, dirfd, flags = 0, new_dirfd;
 	ssize_t linksize;
-	struct stat st;
+	నిర్మాణం stat st;
 
-	if (!path || *path != '/')
+	ఒకవేళ (!మార్గం || *మార్గం != '/')
 		eerrorx("%s: empty or relative path", applet);
 	dirfd = openat(AT_FDCWD, "/", O_RDONLY);
-	if (dirfd == -1)
+	ఒకవేళ (dirfd == -1)
 		eerrorx("%s: unable to open the root directory: %s", applet, strerror(errno));
-	ch = path;
-	while (*ch) {
-		if (*ch == '/')
+	ch = మార్గం;
+	అయితే (*ch) {
+		ఒకవేళ (*ch == '/')
 			components++;
 		ch++;
 	}
-	path_dupe = xstrdup(path);
-	item = strtok(path_dupe, "/");
-#ifdef O_PATH
-	flags |= O_PATH;
-#endif
-	if (!symlinks)
+	మార్గం_dupe = xstrdup(మార్గం);
+	అంశం = strtok(మార్గం_dupe, "/");
+#నిర్వచితమైతే O_మార్గం
+	flags |= O_మార్గం;
+#అయితే_ముగింపు
+	ఒకవేళ (!symlinks)
 		flags |= O_NOFOLLOW;
 	flags |= O_RDONLY;
-	while (dirfd > 0 && item && components > 1) {
-		str = xstrdup(linkpath ? linkpath : item);
+	అయితే (dirfd > 0 && అంశం && components > 1) {
+		str = xstrdup(linkpath ? linkpath : అంశం);
 		new_dirfd = openat(dirfd, str, flags);
-		if (new_dirfd == -1)
-			eerrorx("%s: %s: could not open %s: %s", applet, path, str, strerror(errno));
-		if (fstat(new_dirfd, &st) == -1)
-			eerrorx("%s: %s: unable to stat %s: %s", applet, path, item, strerror(errno));
-		if (S_ISLNK(st.st_mode) ) {
-			if (st.st_uid != 0)
-				eerrorx("%s: %s: symbolic link %s not owned by root", applet, path, str);
+		ఒకవేళ (new_dirfd == -1)
+			eerrorx("%s: %s: could not open %s: %s", applet, మార్గం, str, strerror(errno));
+		ఒకవేళ (fstat(new_dirfd, &st) == -1)
+			eerrorx("%s: %s: unable to stat %s: %s", applet, మార్గం, అంశం, strerror(errno));
+		ఒకవేళ (S_ISLNK(st.st_mode) ) {
+			ఒకవేళ (st.st_uid != 0)
+				eerrorx("%s: %s: symbolic link %s not owned by root", applet, మార్గం, str);
 			linksize = st.st_size+1;
-			if (linkpath)
-				free(linkpath);
+			ఒకవేళ (linkpath)
+				విడుదల(linkpath);
 			linkpath = xmalloc(linksize);
 			memset(linkpath, 0, linksize);
-			if (readlinkat(new_dirfd, "", linkpath, linksize) != st.st_size)
+			ఒకవేళ (readlinkat(new_dirfd, "", linkpath, linksize) != st.st_size)
 				eerrorx("%s: symbolic link destination changed", applet);
 			/*
 			 * now follow the symlink.
 			 */
 			close(new_dirfd);
-		} else {
+		} లేకపోతే {
 			/* now walk down the directory path */
 			close(dirfd);
 			dirfd = new_dirfd;
-			free(linkpath);
-			linkpath = NULL;
-			item = strtok(NULL, "/");
+			విడుదల(linkpath);
+			linkpath = ఖాళీ;
+			అంశం = strtok(ఖాళీ, "/");
 			components--;
 		}
 
-		free(str);
+		విడుదల(str);
 	}
-	free(path_dupe);
-	free(linkpath);
-	return dirfd;
+	విడుదల(మార్గం_dupe);
+	విడుదల(linkpath);
+	తిరిగి dirfd;
 }
 
-static char *clean_path(char *path)
+స్థిర అక్షరం *clean_మార్గం(అక్షరం *మార్గం)
 {
-	char *ch, *ch2, *str;
+	అక్షరం *ch, *ch2, *str;
 
-	str = xmalloc(strlen(path) + 1);
-	ch = path;
+	str = xmalloc(అక్షరశ్రేణి_పొడవు(మార్గం) + 1);
+	ch = మార్గం;
 	ch2 = str;
-	while (true) {
+	అయితే (true) {
 		*ch2 = *ch;
 		ch++;
 		ch2++;
-		if (!*(ch-1))
-			break;
-		while (*(ch - 1) == '/' && *ch == '/')
+		ఒకవేళ (!*(ch-1))
+			ఆపు;
+		అయితే (*(ch - 1) == '/' && *ch == '/')
 			ch++;
 	}
 	/* get rid of trailing / characters */
-	while ((ch = strrchr(str, '/'))) {
-		if (ch == str)
-			break;
-		if (!*(ch+1))
+	అయితే ((ch = strrchr(str, '/'))) {
+		ఒకవేళ (ch == str)
+			ఆపు;
+		ఒకవేళ (!*(ch+1))
 			*ch = 0;
-		else
-			break;
+		లేకపోతే
+			ఆపు;
 	}
-	return str;
+	తిరిగి str;
 }
 
-static int do_create(inode_t type, const char *path, int dirfd, const char *name, int flags, mode_t mode)
+స్థిర పూర్ణాంకం do_create(inode_t type, స్థిరరాశి అక్షరం *మార్గం, పూర్ణాంకం dirfd, స్థిరరాశి అక్షరం *name, పూర్ణాంకం flags, mode_t బహుళకం)
 {
-	int mask = umask(0);
-	int fd;
+	పూర్ణాంకం ముసుగు = umask(0);
+	పూర్ణాంకం fd;
 
-	static const mode_t default_mode[] = {
+	స్థిర స్థిరరాశి mode_t default_బహుళకం[] = {
 		[inode_file] = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, /* 664 */
 		[inode_dir] = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH, /* 775 */
 		[inode_fifo] = S_IRUSR | S_IWUSR, /* 600 */
 		[inode_unknown] = 0,
 	};
 
-	if (!mode)
-		mode = default_mode[type];
+	ఒకవేళ (!బహుళకం)
+		బహుళకం = default_బహుళకం[type];
 
-	switch (type) {
-	case inode_file:
-		einfo("%s: creating file", path);
+	ఎంపిక (type) {
+	స్థితి inode_file:
+		einfo("%s: creating file", మార్గం);
 		flags |= O_CREAT;
-		break;
-	case inode_dir:
-		einfo("%s: creating directory", path);
+		ఆపు;
+	స్థితి inode_dir:
+		einfo("%s: creating directory", మార్గం);
 
 		/* We do not recursively create parents */
-		if (mkdirat(dirfd, name, mode) == -1 && errno != EEXIST) {
+		ఒకవేళ (mkdirat(dirfd, name, బహుళకం) == -1 && errno != EEXIST) {
 			eerror("%s: mkdirat: %s", applet, strerror (errno));
-			return -1;
+			తిరిగి -1;
 		}
 
-		break;
-	case inode_fifo:
-		einfo("%s: creating fifo", path);
+		ఆపు;
+	స్థితి inode_fifo:
+		einfo("%s: creating fifo", మార్గం);
 
-		if (mkfifoat(dirfd, name, mode) == -1 && errno != EEXIST) {
+		ఒకవేళ (mkfifoat(dirfd, name, బహుళకం) == -1 && errno != EEXIST) {
 			eerror("%s: mkfifo: %s", applet, strerror (errno));
-			return -1;
+			తిరిగి -1;
 		}
 
-		break;
-	case inode_unknown:
-		break;
+		ఆపు;
+	స్థితి inode_unknown:
+		ఆపు;
 	}
-	umask(mask);
+	umask(ముసుగు);
 
-	if ((fd = openat(dirfd, name, flags, mode)) == -1) {
+	ఒకవేళ ((fd = openat(dirfd, name, flags, బహుళకం)) == -1) {
 		eerror("%s: open: %s", applet, strerror(errno));
-		return -1;
+		తిరిగి -1;
 	}
-	return fd;
+	తిరిగి fd;
 }
 
-static int do_check(char *path, uid_t uid, gid_t gid, mode_t mode, inode_t type,
+స్థిర పూర్ణాంకం do_check(అక్షరం *మార్గం, uid_t uid, gid_t gid, mode_t బహుళకం, inode_t type,
 		bool trunc, bool chowner, bool writable, bool symlinks, bool selinux_on)
 {
-	int flags = O_NDELAY | O_NOCTTY | O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
-	const char *name = basename_c(path);
-	struct stat st;
-	int dirfd, fd;
+	పూర్ణాంకం flags = O_NDELAY | O_NOCTTY | O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
+	స్థిరరాశి అక్షరం *name = basename_c(మార్గం);
+	నిర్మాణం stat st;
+	పూర్ణాంకం dirfd, fd;
 
-	if (writable) {
-		if (access(path, W_OK) == 0)
-			return 0;
-		if (errno != ENOENT || type == inode_unknown)
-			return -1;
+	ఒకవేళ (writable) {
+		ఒకవేళ (access(మార్గం, W_OK) == 0)
+			తిరిగి 0;
+		ఒకవేళ (errno != ENOENT || type == inode_unknown)
+			తిరిగి -1;
 	}
 
-	if (trunc && type == inode_file)
+	ఒకవేళ (trunc && type == inode_file)
 		flags |= O_TRUNC;
 
-	dirfd = get_dirfd(path, symlinks);
-	if ((fd = openat(dirfd, name, flags)) == -1 &&
-			(fd = do_create(type, path, dirfd, name, flags, mode)) == -1)
-		return -1;
+	dirfd = get_dirfd(మార్గం, symlinks);
+	ఒకవేళ ((fd = openat(dirfd, name, flags)) == -1 &&
+			(fd = do_create(type, మార్గం, dirfd, name, flags, బహుళకం)) == -1)
+		తిరిగి -1;
 
-	if (fstat(fd, &st) == -1) {
-		eerror("fstat: %s: %s", path, strerror(errno));
-		goto err;
+	ఒకవేళ (fstat(fd, &st) == -1) {
+		eerror("fstat: %s: %s", మార్గం, strerror(errno));
+		వెళ్ళు err;
 	}
 
-	if (type != inode_dir && S_ISDIR(st.st_mode)) {
-		eerror("%s: is a directory", path);
-		goto err;
+	ఒకవేళ (type != inode_dir && S_ISDIR(st.st_mode)) {
+		eerror("%s: is a directory", మార్గం);
+		వెళ్ళు err;
 	}
 
-	if (type != inode_file && S_ISREG(st.st_mode)) {
-		eerror("%s: is a file", path);
-		goto err;
+	ఒకవేళ (type != inode_file && S_ISREG(st.st_mode)) {
+		eerror("%s: is a file", మార్గం);
+		వెళ్ళు err;
 	}
 
-	if (type != inode_fifo && S_ISFIFO(st.st_mode)) {
-		eerror("%s: is a fifo", path);
-		goto err;
+	ఒకవేళ (type != inode_fifo && S_ISFIFO(st.st_mode)) {
+		eerror("%s: is a fifo", మార్గం);
+		వెళ్ళు err;
 	}
 
-	if (mode && (st.st_mode & 07777) != mode) {
-		if ((type != inode_dir) && (st.st_nlink > 1)) {
-			eerror("%s: chmod: Too many hard links to %s", applet, path);
-			goto err;
+	ఒకవేళ (బహుళకం && (st.st_mode & 07777) != బహుళకం) {
+		ఒకవేళ ((type != inode_dir) && (st.st_nlink > 1)) {
+			eerror("%s: chmod: Too many hard links to %s", applet, మార్గం);
+			వెళ్ళు err;
 		}
 
-		if (S_ISLNK(st.st_mode)) {
-			eerror("%s: chmod: %s is a symbolic link", applet, path);
-			goto err;
+		ఒకవేళ (S_ISLNK(st.st_mode)) {
+			eerror("%s: chmod: %s is a symbolic link", applet, మార్గం);
+			వెళ్ళు err;
 		}
 
-		einfo("%s: correcting mode", path);
-		if (fchmod(fd, mode)) {
+		einfo("%s: correcting mode", మార్గం);
+		ఒకవేళ (fchmod(fd, బహుళకం)) {
 			eerror("%s: chmod: %s", applet, strerror(errno));
-			goto err;
+			వెళ్ళు err;
 		}
 	}
 
-	if (chowner && (st.st_uid != uid || st.st_gid != gid)) {
-		if ((type != inode_dir) && (st.st_nlink > 1)) {
-			eerror("%s: chown: Too many hardlinks to %s", applet, path);
-			goto err;
+	ఒకవేళ (chowner && (st.st_uid != uid || st.st_gid != gid)) {
+		ఒకవేళ ((type != inode_dir) && (st.st_nlink > 1)) {
+			eerror("%s: chown: Too many hardlinks to %s", applet, మార్గం);
+			వెళ్ళు err;
 		}
 
-		if (S_ISLNK(st.st_mode)) {
-			eerror("%s: chown: %s is a symbolic link", applet, path);
-			goto err;
+		ఒకవేళ (S_ISLNK(st.st_mode)) {
+			eerror("%s: chown: %s is a symbolic link", applet, మార్గం);
+			వెళ్ళు err;
 		}
 
-		einfo("%s: correcting owner", path);
-		if (fchown(fd, uid, gid)) {
+		einfo("%s: correcting owner", మార్గం);
+		ఒకవేళ (fchown(fd, uid, gid)) {
 			eerror("%s: chown: %s", applet, strerror(errno));
-			goto err;
+			వెళ్ళు err;
 		}
 	}
 
-	if (selinux_on)
-		selinux_util_label(path);
+	ఒకవేళ (selinux_on)
+		selinux_util_label(మార్గం);
 	close(fd);
 
-	return 0;
+	తిరిగి 0;
 err:
 	close(fd);
-	return -1;
+	తిరిగి -1;
 }
 
-static int parse_owner(struct passwd **user, struct group **group, const char *owner)
+స్థిర పూర్ణాంకం parse_owner(నిర్మాణం passwd **user, నిర్మాణం group **group, స్థిరరాశి అక్షరం *owner)
 {
-	char *u = xstrdup(owner), *g = strchr(u, ':');
-	int id = 0, retval = 0;
+	అక్షరం *u = xstrdup(owner), *g = strchr(u, ':');
+	పూర్ణాంకం id = 0, retval = 0;
 
-	if (g)
+	ఒకవేళ (g)
 		*g++ = '\0';
 
-	if (user && *u) {
-		if (sscanf(u, "%d", &id) == 1)
+	ఒకవేళ (user && *u) {
+		ఒకవేళ (అక్షరశ్రేణి_చదువు(u, "%d", &id) == 1)
 			*user = getpwuid((uid_t) id);
-		else
+		లేకపోతే
 			*user = getpwnam(u);
-		if (*user == NULL)
+		ఒకవేళ (*user == ఖాళీ)
 			retval = -1;
 	}
 
-	if (group && g && *g) {
-		if (sscanf(g, "%d", &id) == 1)
+	ఒకవేళ (group && g && *g) {
+		ఒకవేళ (అక్షరశ్రేణి_చదువు(g, "%d", &id) == 1)
 			*group = getgrgid((gid_t) id);
-		else
+		లేకపోతే
 			*group = getgrnam(g);
-		if (*group == NULL)
+		ఒకవేళ (*group == ఖాళీ)
 			retval = -1;
 	}
 
-	free(u);
-	return retval;
+	విడుదల(u);
+	తిరిగి retval;
 }
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	int opt;
+	పూర్ణాంకం opt;
 	uid_t uid = geteuid();
 	gid_t gid = getgid();
-	mode_t mode = 0;
-	struct passwd *pw = NULL;
-	struct group *gr = NULL;
+	mode_t బహుళకం = 0;
+	నిర్మాణం passwd *pw = ఖాళీ;
+	నిర్మాణం group *gr = ఖాళీ;
 	inode_t type = inode_unknown;
-	int retval = EXIT_SUCCESS;
+	పూర్ణాంకం retval = EXIT_SUCCESS;
 	bool trunc = false;
 	bool chowner = false;
 	bool symlinks = false;
 	bool writable = false;
 	bool selinux_on = false;
-	char *path = NULL;
+	అక్షరం *మార్గం = ఖాళీ;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1) {
-		switch (opt) {
-		case 'D':
+	అయితే ((opt = getopt_long(argc, argv, getoptstring, longopts, (పూర్ణాంకం *) 0)) != -1) {
+		ఎంపిక (opt) {
+		స్థితి 'D':
 			trunc = true;
 			/* falls through */
-		case 'd':
+		స్థితి 'd':
 			type = inode_dir;
-			break;
-		case 'F':
+			ఆపు;
+		స్థితి 'F':
 			trunc = true;
 			/* falls through */
-		case 'f':
+		స్థితి 'f':
 			type = inode_file;
-			break;
-		case 'p':
+			ఆపు;
+		స్థితి 'p':
 			type = inode_fifo;
-			break;
-		case 'm':
-			if (parse_mode(&mode, optarg) != 0)
+			ఆపు;
+		స్థితి 'm':
+			ఒకవేళ (parse_బహుళకం(&బహుళకం, optarg) != 0)
 				eerrorx("%s: invalid mode '%s'", applet, optarg);
-			break;
-		case 'o':
+			ఆపు;
+		స్థితి 'o':
 			chowner = true;
-			if (parse_owner(&pw, &gr, optarg) != 0)
+			ఒకవేళ (parse_owner(&pw, &gr, optarg) != 0)
 				eerrorx("%s: owner '%s' not found", applet, optarg);
-			break;
-		case 's':
-#ifndef O_PATH
+			ఆపు;
+		స్థితి 's':
+#నిర్వచితం_కాకపోతే O_మార్గం
 			symlinks = true;
-#endif
-			break;
-		case 'W':
+#అయితే_ముగింపు
+			ఆపు;
+		స్థితి 'W':
 			writable = true;
-			break;
+			ఆపు;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind >= argc)
+	ఒకవేళ (optind >= argc)
 		usage(EXIT_FAILURE);
 
-	if (pw) {
+	ఒకవేళ (pw) {
 		uid = pw->pw_uid;
 		gid = pw->pw_gid;
 	}
-	if (gr)
+	ఒకవేళ (gr)
 		gid = gr->gr_gid;
 
-	if (selinux_util_open() == 1)
+	ఒకవేళ (selinux_util_open() == 1)
 		selinux_on = true;
 
-	while (optind < argc) {
-		path = clean_path(argv[optind]);
-		if (do_check(path, uid, gid, mode, type, trunc, chowner, writable, symlinks, selinux_on))
+	అయితే (optind < argc) {
+		మార్గం = clean_మార్గం(argv[optind]);
+		ఒకవేళ (do_check(మార్గం, uid, gid, బహుళకం, type, trunc, chowner, writable, symlinks, selinux_on))
 			retval = EXIT_FAILURE;
 		optind++;
-		free(path);
+		విడుదల(మార్గం);
 	}
 
-	if (selinux_on)
+	ఒకవేళ (selinux_on)
 		selinux_util_close();
 
-	return retval;
+	తిరిగి retval;
 }

@@ -10,25 +10,25 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <string.h>
 
-#include "einfo.h"
+#అన్తర్భావ "einfo.h"
 
-int main(void)
+పూర్ణాంకం ప్రధాన(శూన్య)
 {
-	const char *p = getenv("RC_PID");
-	int pid;
+	స్థిరరాశి అక్షరం *p = getenv("RC_PID");
+	పూర్ణాంకం pid;
 
-	if (p && sscanf(p, "%d", &pid) == 1) {
-		if (kill(pid, SIGUSR1) != 0)
+	ఒకవేళ (p && అక్షరశ్రేణి_చదువు(p, "%d", &pid) == 1) {
+		ఒకవేళ (kill(pid, SIGUSR1) != 0)
 			eerrorx("rc-abort: failed to signal parent %d: %s",
 			    pid, strerror(errno));
-		return EXIT_SUCCESS;
+		తిరిగి EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	తిరిగి EXIT_FAILURE;
 }

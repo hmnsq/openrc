@@ -19,46 +19,46 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <sys/types.h>
-#include <strings.h>
-#include <unistd.h>
-#include <time.h>
-#include <utmp.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <getopt.h>
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <syslog.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <strings.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <time.h>
+#అన్తర్భావ <utmp.h>
 
-#include "broadcast.h"
-#include "einfo.h"
-#include "rc.h"
-#include "helpers.h"
-#include "misc.h"
-#include "sysvinit.h"
-#include "wtmp.h"
-#include "_usage.h"
+#అన్తర్భావ "broadcast.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "helpers.h"
+#అన్తర్భావ "misc.h"
+#అన్తర్భావ "sysvinit.h"
+#అన్తర్భావ "wtmp.h"
+#అన్తర్భావ "_usage.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "cdDfFHKpRrsw" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "cancel",        no_argument, NULL, 'c'},
-	{ "no-write",        no_argument, NULL, 'd'},
-	{ "dry-run",        no_argument, NULL, 'D'},
-	{ "halt",        no_argument, NULL, 'H'},
-	{ "kexec",        no_argument, NULL, 'K'},
-	{ "poweroff",        no_argument, NULL, 'p'},
-	{ "reexec",        no_argument, NULL, 'R'},
-	{ "reboot",        no_argument, NULL, 'r'},
-	{ "single",        no_argument, NULL, 's'},
-	{ "write-only",        no_argument, NULL, 'w'},
+స్థిరరాశి అక్షరం *applet = ఖాళీ;
+స్థిరరాశి అక్షరం *extraopts = ఖాళీ;
+స్థిరరాశి అక్షరం getoptstring[] = "cdDfFHKpRrsw" getoptstring_COMMON;
+స్థిరరాశి నిర్మాణం option longopts[] = {
+	{ "cancel",        no_argument, ఖాళీ, 'c'},
+	{ "no-write",        no_argument, ఖాళీ, 'd'},
+	{ "dry-run",        no_argument, ఖాళీ, 'D'},
+	{ "halt",        no_argument, ఖాళీ, 'H'},
+	{ "kexec",        no_argument, ఖాళీ, 'K'},
+	{ "poweroff",        no_argument, ఖాళీ, 'p'},
+	{ "reexec",        no_argument, ఖాళీ, 'R'},
+	{ "reboot",        no_argument, ఖాళీ, 'r'},
+	{ "single",        no_argument, ఖాళీ, 's'},
+	{ "write-only",        no_argument, ఖాళీ, 'w'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+స్థిరరాశి అక్షరం * స్థిరరాశి longopts_help[] = {
 	"cancel a pending shutdown",
 	"do not write wtmp record",
 	"print actions instead of executing them",
@@ -71,7 +71,7 @@ const char * const longopts_help[] = {
 	"write wtmp boot record and exit",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+స్థిరరాశి అక్షరం *usagestring = ""
 	"Usage: openrc-shutdown -c | --cancel\n"
 	"   or: openrc-shutdown -R | --reexec\n"
 	"   or: openrc-shutdown -w | --write-only\n"
@@ -80,41 +80,41 @@ const char *usagestring = ""
 	"   or: openrc-shutdown -p | --poweroff time\n"
 	"   or: openrc-shutdown -r | --reboot time\n"
 	"   or: openrc-shutdown -s | --single time";
-const char *exclusive = "Select one of "
+స్థిరరాశి అక్షరం *exclusive = "Select one of "
 	"--cancel, --halt, --kexec, --poweroff, --reexec, --reboot, --single or \n"
 	"--write-only";
-const char *nologin_file = RC_SYSCONFDIR"/nologin";
-const char *shutdown_pid = "/run/openrc-shutdown.pid";
+స్థిరరాశి అక్షరం *nologin_file = RC_SYSCONFDIR"/nologin";
+స్థిరరాశి అక్షరం *shutdown_pid = "/run/openrc-shutdown.pid";
 
-static bool do_cancel = false;
-static bool do_dryrun = false;
-static bool do_halt = false;
-static bool do_kexec = false;
-static bool do_poweroff = false;
-static bool do_reboot = false;
-static bool do_reexec = false;
-static bool do_single = false;
-static bool do_wtmp = true;
-static bool do_wtmp_only = false;
+స్థిర bool do_cancel = false;
+స్థిర bool do_dryrun = false;
+స్థిర bool do_halt = false;
+స్థిర bool do_kexec = false;
+స్థిర bool do_poweroff = false;
+స్థిర bool do_reboot = false;
+స్థిర bool do_reexec = false;
+స్థిర bool do_single = false;
+స్థిర bool do_wtmp = true;
+స్థిర bool do_wtmp_only = false;
 
-static void cancel_shutdown(void)
+స్థిర శూన్య cancel_shutdown(శూన్య)
 {
 	pid_t pid;
 
 	pid = get_pid(applet, shutdown_pid);
-	if (pid <= 0)
+	ఒకవేళ (pid <= 0)
 		eerrorx("%s: Unable to cancel shutdown", applet);
 
-	if (kill(pid, SIGTERM) != -1)
+	ఒకవేళ (kill(pid, SIGTERM) != -1)
 		einfo("%s: shutdown canceled", applet);
-	else
+	లేకపోతే
 		eerrorx("%s: Unable to cancel shutdown", applet);
 }
 
 /*
  *	Create the nologin file.
  */
-static void create_nologin(int mins)
+స్థిర శూన్య create_nologin(పూర్ణాంకం mins)
 {
 	FILE *fp;
 	time_t t;
@@ -122,7 +122,7 @@ static void create_nologin(int mins)
 	time(&t);
 	t += 60 * mins;
 
-	if ((fp = fopen(nologin_file, "w")) != NULL) {
+	ఒకవేళ ((fp = fopen(nologin_file, "w")) != ఖాళీ) {
 		fprintf(fp, "\rThe system is going down on %s\r\n", ctime(&t));
 		fclose(fp);
 	}
@@ -131,26 +131,26 @@ static void create_nologin(int mins)
 /*
  * Send a command to our init
  */
-static void send_cmd(const char *cmd)
+స్థిర శూన్య send_cmd(స్థిరరాశి అక్షరం *cmd)
 {
 	FILE *fifo;
 	size_t ignored;
 
-	if (do_dryrun) {
+	ఒకవేళ (do_dryrun) {
 		einfo("Would send %s to init", cmd);
-		return;
+		తిరిగి;
 	}
-	if (do_wtmp && (do_halt || do_kexec || do_reboot || do_poweroff))
+	ఒకవేళ (do_wtmp && (do_halt || do_kexec || do_reboot || do_poweroff))
 		log_wtmp("shutdown", "~~", 0, RUN_LVL, "~~");
 	fifo = fopen(RC_INIT_FIFO, "w");
-	if (!fifo) {
+	ఒకవేళ (!fifo) {
 		perror("fopen");
-		return;
+		తిరిగి;
 	}
 
-	ignored = fwrite(cmd, 1, strlen(cmd), fifo);
-	if (ignored != strlen(cmd))
-		printf("Error writing to init fifo\n");
+	ignored = fwrite(cmd, 1, అక్షరశ్రేణి_పొడవు(cmd), fifo);
+	ఒకవేళ (ignored != అక్షరశ్రేణి_పొడవు(cmd))
+		రాయి("Error writing to init fifo\n");
 	fclose(fifo);
 }
 
@@ -158,204 +158,204 @@ static void send_cmd(const char *cmd)
  * sleep without being interrupted.
  * The idea for this code came from sysvinit.
  */
-static void sleep_no_interrupt(int seconds)
+స్థిర శూన్య sleep_no_అంతరాయం(పూర్ణాంకం seconds)
 {
-	struct timespec duration;
-	struct timespec remaining;
+	నిర్మాణం timespec duration;
+	నిర్మాణం timespec మిగిలిన;
 
 	duration.tv_sec = seconds;
 	duration.tv_nsec = 0;
 
-	while (nanosleep(&duration, &remaining) < 0 && errno == EINTR)
-		duration = remaining;
+	అయితే (nanosleep(&duration, &మిగిలిన) < 0 && errno == EINTR)
+		duration = మిగిలిన;
 }
 
-RC_NORETURN static void stop_shutdown(int sig)
+RC_NORETURN స్థిర శూన్య stop_shutdown(పూర్ణాంకం sig)
 {
-	(void) sig;
+	(శూన్య) sig;
 	unlink(nologin_file);
 	unlink(shutdown_pid);
 	einfo("Shutdown cancelled");
-	exit(0);
+	నిష్క్రమించు(0);
 }
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	char *ch = NULL;
-	int opt;
-	int cmd_count = 0;
-	int hour = 0;
-	int min = 0;
-	int shutdown_delay = 0;
-	struct sigaction sa;
-	struct tm *lt;
+	అక్షరం *ch = ఖాళీ;
+	పూర్ణాంకం opt;
+	పూర్ణాంకం cmd_లెక్క = 0;
+	పూర్ణాంకం hour = 0;
+	పూర్ణాంకం min = 0;
+	పూర్ణాంకం shutdown_delay = 0;
+	నిర్మాణం sigaction sa;
+	నిర్మాణం tm *lt;
 	time_t tv;
 	bool need_warning = false;
-	char *msg = NULL;
-	char *state = NULL;
-	char *time_arg = NULL;
+	అక్షరం *సందేశం_2 = ఖాళీ;
+	అక్షరం *state = ఖాళీ;
+	అక్షరం *సమయం_arg = ఖాళీ;
 	FILE *fp;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	అయితే ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (పూర్ణాంకం *) 0)) != -1)
 	{
-		switch (opt) {
-			case 'c':
+		ఎంపిక (opt) {
+			స్థితి 'c':
 				do_cancel = true;
-			cmd_count++;
-				break;
-			case 'd':
+			cmd_లెక్క++;
+				ఆపు;
+			స్థితి 'd':
 				do_wtmp = false;
-				break;
-		case 'D':
+				ఆపు;
+		స్థితి 'D':
 			do_dryrun = true;
-			break;
-		case 'H':
+			ఆపు;
+		స్థితి 'H':
 			do_halt = true;
 			xasprintf(&state, "%s", "halt");
-			cmd_count++;
-			break;
-		case 'K':
+			cmd_లెక్క++;
+			ఆపు;
+		స్థితి 'K':
 			do_kexec = true;
 			xasprintf(&state, "%s", "reboot");
-			cmd_count++;
-			break;
-		case 'p':
+			cmd_లెక్క++;
+			ఆపు;
+		స్థితి 'p':
 			do_poweroff = true;
 			xasprintf(&state, "%s", "power off");
-			cmd_count++;
-			break;
-		case 'R':
+			cmd_లెక్క++;
+			ఆపు;
+		స్థితి 'R':
 			do_reexec = true;
-			cmd_count++;
-			break;
-		case 'r':
+			cmd_లెక్క++;
+			ఆపు;
+		స్థితి 'r':
 			do_reboot = true;
 			xasprintf(&state, "%s", "reboot");
-			cmd_count++;
-			break;
-		case 's':
+			cmd_లెక్క++;
+			ఆపు;
+		స్థితి 's':
 			do_single = true;
 			xasprintf(&state, "%s", "go down for maintenance");
-			cmd_count++;
-			break;
-		case 'w':
+			cmd_లెక్క++;
+			ఆపు;
+		స్థితి 'w':
 			do_wtmp_only = true;
-			cmd_count++;
-			break;
+			cmd_లెక్క++;
+			ఆపు;
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (geteuid() != 0)
+	ఒకవేళ (geteuid() != 0)
 		eerrorx("%s: you must be root\n", applet);
-	if (cmd_count != 1) {
+	ఒకవేళ (cmd_లెక్క != 1) {
 		eerror("%s: %s\n", applet, exclusive);
 		usage(EXIT_FAILURE);
 	}
 
-	if (do_cancel) {
+	ఒకవేళ (do_cancel) {
 		cancel_shutdown();
-		exit(EXIT_SUCCESS);
-	} else if (do_reexec) {
+		నిష్క్రమించు(EXIT_SUCCESS);
+	} లేకపోతే ఒకవేళ (do_reexec) {
 		send_cmd("reexec");
-		exit(EXIT_SUCCESS);
-	} else if (do_wtmp_only) {
+		నిష్క్రమించు(EXIT_SUCCESS);
+	} లేకపోతే ఒకవేళ (do_wtmp_only) {
 		log_wtmp("shutdown", "~~", 0, RUN_LVL, "~~");
-		exit(EXIT_SUCCESS);
+		నిష్క్రమించు(EXIT_SUCCESS);
 	}
 
-	if (optind >= argc) {
+	ఒకవేళ (optind >= argc) {
 		eerror("%s: No shutdown time specified", applet);
 		usage(EXIT_FAILURE);
 	}
-	time_arg = argv[optind];
-	if (*time_arg == '+')
-		time_arg++;
-	if (strcasecmp(time_arg, "now") == 0)
-		strcpy(time_arg, "0");
-	for (ch=time_arg; *ch; ch++)
-		if ((*ch < '0' || *ch > '9') && *ch != ':') {
-			eerror("%s: invalid time %s", applet, time_arg);
+	సమయం_arg = argv[optind];
+	ఒకవేళ (*సమయం_arg == '+')
+		సమయం_arg++;
+	ఒకవేళ (strcasecmp(సమయం_arg, "now") == 0)
+		strcpy(సమయం_arg, "0");
+	కొరకు (ch=సమయం_arg; *ch; ch++)
+		ఒకవేళ ((*ch < '0' || *ch > '9') && *ch != ':') {
+			eerror("%s: invalid time %s", applet, సమయం_arg);
 			usage(EXIT_FAILURE);
 		}
-	if (strchr(time_arg, ':')) {
-		if ((sscanf(time_arg, "%2d:%2d", &hour, &min) != 2) ||
+	ఒకవేళ (strchr(సమయం_arg, ':')) {
+		ఒకవేళ ((అక్షరశ్రేణి_చదువు(సమయం_arg, "%2d:%2d", &hour, &min) != 2) ||
 				(hour > 23) || (min > 59)) {
-			eerror("%s: invalid time %s", applet, time_arg);
+			eerror("%s: invalid time %s", applet, సమయం_arg);
 			usage(EXIT_FAILURE);
 		}
 		time(&tv);
 		lt = localtime(&tv);
 		shutdown_delay = (hour * 60 + min) - (lt->tm_hour * 60 + lt->tm_min);
-		if (shutdown_delay < 0)
+		ఒకవేళ (shutdown_delay < 0)
 			shutdown_delay += 1440;
-	} else {
-		shutdown_delay = atoi(time_arg);
+	} లేకపోతే {
+		shutdown_delay = atoi(సమయం_arg);
 	}
 
 	fp = fopen(shutdown_pid, "w");
-	if (!fp)
+	ఒకవేళ (!fp)
 		eerrorx("%s: fopen `%s': %s", applet, shutdown_pid, strerror(errno));
 	fprintf(fp, "%d\n", getpid());
 	fclose(fp);
 
 	openlog(applet, LOG_PID, LOG_DAEMON);
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, పరిమాణం(sa));
 	sa.sa_handler = stop_shutdown;
 	sigemptyset(&sa.sa_mask);
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-	while (shutdown_delay > 0) {
-		if (shutdown_delay > 180)
+	sigaction(SIGINT, &sa, ఖాళీ);
+	sigaction(SIGTERM, &sa, ఖాళీ);
+	అయితే (shutdown_delay > 0) {
+		ఒకవేళ (shutdown_delay > 180)
 			need_warning = (shutdown_delay % 60 == 0);
-		else if (shutdown_delay > 60)
+		లేకపోతే ఒకవేళ (shutdown_delay > 60)
 			need_warning = (shutdown_delay % 30 == 0);
-		else if	(shutdown_delay > 10)
+		లేకపోతే ఒకవేళ	(shutdown_delay > 10)
 			need_warning = (shutdown_delay % 15 == 0);
-		else
+		లేకపోతే
 			need_warning = true;
 
-		if (shutdown_delay <= 5)
+		ఒకవేళ (shutdown_delay <= 5)
 			create_nologin(shutdown_delay);
-		if (need_warning) {
-			xasprintf(&msg, "\rThe system will %s in %d minutes\r\n",
+		ఒకవేళ (need_warning) {
+			xasprintf(&సందేశం_2, "\rThe system will %s in %d minutes\r\n",
 			          state, shutdown_delay);
-			broadcast(msg);
-			free(msg);
+			ప్రసారం(సందేశం_2);
+			విడుదల(సందేశం_2);
 		}
-		sleep_no_interrupt(60);
+		sleep_no_అంతరాయం(60);
 		shutdown_delay--;
 	}
-	xasprintf(&msg, "\rThe system will %s now\r\n", state);
-	broadcast(msg);
+	xasprintf(&సందేశం_2, "\rThe system will %s now\r\n", state);
+	ప్రసారం(సందేశం_2);
 	syslog(LOG_NOTICE, "The system will %s now", state);
 	unlink(nologin_file);
 	unlink(shutdown_pid);
-	if (do_halt) {
-		if (access("/run/initctl", F_OK) == 0) {
+	ఒకవేళ (do_halt) {
+		ఒకవేళ (access("/run/initctl", F_OK) == 0) {
 			sysvinit_setenv("INIT_HALT", "HALT");
 			sysvinit_runlevel('0');
-		} else
+		} లేకపోతే
 			send_cmd("halt");
-	} else if (do_kexec)
+	} లేకపోతే ఒకవేళ (do_kexec)
 		send_cmd("kexec");
-	else if (do_poweroff) {
-		if (access("/run/initctl", F_OK) == 0) {
+	లేకపోతే ఒకవేళ (do_poweroff) {
+		ఒకవేళ (access("/run/initctl", F_OK) == 0) {
 			sysvinit_setenv("INIT_HALT", "POWEROFF");
 			sysvinit_runlevel('0');
-		} else
+		} లేకపోతే
 			send_cmd("poweroff");
-	} else if (do_reboot) {
-		if (access("/run/initctl", F_OK) == 0)
+	} లేకపోతే ఒకవేళ (do_reboot) {
+		ఒకవేళ (access("/run/initctl", F_OK) == 0)
 			sysvinit_runlevel('6');
-		else
+		లేకపోతే
 			send_cmd("reboot");
-	} else if (do_single) {
-		if (access("/run/initctl", F_OK) == 0)
+	} లేకపోతే ఒకవేళ (do_single) {
+		ఒకవేళ (access("/run/initctl", F_OK) == 0)
 			sysvinit_runlevel('S');
-		else
+		లేకపోతే
 			send_cmd("single");
 	}
-	return 0;
+	తిరిగి 0;
 }

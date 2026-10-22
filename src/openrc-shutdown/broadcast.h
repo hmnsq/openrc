@@ -8,9 +8,9 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef BROADCAST_H
-#define BROADCAST_H
+#నిర్వచితం_కాకపోతే ప్రసారం_H
+#నిర్వచించు ప్రసారం_H
 
-void broadcast(char *text);
+శూన్య ప్రసారం(అక్షరం *పాఠ్యం);
 
-#endif
+#అయితే_ముగింపు

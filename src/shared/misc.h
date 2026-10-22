@@ -15,45 +15,45 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __RC_MISC_H__
-#define __RC_MISC_H__
+#నిర్వచితం_కాకపోతే __RC_MISC_H__
+#నిర్వచించు __RC_MISC_H__
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <time.h>
+#అన్తర్భావ <unistd.h>
 
-#include "helpers.h"
-#include "rc.h"
+#అన్తర్భావ "helpers.h"
+#అన్తర్భావ "rc.h"
 
-#define RC_LEVEL_BOOT           "boot"
-#define RC_LEVEL_DEFAULT        "default"
+#నిర్వచించు RC_LEVEL_BOOT           "boot"
+#నిర్వచించు RC_LEVEL_DEFAULT        "default"
 
-#define RC_KRUNLEVEL            RC_SVCDIR "/krunlevel"
+#నిర్వచించు RC_KRUNLEVEL            RC_SVCDIR "/krunlevel"
 
-char *rc_conf_value(const char *var);
-bool rc_conf_yesno(const char *var);
-char *default_runlevel(void);
-void env_filter(void);
-void env_config(void);
-int signal_setup(int sig, void (*handler)(int));
-int svc_lock(const char *, bool);
-int svc_unlock(const char *, int);
-pid_t exec_service(const char *, const char *);
+అక్షరం *rc_conf_విలువ(స్థిరరాశి అక్షరం *var);
+bool rc_conf_yesno(స్థిరరాశి అక్షరం *var);
+అక్షరం *default_runlevel(శూన్య);
+శూన్య env_filter(శూన్య);
+శూన్య env_config(శూన్య);
+పూర్ణాంకం signal_అమరిక(పూర్ణాంకం sig, శూన్య (*handler)(పూర్ణాంకం));
+పూర్ణాంకం svc_తాళం(స్థిరరాశి అక్షరం *, bool);
+పూర్ణాంకం svc_unlock(స్థిరరాశి అక్షరం *, పూర్ణాంకం);
+pid_t exec_service(స్థిరరాశి అక్షరం *, స్థిరరాశి అక్షరం *);
 
-typedef struct rc_service_state_name {
+రకనిర్వచనం నిర్మాణం rc_service_state_name {
 	RC_SERVICE state;
-	enum rc_dir dir;
-	const char *const name;
+	గణన rc_dir dir;
+	స్థిరరాశి అక్షరం *స్థిరరాశి name;
 } rc_service_state_name_t;
 
 /* We MUST list the states below 0x10 first
  * The rest can be in any order */
-static const rc_service_state_name_t rc_service_state_names[] = {
+స్థిర స్థిరరాశి rc_service_state_name_t rc_service_state_పేర్లు[] = {
 	{ RC_SERVICE_STARTED,     RC_DIR_STARTED,     "started" },
 	{ RC_SERVICE_STOPPED,     RC_DIR_INVALID,     "stopped" },
 	{ RC_SERVICE_STARTING,    RC_DIR_STARTING,    "starting" },
@@ -64,37 +64,37 @@ static const rc_service_state_name_t rc_service_state_names[] = {
 	{ RC_SERVICE_FAILED,      RC_DIR_FAILED,      "failed" },
 	{ RC_SERVICE_SCHEDULED,   RC_DIR_SCHEDULED,   "scheduled"},
 	{ RC_SERVICE_CRASHED,     RC_DIR_INVALID,     "crashed"},
-	{ 0, -1, NULL}
+	{ 0, -1, ఖాళీ}
 };
 
-#define service_start(service) exec_service(service, "start")
-#define service_stop(service)  exec_service(service, "stop")
+#నిర్వచించు service_ప్రారంభం(service) exec_service(service, "start")
+#నిర్వచించు service_stop(service)  exec_service(service, "stop")
 
-int parse_mode(mode_t *, char *);
+పూర్ణాంకం parse_బహుళకం(mode_t *, అక్షరం *);
 
 /* Handy function so we can wrap einfo around our deptree */
-RC_DEPTREE *_rc_deptree_load (int, int *);
+RC_DEPTREE *rc_deptree_ఎక్కించు_2 (పూర్ణాంకం, పూర్ణాంకం *);
 
-RC_SERVICE lookup_service_state(const char *service);
-void from_time_t(char *time_string, time_t tv);
-time_t to_time_t(char *timestring);
-pid_t get_pid(const char *applet, const char *pidfile);
+RC_SERVICE lookup_service_state(స్థిరరాశి అక్షరం *service);
+శూన్య from_సమయం_t(అక్షరం *సమయం_string, time_t tv);
+time_t గమ్యం_సమయం_t(అక్షరం *timestring);
+pid_t get_pid(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *pidfile);
 
-void cloexec_fds_from(int);
+శూన్య cloexec_fds_from(పూర్ణాంకం);
 
-struct notify {
-	enum {
+నిర్మాణం notify {
+	గణన {
 		NOTIFY_NONE = 0,
 		NOTIFY_FD,
 		NOTIFY_SOCKET
 	} type;
 
-	char *path;
-	int pipe[2];
-	int fd;
+	అక్షరం *మార్గం;
+	పూర్ణాంకం pipe[2];
+	పూర్ణాంకం fd;
 };
 
-struct notify notify_parse(const char *applet, const char *ready_string);
-bool notify_wait(const char *applet, struct notify ready);
+నిర్మాణం notify notify_parse(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *ready_string);
+bool notify_wait(స్థిరరాశి అక్షరం *applet, నిర్మాణం notify ready);
 
-#endif
+#అయితే_ముగింపు

@@ -10,95 +10,95 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#define SYSLOG_NAMES
+#నిర్వచించు SYSLOG_పేర్లు
 
-#include <sys/time.h>
-#include <errno.h>
-#include <ctype.h>
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <strings.h>
+#అన్తర్భావ <sys/time.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <inttypes.h>
+#అన్తర్భావ <stddef.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <syslog.h>
+#అన్తర్భావ <time.h>
+#అన్తర్భావ <strings.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "helpers.h"
 
 /* usecs to wait while we poll the file existence  */
-#define WAIT_INTERVAL	20000000
+#నిర్వచించు WAIT_INTERVAL	20000000
 
-const char *applet = NULL;
+స్థిరరాశి అక్షరం *applet = ఖాళీ;
 
-static int syslog_decode(char *name, const CODE *codetab)
+స్థిర పూర్ణాంకం syslog_decode(అక్షరం *name, స్థిరరాశి CODE *codetab)
 {
-	const CODE *c;
+	స్థిరరాశి CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	ఒకవేళ (అంకెనా((గుర్తులేని అక్షరం)*name))
+		తిరిగి atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	కొరకు (c = codetab; c->c_name; c++)
+		ఒకవేళ (!strcasecmp(name, c->c_name))
+			తిరిగి c->c_val;
 
-	return -1;
+	తిరిగి -1;
 }
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	పూర్ణాంకం retval = EXIT_SUCCESS;
+	పూర్ణాంకం i;
 	size_t l = 0;
-	char *message = NULL;
-	char *p;
-	int level = 0;
-	struct timespec ts;
-	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	అక్షరం *సందేశం = ఖాళీ;
+	అక్షరం *p;
+	పూర్ణాంకం level = 0;
+	నిర్మాణం timespec ts;
+	నిర్మాణం timeval stop, now;
+	పూర్ణాంకం (*e) (స్థిరరాశి అక్షరం *, ...) EINFO_PRINTF(1, 2) = ఖాళీ;
+	పూర్ణాంకం (*ee) (పూర్ణాంకం, స్థిరరాశి అక్షరం *, ...) EINFO_PRINTF(2, 3) = ఖాళీ;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
-		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
+	ఒకవేళ (strcmp(applet, "eval_ecolors") == 0) {
+		రాయి("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
 		    ecolor(ECOLOR_BAD),
 		    ecolor(ECOLOR_HILITE),
 		    ecolor(ECOLOR_BRACKET),
-		    ecolor(ECOLOR_NORMAL));
-		exit(EXIT_SUCCESS);
+		    ecolor(ECOLOR_సాధారణ));
+		నిష్క్రమించు(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	ఒకవేళ (argc > 0) {
+		ఒకవేళ (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (పూర్ణాంకం)strtoimax(argv[0], &p, 0);
+			ఒకవేళ (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			ఒకవేళ (errno)
 				retval = EXIT_FAILURE;
-			else {
+			లేకపోతే {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} లేకపోతే ఒకవేళ (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			ఒకవేళ (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			ఒకవేళ (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,110 +109,110 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	ఒకవేళ (strcmp(applet, "ewaitfile") == 0) {
+		ఒకవేళ (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		ఒకవేళ (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
-		gettimeofday(&stop, NULL);
+		gettimeofday(&stop, ఖాళీ);
 		/* retval stores the timeout */
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		కొరకు (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
-					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
-				gettimeofday(&now, NULL);
-				if (retval <= 0)
-					continue;
-				if (timercmp(&now, &stop, <))
-					continue;
+			కొరకు (;;) {
+				ఒకవేళ (access(argv[i], F_OK) == 0)
+					ఆపు;
+				ఒకవేళ (nanosleep(&ts, ఖాళీ) == -1)
+					తిరిగి EXIT_FAILURE;
+				gettimeofday(&now, ఖాళీ);
+				ఒకవేళ (retval <= 0)
+					కొనసాగు;
+				ఒకవేళ (timercmp(&now, &stop, <))
+					కొనసాగు;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				తిరిగి EXIT_FAILURE;
 			}
-			eendv(EXIT_SUCCESS, NULL);
+			eendv(EXIT_SUCCESS, ఖాళీ);
 		}
-		return EXIT_SUCCESS;
+		తిరిగి EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
-		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+	ఒకవేళ (argc > 0) {
+		FILE *mem = xopen_memstream(&సందేశం, &l);
+		కొరకు (i = 0; i < argc; i++) {
+			ఒకవేళ (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	ఒకవేళ (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	లేకపోతే ఒకవేళ (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} లేకపోతే ఒకవేళ (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} లేకపోతే ఒకవేళ (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
-		elog(retval, "%s", message);
+	లేకపోతే ఒకవేళ (strcmp(applet, "esyslog") == 0) {
+		elog(retval, "%s", సందేశం);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} లేకపోతే ఒకవేళ (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	లేకపోతే ఒకవేళ (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	లేకపోతే {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
-			e("%s", message);
-		else if (ee)
-			ee(retval, "%s", message);
-	} else {
-		if (e)
-			e(NULL);
-		else if (ee)
-			ee(retval, NULL);
+	ఒకవేళ (సందేశం) {
+		ఒకవేళ (e)
+			e("%s", సందేశం);
+		లేకపోతే ఒకవేళ (ee)
+			ee(retval, "%s", సందేశం);
+	} లేకపోతే {
+		ఒకవేళ (e)
+			e(ఖాళీ);
+		లేకపోతే ఒకవేళ (ee)
+			ee(retval, ఖాళీ);
 	}
 
-	free(message);
-	return retval;
+	విడుదల(సందేశం);
+	తిరిగి retval;
 }

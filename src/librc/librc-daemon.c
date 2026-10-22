@@ -15,105 +15,105 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <dirent.h>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#అన్తర్భావ "queue.h"
+#అన్తర్భావ "librc.h"
+#అన్తర్భావ "helpers.h"
 
-#if defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#ఒకవేళ defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
-static bool
-pid_is_exec(pid_t pid, const char *exec)
+స్థిర bool
+pid_is_exec(pid_t pid, స్థిరరాశి అక్షరం *exec)
 {
-	char *buffer = NULL;
+	అక్షరం *బఫరు = ఖాళీ;
 	FILE *fp;
-	int c;
+	పూర్ణాంకం c;
 	bool retval = false;
 
 	exec = basename_c(exec);
-	xasprintf(&buffer, "/proc/%d/stat", pid);
-	if ((fp = fopen(buffer, "r"))) {
-		while ((c = getc(fp)) != EOF && c != '(')
+	xasprintf(&బఫరు, "/proc/%d/stat", pid);
+	ఒకవేళ ((fp = fopen(బఫరు, "r"))) {
+		అయితే ((c = getc(fp)) != EOF && c != '(')
 			;
-		if (c == '(') {
-			while ((c = getc(fp)) != EOF && c == *exec)
+		ఒకవేళ (c == '(') {
+			అయితే ((c = getc(fp)) != EOF && c == *exec)
 				exec++;
-			if (c == ')' && *exec == '\0')
+			ఒకవేళ (c == ')' && *exec == '\0')
 				retval = true;
 		}
 		fclose(fp);
 	}
-	free(buffer);
-	return retval;
+	విడుదల(బఫరు);
+	తిరిగి retval;
 }
 
-static bool
-pid_is_argv(pid_t pid, const char *const *argv)
+స్థిర bool
+pid_is_argv(pid_t pid, స్థిరరాశి అక్షరం *స్థిరరాశి *argv)
 {
-	char *cmdline = NULL;
-	int fd;
-	char buffer[PATH_MAX];
-	char *p;
-	ssize_t bytes;
+	అక్షరం *cmdline = ఖాళీ;
+	పూర్ణాంకం fd;
+	అక్షరం బఫరు[PATH_MAX];
+	అక్షరం *p;
+	ssize_t బైట్లు;
 
 	xasprintf(&cmdline, "/proc/%u/cmdline", pid);
-	if ((fd = open(cmdline, O_RDONLY)) < 0) {
-		free(cmdline);
-		return false;
+	ఒకవేళ ((fd = open(cmdline, O_RDONLY)) < 0) {
+		విడుదల(cmdline);
+		తిరిగి false;
 	}
-	bytes = read(fd, buffer, sizeof(buffer) - 1);
+	బైట్లు = పఠ(fd, బఫరు, పరిమాణం(బఫరు) - 1);
 	close(fd);
-	free(cmdline);
-	if (bytes == -1)
-		return false;
+	విడుదల(cmdline);
+	ఒకవేళ (బైట్లు == -1)
+		తిరిగి false;
 
-	buffer[bytes] = '\0';
-	p = buffer;
-	while (*argv) {
-		if ((unsigned)(p - buffer) >= sizeof(buffer))
-			return false;
-		if (strcmp(*argv, p) != 0)
-			return false;
+	బఫరు[బైట్లు] = '\0';
+	p = బఫరు;
+	అయితే (*argv) {
+		ఒకవేళ ((గుర్తులేని)(p - బఫరు) >= పరిమాణం(బఫరు))
+			తిరిగి false;
+		ఒకవేళ (strcmp(*argv, p) != 0)
+			తిరిగి false;
 		argv++;
-		p += strlen(p) + 1;
+		p += అక్షరశ్రేణి_పొడవు(p) + 1;
 	}
-	return true;
+	తిరిగి true;
 }
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_కనుగొను_pids(స్థిరరాశి అక్షరం *exec, స్థిరరాశి అక్షరం *స్థిరరాశి *argv, uid_t uid, pid_t pid)
 {
 	DIR *procdir;
-	struct dirent *entry;
+	నిర్మాణం dirent *నమోదు_2;
 	FILE *fp;
-	int rc;
+	పూర్ణాంకం rc;
 	bool container_pid = false;
 	bool openvz_host = false;
-	char *line = NULL;
-	char my_ns[30] = {0};
-	char proc_ns[30] = {0};
+	అక్షరం *పంక్తి = ఖాళీ;
+	అక్షరం my_ns[30] = {0};
+	అక్షరం proc_ns[30] = {0};
 	size_t len = 0;
 	pid_t p;
-	char *buffer = NULL;
-	struct stat sb;
+	అక్షరం *బఫరు = ఖాళీ;
+	నిర్మాణం stat sb;
 	pid_t openrc_pid = 0;
-	char *pp;
-	RC_PIDLIST *pids = NULL;
+	అక్షరం *pp;
+	RC_PIDLIST *pids = ఖాళీ;
 	RC_PID *pi;
 
-	if ((procdir = opendir("/proc")) == NULL)
-		return NULL;
+	ఒకవేళ ((procdir = opendir("/proc")) == ఖాళీ)
+		తిరిగి ఖాళీ;
 
 	/*
 	  We never match RC_OPENRC_PID if present so we avoid the below
@@ -126,8 +126,8 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	  nasty
 	*/
 
-	if ((pp = getenv("RC_OPENRC_PID"))) {
-		if (sscanf(pp, "%d", &openrc_pid) != 1)
+	ఒకవేళ ((pp = getenv("RC_OPENRC_PID"))) {
+		ఒకవేళ (అక్షరశ్రేణి_చదువు(pp, "%d", &openrc_pid) != 1)
 			openrc_pid = 0;
 	}
 
@@ -137,505 +137,505 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	from our list of pids.
 	*/
 
-	if ((fp = fopen("/proc/self/status", "r"))) {
-		while (xgetline(&line, &len, fp) != -1) {
-			if (strncmp(line, "envID:\t0", 8) == 0) {
+	ఒకవేళ ((fp = fopen("/proc/self/status", "r"))) {
+		అయితే (xgetline(&పంక్తి, &len, fp) != -1) {
+			ఒకవేళ (అక్షరశ్రేణి_పోలిక(పంక్తి, "envID:\t0", 8) == 0) {
 				openvz_host = true;
-				break;
+				ఆపు;
 			}
 		}
 		fclose(fp);
 	}
 
-	if ((rc = readlink("/proc/self/ns/pid", my_ns, sizeof(my_ns)-1)) <= 0)
+	ఒకవేళ ((rc = readlink("/proc/self/ns/pid", my_ns, పరిమాణం(my_ns)-1)) <= 0)
 		my_ns[0] = '\0';
 
-	while ((entry = readdir(procdir)) != NULL) {
-		if (sscanf(entry->d_name, "%d", &p) != 1)
-			continue;
-		if (openrc_pid != 0 && openrc_pid == p)
-			continue;
-		if (pid != 0 && pid != p)
-			continue;
-		xasprintf(&buffer, "/proc/%d/ns/pid", p);
-		if ((rc = readlink(buffer, proc_ns, sizeof(proc_ns)-1)) <= 0)
+	అయితే ((నమోదు_2 = readdir(procdir)) != ఖాళీ) {
+		ఒకవేళ (అక్షరశ్రేణి_చదువు(నమోదు_2->d_name, "%d", &p) != 1)
+			కొనసాగు;
+		ఒకవేళ (openrc_pid != 0 && openrc_pid == p)
+			కొనసాగు;
+		ఒకవేళ (pid != 0 && pid != p)
+			కొనసాగు;
+		xasprintf(&బఫరు, "/proc/%d/ns/pid", p);
+		ఒకవేళ ((rc = readlink(బఫరు, proc_ns, పరిమాణం(proc_ns)-1)) <= 0)
 			proc_ns[0] = '\0';
-		free(buffer);
-		if (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
-			continue;
-		if (uid) {
-			xasprintf(&buffer, "/proc/%d", p);
-			if (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
-				free(buffer);
-				continue;
+		విడుదల(బఫరు);
+		ఒకవేళ (pid == 0 && అక్షరశ్రేణి_పొడవు(my_ns) && అక్షరశ్రేణి_పొడవు (proc_ns) && strcmp(my_ns, proc_ns))
+			కొనసాగు;
+		ఒకవేళ (uid) {
+			xasprintf(&బఫరు, "/proc/%d", p);
+			ఒకవేళ (stat(బఫరు, &sb) != 0 || sb.st_uid != uid) {
+				విడుదల(బఫరు);
+				కొనసాగు;
 			}
-			free(buffer);
+			విడుదల(బఫరు);
 		}
-		if (exec && !pid_is_exec(p, exec))
-			continue;
-		if (argv &&
-		    !pid_is_argv(p, (const char *const *)argv))
-			continue;
+		ఒకవేళ (exec && !pid_is_exec(p, exec))
+			కొనసాగు;
+		ఒకవేళ (argv &&
+		    !pid_is_argv(p, (స్థిరరాశి అక్షరం *స్థిరరాశి *)argv))
+			కొనసాగు;
 		/* If this is an OpenVZ host, filter out container processes */
-		if (openvz_host) {
-			xasprintf(&buffer, "/proc/%d/status", p);
-			fp = fopen(buffer, "r");
-			free(buffer);
-			if (!fp)
-				continue;
-			while (xgetline(&line, &len, fp) != -1) {
-				if (strncmp(line, "envID:", 6) == 0) {
-					container_pid = !(strncmp(line, "envID:\t0", 8) == 0);
-					break;
+		ఒకవేళ (openvz_host) {
+			xasprintf(&బఫరు, "/proc/%d/status", p);
+			fp = fopen(బఫరు, "r");
+			విడుదల(బఫరు);
+			ఒకవేళ (!fp)
+				కొనసాగు;
+			అయితే (xgetline(&పంక్తి, &len, fp) != -1) {
+				ఒకవేళ (అక్షరశ్రేణి_పోలిక(పంక్తి, "envID:", 6) == 0) {
+					container_pid = !(అక్షరశ్రేణి_పోలిక(పంక్తి, "envID:\t0", 8) == 0);
+					ఆపు;
 				}
 			}
 			fclose(fp);
 		}
-		if (container_pid)
-			continue;
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		ఒకవేళ (container_pid)
+			కొనసాగు;
+		ఒకవేళ (!pids) {
+			pids = xmalloc(పరిమాణం(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(పరిమాణం(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_చొప్పించు_తల(pids, pi, entries);
 	}
-	if (line != NULL)
-		free(line);
+	ఒకవేళ (పంక్తి != ఖాళీ)
+		విడుదల(పంక్తి);
 	closedir(procdir);
-	return pids;
+	తిరిగి pids;
 }
 
-#elif BSD
+#లేదావేళ BSD
 
-# if defined(__NetBSD__) || defined(__OpenBSD__)
+# ఒకవేళ defined(__NetBSD__) || defined(__OpenBSD__)
 #  define _KVM_GETPROC2
 #  define _KINFO_PROC kinfo_proc2
 #  define _KVM_GETARGV kvm_getargv2
 #  define _GET_KINFO_UID(kp) (kp.p_ruid)
 #  define _GET_KINFO_COMM(kp) (kp.p_comm)
 #  define _GET_KINFO_PID(kp) (kp.p_pid)
-#  define _KVM_PATH NULL
+#  define KVM_మార్గం ఖాళీ
 #  define _KVM_FLAGS KVM_NO_FILES
-# else
+# లేకపోతే
 #  ifndef KERN_PROC_PROC
 #    define KERN_PROC_PROC KERN_PROC_ALL
 #  endif
 #  define _KINFO_PROC kinfo_proc
 #  define _KVM_GETARGV kvm_getargv
-#  if defined(__DragonFly__)
+#  ఒకవేళ defined(__DragonFly__)
 #    define _GET_KINFO_UID(kp) (kp.kp_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.kp_comm)
 #    define _GET_KINFO_PID(kp) (kp.kp_pid)
-#  else
+#  లేకపోతే
 #    define _GET_KINFO_UID(kp) (kp.ki_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.ki_comm)
 #    define _GET_KINFO_PID(kp) (kp.ki_pid)
 #  endif
-#  define _KVM_PATH _PATH_DEVNULL
+#  define KVM_మార్గం _PATH_DEVNULL
 #  define _KVM_FLAGS O_RDONLY
 # endif
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_కనుగొను_pids(స్థిరరాశి అక్షరం *exec, స్థిరరాశి అక్షరం *స్థిరరాశి *argv, uid_t uid, pid_t pid)
 {
-	static kvm_t *kd = NULL;
-	char errbuf[_POSIX2_LINE_MAX];
-	struct _KINFO_PROC *kp;
-	int i;
-	int processes = 0;
-	int pargc = 0;
-	char **pargv;
-	RC_PIDLIST *pids = NULL;
+	స్థిర kvm_t *kd = ఖాళీ;
+	అక్షరం errbuf[_POSIX2_LINE_MAX];
+	నిర్మాణం _KINFO_PROC *kp;
+	పూర్ణాంకం i;
+	పూర్ణాంకం processes = 0;
+	పూర్ణాంకం pargc = 0;
+	అక్షరం **pargv;
+	RC_PIDLIST *pids = ఖాళీ;
 	RC_PID *pi;
 	pid_t p;
-	const char *const *arg;
-	int match;
+	స్థిరరాశి అక్షరం *స్థిరరాశి *arg;
+	పూర్ణాంకం సరిపోలిక;
 
-	if ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
-		    NULL, _KVM_FLAGS, errbuf)) == NULL)
+	ఒకవేళ ((kd = kvm_openfiles(KVM_మార్గం, KVM_మార్గం,
+		    ఖాళీ, _KVM_FLAGS, errbuf)) == ఖాళీ)
 	{
 		fprintf(stderr, "kvm_open: %s\n", errbuf);
-		return NULL;
+		తిరిగి ఖాళీ;
 	}
 
-#ifdef _KVM_GETPROC2
-	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(*kp), &processes);
-#else
+#నిర్వచితమైతే _KVM_GETPROC2
+	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, పరిమాణం(*kp), &processes);
+#లేకపోతే
 	kp = kvm_getprocs(kd, KERN_PROC_PROC, 0, &processes);
-#endif
-	if ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
+#అయితే_ముగింపు
+	ఒకవేళ ((kp == ఖాళీ && processes > 0) || (kp != ఖాళీ && processes < 0)) {
 		fprintf(stderr, "kvm_getprocs: %s\n", kvm_geterr(kd));
 		kvm_close(kd);
-		return NULL;
+		తిరిగి ఖాళీ;
 	}
 
-	if (exec)
+	ఒకవేళ (exec)
 		exec = basename_c(exec);
-	for (i = 0; i < processes; i++) {
+	కొరకు (i = 0; i < processes; i++) {
 		p = _GET_KINFO_PID(kp[i]);
-		if (pid != 0 && pid != p)
-			continue;
-		if (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
-			continue;
-		if (exec) {
-			if (!_GET_KINFO_COMM(kp[i]) ||
+		ఒకవేళ (pid != 0 && pid != p)
+			కొనసాగు;
+		ఒకవేళ (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
+			కొనసాగు;
+		ఒకవేళ (exec) {
+			ఒకవేళ (!_GET_KINFO_COMM(kp[i]) ||
 			    strcmp(exec, _GET_KINFO_COMM(kp[i])) != 0)
-				continue;
+				కొనసాగు;
 		}
-		if (argv && *argv) {
+		ఒకవేళ (argv && *argv) {
 			pargv = _KVM_GETARGV(kd, &kp[i], pargc);
-			if (!pargv || !*pargv)
-				continue;
+			ఒకవేళ (!pargv || !*pargv)
+				కొనసాగు;
 			arg = argv;
-			match = 1;
-			while (*arg && *pargv)
-				if (strcmp(*arg++, *pargv++) != 0) {
-					match = 0;
-					break;
+			సరిపోలిక = 1;
+			అయితే (*arg && *pargv)
+				ఒకవేళ (strcmp(*arg++, *pargv++) != 0) {
+					సరిపోలిక = 0;
+					ఆపు;
 				}
-			if (!match)
-				continue;
+			ఒకవేళ (!సరిపోలిక)
+				కొనసాగు;
 		}
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		ఒకవేళ (!pids) {
+			pids = xmalloc(పరిమాణం(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(పరిమాణం(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_చొప్పించు_తల(pids, pi, entries);
 	}
 	kvm_close(kd);
 
-	return pids;
+	తిరిగి pids;
 }
 
-#else
+#లేకపోతే
 #  error "Platform not supported!"
-#endif
+#అయితే_ముగింపు
 
-static bool
-_match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
+స్థిర bool
+సరిపోలిక_daemon(స్థిరరాశి అక్షరం *svcname, స్థిరరాశి అక్షరం *instance, RC_STRINGLIST *సరిపోలిక)
 {
-	char *line = NULL;
+	అక్షరం *పంక్తి = ఖాళీ;
 	size_t len = 0;
 	FILE *fp;
 	RC_STRING *m;
-	char *daemon;
+	అక్షరం *daemon;
 
 	xasprintf(&daemon, "%s/%s", svcname, instance);
 	fp = do_fopenat(rc_dirfd(RC_DIR_DAEMONS), daemon, O_RDONLY);
-	free(daemon);
+	విడుదల(daemon);
 
-	if (!fp)
-		return false;
+	ఒకవేళ (!fp)
+		తిరిగి false;
 
-	while (xgetline(&line, &len, fp) != -1) {
-		TAILQ_FOREACH(m, match, entries)
-		    if (strcmp(line, m->value) == 0) {
-			    TAILQ_REMOVE(match, m, entries);
-			    break;
+	అయితే (xgetline(&పంక్తి, &len, fp) != -1) {
+		TAILQ_FOREACH(m, సరిపోలిక, entries)
+		    ఒకవేళ (strcmp(పంక్తి, m->విలువ) == 0) {
+			    TAILQ_REMOVE(సరిపోలిక, m, entries);
+			    ఆపు;
 		    }
-		if (!TAILQ_FIRST(match))
-			break;
+		ఒకవేళ (!TAILQ_మొదటి(సరిపోలిక))
+			ఆపు;
 	}
 	fclose(fp);
-	free(line);
-	if (TAILQ_FIRST(match))
-		return false;
-	return true;
+	విడుదల(పంక్తి);
+	ఒకవేళ (TAILQ_మొదటి(సరిపోలిక))
+		తిరిగి false;
+	తిరిగి true;
 }
 
-static RC_STRINGLIST *
-_match_list(const char *exec, const char *const *argv, const char *pidfile)
+స్థిర RC_STRINGLIST *
+సరిపోలిక_list(స్థిరరాశి అక్షరం *exec, స్థిరరాశి అక్షరం *స్థిరరాశి *argv, స్థిరరాశి అక్షరం *pidfile)
 {
-	RC_STRINGLIST *match = rc_stringlist_new();
-	int i = 0;
-	char *m;
+	RC_STRINGLIST *సరిపోలిక = rc_stringlist_new();
+	పూర్ణాంకం i = 0;
+	అక్షరం *m;
 
-	if (exec) {
+	ఒకవేళ (exec) {
 		xasprintf(&m, "exec=%s", exec);
-		rc_stringlist_add(match, m);
-		free(m);
+		rc_stringlist_కూడు(సరిపోలిక, m);
+		విడుదల(m);
 	}
 
-	while (argv && argv[i]) {
+	అయితే (argv && argv[i]) {
 		xasprintf(&m, "argv_0=%s", argv[i++]);
-		rc_stringlist_add(match, m);
-		free(m);
+		rc_stringlist_కూడు(సరిపోలిక, m);
+		విడుదల(m);
 	}
 
-	if (pidfile) {
+	ఒకవేళ (pidfile) {
 		xasprintf(&m, "pidfile=%s", pidfile);
-		rc_stringlist_add(match, m);
-		free(m);
+		rc_stringlist_కూడు(సరిపోలిక, m);
+		విడుదల(m);
 	}
 
-	return match;
+	తిరిగి సరిపోలిక;
 }
 
 bool
-rc_service_daemon_set(const char *service, const char *exec,
-    const char *const *argv,
-    const char *pidfile, bool started)
+rc_service_daemon_సమితి(స్థిరరాశి అక్షరం *service, స్థిరరాశి అక్షరం *exec,
+    స్థిరరాశి అక్షరం *స్థిరరాశి *argv,
+    స్థిరరాశి అక్షరం *pidfile, bool started)
 {
-	char *file = NULL;
-	int nfiles = 0;
-	char oldfile[PATH_MAX] = { '\0' };
+	అక్షరం *file = ఖాళీ;
+	పూర్ణాంకం nfiles = 0;
+	అక్షరం oldfile[PATH_MAX] = { '\0' };
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
-	RC_STRINGLIST *match, *renamelist;
-	int i = 0;
+	నిర్మాణం dirent *d;
+	RC_STRINGLIST *సరిపోలిక, *renamelist;
+	పూర్ణాంకం i = 0;
 	FILE *fp;
-	const char *base = basename_c(service);
+	స్థిరరాశి అక్షరం *పునాది = basename_c(service);
 
-	if (!exec && !pidfile) {
+	ఒకవేళ (!exec && !pidfile) {
 		errno = EINVAL;
-		return false;
+		తిరిగి false;
 	}
 
 	/* Regardless, erase any existing daemon info */
-	if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		match = _match_list(exec, argv, pidfile);
+	ఒకవేళ ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), పునాది))) {
+		సరిపోలిక = సరిపోలిక_list(exec, argv, pidfile);
 		renamelist = rc_stringlist_new();
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
+		అయితే ((d = readdir(dp))) {
+			ఒకవేళ (d->d_name[0] == '.')
+				కొనసాగు;
 
-			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), base, d->d_name);
-			if (rc_stringlist_find(renamelist, file)) {
-				free(file);
-				continue;
+			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), పునాది, d->d_name);
+			ఒకవేళ (rc_stringlist_కనుగొను(renamelist, file)) {
+				విడుదల(file);
+				కొనసాగు;
 			}
 
 			nfiles++;
 
-			if (!*oldfile) {
-				if (_match_daemon(base, d->d_name, match)) {
+			ఒకవేళ (!*oldfile) {
+				ఒకవేళ (సరిపోలిక_daemon(పునాది, d->d_name, సరిపోలిక)) {
 					unlink(file);
-					strlcpy(oldfile, file, sizeof(oldfile));
+					strlcpy(oldfile, file, పరిమాణం(oldfile));
 					nfiles--;
 				}
-			} else {
+			} లేకపోతే {
 				rename(file, oldfile);
-				strlcpy(oldfile, file, sizeof(oldfile));
+				strlcpy(oldfile, file, పరిమాణం(oldfile));
 				/* Add renamed file to renamelist, as this new file name could
 				 * be read again from readdir() */
-				rc_stringlist_add(renamelist, oldfile);
+				rc_stringlist_కూడు(renamelist, oldfile);
 			}
-			free(file);
+			విడుదల(file);
 		}
 		closedir(dp);
-		rc_stringlist_free(match);
+		rc_stringlist_free(సరిపోలిక);
 		rc_stringlist_free(renamelist);
 	}
 
 	/* Now store our daemon info */
-	if (!started)
-		return true;
+	ఒకవేళ (!started)
+		తిరిగి true;
 
-	if (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
-		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), base, nfiles + 1);
-		if ((fp = fopen(file, "w"))) {
+	ఒకవేళ (mkdirat(rc_dirfd(RC_DIR_DAEMONS), పునాది, 0755) == 0 || errno == EEXIST) {
+		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), పునాది, nfiles + 1);
+		ఒకవేళ ((fp = fopen(file, "w"))) {
 			fprintf(fp, "exec=");
-			if (exec)
+			ఒకవేళ (exec)
 				fprintf(fp, "%s", exec);
-			while (argv && argv[i]) {
+			అయితే (argv && argv[i]) {
 				fprintf(fp, "\nargv_%d=%s", i, argv[i]);
 				i++;
 			}
 			fprintf(fp, "\npidfile=");
-			if (pidfile)
+			ఒకవేళ (pidfile)
 				fprintf(fp, "%s", pidfile);
 			fprintf(fp, "\n");
 			fclose(fp);
 			retval = true;
 		}
-		free(file);
+		విడుదల(file);
 	}
 
-	return retval;
+	తిరిగి retval;
 }
 
 bool
-rc_service_started_daemon(const char *service,
-    const char *exec, const char *const *argv, int indx)
+rc_service_started_daemon(స్థిరరాశి అక్షరం *service,
+    స్థిరరాశి అక్షరం *exec, స్థిరరాశి అక్షరం *స్థిరరాశి *argv, పూర్ణాంకం indx)
 {
-	const char *base = basename_c(service);
-	char *file = NULL;
-	RC_STRINGLIST *match;
+	స్థిరరాశి అక్షరం *పునాది = basename_c(service);
+	అక్షరం *file = ఖాళీ;
+	RC_STRINGLIST *సరిపోలిక;
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	నిర్మాణం dirent *d;
 
-	if (!service || !exec)
-		return false;
+	ఒకవేళ (!service || !exec)
+		తిరిగి false;
 
-	match = _match_list(exec, argv, NULL);
+	సరిపోలిక = సరిపోలిక_list(exec, argv, ఖాళీ);
 
-	if (indx > 0) {
+	ఒకవేళ (indx > 0) {
 		xasprintf(&file, "%03d", indx);
-		retval = _match_daemon(base, file, match);
-		free(file);
-	} else if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
-			if ((retval = _match_daemon(base, d->d_name, match)))
-				break;
+		retval = సరిపోలిక_daemon(పునాది, file, సరిపోలిక);
+		విడుదల(file);
+	} లేకపోతే ఒకవేళ ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), పునాది))) {
+		అయితే ((d = readdir(dp))) {
+			ఒకవేళ (d->d_name[0] == '.')
+				కొనసాగు;
+			ఒకవేళ ((retval = సరిపోలిక_daemon(పునాది, d->d_name, సరిపోలిక)))
+				ఆపు;
 		}
 		closedir(dp);
 	}
 
-	rc_stringlist_free(match);
-	return retval;
+	rc_stringlist_free(సరిపోలిక);
+	తిరిగి retval;
 }
 
 bool
-rc_service_daemons_crashed(const char *service)
+rc_service_daemons_crashed(స్థిరరాశి అక్షరం *service)
 {
 	DIR *dp;
-	struct dirent *d;
+	నిర్మాణం dirent *d;
 	FILE *fp;
-	char *line = NULL;
+	అక్షరం *పంక్తి = ఖాళీ;
 	size_t len = 0;
-	char **argv = NULL;
-	char *exec = NULL;
-	char *name = NULL;
-	char *pidfile = NULL;
+	అక్షరం **argv = ఖాళీ;
+	అక్షరం *exec = ఖాళీ;
+	అక్షరం *name = ఖాళీ;
+	అక్షరం *pidfile = ఖాళీ;
 	pid_t pid = 0;
 	RC_PIDLIST *pids;
 	RC_PID *p1;
 	RC_PID *p2;
-	char *p;
-	char *token;
+	అక్షరం *p;
+	అక్షరం *token;
 	bool retval = false;
-	RC_STRINGLIST *list = NULL;
+	RC_STRINGLIST *list = ఖాళీ;
 	RC_STRING *s;
 	size_t i;
-	char *ch_root;
-	char *spidfile;
+	అక్షరం *ch_మూలం;
+	అక్షరం *spidfile;
 
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
-		return false;
+	ఒకవేళ (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
+		తిరిగి false;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	అయితే ((d = readdir(dp))) {
+		ఒకవేళ (d->d_name[0] == '.')
+			కొనసాగు;
 
-		if (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
-			break;
+		ఒకవేళ (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
+			ఆపు;
 
-		while (xgetline(&line, &len, fp) != -1) {
-			p = line;
-			if ((token = strsep(&p, "=")) == NULL || !p)
-				continue;
+		అయితే (xgetline(&పంక్తి, &len, fp) != -1) {
+			p = పంక్తి;
+			ఒకవేళ ((token = strsep(&p, "=")) == ఖాళీ || !p)
+				కొనసాగు;
 
-			if (!*p)
-				continue;
+			ఒకవేళ (!*p)
+				కొనసాగు;
 
-			if (strcmp(token, "exec") == 0) {
-				if (exec)
-					free(exec);
+			ఒకవేళ (strcmp(token, "exec") == 0) {
+				ఒకవేళ (exec)
+					విడుదల(exec);
 				exec = xstrdup(p);
-			} else if (strncmp(token, "argv_", 5) == 0) {
-				if (!list)
+			} లేకపోతే ఒకవేళ (అక్షరశ్రేణి_పోలిక(token, "argv_", 5) == 0) {
+				ఒకవేళ (!list)
 					list = rc_stringlist_new();
-				rc_stringlist_add(list, p);
-			} else if (strcmp(token, "name") == 0) {
-				if (name)
-					free(name);
+				rc_stringlist_కూడు(list, p);
+			} లేకపోతే ఒకవేళ (strcmp(token, "name") == 0) {
+				ఒకవేళ (name)
+					విడుదల(name);
 				name = xstrdup(p);
-			} else if (strcmp(token, "pidfile") == 0) {
+			} లేకపోతే ఒకవేళ (strcmp(token, "pidfile") == 0) {
 				pidfile = xstrdup(p);
-				break;
+				ఆపు;
 			}
 		}
 		fclose(fp);
 
-		ch_root = rc_service_value_get(basename_c(service), "chroot");
+		ch_మూలం = rc_service_విలువ_get(basename_c(service), "chroot");
 		spidfile = pidfile;
-		if (ch_root && pidfile) {
-			xasprintf(&spidfile, "%s%s", ch_root, pidfile);
-			free(pidfile);
+		ఒకవేళ (ch_మూలం && pidfile) {
+			xasprintf(&spidfile, "%s%s", ch_మూలం, pidfile);
+			విడుదల(pidfile);
 			pidfile = spidfile;
 		}
 
 		pid = 0;
-		if (pidfile) {
+		ఒకవేళ (pidfile) {
 			retval = true;
-			if ((fp = fopen(pidfile, "r"))) {
-				if (fscanf(fp, "%d", &pid) == 1)
+			ఒకవేళ ((fp = fopen(pidfile, "r"))) {
+				ఒకవేళ (fscanf(fp, "%d", &pid) == 1)
 					retval = false;
 				fclose(fp);
 			}
-			free(pidfile);
-			pidfile = NULL;
+			విడుదల(pidfile);
+			pidfile = ఖాళీ;
 
 			/* We have the pid, so no need to match
 			   on exec or name */
-			free(exec);
-			exec = NULL;
-			free(name);
-			name = NULL;
-		} else {
-			if (exec) {
-				if (!list)
+			విడుదల(exec);
+			exec = ఖాళీ;
+			విడుదల(name);
+			name = ఖాళీ;
+		} లేకపోతే {
+			ఒకవేళ (exec) {
+				ఒకవేళ (!list)
 					list = rc_stringlist_new();
-				if (!TAILQ_FIRST(list))
-					rc_stringlist_add(list, exec);
+				ఒకవేళ (!TAILQ_మొదటి(list))
+					rc_stringlist_కూడు(list, exec);
 
-				free(exec);
-				exec = NULL;
+				విడుదల(exec);
+				exec = ఖాళీ;
 			}
 
-			if (list) {
+			ఒకవేళ (list) {
 				/* We need to flatten our linked list
 				   into an array */
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    i++;
-				argv = xmalloc(sizeof(char *) * (i + 1));
+				argv = xmalloc(పరిమాణం(అక్షరం *) * (i + 1));
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
-				    argv[i++] = s->value;
-				argv[i] = NULL;
+				    argv[i++] = s->విలువ;
+				argv[i] = ఖాళీ;
 			}
 		}
 
-		if (!retval) {
-			if (pid != 0) {
-				if (kill(pid, 0) == -1 && errno == ESRCH)
+		ఒకవేళ (!retval) {
+			ఒకవేళ (pid != 0) {
+				ఒకవేళ (kill(pid, 0) == -1 && errno == ESRCH)
 					retval = true;
-			} else if ((pids = rc_find_pids(exec,
-				    (const char *const *)argv,
+			} లేకపోతే ఒకవేళ ((pids = rc_కనుగొను_pids(exec,
+				    (స్థిరరాశి అక్షరం *స్థిరరాశి *)argv,
 				    0, pid)))
 			{
-				p1 = LIST_FIRST(pids);
-				while (p1) {
-					p2 = LIST_NEXT(p1, entries);
-					free(p1);
+				p1 = LIST_మొదటి(pids);
+				అయితే (p1) {
+					p2 = LIST_తదుపరి(p1, entries);
+					విడుదల(p1);
 					p1 = p2;
 				}
-				free(pids);
-			} else
+				విడుదల(pids);
+			} లేకపోతే
 				retval = true;
 		}
 		rc_stringlist_free(list);
-		list = NULL;
-		free(argv);
-		argv = NULL;
-		free(exec);
-		exec = NULL;
-		free(name);
-		name = NULL;
-		if (retval)
-			break;
+		list = ఖాళీ;
+		విడుదల(argv);
+		argv = ఖాళీ;
+		విడుదల(exec);
+		exec = ఖాళీ;
+		విడుదల(name);
+		name = ఖాళీ;
+		ఒకవేళ (retval)
+			ఆపు;
 	}
 	closedir(dp);
-	free(line);
+	విడుదల(పంక్తి);
 
-	return retval;
+	తిరిగి retval;
 }

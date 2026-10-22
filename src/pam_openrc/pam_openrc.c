@@ -1,176 +1,176 @@
-#include <pwd.h>
-#include <grp.h>
-#include <security/pam_modules.h>
-#include <security/pam_appl.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/file.h>
-#include <syslog.h>
-#include <unistd.h>
+#అన్తర్భావ <pwd.h>
+#అన్తర్భావ <grp.h>
+#అన్తర్భావ <security/pam_modules.h>
+#అన్తర్భావ <security/pam_appl.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/file.h>
+#అన్తర్భావ <syslog.h>
+#అన్తర్భావ <unistd.h>
 
-#include "librc.h"
-#include "einfo.h"
-#include "helpers.h"
+#అన్తర్భావ "librc.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "helpers.h"
 
-static bool
-import_env(pam_handle_t *pamh, const char *user)
+స్థిర bool
+import_env(pam_handle_t *pamh, స్థిరరాశి అక్షరం *user)
 {
-	char *path, *string = NULL;
+	అక్షరం *మార్గం, *string = ఖాళీ;
 	bool ret = false;
-	size_t size;
+	size_t కొలత;
 	FILE *fp;
 
-	xasprintf(&path, "user/%s/environ", user);
+	xasprintf(&మార్గం, "user/%s/environ", user);
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), path, O_RDONLY)))
-		goto out;
+	ఒకవేళ (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), మార్గం, O_RDONLY)))
+		వెళ్ళు బహిర్గతం;
 
-	while (getdelim(&string, &size, '\0', fp) != -1)
+	అయితే (getdelim(&string, &కొలత, '\0', fp) != -1)
 		pam_putenv(pamh, string);
 
-	free(string);
+	విడుదల(string);
 	fclose(fp);
 
 	ret = true;
-out:
-	free(path);
+బహిర్గతం:
+	విడుదల(మార్గం);
 
-	return ret;
+	తిరిగి ret;
 }
 
-static int
+స్థిర పూర్ణాంకం
 exec_openrc(pam_handle_t *pamh, bool opening, bool quiet)
 {
-	char *do_autostart = rc_conf_value("rc_autostart_user");
-	char *svc_name, *pam_lock, *logins, *script = NULL;
-	const char *username = NULL, *session = NULL;
-	RC_SERVICE service_status;
-	int count = 0, fd, status;
-	int ret = PAM_SUCCESS;
-	struct passwd *user;
+	అక్షరం *do_autostart = rc_conf_విలువ("rc_autostart_user");
+	అక్షరం *svc_name, *pam_తాళం, *logins, *script = ఖాళీ;
+	స్థిరరాశి అక్షరం *username = ఖాళీ, *session = ఖాళీ;
+	RC_SERVICE service_స్థితి;
+	పూర్ణాంకం లెక్క = 0, fd, స్థితి_2;
+	పూర్ణాంకం ret = PAM_SUCCESS;
+	నిర్మాణం passwd *user;
 	pid_t pid = -1;
 
 	errno = 0;
-	if (!rc_yesno(do_autostart) && errno == 0)
-		return PAM_SUCCESS;
+	ఒకవేళ (!rc_yesno(do_autostart) && errno == 0)
+		తిరిగి PAM_SUCCESS;
 
 	setenv("EINFO_LOG", "pam_openrc", true);
 
-	if (quiet) {
+	ఒకవేళ (quiet) {
 		setenv("EINFO_QUIET", "yes", true);
 		setenv("EERROR_QUIET", "yes", true);
 	}
 
-	if (pam_get_item(pamh, PAM_SERVICE, (const void **)&session) != PAM_SUCCESS) {
+	ఒకవేళ (pam_get_అంశం(pamh, PAM_SERVICE, (స్థిరరాశి శూన్య **)&session) != PAM_SUCCESS) {
 		elog(LOG_ERR, "Failed to get PAM_SERVICE");
-		return PAM_SESSION_ERR;
+		తిరిగి PAM_SESSION_ERR;
 	}
 
-	if (session && strcmp(session, "openrc-user") == 0)
-		return PAM_SUCCESS;
+	ఒకవేళ (session && strcmp(session, "openrc-user") == 0)
+		తిరిగి PAM_SUCCESS;
 
-	if (pam_get_item(pamh, PAM_USER, (const void **)&username) != PAM_SUCCESS)
-		return PAM_SESSION_ERR;
+	ఒకవేళ (pam_get_అంశం(pamh, PAM_USER, (స్థిరరాశి శూన్య **)&username) != PAM_SUCCESS)
+		తిరిగి PAM_SESSION_ERR;
 
-	if (!username) {
+	ఒకవేళ (!username) {
 		elog(LOG_ERR, "PAM_USER unset.");
-		return PAM_SESSION_ERR;
+		తిరిగి PAM_SESSION_ERR;
 	}
 
-	if (!(user = getpwnam(username))) {
+	ఒకవేళ (!(user = getpwnam(username))) {
 		elog(LOG_ERR, "User '%s' not found.", username);
-		return PAM_SESSION_ERR;
+		తిరిగి PAM_SESSION_ERR;
 	}
 
-	if (user->pw_uid == 0)
-		return PAM_SUCCESS;
+	ఒకవేళ (user->pw_uid == 0)
+		తిరిగి PAM_SUCCESS;
 
-	xasprintf(&pam_lock, "pam_openrc[%s]", user->pw_name);
-	setenv("EINFO_LOG", pam_lock, true);
+	xasprintf(&pam_తాళం, "pam_openrc[%s]", user->pw_name);
+	setenv("EINFO_LOG", pam_తాళం, true);
 
 	xasprintf(&svc_name, "user.%s", user->pw_name);
 
-	service_status = rc_service_state(svc_name);
-	if (service_status & RC_SERVICE_STARTED && !(service_status & RC_SERVICE_HOTPLUGGED)) {
+	service_స్థితి = rc_service_state(svc_name);
+	ఒకవేళ (service_స్థితి & RC_SERVICE_STARTED && !(service_స్థితి & RC_SERVICE_HOTPLUGGED)) {
 		elog(LOG_INFO, "%s started and not hotplugged, skipping session.", svc_name);
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
 	elog(LOG_INFO, opening ? "starting session" : "stopping session");
 
-	if ((fd = svc_lock(pam_lock, false)) == -1) {
+	ఒకవేళ ((fd = svc_తాళం(pam_తాళం, false)) == -1) {
 		ret = PAM_SESSION_ERR;
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (!(script = rc_service_resolve(svc_name))) {
-		if (!(script = rc_service_resolve("user"))) {
+	ఒకవేళ (!(script = rc_service_resolve(svc_name))) {
+		ఒకవేళ (!(script = rc_service_resolve("user"))) {
 			elog(LOG_ERR, "Failed to resolve %s.", svc_name);
 			ret = PAM_SESSION_ERR;
-			goto unlock;
+			వెళ్ళు unlock;
 		}
 
-		if (symlinkat(script, rc_dirfd(RC_DIR_INITD), svc_name) != 0) {
+		ఒకవేళ (symlinkat(script, rc_dirfd(RC_DIR_INITD), svc_name) != 0) {
 			elog(LOG_ERR, "symlink: %s", strerror(errno));
 			ret = PAM_SESSION_ERR;
-			goto unlock;
+			వెళ్ళు unlock;
 		}
 	}
 
-	logins = rc_service_value_get(svc_name, "logins");
-	if (logins)
-		sscanf(logins, "%d", &count);
-	free(logins);
+	logins = rc_service_విలువ_get(svc_name, "logins");
+	ఒకవేళ (logins)
+		అక్షరశ్రేణి_చదువు(logins, "%d", &లెక్క);
+	విడుదల(logins);
 
-	if (opening) {
-		if (count == 0) {
-			pid = service_start(svc_name);
+	ఒకవేళ (opening) {
+		ఒకవేళ (లెక్క == 0) {
+			pid = service_ప్రారంభం(svc_name);
 			rc_service_mark(svc_name, RC_SERVICE_HOTPLUGGED);
 		}
-		count++;
-	} else {
-		count--;
-		if (count == 0)
+		లెక్క++;
+	} లేకపోతే {
+		లెక్క--;
+		ఒకవేళ (లెక్క == 0)
 			pid = service_stop(svc_name);
 	}
 
-	elog(LOG_INFO, "%d sessions", count);
+	elog(LOG_INFO, "%d sessions", లెక్క);
 
-	if (pid > 0) {
-		waitpid(pid, &status, 0);
-		if (status != 0)
+	ఒకవేళ (pid > 0) {
+		waitpid(pid, &స్థితి_2, 0);
+		ఒకవేళ (స్థితి_2 != 0)
 			ret = PAM_SESSION_ERR;
 	}
 
-	xasprintf(&logins, "%d", count);
-	rc_service_value_set(svc_name, "logins", logins);
-	free(logins);
+	xasprintf(&logins, "%d", లెక్క);
+	rc_service_విలువ_సమితి(svc_name, "logins", logins);
+	విడుదల(logins);
 
 unlock:
-	svc_unlock(pam_lock, fd);
-out:
-	if (opening)
+	svc_unlock(pam_తాళం, fd);
+బహిర్గతం:
+	ఒకవేళ (opening)
 		import_env(pamh, user->pw_name);
 
-	free(pam_lock);
-	free(svc_name);
-	free(script);
+	విడుదల(pam_తాళం);
+	విడుదల(svc_name);
+	విడుదల(script);
 	unsetenv("EINFO_LOG");
-	return ret;
+	తిరిగి ret;
 }
 
-PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	(void) argc;
-	(void) argv;
+PAM_EXTERN పూర్ణాంకం pam_sm_open_session(pam_handle_t *pamh, పూర్ణాంకం flags, పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv) {
+	(శూన్య) argc;
+	(శూన్య) argv;
 
-	return exec_openrc(pamh, true, flags & PAM_SILENT);
+	తిరిగి exec_openrc(pamh, true, flags & PAM_SILENT);
 }
 
-PAM_EXTERN int pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	(void) argc;
-	(void) argv;
-	(void) flags;
+PAM_EXTERN పూర్ణాంకం pam_sm_close_session(pam_handle_t *pamh, పూర్ణాంకం flags, పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv) {
+	(శూన్య) argc;
+	(శూన్య) argv;
+	(శూన్య) flags;
 
-	return exec_openrc(pamh, false, flags & PAM_SILENT);
+	తిరిగి exec_openrc(pamh, false, flags & PAM_SILENT);
 }

@@ -10,81 +10,81 @@
  * except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
+#అన్తర్భావ <errno.h>
 
-#include "helpers.h"
-#include "timeutils.h"
+#అన్తర్భావ "helpers.h"
+#అన్తర్భావ "timeutils.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#ఒకవేళ defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
-#endif
+#అయితే_ముగింపు
 
-static int64_t ts_to_ms(struct timespec tv)
+స్థిర int64_t ts_గమ్యం_ms(నిర్మాణం timespec tv)
 {
-	int64_t sec_to_ms = 1000, round_up = 500000, ns_to_ms = 1000000;
-	return (tv.tv_sec * sec_to_ms) + ((tv.tv_nsec + round_up) / ns_to_ms);
+	int64_t sec_గమ్యం_ms = 1000, విడత_పైకి = 500000, ns_గమ్యం_ms = 1000000;
+	తిరిగి (tv.tv_sec * sec_గమ్యం_ms) + ((tv.tv_nsec + విడత_పైకి) / ns_గమ్యం_ms);
 }
 
-int64_t tm_now(void)
+int64_t tm_now(శూన్య)
 {
-	struct timespec tv;
+	నిర్మాణం timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
-	return ts_to_ms(tv);
+	తిరిగి ts_గమ్యం_ms(tv);
 }
 
-int64_t tm_sleep(int64_t ms, enum tm_sleep_flags flags)
+int64_t tm_sleep(int64_t ms, గణన tm_sleep_flags flags)
 {
-	int ret;
-	struct timespec tv, rem;
+	పూర్ణాంకం ret;
+	నిర్మాణం timespec tv, rem;
 	tv.tv_sec  = ms / 1000;
 	tv.tv_nsec = (ms % 1000) * 1000000l;
-	for (;;) {
+	కొరకు (;;) {
 		ret = clock_nanosleep(CLOCK_MONOTONIC, 0, &tv, &rem);
-		if (ret < 0 && (!(flags & TM_NO_EINTR) || errno != EINTR))
-			return ts_to_ms(rem);
-		if (ret == 0)
-			break;
+		ఒకవేళ (ret < 0 && (!(flags & TM_NO_EINTR) || errno != EINTR))
+			తిరిగి ts_గమ్యం_ms(rem);
+		ఒకవేళ (ret == 0)
+			ఆపు;
 		tv = rem;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-int64_t parse_duration(const char *duration)
+int64_t parse_duration(స్థిరరాశి అక్షరం *duration)
 {
-	enum delay_unit {
+	గణన delay_unit {
 		UNIT_INVALID = -1,
 		UNIT_MS   = 1,
 		UNIT_SEC  = 1000,
 		UNIT_MIN  = UNIT_SEC * 60,
 		UNIT_HOUR = UNIT_MIN * 60,
 	} unit = UNIT_INVALID;
-	struct { const char *ext; enum delay_unit unit; } exts[] = {
+	నిర్మాణం { స్థిరరాశి అక్షరం *ext; గణన delay_unit unit; } exts[] = {
 		{ "ms", UNIT_MS }, { "miliseconds", UNIT_MS },
 		{ "s", UNIT_SEC }, { "sec", UNIT_SEC }, { "seconds", UNIT_SEC }, { "", UNIT_SEC },
 		{ "m", UNIT_MIN }, { "min", UNIT_MIN }, { "minutes", UNIT_MIN },
 		{ "h", UNIT_HOUR }, { "hour", UNIT_HOUR }
 	};
-	char *end;
-	long val;
+	అక్షరం *చివర;
+	దీర్ఘ val;
 
 	errno = 0;
-	val = strtol(duration, &end, 10);
-	if (errno == ERANGE || *duration == '\0' || val < 0)
-		return -1;
-	for (size_t i = 0; i < ARRAY_SIZE(exts); ++i) {
-		if (strcmp(end, exts[i].ext) == 0) {
+	val = strtol(duration, &చివర, 10);
+	ఒకవేళ (errno == ERANGE || *duration == '\0' || val < 0)
+		తిరిగి -1;
+	కొరకు (size_t i = 0; i < ARRAY_కొలత(exts); ++i) {
+		ఒకవేళ (strcmp(చివర, exts[i].ext) == 0) {
 			unit = exts[i].unit;
-			break;
+			ఆపు;
 		}
 	}
-	switch (unit) {
-	case UNIT_INVALID:
-		return -1;
-	default:
-		if (INT64_MAX/unit < val) /* overflow */
-			return -1;
-		return (int64_t)val * unit;
+	ఎంపిక (unit) {
+	స్థితి UNIT_INVALID:
+		తిరిగి -1;
+	అప్రమేయ:
+		ఒకవేళ (INT64_MAX/unit < val) /*అధికప్రవాహం*/
+			తిరిగి -1;
+		తిరిగి (int64_t)val * unit;
 	}
 }

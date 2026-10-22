@@ -10,20 +10,20 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __RC_SCHEDULES_H
-#define __RC_SCHEDULES_H
+#నిర్వచితం_కాకపోతే __RC_SCHEDULES_H
+#నిర్వచించు __RC_SCHEDULES_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <sys/types.h>
 
-void free_schedulelist(void);
-int parse_signal(const char *applet, const char *sig);
-void parse_schedule(const char *applet, const char *string, int timeout);
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-		pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet);
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+శూన్య free_schedulelist(శూన్య);
+పూర్ణాంకం parse_signal(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *sig);
+శూన్య parse_కాలపట్టిక(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *string, పూర్ణాంకం timeout);
+పూర్ణాంకం do_stop(స్థిరరాశి అక్షరం *applet, స్థిరరాశి అక్షరం *exec, స్థిరరాశి అక్షరం *స్థిరరాశి *argv,
+		pid_t pid, uid_t uid, పూర్ణాంకం sig, bool group, bool test, bool quiet);
+పూర్ణాంకం నిరంతరం_stop_కాలపట్టిక(స్థిరరాశి అక్షరం *applet,
+		స్థిరరాశి అక్షరం *exec, స్థిరరాశి అక్షరం *స్థిరరాశి *argv,
 		pid_t pid, uid_t uid, bool group,
-		bool test, bool progress, bool quiet);
+		bool test, bool పురోగతి, bool quiet);
 
-#endif
+#అయితే_ముగింపు

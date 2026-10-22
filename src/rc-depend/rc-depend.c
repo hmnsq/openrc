@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <getopt.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "_usage.h"
-#include "helpers.h"
+#అన్తర్భావ "einfo.h"
+#అన్తర్భావ "queue.h"
+#అన్తర్భావ "rc.h"
+#అన్తర్భావ "misc.h"
+#అన్తర్భావ "_usage.h"
+#అన్తర్భావ "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "aot:suTF:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "starting", 0, NULL, 'a'},
-	{ "stopping", 0, NULL, 'o'},
-	{ "type",     1, NULL, 't'},
-	{ "notrace",  0, NULL, 'T'},
-	{ "strict",   0, NULL, 's'},
-	{ "update",   0, NULL, 'u'},
-	{ "deptree-file", 1, NULL, 'F'},
+స్థిరరాశి అక్షరం *applet = ఖాళీ;
+స్థిరరాశి అక్షరం *extraopts = ఖాళీ;
+స్థిరరాశి అక్షరం getoptstring[] = "aot:suTF:" getoptstring_COMMON;
+స్థిరరాశి నిర్మాణం option longopts[] = {
+	{ "starting", 0, ఖాళీ, 'a'},
+	{ "stopping", 0, ఖాళీ, 'o'},
+	{ "type",     1, ఖాళీ, 't'},
+	{ "notrace",  0, ఖాళీ, 'T'},
+	{ "strict",   0, ఖాళీ, 's'},
+	{ "update",   0, ఖాళీ, 'u'},
+	{ "deptree-file", 1, ఖాళీ, 'F'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+స్థిరరాశి అక్షరం * స్థిరరాశి longopts_help[] = {
 	"Order services as if runlevel is starting",
 	"Order services as if runlevel is stopping",
 	"Type(s) of dependency to list",
@@ -53,118 +53,118 @@ const char * const longopts_help[] = {
 	"File to load cached deptree from",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+స్థిరరాశి అక్షరం *usagestring = ఖాళీ;
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *types;
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *depends;
 	RC_STRING *s;
-	RC_DEPTREE *deptree = NULL;
-	int options = RC_DEP_TRACE, update = 0;
-	bool first = true;
-	char *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
-	int opt;
-	char *token;
-	char *deptree_file = NULL;
+	RC_DEPTREE *deptree = ఖాళీ;
+	పూర్ణాంకం options = RC_DEP_TRACE, update = 0;
+	bool మొదటి = true;
+	అక్షరం *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
+	పూర్ణాంకం opt;
+	అక్షరం *token;
+	అక్షరం *deptree_file = ఖాళీ;
 
 	applet = basename_c(argv[0]);
 	types = rc_stringlist_new();
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	అయితే ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (పూర్ణాంకం *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'a':
-			options |= RC_DEP_START;
-			break;
-		case 'o':
+		ఎంపిక (opt) {
+		స్థితి 'a':
+			options |= RC_DEP_ప్రారంభం;
+			ఆపు;
+		స్థితి 'o':
 			options |= RC_DEP_STOP;
-			break;
-		case 's':
+			ఆపు;
+		స్థితి 's':
 			options |= RC_DEP_STRICT;
-			break;
-		case 't':
-			while ((token = strsep(&optarg, ",")))
-				rc_stringlist_add(types, token);
-			break;
-		case 'u':
+			ఆపు;
+		స్థితి 't':
+			అయితే ((token = strsep(&optarg, ",")))
+				rc_stringlist_కూడు(types, token);
+			ఆపు;
+		స్థితి 'u':
 			update = 1;
-			break;
-		case 'T':
+			ఆపు;
+		స్థితి 'T':
 			options &= RC_DEP_TRACE;
-			break;
-		case 'F':
+			ఆపు;
+		స్థితి 'F':
 			deptree_file = xstrdup(optarg);
-			break;
+			ఆపు;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (deptree_file) {
-		if (!(deptree = rc_deptree_load_file(deptree_file)))
+	ఒకవేళ (deptree_file) {
+		ఒకవేళ (!(deptree = rc_deptree_ఎక్కించు_file(deptree_file)))
 			eerrorx("failed to load deptree");
-	} else {
-		if (!(deptree = _rc_deptree_load(update, NULL)))
+	} లేకపోతే {
+		ఒకవేళ (!(deptree = rc_deptree_ఎక్కించు_2(update, ఖాళీ)))
 			eerrorx("failed to load deptree");
 	}
 
-	if (!runlevel)
+	ఒకవేళ (!runlevel)
 		runlevel = default_runlevel();
 
 	services = rc_stringlist_new();
-	while (optind < argc) {
+	అయితే (optind < argc) {
 		list = rc_stringlist_new();
-		rc_stringlist_add(list, argv[optind]);
+		rc_stringlist_కూడు(list, argv[optind]);
 		errno = 0;
-		depends = rc_deptree_depends(deptree, NULL, list, runlevel, 0);
-		if (!depends && errno == ENOENT)
+		depends = rc_deptree_depends(deptree, ఖాళీ, list, runlevel, 0);
+		ఒకవేళ (!depends && errno == ENOENT)
 			eerror("no dependency info for service `%s'",
 			    argv[optind]);
-		else
-			rc_stringlist_add(services, argv[optind]);
+		లేకపోతే
+			rc_stringlist_కూడు(services, argv[optind]);
 
 		rc_stringlist_free(depends);
 		rc_stringlist_free(list);
 		optind++;
 	}
-	if (!TAILQ_FIRST(services)) {
+	ఒకవేళ (!TAILQ_మొదటి(services)) {
 		rc_stringlist_free(services);
 		rc_stringlist_free(types);
 		rc_deptree_free(deptree);
-		free(runlevel);
-		if (update)
-			return EXIT_SUCCESS;
+		విడుదల(runlevel);
+		ఒకవేళ (update)
+			తిరిగి EXIT_SUCCESS;
 		eerrorx("no services specified");
 	}
 
 	/* If we don't have any types, then supply some defaults */
-	if (!TAILQ_FIRST(types)) {
-		rc_stringlist_add(types, "ineed");
-		rc_stringlist_add(types, "iuse");
+	ఒకవేళ (!TAILQ_మొదటి(types)) {
+		rc_stringlist_కూడు(types, "ineed");
+		rc_stringlist_కూడు(types, "iuse");
 	}
 
 	depends = rc_deptree_depends(deptree, types, services,
 	    runlevel, options);
 
-	if (TAILQ_FIRST(depends)) {
+	ఒకవేళ (TAILQ_మొదటి(depends)) {
 		TAILQ_FOREACH(s, depends, entries) {
-			if (first)
-				first = false;
-			else
-				printf (" ");
-			printf ("%s", s->value);
+			ఒకవేళ (మొదటి)
+				మొదటి = false;
+			లేకపోతే
+				రాయి (" ");
+			రాయి ("%s", s->విలువ);
 
 		}
-		printf ("\n");
+		రాయి ("\n");
 	}
 
 	rc_stringlist_free(types);
 	rc_stringlist_free(services);
 	rc_stringlist_free(depends);
 	rc_deptree_free(deptree);
-	free(runlevel);
-	return EXIT_SUCCESS;
+	విడుదల(runlevel);
+	తిరిగి EXIT_SUCCESS;
 }
