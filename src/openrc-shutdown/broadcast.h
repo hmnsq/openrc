@@ -8,9 +8,9 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef BROADCAST_H
-#define BROADCAST_H
+#جے_بنا_تعریف نشر_H
+#تعریف_کرو نشر_H
 
-void broadcast(char *text);
+فراغ نشر(حرف *متن);
 
-#endif
+#جے_انت

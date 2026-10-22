@@ -15,20 +15,20 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef __LIBRC_PLUGIN_H__
-#define __LIBRC_PLUGIN_H__
+#جے_بنا_تعریف __LIBRC_PLUGIN_H__
+#تعریف_کرو __LIBRC_PLUGIN_H__
 
-#include <stdbool.h>
-#include <sys/types.h>
+#ضمن <stdbool.h>
+#ضمن <sys/types.h>
 
-#include "rc.h"
+#ضمن "rc.h"
 
 /* A simple flag to say if we're in a plugin process or not.
  * Mainly used in atexit code. */
-extern bool rc_in_plugin;
+خارجي bool rc_وچ_plugin;
 
-void rc_plugin_load(void);
-void rc_plugin_unload(void);
-void rc_plugin_run(RC_HOOK, const char *value);
+فراغ rc_plugin_لدو(فراغ);
+فراغ rc_plugin_unload(فراغ);
+فراغ rc_plugin_لگاتار(RC_HOOK, ثابت حرف *قدر);
 
-#endif
+#جے_انت

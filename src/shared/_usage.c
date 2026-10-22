@@ -10,80 +10,80 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ضمن <ctype.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#ضمن "rc.h"
+#ضمن "_usage.h"
+#ضمن "version.h"
+#ضمن "helpers.h"
 
 
-void set_quiet_options(void)
+فراغ سیٹ_quiet_options(فراغ)
 {
-	static int qcount = 0;
+	ساكن صحيح qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	بدل (qcount) {
+	حالة 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		اكسر;
+	حالة 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		اكسر;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN فراغ show_نسخہ(فراغ)
 {
-	const char *systype = NULL;
+	ثابت حرف *systype = عدم;
 
-	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
-		printf(" [%s]", systype);
-	printf(") %s", VERSION);
-#ifdef BRANDING
-	printf(" (%s)", BRANDING);
-#endif
-	printf("\n");
-	exit(EXIT_SUCCESS);
+	لکھو("%s (OpenRC", applet);
+	إذا ((systype = rc_sys()))
+		لکھو(" [%s]", systype);
+	لکھو(") %s", نسخہ);
+#جے_تعریف_شدہ BRANDING
+	لکھو(" (%s)", BRANDING);
+#جے_انت
+	لکھو("\n");
+	باہر_نکلو(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN فراغ usage(صحيح exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	ثابت حرف * ثابت has_arg[] = { "", "<arg>", "[arg]" };
+	صحيح i;
+	صحيح len;
+	حرف *lo;
+	حرف *p;
+	حرف *token;
+	حرف val[4] = "-?,";
 
-	if (usagestring)
-		printf("%s", usagestring);
-	else
-		printf("Usage: %s [options] ", applet);
+	إذا (usagestring)
+		لکھو("%s", usagestring);
+	وإلا
+		لکھو("Usage: %s [options] ", applet);
 
-	if (extraopts)
-		printf("%s", extraopts);
+	إذا (extraopts)
+		لکھو("%s", extraopts);
 
-	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	لکھو("\n\nOptions: [ %s ]\n", getoptstring);
+	لكل (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
-		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
+		len = لکھو("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		طالما ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
-				printf("%*s", len, "");
+			إذا (len > 0)
+				لکھو("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		حرر(lo);
 	}
-	exit(exit_status);
+	باہر_نکلو(exit_status);
 }

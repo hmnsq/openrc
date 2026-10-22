@@ -16,120 +16,120 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <linux/random.h>
-#include <sys/random.h>
-#include <sys/ioctl.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <poll.h>
-#include <unistd.h>
-#include <time.h>
-#include <errno.h>
-#include <endian.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#ضمن <linux/random.h>
+#ضمن <sys/random.h>
+#ضمن <sys/ioctl.h>
+#ضمن <sys/file.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/types.h>
+#ضمن <fcntl.h>
+#ضمن <getopt.h>
+#ضمن <poll.h>
+#ضمن <unistd.h>
+#ضمن <time.h>
+#ضمن <errno.h>
+#ضمن <endian.h>
+#ضمن <stdbool.h>
+#ضمن <stddef.h>
+#ضمن <stdint.h>
+#ضمن <string.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
 
-#include "einfo.h"
-#include "helpers.h"
-#include "_usage.h"
+#ضمن "einfo.h"
+#ضمن "helpers.h"
+#ضمن "_usage.h"
 
-#ifndef GRND_INSECURE
-#define GRND_INSECURE 0x0004 /* Apparently some headers don't ship with this yet. */
-#endif
+#جے_بنا_تعریف GRND_INSECURE
+#تعریف_کرو GRND_INSECURE 0x0004 /* Apparently some headers don't ship with this yet. */
+#جے_انت
 
-#define DEFAULT_SEED_DIR "/var/lib/seedrng"
-#define CREDITABLE_SEED "seed.credit"
-#define NON_CREDITABLE_SEED "seed.no-credit"
+#تعریف_کرو DEFAULT_بیج_DIR "/var/lib/seedrng"
+#تعریف_کرو CREDITABLE_بیج "seed.credit"
+#تعریف_کرو NON_CREDITABLE_بیج "seed.no-credit"
 
 /* Use long option value that is out of range for 8 bit getopt values.
  * The exact enum value is internal and can freely change, so we keep the
  * options sorted.
  */
-enum long_opts {
+تعداد long_opts {
 	/* This has to come first so following values stay in the 0x100+ range. */
-	LONGOPT_BASE = 0x100,
-	LONGOPT_SEED_DIR,
+	LONGOPT_ادھار = 0x100,
+	LONGOPT_بیج_DIR,
 	LONGOPT_SKIP_CREDIT,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "seed-dir", 1, NULL, LONGOPT_SEED_DIR },
-	{ "skip-credit", 0, NULL, LONGOPT_SKIP_CREDIT },
+ثابت حرف *applet = عدم;
+ثابت حرف *extraopts = عدم;
+ثابت حرف getoptstring[] = getoptstring_COMMON;
+ثابت بنية option longopts[] = {
+	{ "seed-dir", 1, عدم, LONGOPT_بیج_DIR },
+	{ "skip-credit", 0, عدم, LONGOPT_SKIP_CREDIT },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
-	"Directory for seed files (default: " DEFAULT_SEED_DIR ")",
+ثابت حرف * ثابت longopts_help[] = {
+	"Directory for seed files (default: " DEFAULT_بیج_DIR ")",
 	"Skip crediting entropy of seeds",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+ثابت حرف *usagestring = عدم;
 
-enum blake2s_lengths {
-	BLAKE2S_BLOCK_LEN = 64,
+تعداد blake2s_lengths {
+	BLAKE2_S_بلاک_LEN = 64,
 	BLAKE2S_HASH_LEN = 32,
-	BLAKE2S_KEY_LEN = 32
+	BLAKE2_S_کلید_LEN = 32
 };
 
-enum seedrng_lengths {
-	MAX_SEED_LEN = 512,
-	MIN_SEED_LEN = BLAKE2S_HASH_LEN
+تعداد seedrng_lengths {
+	MAX_بیج_LEN = 512,
+	MIN_بیج_LEN = BLAKE2S_HASH_LEN
 };
 
-struct blake2s_state {
+بنية blake2s_state {
 	uint32_t h[8];
 	uint32_t t[2];
 	uint32_t f[2];
-	uint8_t buf[BLAKE2S_BLOCK_LEN];
-	unsigned int buflen;
-	unsigned int outlen;
+	uint8_t buf[BLAKE2_S_بلاک_LEN];
+	بنانشانی صحيح buflen;
+	بنانشانی صحيح outlen;
 };
 
-#define le32_to_cpup(a) le32toh(*(a))
-#define cpu_to_le32(a) htole32(a)
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#endif
-#ifndef DIV_ROUND_UP
-#define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
-#endif
+#تعریف_کرو le32_منزل_cpup(a) le32toh(*(a))
+#تعریف_کرو cpu_منزل_le32(a) htole32(a)
+#جے_بنا_تعریف ARRAY_ناپ
+#تعریف_کرو ARRAY_ناپ(x) (حجم(x) / حجم((x)[0]))
+#جے_انت
+#جے_بنا_تعریف DIV_گیڑا_اتے
+#تعریف_کرو DIV_گیڑا_اتے(n, d) (((n) + (d) - 1) / (d))
+#جے_انت
 
-static inline void cpu_to_le32_array(uint32_t *buf, unsigned int words)
+ساكن مضمن فراغ cpu_منزل_le32_array(uint32_t *buf, بنانشانی صحيح الفاظ)
 {
-	while (words--) {
-		*buf = cpu_to_le32(*buf);
+	طالما (الفاظ--) {
+		*buf = cpu_منزل_le32(*buf);
 		++buf;
 	}
 }
 
-static inline void le32_to_cpu_array(uint32_t *buf, unsigned int words)
+ساكن مضمن فراغ le32_منزل_cpu_array(uint32_t *buf, بنانشانی صحيح الفاظ)
 {
-	while (words--) {
-		*buf = le32_to_cpup(buf);
+	طالما (الفاظ--) {
+		*buf = le32_منزل_cpup(buf);
 		++buf;
 	}
 }
 
-static inline uint32_t ror32(uint32_t word, unsigned int shift)
+ساكن مضمن uint32_t ror32(uint32_t لفظ, بنانشانی صحيح shift)
 {
-	return (word >> (shift & 31)) | (word << ((-shift) & 31));
+	أرجع (لفظ >> (shift & 31)) | (لفظ << ((-shift) & 31));
 }
 
-static const uint32_t blake2s_iv[8] = {
+ساكن ثابت uint32_t blake2s_iv[8] = {
 	0x6A09E667UL, 0xBB67AE85UL, 0x3C6EF372UL, 0xA54FF53AUL,
 	0x510E527FUL, 0x9B05688CUL, 0x1F83D9ABUL, 0x5BE0CD19UL
 };
 
-static const uint8_t blake2s_sigma[10][16] = {
+ساكن ثابت uint8_t blake2s_sigma[10][16] = {
 	{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
 	{ 14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3 },
 	{ 11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4 },
@@ -142,44 +142,44 @@ static const uint8_t blake2s_sigma[10][16] = {
 	{ 10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0 },
 };
 
-static void blake2s_set_lastblock(struct blake2s_state *state)
+ساكن فراغ blake2s_سیٹ_lastblock(بنية blake2s_state *state)
 {
 	state->f[0] = -1;
 }
 
-static void blake2s_increment_counter(struct blake2s_state *state, const uint32_t inc)
+ساكن فراغ blake2s_increment_counter(بنية blake2s_state *state, ثابت uint32_t inc)
 {
 	state->t[0] += inc;
 	state->t[1] += (state->t[0] < inc);
 }
 
-static void blake2s_init_param(struct blake2s_state *state, const uint32_t param)
+ساكن فراغ blake2s_init_param(بنية blake2s_state *state, ثابت uint32_t param)
 {
-	int i;
+	صحيح i;
 
-	memset(state, 0, sizeof(*state));
-	for (i = 0; i < 8; ++i)
+	memset(state, 0, حجم(*state));
+	لكل (i = 0; i < 8; ++i)
 		state->h[i] = blake2s_iv[i];
 	state->h[0] ^= param;
 }
 
-static void blake2s_init(struct blake2s_state *state, const size_t outlen)
+ساكن فراغ blake2s_init(بنية blake2s_state *state, ثابت size_t outlen)
 {
 	blake2s_init_param(state, 0x01010000 | outlen);
 	state->outlen = outlen;
 }
 
-static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, size_t nblocks, const uint32_t inc)
+ساكن فراغ blake2s_compress(بنية blake2s_state *state, ثابت uint8_t *بلاک, size_t nblocks, ثابت uint32_t inc)
 {
 	uint32_t m[16];
 	uint32_t v[16];
-	int i;
+	صحيح i;
 
-	while (nblocks > 0) {
+	طالما (nblocks > 0) {
 		blake2s_increment_counter(state, inc);
-		memcpy(m, block, BLAKE2S_BLOCK_LEN);
-		le32_to_cpu_array(m, ARRAY_SIZE(m));
-		memcpy(v, state->h, 32);
+		حافظہ_نقل(m, بلاک, BLAKE2_S_بلاک_LEN);
+		le32_منزل_cpu_array(m, ARRAY_ناپ(m));
+		حافظہ_نقل(v, state->h, 32);
 		v[ 8] = blake2s_iv[0];
 		v[ 9] = blake2s_iv[1];
 		v[10] = blake2s_iv[2];
@@ -189,7 +189,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 		v[14] = blake2s_iv[6] ^ state->f[0];
 		v[15] = blake2s_iv[7] ^ state->f[1];
 
-#define G(r, i, a, b, c, d) do { \
+#تعریف_کرو G(r, i, a, b, c, d) افعل { \
 	a += b + m[blake2s_sigma[r][2 * i + 0]]; \
 	d = ror32(d ^ a, 16); \
 	c += d; \
@@ -198,9 +198,9 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	d = ror32(d ^ a, 8); \
 	c += d; \
 	b = ror32(b ^ c, 7); \
-} while (0)
+} طالما (0)
 
-#define ROUND(r) do { \
+#تعریف_کرو گیڑا(r) افعل { \
 	G(r, 0, v[0], v[ 4], v[ 8], v[12]); \
 	G(r, 1, v[1], v[ 5], v[ 9], v[13]); \
 	G(r, 2, v[2], v[ 6], v[10], v[14]); \
@@ -209,324 +209,324 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	G(r, 5, v[1], v[ 6], v[11], v[12]); \
 	G(r, 6, v[2], v[ 7], v[ 8], v[13]); \
 	G(r, 7, v[3], v[ 4], v[ 9], v[14]); \
-} while (0)
-		ROUND(0);
-		ROUND(1);
-		ROUND(2);
-		ROUND(3);
-		ROUND(4);
-		ROUND(5);
-		ROUND(6);
-		ROUND(7);
-		ROUND(8);
-		ROUND(9);
+} طالما (0)
+		گیڑا(0);
+		گیڑا(1);
+		گیڑا(2);
+		گیڑا(3);
+		گیڑا(4);
+		گیڑا(5);
+		گیڑا(6);
+		گیڑا(7);
+		گیڑا(8);
+		گیڑا(9);
 
-#undef G
-#undef ROUND
+#تعریف_رد G
+#تعریف_رد گیڑا
 
-		for (i = 0; i < 8; ++i)
+		لكل (i = 0; i < 8; ++i)
 			state->h[i] ^= v[i] ^ v[i + 8];
 
-		block += BLAKE2S_BLOCK_LEN;
+		بلاک += BLAKE2_S_بلاک_LEN;
 		--nblocks;
 	}
 }
 
-static void blake2s_update(struct blake2s_state *state, const void *inp, size_t inlen)
+ساكن فراغ blake2s_update(بنية blake2s_state *state, ثابت فراغ *inp, size_t inlen)
 {
-	const size_t fill = BLAKE2S_BLOCK_LEN - state->buflen;
-	const uint8_t *in = inp;
+	ثابت size_t fill = BLAKE2_S_بلاک_LEN - state->buflen;
+	ثابت uint8_t *وچ = inp;
 
-	if (!inlen)
-		return;
-	if (inlen > fill) {
-		memcpy(state->buf + state->buflen, in, fill);
-		blake2s_compress(state, state->buf, 1, BLAKE2S_BLOCK_LEN);
+	إذا (!inlen)
+		أرجع;
+	إذا (inlen > fill) {
+		حافظہ_نقل(state->buf + state->buflen, وچ, fill);
+		blake2s_compress(state, state->buf, 1, BLAKE2_S_بلاک_LEN);
 		state->buflen = 0;
-		in += fill;
+		وچ += fill;
 		inlen -= fill;
 	}
-	if (inlen > BLAKE2S_BLOCK_LEN) {
-		const size_t nblocks = DIV_ROUND_UP(inlen, BLAKE2S_BLOCK_LEN);
-		blake2s_compress(state, in, nblocks - 1, BLAKE2S_BLOCK_LEN);
-		in += BLAKE2S_BLOCK_LEN * (nblocks - 1);
-		inlen -= BLAKE2S_BLOCK_LEN * (nblocks - 1);
+	إذا (inlen > BLAKE2_S_بلاک_LEN) {
+		ثابت size_t nblocks = DIV_گیڑا_اتے(inlen, BLAKE2_S_بلاک_LEN);
+		blake2s_compress(state, وچ, nblocks - 1, BLAKE2_S_بلاک_LEN);
+		وچ += BLAKE2_S_بلاک_LEN * (nblocks - 1);
+		inlen -= BLAKE2_S_بلاک_LEN * (nblocks - 1);
 	}
-	memcpy(state->buf + state->buflen, in, inlen);
+	حافظہ_نقل(state->buf + state->buflen, وچ, inlen);
 	state->buflen += inlen;
 }
 
-static void blake2s_final(struct blake2s_state *state, uint8_t *out)
+ساكن فراغ blake2s_final(بنية blake2s_state *state, uint8_t *باہرلا)
 {
-	blake2s_set_lastblock(state);
-	memset(state->buf + state->buflen, 0, BLAKE2S_BLOCK_LEN - state->buflen);
+	blake2s_سیٹ_lastblock(state);
+	memset(state->buf + state->buflen, 0, BLAKE2_S_بلاک_LEN - state->buflen);
 	blake2s_compress(state, state->buf, 1, state->buflen);
-	cpu_to_le32_array(state->h, ARRAY_SIZE(state->h));
-	memcpy(out, state->h, state->outlen);
+	cpu_منزل_le32_array(state->h, ARRAY_ناپ(state->h));
+	حافظہ_نقل(باہرلا, state->h, state->outlen);
 }
 
-static ssize_t getrandom_full(void *buf, size_t count, unsigned int flags)
+ساكن ssize_t getrandom_بھریا(فراغ *buf, size_t گنتی, بنانشانی صحيح flags)
 {
-	ssize_t ret, total = 0;
+	ssize_t ret, کل = 0;
 	uint8_t *p = buf;
 
-	do {
-		ret = getrandom(p, count, flags);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
-		total += ret;
+	افعل {
+		ret = getrandom(p, گنتی, flags);
+		إذا (ret < 0 && errno == EINTR)
+			استمر;
+		وإلا إذا (ret < 0)
+			أرجع ret;
+		کل += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		گنتی -= ret;
+	} طالما (گنتی);
+	أرجع کل;
 }
 
-static ssize_t read_full(int fd, void *buf, size_t count)
+ساكن ssize_t read_بھریا(صحيح fd, فراغ *buf, size_t گنتی)
 {
-	ssize_t ret, total = 0;
+	ssize_t ret, کل = 0;
 	uint8_t *p = buf;
 
-	do {
-		ret = read(fd, p, count);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
-		else if (ret == 0)
-			break;
-		total += ret;
+	افعل {
+		ret = اقرأ(fd, p, گنتی);
+		إذا (ret < 0 && errno == EINTR)
+			استمر;
+		وإلا إذا (ret < 0)
+			أرجع ret;
+		وإلا إذا (ret == 0)
+			اكسر;
+		کل += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		گنتی -= ret;
+	} طالما (گنتی);
+	أرجع کل;
 }
 
-static ssize_t write_full(int fd, const void *buf, size_t count)
+ساكن ssize_t write_بھریا(صحيح fd, ثابت فراغ *buf, size_t گنتی)
 {
-	ssize_t ret, total = 0;
-	const uint8_t *p = buf;
+	ssize_t ret, کل = 0;
+	ثابت uint8_t *p = buf;
 
-	do {
-		ret = write(fd, p, count);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
-		total += ret;
+	افعل {
+		ret = اكتب(fd, p, گنتی);
+		إذا (ret < 0 && errno == EINTR)
+			استمر;
+		وإلا إذا (ret < 0)
+			أرجع ret;
+		کل += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		گنتی -= ret;
+	} طالما (گنتی);
+	أرجع کل;
 }
 
-static size_t determine_optimal_seed_len(void)
+ساكن size_t determine_optimal_بیج_len(فراغ)
 {
 	size_t ret = 0;
-	char poolsize_str[11] = { 0 };
-	int fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
+	حرف poolsize_str[11] = { 0 };
+	صحيح fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
 
-	if (fd < 0 || read_full(fd, poolsize_str, sizeof(poolsize_str) - 1) < 0) {
+	إذا (fd < 0 || read_بھریا(fd, poolsize_str, حجم(poolsize_str) - 1) < 0) {
 		ewarn("%s: Unable to determine pool size, falling back to %u bits: %s",
-		      applet, MIN_SEED_LEN * 8, strerror(errno));
-		ret = MIN_SEED_LEN;
-	} else
-		ret = DIV_ROUND_UP(strtoul(poolsize_str, NULL, 10), 8);
-	if (fd >= 0)
+		      applet, MIN_بیج_LEN * 8, strerror(errno));
+		ret = MIN_بیج_LEN;
+	} وإلا
+		ret = DIV_گیڑا_اتے(strtoul(poolsize_str, عدم, 10), 8);
+	إذا (fd >= 0)
 		close(fd);
-	if (ret < MIN_SEED_LEN)
-		ret = MIN_SEED_LEN;
-	else if (ret > MAX_SEED_LEN)
-		ret = MAX_SEED_LEN;
-	return ret;
+	إذا (ret < MIN_بیج_LEN)
+		ret = MIN_بیج_LEN;
+	وإلا إذا (ret > MAX_بیج_LEN)
+		ret = MAX_بیج_LEN;
+	أرجع ret;
 }
 
-static int read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
+ساكن صحيح read_new_بیج(uint8_t *بیج, size_t len, bool *is_creditable)
 {
 	ssize_t ret;
-	int urandom_fd;
+	صحيح urandom_fd;
 
 	*is_creditable = false;
-	ret = getrandom_full(seed, len, GRND_NONBLOCK);
-	if (ret == (ssize_t)len) {
+	ret = getrandom_بھریا(بیج, len, GRND_NONBLOCK);
+	إذا (ret == (ssize_t)len) {
 		*is_creditable = true;
-		return 0;
-	} else if (ret < 0 && errno == ENOSYS) {
-		struct pollfd random_fd = {
+		أرجع 0;
+	} وإلا إذا (ret < 0 && errno == ENOSYS) {
+		بنية pollfd random_fd = {
 			.fd = open("/dev/random", O_RDONLY),
 			.events = POLLIN
 		};
-		if (random_fd.fd < 0)
-			return -errno;
+		إذا (random_fd.fd < 0)
+			أرجع -errno;
 		*is_creditable = poll(&random_fd, 1, 0) == 1;
 		close(random_fd.fd);
-	} else if (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
-		return 0;
+	} وإلا إذا (getrandom_بھریا(بیج, len, GRND_INSECURE) == (ssize_t)len)
+		أرجع 0;
 	urandom_fd = open("/dev/urandom", O_RDONLY);
-	if (urandom_fd < 0)
-		return -1;
-	ret = read_full(urandom_fd, seed, len);
-	if (ret == (ssize_t)len)
+	إذا (urandom_fd < 0)
+		أرجع -1;
+	ret = read_بھریا(urandom_fd, بیج, len);
+	إذا (ret == (ssize_t)len)
 		ret = 0;
-	else
+	وإلا
 		ret = -errno ? -errno : -EIO;
 	close(urandom_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	أرجع ret ? -1 : 0;
 }
 
-static int seed_rng(uint8_t *seed, size_t len, bool credit)
+ساكن صحيح بیج_rng(uint8_t *بیج, size_t len, bool credit)
 {
-	struct {
-		int entropy_count;
-		int buf_size;
-		uint8_t buffer[MAX_SEED_LEN];
+	بنية {
+		صحيح entropy_گنتی;
+		صحيح buf_ناپ;
+		uint8_t بفر[MAX_بیج_LEN];
 	} req = {
-		.entropy_count = credit ? len * 8 : 0,
-		.buf_size = len
+		.entropy_گنتی = credit ? len * 8 : 0,
+		.buf_ناپ = len
 	};
-	int random_fd, ret;
+	صحيح random_fd, ret;
 
-	if (len > sizeof(req.buffer)) {
+	إذا (len > حجم(req.بفر)) {
 		errno = EFBIG;
-		return -1;
+		أرجع -1;
 	}
-	memcpy(req.buffer, seed, len);
+	حافظہ_نقل(req.بفر, بیج, len);
 
 	random_fd = open("/dev/urandom", O_RDONLY);
-	if (random_fd < 0)
-		return -1;
+	إذا (random_fd < 0)
+		أرجع -1;
 	ret = ioctl(random_fd, RNDADDENTROPY, &req);
-	if (ret)
+	إذا (ret)
 		ret = -errno ? -errno : -EIO;
 	close(random_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	أرجع ret ? -1 : 0;
 }
 
-static int seed_from_file_if_exists(const char *filename, int dfd, bool credit, struct blake2s_state *hash)
+ساكن صحيح بیج_from_file_if_exists(ثابت حرف *filename, صحيح dfd, bool credit, بنية blake2s_state *hash)
 {
-	uint8_t seed[MAX_SEED_LEN];
-	ssize_t seed_len;
-	int fd = -1, ret = 0;
+	uint8_t بیج[MAX_بیج_LEN];
+	ssize_t بیج_len;
+	صحيح fd = -1, ret = 0;
 
 	fd = openat(dfd, filename, O_RDONLY);
-	if (fd < 0 && errno == ENOENT)
-		return 0;
-	else if (fd < 0) {
+	إذا (fd < 0 && errno == ENOENT)
+		أرجع 0;
+	وإلا إذا (fd < 0) {
 		ret = -errno;
 		eerror("%s: Unable to open seed file: %s", applet, strerror(errno));
-		goto out;
+		اذهب باہرلا;
 	}
-	seed_len = read_full(fd, seed, sizeof(seed));
-	if (seed_len < 0) {
+	بیج_len = read_بھریا(fd, بیج, حجم(بیج));
+	إذا (بیج_len < 0) {
 		ret = -errno;
 		eerror("%s: Unable to read seed file: %s", applet, strerror(errno));
-		goto out;
+		اذهب باہرلا;
 	}
-	if ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
+	إذا ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && بیج_len) {
 		ret = -errno;
 		eerror("%s: Unable to remove seed after reading, so not seeding: %s",
 		       applet, strerror(errno));
-		goto out;
+		اذهب باہرلا;
 	}
-	if (!seed_len)
-		goto out;
+	إذا (!بیج_len)
+		اذهب باہرلا;
 
-	blake2s_update(hash, &seed_len, sizeof(seed_len));
-	blake2s_update(hash, seed, seed_len);
+	blake2s_update(hash, &بیج_len, حجم(بیج_len));
+	blake2s_update(hash, بیج, بیج_len);
 
-	einfo("Seeding %zd bits %s crediting", seed_len * 8, credit ? "and" : "without");
-	if (seed_rng(seed, seed_len, credit) < 0) {
+	einfo("Seeding %zd bits %s crediting", بیج_len * 8, credit ? "and" : "without");
+	إذا (بیج_rng(بیج, بیج_len, credit) < 0) {
 		ret = -errno;
 		eerror("%s: Unable to seed: %s", applet, strerror(errno));
 	}
 
-out:
-	if (fd >= 0)
+باہرلا:
+	إذا (fd >= 0)
 		close(fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	أرجع ret ? -1 : 0;
 }
 
-int main(int argc, char **argv)
+صحيح مکھ(صحيح argc, حرف **argv)
 {
-	static const char seedrng_prefix[] = "SeedRNG v1 Old+New Prefix";
-	static const char seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
-	int opt, fd, dfd, program_ret = 0;
-	const char *seed_dir = NULL;
-	uint8_t new_seed[MAX_SEED_LEN];
-	size_t new_seed_len;
-	bool new_seed_creditable;
-	struct timespec realtime = { 0 }, boottime = { 0 };
-	struct blake2s_state hash;
+	ساكن ثابت حرف seedrng_اگیتر[] = "SeedRNG v1 Old+New Prefix";
+	ساكن ثابت حرف seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
+	صحيح opt, fd, dfd, پروگرام_ret = 0;
+	ثابت حرف *بیج_dir = عدم;
+	uint8_t new_بیج[MAX_بیج_LEN];
+	size_t new_بیج_len;
+	bool new_بیج_creditable;
+	بنية timespec realtime = { 0 }, boottime = { 0 };
+	بنية blake2s_state hash;
 	bool skip_credit = false;
 
 	applet = basename_c(argv[0]);
 
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1)
+	طالما ((opt = getopt_long(argc, argv, getoptstring, longopts, (صحيح *) 0)) != -1)
 	{
-		switch (opt) {
-		case LONGOPT_SEED_DIR:
-			if (!seed_dir)
-				seed_dir = optarg;
-			break;
-		case LONGOPT_SKIP_CREDIT:
+		بدل (opt) {
+		حالة LONGOPT_بیج_DIR:
+			إذا (!بیج_dir)
+				بیج_dir = optarg;
+			اكسر;
+		حالة LONGOPT_SKIP_CREDIT:
 			skip_credit = true;
-			break;
+			اكسر;
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (!seed_dir)
-		seed_dir = DEFAULT_SEED_DIR;
-	if (getuid())
+	إذا (!بیج_dir)
+		بیج_dir = DEFAULT_بیج_DIR;
+	إذا (getuid())
 		eerrorx("%s: superuser access is required", applet);
 	umask(0077);
 
 	blake2s_init(&hash, BLAKE2S_HASH_LEN);
-	blake2s_update(&hash, seedrng_prefix, strlen(seedrng_prefix));
+	blake2s_update(&hash, seedrng_اگیتر, لڑی_لمبائی(seedrng_اگیتر));
 	clock_gettime(CLOCK_REALTIME, &realtime);
 	clock_gettime(CLOCK_BOOTTIME, &boottime);
-	blake2s_update(&hash, &realtime, sizeof(realtime));
-	blake2s_update(&hash, &boottime, sizeof(boottime));
+	blake2s_update(&hash, &realtime, حجم(realtime));
+	blake2s_update(&hash, &boottime, حجم(boottime));
 
-	if (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
+	إذا (mkdir(بیج_dir, 0700) < 0 && errno != EEXIST)
 		eerrorx("%s: Unable to create seed directory: %s", applet, strerror(errno));
 
-	dfd = open(seed_dir, O_DIRECTORY | O_RDONLY);
-	if (dfd < 0 || flock(dfd, LOCK_EX) < 0)
+	dfd = open(بیج_dir, O_DIRECTORY | O_RDONLY);
+	إذا (dfd < 0 || flock(dfd, LOCK_EX) < 0)
 		eerrorx("%s: Unable to lock seed directory: %s", applet, strerror(errno));
 
-	if (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
-		program_ret |= 1 << 1;
-	if (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
-		program_ret |= 1 << 2;
+	إذا (بیج_from_file_if_exists(NON_CREDITABLE_بیج, dfd, false, &hash) < 0)
+		پروگرام_ret |= 1 << 1;
+	إذا (بیج_from_file_if_exists(CREDITABLE_بیج, dfd, !skip_credit, &hash) < 0)
+		پروگرام_ret |= 1 << 2;
 
-	new_seed_len = determine_optimal_seed_len();
-	if (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
+	new_بیج_len = determine_optimal_بیج_len();
+	إذا (read_new_بیج(new_بیج, new_بیج_len, &new_بیج_creditable) < 0) {
 		eerror("%s: Unable to read new seed: %s", applet, strerror(errno));
-		new_seed_len = BLAKE2S_HASH_LEN;
-		strncpy((char *)new_seed, seedrng_failure, new_seed_len);
-		program_ret |= 1 << 3;
+		new_بیج_len = BLAKE2S_HASH_LEN;
+		strncpy((حرف *)new_بیج, seedrng_failure, new_بیج_len);
+		پروگرام_ret |= 1 << 3;
 	}
-	blake2s_update(&hash, &new_seed_len, sizeof(new_seed_len));
-	blake2s_update(&hash, new_seed, new_seed_len);
-	blake2s_final(&hash, new_seed + new_seed_len - BLAKE2S_HASH_LEN);
+	blake2s_update(&hash, &new_بیج_len, حجم(new_بیج_len));
+	blake2s_update(&hash, new_بیج, new_بیج_len);
+	blake2s_final(&hash, new_بیج + new_بیج_len - BLAKE2S_HASH_LEN);
 
-	einfo("Saving %zu bits of %s seed for next boot", new_seed_len * 8, new_seed_creditable ? "creditable" : "non-creditable");
-	fd = openat(dfd, NON_CREDITABLE_SEED, O_WRONLY | O_CREAT | O_TRUNC, 0400);
-	if (fd < 0) {
+	einfo("Saving %zu bits of %s seed for next boot", new_بیج_len * 8, new_بیج_creditable ? "creditable" : "non-creditable");
+	fd = openat(dfd, NON_CREDITABLE_بیج, O_WRONLY | O_CREAT | O_TRUNC, 0400);
+	إذا (fd < 0) {
 		eerror("%s: Unable to open seed file for writing: %s", applet, strerror(errno));
-		return program_ret | (1 << 4);
+		أرجع پروگرام_ret | (1 << 4);
 	}
-	if (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
+	إذا (write_بھریا(fd, new_بیج, new_بیج_len) != (ssize_t)new_بیج_len || fsync(fd) < 0) {
 		eerror("%s: Unable to write seed file: %s", applet, strerror(errno));
-		return program_ret | (1 << 5);
+		أرجع پروگرام_ret | (1 << 5);
 	}
-	if (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
+	إذا (new_بیج_creditable && renameat(dfd, NON_CREDITABLE_بیج, dfd, CREDITABLE_بیج) < 0) {
 		ewarn("%s: Unable to make new seed creditable: %s", applet, strerror(errno));
-		return program_ret | (1 << 6);
+		أرجع پروگرام_ret | (1 << 6);
 	}
-	return program_ret;
+	أرجع پروگرام_ret;
 }

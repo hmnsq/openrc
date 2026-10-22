@@ -15,39 +15,39 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#ضمن <errno.h>
+#ضمن <getopt.h>
+#ضمن <stdbool.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "_usage.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "queue.h"
+#ضمن "rc.h"
+#ضمن "_usage.h"
+#ضمن "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "cdDe:ilr:INsSZ" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "debug",     0, NULL, 'd' },
-	{ "nodeps",     0, NULL, 'D' },
-	{ "exists",   1, NULL, 'e' },
-	{ "ifcrashed", 0, NULL, 'c' },
-	{ "ifexists", 0, NULL, 'i' },
-	{ "ifinactive", 0, NULL, 'I' },
-	{ "ifnotstarted", 0, NULL, 'N' },
-	{ "ifstarted", 0, NULL, 's' },
-	{ "ifstopped", 0, NULL, 'S' },
-	{ "list",     0, NULL, 'l' },
-	{ "resolve",  1, NULL, 'r' },
-	{ "dry-run",     0, NULL, 'Z' },
+ثابت حرف *applet = عدم;
+ثابت حرف *extraopts = عدم;
+ثابت حرف getoptstring[] = "cdDe:ilr:INsSZ" getoptstring_COMMON;
+ثابت بنية option longopts[] = {
+	{ "debug",     0, عدم, 'd' },
+	{ "nodeps",     0, عدم, 'D' },
+	{ "exists",   1, عدم, 'e' },
+	{ "ifcrashed", 0, عدم, 'c' },
+	{ "ifexists", 0, عدم, 'i' },
+	{ "ifinactive", 0, عدم, 'I' },
+	{ "ifnotstarted", 0, عدم, 'N' },
+	{ "ifstarted", 0, عدم, 's' },
+	{ "ifstopped", 0, عدم, 'S' },
+	{ "list",     0, عدم, 'l' },
+	{ "resolve",  1, عدم, 'r' },
+	{ "dry-run",     0, عدم, 'Z' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+ثابت حرف * ثابت longopts_help[] = {
 	"set xtrace when running the command",
 	"ignore dependencies",
 	"tests if the service exists or not",
@@ -62,16 +62,16 @@ const char * const longopts_help[] = {
 	"dry run (show what would happen)",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+ثابت حرف *usagestring = ""
 	"Usage: rc-service [options] [-i] <service> <cmd>...\n"
 	"   or: rc-service [options] -e <service>\n"
 	"   or: rc-service [options] -l\n"
 	"   or: rc-service [options] -r <service>";
 
-int main(int argc, char **argv)
+صحيح مکھ(صحيح argc, حرف **argv)
 {
-	int opt;
-	char *service;
+	صحيح opt;
+	حرف *service;
 	RC_STRINGLIST *list;
 	RC_STRING *s;
 	RC_SERVICE state;
@@ -86,61 +86,61 @@ int main(int argc, char **argv)
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	طالما ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (صحيح *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'd':
+		بدل (opt) {
+		حالة 'd':
 			setenv("RC_DEBUG", "yes", 1);
-			break;
-		case 'D':
+			اكسر;
+		حالة 'D':
 			setenv("RC_NODEPS", "yes", 1);
-			break;
-		case 'e':
+			اكسر;
+		حالة 'e':
 			service = rc_service_resolve(optarg);
 			opt = service ? EXIT_SUCCESS : EXIT_FAILURE;
-			free(service);
-			return opt;
+			حرر(service);
+			أرجع opt;
 			/* NOTREACHED */
-		case 'c':
+		حالة 'c':
 			if_crashed = true;
-			break;
-		case 'i':
+			اكسر;
+		حالة 'i':
 			if_exists = true;
-			break;
-		case 'I':
+			اكسر;
+		حالة 'I':
 			if_inactive = true;
-			break;
-		case 'N':
+			اكسر;
+		حالة 'N':
 			if_notstarted = true;
-			break;
-		case 'l':
-			list = rc_services_in_runlevel(NULL);
-			if (TAILQ_FIRST(list) == NULL)
-				return EXIT_FAILURE;
-			rc_stringlist_sort(&list);
+			اكسر;
+		حالة 'l':
+			list = rc_services_وچ_runlevel(عدم);
+			إذا (TAILQ_پہلا(list) == عدم)
+				أرجع EXIT_FAILURE;
+			rc_stringlist_ترتیب_دیو(&list);
 			TAILQ_FOREACH(s, list, entries)
-			    printf("%s\n", s->value);
+			    لکھو("%s\n", s->قدر);
 			rc_stringlist_free(list);
-			return EXIT_SUCCESS;
+			أرجع EXIT_SUCCESS;
 			/* NOTREACHED */
-		case 'r':
+		حالة 'r':
 			service = rc_service_resolve(optarg);
-			if (service == NULL)
-				return EXIT_FAILURE;
-			printf("%s\n", service);
-			free(service);
-			return EXIT_SUCCESS;
+			إذا (service == عدم)
+				أرجع EXIT_FAILURE;
+			لکھو("%s\n", service);
+			حرر(service);
+			أرجع EXIT_SUCCESS;
 			/* NOTREACHED */
-		case 's':
+		حالة 's':
 			if_started = true;
-			break;
-		case 'S':
+			اكسر;
+		حالة 'S':
 			if_stopped = true;
-			break;
-		case 'Z':
+			اكسر;
+		حالة 'Z':
 			setenv("IN_DRYRUN", "yes", 1);
-			break;
+			اكسر;
 
 		case_RC_COMMON_GETOPT
 		}
@@ -148,24 +148,24 @@ int main(int argc, char **argv)
 
 	argc -= optind;
 	argv += optind;
-	if (*argv == NULL)
+	إذا (*argv == عدم)
 		eerrorx("%s: you need to specify a service", applet);
-	if ((service = rc_service_resolve(*argv)) == NULL) {
-		if (if_exists)
-			return 0;
+	إذا ((service = rc_service_resolve(*argv)) == عدم) {
+		إذا (if_exists)
+			أرجع 0;
 		eerrorx("%s: service `%s' does not exist", applet, *argv);
 	}
 	state = rc_service_state(*argv);
-	if (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
-		return 0;
-	if (if_inactive && !(state & RC_SERVICE_INACTIVE))
-		return 0;
-	if (if_notstarted && (state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_started && !(state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_stopped && !(state & RC_SERVICE_STOPPED))
-		return 0;
+	إذا (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
+		أرجع 0;
+	إذا (if_inactive && !(state & RC_SERVICE_INACTIVE))
+		أرجع 0;
+	إذا (if_notstarted && (state & RC_SERVICE_STARTED))
+		أرجع 0;
+	إذا (if_started && !(state & RC_SERVICE_STARTED))
+		أرجع 0;
+	إذا (if_stopped && !(state & RC_SERVICE_STOPPED))
+		أرجع 0;
 	env_filter();
 	env_config();
 	*argv = service;
