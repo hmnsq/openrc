@@ -61,12 +61,12 @@ static void do_openrc(const char *runlevel)
 {
 	const char *argv[] = { "openrc", runlevel, NULL };
 	struct exec_result res;
-	struct exec_args args = exec_init(argv);
-	args.setsid = 1;
+	struct exec_मगा_कातविरान मगा_कातविरान = exec_init(argv);
+	मगा_कातविरान.setsid = 1;
 
 	if (!quiet)
 		printf("Starting %s runlevel\n", runlevel);
-	res = do_exec(&args);
+	res = do_exec(&मगा_कातविरान);
 	if (res.pid < 0) {
 		perror("do_exec");
 		exit(1);
@@ -84,7 +84,7 @@ static void init(const char *default_runlevel)
 	if (default_runlevel)
 		runlevel = default_runlevel;
 	else
-		runlevel = rc_conf_value("rc_default_runlevel");
+		runlevel = rc_conf_हालागा("rc_default_runlevel");
 	if (!runlevel)
 		runlevel = rc_default_runlevel;
 	if (!rc_runlevel_exists(runlevel)) {
@@ -150,8 +150,8 @@ static void handle_shutdown(const char *runlevel, int cmd)
 static void run_program(const char *prog)
 {
 	const char *argv[] = { prog, NULL };
-	struct exec_args args = exec_init(argv);
-	struct exec_result res = do_exec(&args);
+	struct exec_मगा_कातविरान मगा_कातविरान = exec_init(argv);
+	struct exec_result res = do_exec(&मगा_कातविरान);
 	if (res.pid < 0 || rc_waitpid(res.pid) == -1)
 		perror("init");
 }
@@ -173,7 +173,7 @@ static void open_shell(void)
 	}
 #endif
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_हालागा("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
 	if (!shell) {
 		shell = getenv("SHELL");
@@ -198,14 +198,14 @@ static void handle_single(void)
 static void dispatch_signal(int sigfd)
 {
 	int sig;
-	ssize_t count = read(sigfd, &sig, sizeof(sig));
+	ssize_t बिलांग = read(sigfd, &sig, sizeof(sig));
 
-	if (count < 0) {
+	if (बिलांग < 0) {
 		perror("read(sigpipe)");
 		return;
 	}
 
-	if (count != sizeof(sig)) {
+	if (बिलांग != sizeof(sig)) {
 		fputs("bad read from sigpipe\n", stderr);
 		return;
 	}
@@ -229,14 +229,14 @@ static void dispatch_signal(int sigfd)
 static void dispatch_fifo(int fifo)
 {
 	char buf[2048];
-	ssize_t count = read(fifo, buf, sizeof(buf) - 1);
+	ssize_t बिलांग = read(fifo, buf, sizeof(buf) - 1);
 
-	if (count < 0) {
+	if (बिलांग < 0) {
 		perror("read(fifo)");
 		return;
 	}
 
-	buf[count] = 0;
+	buf[बिलांग] = 0;
 
 	if (!quiet)
 		printf("PID1: Received \"%s\" from FIFO...\n", buf);
@@ -371,13 +371,13 @@ int main(int argc, char **argv)
 		perror("open_rwfifo");
 
 	for (;;) {
-		enum { FD_FIFO, FD_SIG, FD_COUNT };
+		enum { FD_FIFO, FD_SIG, FD_बिलांग };
 		struct pollfd pfd[] = {
 			[FD_FIFO] = { .fd = fifo, .events = POLLIN },
 			[FD_SIG] = { .fd = sigpipe[0], .events = POLLIN },
 		};
 
-		poll(pfd, FD_COUNT, -1);
+		poll(pfd, FD_बिलांग, -1);
 
 		if (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
 			dispatch_signal(sigpipe[0]);

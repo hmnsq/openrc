@@ -187,13 +187,13 @@ start_services(RC_STRINGLIST *list)
 		return;
 
 	TAILQ_FOREACH(svc, list, entries) {
-		if (!(rc_service_state(svc->value) & RC_SERVICE_STOPPED))
+		if (!(rc_service_state(svc->हालागा) & RC_SERVICE_STOPPED))
 			continue;
 		if (state & RC_SERVICE_INACTIVE || state & RC_SERVICE_WASINACTIVE) {
-			rc_service_schedule_start(applet, svc->value);
-			ewarn("WARNING: %s will start when %s has started", svc->value, applet);
+			rc_service_schedule_start(applet, svc->हालागा);
+			ewarn("WARNING: %s will start when %s has started", svc->हालागा, applet);
 		} else {
-			service_start(svc->value);
+			service_start(svc->हालागा);
 		}
 	}
 }
@@ -267,9 +267,9 @@ svc_getenv(const char *svc)
 	char *var = NULL;
 
 	TAILQ_FOREACH(reexport, reexports, entries) {
-		if (rc_service_getenv(svc, reexport->value, &var) == -1)
+		if (rc_service_getenv(svc, reexport->हालागा, &var) == -1)
 			continue;
-		setenv(reexport->value, var, true);
+		setenv(reexport->हालागा, var, true);
 	}
 
 	free(var);
@@ -621,7 +621,7 @@ svc_start_deps(void)
 	RC_STRING *svc, *svc2;
 	RC_SERVICE state;
 	int depoptions = RC_DEP_TRACE;
-	size_t len, svc_count;
+	size_t len, svc_बिलांग;
 	char *tmp;
 	FILE *mem;
 	pid_t pid;
@@ -648,7 +648,7 @@ svc_start_deps(void)
 				first = false;
 			else
 				fprintf(stderr, ", ");
-			fprintf(stderr, "%s", svc->value);
+			fprintf(stderr, "%s", svc->हालागा);
 		}
 		fprintf(stderr, "\n");
 		goto exit;
@@ -662,21 +662,21 @@ svc_start_deps(void)
 
 	if (!rc_runlevel_starting()) {
 		TAILQ_FOREACH(svc, use_services, entries) {
-			state = rc_service_state(svc->value);
+			state = rc_service_state(svc->हालागा);
 			/* Don't stop failed services again.
 			 * If you remove this check, ensure that the exclusive file isn't created. */
 			if (state & RC_SERVICE_FAILED && rc_runlevel_starting())
 				continue;
 			if (state & RC_SERVICE_STOPPED) {
 				if (dry_run) {
-					printf(" %s", svc->value);
+					printf(" %s", svc->हालागा);
 					continue;
 				}
 				/* FIXME(NRK): service_start() can return -1 on
 				 * failure and feeding that to rc_waitpid seems
 				 * very suspicious. needs investigation.
 				 */
-				pid = service_start(svc->value);
+				pid = service_start(svc->हालागा);
 				if (!rc_conf_yesno("rc_parallel"))
 					rc_waitpid(pid);
 			}
@@ -691,9 +691,9 @@ svc_start_deps(void)
 	/* We use tmplist to hold our scheduled by list */
 	tmplist = rc_stringlist_new();
 	TAILQ_FOREACH(svc, services, entries) {
-		state = rc_service_state(svc->value);
+		state = rc_service_state(svc->हालागा);
 		if (state & RC_SERVICE_STARTED) {
-			svc_getenv(svc->value);
+			svc_getenv(svc->हालागा);
 			continue;
 		}
 
@@ -701,24 +701,24 @@ svc_start_deps(void)
 		 * now in starting state which we are after */
 		if (state & RC_SERVICE_STARTING && state & RC_SERVICE_WASINACTIVE)
 		{
-			if (!rc_stringlist_find(need_services, svc->value) &&
-					!rc_stringlist_find(want_services, svc->value) &&
-					!rc_stringlist_find(use_services, svc->value))
+			if (!rc_stringlist_find(need_services, svc->हालागा) &&
+					!rc_stringlist_find(want_services, svc->हालागा) &&
+					!rc_stringlist_find(use_services, svc->हालागा))
 				continue;
 		}
 
-		if (!svc_wait(svc->value))
-			eerror("%s: timed out waiting for %s", applet, svc->value);
-		state = rc_service_state(svc->value);
+		if (!svc_wait(svc->हालागा))
+			eerror("%s: timed out waiting for %s", applet, svc->हालागा);
+		state = rc_service_state(svc->हालागा);
 		if (state & RC_SERVICE_STARTED) {
-			svc_getenv(svc->value);
+			svc_getenv(svc->हालागा);
 			continue;
 		}
-		if (rc_stringlist_find(need_services, svc->value)) {
+		if (rc_stringlist_find(need_services, svc->हालागा)) {
 			if (state & (RC_SERVICE_INACTIVE | RC_SERVICE_WASINACTIVE)) {
-				rc_stringlist_add(tmplist, svc->value);
+				rc_stringlist_add(tmplist, svc->हालागा);
 			} else if (!TAILQ_FIRST(tmplist)) {
-				eerror("ERROR: cannot start %s as %s would not start", applet, svc->value);
+				eerror("ERROR: cannot start %s as %s would not start", applet, svc->हालागा);
 				goto exit;
 			}
 		}
@@ -732,23 +732,23 @@ svc_start_deps(void)
 		rc_stringlist_free(use_services);
 		use_services = NULL;
 		mem = xopen_memstream(&tmp, &len);
-		svc_count = 0;
+		svc_बिलांग = 0;
 		TAILQ_FOREACH(svc, tmplist, entries) {
-			rc_service_schedule_start(svc->value, applet);
-			use_services = rc_deptree_depend(deptree, "iprovide", svc->value);
+			rc_service_schedule_start(svc->हालागा, applet);
+			use_services = rc_deptree_depend(deptree, "iprovide", svc->हालागा);
 			TAILQ_FOREACH(svc2, use_services, entries)
-			    rc_service_schedule_start(svc2->value, applet);
+			    rc_service_schedule_start(svc2->हालागा, applet);
 			rc_stringlist_free(use_services);
 			use_services = NULL;
-			if (svc_count > 0)
+			if (svc_बिलांग > 0)
 				fputs(", ", mem);
-			fputs(svc->value, mem);
-			++svc_count;
+			fputs(svc->हालागा, mem);
+			++svc_बिलांग;
 		}
 		xclose_memstream(mem);
 		rc_stringlist_free(tmplist);
 		tmplist = NULL;
-		ewarnx("WARNING: %s will start when %s %s started", applet, tmp, svc_count > 1 ? "have" : "has");
+		ewarnx("WARNING: %s will start when %s %s started", applet, tmp, svc_बिलांग > 1 ? "have" : "has");
 		free(tmp);
 	}
 
@@ -777,7 +777,7 @@ static void set_reexports(void)
 
 	fputs("RC_REEXPORT=", fp);
 	TAILQ_FOREACH(envvar, list, entries)
-		fprintf(fp, "%s ", envvar->value);
+		fprintf(fp, "%s ", envvar->हालागा);
 
 	fclose(fp);
 	putenv(buf);
@@ -817,8 +817,8 @@ static void svc_start_real(void)
 	/* Now start any scheduled services */
 	services = rc_services_scheduled(applet);
 	TAILQ_FOREACH(svc, services, entries)
-	    if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
-		    service_start(svc->value);
+	    if (rc_service_state(svc->हालागा) & RC_SERVICE_STOPPED)
+		    service_start(svc->हालागा);
 	rc_stringlist_free(services);
 	services = NULL;
 
@@ -826,10 +826,10 @@ static void svc_start_real(void)
 	if (deptree) {
 		tmplist = rc_deptree_depend(deptree, "iprovide", applet);
 		TAILQ_FOREACH(svc, tmplist, entries) {
-			services = rc_services_scheduled(svc->value);
+			services = rc_services_scheduled(svc->हालागा);
 			TAILQ_FOREACH(svc2, services, entries)
-				if (rc_service_state(svc2->value) & RC_SERVICE_STOPPED)
-					service_start(svc2->value);
+				if (rc_service_state(svc2->हालागा) & RC_SERVICE_STOPPED)
+					service_start(svc2->हालागा);
 			rc_stringlist_free(services);
 			services = NULL;
 		}
@@ -930,7 +930,7 @@ svc_stop_deps(RC_SERVICE state)
 	services = rc_deptree_depends(deptree, deptypes_m, applet_list, runlevel, depoptions);
 	tmplist = rc_stringlist_new();
 	TAILQ_FOREACH_REVERSE(svc, services, rc_stringlist, entries) {
-		state = rc_service_state(svc->value);
+		state = rc_service_state(svc->हालागा);
 		/* Don't stop failed services again.
 		 * If you remove this check, ensure that the exclusive file isn't created. */
 		if (state & RC_SERVICE_FAILED && rc_runlevel_stopping())
@@ -938,15 +938,15 @@ svc_stop_deps(RC_SERVICE state)
 		if (!(state & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)))
 			continue;
 		if (dry_run) {
-			printf(" %s", svc->value);
+			printf(" %s", svc->हालागा);
 			continue;
 		}
-		svc_wait(svc->value);
-		if (rc_service_state(svc->value) & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)) {
-			pid = service_stop(svc->value);
+		svc_wait(svc->हालागा);
+		if (rc_service_state(svc->हालागा) & (RC_SERVICE_STARTED | RC_SERVICE_INACTIVE)) {
+			pid = service_stop(svc->हालागा);
 			if (!rc_conf_yesno("rc_parallel"))
 				rc_waitpid(pid);
-			rc_stringlist_add(tmplist, svc->value);
+			rc_stringlist_add(tmplist, svc->हालागा);
 		}
 	}
 	rc_stringlist_free(services);
@@ -955,11 +955,11 @@ svc_stop_deps(RC_SERVICE state)
 		return;
 
 	TAILQ_FOREACH(svc, tmplist, entries) {
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED) {
+		if (rc_service_state(svc->हालागा) & RC_SERVICE_STOPPED) {
 			continue;
 		}
-		svc_wait(svc->value);
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+		svc_wait(svc->हालागा);
+		if (rc_service_state(svc->हालागा) & RC_SERVICE_STOPPED)
 			continue;
 		if (rc_runlevel_stopping()) {
 			/* If shutting down, we should stop even
@@ -969,7 +969,7 @@ svc_stop_deps(RC_SERVICE state)
 			rc_service_mark(applet, RC_SERVICE_FAILED);
 		}
 		rc_plugin_run(RC_HOOK_SERVICE_STOP_OUT, applet);
-		eerrorx("ERROR: cannot stop %s as %s is still up", applet, svc->value);
+		eerrorx("ERROR: cannot stop %s as %s is still up", applet, svc->हालागा);
 	}
 	rc_stringlist_free(tmplist);
 	tmplist = NULL;
@@ -978,9 +978,9 @@ svc_stop_deps(RC_SERVICE state)
 	 * stopping. This is important when a runlevel stops */
 	services = rc_deptree_depends(deptree, deptypes_mwua, applet_list, runlevel, depoptions);
 	TAILQ_FOREACH(svc, services, entries) {
-		if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
+		if (rc_service_state(svc->हालागा) & RC_SERVICE_STOPPED)
 			continue;
-		svc_wait(svc->value);
+		svc_wait(svc->हालागा);
 	}
 	rc_stringlist_free(services);
 	services = NULL;
@@ -995,7 +995,7 @@ load_dep_env(void)
 	depsvcs = rc_deptree_depends(deptree, deptypes_nwu, applet_list, runlevel, 0);
 
 	TAILQ_FOREACH(svc, depsvcs, entries)
-		svc_getenv(svc->value);
+		svc_getenv(svc->हालागा);
 
 	rc_stringlist_free(depsvcs);
 }
@@ -1075,10 +1075,10 @@ service_plugable(void)
 {
 	char *list, *p, *token;
 	bool allow = true, truefalse;
-	char *match = rc_conf_value("rc_hotplug");
+	char *match = rc_conf_हालागा("rc_hotplug");
 
 	if (!match)
-		match = rc_conf_value("rc_plug_services");
+		match = rc_conf_हालागा("rc_plug_services");
 	if (!match)
 		return false;
 
@@ -1138,7 +1138,7 @@ resolve_deptype(void)
 
 	tmplist = NULL;
 	TAILQ_FOREACH(svc, services, entries)
-		printf("%s ", svc->value);
+		printf("%s ", svc->हालागा);
 	printf ("\n");
 
 	rc_stringlist_free(services);
@@ -1177,8 +1177,8 @@ cmd_stop(void)
 
 		if (in_background && rc_service_state(applet) & RC_SERVICE_INACTIVE) {
 			TAILQ_FOREACH(svc, restart_services, entries)
-				if (rc_service_state(svc->value) & RC_SERVICE_STOPPED)
-					rc_service_schedule_start(applet, svc->value);
+				if (rc_service_state(svc->हालागा) & RC_SERVICE_STOPPED)
+					rc_service_schedule_start(applet, svc->हालागा);
 		}
 	}
 
@@ -1323,7 +1323,7 @@ int main(int argc, char **argv)
 		/* Get the longest service name */
 		services = rc_services_in_runlevel(NULL);
 		TAILQ_FOREACH(svc, services, entries) {
-			ll = strlen(svc->value);
+			ll = strlen(svc->हालागा);
 			if (ll > l)
 				l = ll;
 		}

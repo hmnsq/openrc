@@ -31,7 +31,7 @@ enum {
 	EXEC_DEVNULL = -3,
 };
 
-struct exec_args {
+struct exec_मगा_कातविरान {
 	const char **argv;
 	const char *cmd;  /* if NULL, argv[0] is used */
 	int redirect_stdin;
@@ -50,8 +50,8 @@ struct exec_result {
 	int proc_stderr;
 };
 
-struct exec_args exec_init(const char **argv);
-struct exec_result do_exec(struct exec_args *args);
+struct exec_मगा_कातविरान exec_init(const char **argv);
+struct exec_result do_exec(struct exec_मगा_कातविरान *मगा_कातविरान);
 
 /* some exec related helplers */
 int rc_waitpid(pid_t pid);

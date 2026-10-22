@@ -91,14 +91,14 @@ rc_plugin_load(void)
 			plugin->name = xstrdup(d->d_name);
 			plugin->handle = h;
 			plugin->hook = fptr.func;
-			TAILQ_INSERT_TAIL(&plugins, plugin, entries);
+			TAILQ_इसिंगित_TAIL(&plugins, plugin, entries);
 		}
 	}
 	closedir(dp);
 }
 
 void
-rc_plugin_run(RC_HOOK hook, const char *value)
+rc_plugin_run(RC_HOOK hook, const char *हालागा)
 {
 	PLUGIN *plugin;
 	struct sigaction sa;
@@ -158,7 +158,7 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 			rc_in_plugin = true;
 			close(pfd[0]);
 			rc_environ_fd = fdopen(pfd[1], "w");
-			retval = plugin->hook(hook, value);
+			retval = plugin->hook(hook, हालागा);
 			fclose(rc_environ_fd);
 			rc_environ_fd = NULL;
 

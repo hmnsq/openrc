@@ -150,7 +150,7 @@ cleanup(void)
 }
 
 static char
-read_key(bool block)
+read_सुसि(bool block)
 {
 	struct termios termios;
 	char c = 0;
@@ -196,7 +196,7 @@ want_interactive(void)
 	}
 	if (!interactive)
 		return false;
-	c = read_key(false);
+	c = read_सुसि(false);
 	return (c == 'I' || c == 'i') ? true : false;
 }
 
@@ -277,7 +277,7 @@ open_shell(void)
 	}
 #endif
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_हालागा("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
 	if (shell == NULL) {
 		shell = getenv("SHELL");
@@ -359,7 +359,7 @@ add_pid(pid_t pid)
 	sigemptyset(&sset);
 	sigaddset(&sset, SIGCHLD);
 	sigprocmask(SIG_SETMASK, &sset, &old);
-	LIST_INSERT_HEAD(&service_pids, p, entries);
+	LIST_इसिंगित_HEAD(&service_pids, p, entries);
 	sigprocmask(SIG_SETMASK, &old, NULL);
 }
 
@@ -376,7 +376,7 @@ remove_pid(pid_t pid, bool inside_signal)
 	LIST_FOREACH(p, &service_pids, entries) {
 		if (p->pid == pid) {
 			LIST_REMOVE(p, entries);
-			LIST_INSERT_HEAD(&free_these_pids, p, entries);
+			LIST_इसिंगित_HEAD(&free_these_pids, p, entries);
 			break;
 		}
 	}
@@ -558,19 +558,19 @@ do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
 
 	crashed = rc_conf_yesno("rc_crashed_stop");
 
-	nostop = rc_stringlist_split(rc_conf_value("rc_nostop"), " ");
+	nostop = rc_stringlist_split(rc_conf_हालागा("rc_nostop"), " ");
 	TAILQ_FOREACH_REVERSE(service, stop_services, rc_stringlist, entries)
 	{
-		state = rc_service_state(service->value);
+		state = rc_service_state(service->हालागा);
 		if (state & RC_SERVICE_STOPPED || state & RC_SERVICE_FAILED)
 			continue;
 
 		/* Sometimes we don't ever want to stop a service. */
-		if (rc_stringlist_find(nostop, service->value)) {
-			rc_service_mark(service->value, RC_SERVICE_FAILED);
+		if (rc_stringlist_find(nostop, service->हालागा)) {
+			rc_service_mark(service->हालागा, RC_SERVICE_FAILED);
 			continue;
 		}
-		kwords = rc_deptree_depend(deptree, service->value, "keyword");
+		kwords = rc_deptree_depend(deptree, service->हालागा, "keyword");
 		if (rc_stringlist_find(kwords, "-stop") ||
 		    rc_stringlist_find(kwords, "nostop") ||
 		    (going_down &&
@@ -581,26 +581,26 @@ do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
 			nstop = false;
 		rc_stringlist_free(kwords);
 		if (nstop) {
-			rc_service_mark(service->value, RC_SERVICE_FAILED);
+			rc_service_mark(service->हालागा, RC_SERVICE_FAILED);
 			continue;
 		}
 
 		/* If the service has crashed, skip further checks and just stop
 		   it */
 		if (crashed &&
-		    rc_service_daemons_crashed(service->value))
+		    rc_service_daemons_crashed(service->हालागा))
 			goto stop;
 
 		/* If we're in the start list then don't bother stopping us */
-		svc1 = rc_stringlist_find(start_services, service->value);
+		svc1 = rc_stringlist_find(start_services, service->हालागा);
 		if (svc1) {
 			if (newlevel && strcmp(runlevel, newlevel) != 0) {
 				/* So we're in the start list. But we should
 				 * be stopped if we have a runlevel
 				 * configuration file for either the current
 				 * or next so we use the correct one. */
-				if (!runlevel_config(service->value,runlevel) &&
-				    !runlevel_config(service->value,newlevel))
+				if (!runlevel_config(service->हालागा,runlevel) &&
+				    !runlevel_config(service->हालागा,newlevel))
 					continue;
 			}
 			else
@@ -611,7 +611,7 @@ do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
 		 * that going to be started depends on us */
 		if (!svc1) {
 			tmplist = rc_stringlist_new();
-			rc_stringlist_add(tmplist, service->value);
+			rc_stringlist_add(tmplist, service->हालागा);
 			deporder = rc_deptree_depends(deptree, types_nw,
 			    tmplist, newlevel ? newlevel : runlevel,
 			    RC_DEP_STRICT | RC_DEP_TRACE);
@@ -619,7 +619,7 @@ do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
 			svc2 = NULL;
 			TAILQ_FOREACH(svc1, deporder, entries) {
 				svc2 = rc_stringlist_find(start_services,
-				    svc1->value);
+				    svc1->हालागा);
 				if (svc2)
 					break;
 			}
@@ -631,7 +631,7 @@ do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
 
 stop:
 		/* After all that we can finally stop the blighter! */
-		pid = service_stop(service->value);
+		pid = service_stop(service->हालागा);
 		if (pid > 0) {
 			add_pid(pid);
 			if (!parallel) {
@@ -664,13 +664,13 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 		crashed = true;
 
 	TAILQ_FOREACH(service, start_services, entries) {
-		state = rc_service_state(service->value);
+		state = rc_service_state(service->हालागा);
 		if (state & RC_SERVICE_FAILED)
 			continue;
 		if (!(state & RC_SERVICE_STOPPED)) {
 			if (crashed &&
-			    rc_service_daemons_crashed(service->value))
-				rc_service_mark(service->value,
+			    rc_service_daemons_crashed(service->हालागा))
+				rc_service_mark(service->हालागा,
 				    RC_SERVICE_STOPPED);
 			else
 			    continue;
@@ -682,13 +682,13 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 	interactive_retry:
 			printf("\n");
 			einfo("About to start the service %s",
-			    service->value);
+			    service->हालागा);
 			eindent();
 			einfo("1) Start the service\t\t2) Skip the service");
 			einfo("3) Continue boot process\t\t4) Exit to shell");
 			eoutdent();
 	interactive_option:
-			switch (read_key(true)) {
+			switch (read_सुसि(true)) {
 			case '1': break;
 			case '2': continue;
 			case '3': interactive = false; break;
@@ -697,7 +697,7 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 			}
 		}
 
-		pid = service_start(service->value);
+		pid = service_start(service->हालागा);
 		if (pid == -1)
 			break;
 		/* Remember the pid if we're running in parallel */
@@ -1040,7 +1040,7 @@ int main(int argc, char **argv)
 				TAILQ_FOREACH(service, main_hotplugged_services,
 				    entries)
 				    rc_stringlist_addu(main_start_services,
-					service->value);
+					service->हालागा);
 			}
 		}
 	}
@@ -1082,7 +1082,7 @@ int main(int argc, char **argv)
 	/* Re-add our hotplugged services if they stopped */
 	if (main_hotplugged_services)
 		TAILQ_FOREACH(service, main_hotplugged_services, entries)
-		    rc_service_mark(service->value, RC_SERVICE_HOTPLUGGED);
+		    rc_service_mark(service->हालागा, RC_SERVICE_HOTPLUGGED);
 
 #ifdef __linux__
 	/* If the "noinit" parameter was passed on the kernel command line then
@@ -1106,11 +1106,11 @@ int main(int argc, char **argv)
 		TAILQ_FOREACH_REVERSE(rlevel, runlevel_chain, rc_stringlist, entries)
 		{
 			/* Get a list of all the services in that runlevel */
-			RC_STRINGLIST *run_services = rc_services_in_runlevel(rlevel->value);
+			RC_STRINGLIST *run_services = rc_services_in_runlevel(rlevel->हालागा);
 
 			/* Start those services. */
 			rc_stringlist_sort(&run_services);
-			deporder = rc_deptree_depends(main_deptree, main_types_nwua, run_services, rlevel->value, depoptions | RC_DEP_START);
+			deporder = rc_deptree_depends(main_deptree, main_types_nwua, run_services, rlevel->हालागा, depoptions | RC_DEP_START);
 			rc_stringlist_free(run_services);
 			run_services = deporder;
 			do_start_services(run_services, parallel);

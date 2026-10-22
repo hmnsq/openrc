@@ -45,7 +45,7 @@ typedef struct scheduleitem {
 		SC_GOTO,
 		SC_FOREVER,
 	} type;
-	int value;
+	int हालागा;
 	struct scheduleitem *gotoitem;
 	TAILQ_ENTRY(scheduleitem) entries;
 } SCHEDULEITEM;
@@ -147,21 +147,21 @@ static SCHEDULEITEM *parse_schedule_item(const char *applet, const char *string)
 	int sig;
 	SCHEDULEITEM *item = xmalloc(sizeof(*item));
 
-	item->value = 0;
+	item->हालागा = 0;
 	item->gotoitem = NULL;
 	if (strcmp(string,"forever") == 0)
 		item->type = SC_FOREVER;
 	else if (isdigit((unsigned char)string[0])) {
 		item->type = SC_TIMEOUT;
 		errno = 0;
-		if (sscanf(string, "%d", &item->value) != 1)
+		if (sscanf(string, "%d", &item->हालागा) != 1)
 			eerrorx("%s: invalid timeout value in schedule '%s'",
 			    applet, string);
 	} else if ((after_hyph = string + (string[0] == '-')) &&
 	    ((sig = parse_signal(applet, after_hyph)) != -1))
 	{
 		item->type = SC_SIGNAL;
-		item->value = (int)sig;
+		item->हालागा = (int)sig;
 	} else
 		eerrorx("%s: invalid schedule item `%s'", applet, string);
 
@@ -172,7 +172,7 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 {
 	char buffer[20];
 	const char *slash;
-	int count = 0;
+	int बिलांग = 0;
 	SCHEDULEITEM *repeatat = NULL;
 	size_t len;
 	SCHEDULEITEM *item;
@@ -181,27 +181,27 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 	if (string)
 		for (slash = string; *slash; slash++)
 			if (*slash == '/')
-				count++;
+				बिलांग++;
 
 	free_schedulelist();
 
-	if (count == 0) {
+	if (बिलांग == 0) {
 		item = xmalloc(sizeof(*item));
 		item->type = SC_SIGNAL;
-		item->value = timeout;
+		item->हालागा = timeout;
 		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+		TAILQ_इसिंगित_TAIL(&schedule, item, entries);
 
 		item = xmalloc(sizeof(*item));
 		item->type = SC_TIMEOUT;
 		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+		TAILQ_इसिंगित_TAIL(&schedule, item, entries);
 		if (string) {
-			if (sscanf(string, "%d", &item->value) != 1)
+			if (sscanf(string, "%d", &item->हालागा) != 1)
 				eerrorx("%s: invalid timeout value in schedule '%s'",
 					applet, string);
 		} else
-			item->value = 5;
+			item->हालागा = 5;
 
 		return;
 	}
@@ -221,7 +221,7 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 		string = slash ? slash + 1 : NULL;
 
 		item = parse_schedule_item(applet, buffer);
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+		TAILQ_इसिंगित_TAIL(&schedule, item, entries);
 		if (item->type == SC_FOREVER) {
 			if (repeatat)
 				eerrorx("%s: invalid schedule, `forever' "
@@ -235,9 +235,9 @@ void parse_schedule(const char *applet, const char *string, int timeout)
 	if (repeatat) {
 		item = xmalloc(sizeof(*item));
 		item->type = SC_GOTO;
-		item->value = 0;
+		item->हालागा = 0;
 		item->gotoitem = repeatat;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+		TAILQ_इसिंगित_TAIL(&schedule, item, entries);
 	}
 
 	return;
@@ -357,7 +357,7 @@ int run_stop_schedule(const char *applet,
 
 		case SC_SIGNAL:
 			nrunning = 0;
-			nkilled = do_stop(applet, exec, argv, pid, uid, item->value, group,
+			nkilled = do_stop(applet, exec, argv, pid, uid, item->हालागा, group,
 					test, quiet);
 			if (nkilled == 0) {
 				if (tkilled == 0) {
@@ -374,7 +374,7 @@ int run_stop_schedule(const char *applet,
 			break;
 		case SC_FOREVER:
 		case SC_TIMEOUT:
-			if (item->type == SC_TIMEOUT && item->value < 1) {
+			if (item->type == SC_TIMEOUT && item->हालागा < 1) {
 				item = NULL;
 				break;
 			}
@@ -382,7 +382,7 @@ int run_stop_schedule(const char *applet,
 			ts.tv_sec = 0;
 			ts.tv_nsec = POLL_INTERVAL;
 
-			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
+			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->हालागा; nsecs++) {
 				for (nloops = 0;
 				     nloops < ONE_SECOND / POLL_INTERVAL;
 				     nloops++)

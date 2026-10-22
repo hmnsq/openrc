@@ -35,7 +35,7 @@
 
 #define RC_KRUNLEVEL            RC_SVCDIR "/krunlevel"
 
-char *rc_conf_value(const char *var);
+char *rc_conf_हालागा(const char *var);
 bool rc_conf_yesno(const char *var);
 char *default_runlevel(void);
 void env_filter(void);

@@ -33,23 +33,23 @@
 #include "misc.h"
 
 bool
-rc_yesno(const char *value)
+rc_yesno(const char *हालागा)
 {
-	if (!value) {
+	if (!हालागा) {
 		errno = ENOENT;
 		return false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "1") == 0)
+	if (strcasecmp(हालागा, "yes") == 0 ||
+	    strcasecmp(हालागा, "y") == 0 ||
+	    strcasecmp(हालागा, "true") == 0 ||
+	    strcasecmp(हालागा, "1") == 0)
 		return true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	if (strcasecmp(हालागा, "no") != 0 &&
+	    strcasecmp(हालागा, "n") != 0 &&
+	    strcasecmp(हालागा, "false") != 0 &&
+	    strcasecmp(हालागा, "0") != 0)
 		errno = EINVAL;
 
 	return false;
@@ -69,7 +69,7 @@ rc_getfile(const char *file, char **buffer, size_t *len)
 	FILE *fp;
 	int fd;
 	struct stat st;
-	size_t done, left;
+	size_t done, कालिवा;
 
 	fp = fopen(file, "re");
 	if (!fp)
@@ -81,14 +81,14 @@ rc_getfile(const char *file, char **buffer, size_t *len)
 	if (fstat(fd, &st))
 		goto finished;
 
-	left = st.st_size;
-	*len = left + 1; /* NUL terminator */
+	कालिवा = st.st_size;
+	*len = कालिवा + 1; /* NUL terminator */
 	*buffer = xrealloc(*buffer, *len);
-	while (left) {
-		done = fread(*buffer, sizeof(*buffer[0]), left, fp);
+	while (कालिवा) {
+		done = fread(*buffer, sizeof(*buffer[0]), कालिवा, fp);
 		if (done == 0 && ferror(fp))
 			goto finished;
-		left -= done;
+		कालिवा -= done;
 	}
 	ret = true;
 
@@ -107,7 +107,7 @@ rc_proc_getent(const char *ent RC_UNUSED)
 {
 #ifdef __linux__
 	FILE *fp;
-	char *proc = NULL, *p, *value = NULL, *save;
+	char *proc = NULL, *p, *हालागा = NULL, *save;
 	size_t i, len;
 
 	if (!(fp = fopen("/proc/cmdline", "r")))
@@ -124,18 +124,18 @@ rc_proc_getent(const char *ent RC_UNUSED)
 			p += len;
 			if (*p == '=')
 				p++;
-			value = xstrdup(p);
+			हालागा = xstrdup(p);
 		}
 	}
 
-	if (!value)
+	if (!हालागा)
 		errno = ENOENT;
 
 out:
 	fclose(fp);
 	free(proc);
 
-	return value;
+	return हालागा;
 #else
 	return NULL;
 #endif
@@ -185,13 +185,13 @@ rc_config_list(const char *file)
 	return config_list(AT_FDCWD, file);
 }
 
-static void rc_config_set_value(RC_STRINGLIST *config, char *value)
+static void rc_config_set_हालागा(RC_STRINGLIST *config, char *हालागा)
 {
 	RC_STRING *cline;
 	char *entry;
 	size_t i = 0;
 	char *newline;
-	char *p = value;
+	char *p = हालागा;
 	bool replaced;
 	char *token;
 
@@ -205,7 +205,7 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
 	entry = xstrdup(token);
 	/* Preserve shell coloring */
 	if (*p == '$')
-		token = value;
+		token = हालागा;
 	else
 		do {
 			/* Bash variables are usually quoted */
@@ -228,10 +228,10 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
 	   any prior values we may already have */
 	TAILQ_FOREACH(cline, config, entries) {
 		i = strlen(entry);
-		if (strncmp(entry, cline->value, i) == 0 && cline->value[i] == '=') {
+		if (strncmp(entry, cline->हालागा, i) == 0 && cline->हालागा[i] == '=') {
 			/* We have a match now - to save time we directly replace it */
-			free(cline->value);
-			cline->value = newline;
+			free(cline->हालागा);
+			cline->हालागा = newline;
 			replaced = true;
 			break;
 		}
@@ -256,7 +256,7 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 	RC_STRINGLIST *overrides;
 	RC_STRING *cline, *override, *config_np;
 	char *tmp = NULL;
-	char *value = NULL;
+	char *हालागा = NULL;
 	size_t varlen = 0;
 
 	overrides = rc_stringlist_new();
@@ -266,17 +266,17 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 	rc_stringlist_add(overrides, "rc_parallel");
 
 	TAILQ_FOREACH(override, overrides, entries) {
-		varlen = strlen(override->value);
-		value = rc_proc_getent(override->value);
+		varlen = strlen(override->हालागा);
+		हालागा = rc_proc_getent(override->हालागा);
 
 		/* No need to continue if there's nothing to override */
-		if (!value) {
-			free(value);
+		if (!हालागा) {
+			free(हालागा);
 			continue;
 		}
 
-		if (value != NULL) {
-			xasprintf(&tmp, "%s=%s", override->value, value);
+		if (हालागा != NULL) {
+			xasprintf(&tmp, "%s=%s", override->हालागा, हालागा);
 		}
 
 		/*
@@ -284,9 +284,9 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 		 * duplicates
 		 */
 		TAILQ_FOREACH_SAFE(cline, config, entries, config_np) {
-			if (strncmp(override->value, cline->value, varlen) == 0
-				&& cline->value[varlen] == '=') {
-				rc_stringlist_delete(config, cline->value);
+			if (strncmp(override->हालागा, cline->हालागा, varlen) == 0
+				&& cline->हालागा[varlen] == '=') {
+				rc_stringlist_delete(config, cline->हालागा);
 				break;
 			}
 		}
@@ -295,7 +295,7 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 		rc_stringlist_add(config, tmp);
 
 		free(tmp);
-		free(value);
+		free(हालागा);
 	}
 
 	rc_stringlist_free(overrides);
@@ -311,7 +311,7 @@ rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
 	RC_STRINGLIST *rc_conf_d_files;
 	RC_STRING *fname;
 	RC_STRINGLIST *rc_conf_d_list;
-	RC_STRING *line;
+	RC_STRING *लिन्या;
 
 	if (!(dp = do_opendirat(targetfd, dir)))
 		return;
@@ -325,13 +325,13 @@ rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
 
 	rc_stringlist_sort(&rc_conf_d_files);
 	TAILQ_FOREACH(fname, rc_conf_d_files, entries) {
-		if (!fname->value)
+		if (!fname->हालागा)
 			continue;
 
-		rc_conf_d_list = config_list(dirfd(dp), fname->value);
-		TAILQ_FOREACH(line, rc_conf_d_list, entries)
-			if (line->value)
-				rc_config_set_value(config, line->value);
+		rc_conf_d_list = config_list(dirfd(dp), fname->हालागा);
+		TAILQ_FOREACH(लिन्या, rc_conf_d_list, entries)
+			if (लिन्या->हालागा)
+				rc_config_set_हालागा(config, लिन्या->हालागा);
 		rc_stringlist_free(rc_conf_d_list);
 	}
 
@@ -346,12 +346,12 @@ config_load(int dirfd, const char *pathname)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *config;
-	RC_STRING *line;
+	RC_STRING *लिन्या;
 
 	list = config_list(dirfd, pathname);
 	config = rc_stringlist_new();
-	TAILQ_FOREACH(line, list, entries) {
-		rc_config_set_value(config, line->value);
+	TAILQ_FOREACH(लिन्या, list, entries) {
+		rc_config_set_हालागा(config, लिन्या->हालागा);
 	}
 	rc_stringlist_free(list);
 
@@ -365,17 +365,17 @@ rc_config_load(const char *file)
 }
 
 char *
-rc_config_value(RC_STRINGLIST *list, const char *entry)
+rc_config_हालागा(RC_STRINGLIST *list, const char *entry)
 {
-	RC_STRING *line;
+	RC_STRING *लिन्या;
 	char *p;
 	size_t len;
 
 	len = strlen(entry);
-	TAILQ_FOREACH(line, list, entries) {
-		p = strchr(line->value, '=');
+	TAILQ_FOREACH(लिन्या, list, entries) {
+		p = strchr(लिन्या->हालागा, '=');
 		if (p != NULL) {
-			if (strncmp(entry, line->value, len) == 0 && line->value[len] == '=')
+			if (strncmp(entry, लिन्या->हालागा, len) == 0 && लिन्या->हालागा[len] == '=')
 				return ++p;
 		}
 	}
@@ -401,21 +401,21 @@ rc_conf_append(int dirfd)
 }
 
 char *
-rc_conf_value(const char *setting)
+rc_conf_हालागा(const char *setting)
 {
 	const int *dirfds;
-	size_t dir_count = rc_scriptdirfds(&dirfds);
+	size_t dir_बिलांग = rc_scriptdirfds(&dirfds);
 	RC_STRING *s;
 
 	if (rc_conf)
-		return rc_config_value(rc_conf, setting);
+		return rc_config_हालागा(rc_conf, setting);
 
 	rc_conf = rc_stringlist_new();
 	atexit(_free_rc_conf);
 
-	for (size_t i = 0; i < dir_count; i++) {
+	for (size_t i = 0; i < dir_बिलांग; i++) {
 		/* load configs in reverse order, so earlier entries override later ones */
-		size_t idx = dir_count - 1 - i;
+		size_t idx = dir_बिलांग - 1 - i;
 		rc_conf_append(dirfds[idx]);
 		rc_config_directory(rc_conf, dirfds[idx], "rc.conf.d");
 	}
@@ -431,7 +431,7 @@ rc_conf_value(const char *setting)
 
 	/* Convert old uppercase to lowercase */
 	TAILQ_FOREACH(s, rc_conf, entries) {
-		char *p = s->value;
+		char *p = s->हालागा;
 		while (p && *p && *p != '=') {
 			if (isupper((unsigned char)*p))
 				*p = tolower((unsigned char)*p);
@@ -439,5 +439,5 @@ rc_conf_value(const char *setting)
 		}
 	}
 
-	return rc_config_value(rc_conf, setting);
+	return rc_config_हालागा(rc_conf, setting);
 }

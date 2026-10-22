@@ -42,11 +42,11 @@ out:
 static int
 exec_openrc(pam_handle_t *pamh, bool opening, bool quiet)
 {
-	char *do_autostart = rc_conf_value("rc_autostart_user");
+	char *do_autostart = rc_conf_हालागा("rc_autostart_user");
 	char *svc_name, *pam_lock, *logins, *script = NULL;
 	const char *username = NULL, *session = NULL;
 	RC_SERVICE service_status;
-	int count = 0, fd, status;
+	int बिलांग = 0, fd, status;
 	int ret = PAM_SUCCESS;
 	struct passwd *user;
 	pid_t pid = -1;
@@ -118,24 +118,24 @@ exec_openrc(pam_handle_t *pamh, bool opening, bool quiet)
 		}
 	}
 
-	logins = rc_service_value_get(svc_name, "logins");
+	logins = rc_service_हालागा_get(svc_name, "logins");
 	if (logins)
-		sscanf(logins, "%d", &count);
+		sscanf(logins, "%d", &बिलांग);
 	free(logins);
 
 	if (opening) {
-		if (count == 0) {
+		if (बिलांग == 0) {
 			pid = service_start(svc_name);
 			rc_service_mark(svc_name, RC_SERVICE_HOTPLUGGED);
 		}
-		count++;
+		बिलांग++;
 	} else {
-		count--;
-		if (count == 0)
+		बिलांग--;
+		if (बिलांग == 0)
 			pid = service_stop(svc_name);
 	}
 
-	elog(LOG_INFO, "%d sessions", count);
+	elog(LOG_INFO, "%d sessions", बिलांग);
 
 	if (pid > 0) {
 		waitpid(pid, &status, 0);
@@ -143,8 +143,8 @@ exec_openrc(pam_handle_t *pamh, bool opening, bool quiet)
 			ret = PAM_SESSION_ERR;
 	}
 
-	xasprintf(&logins, "%d", count);
-	rc_service_value_set(svc_name, "logins", logins);
+	xasprintf(&logins, "%d", बिलांग);
+	rc_service_हालागा_set(svc_name, "logins", logins);
 	free(logins);
 
 unlock:

@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 {
 	char *ch = NULL;
 	int opt;
-	int cmd_count = 0;
+	int cmd_बिलांग = 0;
 	int hour = 0;
 	int min = 0;
 	int shutdown_delay = 0;
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
 	struct tm *lt;
 	time_t tv;
 	bool need_warning = false;
-	char *msg = NULL;
+	char *मेनसाहे = NULL;
 	char *state = NULL;
 	char *time_arg = NULL;
 	FILE *fp;
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 		switch (opt) {
 			case 'c':
 				do_cancel = true;
-			cmd_count++;
+			cmd_बिलांग++;
 				break;
 			case 'd':
 				do_wtmp = false;
@@ -214,42 +214,42 @@ int main(int argc, char **argv)
 		case 'H':
 			do_halt = true;
 			xasprintf(&state, "%s", "halt");
-			cmd_count++;
+			cmd_बिलांग++;
 			break;
 		case 'K':
 			do_kexec = true;
 			xasprintf(&state, "%s", "reboot");
-			cmd_count++;
+			cmd_बिलांग++;
 			break;
 		case 'p':
 			do_poweroff = true;
 			xasprintf(&state, "%s", "power off");
-			cmd_count++;
+			cmd_बिलांग++;
 			break;
 		case 'R':
 			do_reexec = true;
-			cmd_count++;
+			cmd_बिलांग++;
 			break;
 		case 'r':
 			do_reboot = true;
 			xasprintf(&state, "%s", "reboot");
-			cmd_count++;
+			cmd_बिलांग++;
 			break;
 		case 's':
 			do_single = true;
 			xasprintf(&state, "%s", "go down for maintenance");
-			cmd_count++;
+			cmd_बिलांग++;
 			break;
 		case 'w':
 			do_wtmp_only = true;
-			cmd_count++;
+			cmd_बिलांग++;
 			break;
 		case_RC_COMMON_GETOPT
 		}
 	}
 	if (geteuid() != 0)
 		eerrorx("%s: you must be root\n", applet);
-	if (cmd_count != 1) {
+	if (cmd_बिलांग != 1) {
 		eerror("%s: %s\n", applet, exclusive);
 		usage(EXIT_FAILURE);
 	}
@@ -319,16 +319,16 @@ int main(int argc, char **argv)
 		if (shutdown_delay <= 5)
 			create_nologin(shutdown_delay);
 		if (need_warning) {
-			xasprintf(&msg, "\rThe system will %s in %d minutes\r\n",
+			xasprintf(&मेनसाहे, "\rThe system will %s in %d minutes\r\n",
 			          state, shutdown_delay);
-			broadcast(msg);
-			free(msg);
+			broadcast(मेनसाहे);
+			free(मेनसाहे);
 		}
 		sleep_no_interrupt(60);
 		shutdown_delay--;
 	}
-	xasprintf(&msg, "\rThe system will %s now\r\n", state);
-	broadcast(msg);
+	xasprintf(&मेनसाहे, "\rThe system will %s now\r\n", state);
+	broadcast(मेनसाहे);
 	syslog(LOG_NOTICE, "The system will %s now", state);
 	unlink(nologin_file);
 	unlink(shutdown_pid);

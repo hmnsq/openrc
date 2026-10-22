@@ -111,7 +111,7 @@ void broadcast(char *text)
 	time_t t;
 	char *date;
 	char *p;
-	char *line = NULL;
+	char *लिन्या = NULL;
 	int len;
 	int fd;
 	char *term = NULL;
@@ -132,7 +132,7 @@ void broadcast(char *text)
 	if (p)
 		*p = 0;
 
-	len = xasprintf(&line, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
+	len = xasprintf(&लिन्या, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
 			user, name.nodename, tty, date, text);
 	free(tty);
 
@@ -159,12 +159,12 @@ void broadcast(char *text)
 		/* Open it non-delay */
 		if (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
 			if (isatty(fd))
-				write(fd, line, len);
+				write(fd, लिन्या, len);
 			close(fd);
 		}
 		free(term);
 	}
 	endutxent();
-	free(line);
+	free(लिन्या);
 	exit(0);
 }

@@ -48,13 +48,13 @@ int main(int argc, char **argv)
 
 	switch (action) {
 	case GET:
-		if (!(option = rc_service_value_get(service, argv[1])))
+		if (!(option = rc_service_हालागा_get(service, argv[1])))
 			return EXIT_FAILURE;
 		printf("%s", option);
 		free(option);
 		return EXIT_SUCCESS;
 	case SET:
-		return rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
+		return rc_service_हालागा_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
 	case EXPORT:
 		for (int i = 1; i < argc; i++) {
 			char *var;

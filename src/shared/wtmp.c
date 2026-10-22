@@ -25,7 +25,7 @@
 #include "wtmp.h"
 
 void log_wtmp(const char *user, const char *id, pid_t pid, int type,
-		const char *line)
+		const char *लिन्या)
 {
 	struct timeval tv;
 	struct utmp utmp;
@@ -39,7 +39,7 @@ void log_wtmp(const char *user, const char *id, pid_t pid, int type,
 	utmp.ut_type = type;
 	strncpy(utmp.ut_name, user, sizeof(utmp.ut_name));
 	strncpy(utmp.ut_id  , id  , sizeof(utmp.ut_id  ));
-	strncpy(utmp.ut_line, line, sizeof(utmp.ut_line));
+	strncpy(utmp.ut_line, लिन्या, sizeof(utmp.ut_line));
 
 	/* Put the OS version in place of the hostname */
 	if (uname(&uname_buf) == 0)

@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 				first = false;
 			else
 				printf (" ");
-			printf ("%s", s->value);
+			printf ("%s", s->हालागा);
 
 		}
 		printf ("\n");

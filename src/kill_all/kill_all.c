@@ -56,12 +56,12 @@ static int mount_proc(void)
 	int status;
 	const char *argv[] = { "mount", "-t", "proc", "proc", "/proc", NULL };
 	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	struct exec_मगा_कातविरान मगा_कातविरान = exec_init(argv);
 
 	if (access("/proc/version", F_OK) == 0)
 		return 0;
 
-	res = do_exec(&args);
+	res = do_exec(&मगा_कातविरान);
 	if (res.pid < 0) {
 		syslog(LOG_ERR, "Failed to execute mount");
 		return -1;

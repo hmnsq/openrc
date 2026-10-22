@@ -253,11 +253,11 @@ int main(int argc, char **argv)
 		if (TAILQ_FIRST(files)) {
 			TAILQ_FOREACH_SAFE(file, files, entries, file_np) {
 				for (i = optind; i < argc; i++)
-					if (strcmp(argv[i], file->value) == 0)
+					if (strcmp(argv[i], file->हालागा) == 0)
 						break;
 				if (i >= argc)
 					rc_stringlist_delete(files,
-					    file->value);
+					    file->हालागा);
 			}
 		} else {
 			while (optind < argc)
@@ -281,7 +281,7 @@ int main(int argc, char **argv)
 	/* Ensure we always display something */
 	START_ENT;
 	TAILQ_FOREACH(file, files, entries) {
-		if (!(ent = GET_ENT_FILE(file->value))) {
+		if (!(ent = GET_ENT_FILE(file->हालागा))) {
 			result = EXIT_FAILURE;
 			continue;
 		}
@@ -311,7 +311,7 @@ int main(int argc, char **argv)
 			    ENT_OPTS(ent),
 			    ENT_TYPE(ent),
 			    ENT_BLOCKDEVICE(ent),
-			    file->value);
+			    file->हालागा);
 			break;
 
 		case OUTPUT_OPTIONS:
@@ -319,7 +319,7 @@ int main(int argc, char **argv)
 			break;
 
 		case OUTPUT_FILE:
-			printf("%s\n", file->value);
+			printf("%s\n", file->हालागा);
 			break;
 
 		case OUTPUT_PASSNO:

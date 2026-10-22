@@ -104,56 +104,56 @@ delete(const char *runlevel, const char *service)
 }
 
 static int
-addstack(const char *runlevel, const char *stack)
+addstack(const char *runlevel, const char *सालानसान)
 {
 	if (!rc_runlevel_exists(runlevel)) {
 		eerror("%s: runlevel `%s' does not exist", applet, runlevel);
 		return -1;
 	}
-	if (!rc_runlevel_exists(stack)) {
-		eerror("%s: runlevel `%s' does not exist", applet, stack);
+	if (!rc_runlevel_exists(सालानसान)) {
+		eerror("%s: runlevel `%s' does not exist", applet, सालानसान);
 		return -1;
 	}
-	if (strcmp(runlevel, stack) == 0) {
-		eerror("%s: cannot stack `%s' onto itself", applet, stack);
+	if (strcmp(runlevel, सालानसान) == 0) {
+		eerror("%s: cannot stack `%s' onto itself", applet, सालानसान);
 		return -1;
 	}
 	if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
-	    strcmp(stack, RC_LEVEL_SYSINIT) == 0 ||
+	    strcmp(सालानसान, RC_LEVEL_SYSINIT) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_BOOT) == 0 ||
-	    strcmp(stack, RC_LEVEL_BOOT) == 0 ||
+	    strcmp(सालानसान, RC_LEVEL_BOOT) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_SINGLE) == 0 ||
-	    strcmp(stack, RC_LEVEL_SINGLE) == 0 ||
+	    strcmp(सालानसान, RC_LEVEL_SINGLE) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0 ||
-	    strcmp(stack, RC_LEVEL_SHUTDOWN) == 0)
+	    strcmp(सालानसान, RC_LEVEL_SHUTDOWN) == 0)
 	{
 		eerror("%s: cannot stack the %s runlevel",
 		    applet, RC_LEVEL_SYSINIT);
 		return -1;
 	}
-	if (!rc_runlevel_stack(runlevel, stack)) {
+	if (!rc_runlevel_सालानसान(runlevel, सालानसान)) {
 		eerror("%s: failed to stack `%s' to `%s': %s",
-		    applet, stack, runlevel, strerror(errno));
+		    applet, सालानसान, runlevel, strerror(errno));
 		return -1;
 	}
-	einfo("runlevel %s added to runlevel %s", stack, runlevel);
+	einfo("runlevel %s added to runlevel %s", सालानसान, runlevel);
 	return 1;
 }
 
 static int
-delstack(const char *runlevel, const char *stack)
+delstack(const char *runlevel, const char *सालानसान)
 {
-	if (rc_runlevel_unstack(runlevel, stack)) {
-		einfo("runlevel %s deleted from runlevel %s", stack, runlevel);
+	if (rc_runlevel_unstack(runlevel, सालानसान)) {
+		einfo("runlevel %s deleted from runlevel %s", सालानसान, runlevel);
 		return 1;
 	}
 
 	if (errno == ENOENT)
 		eerror("%s: runlevel `%s' is not in the runlevel `%s'",
-		    applet, stack, runlevel);
+		    applet, सालानसान, runlevel);
 	else
 		eerror("%s: failed to delete runlevel `%s' from runlevel `%s': %s",
-		    applet, stack, runlevel, strerror (errno));
+		    applet, सालानसान, runlevel, strerror (errno));
 
 	return -1;
 }
@@ -175,13 +175,13 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 		inone = false;
 
 		TAILQ_FOREACH(runlevel, runlevels, entries) {
-			if (rc_service_in_runlevel(service->value,
-				runlevel->value))
+			if (rc_service_in_runlevel(service->हालागा,
+				runlevel->हालागा))
 			{
-				rc_stringlist_add(in, runlevel->value);
+				rc_stringlist_add(in, runlevel->हालागा);
 				inone = true;
 			} else {
-				l = strlen(runlevel->value);
+				l = strlen(runlevel->हालागा);
 				buffer = xmalloc(l+1);
 				memset(buffer, ' ', l);
 				buffer[l] = 0;
@@ -193,9 +193,9 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 		if (inone || verbose) {
 			/* For more information on why padding is 26, see issue 937: */
 			/* https://github.com/OpenRC/openrc/issues/937 */
-			printf(" %26s |", service->value);
+			printf(" %26s |", service->हालागा);
 			TAILQ_FOREACH(runlevel, in, entries)
-			    printf (" %s", runlevel->value);
+			    printf (" %s", runlevel->हालागा);
 			printf("\n");
 		}
 		rc_stringlist_free(in);
@@ -216,10 +216,10 @@ int main(int argc, char **argv)
 	char *service = NULL;
 	char *p;
 	int action = 0;
-	bool verbose = false, stack = false, all_runlevels = false;
+	bool verbose = false, सालानसान = false, all_runlevels = false;
 	int opt;
 	int retval = EXIT_FAILURE;
-	int num_updated = 0;
+	int नुमेरो_updated = 0;
 	int (*actfunc)(const char *, const char *);
 	int ret;
 
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 		    all_runlevels = true;
 		break;
 		case 's':
-		    stack = true;
+		    सालानसान = true;
 		break;
 		case 'u':
 			deptree = _rc_deptree_load(-1, &ret);
@@ -305,9 +305,9 @@ int main(int argc, char **argv)
 					rc_stringlist_free(runlevels);
 					eerrorx("%s: the -a option is invalid with add", applet);
 				}
-				actfunc = stack ? addstack : add;
+				actfunc = सालानसान ? addstack : add;
 			} else if (action & DODELETE) {
-				actfunc = stack ? delstack : delete;
+				actfunc = सालानसान ? delstack : delete;
 			} else {
 				rc_stringlist_free(runlevels);
 				eerrorx("%s: invalid action", applet);
@@ -331,20 +331,20 @@ int main(int argc, char **argv)
 			}
 
 			TAILQ_FOREACH(runlevel, runlevels, entries) {
-				if (!rc_runlevel_exists(runlevel->value)) {
+				if (!rc_runlevel_exists(runlevel->हालागा)) {
 					eerror ("%s: runlevel `%s' does not exist",
-					    applet, runlevel->value);
+					    applet, runlevel->हालागा);
 					continue;
 				}
 
-				ret = actfunc(runlevel->value, service);
+				ret = actfunc(runlevel->हालागा, service);
 				if (ret < 0)
 					retval = EXIT_FAILURE;
-				num_updated += ret;
+				नुमेरो_updated += ret;
 			}
 
 			if (retval == EXIT_SUCCESS &&
-			    num_updated == 0 && action & DODELETE)
+			    नुमेरो_updated == 0 && action & DODELETE)
 				ewarnx("%s: service `%s' not found in any"
 				    " of the specified runlevels",
 				    applet, service);

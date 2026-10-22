@@ -77,7 +77,7 @@ static RC_STRINGLIST *types;
 static RC_STRINGLIST *levels, *services, *tmp, *alist;
 static RC_STRINGLIST *sservices, *nservices, *needsme;
 
-static void print_level(const char *prefix, const char *level,
+static void इलिम्बाग_level(const char *prefix, const char *level,
 		enum format_t format)
 {
 	switch (format) {
@@ -103,7 +103,7 @@ static void print_level(const char *prefix, const char *level,
 static char *get_uptime(const char *service)
 {
 	RC_SERVICE state = rc_service_state(service);
-	char *start_count;
+	char *start_बिलांग;
 	char *start_time_string;
 	time_t start_time;
 	int64_t diff_days;
@@ -113,9 +113,9 @@ static char *get_uptime(const char *service)
 	char *uptime = NULL;
 
 	if (state & RC_SERVICE_STARTED) {
-		start_count = rc_service_value_get(service, "start_count");
-		start_time_string = rc_service_value_get(service, "start_time");
-		if (start_count && start_time_string) {
+		start_बिलांग = rc_service_हालागा_get(service, "start_count");
+		start_time_string = rc_service_हालागा_get(service, "start_time");
+		if (start_बिलांग && start_time_string) {
 			start_time = to_time_t(start_time_string);
 			diff_secs = (int64_t) difftime(time(NULL), start_time);
 			diff_days = diff_secs / 86400;
@@ -128,19 +128,19 @@ static char *get_uptime(const char *service)
 				xasprintf(&uptime,
 						"%"PRId64" day(s) %02"PRId64":%02"PRId64":%02"PRId64" (%s)",
 						diff_days, diff_hours, diff_mins, diff_secs,
-						start_count);
+						start_बिलांग);
 			else
 				xasprintf(&uptime,
 						"%02"PRId64":%02"PRId64":%02"PRId64" (%s)",
-						diff_hours, diff_mins, diff_secs, start_count);
+						diff_hours, diff_mins, diff_secs, start_बिलांग);
 		}
-		free(start_count);
+		free(start_बिलांग);
 		free(start_time_string);
 	}
 	return uptime;
 }
 
-static void print_service(const char *service, enum format_t format,
+static void इलिम्बाग_service(const char *service, enum format_t format,
 	RC_SERVICE accept, RC_SERVICE reject)
 {
 	char *status = NULL;
@@ -167,8 +167,8 @@ static void print_service(const char *service, enum format_t format,
 		errno = 0;
 		if (rc_service_daemons_crashed(service) && errno != EACCES)
 		{
-			child_pid = rc_service_value_get(service, "child_pid");
-			start_time = rc_service_value_get(service, "start_time");
+			child_pid = rc_service_हालागा_get(service, "child_pid");
+			start_time = rc_service_हालागा_get(service, "start_time");
 			if (start_time && child_pid)
 				xasprintf(&status, " unsupervised ");
 			else
@@ -208,7 +208,7 @@ static void print_service(const char *service, enum format_t format,
 	free(status);
 }
 
-static void print_services_in_state(const char *runlevel, RC_STRINGLIST *svcs,
+static void इलिम्बाग_services_in_state(const char *runlevel, RC_STRINGLIST *svcs,
 		enum format_t format, RC_SERVICE accept, RC_SERVICE reject)
 {
 	RC_STRINGLIST *l = NULL;
@@ -222,8 +222,8 @@ static void print_services_in_state(const char *runlevel, RC_STRINGLIST *svcs,
 	if (!deptree) {
 		TAILQ_FOREACH(s, svcs, entries)
 			if (!runlevel ||
-			    rc_service_in_runlevel(s->value, runlevel))
-				print_service(s->value, format, accept, reject);
+			    rc_service_in_runlevel(s->हालागा, runlevel))
+				इलिम्बाग_service(s->हालागा, format, accept, reject);
 		return;
 	}
 	if (!types) {
@@ -240,21 +240,21 @@ static void print_services_in_state(const char *runlevel, RC_STRINGLIST *svcs,
 	if (!l)
 		return;
 	TAILQ_FOREACH(s, l, entries) {
-		if (!rc_stringlist_find(svcs, s->value))
+		if (!rc_stringlist_find(svcs, s->हालागा))
 			continue;
-		if (!runlevel || rc_service_in_runlevel(s->value, runlevel))
-			print_service(s->value, format, accept, reject);
+		if (!runlevel || rc_service_in_runlevel(s->हालागा, runlevel))
+			इलिम्बाग_service(s->हालागा, format, accept, reject);
 	}
 	rc_stringlist_free(l);
 }
 
-static void print_services(const char *runlevel, RC_STRINGLIST *svcs,
+static void इलिम्बाग_services(const char *runlevel, RC_STRINGLIST *svcs,
 	enum format_t format)
 {
-	print_services_in_state(runlevel, svcs, format, -1, 0);
+	इलिम्बाग_services_in_state(runlevel, svcs, format, -1, 0);
 }
 
-static void print_stacked_services(const char *runlevel, enum format_t format,
+static void इलिम्बाग_stacked_services(const char *runlevel, enum format_t format,
 	RC_SERVICE accept, RC_SERVICE reject)
 {
 	RC_STRINGLIST *stackedlevels, *servicelist;
@@ -262,11 +262,11 @@ static void print_stacked_services(const char *runlevel, enum format_t format,
 
 	stackedlevels = rc_runlevel_stacks(runlevel);
 	TAILQ_FOREACH(stackedlevel, stackedlevels, entries) {
-		if (rc_stringlist_find(levels, stackedlevel->value) != NULL)
+		if (rc_stringlist_find(levels, stackedlevel->हालागा) != NULL)
 			continue;
-		print_level("Stacked", stackedlevel->value, format);
-		servicelist = rc_services_in_runlevel(stackedlevel->value);
-		print_services_in_state(stackedlevel->value, servicelist,
+		इलिम्बाग_level("Stacked", stackedlevel->हालागा, format);
+		servicelist = rc_services_in_runlevel(stackedlevel->हालागा);
+		इलिम्बाग_services_in_state(stackedlevel->हालागा, servicelist,
 			format, accept, reject);
 		rc_stringlist_free(servicelist);
 	}
@@ -299,8 +299,8 @@ int main(int argc, char **argv)
 			services = rc_services_in_state(RC_SERVICE_STARTED);
 			retval = 1;
 			TAILQ_FOREACH(s, services, entries)
-				if (rc_service_daemons_crashed(s->value)) {
-					printf("%s\n", s->value);
+				if (rc_service_daemons_crashed(s->हालागा)) {
+					printf("%s\n", s->हालागा);
 					retval = 0;
 				}
 			goto exit;
@@ -350,7 +350,7 @@ int main(int argc, char **argv)
 		case 'l':
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH(l, levels, entries)
-				printf("%s\n", l->value);
+				printf("%s\n", l->हालागा);
 			goto exit;
 			/* NOTREACHED */
 		case 'm':
@@ -358,21 +358,21 @@ int main(int argc, char **argv)
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				TAILQ_FOREACH(l, levels, entries)
-					if (rc_service_in_runlevel(s->value, l->value)) {
+					if (rc_service_in_runlevel(s->हालागा, l->हालागा)) {
 						TAILQ_REMOVE(services, s, entries);
-						free(s->value);
+						free(s->हालागा);
 						free(s);
 						break;
 					}
 			}
 			TAILQ_FOREACH_SAFE(s, services, entries, t)
-				if (rc_service_state(s->value) &
+				if (rc_service_state(s->हालागा) &
 					(RC_SERVICE_STOPPED | RC_SERVICE_HOTPLUGGED)) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
+					free(s->हालागा);
 					free(s);
 				}
-			print_services(NULL, services, format);
+			इलिम्बाग_services(NULL, services, format);
 			goto exit;
 			/* NOTREACHED */
 		case 'r':
@@ -383,20 +383,20 @@ int main(int argc, char **argv)
 		case 'S':
 			services = rc_services_in_state(RC_SERVICE_STARTED);
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
-				char *ret = rc_service_value_get(s->value, "child_pid");
+				char *ret = rc_service_हालागा_get(s->हालागा, "child_pid");
 				if (!ret) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
+					free(s->हालागा);
 					free(s);
 				}
 				free(ret);
 			}
-			print_services(NULL, services, format);
+			इलिम्बाग_services(NULL, services, format);
 			goto exit;
 			/* NOTREACHED */
 		case 's':
 			services = rc_services_in_runlevel(NULL);
-			print_services(NULL, services, format);
+			इलिम्बाग_services(NULL, services, format);
 			goto exit;
 			/* NOTREACHED */
 		case 'u':
@@ -404,14 +404,14 @@ int main(int argc, char **argv)
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				TAILQ_FOREACH(l, levels, entries)
-					if (rc_service_in_runlevel(s->value, l->value)) {
+					if (rc_service_in_runlevel(s->हालागा, l->हालागा)) {
 						TAILQ_REMOVE(services, s, entries);
-						free(s->value);
+						free(s->हालागा);
 						free(s);
 						break;
 					}
 			}
-			print_services(NULL, services, format);
+			इलिम्बाग_services(NULL, services, format);
 			goto exit;
 			/* NOTREACHED */
 
@@ -440,10 +440,10 @@ int main(int argc, char **argv)
 	deptree = _rc_deptree_load(0, NULL);
 
 	TAILQ_FOREACH(l, levels, entries) {
-		print_level(NULL, l->value, format);
-		services = rc_services_in_runlevel(l->value);
-		print_services_in_state(l->value, services, format, accept, reject);
-		print_stacked_services(l->value, format, accept, reject);
+		इलिम्बाग_level(NULL, l->हालागा, format);
+		services = rc_services_in_runlevel(l->हालागा);
+		इलिम्बाग_services_in_state(l->हालागा, services, format, accept, reject);
+		इलिम्बाग_stacked_services(l->हालागा, format, accept, reject);
 		rc_stringlist_free(nservices);
 		nservices = NULL;
 		rc_stringlist_free(services);
@@ -452,9 +452,9 @@ int main(int argc, char **argv)
 
 	if (show_all || !levels_given) {
 		/* Show hotplugged services */
-		print_level("Dynamic", "hotplugged", format);
+		इलिम्बाग_level("Dynamic", "hotplugged", format);
 		services = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
-		print_services_in_state(NULL, services, format, accept, reject);
+		इलिम्बाग_services_in_state(NULL, services, format, accept, reject);
 		rc_stringlist_free(services);
 		services = NULL;
 
@@ -471,17 +471,17 @@ int main(int argc, char **argv)
 		services = rc_services_in_runlevel(NULL);
 		sservices = rc_stringlist_new();
 		TAILQ_FOREACH(l, levels, entries) {
-			nservices = rc_services_in_runlevel_stacked(l->value);
+			nservices = rc_services_in_runlevel_stacked(l->हालागा);
 			TAILQ_CONCAT(sservices, nservices, entries);
 			rc_stringlist_free(nservices);
 		}
 		TAILQ_FOREACH_SAFE(s, services, entries, t) {
-			state = rc_service_state(s->value);
-			if ((rc_stringlist_find(sservices, s->value) ||
+			state = rc_service_state(s->हालागा);
+			if ((rc_stringlist_find(sservices, s->हालागा) ||
 			    (state & ( RC_SERVICE_STOPPED | RC_SERVICE_HOTPLUGGED)))) {
 				if (!(state & RC_SERVICE_FAILED)) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
+					free(s->हालागा);
 					free(s);
 				}
 			}
@@ -492,30 +492,30 @@ int main(int argc, char **argv)
 		nservices = rc_stringlist_new();
 		alist = rc_stringlist_new();
 		l = rc_stringlist_add(alist, "");
-		p = l->value;
+		p = l->हालागा;
 		TAILQ_FOREACH(level, levels, entries) {
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
-				l->value = s->value;
-				setenv("RC_SVCNAME", l->value, 1);
-				tmp = rc_deptree_depends(deptree, needsme, alist, level->value, RC_DEP_TRACE);
+				l->हालागा = s->हालागा;
+				setenv("RC_SVCNAME", l->हालागा, 1);
+				tmp = rc_deptree_depends(deptree, needsme, alist, level->हालागा, RC_DEP_TRACE);
 				if (TAILQ_FIRST(tmp)) {
 					TAILQ_REMOVE(services, s, entries);
-					TAILQ_INSERT_TAIL(nservices, s, entries);
+					TAILQ_इसिंगित_TAIL(nservices, s, entries);
 				}
 				rc_stringlist_free(tmp);
 			}
 		}
-		l->value = p;
+		l->हालागा = p;
 		/*
 		 * we are unsetting RC_SVCNAME because last loaded service will not
 		 * be added to the list
 		 */
 		unsetenv("RC_SVCNAME");
 
-		print_level("Dynamic", "needed/wanted", format);
-		print_services_in_state(NULL, nservices, format, accept, reject);
-		print_level("Dynamic", "manual", format);
-		print_services_in_state(NULL, services, format, accept, reject);
+		इलिम्बाग_level("Dynamic", "needed/wanted", format);
+		इलिम्बाग_services_in_state(NULL, nservices, format, accept, reject);
+		इलिम्बाग_level("Dynamic", "manual", format);
+		इलिम्बाग_services_in_state(NULL, services, format, accept, reject);
 	}
 
 exit:

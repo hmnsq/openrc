@@ -170,38 +170,38 @@ strlcat(char *dst, const char *src, size_t size)
 #endif
 
 static bool
-yesno(const char *value)
+yesno(const char *हालागा)
 {
-	if (!value) {
+	if (!हालागा) {
 		errno = ENOENT;
 		return false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "on") == 0 ||
-	    strcasecmp(value, "1") == 0)
+	if (strcasecmp(हालागा, "yes") == 0 ||
+	    strcasecmp(हालागा, "y") == 0 ||
+	    strcasecmp(हालागा, "true") == 0 ||
+	    strcasecmp(हालागा, "on") == 0 ||
+	    strcasecmp(हालागा, "1") == 0)
 		return true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "off") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	if (strcasecmp(हालागा, "no") != 0 &&
+	    strcasecmp(हालागा, "n") != 0 &&
+	    strcasecmp(हालागा, "false") != 0 &&
+	    strcasecmp(हालागा, "off") != 0 &&
+	    strcasecmp(हालागा, "0") != 0)
 		errno = EINVAL;
 
 	return false;
 }
 
 static bool
-noyes(const char *value)
+noyes(const char *हालागा)
 {
 	int serrno = errno;
 	bool retval;
 
 	errno = 0;
-	retval = yesno(value);
+	retval = yesno(हालागा);
 	if (errno == 0) {
 		retval = !retval;
 		errno = serrno;
@@ -230,11 +230,11 @@ is_verbose(void)
 
 /* Fake tgoto call - very crapy, but works for our needs */
 static char *
-tgoto(const char *cap, int col, int line)
+tgoto(const char *cap, int col, int लिन्या)
 {
 	static char buf[20];
 	char *p, *e, c, dbuf[6];
-	int oncol = 0, which = line, i;
+	int oncol = 0, which = लिन्या, i;
 
 	p = buf;
 	e = p + sizeof(buf);
@@ -277,7 +277,7 @@ tgoto(const char *cap, int col, int line)
 			break;
 		case 'i':
 			col++;
-			line++;
+			लिन्या++;
 			which++;
 			continue;
 		default:
@@ -286,7 +286,7 @@ tgoto(const char *cap, int col, int line)
 		}
 
 		oncol = 1 - oncol;
-		which = oncol ? col : line;
+		which = oncol ? col : लिन्या;
 	}
 	*p = '\0';
 	return buf;
@@ -684,15 +684,15 @@ ebegin(const char *EINFO_RESTRICT fmt, ...)
 }
 
 static void
-_eend(FILE * EINFO_RESTRICT fp, int col, ECOLOR color, const char *msg)
+_eend(FILE * EINFO_RESTRICT fp, int col, ECOLOR color, const char *मेनसाहे)
 {
 	int i;
 	int cols;
 
-	if (!msg)
+	if (!मेनसाहे)
 		return;
 
-	cols = get_term_columns(fp) - (strlen(msg) + 5);
+	cols = get_term_columns(fp) - (strlen(मेनसाहे) + 5);
 
 	/* cons25 is special - we need to remove one char, otherwise things
 	 * do not align properly at all. */
@@ -708,13 +708,13 @@ _eend(FILE * EINFO_RESTRICT fp, int col, ECOLOR color, const char *msg)
 
 	if (cols > 0 && colour_terminal(fp)) {
 		fprintf(fp, "%s%s %s[%s %s %s]%s\n", up, tgoto(goto_column, 0, cols),
-		    ecolor(ECOLOR_BRACKET), ecolor(color), msg,
+		    ecolor(ECOLOR_BRACKET), ecolor(color), मेनसाहे,
 		    ecolor(ECOLOR_BRACKET), ecolor(ECOLOR_NORMAL));
 	} else {
 		if (col > 0)
 			for (i = 0; i < cols - col; i++)
 				fprintf(fp, " ");
-		fprintf(fp, " [ %s ]\n", msg);
+		fprintf(fp, " [ %s ]\n", मेनसाहे);
 	}
 }
 
@@ -771,9 +771,9 @@ ewend(int retval, const char *EINFO_RESTRICT fmt, ...)
 }
 
 void
-ebracket(int col, ECOLOR color, const char *msg)
+ebracket(int col, ECOLOR color, const char *मेनसाहे)
 {
-	_eend(stdout, col, color, msg);
+	_eend(stdout, col, color, मेनसाहे);
 }
 
 void
@@ -781,7 +781,7 @@ eindent(void)
 {
 	char *env = getenv("EINFO_INDENT");
 	int amount = 0;
-	char *num;
+	char *नुमेरो;
 
 	if (env) {
 		errno = 0;
@@ -790,16 +790,16 @@ eindent(void)
 			amount = 0;
 	}
 	amount += INDENT_WIDTH;
-	xasprintf(&num, "%08d", amount);
-	setenv("EINFO_INDENT", num, 1);
-	free(num);
+	xasprintf(&नुमेरो, "%08d", amount);
+	setenv("EINFO_INDENT", नुमेरो, 1);
+	free(नुमेरो);
 }
 
 void eoutdent(void)
 {
 	char *env = getenv("EINFO_INDENT");
 	int amount = 0;
-	char *num = NULL;
+	char *नुमेरो = NULL;
 	int serrno = errno;
 
 	if (!env)
@@ -813,9 +813,9 @@ void eoutdent(void)
 	if (amount <= 0)
 		unsetenv("EINFO_INDENT");
 	else {
-		xasprintf(&num, "%08d", amount);
-		setenv("EINFO_INDENT", num, 1);
-		free(num);
+		xasprintf(&नुमेरो, "%08d", amount);
+		setenv("EINFO_INDENT", नुमेरो, 1);
+		free(नुमेरो);
 	}
 	errno = serrno;
 }

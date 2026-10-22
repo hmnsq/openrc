@@ -256,7 +256,7 @@ rc_logger_open(const char *level)
 		}
 
 		/* Append the temporary log to the real log */
-		logfile = rc_conf_value("rc_log_path");
+		logfile = rc_conf_हालागा("rc_log_path");
 		if (logfile == NULL) {
 			if (!rc_is_user()) {
 				logfile = DEFAULTLOG;

@@ -257,7 +257,7 @@ static int read_context_file(const char *filename, char **context)
 	int ret = -1;
 	FILE *fp;
 	char *filepath = NULL;
-	char *line = NULL;
+	char *लिन्या = NULL;
 	char *p;
 	char *p2;
 	size_t len = 0;
@@ -271,9 +271,9 @@ static int read_context_file(const char *filename, char **context)
 		return -1;
 	}
 
-	while (xgetline(&line, &len, fp) != -1) {
+	while (xgetline(&लिन्या, &len, fp) != -1) {
 		/* cut off spaces before the string */
-		p = line;
+		p = लिन्या;
 		while (isspace(*p) && *p != '\0')
 			p++;
 
@@ -292,7 +292,7 @@ static int read_context_file(const char *filename, char **context)
 		break;
 	}
 
-	free(line);
+	free(लिन्या);
 	free(filepath);
 	fclose(fp);
 	return ret;
@@ -302,15 +302,15 @@ static int read_run_init_context(char **context)
 {
 	int ret = -1;
 	RC_STRINGLIST *list;
-	char *value = NULL;
+	char *हालागा = NULL;
 
 	list = rc_config_list(selinux_openrc_contexts_path());
 	if (list == NULL)
 		return ret;
 
-	value = rc_config_value(list, "run_init");
-	if (value != NULL && strlen(value) > 0) {
-		*context = xstrdup(value);
+	हालागा = rc_config_हालागा(list, "run_init");
+	if (हालागा != NULL && strlen(हालागा) > 0) {
+		*context = xstrdup(हालागा);
 		ret = 0;
 	}
 

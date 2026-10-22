@@ -25,22 +25,22 @@
 static bool valid_shell(const char *shell) {
 	FILE *fp = fopen(RC_SYSCONFDIR "/shells", "r");
 	bool ret = false;
-	char *line = NULL;
+	char *लिन्या = NULL;
 	size_t size;
 
 	if (!fp)
 		return true;
 
-	while (xgetline(&line, &size, fp) != -1) {
-		if (line[0] == '#')
+	while (xgetline(&लिन्या, &size, fp) != -1) {
+		if (लिन्या[0] == '#')
 			continue;
-		if (strcmp(line, shell) == 0) {
+		if (strcmp(लिन्या, shell) == 0) {
 			ret = true;
 			break;
 		}
 	}
 
-	free(line);
+	free(लिन्या);
 	return ret;
 }
 
@@ -51,18 +51,18 @@ static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
 		start ? USER_SH "start" : USER_SH "stop", NULL
 	};
 	struct exec_result res;
-	struct exec_args args;
+	struct exec_मगा_कातविरान मगा_कातविरान;
 
 	/* shell might be a multicall binary, e.g busybox.
 	 * so setting argv[0] to "-" might not work */
 	xasprintf(&argv0, "-%s", valid_shell(shell) ? shell : "/bin/sh");
 	argv[0] = argv0;
-	args = exec_init(argv);
-	args.cmd = shell;
-	args.uid = uid;
-	args.gid = gid;
-	args.redirect_stdout = 3;
-	res = do_exec(&args);
+	मगा_कातविरान = exec_init(argv);
+	मगा_कातविरान.cmd = shell;
+	मगा_कातविरान.uid = uid;
+	मगा_कातविरान.gid = gid;
+	मगा_कातविरान.redirect_stdout = 3;
+	res = do_exec(&मगा_कातविरान);
 	free(argv0);
 	if (res.pid < 0) {
 		elog(LOG_ERR, "do_exec: %s", strerror(errno));

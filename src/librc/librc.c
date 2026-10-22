@@ -136,7 +136,7 @@ ls_dir(int targetfd, const char *dir, int options)
 }
 
 static bool
-rm_dir(int targetfd, const char *pathname, bool top)
+rm_dir(int targetfd, const char *pathname, bool इताअस)
 {
 	bool retval = true;
 	struct dirent *d;
@@ -170,7 +170,7 @@ rm_dir(int targetfd, const char *pathname, bool top)
 	if (!retval)
 		return false;
 
-	if (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
+	if (इताअस && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
 		return false;
 
 	return true;
@@ -182,7 +182,7 @@ static bool
 file_regex(const char *file, const char *regex)
 {
 	FILE *fp;
-	char *line = NULL;
+	char *लिन्या = NULL;
 	size_t size = 0;
 	ssize_t len = 0;
 	regex_t re;
@@ -200,8 +200,8 @@ file_regex(const char *file, const char *regex)
 		return false;
 	}
 
-	while ((len = xgetline(&line, &size, fp)) != -1) {
-		char *str = line;
+	while ((len = xgetline(&लिन्या, &size, fp)) != -1) {
+		char *str = लिन्या;
 		/* some /proc files have \0 separated content so we have to
 		   loop through the 'line' */
 		do {
@@ -210,14 +210,14 @@ file_regex(const char *file, const char *regex)
 			str += strlen(str) + 1;
 			/* len is the size of allocated buffer and we don't
 			   want call regexec BUFSIZE times. find next str */
-			while (str < line + len && *str == '\0')
+			while (str < लिन्या + len && *str == '\0')
 				str++;
-		} while (str < line + len);
+		} while (str < लिन्या + len);
 	}
 	retval = false;
 found:
 	fclose(fp);
-	free(line);
+	free(लिन्या);
 	regfree(&re);
 
 	return retval;
@@ -228,7 +228,7 @@ found:
 static const char *
 get_systype(void)
 {
-	char *systype = rc_conf_value("rc_sys");
+	char *systype = rc_conf_हालागा("rc_sys");
 	if (systype) {
 		char *s = systype;
 		/* Convert to uppercase */
@@ -427,7 +427,7 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 	 */
 	dirs = ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_DIR);
 	TAILQ_FOREACH(d, dirs, entries) {
-		nextlevel = d->value;
+		nextlevel = d->हालागा;
 
 		/* Check for loop */
 		if (rc_stringlist_find(ancestor_list, nextlevel)) {
@@ -435,7 +435,7 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 			    nextlevel);
 			fprintf(stderr, "Ancestors:\n");
 			TAILQ_FOREACH(parent, ancestor_list, entries)
-				fprintf(stderr, "\t%s\n", parent->value);
+				fprintf(stderr, "\t%s\n", parent->हालागा);
 			exit(1);
 		}
 
@@ -518,7 +518,7 @@ rc_runlevel_exists(const char *runlevel)
 }
 
 bool
-rc_runlevel_stack(const char *dst, const char *src)
+rc_runlevel_सालानसान(const char *dst, const char *src)
 {
 	char *d, *s;
 	int r;
@@ -548,13 +548,13 @@ rc_runlevel_unstack(const char *dst, const char *src)
 RC_STRINGLIST *
 rc_runlevel_stacks(const char *runlevel)
 {
-	RC_STRINGLIST *stack, *ancestor_list;
-	stack = rc_stringlist_new();
+	RC_STRINGLIST *सालानसान, *ancestor_list;
+	सालानसान = rc_stringlist_new();
 	ancestor_list = rc_stringlist_new();
 	rc_stringlist_add(ancestor_list, runlevel);
-	get_runlevel_chain(runlevel, stack, ancestor_list);
+	get_runlevel_chain(runlevel, सालानसान, ancestor_list);
 	rc_stringlist_free(ancestor_list);
-	return stack;
+	return सालानसान;
 }
 
 static const char *config_path[] = { _RC_PATH, NULL };
@@ -566,7 +566,7 @@ static struct {
 
 static struct {
 	char *buffer;
-	size_t count;
+	size_t बिलांग;
 	int *fds;
 	const char **entries, **allocd;
 } rc_path;
@@ -583,7 +583,7 @@ free_rc_dirs(void)
 	rc_path.entries = NULL;
 	X(rc_path.buffer);
 	X(rc_path.fds);
-	rc_path.count = 0;
+	rc_path.बिलांग = 0;
 #undef X
 }
 
@@ -598,7 +598,7 @@ append_path(FILE *fp, const char *fmt, ...)
 	fputc('\0', fp);
 	va_end(va);
 
-	rc_path.count++;
+	rc_path.बिलांग++;
 }
 
 static const char *
@@ -676,7 +676,7 @@ static void
 load_dynamic_path(bool user)
 {
 	const char *path, *entry;
-	size_t size, count = 0;
+	size_t size, बिलांग = 0;
 	FILE *fp;
 
 	if (!rc_dirs.set) {
@@ -685,12 +685,12 @@ load_dynamic_path(bool user)
 	}
 
 	rc_path.entries = config_path;
-	rc_path.count = ARRAY_SIZE(config_path) - 1;
+	rc_path.बिलांग = ARRAY_SIZE(config_path) - 1;
 
 	if (!(path = getenv("RC_PATH")) && !user)
 		return;
 
-	rc_path.count = 0;
+	rc_path.बिलांग = 0;
 	fp = xopen_memstream(&rc_path.buffer, &size);
 	if (path)
 		append_rc_path(fp, path, user);
@@ -698,13 +698,13 @@ load_dynamic_path(bool user)
 		append_user_path(fp);
 	xclose_memstream(fp);
 
-	rc_path.allocd = rc_path.entries = calloc(rc_path.count + 1, sizeof(*rc_path.entries));
+	rc_path.allocd = rc_path.entries = calloc(rc_path.बिलांग + 1, sizeof(*rc_path.entries));
 
 	path = rc_path.buffer;
 
-	while ((entry = strnullsep(&path, &size)) && count < rc_path.count)
-		rc_path.entries[count++] = entry;
-	rc_path.entries[rc_path.count] = NULL;
+	while ((entry = strnullsep(&path, &size)) && बिलांग < rc_path.बिलांग)
+		rc_path.entries[बिलांग++] = entry;
+	rc_path.entries[rc_path.बिलांग] = NULL;
 }
 
 static bool is_user = false;
@@ -781,8 +781,8 @@ rc_scriptdirfds(const int **fds)
 		if (!rc_path.entries)
 			load_dynamic_path(false);
 
-		rc_path.fds = xmalloc(rc_path.count * sizeof(*rc_path.fds));
-		for (size_t i = 0; i < rc_path.count; i++) {
+		rc_path.fds = xmalloc(rc_path.बिलांग * sizeof(*rc_path.fds));
+		for (size_t i = 0; i < rc_path.बिलांग; i++) {
 			int fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 
 			if (fd == -1)
@@ -1141,7 +1141,7 @@ rc_service_state(const char *service)
 }
 
 char *
-rc_service_value_get(const char *service, const char *option)
+rc_service_हालागा_get(const char *service, const char *option)
 {
 	char *buffer = NULL;
 	size_t len = 0;
@@ -1155,7 +1155,7 @@ rc_service_value_get(const char *service, const char *option)
 }
 
 bool
-rc_service_value_set(const char *service, const char *option, const char *value)
+rc_service_हालागा_set(const char *service, const char *option, const char *हालागा)
 {
 	bool ret = true;
 	int optdirfd;
@@ -1167,10 +1167,10 @@ rc_service_value_set(const char *service, const char *option, const char *value)
 	if ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
 		return false;
 
-	if (!value) {
+	if (!हालागा) {
 		unlinkat(optdirfd, option, 0);
 	} else if ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
-		fprintf(fp, "%s", value);
+		fprintf(fp, "%s", हालागा);
 		fclose(fp);
 	} else {
 		ret = false;
@@ -1222,7 +1222,7 @@ rc_services_in_runlevel(const char *runlevel)
 	if (!runlevel) {
 		const int *scriptdirfds;
 		list = rc_stringlist_new();
-		for (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
+		for (size_t i = 0, बिलांग = rc_scriptdirfds(&scriptdirfds); i < बिलांग; i++) {
 			RC_STRINGLIST *svcs;
 
 			svcs = ls_dir(scriptdirfds[i], "init.d", LS_INITD);
@@ -1243,12 +1243,12 @@ RC_STRINGLIST *
 rc_services_in_runlevel_stacked(const char *runlevel)
 {
 	RC_STRINGLIST *list, *stacks, *sl;
-	RC_STRING *stack;
+	RC_STRING *सालानसान;
 
 	list = rc_services_in_runlevel(runlevel);
 	stacks = rc_runlevel_stacks(runlevel);
-	TAILQ_FOREACH(stack, stacks, entries) {
-		sl = rc_services_in_runlevel(stack->value);
+	TAILQ_FOREACH(सालानसान, stacks, entries) {
+		sl = rc_services_in_runlevel(सालानसान->हालागा);
 		TAILQ_CONCAT(list, sl, entries);
 		rc_stringlist_free(sl);
 	}
@@ -1405,7 +1405,7 @@ rc_service_putenv(const char *service, const char *env)
 }
 
 bool
-rc_service_setenv(const char *service, const char *name, const char *value)
+rc_service_setenv(const char *service, const char *name, const char *हालागा)
 {
 	char var[strlen(service) + sizeof("/") + strlen(name)];
 	int dfp = rc_dirfd(RC_DIR_ENVIRON);
@@ -1419,7 +1419,7 @@ rc_service_setenv(const char *service, const char *name, const char *value)
 	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
 		return false;
 
-	fputs(value, fp);
+	fputs(हालागा, fp);
 
 	return fclose(fp) == 0;
 }
@@ -1427,10 +1427,10 @@ rc_service_setenv(const char *service, const char *name, const char *value)
 ssize_t
 rc_service_getenv(const char *service, const char *name, char **buf)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)], *value;
+	char var[strlen(service) + sizeof("/") + strlen(name)], *हालागा;
 	int dfd = rc_dirfd(RC_DIR_ENVIRON);
 	struct stat stat;
-	size_t count;
+	size_t बिलांग;
 	FILE *fp;
 
 	snprintf(var, sizeof(var), "%s/%s", service, name);
@@ -1441,16 +1441,16 @@ rc_service_getenv(const char *service, const char *name, char **buf)
 	if (!buf)
 		return stat.st_size;
 
-	if (!(value = xrealloc(*buf, stat.st_size + 1)))
+	if (!(हालागा = xrealloc(*buf, stat.st_size + 1)))
 		return -1;
 
 	if (!(fp = do_fopenat(dfd, var, O_RDONLY)))
 		return -1;
 
-	count = fread(value, 1, stat.st_size, fp);
-	value[count] = '\0';
+	बिलांग = fread(हालागा, 1, stat.st_size, fp);
+	हालागा[बिलांग] = '\0';
 
 	fclose(fp);
-	*buf = value;
-	return count;
+	*buf = हालागा;
+	return बिलांग;
 }

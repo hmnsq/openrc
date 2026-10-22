@@ -37,19 +37,19 @@ static int devnull(void)
 	return devnullfd;
 }
 
-struct exec_args exec_init(const char **argv)
+struct exec_मगा_कातविरान exec_init(const char **argv)
 {
-	struct exec_args args = {0};
-	args.argv = argv;
-	args.redirect_stdin  = EXEC_NO_REDIRECT;
-	args.redirect_stdout = EXEC_NO_REDIRECT;
-	args.redirect_stderr = EXEC_NO_REDIRECT;
-	args.uid = (uid_t)-1;
-	args.gid = (gid_t)-1;
-	return args;
+	struct exec_मगा_कातविरान मगा_कातविरान = {0};
+	मगा_कातविरान.argv = argv;
+	मगा_कातविरान.redirect_stdin  = EXEC_NO_REDIRECT;
+	मगा_कातविरान.redirect_stdout = EXEC_NO_REDIRECT;
+	मगा_कातविरान.redirect_stderr = EXEC_NO_REDIRECT;
+	मगा_कातविरान.uid = (uid_t)-1;
+	मगा_कातविरान.gid = (gid_t)-1;
+	return मगा_कातविरान;
 }
 
-struct exec_result do_exec(struct exec_args *args)
+struct exec_result do_exec(struct exec_मगा_कातविरान *मगा_कातविरान)
 {
 	struct exec_result res = { .pid = -1 };
 	sigset_t full, old;
@@ -58,32 +58,32 @@ struct exec_result do_exec(struct exec_args *args)
 	int stdin_pipe[2] = {-1, -1};
 	int stdout_pipe[2] = {-1, -1};
 	int stderr_pipe[2] = {-1, -1};
-	const char *cmd = args->cmd ? args->cmd : args->argv[0];
+	const char *cmd = मगा_कातविरान->cmd ? मगा_कातविरान->cmd : मगा_कातविरान->argv[0];
 
 	if (pipe2(execpipe, O_CLOEXEC) < 0)
 		goto exit;
-	if (args->redirect_stdin == EXEC_MKPIPE) {
+	if (मगा_कातविरान->redirect_stdin == EXEC_MKPIPE) {
 		if (pipe2(stdin_pipe, O_CLOEXEC) < 0)
 			goto exit;
-		args->redirect_stdin = stdin_pipe[0];
+		मगा_कातविरान->redirect_stdin = stdin_pipe[0];
 	}
-	if (args->redirect_stdout == EXEC_MKPIPE) {
+	if (मगा_कातविरान->redirect_stdout == EXEC_MKPIPE) {
 		if (pipe2(stdout_pipe, O_CLOEXEC) < 0)
 			goto exit;
-		args->redirect_stdout = stdout_pipe[1];
+		मगा_कातविरान->redirect_stdout = stdout_pipe[1];
 	}
-	if (args->redirect_stderr == EXEC_MKPIPE) {
+	if (मगा_कातविरान->redirect_stderr == EXEC_MKPIPE) {
 		if (pipe2(stderr_pipe, O_CLOEXEC) < 0)
 			goto exit;
-		args->redirect_stderr = stderr_pipe[1];
+		मगा_कातविरान->redirect_stderr = stderr_pipe[1];
 	}
 
-	if (args->redirect_stdin == EXEC_DEVNULL)
-		args->redirect_stdin = devnull();
-	if (args->redirect_stdout == EXEC_DEVNULL)
-		args->redirect_stdout = devnull();
-	if (args->redirect_stderr == EXEC_DEVNULL)
-		args->redirect_stderr = devnull();
+	if (मगा_कातविरान->redirect_stdin == EXEC_DEVNULL)
+		मगा_कातविरान->redirect_stdin = devnull();
+	if (मगा_कातविरान->redirect_stdout == EXEC_DEVNULL)
+		मगा_कातविरान->redirect_stdout = devnull();
+	if (मगा_कातविरान->redirect_stderr == EXEC_DEVNULL)
+		मगा_कातविरान->redirect_stderr = devnull();
 
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
@@ -94,23 +94,23 @@ struct exec_result do_exec(struct exec_args *args)
 		goto exit;
 	} else if (res.pid == 0) {
 		/* child */
-		if (args->redirect_stdin != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stdin, STDIN_FILENO) < 0)
+		if (मगा_कातविरान->redirect_stdin != EXEC_NO_REDIRECT &&
+		    dup2(मगा_कातविरान->redirect_stdin, STDIN_FILENO) < 0)
 			goto child_err;
-		if (args->redirect_stdout != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stdout, STDOUT_FILENO) < 0)
+		if (मगा_कातविरान->redirect_stdout != EXEC_NO_REDIRECT &&
+		    dup2(मगा_कातविरान->redirect_stdout, STDOUT_FILENO) < 0)
 			goto child_err;
-		if (args->redirect_stderr != EXEC_NO_REDIRECT &&
-		    dup2(args->redirect_stderr, STDERR_FILENO) < 0)
+		if (मगा_कातविरान->redirect_stderr != EXEC_NO_REDIRECT &&
+		    dup2(मगा_कातविरान->redirect_stderr, STDERR_FILENO) < 0)
 			goto child_err;
-		if (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
+		if (मगा_कातविरान->gid != (gid_t)-1 && setgid(मगा_कातविरान->gid) < 0)
 			goto child_err;
-		if (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
+		if (मगा_कातविरान->uid != (uid_t)-1 && setuid(मगा_कातविरान->uid) < 0)
 			goto child_err;
-		if (args->setsid && setsid() < 0)
+		if (मगा_कातविरान->setsid && setsid() < 0)
 			goto child_err;
 		sigprocmask(SIG_SETMASK, &old, NULL);
-		execvp(cmd, UNCONST(args->argv));
+		execvp(cmd, UNCONST(मगा_कातविरान->argv));
 child_err:
 		saved_errno = errno;
 		write(execpipe[1], &saved_errno, sizeof saved_errno);
@@ -171,9 +171,9 @@ int rc_pipe_command(const char *cmd, int devnullfd)
 {
 	const char *argv[] = { "/bin/sh", "-c", cmd, NULL };
 	struct exec_result res;
-	struct exec_args args = exec_init(argv);
-	args.redirect_stdin = EXEC_MKPIPE;
-	args.redirect_stdout = args.redirect_stderr = devnullfd;
-	res = do_exec(&args);
+	struct exec_मगा_कातविरान मगा_कातविरान = exec_init(argv);
+	मगा_कातविरान.redirect_stdin = EXEC_MKPIPE;
+	मगा_कातविरान.redirect_stdout = मगा_कातविरान.redirect_stderr = devnullfd;
+	res = do_exec(&मगा_कातविरान);
 	return (res.pid > 0) ? res.proc_stdin : -1;
 }

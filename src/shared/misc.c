@@ -54,7 +54,7 @@ extern char **environ;
 bool
 rc_conf_yesno(const char *setting)
 {
-	return rc_yesno(rc_conf_value (setting));
+	return rc_yesno(rc_conf_हालागा (setting));
 }
 
 static const char *const env_allowlist[] = {
@@ -74,10 +74,10 @@ static const char *const usrenv_allowlist[] = {
 };
 
 static bool
-env_allowed(const char *const list[], const char *value)
+env_allowed(const char *const list[], const char *हालागा)
 {
 	for (size_t i = 0; list[i]; i++)
-		if (fnmatch(list[i], value, FNM_NOESCAPE | FNM_PERIOD) == 0)
+		if (fnmatch(list[i], हालागा, FNM_NOESCAPE | FNM_PERIOD) == 0)
 			return true;
 	return false;
 }
@@ -94,7 +94,7 @@ env_filter(void)
 	size_t i = 0;
 
 	/* Add the user defined list of vars */
-	env_allow = rc_stringlist_split(rc_conf_value("rc_env_allow"), " ");
+	env_allow = rc_stringlist_split(rc_conf_हालागा("rc_env_allow"), " ");
 	/*
 	 * If '*' is an entry in rc_env_allow, do nothing as we are to pass
 	 * through all environment variables.
@@ -121,7 +121,7 @@ env_filter(void)
 	env_list = rc_stringlist_new();
 	while (environ && environ[i]) {
 		env = rc_stringlist_add(env_list, environ[i++]);
-		e = strchr(env->value, '=');
+		e = strchr(env->हालागा, '=');
 		if (e)
 			*e = '\0';
 	}
@@ -130,27 +130,27 @@ env_filter(void)
 		RC_STRING *var;
 
 		/* Check the whitelist */
-		if (env_allowed(env_allowlist, env->value))
+		if (env_allowed(env_allowlist, env->हालागा))
 			continue;
-		if (rc_is_user() && env_allowed(usrenv_allowlist, env->value))
+		if (rc_is_user() && env_allowed(usrenv_allowlist, env->हालागा))
 			continue;
 
 		/* Check our user defined list */
 		TAILQ_FOREACH(var, env_allow, entries)
-			if (fnmatch(var->value, env->value, FNM_NOESCAPE | FNM_PERIOD) == 0)
+			if (fnmatch(var->हालागा, env->हालागा, FNM_NOESCAPE | FNM_PERIOD) == 0)
 				goto next;
 
 		/* OK, not allowed! */
-		unsetenv(env->value);
+		unsetenv(env->हालागा);
 next:;
 	}
 
 	/* Now add anything missing from the profile */
 	TAILQ_FOREACH(env, profile, entries) {
-		e = strchr(env->value, '=');
+		e = strchr(env->हालागा, '=');
 		*e = '\0';
-		if (!getenv(env->value))
-			setenv(env->value, e + 1, 1);
+		if (!getenv(env->हालागा))
+			setenv(env->हालागा, e + 1, 1);
 	}
 
 	rc_stringlist_free(env_list);
@@ -164,7 +164,7 @@ default_runlevel(void)
 	char *runlevel = rc_runlevel_get();
 
 	if (!runlevel)
-		runlevel = xstrdup(rc_conf_value("rc_default_runlevel"));
+		runlevel = xstrdup(rc_conf_हालागा("rc_default_runlevel"));
 	if (!runlevel || !*runlevel) {
 		free(runlevel);
 		runlevel = xstrdup(RC_LEVEL_DEFAULT);

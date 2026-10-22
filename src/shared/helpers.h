@@ -59,10 +59,10 @@
 
 RC_UNUSED static void *xmalloc (size_t size)
 {
-	void *value = malloc(size);
+	void *हालागा = malloc(size);
 
-	if (value)
-		return (value);
+	if (हालागा)
+		return (हालागा);
 
 	ERRX;
 	/* NOTREACHED */
@@ -70,10 +70,10 @@ RC_UNUSED static void *xmalloc (size_t size)
 
 RC_UNUSED static void *xrealloc(void *ptr, size_t size)
 {
-	void *value = realloc(ptr, size);
+	void *हालागा = realloc(ptr, size);
 
-	if (value)
-		return (value);
+	if (हालागा)
+		return (हालागा);
 
 	ERRX;
 	/* NOTREACHED */
@@ -81,15 +81,15 @@ RC_UNUSED static void *xrealloc(void *ptr, size_t size)
 
 RC_UNUSED static char *xstrdup(const char *str)
 {
-	char *value;
+	char *हालागा;
 
 	if (!str)
 		return (NULL);
 
-	value = strdup(str);
+	हालागा = strdup(str);
 
-	if (value)
-		return (value);
+	if (हालागा)
+		return (हालागा);
 
 	ERRX;
 	/* NOTREACHED */

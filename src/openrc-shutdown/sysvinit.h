@@ -18,6 +18,6 @@
 #define _RC_SYSVINIT_H
 
 void sysvinit_runlevel(char rl);
-void sysvinit_setenv(const char *name, const char *value);
+void sysvinit_setenv(const char *name, const char *हालागा);
 
 #endif

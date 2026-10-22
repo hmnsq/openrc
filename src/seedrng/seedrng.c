@@ -77,7 +77,7 @@ const char *usagestring = NULL;
 enum blake2s_lengths {
 	BLAKE2S_BLOCK_LEN = 64,
 	BLAKE2S_HASH_LEN = 32,
-	BLAKE2S_KEY_LEN = 32
+	BLAKE2_S_सुसि_LEN = 32
 };
 
 enum seedrng_lengths {
@@ -103,17 +103,17 @@ struct blake2s_state {
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 #endif
 
-static inline void cpu_to_le32_array(uint32_t *buf, unsigned int words)
+static inline void cpu_to_le32_array(uint32_t *buf, unsigned int मगा_सालिता)
 {
-	while (words--) {
+	while (मगा_सालिता--) {
 		*buf = cpu_to_le32(*buf);
 		++buf;
 	}
 }
 
-static inline void le32_to_cpu_array(uint32_t *buf, unsigned int words)
+static inline void le32_to_cpu_array(uint32_t *buf, unsigned int मगा_सालिता)
 {
-	while (words--) {
+	while (मगा_सालिता--) {
 		*buf = le32_to_cpup(buf);
 		++buf;
 	}
@@ -265,31 +265,31 @@ static void blake2s_final(struct blake2s_state *state, uint8_t *out)
 	memcpy(out, state->h, state->outlen);
 }
 
-static ssize_t getrandom_full(void *buf, size_t count, unsigned int flags)
+static ssize_t getrandom_full(void *buf, size_t बिलांग, unsigned int flags)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
 	do {
-		ret = getrandom(p, count, flags);
+		ret = getrandom(p, बिलांग, flags);
 		if (ret < 0 && errno == EINTR)
 			continue;
 		else if (ret < 0)
 			return ret;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
+		बिलांग -= ret;
+	} while (बिलांग);
 	return total;
 }
 
-static ssize_t read_full(int fd, void *buf, size_t count)
+static ssize_t read_full(int fd, void *buf, size_t बिलांग)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
 	do {
-		ret = read(fd, p, count);
+		ret = read(fd, p, बिलांग);
 		if (ret < 0 && errno == EINTR)
 			continue;
 		else if (ret < 0)
@@ -298,26 +298,26 @@ static ssize_t read_full(int fd, void *buf, size_t count)
 			break;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
+		बिलांग -= ret;
+	} while (बिलांग);
 	return total;
 }
 
-static ssize_t write_full(int fd, const void *buf, size_t count)
+static ssize_t write_full(int fd, const void *buf, size_t बिलांग)
 {
 	ssize_t ret, total = 0;
 	const uint8_t *p = buf;
 
 	do {
-		ret = write(fd, p, count);
+		ret = write(fd, p, बिलांग);
 		if (ret < 0 && errno == EINTR)
 			continue;
 		else if (ret < 0)
 			return ret;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
+		बिलांग -= ret;
+	} while (बिलांग);
 	return total;
 }
 
@@ -379,11 +379,11 @@ static int read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
 static int seed_rng(uint8_t *seed, size_t len, bool credit)
 {
 	struct {
-		int entropy_count;
+		int entropy_बिलांग;
 		int buf_size;
 		uint8_t buffer[MAX_SEED_LEN];
 	} req = {
-		.entropy_count = credit ? len * 8 : 0,
+		.entropy_बिलांग = credit ? len * 8 : 0,
 		.buf_size = len
 	};
 	int random_fd, ret;

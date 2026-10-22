@@ -82,14 +82,14 @@ int main(void) {
 
 	for (;;) {
 		struct init_request req;
-		ssize_t count = read(fifo, &req, sizeof(req));
+		ssize_t बिलांग = read(fifo, &req, sizeof(req));
 
-		if (count == -1) {
+		if (बिलांग == -1) {
 			syslog(LOG_ERR, "read: %s", strerror(errno));
 			continue;
 		}
 
-		if (count != sizeof(req)) {
+		if (बिलांग != sizeof(req)) {
 			syslog(LOG_ERR, "read: short count");
 			continue;
 		}

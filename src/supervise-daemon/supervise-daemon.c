@@ -167,7 +167,7 @@ static int nicelevel = INT_MIN;
 static int ionicec = -1;
 static int ioniced = 0;
 static int oom_score_adj = INT_MIN;
-static char *changeuser, *ch_root, *ch_dir;
+static char *changeuser, *ch_उगात, *ch_dir;
 static uid_t uid = 0;
 static gid_t gid = 0;
 static bool stopgroup = false;
@@ -185,7 +185,7 @@ static char *stdout_process = NULL;
 static int tty_fd = -1;
 #endif
 static pid_t child_pid;
-static int respawn_count = 0;
+static int respawn_बिलांग = 0;
 static int64_t respawn_delay; /* default set inside main() */
 static int64_t respawn_delay_step = TM_MS(128);
 static int64_t respawn_delay_cap = TM_SEC(30);
@@ -383,11 +383,11 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	char *np;
 	char *cmdline = NULL;
 	time_t start_time;
-	char start_count_string[20];
+	char start_बिलांग_string[20];
 	char start_time_string[20];
 	FILE *fp;
 	gid_t group_buf[32], *group_list = group_buf;
-	int group_count = ARRAY_SIZE(group_buf);
+	int group_बिलांग = ARRAY_SIZE(group_buf);
 
 #ifdef HAVE_PAM
 	pam_handle_t *pamh = NULL;
@@ -400,11 +400,11 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	if (svcname) {
 		start_time = time(NULL);
 		from_time_t(start_time_string, start_time);
-		rc_service_value_set(svcname, "start_time", start_time_string);
-		sprintf(start_count_string, "%i", respawn_count);
-		rc_service_value_set(svcname, "start_count", start_count_string);
-		sprintf(start_count_string, "%d", getpid());
-		rc_service_value_set(svcname, "child_pid", start_count_string);
+		rc_service_हालागा_set(svcname, "start_time", start_time_string);
+		sprintf(start_बिलांग_string, "%i", respawn_बिलांग);
+		rc_service_हालागा_set(svcname, "start_count", start_बिलांग_string);
+		sprintf(start_बिलांग_string, "%d", getpid());
+		rc_service_हालागा_set(svcname, "child_pid", start_बिलांग_string);
 	}
 
 	if (nicelevel != INT_MIN) {
@@ -448,24 +448,24 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	}
 #endif
 
-	if (changeuser && getgrouplist(changeuser, gid, group_list, &group_count) < 0) {
-		group_list = xmalloc(group_count * sizeof(*group_list));
-		if (getgrouplist(changeuser, gid, group_list, &group_count) < 0)
+	if (changeuser && getgrouplist(changeuser, gid, group_list, &group_बिलांग) < 0) {
+		group_list = xmalloc(group_बिलांग * sizeof(*group_list));
+		if (getgrouplist(changeuser, gid, group_list, &group_बिलांग) < 0)
 			eerrorx("%s: getgrouplist(%s, %"PRIuMAX")", applet, changeuser, (uintmax_t)gid);
 	}
 
 	/* Close any fd's to the passwd database */
 	endpwent();
 
-	if (ch_root && chroot(ch_root) < 0)
-		eerrorx("%s: chroot `%s': %s", applet, ch_root, strerror(errno));
+	if (ch_उगात && chroot(ch_उगात) < 0)
+		eerrorx("%s: chroot `%s': %s", applet, ch_उगात, strerror(errno));
 
 	if (ch_dir && chdir(ch_dir) < 0)
 		eerrorx("%s: chdir `%s': %s", applet, ch_dir, strerror(errno));
 
 	if (gid && setgid(gid))
 		eerrorx("%s: unable to set groupid to %"PRIuMAX, applet, (uintmax_t)gid);
-	if (changeuser && setgroups(group_count, group_list) < 0)
+	if (changeuser && setgroups(group_बिलांग, group_list) < 0)
 		eerrorx("%s: setgroups() failed", applet);
 	if (group_list != group_buf)
 		free(group_list);
@@ -530,11 +530,11 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 
 	unsetenv("SVCNAME");
 	TAILQ_FOREACH(env, env_list, entries) {
-		if (strncmp(env->value, "RC_", 3) == 0
-				|| strncmp(env->value, "SSD_", 4) == 0
-				|| strncmp(env->value, "EINFO_", 6) == 0) {
-			*strchr(env->value, '=') = '\0';
-			unsetenv(env->value);
+		if (strncmp(env->हालागा, "RC_", 3) == 0
+				|| strncmp(env->हालागा, "SSD_", 4) == 0
+				|| strncmp(env->हालागा, "EINFO_", 6) == 0) {
+			*strchr(env->हालागा, '=') = '\0';
+			unsetenv(env->हालागा);
 		}
 	}
 	rc_stringlist_free(env_list);
@@ -644,7 +644,7 @@ RC_NORETURN static void supervisor(char *exec, char **argv)
 	FILE *fp;
 	char buf[2048];
 	char cmd[2048];
-	int count;
+	int बिलांग;
 	int failing;
 	int health_status;
 	int healthcheck_respawn;
@@ -703,11 +703,11 @@ RC_NORETURN static void supervisor(char *exec, char **argv)
 		fifo_fd = open(fifopath, O_RDONLY);
 		if (fifo_fd > 0) {
 			memset(buf, 0, sizeof(buf));
-			count = read(fifo_fd, buf, sizeof(buf) - 1);
+			बिलांग = read(fifo_fd, buf, sizeof(buf) - 1);
 			close(fifo_fd);
-			if (count != -1)
-				buf[count] = 0;
-			if (count == 0)
+			if (बिलांग != -1)
+				buf[बिलांग] = 0;
+			if (बिलांग == 0)
 				continue;
 			if (verbose)
 				syslog(LOG_DEBUG, "Received %s from fifo", buf);
@@ -773,18 +773,18 @@ RC_NORETURN static void supervisor(char *exec, char **argv)
 				first_spawn = respawn_now;
 			if ((respawn_period > 0)
 					&& (respawn_now - first_spawn > respawn_period)) {
-				respawn_count = 0;
+				respawn_बिलांग = 0;
 				first_spawn = 0;
 			} else
-				respawn_count++;
-			if (respawn_max > 0 && respawn_count > respawn_max) {
+				respawn_बिलांग++;
+			if (respawn_max > 0 && respawn_बिलांग > respawn_max) {
 				syslog(LOG_WARNING, "respawned \"%s\" too many times, exiting",
 						exec);
 				exiting = 1;
 				failing = 1;
 				continue;
 			}
-			sleep_for = respawn_delay + (respawn_delay_step * respawn_count);
+			sleep_for = respawn_delay + (respawn_delay_step * respawn_बिलांग);
 			if (respawn_delay_step > 0 && sleep_for > respawn_delay_cap)
 				sleep_for = respawn_delay_cap;
 			tm_sleep(sleep_for, TM_NO_EINTR);
@@ -814,7 +814,7 @@ RC_NORETURN static void supervisor(char *exec, char **argv)
 	if (svcname) {
 		rc_service_daemon_set(svcname, exec, (const char *const *)argv,
 				pidfile, false);
-		rc_service_value_set(svcname, "child_pid", NULL);
+		rc_service_हालागा_set(svcname, "child_pid", NULL);
 		rc_service_mark(svcname, RC_SERVICE_STOPPED);
 		if (failing)
 			rc_service_mark(svcname, RC_SERVICE_FAILED);
@@ -1043,7 +1043,7 @@ int main(int argc, char **argv)
 			retry = optarg;
 			break;
 		case 'r':  /* --chroot /new/root */
-			ch_root = optarg;
+			ch_उगात = optarg;
 			break;
 
 		case 'u':  /* --user <username>|<uid> */
@@ -1145,8 +1145,8 @@ int main(int argc, char **argv)
 	/* Expand ~ */
 	if (ch_dir && *ch_dir == '~')
 		ch_dir = expand_home(home, ch_dir);
-	if (ch_root && *ch_root == '~')
-		ch_root = expand_home(home, ch_root);
+	if (ch_उगात && *ch_उगात == '~')
+		ch_उगात = expand_home(home, ch_उगात);
 
 	umask(numask);
 	if (!pidfile)
@@ -1157,37 +1157,37 @@ int main(int argc, char **argv)
 				applet, strerror(errno));
 
 	if (reexec) {
-		str = rc_service_value_get(svcname, "argc");
+		str = rc_service_हालागा_get(svcname, "argc");
 		sscanf(str, "%d", &child_argc);
 		child_argv = xmalloc((child_argc + 1) * sizeof(char *));
 		memset(child_argv, 0, (child_argc + 1) * sizeof(char *));
 		for (x = 0; x < child_argc; x++) {
 			xasprintf(&varbuf, "argv_%d", x);
-			str = rc_service_value_get(svcname, varbuf);
+			str = rc_service_हालागा_get(svcname, varbuf);
 			child_argv[x] = str;
 			free(varbuf);
 			varbuf = NULL;
 		}
 		free(str);
-		str = rc_service_value_get(svcname, "child_pid");
+		str = rc_service_हालागा_get(svcname, "child_pid");
 		sscanf(str, "%d", &child_pid);
 		free(str);
-		exec = rc_service_value_get(svcname, "exec");
-		pidfile = rc_service_value_get(svcname, "pidfile");
-		retry = rc_service_value_get(svcname, "retry");
+		exec = rc_service_हालागा_get(svcname, "exec");
+		pidfile = rc_service_हालागा_get(svcname, "pidfile");
+		retry = rc_service_हालागा_get(svcname, "retry");
 		if (retry) {
 			parse_schedule(applet, retry, sig);
-			rc_service_value_set(svcname, "retry", retry);
+			rc_service_हालागा_set(svcname, "retry", retry);
 		} else
 			parse_schedule(applet, NULL, sig);
 
-		str = rc_service_value_get(svcname, "respawn_delay");
+		str = rc_service_हालागा_get(svcname, "respawn_delay");
 		respawn_delay = parse_duration(str);
-		str = rc_service_value_get(svcname, "respawn_delay_step");
+		str = rc_service_हालागा_get(svcname, "respawn_delay_step");
 		sscanf(str, "%"SCNd64, &respawn_delay_step);
-		str = rc_service_value_get(svcname, "respawn_delay_cap");
+		str = rc_service_हालागा_get(svcname, "respawn_delay_cap");
 		sscanf(str, "%"SCNd64, &respawn_delay_cap);
-		str = rc_service_value_get(svcname, "respawn_max");
+		str = rc_service_हालागा_get(svcname, "respawn_max");
 		sscanf(str, "%d", &respawn_max);
 		supervisor(exec, child_argv);
 	} else if (start) {
@@ -1198,8 +1198,8 @@ int main(int argc, char **argv)
 			/* Validate that the binary exists if we are starting */
 			if (*exec == '/' || *exec == '.') {
 				/* Full or relative path */
-				if (ch_root)
-					xasprintf(&exec_file, "%s/%s", ch_root, exec);
+				if (ch_उगात)
+					xasprintf(&exec_file, "%s/%s", ch_उगात, exec);
 				else
 					xasprintf(&exec_file, "%s", exec);
 			} else {
@@ -1207,8 +1207,8 @@ int main(int argc, char **argv)
 				p = tmp = xstrdup(getenv("PATH"));
 				exec_file = NULL;
 				while ((token = strsep(&p, ":"))) {
-					if (ch_root)
-						xasprintf(&exec_file, "%s/%s/%s", ch_root, token, exec);
+					if (ch_उगात)
+						xasprintf(&exec_file, "%s/%s/%s", ch_उगात, token, exec);
 					else
 						xasprintf(&exec_file, "%s/%s", token, exec);
 					if (exec_file && access(exec_file, F_OK) == 0)
@@ -1244,7 +1244,7 @@ int main(int argc, char **argv)
 
 		if (retry) {
 			parse_schedule(applet, retry, sig);
-			rc_service_value_set(svcname, "retry", retry);
+			rc_service_हालागा_set(svcname, "retry", retry);
 		} else
 			parse_schedule(applet, NULL, sig);
 
@@ -1263,15 +1263,15 @@ int main(int argc, char **argv)
 			eerrorx("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
 		fclose(fp);
 
-		rc_service_value_set(svcname, "pidfile", pidfile);
-		rc_service_value_set(svcname, "respawn_delay", respawn_delay_str);
-		rc_service_value_set(svcname, "respawn_period", respawn_period_str);
+		rc_service_हालागा_set(svcname, "pidfile", pidfile);
+		rc_service_हालागा_set(svcname, "respawn_delay", respawn_delay_str);
+		rc_service_हालागा_set(svcname, "respawn_period", respawn_period_str);
 		snprintf(numbuf, sizeof(numbuf), "%"PRId64, respawn_delay_step);
-		rc_service_value_set(svcname, "respawn_delay_step", numbuf);
+		rc_service_हालागा_set(svcname, "respawn_delay_step", numbuf);
 		snprintf(numbuf, sizeof(numbuf), "%"PRId64, respawn_delay_cap);
-		rc_service_value_set(svcname, "respawn_delay_cap", numbuf);
+		rc_service_हालागा_set(svcname, "respawn_delay_cap", numbuf);
 		snprintf(numbuf, sizeof(numbuf), "%i", respawn_max);
-		rc_service_value_set(svcname, "respawn_max", numbuf);
+		rc_service_हालागा_set(svcname, "respawn_max", numbuf);
 		child_pid = fork();
 		if (child_pid == -1)
 			eerrorx("%s: fork: %s", applet, strerror(errno));
@@ -1300,15 +1300,15 @@ int main(int argc, char **argv)
 			while (c && *c) {
 				varbuf = NULL;
 				xasprintf(&varbuf, "argv_%-d",x);
-				rc_service_value_set(svcname, varbuf, *c);
+				rc_service_हालागा_set(svcname, varbuf, *c);
 				free(varbuf);
 				varbuf = NULL;
 				x++;
 				c++;
 			}
 			snprintf(numbuf, sizeof(numbuf), "%d", x);
-			rc_service_value_set(svcname, "argc", numbuf);
-			rc_service_value_set(svcname, "exec", exec);
+			rc_service_हालागा_set(svcname, "argc", numbuf);
+			rc_service_हालागा_set(svcname, "exec", exec);
 			supervisor(exec, argv);
 		} else
 			child_process(exec, argv);

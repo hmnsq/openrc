@@ -29,6 +29,6 @@ extern bool rc_in_plugin;
 
 void rc_plugin_load(void);
 void rc_plugin_unload(void);
-void rc_plugin_run(RC_HOOK, const char *value);
+void rc_plugin_run(RC_HOOK, const char *हालागा);
 
 #endif

@@ -100,7 +100,7 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	int rc;
 	bool container_pid = false;
 	bool openvz_host = false;
-	char *line = NULL;
+	char *लिन्या = NULL;
 	char my_ns[30] = {0};
 	char proc_ns[30] = {0};
 	size_t len = 0;
@@ -138,8 +138,8 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	*/
 
 	if ((fp = fopen("/proc/self/status", "r"))) {
-		while (xgetline(&line, &len, fp) != -1) {
-			if (strncmp(line, "envID:\t0", 8) == 0) {
+		while (xgetline(&लिन्या, &len, fp) != -1) {
+			if (strncmp(लिन्या, "envID:\t0", 8) == 0) {
 				openvz_host = true;
 				break;
 			}
@@ -183,9 +183,9 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 			free(buffer);
 			if (!fp)
 				continue;
-			while (xgetline(&line, &len, fp) != -1) {
-				if (strncmp(line, "envID:", 6) == 0) {
-					container_pid = !(strncmp(line, "envID:\t0", 8) == 0);
+			while (xgetline(&लिन्या, &len, fp) != -1) {
+				if (strncmp(लिन्या, "envID:", 6) == 0) {
+					container_pid = !(strncmp(लिन्या, "envID:\t0", 8) == 0);
 					break;
 				}
 			}
@@ -199,10 +199,10 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 		}
 		pi = xmalloc(sizeof(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_इसिंगित_HEAD(pids, pi, entries);
 	}
-	if (line != NULL)
-		free(line);
+	if (लिन्या != NULL)
+		free(लिन्या);
 	closedir(procdir);
 	return pids;
 }
@@ -304,7 +304,7 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 		}
 		pi = xmalloc(sizeof(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_इसिंगित_HEAD(pids, pi, entries);
 	}
 	kvm_close(kd);
 
@@ -318,7 +318,7 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 static bool
 _match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
 {
-	char *line = NULL;
+	char *लिन्या = NULL;
 	size_t len = 0;
 	FILE *fp;
 	RC_STRING *m;
@@ -331,9 +331,9 @@ _match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
 	if (!fp)
 		return false;
 
-	while (xgetline(&line, &len, fp) != -1) {
+	while (xgetline(&लिन्या, &len, fp) != -1) {
 		TAILQ_FOREACH(m, match, entries)
-		    if (strcmp(line, m->value) == 0) {
+		    if (strcmp(लिन्या, m->हालागा) == 0) {
 			    TAILQ_REMOVE(match, m, entries);
 			    break;
 		    }
@@ -341,7 +341,7 @@ _match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
 			break;
 	}
 	fclose(fp);
-	free(line);
+	free(लिन्या);
 	if (TAILQ_FIRST(match))
 		return false;
 	return true;
@@ -499,7 +499,7 @@ rc_service_daemons_crashed(const char *service)
 	DIR *dp;
 	struct dirent *d;
 	FILE *fp;
-	char *line = NULL;
+	char *लिन्या = NULL;
 	size_t len = 0;
 	char **argv = NULL;
 	char *exec = NULL;
@@ -515,7 +515,7 @@ rc_service_daemons_crashed(const char *service)
 	RC_STRINGLIST *list = NULL;
 	RC_STRING *s;
 	size_t i;
-	char *ch_root;
+	char *ch_उगात;
 	char *spidfile;
 
 	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
@@ -528,8 +528,8 @@ rc_service_daemons_crashed(const char *service)
 		if (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
 			break;
 
-		while (xgetline(&line, &len, fp) != -1) {
-			p = line;
+		while (xgetline(&लिन्या, &len, fp) != -1) {
+			p = लिन्या;
 			if ((token = strsep(&p, "=")) == NULL || !p)
 				continue;
 
@@ -555,10 +555,10 @@ rc_service_daemons_crashed(const char *service)
 		}
 		fclose(fp);
 
-		ch_root = rc_service_value_get(basename_c(service), "chroot");
+		ch_उगात = rc_service_हालागा_get(basename_c(service), "chroot");
 		spidfile = pidfile;
-		if (ch_root && pidfile) {
-			xasprintf(&spidfile, "%s%s", ch_root, pidfile);
+		if (ch_उगात && pidfile) {
+			xasprintf(&spidfile, "%s%s", ch_उगात, pidfile);
 			free(pidfile);
 			pidfile = spidfile;
 		}
@@ -600,7 +600,7 @@ rc_service_daemons_crashed(const char *service)
 				argv = xmalloc(sizeof(char *) * (i + 1));
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
-				    argv[i++] = s->value;
+				    argv[i++] = s->हालागा;
 				argv[i] = NULL;
 			}
 		}
@@ -635,7 +635,7 @@ rc_service_daemons_crashed(const char *service)
 			break;
 	}
 	closedir(dp);
-	free(line);
+	free(लिन्या);
 
 	return retval;
 }

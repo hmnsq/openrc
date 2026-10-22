@@ -74,7 +74,7 @@ void sysvinit_runlevel(char rl)
 /*
  *	Set environment variables in the init process.
  */
-void sysvinit_setenv(const char *name, const char *value)
+void sysvinit_setenv(const char *name, const char *हालागा)
 {
 	struct init_request	request;
 	size_t nl;
@@ -84,8 +84,8 @@ void sysvinit_setenv(const char *name, const char *value)
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
-		vl = strlen(value);
+	if (हालागा)
+		vl = strlen(हालागा);
 else
 		vl = 0;
 
@@ -93,9 +93,9 @@ else
 		return;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	if (हालागा) {
 		request.i.data[nl] = '=';
-		memcpy(request.i.data + nl + 1, value, vl);
+		memcpy(request.i.data + nl + 1, हालागा, vl);
 	}
 	sysvinit_send_cmd(&request);
 	return;

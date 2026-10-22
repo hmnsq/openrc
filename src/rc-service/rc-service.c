@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 				return EXIT_FAILURE;
 			rc_stringlist_sort(&list);
 			TAILQ_FOREACH(s, list, entries)
-			    printf("%s\n", s->value);
+			    printf("%s\n", s->हालागा);
 			rc_stringlist_free(list);
 			return EXIT_SUCCESS;
 			/* NOTREACHED */

@@ -182,7 +182,7 @@ const char *usagestring = NULL;
 
 static char **nav;
 
-static char *changeuser, *ch_root, *ch_dir;
+static char *changeuser, *ch_उगात, *ch_dir;
 
 extern char **environ;
 
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 	struct passwd *pw;
 	struct group *gr;
 	bool stopgroup = false;
-	char *line = NULL;
+	char *लिन्या = NULL;
 	FILE *fp;
 	size_t len;
 	mode_t numask = 022;
@@ -594,7 +594,7 @@ int main(int argc, char **argv)
 			break;
 
 		case 'r':  /* --chroot /new/root */
-			ch_root = optarg;
+			ch_उगात = optarg;
 			break;
 
 		case 'a': /* --startas <name> */
@@ -723,8 +723,8 @@ int main(int argc, char **argv)
 	/* Expand ~ */
 	if (ch_dir && *ch_dir == '~')
 		ch_dir = expand_home(home, ch_dir);
-	if (ch_root && *ch_root == '~')
-		ch_root = expand_home(home, ch_root);
+	if (ch_उगात && *ch_उगात == '~')
+		ch_उगात = expand_home(home, ch_उगात);
 	if (exec) {
 		if (*exec == '~')
 			exec = expand_home(home, exec);
@@ -732,8 +732,8 @@ int main(int argc, char **argv)
 		/* Validate that the binary exists if we are starting */
 		if (*exec == '/' || *exec == '.') {
 			/* Full or relative path */
-			if (ch_root)
-				xasprintf(&exec_file, "%s/%s", ch_root, exec);
+			if (ch_उगात)
+				xasprintf(&exec_file, "%s/%s", ch_उगात, exec);
 			else
 				xasprintf(&exec_file, "%s", exec);
 		} else {
@@ -741,8 +741,8 @@ int main(int argc, char **argv)
 			p = tmp = xstrdup(getenv("PATH"));
 			exec_file = NULL;
 			while ((token = strsep(&p, ":"))) {
-				if (ch_root)
-					xasprintf(&exec_file, "%s/%s/%s", ch_root, token, exec);
+				if (ch_उगात)
+					xasprintf(&exec_file, "%s/%s/%s", ch_उगात, token, exec);
 				else
 					xasprintf(&exec_file, "%s/%s", token, exec);
 				if (exec_file && access(exec_file, F_OK) == 0)
@@ -769,13 +769,13 @@ int main(int argc, char **argv)
 	if (interpreted && !pidfile) {
 		fp = fopen(exec_file, "r");
 		if (fp) {
-			line = NULL;
-			if (xgetline(&line, &size, fp) == -1)
+			लिन्या = NULL;
+			if (xgetline(&लिन्या, &size, fp) == -1)
 				eerrorx("%s: %s", applet, strerror(errno));
-			p = line;
+			p = लिन्या;
 			fclose(fp);
-			if (p != NULL && line[0] == '#' && line[1] == '!') {
-				p = line + 2;
+			if (p != NULL && लिन्या[0] == '#' && लिन्या[1] == '!') {
+				p = लिन्या + 2;
 				/* Strip leading spaces */
 				while (*p == ' ' || *p == '\t')
 					p++;
@@ -864,8 +864,8 @@ int main(int argc, char **argv)
 			einfo("as user id %"PRIuMAX, (uintmax_t)uid);
 		if (gid != 0)
 			einfo("as group id %"PRIuMAX, (uintmax_t)gid);
-		if (ch_root)
-			einfo("in root `%s'", ch_root);
+		if (ch_उगात)
+			einfo("in root `%s'", ch_उगात);
 		if (ch_dir)
 			einfo("in dir `%s'", ch_dir);
 		if (nicelevel != 0)
@@ -896,7 +896,7 @@ int main(int argc, char **argv)
 	/* Child process - lets go! */
 	if (pid == 0) {
 		gid_t group_buf[32], *group_list = group_buf;
-		int group_count = ARRAY_SIZE(group_buf);
+		int group_बिलांग = ARRAY_SIZE(group_buf);
 		pid_t mypid = getpid();
 		close(pipefd[0]); /* Close the read end of the pipe. */
 		umask(numask);
@@ -954,18 +954,18 @@ int main(int argc, char **argv)
 					applet, pam_strerror(pamh, pamr));
 		}
 #endif
-		if (changeuser && getgrouplist(changeuser, gid, group_list, &group_count) < 0) {
-			group_list = xmalloc(group_count * sizeof(*group_list));
-			if (getgrouplist(changeuser, gid, group_list, &group_count) < 0)
+		if (changeuser && getgrouplist(changeuser, gid, group_list, &group_बिलांग) < 0) {
+			group_list = xmalloc(group_बिलांग * sizeof(*group_list));
+			if (getgrouplist(changeuser, gid, group_list, &group_बिलांग) < 0)
 				eerrorx("%s: getgrouplist(%s, %"PRIuMAX")", applet, changeuser, (uintmax_t)gid);
 		}
 
 		/* Close any fd's to the passwd database */
 		endpwent();
 
-		if (ch_root && chroot(ch_root) < 0)
+		if (ch_उगात && chroot(ch_उगात) < 0)
 			eerrorx("%s: chroot `%s': %s",
-			    applet, ch_root, strerror(errno));
+			    applet, ch_उगात, strerror(errno));
 
 		if (ch_dir && chdir(ch_dir) < 0)
 			eerrorx("%s: chdir `%s': %s",
@@ -984,7 +984,7 @@ int main(int argc, char **argv)
 		if (gid && setgid(gid))
 			eerrorx("%s: unable to set groupid to %"PRIuMAX,
 			    applet, (uintmax_t)gid);
-		if (changeuser && setgroups(group_count, group_list))
+		if (changeuser && setgroups(group_बिलांग, group_list))
 			eerrorx("%s: setgroups() failed", applet);
 		if (group_list != group_buf)
 			free(group_list);
@@ -1050,11 +1050,11 @@ int main(int argc, char **argv)
 
 		unsetenv("SVCNAME");
 		TAILQ_FOREACH(env, env_list, entries) {
-			if (strncmp(env->value, "RC_", 3) == 0
-					|| strncmp(env->value, "SSD_", 4) == 0
-					|| strncmp(env->value, "EINFO_", 6) == 0) {
-				*strchr(env->value, '=') = '\0';
-				unsetenv(env->value);
+			if (strncmp(env->हालागा, "RC_", 3) == 0
+					|| strncmp(env->हालागा, "SSD_", 4) == 0
+					|| strncmp(env->हालागा, "EINFO_", 6) == 0) {
+				*strchr(env->हालागा, '=') = '\0';
+				unsetenv(env->हालागा);
 			}
 		}
 		rc_stringlist_free(env_list);
@@ -1233,7 +1233,7 @@ int main(int argc, char **argv)
 	   We do this as some badly written daemons fork and then barf */
 	if (start_wait == 0 &&
 	    ((p = getenv("SSD_STARTWAIT")) ||
-		(p = rc_conf_value("rc_start_wait"))))
+		(p = rc_conf_हालागा("rc_start_wait"))))
 	{
 		if (sscanf(p, "%u", &start_wait) != 1)
 			start_wait = 0;

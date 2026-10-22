@@ -142,12 +142,12 @@ struct {								\
 	(head)->slh_first = SLIST_END(head);				\
 } while (/*CONSTCOND*/0)
 
-#define	SLIST_INSERT_AFTER(slistelm, elm, field) do {			\
+#define	SLIST_इसिंगित_AFTER(slistelm, elm, field) do {			\
 	(elm)->field.sle_next = (slistelm)->field.sle_next;		\
 	(slistelm)->field.sle_next = (elm);				\
 } while (/*CONSTCOND*/0)
 
-#define	SLIST_INSERT_HEAD(head, elm, field) do {			\
+#define	SLIST_इसिंगित_HEAD(head, elm, field) do {			\
 	(elm)->field.sle_next = (head)->slh_first;			\
 	(head)->slh_first = (elm);					\
 } while (/*CONSTCOND*/0)
@@ -223,7 +223,7 @@ struct {								\
  * List functions.
  */
 #if defined(QUEUEDEBUG)
-#define	QUEUEDEBUG_LIST_INSERT_HEAD(head, elm, field)			\
+#define	QUEUEDEBUG_LIST_इसिंगित_HEAD(head, elm, field)			\
 	if ((head)->lh_first &&						\
 	    (head)->lh_first->field.le_prev != &(head)->lh_first)	\
 		QUEUEDEBUG_ABORT("LIST_INSERT_HEAD %p %s:%d", (head),	\
@@ -241,7 +241,7 @@ struct {								\
 	(elm)->field.le_next = (void *)1L;				\
 	(elm)->field.le_prev = (void *)1L;
 #else
-#define	QUEUEDEBUG_LIST_INSERT_HEAD(head, elm, field)
+#define	QUEUEDEBUG_LIST_इसिंगित_HEAD(head, elm, field)
 #define	QUEUEDEBUG_LIST_OP(elm, field)
 #define	QUEUEDEBUG_LIST_POSTREMOVE(elm, field)
 #endif
@@ -250,7 +250,7 @@ struct {								\
 	(head)->lh_first = LIST_END(head);				\
 } while (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_AFTER(listelm, elm, field) do {			\
+#define	LIST_इसिंगित_AFTER(listelm, elm, field) do {			\
 	QUEUEDEBUG_LIST_OP((listelm), field)				\
 	if (((elm)->field.le_next = (listelm)->field.le_next) != 	\
 	    LIST_END(head))						\
@@ -260,7 +260,7 @@ struct {								\
 	(elm)->field.le_prev = &(listelm)->field.le_next;		\
 } while (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_BEFORE(listelm, elm, field) do {			\
+#define	LIST_इसिंगित_BEFORE(listelm, elm, field) do {			\
 	QUEUEDEBUG_LIST_OP((listelm), field)				\
 	(elm)->field.le_prev = (listelm)->field.le_prev;		\
 	(elm)->field.le_next = (listelm);				\
@@ -268,8 +268,8 @@ struct {								\
 	(listelm)->field.le_prev = &(elm)->field.le_next;		\
 } while (/*CONSTCOND*/0)
 
-#define	LIST_INSERT_HEAD(head, elm, field) do {				\
-	QUEUEDEBUG_LIST_INSERT_HEAD((head), (elm), field)		\
+#define	LIST_इसिंगित_HEAD(head, elm, field) do {				\
+	QUEUEDEBUG_LIST_इसिंगित_HEAD((head), (elm), field)		\
 	if (((elm)->field.le_next = (head)->lh_first) != LIST_END(head))\
 		(head)->lh_first->field.le_prev = &(elm)->field.le_next;\
 	(head)->lh_first = (elm);					\
@@ -338,19 +338,19 @@ struct {								\
 	(head)->sqh_last = &(head)->sqh_first;				\
 } while (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_HEAD(head, elm, field) do {			\
+#define	SIMPLEQ_इसिंगित_HEAD(head, elm, field) do {			\
 	if (((elm)->field.sqe_next = (head)->sqh_first) == NULL)	\
 		(head)->sqh_last = &(elm)->field.sqe_next;		\
 	(head)->sqh_first = (elm);					\
 } while (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_TAIL(head, elm, field) do {			\
+#define	SIMPLEQ_इसिंगित_TAIL(head, elm, field) do {			\
 	(elm)->field.sqe_next = NULL;					\
 	*(head)->sqh_last = (elm);					\
 	(head)->sqh_last = &(elm)->field.sqe_next;			\
 } while (/*CONSTCOND*/0)
 
-#define	SIMPLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
+#define	SIMPLEQ_इसिंगित_AFTER(head, listelm, elm, field) do {		\
 	if (((elm)->field.sqe_next = (listelm)->field.sqe_next) == NULL)\
 		(head)->sqh_last = &(elm)->field.sqe_next;		\
 	(listelm)->field.sqe_next = (elm);				\
@@ -451,12 +451,12 @@ struct {								\
  * Tail queue functions.
  */
 #if defined(QUEUEDEBUG)
-#define	QUEUEDEBUG_TAILQ_INSERT_HEAD(head, elm, field)			\
+#define	QUEUEDEBUG_TAILQ_इसिंगित_HEAD(head, elm, field)			\
 	if ((head)->tqh_first &&					\
 	    (head)->tqh_first->field.tqe_prev != &(head)->tqh_first)	\
 		QUEUEDEBUG_ABORT("TAILQ_INSERT_HEAD %p %s:%d", (head),	\
 		    __FILE__, __LINE__);
-#define	QUEUEDEBUG_TAILQ_INSERT_TAIL(head, elm, field)			\
+#define	QUEUEDEBUG_TAILQ_इसिंगित_TAIL(head, elm, field)			\
 	if (*(head)->tqh_last != NULL)					\
 		QUEUEDEBUG_ABORT("TAILQ_INSERT_TAIL %p %s:%d", (head),	\
 		    __FILE__, __LINE__);
@@ -478,8 +478,8 @@ struct {								\
 	(elm)->field.tqe_next = (void *)1L;				\
 	(elm)->field.tqe_prev = (void *)1L;
 #else
-#define	QUEUEDEBUG_TAILQ_INSERT_HEAD(head, elm, field)
-#define	QUEUEDEBUG_TAILQ_INSERT_TAIL(head, elm, field)
+#define	QUEUEDEBUG_TAILQ_इसिंगित_HEAD(head, elm, field)
+#define	QUEUEDEBUG_TAILQ_इसिंगित_TAIL(head, elm, field)
 #define	QUEUEDEBUG_TAILQ_OP(elm, field)
 #define	QUEUEDEBUG_TAILQ_PREREMOVE(head, elm, field)
 #define	QUEUEDEBUG_TAILQ_POSTREMOVE(elm, field)
@@ -490,8 +490,8 @@ struct {								\
 	(head)->tqh_last = &(head)->tqh_first;				\
 } while (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_HEAD(head, elm, field) do {			\
-	QUEUEDEBUG_TAILQ_INSERT_HEAD((head), (elm), field)		\
+#define	TAILQ_इसिंगित_HEAD(head, elm, field) do {			\
+	QUEUEDEBUG_TAILQ_इसिंगित_HEAD((head), (elm), field)		\
 	if (((elm)->field.tqe_next = (head)->tqh_first) != TAILQ_END(head))\
 		(head)->tqh_first->field.tqe_prev =			\
 		    &(elm)->field.tqe_next;				\
@@ -501,15 +501,15 @@ struct {								\
 	(elm)->field.tqe_prev = &(head)->tqh_first;			\
 } while (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_TAIL(head, elm, field) do {			\
-	QUEUEDEBUG_TAILQ_INSERT_TAIL((head), (elm), field)		\
+#define	TAILQ_इसिंगित_TAIL(head, elm, field) do {			\
+	QUEUEDEBUG_TAILQ_इसिंगित_TAIL((head), (elm), field)		\
 	(elm)->field.tqe_next = TAILQ_END(head);			\
 	(elm)->field.tqe_prev = (head)->tqh_last;			\
 	*(head)->tqh_last = (elm);					\
 	(head)->tqh_last = &(elm)->field.tqe_next;			\
 } while (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_AFTER(head, listelm, elm, field) do {		\
+#define	TAILQ_इसिंगित_AFTER(head, listelm, elm, field) do {		\
 	QUEUEDEBUG_TAILQ_OP((listelm), field)				\
 	if (((elm)->field.tqe_next = (listelm)->field.tqe_next) != 	\
 	    TAILQ_END(head))						\
@@ -521,7 +521,7 @@ struct {								\
 	(elm)->field.tqe_prev = &(listelm)->field.tqe_next;		\
 } while (/*CONSTCOND*/0)
 
-#define	TAILQ_INSERT_BEFORE(listelm, elm, field) do {			\
+#define	TAILQ_इसिंगित_BEFORE(listelm, elm, field) do {			\
 	QUEUEDEBUG_TAILQ_OP((listelm), field)				\
 	(elm)->field.tqe_prev = (listelm)->field.tqe_prev;		\
 	(elm)->field.tqe_next = (listelm);				\
@@ -595,19 +595,19 @@ struct {								\
 	(head)->stqh_last = &(head)->stqh_first;				\
 } while (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_HEAD(head, elm, field) do {			\
+#define	STAILQ_इसिंगित_HEAD(head, elm, field) do {			\
 	if (((elm)->field.stqe_next = (head)->stqh_first) == NULL)	\
 		(head)->stqh_last = &(elm)->field.stqe_next;		\
 	(head)->stqh_first = (elm);					\
 } while (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_TAIL(head, elm, field) do {			\
+#define	STAILQ_इसिंगित_TAIL(head, elm, field) do {			\
 	(elm)->field.stqe_next = NULL;					\
 	*(head)->stqh_last = (elm);					\
 	(head)->stqh_last = &(elm)->field.stqe_next;			\
 } while (/*CONSTCOND*/0)
 
-#define	STAILQ_INSERT_AFTER(head, listelm, elm, field) do {		\
+#define	STAILQ_इसिंगित_AFTER(head, listelm, elm, field) do {		\
 	if (((elm)->field.stqe_next = (listelm)->field.stqe_next) == NULL)\
 		(head)->stqh_last = &(elm)->field.stqe_next;		\
 	(listelm)->field.stqe_next = (elm);				\
@@ -747,7 +747,7 @@ struct {								\
 	(head)->cqh_last = CIRCLEQ_END(head);				\
 } while (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_AFTER(head, listelm, elm, field) do {		\
+#define	CIRCLEQ_इसिंगित_AFTER(head, listelm, elm, field) do {		\
 	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
 	QUEUEDEBUG_CIRCLEQ_ELM((head), (listelm), field)		\
 	(elm)->field.cqe_next = (listelm)->field.cqe_next;		\
@@ -759,7 +759,7 @@ struct {								\
 	(listelm)->field.cqe_next = (elm);				\
 } while (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_BEFORE(head, listelm, elm, field) do {		\
+#define	CIRCLEQ_इसिंगित_BEFORE(head, listelm, elm, field) do {		\
 	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
 	QUEUEDEBUG_CIRCLEQ_ELM((head), (listelm), field)		\
 	(elm)->field.cqe_next = (listelm);				\
@@ -771,7 +771,7 @@ struct {								\
 	(listelm)->field.cqe_prev = (elm);				\
 } while (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_HEAD(head, elm, field) do {			\
+#define	CIRCLEQ_इसिंगित_HEAD(head, elm, field) do {			\
 	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
 	(elm)->field.cqe_next = (head)->cqh_first;			\
 	(elm)->field.cqe_prev = CIRCLEQ_END(head);			\
@@ -782,7 +782,7 @@ struct {								\
 	(head)->cqh_first = (elm);					\
 } while (/*CONSTCOND*/0)
 
-#define	CIRCLEQ_INSERT_TAIL(head, elm, field) do {			\
+#define	CIRCLEQ_इसिंगित_TAIL(head, elm, field) do {			\
 	QUEUEDEBUG_CIRCLEQ_HEAD((head), field)				\
 	(elm)->field.cqe_next = CIRCLEQ_END(head);			\
 	(elm)->field.cqe_prev = (head)->cqh_last;			\

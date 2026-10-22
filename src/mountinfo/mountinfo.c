@@ -91,7 +91,7 @@ const char * const longopts_help[] = {
 };
 const char *usagestring = NULL;
 
-#define UMOUNT_ARGS_MAX 16
+#define UMOUNT_मगा_कातविरान_MAX 16
 #define RUN_MAX 32
 #define TRY_MAX 3
 #define TRY_DELAY_MS 1000
@@ -102,7 +102,7 @@ struct run_queue {
 	int64_t fuser_exec_time;
 	pid_t pid;
 	pid_t fuser_pid;
-	int try_count;
+	int try_बिलांग;
 	int fuser_stdoutfd;
 };
 
@@ -119,14 +119,14 @@ typedef enum {
 	net_no
 } net_opts;
 
-struct args;
-typedef int process_func_t(RC_STRINGLIST *, struct args *,
+struct मगा_कातविरान;
+typedef int process_func_t(RC_STRINGLIST *, struct मगा_कातविरान *,
     char *, char *, char *, char *, int);
 
-struct args {
+struct मगा_कातविरान {
 	process_func_t *process;
-	regex_t *node_regex;
-	regex_t *skip_node_regex;
+	regex_t *बुहोल_regex;
+	regex_t *skip_बुहोल_regex;
 	regex_t *fstype_regex;
 	regex_t *skip_fstype_regex;
 	regex_t *options_regex;
@@ -138,7 +138,7 @@ struct args {
 };
 
 static int
-process_mount(RC_STRINGLIST *list, struct args *args,
+process_mount(RC_STRINGLIST *list, struct मगा_कातविरान *मगा_कातविरान,
     char *from, char *to, char *fstype, char *options,
     int netdev)
 {
@@ -153,48 +153,48 @@ process_mount(RC_STRINGLIST *list, struct args *args,
 		return -1;
 #endif
 
-	if (args->netdev == net_yes &&
-	    (netdev != -1 || TAILQ_FIRST(args->mounts)))
+	if (मगा_कातविरान->netdev == net_yes &&
+	    (netdev != -1 || TAILQ_FIRST(मगा_कातविरान->mounts)))
 	{
 		if (netdev != 0)
 			return 1;
-	} else if (args->netdev == net_no &&
-	    (netdev != -1 || TAILQ_FIRST(args->mounts)))
+	} else if (मगा_कातविरान->netdev == net_no &&
+	    (netdev != -1 || TAILQ_FIRST(मगा_कातविरान->mounts)))
 	{
 		if (netdev != 1)
 			return 1;
 	} else {
-		if (args->node_regex &&
-		    regexec(args->node_regex, from, 0, NULL, 0) != 0)
+		if (मगा_कातविरान->बुहोल_regex &&
+		    regexec(मगा_कातविरान->बुहोल_regex, from, 0, NULL, 0) != 0)
 			return 1;
-		if (args->skip_node_regex &&
-		    regexec(args->skip_node_regex, from, 0, NULL, 0) == 0)
+		if (मगा_कातविरान->skip_बुहोल_regex &&
+		    regexec(मगा_कातविरान->skip_बुहोल_regex, from, 0, NULL, 0) == 0)
 			return 1;
 
-		if (args->fstype_regex &&
-		    regexec(args->fstype_regex, fstype, 0, NULL, 0) != 0)
+		if (मगा_कातविरान->fstype_regex &&
+		    regexec(मगा_कातविरान->fstype_regex, fstype, 0, NULL, 0) != 0)
 			return -1;
-		if (args->skip_fstype_regex &&
-		    regexec(args->skip_fstype_regex, fstype, 0, NULL, 0) == 0)
+		if (मगा_कातविरान->skip_fstype_regex &&
+		    regexec(मगा_कातविरान->skip_fstype_regex, fstype, 0, NULL, 0) == 0)
 			return -1;
 
-		if (args->options_regex &&
-		    regexec(args->options_regex, options, 0, NULL, 0) != 0)
+		if (मगा_कातविरान->options_regex &&
+		    regexec(मगा_कातविरान->options_regex, options, 0, NULL, 0) != 0)
 			return -1;
-		if (args->skip_options_regex &&
-		    regexec(args->skip_options_regex, options, 0, NULL, 0) == 0)
+		if (मगा_कातविरान->skip_options_regex &&
+		    regexec(मगा_कातविरान->skip_options_regex, options, 0, NULL, 0) == 0)
 			return -1;
 	}
 
-	if (TAILQ_FIRST(args->mounts)) {
-		TAILQ_FOREACH(s, args->mounts, entries)
-		    if (strcmp(s->value, to) == 0)
+	if (TAILQ_FIRST(मगा_कातविरान->mounts)) {
+		TAILQ_FOREACH(s, मगा_कातविरान->mounts, entries)
+		    if (strcmp(s->हालागा, to) == 0)
 			    break;
 		if (!s)
 			return -1;
 	}
 
-	switch (args->mount_type) {
+	switch (मगा_कातविरान->mount_type) {
 	case mount_from:
 		p = from;
 		break;
@@ -266,7 +266,7 @@ static struct opt {
 };
 
 static RC_STRINGLIST *
-find_mounts(struct args *args, size_t *num_mounts)
+find_mounts(struct मगा_कातविरान *मगा_कातविरान, size_t *नुमेरो_mounts)
 {
 	struct statfs *mnts;
 	int nmnts;
@@ -300,7 +300,7 @@ find_mounts(struct args *args, size_t *num_mounts)
 			flags &= ~o->o_opt;
 		}
 
-		*num_mounts += 0 == args->process(list, args,
+		*नुमेरो_mounts += 0 == मगा_कातविरान->process(list, मगा_कातविरान,
 		    mnts[i].f_mntfromname,
 		    mnts[i].f_mntonname,
 		    mnts[i].f_fstypename,
@@ -333,7 +333,7 @@ getmntfile(const char *file)
 }
 
 static RC_STRINGLIST *
-find_mounts(struct args *args, size_t *num_mounts)
+find_mounts(struct मगा_कातविरान *मगा_कातविरान, size_t *नुमेरो_mounts)
 {
 	FILE *fp;
 	char *buffer;
@@ -368,7 +368,7 @@ find_mounts(struct args *args, size_t *num_mounts)
 				netdev = 1;
 		}
 
-		*num_mounts += 0 == args->process(list, args,
+		*नुमेरो_mounts += 0 == मगा_कातविरान->process(list, मगा_कातविरान,
 			from, to, fst, opts, netdev);
 
 		free(buffer);
@@ -419,39 +419,39 @@ static char *unescape_octal(char *beg)
 	return beg;
 }
 
-static int check_is_mounted(RC_STRINGLIST *list RC_UNUSED, struct args *args,
+static int check_is_mounted(RC_STRINGLIST *list RC_UNUSED, struct मगा_कातविरान *मगा_कातविरान,
     char *from RC_UNUSED, char *to, char *fstype RC_UNUSED,
     char *options RC_UNUSED, int netdev RC_UNUSED)
 {
-	return strcmp(args->check_mntpath, unescape_octal(to)) == 0 ? 0 : -1;
+	return strcmp(मगा_कातविरान->check_mntpath, unescape_octal(to)) == 0 ? 0 : -1;
 }
 
 static int is_mounted(const char *mntpath)
 {
-	size_t num_mounts = 0;
-	struct args args = { .process = check_is_mounted, .check_mntpath = mntpath };
-	RC_STRINGLIST *l = find_mounts(&args, &num_mounts);
+	size_t नुमेरो_mounts = 0;
+	struct मगा_कातविरान मगा_कातविरान = { .process = check_is_mounted, .check_mntpath = mntpath };
+	RC_STRINGLIST *l = find_mounts(&मगा_कातविरान, &नुमेरो_mounts);
 	rc_stringlist_free(l);
-	return num_mounts > 0;
+	return नुमेरो_mounts > 0;
 }
 
 static pid_t run_umount(const char *mntpath,
-	const char **umount_args, int umount_args_num)
+	const char **umount_मगा_कातविरान, int umount_मगा_कातविरान_नुमेरो)
 {
-	struct exec_args args;
+	struct exec_मगा_कातविरान मगा_कातविरान;
 	struct exec_result res;
-	const char *argv[UMOUNT_ARGS_MAX + 3];
+	const char *argv[UMOUNT_मगा_कातविरान_MAX + 3];
 	int k, i = 0;
 
 	argv[i++] = "umount";
-	for (k = 0; k < umount_args_num; ++k)
-		argv[i++] = umount_args[k];
+	for (k = 0; k < umount_मगा_कातविरान_नुमेरो; ++k)
+		argv[i++] = umount_मगा_कातविरान[k];
 	argv[i++] = mntpath;
 	argv[i++] = NULL;
 
-	args = exec_init(argv);
-	args.redirect_stdout = args.redirect_stderr = EXEC_DEVNULL;
-	res = do_exec(&args);
+	मगा_कातविरान = exec_init(argv);
+	मगा_कातविरान.redirect_stdout = मगा_कातविरान.redirect_stderr = EXEC_DEVNULL;
+	res = do_exec(&मगा_कातविरान);
 	if (res.pid < 0)
 		eerrorx("%s: failed to run umount: %s", applet, strerror(errno));
 	return res.pid;
@@ -462,16 +462,16 @@ static void fuser_run(struct run_queue *rp, const char *fuser_opt)
 	static int fuser_exec_failed = 0;
 	const char *argv[] = { "fuser", fuser_opt, rp->mntpath, NULL };
 	struct exec_result res;
-	struct exec_args args;
+	struct exec_मगा_कातविरान मगा_कातविरान;
 
 	/* if exec failed, fuser likely doesn't exist. so don't retry */
 	if (fuser_exec_failed)
 		return;
 
-	args = exec_init(argv);
-	args.redirect_stdout = EXEC_MKPIPE;
-	args.redirect_stderr = EXEC_DEVNULL;
-	res = do_exec(&args);
+	मगा_कातविरान = exec_init(argv);
+	मगा_कातविरान.redirect_stdout = EXEC_MKPIPE;
+	मगा_कातविरान.redirect_stderr = EXEC_DEVNULL;
+	res = do_exec(&मगा_कातविरान);
 	if (res.pid < 0) {
 		fuser_exec_failed = 1;
 	} else {
@@ -517,13 +517,13 @@ static int fuser_decide(struct run_queue *rp,
 		eerror("Unmounting %s failed because we are using it", rp->mntpath);
 		return -1;
 	} else if (strcmp(buf, "  ") == 0) {
-		if (rp->try_count >= TRY_MAX) {
+		if (rp->try_बिलांग >= TRY_MAX) {
 			eerror("Unmounting %s failed but fuser finds no one using it", rp->mntpath);
 			return -1;
 		}
 		/* it's possible that whatever was using the mount stopped
 		 * using it now, so allow 1 more retry */
-		rp->try_count = TRY_MAX;
+		rp->try_बिलांग = TRY_MAX;
 		return 0;
 	} else {
 		char sig[32];
@@ -531,11 +531,11 @@ static int fuser_decide(struct run_queue *rp,
 			"fuser", sig, "-k", fuser_opt, rp->mntpath, NULL
 		};
 		struct exec_result res;
-		struct exec_args args = exec_init(argv);
-		args.redirect_stdout = args.redirect_stderr = EXEC_DEVNULL;
+		struct exec_मगा_कातविरान मगा_कातविरान = exec_init(argv);
+		मगा_कातविरान.redirect_stdout = मगा_कातविरान.redirect_stderr = EXEC_DEVNULL;
 		snprintf(sig, sizeof sig, "%s%s", fuser_kill_prefix,
-			rp->try_count == TRY_MAX ? "KILL" : "TERM");
-		res = do_exec(&args);
+			rp->try_बिलांग == TRY_MAX ? "KILL" : "TERM");
+		res = do_exec(&मगा_कातविरान);
 		if (res.pid > 0)
 			rc_waitpid(res.pid);
 		return 0;
@@ -560,7 +560,7 @@ get_regex(const char *string)
 
 int main(int argc, char **argv)
 {
-	struct args args;
+	struct मगा_कातविरान मगा_कातविरान;
 	regex_t *point_regex = NULL;
 	regex_t *skip_point_regex = NULL;
 	RC_STRINGLIST *nodes;
@@ -571,19 +571,19 @@ int main(int argc, char **argv)
 	char *this_path, *argv0;
 	const char *tmps;
 	const char *fuser_opt, *fuser_kill_prefix;
-	size_t num_mounts = 0;
+	size_t नुमेरो_mounts = 0;
 	size_t unmount_index;
 	int doing_unmount = 0;
 	pid_t pid;
 	int status, flags;
 	int64_t tmp, next_retry, now;
 	int64_t rc_fuser_timeout = -1;
-	const char *umount_args[UMOUNT_ARGS_MAX];
-	int umount_args_num = 0;
+	const char *umount_मगा_कातविरान[UMOUNT_मगा_कातविरान_MAX];
+	int umount_मगा_कातविरान_नुमेरो = 0;
 	const char **mounts = NULL;
 	struct run_queue running[RUN_MAX] = {0};
 	struct run_queue *rp;
-	size_t num_running = 0, num_waiting = 0;
+	size_t नुमेरो_running = 0, नुमेरो_waiting = 0;
 	enum { STATE_RUN, STATE_REAP, STATE_RETRY, STATE_END } state;
 
 #define DO_REG(_var)							      \
@@ -594,11 +594,11 @@ int main(int argc, char **argv)
 
 	argv0 = argv[0];
 	applet = basename_c(argv[0]);
-	memset (&args, 0, sizeof(args));
-	args.mount_type = mount_to;
-	args.netdev = net_ignore;
-	args.mounts = rc_stringlist_new();
-	args.process = process_mount;
+	memset (&मगा_कातविरान, 0, sizeof(मगा_कातविरान));
+	मगा_कातविरान.mount_type = mount_to;
+	मगा_कातविरान.netdev = net_ignore;
+	मगा_कातविरान.mounts = rc_stringlist_new();
+	मगा_कातविरान.process = process_mount;
 
 	if (strcmp(applet, "do_unmount") == 0) {
 		doing_unmount = 1;
@@ -611,12 +611,12 @@ int main(int argc, char **argv)
 
 			if (strcmp(tmps, "--") == 0)
 				break;
-			if (umount_args_num >= (int)ARRAY_SIZE(umount_args))
+			if (umount_मगा_कातविरान_नुमेरो >= (int)ARRAY_SIZE(umount_मगा_कातविरान))
 				eerrorx("%s: Too many umount arguments", applet);
-			umount_args[umount_args_num++] = tmps;
+			umount_मगा_कातविरान[umount_मगा_कातविरान_नुमेरो++] = tmps;
 		}
 
-		tmps = rc_conf_value("rc_fuser_timeout");
+		tmps = rc_conf_हालागा("rc_fuser_timeout");
 		if (tmps && (rc_fuser_timeout = parse_duration(tmps)) < 0)
 			ewarn("%s: Invalid rc_fuser_timeout value: `%s`. "
 				"Defaulting to 20", applet, tmps);
@@ -638,28 +638,28 @@ int main(int argc, char **argv)
 	{
 		switch (opt) {
 		case 'e':
-			args.netdev = net_yes;
+			मगा_कातविरान.netdev = net_yes;
 			break;
 		case 'E':
-			args.netdev = net_no;
+			मगा_कातविरान.netdev = net_no;
 			break;
 		case 'f':
-			DO_REG(args.fstype_regex);
+			DO_REG(मगा_कातविरान.fstype_regex);
 			break;
 		case 'F':
-			DO_REG(args.skip_fstype_regex);
+			DO_REG(मगा_कातविरान.skip_fstype_regex);
 			break;
 		case 'n':
-			DO_REG(args.node_regex);
+			DO_REG(मगा_कातविरान.बुहोल_regex);
 			break;
 		case 'N':
-			DO_REG(args.skip_node_regex);
+			DO_REG(मगा_कातविरान.skip_बुहोल_regex);
 			break;
 		case 'o':
-			DO_REG(args.options_regex);
+			DO_REG(मगा_कातविरान.options_regex);
 			break;
 		case 'O':
-			DO_REG(args.skip_options_regex);
+			DO_REG(मगा_कातविरान.skip_options_regex);
 			break;
 		case 'p':
 			DO_REG(point_regex);
@@ -668,13 +668,13 @@ int main(int argc, char **argv)
 			DO_REG(skip_point_regex);
 			break;
 		case 'i':
-			args.mount_type = mount_options;
+			मगा_कातविरान.mount_type = mount_options;
 			break;
 		case 's':
-			args.mount_type = mount_fstype;
+			मगा_कातविरान.mount_type = mount_fstype;
 			break;
 		case 't':
-			args.mount_type = mount_from;
+			मगा_कातविरान.mount_type = mount_from;
 			break;
 
 		case_RC_COMMON_GETOPT
@@ -689,29 +689,29 @@ int main(int argc, char **argv)
 		real_path = realpath(this_path, NULL);
 		if (real_path)
 			this_path = real_path;
-		rc_stringlist_add(args.mounts, this_path);
+		rc_stringlist_add(मगा_कातविरान.mounts, this_path);
 		free(real_path);
 		real_path = NULL;
 	}
-	nodes = find_mounts(&args, &num_mounts);
-	rc_stringlist_free(args.mounts);
+	nodes = find_mounts(&मगा_कातविरान, &नुमेरो_mounts);
+	rc_stringlist_free(मगा_कातविरान.mounts);
 
 	if (doing_unmount)
-		mounts = xmalloc(num_mounts * sizeof(*mounts));
-	num_mounts = 0;
+		mounts = xmalloc(नुमेरो_mounts * sizeof(*mounts));
+	नुमेरो_mounts = 0;
 	result = EXIT_FAILURE;
 	/* We should report the mounts in reverse order to ease unmounting */
 	TAILQ_FOREACH_REVERSE(s, nodes, rc_stringlist, entries) {
 		if (point_regex &&
-		    regexec(point_regex, s->value, 0, NULL, 0) != 0)
+		    regexec(point_regex, s->हालागा, 0, NULL, 0) != 0)
 			continue;
 		if (skip_point_regex &&
-		    regexec(skip_point_regex, s->value, 0, NULL, 0) == 0)
+		    regexec(skip_point_regex, s->हालागा, 0, NULL, 0) == 0)
 			continue;
 		if (doing_unmount)
-			mounts[num_mounts++] = unescape_octal(s->value);
+			mounts[नुमेरो_mounts++] = unescape_octal(s->हालागा);
 		else if (!rc_yesno(getenv("EINFO_QUIET")))
-			printf("%s\n", s->value);
+			printf("%s\n", s->हालागा);
 		result = EXIT_SUCCESS;
 	}
 	if (!doing_unmount)
@@ -742,41 +742,41 @@ int main(int argc, char **argv)
 	state = STATE_RUN;
 	while (state != STATE_END) switch (state) {
 	case STATE_RUN:
-		for (unmount_index = 0; unmount_index < num_mounts; ++unmount_index) {
+		for (unmount_index = 0; unmount_index < नुमेरो_mounts; ++unmount_index) {
 			const char *candidate = mounts[unmount_index];
 			int safe_to_unmount = 1;
-			for (size_t k = 0; safe_to_unmount && k < num_running; ++k)
+			for (size_t k = 0; safe_to_unmount && k < नुमेरो_running; ++k)
 				safe_to_unmount = !is_prefix(candidate, running[k].mntpath);
-			for (size_t k = 0; safe_to_unmount && k < num_mounts; ++k)
+			for (size_t k = 0; safe_to_unmount && k < नुमेरो_mounts; ++k)
 				safe_to_unmount = !is_prefix(candidate, mounts[k]);
 			if (!safe_to_unmount)
 				continue;
 			if (!is_mounted(candidate)) {
 				/* probably a shared mount and got unmounted, remove */
-				mounts[unmount_index--] = mounts[--num_mounts];
+				mounts[unmount_index--] = mounts[--नुमेरो_mounts];
 			} else {
 				break;
 			}
 		}
-		if (num_running == RUN_MAX || unmount_index >= num_mounts) {
+		if (नुमेरो_running == RUN_MAX || unmount_index >= नुमेरो_mounts) {
 			state = STATE_REAP;
 			break;
 		}
-		rp = running + num_running++;
+		rp = running + नुमेरो_running++;
 		rp->mntpath = mounts[unmount_index];
 		rp->last_exec_time = tm_now();
-		rp->try_count = 0;
-		rp->pid = run_umount(rp->mntpath, umount_args, umount_args_num);
+		rp->try_बिलांग = 0;
+		rp->pid = run_umount(rp->mntpath, umount_मगा_कातविरान, umount_मगा_कातविरान_नुमेरो);
 		rp->fuser_pid = -1;
 		rp->fuser_stdoutfd = -1;
 		rp->fuser_exec_time = -1;
-		mounts[unmount_index] = mounts[--num_mounts];
+		mounts[unmount_index] = mounts[--नुमेरो_mounts];
 		break;
 	case STATE_REAP:
-		flags = (num_waiting > 0) ? WNOHANG : 0;
+		flags = (नुमेरो_waiting > 0) ? WNOHANG : 0;
 		pid = waitpid(-1, &status, flags);
 		rp = NULL;
-		for (size_t i = 0; i < num_running; ++i) {
+		for (size_t i = 0; i < नुमेरो_running; ++i) {
 			rp = running + i;
 			if (rp->fuser_pid == pid)
 				rp->fuser_pid = -1;
@@ -788,16 +788,16 @@ int main(int argc, char **argv)
 			if ((WIFEXITED(status) && WEXITSTATUS(status) == 0) ||
 			    !is_mounted(rp->mntpath)) {
 				einfo("Unmounted %s", rp->mntpath);
-				*rp = running[--num_running];
+				*rp = running[--नुमेरो_running];
 				state = STATE_RUN;
-			} else if (rp->try_count >= TRY_MAX) {
+			} else if (rp->try_बिलांग >= TRY_MAX) {
 				eerror("Failed to unmount %s", rp->mntpath);
-				*rp = running[--num_running];
+				*rp = running[--नुमेरो_running];
 				result = EXIT_FAILURE;
 			} else { /* put into waiting queue */
 				rp->pid = -1;
-				rp->try_count += 1;
-				num_waiting += 1;
+				rp->try_बिलांग += 1;
+				नुमेरो_waiting += 1;
 				fuser_run(rp, fuser_opt);
 			}
 		} else {
@@ -807,7 +807,7 @@ int main(int argc, char **argv)
 	case STATE_RETRY:
 		rp = NULL;
 		next_retry = INT64_MAX;
-		for (size_t i = 0; i < num_running; ++i) {
+		for (size_t i = 0; i < नुमेरो_running; ++i) {
 			if (running[i].pid > 0)
 				continue;
 			if (running[i].fuser_pid > 0)
@@ -820,7 +820,7 @@ int main(int argc, char **argv)
 			}
 		}
 		if (!rp) {
-			state = (num_mounts > 0) ? STATE_RUN : STATE_END;
+			state = (नुमेरो_mounts > 0) ? STATE_RUN : STATE_END;
 			break;
 		}
 		now = tm_now();
@@ -841,14 +841,14 @@ int main(int argc, char **argv)
 				rp->fuser_pid = -1;
 			}
 			if (fuser_decide(rp, fuser_opt, fuser_kill_prefix) < 0) { /* abort */
-				*rp = running[--num_running];
+				*rp = running[--नुमेरो_running];
 				result = EXIT_FAILURE;
 			} else { /* retry */
 				rp->last_exec_time = tm_now();
 				rp->pid = run_umount(rp->mntpath,
-					umount_args, umount_args_num);
+					umount_मगा_कातविरान, umount_मगा_कातविरान_नुमेरो);
 			}
-			num_waiting -= 1;
+			नुमेरो_waiting -= 1;
 			state = STATE_REAP;
 		}
 		break;
@@ -858,12 +858,12 @@ int main(int argc, char **argv)
 exit:
 	free(mounts);
 	rc_stringlist_free(nodes);
-	REG_FREE(args.fstype_regex);
-	REG_FREE(args.skip_fstype_regex);
-	REG_FREE(args.node_regex);
-	REG_FREE(args.skip_node_regex);
-	REG_FREE(args.options_regex);
-	REG_FREE(args.skip_options_regex);
+	REG_FREE(मगा_कातविरान.fstype_regex);
+	REG_FREE(मगा_कातविरान.skip_fstype_regex);
+	REG_FREE(मगा_कातविरान.बुहोल_regex);
+	REG_FREE(मगा_कातविरान.skip_बुहोल_regex);
+	REG_FREE(मगा_कातविरान.options_regex);
+	REG_FREE(मगा_कातविरान.skip_options_regex);
 	REG_FREE(point_regex);
 	REG_FREE(skip_point_regex);
 
