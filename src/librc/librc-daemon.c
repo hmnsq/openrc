@@ -15,105 +15,105 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ضمن <errno.h>
+#ضمن <dirent.h>
+#ضمن <fcntl.h>
+#ضمن <limits.h>
+#ضمن <signal.h>
+#ضمن <stdbool.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <sys/stat.h>
+#ضمن <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#ضمن "queue.h"
+#ضمن "librc.h"
+#ضمن "helpers.h"
 
-#if defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#إذا defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
-static bool
-pid_is_exec(pid_t pid, const char *exec)
+ساكن bool
+pid_is_exec(pid_t pid, ثابت حرف *exec)
 {
-	char *buffer = NULL;
+	حرف *buffer = عدم;
 	FILE *fp;
-	int c;
+	صحيح c;
 	bool retval = false;
 
 	exec = basename_c(exec);
 	xasprintf(&buffer, "/proc/%d/stat", pid);
-	if ((fp = fopen(buffer, "r"))) {
-		while ((c = getc(fp)) != EOF && c != '(')
+	إذا ((fp = fopen(buffer, "r"))) {
+		طالما ((c = getc(fp)) != EOF && c != '(')
 			;
-		if (c == '(') {
-			while ((c = getc(fp)) != EOF && c == *exec)
+		إذا (c == '(') {
+			طالما ((c = getc(fp)) != EOF && c == *exec)
 				exec++;
-			if (c == ')' && *exec == '\0')
+			إذا (c == ')' && *exec == '\0')
 				retval = true;
 		}
 		fclose(fp);
 	}
-	free(buffer);
-	return retval;
+	حرر(buffer);
+	أرجع retval;
 }
 
-static bool
-pid_is_argv(pid_t pid, const char *const *argv)
+ساكن bool
+pid_is_argv(pid_t pid, ثابت حرف *ثابت *argv)
 {
-	char *cmdline = NULL;
-	int fd;
-	char buffer[PATH_MAX];
-	char *p;
+	حرف *cmdline = عدم;
+	صحيح fd;
+	حرف buffer[PATH_MAX];
+	حرف *p;
 	ssize_t bytes;
 
 	xasprintf(&cmdline, "/proc/%u/cmdline", pid);
-	if ((fd = open(cmdline, O_RDONLY)) < 0) {
-		free(cmdline);
-		return false;
+	إذا ((fd = open(cmdline, O_RDONLY)) < 0) {
+		حرر(cmdline);
+		أرجع false;
 	}
-	bytes = read(fd, buffer, sizeof(buffer) - 1);
+	bytes = اقرأ(fd, buffer, حجم(buffer) - 1);
 	close(fd);
-	free(cmdline);
-	if (bytes == -1)
-		return false;
+	حرر(cmdline);
+	إذا (bytes == -1)
+		أرجع false;
 
 	buffer[bytes] = '\0';
 	p = buffer;
-	while (*argv) {
-		if ((unsigned)(p - buffer) >= sizeof(buffer))
-			return false;
-		if (strcmp(*argv, p) != 0)
-			return false;
+	طالما (*argv) {
+		إذا ((unsigned)(p - buffer) >= حجم(buffer))
+			أرجع false;
+		إذا (strcmp(*argv, p) != 0)
+			أرجع false;
 		argv++;
 		p += strlen(p) + 1;
 	}
-	return true;
+	أرجع true;
 }
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(ثابت حرف *exec, ثابت حرف *ثابت *argv, uid_t uid, pid_t pid)
 {
 	DIR *procdir;
-	struct dirent *entry;
+	بنية dirent *entry;
 	FILE *fp;
-	int rc;
+	صحيح rc;
 	bool container_pid = false;
 	bool openvz_host = false;
-	char *line = NULL;
-	char my_ns[30] = {0};
-	char proc_ns[30] = {0};
+	حرف *سطر = عدم;
+	حرف my_ns[30] = {0};
+	حرف proc_ns[30] = {0};
 	size_t len = 0;
 	pid_t p;
-	char *buffer = NULL;
-	struct stat sb;
+	حرف *buffer = عدم;
+	بنية stat sb;
 	pid_t openrc_pid = 0;
-	char *pp;
-	RC_PIDLIST *pids = NULL;
+	حرف *pp;
+	RC_PIDLIST *pids = عدم;
 	RC_PID *pi;
 
-	if ((procdir = opendir("/proc")) == NULL)
-		return NULL;
+	إذا ((procdir = opendir("/proc")) == عدم)
+		أرجع عدم;
 
 	/*
 	  We never match RC_OPENRC_PID if present so we avoid the below
@@ -126,8 +126,8 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	  nasty
 	*/
 
-	if ((pp = getenv("RC_OPENRC_PID"))) {
-		if (sscanf(pp, "%d", &openrc_pid) != 1)
+	إذا ((pp = getenv("RC_OPENRC_PID"))) {
+		إذا (sscanf(pp, "%d", &openrc_pid) != 1)
 			openrc_pid = 0;
 	}
 
@@ -137,98 +137,98 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	from our list of pids.
 	*/
 
-	if ((fp = fopen("/proc/self/status", "r"))) {
-		while (xgetline(&line, &len, fp) != -1) {
-			if (strncmp(line, "envID:\t0", 8) == 0) {
+	إذا ((fp = fopen("/proc/self/status", "r"))) {
+		طالما (xgetline(&سطر, &len, fp) != -1) {
+			إذا (strncmp(سطر, "envID:\t0", 8) == 0) {
 				openvz_host = true;
-				break;
+				اكسر;
 			}
 		}
 		fclose(fp);
 	}
 
-	if ((rc = readlink("/proc/self/ns/pid", my_ns, sizeof(my_ns)-1)) <= 0)
+	إذا ((rc = readlink("/proc/self/ns/pid", my_ns, حجم(my_ns)-1)) <= 0)
 		my_ns[0] = '\0';
 
-	while ((entry = readdir(procdir)) != NULL) {
-		if (sscanf(entry->d_name, "%d", &p) != 1)
-			continue;
-		if (openrc_pid != 0 && openrc_pid == p)
-			continue;
-		if (pid != 0 && pid != p)
-			continue;
+	طالما ((entry = readdir(procdir)) != عدم) {
+		إذا (sscanf(entry->d_name, "%d", &p) != 1)
+			استمر;
+		إذا (openrc_pid != 0 && openrc_pid == p)
+			استمر;
+		إذا (pid != 0 && pid != p)
+			استمر;
 		xasprintf(&buffer, "/proc/%d/ns/pid", p);
-		if ((rc = readlink(buffer, proc_ns, sizeof(proc_ns)-1)) <= 0)
+		إذا ((rc = readlink(buffer, proc_ns, حجم(proc_ns)-1)) <= 0)
 			proc_ns[0] = '\0';
-		free(buffer);
-		if (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
-			continue;
-		if (uid) {
+		حرر(buffer);
+		إذا (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
+			استمر;
+		إذا (uid) {
 			xasprintf(&buffer, "/proc/%d", p);
-			if (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
-				free(buffer);
-				continue;
+			إذا (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
+				حرر(buffer);
+				استمر;
 			}
-			free(buffer);
+			حرر(buffer);
 		}
-		if (exec && !pid_is_exec(p, exec))
-			continue;
-		if (argv &&
-		    !pid_is_argv(p, (const char *const *)argv))
-			continue;
+		إذا (exec && !pid_is_exec(p, exec))
+			استمر;
+		إذا (argv &&
+		    !pid_is_argv(p, (ثابت حرف *ثابت *)argv))
+			استمر;
 		/* If this is an OpenVZ host, filter out container processes */
-		if (openvz_host) {
+		إذا (openvz_host) {
 			xasprintf(&buffer, "/proc/%d/status", p);
 			fp = fopen(buffer, "r");
-			free(buffer);
-			if (!fp)
-				continue;
-			while (xgetline(&line, &len, fp) != -1) {
-				if (strncmp(line, "envID:", 6) == 0) {
-					container_pid = !(strncmp(line, "envID:\t0", 8) == 0);
-					break;
+			حرر(buffer);
+			إذا (!fp)
+				استمر;
+			طالما (xgetline(&سطر, &len, fp) != -1) {
+				إذا (strncmp(سطر, "envID:", 6) == 0) {
+					container_pid = !(strncmp(سطر, "envID:\t0", 8) == 0);
+					اكسر;
 				}
 			}
 			fclose(fp);
 		}
-		if (container_pid)
-			continue;
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		إذا (container_pid)
+			استمر;
+		إذا (!pids) {
+			pids = xmalloc(حجم(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(حجم(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_داخل_کرو_HEAD(pids, pi, entries);
 	}
-	if (line != NULL)
-		free(line);
+	إذا (سطر != عدم)
+		حرر(سطر);
 	closedir(procdir);
-	return pids;
+	أرجع pids;
 }
 
-#elif BSD
+#وإلاإذا BSD
 
-# if defined(__NetBSD__) || defined(__OpenBSD__)
+# إذا defined(__NetBSD__) || defined(__OpenBSD__)
 #  define _KVM_GETPROC2
 #  define _KINFO_PROC kinfo_proc2
 #  define _KVM_GETARGV kvm_getargv2
 #  define _GET_KINFO_UID(kp) (kp.p_ruid)
 #  define _GET_KINFO_COMM(kp) (kp.p_comm)
 #  define _GET_KINFO_PID(kp) (kp.p_pid)
-#  define _KVM_PATH NULL
+#  define _KVM_PATH عدم
 #  define _KVM_FLAGS KVM_NO_FILES
-# else
+# وإلا
 #  ifndef KERN_PROC_PROC
 #    define KERN_PROC_PROC KERN_PROC_ALL
 #  endif
 #  define _KINFO_PROC kinfo_proc
 #  define _KVM_GETARGV kvm_getargv
-#  if defined(__DragonFly__)
+#  إذا defined(__DragonFly__)
 #    define _GET_KINFO_UID(kp) (kp.kp_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.kp_comm)
 #    define _GET_KINFO_PID(kp) (kp.kp_pid)
-#  else
+#  وإلا
 #    define _GET_KINFO_UID(kp) (kp.ki_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.ki_comm)
 #    define _GET_KINFO_PID(kp) (kp.ki_pid)
@@ -238,194 +238,194 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 # endif
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(ثابت حرف *exec, ثابت حرف *ثابت *argv, uid_t uid, pid_t pid)
 {
-	static kvm_t *kd = NULL;
-	char errbuf[_POSIX2_LINE_MAX];
-	struct _KINFO_PROC *kp;
-	int i;
-	int processes = 0;
-	int pargc = 0;
-	char **pargv;
-	RC_PIDLIST *pids = NULL;
+	ساكن kvm_t *kd = عدم;
+	حرف errbuf[_POSIX2_LINE_MAX];
+	بنية _KINFO_PROC *kp;
+	صحيح i;
+	صحيح processes = 0;
+	صحيح pargc = 0;
+	حرف **pargv;
+	RC_PIDLIST *pids = عدم;
 	RC_PID *pi;
 	pid_t p;
-	const char *const *arg;
-	int match;
+	ثابت حرف *ثابت *arg;
+	صحيح match;
 
-	if ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
-		    NULL, _KVM_FLAGS, errbuf)) == NULL)
+	إذا ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
+		    عدم, _KVM_FLAGS, errbuf)) == عدم)
 	{
 		fprintf(stderr, "kvm_open: %s\n", errbuf);
-		return NULL;
+		أرجع عدم;
 	}
 
 #ifdef _KVM_GETPROC2
-	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(*kp), &processes);
-#else
+	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, حجم(*kp), &processes);
+#وإلا
 	kp = kvm_getprocs(kd, KERN_PROC_PROC, 0, &processes);
 #endif
-	if ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
+	إذا ((kp == عدم && processes > 0) || (kp != عدم && processes < 0)) {
 		fprintf(stderr, "kvm_getprocs: %s\n", kvm_geterr(kd));
 		kvm_close(kd);
-		return NULL;
+		أرجع عدم;
 	}
 
-	if (exec)
+	إذا (exec)
 		exec = basename_c(exec);
-	for (i = 0; i < processes; i++) {
+	لكل (i = 0; i < processes; i++) {
 		p = _GET_KINFO_PID(kp[i]);
-		if (pid != 0 && pid != p)
-			continue;
-		if (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
-			continue;
-		if (exec) {
-			if (!_GET_KINFO_COMM(kp[i]) ||
+		إذا (pid != 0 && pid != p)
+			استمر;
+		إذا (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
+			استمر;
+		إذا (exec) {
+			إذا (!_GET_KINFO_COMM(kp[i]) ||
 			    strcmp(exec, _GET_KINFO_COMM(kp[i])) != 0)
-				continue;
+				استمر;
 		}
-		if (argv && *argv) {
+		إذا (argv && *argv) {
 			pargv = _KVM_GETARGV(kd, &kp[i], pargc);
-			if (!pargv || !*pargv)
-				continue;
+			إذا (!pargv || !*pargv)
+				استمر;
 			arg = argv;
 			match = 1;
-			while (*arg && *pargv)
-				if (strcmp(*arg++, *pargv++) != 0) {
+			طالما (*arg && *pargv)
+				إذا (strcmp(*arg++, *pargv++) != 0) {
 					match = 0;
-					break;
+					اكسر;
 				}
-			if (!match)
-				continue;
+			إذا (!match)
+				استمر;
 		}
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		إذا (!pids) {
+			pids = xmalloc(حجم(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(حجم(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_داخل_کرو_HEAD(pids, pi, entries);
 	}
 	kvm_close(kd);
 
-	return pids;
+	أرجع pids;
 }
 
-#else
+#وإلا
 #  error "Platform not supported!"
 #endif
 
-static bool
-_match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
+ساكن bool
+_match_daemon(ثابت حرف *svcname, ثابت حرف *instance, RC_STRINGLIST *match)
 {
-	char *line = NULL;
+	حرف *سطر = عدم;
 	size_t len = 0;
 	FILE *fp;
 	RC_STRING *m;
-	char *daemon;
+	حرف *daemon;
 
 	xasprintf(&daemon, "%s/%s", svcname, instance);
 	fp = do_fopenat(rc_dirfd(RC_DIR_DAEMONS), daemon, O_RDONLY);
-	free(daemon);
+	حرر(daemon);
 
-	if (!fp)
-		return false;
+	إذا (!fp)
+		أرجع false;
 
-	while (xgetline(&line, &len, fp) != -1) {
+	طالما (xgetline(&سطر, &len, fp) != -1) {
 		TAILQ_FOREACH(m, match, entries)
-		    if (strcmp(line, m->value) == 0) {
+		    إذا (strcmp(سطر, m->قدر) == 0) {
 			    TAILQ_REMOVE(match, m, entries);
-			    break;
+			    اكسر;
 		    }
-		if (!TAILQ_FIRST(match))
-			break;
+		إذا (!TAILQ_FIRST(match))
+			اكسر;
 	}
 	fclose(fp);
-	free(line);
-	if (TAILQ_FIRST(match))
-		return false;
-	return true;
+	حرر(سطر);
+	إذا (TAILQ_FIRST(match))
+		أرجع false;
+	أرجع true;
 }
 
-static RC_STRINGLIST *
-_match_list(const char *exec, const char *const *argv, const char *pidfile)
+ساكن RC_STRINGLIST *
+_match_list(ثابت حرف *exec, ثابت حرف *ثابت *argv, ثابت حرف *pidfile)
 {
 	RC_STRINGLIST *match = rc_stringlist_new();
-	int i = 0;
-	char *m;
+	صحيح i = 0;
+	حرف *m;
 
-	if (exec) {
+	إذا (exec) {
 		xasprintf(&m, "exec=%s", exec);
 		rc_stringlist_add(match, m);
-		free(m);
+		حرر(m);
 	}
 
-	while (argv && argv[i]) {
+	طالما (argv && argv[i]) {
 		xasprintf(&m, "argv_0=%s", argv[i++]);
 		rc_stringlist_add(match, m);
-		free(m);
+		حرر(m);
 	}
 
-	if (pidfile) {
+	إذا (pidfile) {
 		xasprintf(&m, "pidfile=%s", pidfile);
 		rc_stringlist_add(match, m);
-		free(m);
+		حرر(m);
 	}
 
-	return match;
+	أرجع match;
 }
 
 bool
-rc_service_daemon_set(const char *service, const char *exec,
-    const char *const *argv,
-    const char *pidfile, bool started)
+rc_service_daemon_set(ثابت حرف *service, ثابت حرف *exec,
+    ثابت حرف *ثابت *argv,
+    ثابت حرف *pidfile, bool started)
 {
-	char *file = NULL;
-	int nfiles = 0;
-	char oldfile[PATH_MAX] = { '\0' };
+	حرف *file = عدم;
+	صحيح nfiles = 0;
+	حرف oldfile[PATH_MAX] = { '\0' };
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	بنية dirent *d;
 	RC_STRINGLIST *match, *renamelist;
-	int i = 0;
+	صحيح i = 0;
 	FILE *fp;
-	const char *base = basename_c(service);
+	ثابت حرف *base = basename_c(service);
 
-	if (!exec && !pidfile) {
+	إذا (!exec && !pidfile) {
 		errno = EINVAL;
-		return false;
+		أرجع false;
 	}
 
 	/* Regardless, erase any existing daemon info */
-	if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+	إذا ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
 		match = _match_list(exec, argv, pidfile);
 		renamelist = rc_stringlist_new();
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
+		طالما ((d = readdir(dp))) {
+			إذا (d->d_name[0] == '.')
+				استمر;
 
 			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), base, d->d_name);
-			if (rc_stringlist_find(renamelist, file)) {
-				free(file);
-				continue;
+			إذا (rc_stringlist_find(renamelist, file)) {
+				حرر(file);
+				استمر;
 			}
 
 			nfiles++;
 
-			if (!*oldfile) {
-				if (_match_daemon(base, d->d_name, match)) {
+			إذا (!*oldfile) {
+				إذا (_match_daemon(base, d->d_name, match)) {
 					unlink(file);
-					strlcpy(oldfile, file, sizeof(oldfile));
+					strlcpy(oldfile, file, حجم(oldfile));
 					nfiles--;
 				}
-			} else {
+			} وإلا {
 				rename(file, oldfile);
-				strlcpy(oldfile, file, sizeof(oldfile));
+				strlcpy(oldfile, file, حجم(oldfile));
 				/* Add renamed file to renamelist, as this new file name could
 				 * be read again from readdir() */
 				rc_stringlist_add(renamelist, oldfile);
 			}
-			free(file);
+			حرر(file);
 		}
 		closedir(dp);
 		rc_stringlist_free(match);
@@ -433,209 +433,209 @@ rc_service_daemon_set(const char *service, const char *exec,
 	}
 
 	/* Now store our daemon info */
-	if (!started)
-		return true;
+	إذا (!started)
+		أرجع true;
 
-	if (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
+	إذا (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
 		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), base, nfiles + 1);
-		if ((fp = fopen(file, "w"))) {
+		إذا ((fp = fopen(file, "w"))) {
 			fprintf(fp, "exec=");
-			if (exec)
+			إذا (exec)
 				fprintf(fp, "%s", exec);
-			while (argv && argv[i]) {
+			طالما (argv && argv[i]) {
 				fprintf(fp, "\nargv_%d=%s", i, argv[i]);
 				i++;
 			}
 			fprintf(fp, "\npidfile=");
-			if (pidfile)
+			إذا (pidfile)
 				fprintf(fp, "%s", pidfile);
 			fprintf(fp, "\n");
 			fclose(fp);
 			retval = true;
 		}
-		free(file);
+		حرر(file);
 	}
 
-	return retval;
+	أرجع retval;
 }
 
 bool
-rc_service_started_daemon(const char *service,
-    const char *exec, const char *const *argv, int indx)
+rc_service_started_daemon(ثابت حرف *service,
+    ثابت حرف *exec, ثابت حرف *ثابت *argv, صحيح indx)
 {
-	const char *base = basename_c(service);
-	char *file = NULL;
+	ثابت حرف *base = basename_c(service);
+	حرف *file = عدم;
 	RC_STRINGLIST *match;
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	بنية dirent *d;
 
-	if (!service || !exec)
-		return false;
+	إذا (!service || !exec)
+		أرجع false;
 
-	match = _match_list(exec, argv, NULL);
+	match = _match_list(exec, argv, عدم);
 
-	if (indx > 0) {
+	إذا (indx > 0) {
 		xasprintf(&file, "%03d", indx);
 		retval = _match_daemon(base, file, match);
-		free(file);
-	} else if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
-			if ((retval = _match_daemon(base, d->d_name, match)))
-				break;
+		حرر(file);
+	} وإلا إذا ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+		طالما ((d = readdir(dp))) {
+			إذا (d->d_name[0] == '.')
+				استمر;
+			إذا ((retval = _match_daemon(base, d->d_name, match)))
+				اكسر;
 		}
 		closedir(dp);
 	}
 
 	rc_stringlist_free(match);
-	return retval;
+	أرجع retval;
 }
 
 bool
-rc_service_daemons_crashed(const char *service)
+rc_service_daemons_crashed(ثابت حرف *service)
 {
 	DIR *dp;
-	struct dirent *d;
+	بنية dirent *d;
 	FILE *fp;
-	char *line = NULL;
+	حرف *سطر = عدم;
 	size_t len = 0;
-	char **argv = NULL;
-	char *exec = NULL;
-	char *name = NULL;
-	char *pidfile = NULL;
+	حرف **argv = عدم;
+	حرف *exec = عدم;
+	حرف *name = عدم;
+	حرف *pidfile = عدم;
 	pid_t pid = 0;
 	RC_PIDLIST *pids;
 	RC_PID *p1;
 	RC_PID *p2;
-	char *p;
-	char *token;
+	حرف *p;
+	حرف *token;
 	bool retval = false;
-	RC_STRINGLIST *list = NULL;
+	RC_STRINGLIST *list = عدم;
 	RC_STRING *s;
 	size_t i;
-	char *ch_root;
-	char *spidfile;
+	حرف *ch_جڑ;
+	حرف *spidfile;
 
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
-		return false;
+	إذا (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
+		أرجع false;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	طالما ((d = readdir(dp))) {
+		إذا (d->d_name[0] == '.')
+			استمر;
 
-		if (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
-			break;
+		إذا (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
+			اكسر;
 
-		while (xgetline(&line, &len, fp) != -1) {
-			p = line;
-			if ((token = strsep(&p, "=")) == NULL || !p)
-				continue;
+		طالما (xgetline(&سطر, &len, fp) != -1) {
+			p = سطر;
+			إذا ((token = strsep(&p, "=")) == عدم || !p)
+				استمر;
 
-			if (!*p)
-				continue;
+			إذا (!*p)
+				استمر;
 
-			if (strcmp(token, "exec") == 0) {
-				if (exec)
-					free(exec);
+			إذا (strcmp(token, "exec") == 0) {
+				إذا (exec)
+					حرر(exec);
 				exec = xstrdup(p);
-			} else if (strncmp(token, "argv_", 5) == 0) {
-				if (!list)
+			} وإلا إذا (strncmp(token, "argv_", 5) == 0) {
+				إذا (!list)
 					list = rc_stringlist_new();
 				rc_stringlist_add(list, p);
-			} else if (strcmp(token, "name") == 0) {
-				if (name)
-					free(name);
+			} وإلا إذا (strcmp(token, "name") == 0) {
+				إذا (name)
+					حرر(name);
 				name = xstrdup(p);
-			} else if (strcmp(token, "pidfile") == 0) {
+			} وإلا إذا (strcmp(token, "pidfile") == 0) {
 				pidfile = xstrdup(p);
-				break;
+				اكسر;
 			}
 		}
 		fclose(fp);
 
-		ch_root = rc_service_value_get(basename_c(service), "chroot");
+		ch_جڑ = rc_service_قدر_get(basename_c(service), "chroot");
 		spidfile = pidfile;
-		if (ch_root && pidfile) {
-			xasprintf(&spidfile, "%s%s", ch_root, pidfile);
-			free(pidfile);
+		إذا (ch_جڑ && pidfile) {
+			xasprintf(&spidfile, "%s%s", ch_جڑ, pidfile);
+			حرر(pidfile);
 			pidfile = spidfile;
 		}
 
 		pid = 0;
-		if (pidfile) {
+		إذا (pidfile) {
 			retval = true;
-			if ((fp = fopen(pidfile, "r"))) {
-				if (fscanf(fp, "%d", &pid) == 1)
+			إذا ((fp = fopen(pidfile, "r"))) {
+				إذا (fscanf(fp, "%d", &pid) == 1)
 					retval = false;
 				fclose(fp);
 			}
-			free(pidfile);
-			pidfile = NULL;
+			حرر(pidfile);
+			pidfile = عدم;
 
 			/* We have the pid, so no need to match
 			   on exec or name */
-			free(exec);
-			exec = NULL;
-			free(name);
-			name = NULL;
-		} else {
-			if (exec) {
-				if (!list)
+			حرر(exec);
+			exec = عدم;
+			حرر(name);
+			name = عدم;
+		} وإلا {
+			إذا (exec) {
+				إذا (!list)
 					list = rc_stringlist_new();
-				if (!TAILQ_FIRST(list))
+				إذا (!TAILQ_FIRST(list))
 					rc_stringlist_add(list, exec);
 
-				free(exec);
-				exec = NULL;
+				حرر(exec);
+				exec = عدم;
 			}
 
-			if (list) {
+			إذا (list) {
 				/* We need to flatten our linked list
 				   into an array */
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    i++;
-				argv = xmalloc(sizeof(char *) * (i + 1));
+				argv = xmalloc(حجم(حرف *) * (i + 1));
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
-				    argv[i++] = s->value;
-				argv[i] = NULL;
+				    argv[i++] = s->قدر;
+				argv[i] = عدم;
 			}
 		}
 
-		if (!retval) {
-			if (pid != 0) {
-				if (kill(pid, 0) == -1 && errno == ESRCH)
+		إذا (!retval) {
+			إذا (pid != 0) {
+				إذا (kill(pid, 0) == -1 && errno == ESRCH)
 					retval = true;
-			} else if ((pids = rc_find_pids(exec,
-				    (const char *const *)argv,
+			} وإلا إذا ((pids = rc_find_pids(exec,
+				    (ثابت حرف *ثابت *)argv,
 				    0, pid)))
 			{
 				p1 = LIST_FIRST(pids);
-				while (p1) {
+				طالما (p1) {
 					p2 = LIST_NEXT(p1, entries);
-					free(p1);
+					حرر(p1);
 					p1 = p2;
 				}
-				free(pids);
-			} else
+				حرر(pids);
+			} وإلا
 				retval = true;
 		}
 		rc_stringlist_free(list);
-		list = NULL;
-		free(argv);
-		argv = NULL;
-		free(exec);
-		exec = NULL;
-		free(name);
-		name = NULL;
-		if (retval)
-			break;
+		list = عدم;
+		حرر(argv);
+		argv = عدم;
+		حرر(exec);
+		exec = عدم;
+		حرر(name);
+		name = عدم;
+		إذا (retval)
+			اكسر;
 	}
 	closedir(dp);
-	free(line);
+	حرر(سطر);
 
-	return retval;
+	أرجع retval;
 }
