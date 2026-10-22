@@ -15,92 +15,92 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#અન્તર્ભાવ <errno.h>
+#અન્તર્ભાવ <stdbool.h>
+#અન્તર્ભાવ <stdlib.h>
+#અન્તર્ભાવ <string.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#અન્તર્ભાવ "queue.h"
+#અન્તર્ભાવ "librc.h"
+#અન્તર્ભાવ "helpers.h"
 
 RC_STRINGLIST *
-rc_stringlist_new(void)
+rc_stringlist_new(શૂન્ય)
 {
-	RC_STRINGLIST *l = xmalloc(sizeof(*l));
+	RC_STRINGLIST *l = xmalloc(કદ(*l));
 	TAILQ_INIT(l);
-	return l;
+	પાછા l;
 }
 
 RC_STRING *
-rc_stringlist_add(RC_STRINGLIST *list, const char *value)
+rc_stringlist_add(RC_STRINGLIST *list, અચલ અક્ષર *કિંમત)
 {
-	RC_STRING *s = xmalloc(sizeof(*s));
+	RC_STRING *s = xmalloc(કદ(*s));
 
-	s->value = xstrdup(value);
-	TAILQ_INSERT_TAIL(list, s, entries);
-	return s;
+	s->કિંમત = xstrdup(કિંમત);
+	TAILQ_ઉમેરો_TAIL(list, s, entries);
+	પાછા s;
 }
 
 RC_STRING *
-rc_stringlist_addu(RC_STRINGLIST *list, const char *value)
+rc_stringlist_addu(RC_STRINGLIST *list, અચલ અક્ષર *કિંમત)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    જો (strcmp(s->કિંમત, કિંમત) == 0) {
 		    errno = EEXIST;
-		    return NULL;
+		    પાછા ખાલી;
 	    }
 
-	return rc_stringlist_add(list, value);
+	પાછા rc_stringlist_add(list, કિંમત);
 }
 
 bool
-rc_stringlist_delete(RC_STRINGLIST *list, const char *value)
+rc_stringlist_delete(RC_STRINGLIST *list, અચલ અક્ષર *કિંમત)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    જો (strcmp(s->કિંમત, કિંમત) == 0) {
 		    TAILQ_REMOVE(list, s, entries);
-		    free(s->value);
-		    free(s);
-		    return true;
+		    મુક્ત(s->કિંમત);
+		    મુક્ત(s);
+		    પાછા true;
 	    }
 
 	errno = EEXIST;
-	return false;
+	પાછા false;
 }
 
 RC_STRING *
-rc_stringlist_find(RC_STRINGLIST *list, const char *value)
+rc_stringlist_find(RC_STRINGLIST *list, અચલ અક્ષર *કિંમત)
 {
 	RC_STRING *s;
 
-	if (list) {
+	જો (list) {
 		TAILQ_FOREACH(s, list, entries)
-		    if (strcmp(s->value, value) == 0)
-			    return s;
+		    જો (strcmp(s->કિંમત, કિંમત) == 0)
+			    પાછા s;
 	}
-	return NULL;
+	પાછા ખાલી;
 }
 
 RC_STRINGLIST *
-rc_stringlist_split(const char *value, const char *sep)
+rc_stringlist_split(અચલ અક્ષર *કિંમત, અચલ અક્ષર *sep)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	char *d = xstrdup(value);
-	char *p = d, *token;
+	અક્ષર *d = xstrdup(કિંમત);
+	અક્ષર *p = d, *token;
 
-	while ((token = strsep(&p, sep)))
+	જ્યારે ((token = strsep(&p, sep)))
 		rc_stringlist_add(list, token);
-	free(d);
+	મુક્ત(d);
 
-	return list;
+	પાછા list;
 }
 
-void
+શૂન્ય
 rc_stringlist_sort(RC_STRINGLIST **list)
 {
 	RC_STRINGLIST *l = *list;
@@ -112,38 +112,38 @@ rc_stringlist_sort(RC_STRINGLIST **list)
 
 	TAILQ_FOREACH_SAFE(s, l, entries, sn) {
 		TAILQ_REMOVE(l, s, entries);
-		last = NULL;
+		last = ખાલી;
 		TAILQ_FOREACH(n, new, entries) {
-			if (strcmp(s->value, n->value) < 0)
-				break;
+			જો (strcmp(s->કિંમત, n->કિંમત) < 0)
+				તોડો;
 			last = n;
 		}
-		if (last)
-			TAILQ_INSERT_AFTER(new, last, s, entries);
-		else
-			TAILQ_INSERT_HEAD(new, s, entries);
+		જો (last)
+			TAILQ_ઉમેરો_AFTER(new, last, s, entries);
+		નહીંતર
+			TAILQ_ઉમેરો_HEAD(new, s, entries);
 	}
 
 	/* Now we've sorted the list, copy across the new head */
-	free(l);
+	મુક્ત(l);
 	*list = new;
 }
 
-void
+શૂન્ય
 rc_stringlist_free(RC_STRINGLIST *list)
 {
 	RC_STRING *s1;
 	RC_STRING *s2;
 
-	if (!list)
-		return;
+	જો (!list)
+		પાછા;
 
 	s1 = TAILQ_FIRST(list);
-	while (s1) {
+	જ્યારે (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
-		free(s1->value);
-		free(s1);
+		મુક્ત(s1->કિંમત);
+		મુક્ત(s1);
 		s1 = s2;
 	}
-	free(list);
+	મુક્ત(list);
 }

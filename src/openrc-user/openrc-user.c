@@ -1,57 +1,57 @@
-#include <einfo.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <syslog.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <spawn.h>
+#અન્તર્ભાવ <einfo.h>
+#અન્તર્ભાવ <errno.h>
+#અન્તર્ભાવ <fcntl.h>
+#અન્તર્ભાવ <grp.h>
+#અન્તર્ભાવ <pwd.h>
+#અન્તર્ભાવ <stdlib.h>
+#અન્તર્ભાવ <sys/types.h>
+#અન્તર્ભાવ <sys/wait.h>
+#અન્તર્ભાવ <syslog.h>
+#અન્તર્ભાવ <string.h>
+#અન્તર્ભાવ <unistd.h>
+#અન્તર્ભાવ <signal.h>
+#અન્તર્ભાવ <spawn.h>
 
 #ifdef HAVE_PAM
-#include <security/pam_appl.h>
+#અન્તર્ભાવ <security/pam_appl.h>
 #endif
 
 #define USER_SH RC_LIBEXECDIR "/sh/openrc-user.sh "
 
-#include "helpers.h"
-#include "rc.h"
-#include "rc_exec.h"
+#અન્તર્ભાવ "helpers.h"
+#અન્તર્ભાવ "rc.h"
+#અન્તર્ભાવ "rc_exec.h"
 
-static bool valid_shell(const char *shell) {
+સ્થિર bool valid_shell(અચલ અક્ષર *shell) {
 	FILE *fp = fopen(RC_SYSCONFDIR "/shells", "r");
 	bool ret = false;
-	char *line = NULL;
+	અક્ષર *લીટી = ખાલી;
 	size_t size;
 
-	if (!fp)
-		return true;
+	જો (!fp)
+		પાછા true;
 
-	while (xgetline(&line, &size, fp) != -1) {
-		if (line[0] == '#')
-			continue;
-		if (strcmp(line, shell) == 0) {
+	જ્યારે (xgetline(&લીટી, &size, fp) != -1) {
+		જો (લીટી[0] == '#')
+			ચાલુ;
+		જો (strcmp(લીટી, shell) == 0) {
 			ret = true;
-			break;
+			તોડો;
 		}
 	}
 
-	free(line);
-	return ret;
+	મુક્ત(લીટી);
+	પાછા ret;
 }
 
-static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
-	char *argv0;
-	const char *argv[] = {
-		NULL /* replaced below */, "-c",
-		start ? USER_SH "start" : USER_SH "stop", NULL
+સ્થિર bool spawn_openrc(uid_t uid, gid_t gid, અચલ અક્ષર *shell, bool start) {
+	અક્ષર *argv0;
+	અચલ અક્ષર *argv[] = {
+		ખાલી /* replaced below */, "-c",
+		start ? USER_SH "start" : USER_SH "stop", ખાલી
 	};
-	struct exec_result res;
-	struct exec_args args;
+	સંરચના exec_result res;
+	સંરચના exec_args args;
 
 	/* shell might be a multicall binary, e.g busybox.
 	 * so setting argv[0] to "-" might not work */
@@ -63,39 +63,39 @@ static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
 	args.gid = gid;
 	args.redirect_stdout = 3;
 	res = do_exec(&args);
-	free(argv0);
-	if (res.pid < 0) {
+	મુક્ત(argv0);
+	જો (res.pid < 0) {
 		elog(LOG_ERR, "do_exec: %s", strerror(errno));
-		return false;
+		પાછા false;
 	}
-	return rc_waitpid(res.pid) == 0;
+	પાછા rc_waitpid(res.pid) == 0;
 }
 
-int main(int argc, char **argv) {
-	const struct passwd *user;
-	char *log, *shell;
+પૂર્ણાંક મુખ્ય(પૂર્ણાંક argc, અક્ષર **argv) {
+	અચલ સંરચના passwd *user;
+	અક્ષર *log, *shell;
 	sigset_t sigmask;
-	int sig, ret = 0;
+	પૂર્ણાંક sig, ret = 0;
 	uid_t uid;
 	gid_t gid;
 #ifdef HAVE_PAM
-	struct pam_conv conv = { NULL, NULL };
-	pam_handle_t *pamh = NULL;
+	સંરચના pam_conv conv = { ખાલી, ખાલી };
+	pam_handle_t *pamh = ખાલી;
 	bool pam_session = false;
-	int rc;
+	પૂર્ણાંક rc;
 #endif
 
 	setenv("EINFO_LOG", "openrc-user", true);
 
-	if (argc != 2) {
+	જો (argc != 2) {
 		elog(LOG_ERR, "Invalid usage. %s <username>", argv[0]);
-		return -1;
+		પાછા -1;
 	}
 	/* We can't rely on the supervisor to drop perms since
 	 * pam modules might need root perms. */
-	if (!(user = getpwnam(argv[1]))) {
+	જો (!(user = getpwnam(argv[1]))) {
 		elog(LOG_ERR, "Invalid username %s.", argv[1]);
-		return -1;
+		પાછા -1;
 	}
 
 	/* sssd's pam module wrongly calls getpwnam, meaning
@@ -114,54 +114,54 @@ int main(int argc, char **argv) {
 
 	xasprintf(&log, "openrc-user.%s", user->pw_name);
 	setenv("EINFO_LOG", log, true);
-	free(log);
+	મુક્ત(log);
 
 #ifdef HAVE_PAM
-	if ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
+	જો ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to start pam: %s", pam_strerror(pamh, rc));
-	else if ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	નહીંતર જો ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to open session: %s", pam_strerror(pamh, rc));
-	else
+	નહીંતર
 		pam_session = true;
 
-	for (char **env = pam_getenvlist(pamh); env && *env; env++) {
-		if (strchr(*env, '='))
+	માટે (અક્ષર **env = pam_getenvlist(pamh); env && *env; env++) {
+		જો (strchr(*env, '='))
 			putenv(xstrdup(*env));
-		else
+		નહીંતર
 			unsetenv(*env);
 	}
 
-	if (!pam_session && pamh) {
+	જો (!pam_session && pamh) {
 		pam_end(pamh, rc);
-		pamh = NULL;
+		pamh = ખાલી;
 	}
 #endif
 
-	if (!spawn_openrc(uid, gid, shell, true)) {
+	જો (!spawn_openrc(uid, gid, shell, true)) {
 		ret = -1;
-		goto out;
+		જાઓ out;
 	}
 
 	sigfillset(&sigmask);
-	sigprocmask(SIG_SETMASK, &sigmask, NULL);
+	sigprocmask(SIG_SETMASK, &sigmask, ખાલી);
 
 	sigemptyset(&sigmask);
 	sigaddset(&sigmask, SIGTERM);
 
 	sigwait(&sigmask, &sig);
 
-	if (!spawn_openrc(uid, gid, shell, false))
+	જો (!spawn_openrc(uid, gid, shell, false))
 		ret = -1;
 
 out:
 #ifdef HAVE_PAM
-	if (pamh) {
-		if ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	જો (pamh) {
+		જો ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 			elog(LOG_ERR, "Failed to close session: %s", pam_strerror(pamh, rc));
 		pam_end(pamh, rc);
 	}
 #endif
 
-	free(shell);
-	return ret;
+	મુક્ત(shell);
+	પાછા ret;
 }

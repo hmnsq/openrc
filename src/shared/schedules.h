@@ -13,16 +13,16 @@
 #ifndef __RC_SCHEDULES_H
 #define __RC_SCHEDULES_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#અન્તર્ભાવ <stdbool.h>
+#અન્તર્ભાવ <sys/types.h>
 
-void free_schedulelist(void);
-int parse_signal(const char *applet, const char *sig);
-void parse_schedule(const char *applet, const char *string, int timeout);
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-		pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet);
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+શૂન્ય free_schedulelist(શૂન્ય);
+પૂર્ણાંક parse_signal(અચલ અક્ષર *applet, અચલ અક્ષર *sig);
+શૂન્ય parse_schedule(અચલ અક્ષર *applet, અચલ અક્ષર *string, પૂર્ણાંક timeout);
+પૂર્ણાંક do_stop(અચલ અક્ષર *applet, અચલ અક્ષર *exec, અચલ અક્ષર *અચલ *argv,
+		pid_t pid, uid_t uid, પૂર્ણાંક sig, bool group, bool test, bool quiet);
+પૂર્ણાંક run_stop_schedule(અચલ અક્ષર *applet,
+		અચલ અક્ષર *exec, અચલ અક્ષર *અચલ *argv,
 		pid_t pid, uid_t uid, bool group,
 		bool test, bool progress, bool quiet);
 

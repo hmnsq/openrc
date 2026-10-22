@@ -10,21 +10,21 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#અન્તર્ભાવ <stdlib.h>
 
-#include "rc.h"
+#અન્તર્ભાવ "rc.h"
 
-int main(int argc, char **argv)
+પૂર્ણાંક મુખ્ય(પૂર્ણાંક argc, અક્ષર **argv)
 {
-	int i;
+	પૂર્ણાંક i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	જો (argc < 3)
+		પાછા EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	માટે (i = 2; i < argc; ++i)
+		જો (!rc_newer_than(argv[1], argv[i], ખાલી, ખાલી))
+			પાછા EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }

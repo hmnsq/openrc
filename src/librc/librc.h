@@ -20,44 +20,44 @@
 
 #define _IN_LIBRC
 
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <paths.h>
-#include <regex.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <time.h>
-#include <unistd.h>
+#અન્તર્ભાવ <sys/types.h>
+#અન્તર્ભાવ <sys/param.h>
+#અન્તર્ભાવ <sys/stat.h>
+#અન્તર્ભાવ <sys/time.h>
+#અન્તર્ભાવ <sys/wait.h>
+#અન્તર્ભાવ <ctype.h>
+#અન્તર્ભાવ <dirent.h>
+#અન્તર્ભાવ <errno.h>
+#અન્તર્ભાવ <fcntl.h>
+#અન્તર્ભાવ <libgen.h>
+#અન્તર્ભાવ <limits.h>
+#અન્તર્ભાવ <paths.h>
+#અન્તર્ભાવ <regex.h>
+#અન્તર્ભાવ <signal.h>
+#અન્તર્ભાવ <stdarg.h>
+#અન્તર્ભાવ <stdbool.h>
+#અન્તર્ભાવ <stdio.h>
+#અન્તર્ભાવ <stdlib.h>
+#અન્તર્ભાવ <string.h>
+#અન્તર્ભાવ <strings.h>
+#અન્તર્ભાવ <time.h>
+#અન્તર્ભાવ <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
-  #include <sys/user.h>
+#જો defined(BSD) && !defined(__GNU__)
+  #જો !defined(__NetBSD__)
+  #અન્તર્ભાવ <sys/user.h>
   #endif
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#else
-#include <sys/param.h>
+#અન્તર્ભાવ <sys/param.h>
+#અન્તર્ભાવ <sys/sysctl.h>
+#અન્તર્ભાવ <kvm.h>
+#નહીંતર
+#અન્તર્ભાવ <sys/param.h>
 #endif
 
-#include "rc.h"
-#include "misc.h"
+#અન્તર્ભાવ "rc.h"
+#અન્તર્ભાવ "misc.h"
 
-static const char *const dirnames[RC_DIR_SYS_MAX] =
+સ્થિર અચલ અક્ષર *અચલ dirnames[RC_DIR_SYS_MAX] =
 {
 	[RC_DIR_STARTING] = "starting",
 	[RC_DIR_STARTED] = "started",
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
-void clear_dirfds(void);
+RC_STRINGLIST *config_list(પૂર્ણાંક dirfd, અચલ અક્ષર *pathname);
+શૂન્ય clear_dirfds(શૂન્ય);
 
 #endif

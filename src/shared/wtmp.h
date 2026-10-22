@@ -18,10 +18,10 @@
 #ifndef __RC_WTMP_H__
 #define __RC_WTMP_H__
 
-#include <utmp.h>
-#include <sys/types.h>
+#અન્તર્ભાવ <utmp.h>
+#અન્તર્ભાવ <sys/types.h>
 
-void log_wtmp(const char *user, const char *id, pid_t pid, int type,
-		const char *line);
+શૂન્ય log_wtmp(અચલ અક્ષર *user, અચલ અક્ષર *id, pid_t pid, પૂર્ણાંક type,
+		અચલ અક્ષર *લીટી);
 
 #endif

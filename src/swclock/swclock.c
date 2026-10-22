@@ -18,85 +18,85 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <utime.h>
-#include <string.h>
+#અન્તર્ભાવ <sys/time.h>
+#અન્તર્ભાવ <sys/stat.h>
+#અન્તર્ભાવ <errno.h>
+#અન્તર્ભાવ <fcntl.h>
+#અન્તર્ભાવ <getopt.h>
+#અન્તર્ભાવ <unistd.h>
+#અન્તર્ભાવ <utime.h>
+#અન્તર્ભાવ <string.h>
 
-#include "einfo.h"
-#include "_usage.h"
-#include "helpers.h"
+#અન્તર્ભાવ "einfo.h"
+#અન્તર્ભાવ "_usage.h"
+#અન્તર્ભાવ "helpers.h"
 
 
-const char *applet = NULL;
-const char *extraopts = "file";
-const char getoptstring[] = "sw" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "save", 0, NULL, 's' },
-	{ "warn", 0, NULL, 'w' },
+અચલ અક્ષર *applet = ખાલી;
+અચલ અક્ષર *extraopts = "file";
+અચલ અક્ષર getoptstring[] = "sw" getoptstring_COMMON;
+અચલ સંરચના option longopts[] = {
+	{ "save", 0, ખાલી, 's' },
+	{ "warn", 0, ખાલી, 'w' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+અચલ અક્ષર * અચલ longopts_help[] = {
 	"saves the time",
 	"no error if no reference file",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+અચલ અક્ષર *usagestring = ખાલી;
 
-int main(int argc, char **argv)
+પૂર્ણાંક મુખ્ય(પૂર્ણાંક argc, અક્ષર **argv)
 {
-	int opt, sflag = 0, wflag = 0;
-	const char *file = NULL;
-	struct stat sb;
-	struct timeval tv;
+	પૂર્ણાંક opt, sflag = 0, wflag = 0;
+	અચલ અક્ષર *file = ખાલી;
+	સંરચના stat sb;
+	સંરચના timeval tv;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	જ્યારે ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (પૂર્ણાંક *) 0)) != -1)
 	{
-		switch (opt) {
-		case 's':
+		પસંદગી (opt) {
+		સ્થિતિ 's':
 			sflag = 1;
-			break;
-		case 'w':
+			તોડો;
+		સ્થિતિ 'w':
 			wflag = 1;
-			break;
+			તોડો;
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind < argc)
+	જો (optind < argc)
 		file = argv[optind++];
-	else
+	નહીંતર
 		eerrorx("swclock: Reference file was not specified");
 
-	if (sflag) {
-		int fd = open(file, O_WRONLY | O_CREAT, 0644);
-		if (fd == -1)
+	જો (sflag) {
+		પૂર્ણાંક fd = open(file, O_WRONLY | O_CREAT, 0644);
+		જો (fd == -1)
 			eerrorx("swclock: open: %s", strerror(errno));
-		if (futimens(fd, NULL) == -1)
+		જો (futimens(fd, ખાલી) == -1)
 			eerrorx("swclock: futimens: %s", strerror(errno));
 		close(fd);
-		return 0;
+		પાછા 0;
 	}
 
-	if (stat(file, &sb) == -1) {
-		if (wflag != 0 && errno == ENOENT)
+	જો (stat(file, &sb) == -1) {
+		જો (wflag != 0 && errno == ENOENT)
 			ewarn("swclock: `%s': %s", file, strerror(errno));
-		else
+		નહીંતર
 			eerrorx("swclock: `%s': %s", file, strerror(errno));
-		return 0;
+		પાછા 0;
 	}
 
 	tv.tv_sec = sb.st_mtime;
 	tv.tv_usec = 0;
 
-	if (settimeofday(&tv, NULL) == -1)
+	જો (settimeofday(&tv, ખાલી) == -1)
 		eerrorx("swclock: settimeofday: %s", strerror(errno));
 
-	return 0;
+	પાછા 0;
 }

@@ -15,20 +15,20 @@
 
 #ifdef HAVE_SELINUX
 
-int selinux_util_open(void);
-int selinux_util_label(const char *path);
-int selinux_util_close(void);
+પૂર્ણાંક selinux_util_open(શૂન્ય);
+પૂર્ણાંક selinux_util_label(અચલ અક્ષર *path);
+પૂર્ણાંક selinux_util_close(શૂન્ય);
 
-void selinux_setup(char **argv);
+શૂન્ય selinux_setup(અક્ષર **argv);
 
-#else
+#નહીંતર
 
 /* always return false for selinux_util_open() */
 #define selinux_util_open() (0)
-#define selinux_util_label(x) do { } while (0)
-#define selinux_util_close() do { } while (0)
+#define selinux_util_label(x) કરો { } જ્યારે (0)
+#define selinux_util_close() કરો { } જ્યારે (0)
 
-#define selinux_setup(x) do { } while (0)
+#define selinux_setup(x) કરો { } જ્યારે (0)
 
 #endif
 

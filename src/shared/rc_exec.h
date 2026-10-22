@@ -12,8 +12,8 @@
 #ifndef RC_EXEC_H
 #define RC_EXEC_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#અન્તર્ભાવ <stdbool.h>
+#અન્તર્ભાવ <sys/types.h>
 
 /*
  * goal of this api is to provide a convenient and centralized way to do most
@@ -22,7 +22,7 @@
  * here instead of ad-hoc coding fork+exec yourself.
  */
 
-enum {
+ગણના {
 	/* default */
 	EXEC_NO_REDIRECT = -1,
 	/* make a pipe and redirect to it */
@@ -31,30 +31,30 @@ enum {
 	EXEC_DEVNULL = -3,
 };
 
-struct exec_args {
-	const char **argv;
-	const char *cmd;  /* if NULL, argv[0] is used */
-	int redirect_stdin;
-	int redirect_stdout;
-	int redirect_stderr;
+સંરચના exec_args {
+	અચલ અક્ષર **argv;
+	અચલ અક્ષર *cmd;  /* if NULL, argv[0] is used */
+	પૂર્ણાંક redirect_stdin;
+	પૂર્ણાંક redirect_stdout;
+	પૂર્ણાંક redirect_stderr;
 	uid_t uid;
 	gid_t gid;
 	bool setsid : 1;
 };
 
-struct exec_result {
+સંરચના exec_result {
 	pid_t pid;
 	/* returned in case of RC_EXEC_MKPIPE */
-	int proc_stdin;
-	int proc_stdout;
-	int proc_stderr;
+	પૂર્ણાંક proc_stdin;
+	પૂર્ણાંક proc_stdout;
+	પૂર્ણાંક proc_stderr;
 };
 
-struct exec_args exec_init(const char **argv);
-struct exec_result do_exec(struct exec_args *args);
+સંરચના exec_args exec_init(અચલ અક્ષર **argv);
+સંરચના exec_result do_exec(સંરચના exec_args *args);
 
 /* some exec related helplers */
-int rc_waitpid(pid_t pid);
-int rc_pipe_command(const char *cmd, int devnullfd);
+પૂર્ણાંક rc_waitpid(pid_t pid);
+પૂર્ણાંક rc_pipe_command(અચલ અક્ષર *cmd, પૂર્ણાંક devnullfd);
 
 #endif
