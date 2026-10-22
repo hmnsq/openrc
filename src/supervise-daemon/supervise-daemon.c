@@ -16,59 +16,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <inttypes.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <limits.h>
-#include <grp.h>
-#include <pwd.h>
-#include <signal.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <strings.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <inttypes.h>
+#अन्तर्भाव <fcntl.h>
+#अन्तर्भाव <getopt.h>
+#अन्तर्भाव <limits.h>
+#अन्तर्भाव <grp.h>
+#अन्तर्भाव <pwd.h>
+#अन्तर्भाव <signal.h>
+#अन्तर्भाव <stddef.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <stdbool.h>
+#अन्तर्भाव <strings.h>
 #ifdef __linux__
 # include <sys/syscall.h> /* For io priority */
 # include <sys/prctl.h> /* For prctl */
 #endif
-#include <syslog.h>
-#include <sys/ioctl.h>
-#include <sys/resource.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <time.h>
-#include <unistd.h>
+#अन्तर्भाव <syslog.h>
+#अन्तर्भाव <sys/ioctl.h>
+#अन्तर्भाव <sys/resource.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <sys/wait.h>
+#अन्तर्भाव <time.h>
+#अन्तर्भाव <unistd.h>
 
 #ifdef HAVE_PAM
-#include <security/pam_appl.h>
+#अन्तर्भाव <security/pam_appl.h>
 
 /* We are not supporting authentication conversations */
-static struct pam_conv conv = { NULL, NULL};
+स्थिर संरचना pam_conv conv = { रिक्त, रिक्त};
 #endif
 
 #ifdef __linux__
-#include <sys/capability.h>
+#अन्तर्भाव <sys/capability.h>
 #endif
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "rc_exec.h"
-#include "plugin.h"
-#include "schedules.h"
-#include "timeutils.h"
-#include "_usage.h"
-#include "helpers.h"
+#अन्तर्भाव "einfo.h"
+#अन्तर्भाव "queue.h"
+#अन्तर्भाव "rc.h"
+#अन्तर्भाव "misc.h"
+#अन्तर्भाव "rc_exec.h"
+#अन्तर्भाव "plugin.h"
+#अन्तर्भाव "schedules.h"
+#अन्तर्भाव "timeutils.h"
+#अन्तर्भाव "_usage.h"
+#अन्तर्भाव "helpers.h"
 
 /* Use long option value that is out of range for 8 bit getopt values.
  * The exact enum value is internal and can freely change, so we keep the
  * options sorted.
  */
-enum {
+गणना {
   /* This has to come first so following values stay in the 0x100+ range. */
   LONGOPT_BASE = 0x100,
 
@@ -83,46 +83,46 @@ enum {
   LONGOPT_RESPAWN_DELAY_CAP,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "A:a:D:d:e:Gg:I:Kk:m:N:p:R:r:s:Su:0:1:2:3" \
+अचर वर्ण *applet = रिक्त;
+अचर वर्ण *extraopts = रिक्त;
+अचर वर्ण getoptstring[] = "A:a:D:d:e:Gg:I:Kk:m:N:p:R:r:s:Su:0:1:2:3" \
 	getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "healthcheck-timer",        1, NULL, 'a'},
-	{ "healthcheck-delay",        1, NULL, 'A'},
-	{ "capabilities", 1, NULL, LONGOPT_CAPABILITIES},
-	{ "secbits",      1, NULL, LONGOPT_SECBITS},
-	{ "no-new-privs", 0, NULL, LONGOPT_NO_NEW_PRIVS},
-	{ "respawn-delay",        1, NULL, 'D'},
-	{ "respawn-delay-step",   1, NULL, LONGOPT_RESPAWN_DELAY_STEP},
-	{ "respawn-delay-cap",    1, NULL, LONGOPT_RESPAWN_DELAY_CAP},
-	{ "chdir",        1, NULL, 'd'},
-	{ "env",          1, NULL, 'e'},
-	{ "group",        1, NULL, 'g'},
-	{ "stop-group",   0, NULL, 'G'},
-	{ "ionice",       1, NULL, 'I'},
-	{ "stop",         0, NULL, 'K'},
-	{ "umask",        1, NULL, 'k'},
-	{ "respawn-max",    1, NULL, 'm'},
-	{ "nicelevel",    1, NULL, 'N'},
-	{ "oom-score-adj",1, NULL, LONGOPT_OOM_SCORE_ADJ},
-	{ "pidfile",      1, NULL, 'p'},
-	{ "respawn-period",        1, NULL, 'P'},
-	{ "retry",       1, NULL, 'R'},
-	{ "chroot",       1, NULL, 'r'},
-	{ "signal",       1, NULL, 's'},
-	{ "start",        0, NULL, 'S'},
-	{ "user",         1, NULL, 'u'},
-	{ "stdin",        1, NULL, '0'},
-	{ "stdout",       1, NULL, '1'},
-	{ "stderr",       1, NULL, '2'},
-	{ "stdout-logger",1, NULL, LONGOPT_STDOUT_LOGGER},
-	{ "stderr-logger",1, NULL, LONGOPT_STDERR_LOGGER},
-	{ "reexec",       0, NULL, '3'},
-	{ "notify",       1, NULL, LONGOPT_NOTIFY},
+अचर संरचना option longopts[] = {
+	{ "healthcheck-timer",        1, रिक्त, 'a'},
+	{ "healthcheck-delay",        1, रिक्त, 'A'},
+	{ "capabilities", 1, रिक्त, LONGOPT_CAPABILITIES},
+	{ "secbits",      1, रिक्त, LONGOPT_SECBITS},
+	{ "no-new-privs", 0, रिक्त, LONGOPT_NO_NEW_PRIVS},
+	{ "respawn-delay",        1, रिक्त, 'D'},
+	{ "respawn-delay-step",   1, रिक्त, LONGOPT_RESPAWN_DELAY_STEP},
+	{ "respawn-delay-cap",    1, रिक्त, LONGOPT_RESPAWN_DELAY_CAP},
+	{ "chdir",        1, रिक्त, 'd'},
+	{ "env",          1, रिक्त, 'e'},
+	{ "group",        1, रिक्त, 'g'},
+	{ "stop-group",   0, रिक्त, 'G'},
+	{ "ionice",       1, रिक्त, 'I'},
+	{ "stop",         0, रिक्त, 'K'},
+	{ "umask",        1, रिक्त, 'k'},
+	{ "respawn-max",    1, रिक्त, 'm'},
+	{ "nicelevel",    1, रिक्त, 'N'},
+	{ "oom-score-adj",1, रिक्त, LONGOPT_OOM_SCORE_ADJ},
+	{ "pidfile",      1, रिक्त, 'p'},
+	{ "respawn-period",        1, रिक्त, 'P'},
+	{ "retry",       1, रिक्त, 'R'},
+	{ "chroot",       1, रिक्त, 'r'},
+	{ "signal",       1, रिक्त, 's'},
+	{ "start",        0, रिक्त, 'S'},
+	{ "user",         1, रिक्त, 'u'},
+	{ "stdin",        1, रिक्त, '0'},
+	{ "stdout",       1, रिक्त, '1'},
+	{ "stderr",       1, रिक्त, '2'},
+	{ "stdout-logger",1, रिक्त, LONGOPT_STDOUT_LOGGER},
+	{ "stderr-logger",1, रिक्त, LONGOPT_STDERR_LOGGER},
+	{ "reexec",       0, रिक्त, '3'},
+	{ "notify",       1, रिक्त, LONGOPT_NOTIFY},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+अचर वर्ण * अचर longopts_help[] = {
 	"set an initial health check delay",
 	"set a health check timer",
 	"Set the inheritable, ambient and bounding capabilities",
@@ -157,370 +157,370 @@ const char * const longopts_help[] = {
 	"Configures experimental notification behaviour",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+अचर वर्ण *usagestring = रिक्त;
 
-static int healthcheckdelay = 0;
-static int healthchecktimer = 0;
-static volatile sig_atomic_t do_healthcheck = 0;
-static volatile sig_atomic_t exiting = 0;
-static int nicelevel = INT_MIN;
-static int ionicec = -1;
-static int ioniced = 0;
-static int oom_score_adj = INT_MIN;
-static char *changeuser, *ch_root, *ch_dir;
-static uid_t uid = 0;
-static gid_t gid = 0;
-static bool stopgroup = false;
-static int devnull_fd = -1;
-static int stdin_fd;
-static int stdout_fd;
-static int stderr_fd;
-static struct notify notify;
-static char *redirect_stdin = NULL;
-static char *redirect_stderr = NULL;
-static char *redirect_stdout = NULL;
-static char *stderr_process = NULL;
-static char *stdout_process = NULL;
+स्थिर पूर्णाङ्क healthcheckdelay = 0;
+स्थिर पूर्णाङ्क healthchecktimer = 0;
+स्थिर चञ्चल संक_पूर्ण_प्रकार do_healthcheck = 0;
+स्थिर चञ्चल संक_पूर्ण_प्रकार exiting = 0;
+स्थिर पूर्णाङ्क nicelevel = पूर्णांक_न्यून;
+स्थिर पूर्णाङ्क ionicec = -1;
+स्थिर पूर्णाङ्क ioniced = 0;
+स्थिर पूर्णाङ्क oom_score_adj = पूर्णांक_न्यून;
+स्थिर वर्ण *changeuser, *ch_जरा, *ch_dir;
+स्थिर uid_t uid = 0;
+स्थिर gid_t gid = 0;
+स्थिर bool stopgroup = false;
+स्थिर पूर्णाङ्क devnull_fd = -1;
+स्थिर पूर्णाङ्क stdin_fd;
+स्थिर पूर्णाङ्क stdout_fd;
+स्थिर पूर्णाङ्क stderr_fd;
+स्थिर संरचना notify notify;
+स्थिर वर्ण *redirect_stdin = रिक्त;
+स्थिर वर्ण *redirect_stderr = रिक्त;
+स्थिर वर्ण *redirect_stdout = रिक्त;
+स्थिर वर्ण *stderr_process = रिक्त;
+स्थिर वर्ण *stdout_process = रिक्त;
 #ifdef TIOCNOTTY
-static int tty_fd = -1;
+स्थिर पूर्णाङ्क tty_fd = -1;
 #endif
-static pid_t child_pid;
-static int respawn_count = 0;
-static int64_t respawn_delay; /* default set inside main() */
-static int64_t respawn_delay_step = TM_MS(128);
-static int64_t respawn_delay_cap = TM_SEC(30);
-static int64_t respawn_period; /* default set inside main() */
-static int respawn_max = 10;
-static char *fifopath = NULL;
-static int fifo_fd = 0;
-static char *pidfile = NULL;
-static char *svcname = NULL;
-static bool verbose = false;
+स्थिर pid_t child_pid;
+स्थिर पूर्णाङ्क respawn_गन्ती = 0;
+स्थिर int64_t respawn_delay; /* default set inside main() */
+स्थिर int64_t respawn_delay_step = TM_MS(128);
+स्थिर int64_t respawn_delay_cap = TM_SEC(30);
+स्थिर int64_t respawn_period; /* default set inside main() */
+स्थिर पूर्णाङ्क respawn_max = 10;
+स्थिर वर्ण *fifopath = रिक्त;
+स्थिर पूर्णाङ्क fifo_fd = 0;
+स्थिर वर्ण *pidfile = रिक्त;
+स्थिर वर्ण *svcname = रिक्त;
+स्थिर bool verbose = false;
 #ifdef __linux__
-static cap_iab_t cap_iab = NULL;
-static unsigned secbits = 0;
+स्थिर cap_iab_t cap_iab = रिक्त;
+स्थिर अचिन्हित secbits = 0;
 #endif
 #ifdef PR_SET_NO_NEW_PRIVS
-static bool no_new_privs = false;
+स्थिर bool no_new_privs = false;
 #endif
 
-extern char **environ;
+बाह्य वर्ण **environ;
 
-#if !defined(SYS_ioprio_set) && defined(__NR_ioprio_set)
+#यदि !defined(SYS_ioprio_set) && defined(__NR_ioprio_set)
 # define SYS_ioprio_set __NR_ioprio_set
 #endif
-#if !defined(__DragonFly__)
-static inline int ioprio_set(int which RC_UNUSED, int who RC_UNUSED,
-			     int ioprio RC_UNUSED)
+#यदि !defined(__DragonFly__)
+स्थिर अन्तःस्थ पूर्णाङ्क ioprio_set(पूर्णाङ्क which RC_UNUSED, पूर्णाङ्क who RC_UNUSED,
+			     पूर्णाङ्क ioprio RC_UNUSED)
 {
 #ifdef SYS_ioprio_set
-	return syscall(SYS_ioprio_set, which, who, ioprio);
-#else
-	return 0;
+	फर्काऊ syscall(SYS_ioprio_set, which, who, ioprio);
+#अन्यथा
+	फर्काऊ 0;
 #endif
 }
 #endif
 
-static void cleanup(void)
+स्थिर शून्य cleanup(शून्य)
 {
-	free(changeuser);
+	मुक्त(changeuser);
 }
 
-RC_NORETURN static void re_exec_supervisor(void)
+RC_NORETURN स्थिर शून्य re_exec_supervisor(शून्य)
 {
 	syslog(LOG_WARNING, "Re-executing for %s", svcname);
 	execlp("supervise-daemon", "supervise-daemon", svcname, "--reexec",
-			(char *) NULL);
+			(वर्ण *) रिक्त);
 	syslog(LOG_ERR, "Unable to execute supervise-daemon: %s",
-			strerror(errno));
-	exit(EXIT_FAILURE);
+			म_त्रुटि(त्रुटि_सं));
+	निकास(निकास_त्रुटि);
 }
 
-static void handle_signal(int sig)
+स्थिर शून्य handle_signal(पूर्णाङ्क sig)
 {
-	int serrno = errno;
+	पूर्णाङ्क serrno = त्रुटि_सं;
 	pid_t pid;
 
-	switch (sig) {
-	case SIGALRM:
+	विकल्प (sig) {
+	पक्ष SIGALRM:
 		do_healthcheck = 1;
-		break;
-	case SIGCHLD:
-		if (exiting)
-			while (waitpid((pid_t)(-1), NULL, WNOHANG) > 0) {}
-		else {
-			while ((pid = waitpid((pid_t)(-1), NULL, WNOHANG|WNOWAIT)) > 0) {
-				if (pid == child_pid)
-					break;
-				pid = waitpid(pid, NULL, WNOHANG);
+		रोक;
+	पक्ष SIGCHLD:
+		यदि (exiting)
+			जबसम्म (waitpid((pid_t)(-1), रिक्त, WNOHANG) > 0) {}
+		अन्यथा {
+			जबसम्म ((pid = waitpid((pid_t)(-1), रिक्त, WNOHANG|WNOWAIT)) > 0) {
+				यदि (pid == child_pid)
+					रोक;
+				pid = waitpid(pid, रिक्त, WNOHANG);
 			}
 		}
-		break;
-	case SIGTERM:
+		रोक;
+	पक्ष संक_इति:
 		exiting = 1;
-		break;
-	default:
+		रोक;
+	स्वभाव:
 		syslog(LOG_WARNING, "caught signal %d", sig);
 		re_exec_supervisor();
 	}
 	/* Restore errno */
-	errno = serrno;
+	त्रुटि_सं = serrno;
 }
 
-static char * expand_home(const char *home, const char *path)
+स्थिर वर्ण * expand_home(अचर वर्ण *home, अचर वर्ण *path)
 {
-	char *opath, *ppath, *p, *nh;
-	struct passwd *pw;
+	वर्ण *opath, *ppath, *p, *nh;
+	संरचना passwd *pw;
 
-	if (!path || *path != '~')
-		return xstrdup(path);
+	यदि (!path || *path != '~')
+		फर्काऊ xstrdup(path);
 
 	opath = ppath = xstrdup(path);
-	if (ppath[1] != '/' && ppath[1] != '\0') {
-		p = strchr(ppath + 1, '/');
-		if (p)
+	यदि (ppath[1] != '/' && ppath[1] != '\0') {
+		p = म_अक्षर(ppath + 1, '/');
+		यदि (p)
 			*p = '\0';
 		pw = getpwnam(ppath + 1);
-		if (pw) {
+		यदि (pw) {
 			home = pw->pw_dir;
 			ppath = p;
-			if (ppath)
+			यदि (ppath)
 				*ppath = '/';
-		} else
-			home = NULL;
-	} else
+		} अन्यथा
+			home = रिक्त;
+	} अन्यथा
 		ppath++;
 
-	if (!home) {
-		free(opath);
-		return xstrdup(path);
+	यदि (!home) {
+		मुक्त(opath);
+		फर्काऊ xstrdup(path);
 	}
-	if (!ppath) {
-		free(opath);
-		return xstrdup(home);
+	यदि (!ppath) {
+		मुक्त(opath);
+		फर्काऊ xstrdup(home);
 	}
 
 	xasprintf(&nh, "%s%s", home, ppath);
-	free(opath);
-	return nh;
+	मुक्त(opath);
+	फर्काऊ nh;
 }
 
-static char *make_cmdline(char **argv)
+स्थिर वर्ण *make_cmdline(वर्ण **argv)
 {
-	char **c;
-	char *cmdline;
-	size_t len;
-	FILE *mem = xopen_memstream(&cmdline, &len);
+	वर्ण **c;
+	वर्ण *cmdline;
+	माप_प्रकार len;
+	खाता *mem = xopen_memstream(&cmdline, &len);
 
-	for (c = argv; c && *c; c++) {
-		fputs(*c, mem);
-		if (c[1])
-			fputc(' ', mem);
+	लागि (c = argv; c && *c; c++) {
+		ख_माला_दो(*c, mem);
+		यदि (c[1])
+			ख_अक्षर_दो(' ', mem);
 	}
 	xclose_memstream(mem);
-	return cmdline;
+	फर्काऊ cmdline;
 }
 
-static pid_t exec_command(const char *cmd)
+स्थिर pid_t exec_command(अचर वर्ण *cmd)
 {
-	char *file;
+	वर्ण *file;
 	pid_t pid = -1;
 	sigset_t full;
 	sigset_t old;
-	struct sigaction sa;
+	संरचना sigaction sa;
 
 	file = rc_service_resolve(svcname);
-	if (access(file, F_OK) != 0) {
-		free(file);
-		return 0;
+	यदि (access(file, F_OK) != 0) {
+		मुक्त(file);
+		फर्काऊ 0;
 	}
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof (sa));
-	sa.sa_handler = SIG_DFL;
+	स_रखो(&sa, 0, परिमाण (sa));
+	sa.sa_handler = संक_पूर्व;
 	sigemptyset(&sa.sa_mask);
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
 
-	pid = fork();
-	if (pid == 0) {
+	pid = विभाजन();
+	यदि (pid == 0) {
 		/* Restore default handlers */
-		sigaction(SIGCHLD, &sa, NULL);
-		sigaction(SIGHUP, &sa, NULL);
-		sigaction(SIGINT, &sa, NULL);
-		sigaction(SIGQUIT, &sa, NULL);
-		sigaction(SIGTERM, &sa, NULL);
-		sigaction(SIGUSR1, &sa, NULL);
-		sigaction(SIGWINCH, &sa, NULL);
+		sigaction(SIGCHLD, &sa, रिक्त);
+		sigaction(SIGHUP, &sa, रिक्त);
+		sigaction(संक_विघ्न, &sa, रिक्त);
+		sigaction(SIGQUIT, &sa, रिक्त);
+		sigaction(संक_इति, &sa, रिक्त);
+		sigaction(SIGUSR1, &sa, रिक्त);
+		sigaction(SIGWINCH, &sa, रिक्त);
 
 		/* Unmask signals */
-		sigprocmask(SIG_SETMASK, &old, NULL);
+		sigprocmask(SIG_SETMASK, &old, रिक्त);
 
 		/* Safe to run now */
-		execl(file, file, cmd, (char *) NULL);
+		execl(file, file, cmd, (वर्ण *) रिक्त);
 		syslog(LOG_ERR, "unable to exec `%s': %s\n",
-		    file, strerror(errno));
-		_exit(EXIT_FAILURE);
+		    file, म_त्रुटि(त्रुटि_सं));
+		_exit(निकास_त्रुटि);
 	}
 
-	if (pid == -1)
-		syslog(LOG_ERR, "fork: %s\n",strerror (errno));
+	यदि (pid == -1)
+		syslog(LOG_ERR, "fork: %s\n",म_त्रुटि (त्रुटि_सं));
 
-	sigprocmask(SIG_SETMASK, &old, NULL);
-	free(file);
-	return pid;
+	sigprocmask(SIG_SETMASK, &old, रिक्त);
+	मुक्त(file);
+	फर्काऊ pid;
 }
 
-RC_NORETURN static void child_process(char *exec, char **argv)
+RC_NORETURN स्थिर शून्य child_process(वर्ण *exec, वर्ण **argv)
 {
 	RC_STRINGLIST *env_list;
 	RC_STRING *env;
-	int i;
-	char *p;
-	char *token;
-	size_t len;
-	char *newpath;
-	char *np;
-	char *cmdline = NULL;
-	time_t start_time;
-	char start_count_string[20];
-	char start_time_string[20];
-	FILE *fp;
+	पूर्णाङ्क i;
+	वर्ण *p;
+	वर्ण *token;
+	माप_प्रकार len;
+	वर्ण *newpath;
+	वर्ण *np;
+	वर्ण *cmdline = रिक्त;
+	समय_प्रकार start_time;
+	वर्ण start_गन्ती_string[20];
+	वर्ण start_time_string[20];
+	खाता *fp;
 	gid_t group_buf[32], *group_list = group_buf;
-	int group_count = ARRAY_SIZE(group_buf);
+	पूर्णाङ्क group_गन्ती = ARRAY_SIZE(group_buf);
 
 #ifdef HAVE_PAM
-	pam_handle_t *pamh = NULL;
-	int pamr;
-	const char *const *pamenv = NULL;
+	pam_handle_t *pamh = रिक्त;
+	पूर्णाङ्क pamr;
+	अचर वर्ण *अचर *pamenv = रिक्त;
 #endif
 
 	setsid();
 
-	if (svcname) {
-		start_time = time(NULL);
+	यदि (svcname) {
+		start_time = समय(रिक्त);
 		from_time_t(start_time_string, start_time);
-		rc_service_value_set(svcname, "start_time", start_time_string);
-		sprintf(start_count_string, "%i", respawn_count);
-		rc_service_value_set(svcname, "start_count", start_count_string);
-		sprintf(start_count_string, "%d", getpid());
-		rc_service_value_set(svcname, "child_pid", start_count_string);
+		rc_service_मान_set(svcname, "start_time", start_time_string);
+		प्र_लिखो(start_गन्ती_string, "%i", respawn_गन्ती);
+		rc_service_मान_set(svcname, "start_count", start_गन्ती_string);
+		प्र_लिखो(start_गन्ती_string, "%d", getpid());
+		rc_service_मान_set(svcname, "child_pid", start_गन्ती_string);
 	}
 
-	if (nicelevel != INT_MIN) {
-		if (setpriority(PRIO_PROCESS, getpid(), nicelevel) == -1)
+	यदि (nicelevel != पूर्णांक_न्यून) {
+		यदि (setpriority(PRIO_PROCESS, getpid(), nicelevel) == -1)
 			eerrorx("%s: setpriority %d: %s", applet, nicelevel,
-					strerror(errno));
+					म_त्रुटि(त्रुटि_सं));
 		/* Open in "r+" mode to avoid creating if non-existent. */
-		fp = fopen("/proc/self/autogroup", "r+");
-		if (fp) {
-			fprintf(fp, "%d\n", nicelevel);
-			fclose(fp);
-		} else if (errno != ENOENT)
+		fp = ख_खोलो("/proc/self/autogroup", "r+");
+		यदि (fp) {
+			ख_लिखो(fp, "%d\n", nicelevel);
+			ख_बंद(fp);
+		} अन्यथा यदि (त्रुटि_सं != ENOENT)
 			eerrorx("%s: autogroup nice %d: %s", applet,
-			    nicelevel, strerror(errno));
+			    nicelevel, म_त्रुटि(त्रुटि_सं));
 	}
 
-	if (ionicec != -1 && ioprio_set(1, getpid(), ionicec | ioniced) == -1)
+	यदि (ionicec != -1 && ioprio_set(1, getpid(), ionicec | ioniced) == -1)
 		eerrorx("%s: ioprio_set %d %d: %s", applet, ionicec, ioniced,
-				strerror(errno));
+				म_त्रुटि(त्रुटि_सं));
 
-	if (oom_score_adj != INT_MIN) {
-		fp = fopen("/proc/self/oom_score_adj", "w");
-		if (!fp)
+	यदि (oom_score_adj != पूर्णांक_न्यून) {
+		fp = ख_खोलो("/proc/self/oom_score_adj", "w");
+		यदि (!fp)
 			eerrorx("%s: oom_score_adj %d: %s", applet,
-			    oom_score_adj, strerror(errno));
-		fprintf(fp, "%d\n", oom_score_adj);
-		fclose(fp);
+			    oom_score_adj, म_त्रुटि(त्रुटि_सं));
+		ख_लिखो(fp, "%d\n", oom_score_adj);
+		ख_बंद(fp);
 	}
 
 #ifdef HAVE_PAM
-	if (changeuser != NULL) {
+	यदि (changeuser != रिक्त) {
 		pamr = pam_start("supervise-daemon",
 		    changeuser, &conv, &pamh);
 
-		if (pamr == PAM_SUCCESS)
+		यदि (pamr == PAM_SUCCESS)
 			pamr = pam_acct_mgmt(pamh, PAM_SILENT);
-		if (pamr == PAM_SUCCESS)
+		यदि (pamr == PAM_SUCCESS)
 			pamr = pam_open_session(pamh, PAM_SILENT);
-		if (pamr != PAM_SUCCESS)
+		यदि (pamr != PAM_SUCCESS)
 			eerrorx("%s: pam error: %s", applet, pam_strerror(pamh, pamr));
 	}
 #endif
 
-	if (changeuser && getgrouplist(changeuser, gid, group_list, &group_count) < 0) {
-		group_list = xmalloc(group_count * sizeof(*group_list));
-		if (getgrouplist(changeuser, gid, group_list, &group_count) < 0)
+	यदि (changeuser && getgrouplist(changeuser, gid, group_list, &group_गन्ती) < 0) {
+		group_list = xmalloc(group_गन्ती * परिमाण(*group_list));
+		यदि (getgrouplist(changeuser, gid, group_list, &group_गन्ती) < 0)
 			eerrorx("%s: getgrouplist(%s, %"PRIuMAX")", applet, changeuser, (uintmax_t)gid);
 	}
 
 	/* Close any fd's to the passwd database */
 	endpwent();
 
-	if (ch_root && chroot(ch_root) < 0)
-		eerrorx("%s: chroot `%s': %s", applet, ch_root, strerror(errno));
+	यदि (ch_जरा && chroot(ch_जरा) < 0)
+		eerrorx("%s: chroot `%s': %s", applet, ch_जरा, म_त्रुटि(त्रुटि_सं));
 
-	if (ch_dir && chdir(ch_dir) < 0)
-		eerrorx("%s: chdir `%s': %s", applet, ch_dir, strerror(errno));
+	यदि (ch_dir && स_बदलो(ch_dir) < 0)
+		eerrorx("%s: chdir `%s': %s", applet, ch_dir, म_त्रुटि(त्रुटि_सं));
 
-	if (gid && setgid(gid))
+	यदि (gid && setgid(gid))
 		eerrorx("%s: unable to set groupid to %"PRIuMAX, applet, (uintmax_t)gid);
-	if (changeuser && setgroups(group_count, group_list) < 0)
+	यदि (changeuser && setgroups(group_गन्ती, group_list) < 0)
 		eerrorx("%s: setgroups() failed", applet);
-	if (group_list != group_buf)
-		free(group_list);
+	यदि (group_list != group_buf)
+		मुक्त(group_list);
 #ifdef __linux__
-	if (uid && cap_setuid(uid))
-#else
-	if (uid && setuid(uid))
+	यदि (uid && cap_setuid(uid))
+#अन्यथा
+	यदि (uid && setuid(uid))
 #endif
 		eerrorx ("%s: unable to set userid to %"PRIuMAX, applet, (uintmax_t)uid);
 
 #ifdef __linux__
-	if (cap_iab != NULL) {
+	यदि (cap_iab != रिक्त) {
 		i = cap_iab_set_proc(cap_iab);
 
-		if (cap_free(cap_iab) != 0)
-			eerrorx("Could not releasable memory: %s", strerror(errno));
+		यदि (cap_free(cap_iab) != 0)
+			eerrorx("Could not releasable memory: %s", म_त्रुटि(त्रुटि_सं));
 
-		if (i != 0)
-			eerrorx("Could not set iab: %s", strerror(errno));
+		यदि (i != 0)
+			eerrorx("Could not set iab: %s", म_त्रुटि(त्रुटि_सं));
 	}
 
-	if (secbits != 0) {
-		if (cap_set_secbits(secbits) < 0)
-			eerrorx("Could not set securebits to 0x%x: %s", secbits, strerror(errno));
+	यदि (secbits != 0) {
+		यदि (cap_set_secbits(secbits) < 0)
+			eerrorx("Could not set securebits to 0x%x: %s", secbits, म_त्रुटि(त्रुटि_सं));
 	}
 #endif
 
 #ifdef PR_SET_NO_NEW_PRIVS
-	if (no_new_privs) {
-		if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1)
-			eerrorx("Could not set No New Privs flag: %s", strerror(errno));
+	यदि (no_new_privs) {
+		यदि (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1)
+			eerrorx("Could not set No New Privs flag: %s", म_त्रुटि(त्रुटि_सं));
 	}
 #endif
 
 	/* remove the controlling tty */
 #ifdef TIOCNOTTY
 	ioctl(tty_fd, TIOCNOTTY, 0);
-	close(tty_fd);
+	बंद(tty_fd);
 #endif
 
 	/* Clean the environment of any RC_ variables */
 	env_list = rc_stringlist_new();
 	i = 0;
-	while (environ[i])
+	जबसम्म (environ[i])
 		rc_stringlist_add(env_list, environ[i++]);
 
 #ifdef HAVE_PAM
-	if (changeuser != NULL) {
-		pamenv = (const char *const *)pam_getenvlist(pamh);
-		if (pamenv) {
-			while (*pamenv) {
+	यदि (changeuser != रिक्त) {
+		pamenv = (अचर वर्ण *अचर *)pam_getenvlist(pamh);
+		यदि (pamenv) {
+			जबसम्म (*pamenv) {
 				/* Don't add strings unless they set a var */
-				if (strchr(*pamenv, '='))
+				यदि (म_अक्षर(*pamenv, '='))
 					putenv(xstrdup(*pamenv));
-				else
+				अन्यथा
 					unsetenv(*pamenv);
 				pamenv++;
 			}
@@ -530,33 +530,33 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 
 	unsetenv("SVCNAME");
 	TAILQ_FOREACH(env, env_list, entries) {
-		if (strncmp(env->value, "RC_", 3) == 0
-				|| strncmp(env->value, "SSD_", 4) == 0
-				|| strncmp(env->value, "EINFO_", 6) == 0) {
-			*strchr(env->value, '=') = '\0';
-			unsetenv(env->value);
+		यदि (म_भेदन(env->मान, "RC_", 3) == 0
+				|| म_भेदन(env->मान, "SSD_", 4) == 0
+				|| म_भेदन(env->मान, "EINFO_", 6) == 0) {
+			*म_अक्षर(env->मान, '=') = '\0';
+			unsetenv(env->मान);
 		}
 	}
 	rc_stringlist_free(env_list);
 
 	/* For the path, remove the rcscript bin dir from it */
-	if ((token = getenv("PATH"))) {
-		len = strlen(token);
+	यदि ((token = दो_पर्या("PATH"))) {
+		len = म_माप(token);
 		newpath = np = xmalloc(len + 1);
-		while (token && *token) {
-			p = strchr(token, ':');
-			if (p) {
+		जबसम्म (token && *token) {
+			p = म_अक्षर(token, ':');
+			यदि (p) {
 				*p++ = '\0';
-				while (*p == ':')
+				जबसम्म (*p == ':')
 					p++;
 			}
-			if (strcmp(token, RC_LIBEXECDIR "/bin") != 0 &&
-			    strcmp(token, RC_LIBEXECDIR "/sbin") != 0)
+			यदि (म_भेद(token, RC_LIBEXECDIR "/bin") != 0 &&
+			    म_भेद(token, RC_LIBEXECDIR "/sbin") != 0)
 			{
-				len = strlen(token);
-				if (np != newpath)
+				len = म_माप(token);
+				यदि (np != newpath)
 					*np++ = ':';
-				memcpy(np, token, len);
+				स_नकल(np, token, len);
 				np += len;
 				}
 			token = p;
@@ -569,93 +569,93 @@ RC_NORETURN static void child_process(char *exec, char **argv)
 	stdin_fd = devnull_fd;
 	stdout_fd = devnull_fd;
 	stderr_fd = devnull_fd;
-	if (redirect_stdin) {
-		if ((stdin_fd = xopen_nonblock(redirect_stdin, O_RDONLY, 0)) == -1)
+	यदि (redirect_stdin) {
+		यदि ((stdin_fd = xopen_nonblock(redirect_stdin, O_RDONLY, 0)) == -1)
 			eerrorx("%s: unable to redirect the input file"
 			    " for stdin `%s': %s",
-			    applet, redirect_stdin, strerror(errno));
+			    applet, redirect_stdin, म_त्रुटि(त्रुटि_सं));
 	}
-	if (redirect_stdout) {
-		if ((stdout_fd = xopen_nonblock(redirect_stdout,
+	यदि (redirect_stdout) {
+		यदि ((stdout_fd = xopen_nonblock(redirect_stdout,
 			    O_WRONLY | O_CREAT | O_APPEND,
 			    S_IRUSR | S_IWUSR)) == -1)
 			eerrorx("%s: unable to redirect the logfile"
 				    " for stdout `%s': %s",
-				    applet, redirect_stdout, strerror(errno));
-	} else if (stdout_process) {
+				    applet, redirect_stdout, म_त्रुटि(त्रुटि_सं));
+	} अन्यथा यदि (stdout_process) {
 		stdout_fd = rc_pipe_command(stdout_process, devnull_fd);
-		if (stdout_fd == -1)
+		यदि (stdout_fd == -1)
 			eerrorx("%s: unable to open the logging process"
 			    " for stdout `%s': %s",
-			    applet, stdout_process, strerror(errno));
+			    applet, stdout_process, म_त्रुटि(त्रुटि_सं));
 	}
-	if (redirect_stderr) {
-		if ((stderr_fd = xopen_nonblock(redirect_stderr,
+	यदि (redirect_stderr) {
+		यदि ((stderr_fd = xopen_nonblock(redirect_stderr,
 			    O_WRONLY | O_CREAT | O_APPEND,
 			    S_IRUSR | S_IWUSR)) == -1)
 			eerrorx("%s: unable to redirect the logfile"
 			    " for stderr `%s': %s",
-			    applet, redirect_stderr, strerror(errno));
-	} else if (stderr_process) {
+			    applet, redirect_stderr, म_त्रुटि(त्रुटि_सं));
+	} अन्यथा यदि (stderr_process) {
 		stderr_fd = rc_pipe_command(stderr_process, devnull_fd);
-		if (stderr_fd == -1)
+		यदि (stderr_fd == -1)
 			eerrorx("%s: unable to open the logging process"
 			    " for stderr `%s': %s",
-			    applet, stderr_process, strerror(errno));
+			    applet, stderr_process, म_त्रुटि(त्रुटि_सं));
 	}
 
 	dup2(stdin_fd, STDIN_FILENO);
-	if (redirect_stdout || stdout_process || rc_yesno(getenv("EINFO_QUIET")))
+	यदि (redirect_stdout || stdout_process || rc_yesno(दो_पर्या("EINFO_QUIET")))
 		dup2(stdout_fd, STDOUT_FILENO);
-	if (redirect_stderr || stderr_process || rc_yesno(getenv("EINFO_QUIET")))
+	यदि (redirect_stderr || stderr_process || rc_yesno(दो_पर्या("EINFO_QUIET")))
 		dup2(stderr_fd, STDERR_FILENO);
 
 	cloexec_fds_from(3);
 
-	if (notify.type == NOTIFY_FD) {
-		int error;
+	यदि (notify.type == NOTIFY_FD) {
+		पूर्णाङ्क error;
 
-		if (notify.fd == notify.pipe[1]) {
-			int flags = error = fcntl(notify.fd, F_GETFD, 0);
-			if (flags != -1)
+		यदि (notify.fd == notify.pipe[1]) {
+			पूर्णाङ्क flags = error = fcntl(notify.fd, F_GETFD, 0);
+			यदि (flags != -1)
 				error = fcntl(notify.fd, F_SETFD, flags & ~FD_CLOEXEC);
-		} else {
+		} अन्यथा {
 			error = dup2(notify.pipe[1], notify.fd) == -1;
 		}
 
-		if (error)
-			eerrorx("%s: failed to dup ready fd: %s", applet, strerror(errno));
+		यदि (error)
+			eerrorx("%s: failed to dup ready fd: %s", applet, म_त्रुटि(त्रुटि_सं));
 	}
 
 	cmdline = make_cmdline(argv);
 	syslog(LOG_INFO, "Child command line: %s", cmdline);
-	free(cmdline);
+	मुक्त(cmdline);
 	execvp(exec, argv);
 
 #ifdef HAVE_PAM
-	if (changeuser != NULL && pamr == PAM_SUCCESS)
+	यदि (changeuser != रिक्त && pamr == PAM_SUCCESS)
 		pam_close_session(pamh, PAM_SILENT);
 #endif
-	eerrorx("%s: failed to exec `%s': %s", applet, exec,strerror(errno));
+	eerrorx("%s: failed to exec `%s': %s", applet, exec,म_त्रुटि(त्रुटि_सं));
 }
 
-RC_NORETURN static void supervisor(char *exec, char **argv)
+RC_NORETURN स्थिर शून्य supervisor(वर्ण *exec, वर्ण **argv)
 {
-	FILE *fp;
-	char buf[2048];
-	char cmd[2048];
-	int count;
-	int failing;
-	int health_status;
-	int healthcheck_respawn;
-	int i;
-	int nkilled;
-	int sig_send;
+	खाता *fp;
+	वर्ण buf[2048];
+	वर्ण cmd[2048];
+	पूर्णाङ्क गन्ती;
+	पूर्णाङ्क failing;
+	पूर्णाङ्क health_status;
+	पूर्णाङ्क healthcheck_respawn;
+	पूर्णाङ्क i;
+	पूर्णाङ्क nkilled;
+	पूर्णाङ्क sig_send;
 	pid_t health_pid;
 	pid_t wait_pid;
 	sigset_t old_signals;
 	sigset_t signals;
-	struct sigaction sa;
+	संरचना sigaction sa;
 	int64_t respawn_now = 0;
 	int64_t first_spawn = 0;
 	int64_t sleep_for;
@@ -664,243 +664,243 @@ RC_NORETURN static void supervisor(char *exec, char **argv)
 	sigfillset(&signals);
 	sigdelset(&signals, SIGALRM);
 	sigdelset(&signals, SIGCHLD);
-	sigdelset(&signals, SIGTERM);
+	sigdelset(&signals, संक_इति);
 	sigprocmask(SIG_SETMASK, &signals, &old_signals);
 
 	/* install signal  handler */
-	memset(&sa, 0, sizeof(sa));
+	स_रखो(&sa, 0, परिमाण(sa));
 	sa.sa_handler = handle_signal;
-	sigaction(SIGALRM, &sa, NULL);
-	sigaction(SIGCHLD, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGALRM, &sa, रिक्त);
+	sigaction(SIGCHLD, &sa, रिक्त);
+	sigaction(संक_इति, &sa, रिक्त);
 
-	fp = fopen(pidfile, "w");
-	if (!fp)
-		eerrorx("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
-	fprintf(fp, "%d\n", getpid());
-	fclose(fp);
+	fp = ख_खोलो(pidfile, "w");
+	यदि (!fp)
+		eerrorx("%s: fopen `%s': %s", applet, pidfile, म_त्रुटि(त्रुटि_सं));
+	ख_लिखो(fp, "%d\n", getpid());
+	ख_बंद(fp);
 
-	if (svcname)
-		rc_service_daemon_set(svcname, exec, (const char * const *) argv,
+	यदि (svcname)
+		rc_service_daemon_set(svcname, exec, (अचर वर्ण * अचर *) argv,
 				pidfile, true);
 
 	/* remove the controlling tty */
 #ifdef TIOCNOTTY
 	ioctl(tty_fd, TIOCNOTTY, 0);
-	close(tty_fd);
+	बंद(tty_fd);
 #endif
 
 	/*
 	 * Supervisor main loop
 	 */
-	if (healthcheckdelay)
+	यदि (healthcheckdelay)
 		alarm(healthcheckdelay);
-	else if (healthchecktimer)
+	अन्यथा यदि (healthchecktimer)
 		alarm(healthchecktimer);
 	failing = 0;
-	while (!exiting) {
+	जबसम्म (!exiting) {
 		healthcheck_respawn = 0;
-		fifo_fd = open(fifopath, O_RDONLY);
-		if (fifo_fd > 0) {
-			memset(buf, 0, sizeof(buf));
-			count = read(fifo_fd, buf, sizeof(buf) - 1);
-			close(fifo_fd);
-			if (count != -1)
-				buf[count] = 0;
-			if (count == 0)
-				continue;
-			if (verbose)
+		fifo_fd = खोलो(fifopath, O_RDONLY);
+		यदि (fifo_fd > 0) {
+			स_रखो(buf, 0, परिमाण(buf));
+			गन्ती = पठ(fifo_fd, buf, परिमाण(buf) - 1);
+			बंद(fifo_fd);
+			यदि (गन्ती != -1)
+				buf[गन्ती] = 0;
+			यदि (गन्ती == 0)
+				जारी;
+			यदि (verbose)
 				syslog(LOG_DEBUG, "Received %s from fifo", buf);
-			if (strncasecmp(buf, "sig", 3) == 0) {
-				if ((sscanf(buf, "%s %d", cmd, &sig_send) == 2)
+			यदि (strncasecmp(buf, "sig", 3) == 0) {
+				यदि ((माला_पूछो(buf, "%s %d", cmd, &sig_send) == 2)
 						&& (sig_send >= 0 && sig_send < NSIG)) {
 					syslog(LOG_INFO, "Sending signal %d to %d", sig_send,
 							child_pid);
-					if (kill(child_pid, sig_send) == -1)
+					यदि (समाप्त(child_pid, sig_send) == -1)
 						syslog(LOG_ERR, "Unable to send signal %d to %d",
 								sig_send, child_pid);
 				}
 			}
-			continue;
+			जारी;
 		}
-		if (do_healthcheck) {
+		यदि (do_healthcheck) {
 			do_healthcheck = 0;
 			alarm(0);
-			if (verbose)
+			यदि (verbose)
 				syslog(LOG_DEBUG, "running health check for %s", svcname);
 			health_pid = exec_command("healthcheck");
 			health_status = rc_waitpid(health_pid);
-			if (WIFEXITED(health_status) && WEXITSTATUS(health_status) == 0)
+			यदि (WIFEXITED(health_status) && WEXITSTATUS(health_status) == 0)
 				alarm(healthchecktimer);
-			else {
+			अन्यथा {
 				syslog(LOG_WARNING, "health check for %s failed", svcname);
 				health_pid = exec_command("unhealthy");
 				rc_waitpid(health_pid);
 				syslog(LOG_INFO, "stopping %s, pid %d", exec, child_pid);
-				nkilled = run_stop_schedule(applet, NULL, NULL, child_pid, 0,
+				nkilled = run_stop_schedule(applet, रिक्त, रिक्त, child_pid, 0,
 						stopgroup, false, false, true);
-				if (nkilled < 0)
+				यदि (nkilled < 0)
 					syslog(LOG_INFO, "Unable to kill %d: %s",
-							child_pid, strerror(errno));
-				else
+							child_pid, म_त्रुटि(त्रुटि_सं));
+				अन्यथा
 					healthcheck_respawn = 1;
 			}
 		}
-		if (exiting) {
+		यदि (exiting) {
 			alarm(0);
 			syslog(LOG_INFO, "stopping %s, pid %d", exec, child_pid);
-			nkilled = run_stop_schedule(applet, NULL, NULL, child_pid, 0,
+			nkilled = run_stop_schedule(applet, रिक्त, रिक्त, child_pid, 0,
 					stopgroup, false, false, true);
-			if (nkilled > 0)
+			यदि (nkilled > 0)
 				syslog(LOG_INFO, "killed %d processes", nkilled);
-			continue;
+			जारी;
 		}
 		wait_pid = waitpid(child_pid, &i, WNOHANG);
-		if (wait_pid == child_pid) {
-			if (WIFEXITED(i))
+		यदि (wait_pid == child_pid) {
+			यदि (WIFEXITED(i))
 				syslog(LOG_WARNING, "%s, pid %d, exited with return code %d",
 						exec, child_pid, WEXITSTATUS(i));
-			else if (WIFSIGNALED(i))
+			अन्यथा यदि (WIFSIGNALED(i))
 				syslog(LOG_WARNING, "%s, pid %d, terminated by signal %d",
 						exec, child_pid, WTERMSIG(i));
 		}
-		if (wait_pid == child_pid || healthcheck_respawn) {
+		यदि (wait_pid == child_pid || healthcheck_respawn) {
 			do_healthcheck = 0;
 			healthcheck_respawn = 0;
 			alarm(0);
 			respawn_now = tm_now();
-			if (first_spawn == 0)
+			यदि (first_spawn == 0)
 				first_spawn = respawn_now;
-			if ((respawn_period > 0)
+			यदि ((respawn_period > 0)
 					&& (respawn_now - first_spawn > respawn_period)) {
-				respawn_count = 0;
+				respawn_गन्ती = 0;
 				first_spawn = 0;
-			} else
-				respawn_count++;
-			if (respawn_max > 0 && respawn_count > respawn_max) {
+			} अन्यथा
+				respawn_गन्ती++;
+			यदि (respawn_max > 0 && respawn_गन्ती > respawn_max) {
 				syslog(LOG_WARNING, "respawned \"%s\" too many times, exiting",
 						exec);
 				exiting = 1;
 				failing = 1;
-				continue;
+				जारी;
 			}
-			sleep_for = respawn_delay + (respawn_delay_step * respawn_count);
-			if (respawn_delay_step > 0 && sleep_for > respawn_delay_cap)
+			sleep_for = respawn_delay + (respawn_delay_step * respawn_गन्ती);
+			यदि (respawn_delay_step > 0 && sleep_for > respawn_delay_cap)
 				sleep_for = respawn_delay_cap;
 			tm_sleep(sleep_for, TM_NO_EINTR);
-			if (exiting)
-				continue;
-			child_pid = fork();
-			if (child_pid == -1) {
-				syslog(LOG_ERR, "%s: fork: %s", applet, strerror(errno));
-				exit(EXIT_FAILURE);
+			यदि (exiting)
+				जारी;
+			child_pid = विभाजन();
+			यदि (child_pid == -1) {
+				syslog(LOG_ERR, "%s: fork: %s", applet, म_त्रुटि(त्रुटि_सं));
+				निकास(निकास_त्रुटि);
 			}
-			if (child_pid == 0) {
-				sigprocmask(SIG_SETMASK, &old_signals, NULL);
-				memset(&sa, 0, sizeof(sa));
-				sa.sa_handler = SIG_DFL;
-				sigaction(SIGALRM, &sa, NULL);
-				sigaction(SIGCHLD, &sa, NULL);
-				sigaction(SIGTERM, &sa, NULL);
+			यदि (child_pid == 0) {
+				sigprocmask(SIG_SETMASK, &old_signals, रिक्त);
+				स_रखो(&sa, 0, परिमाण(sa));
+				sa.sa_handler = संक_पूर्व;
+				sigaction(SIGALRM, &sa, रिक्त);
+				sigaction(SIGCHLD, &sa, रिक्त);
+				sigaction(संक_इति, &sa, रिक्त);
 				child_process(exec, argv);
 			}
-			if (healthcheckdelay)
+			यदि (healthcheckdelay)
 				alarm(healthcheckdelay);
-			else if (healthchecktimer)
+			अन्यथा यदि (healthchecktimer)
 				alarm(healthchecktimer);
 		}
 	}
 
-	if (svcname) {
-		rc_service_daemon_set(svcname, exec, (const char *const *)argv,
+	यदि (svcname) {
+		rc_service_daemon_set(svcname, exec, (अचर वर्ण *अचर *)argv,
 				pidfile, false);
-		rc_service_value_set(svcname, "child_pid", NULL);
+		rc_service_मान_set(svcname, "child_pid", रिक्त);
 		rc_service_mark(svcname, RC_SERVICE_STOPPED);
-		if (failing)
+		यदि (failing)
 			rc_service_mark(svcname, RC_SERVICE_FAILED);
 	}
-	if (pidfile)
+	यदि (pidfile)
 		unlink(pidfile);
-	if (fifopath)
+	यदि (fifopath)
 		unlink(fifopath);
-	exit(EXIT_SUCCESS);
+	निकास(निकास_सफल);
 }
 
-int main(int argc, char **argv)
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण **argv)
 {
-	int opt;
-	char **c;
-	int x;
+	पूर्णाङ्क opt;
+	वर्ण **c;
+	पूर्णाङ्क x;
 	bool start = false;
 	bool stop = false;
 	bool reexec = false;
 	bool sendsig = false;
-	char *exec = NULL;
-	char *retry = NULL;
-	int sig = SIGTERM;
-	char *home = NULL;
-	int tid = 0;
+	वर्ण *exec = रिक्त;
+	वर्ण *retry = रिक्त;
+	पूर्णाङ्क sig = संक_इति;
+	वर्ण *home = रिक्त;
+	पूर्णाङ्क tid = 0;
 	pid_t pid;
-	char *tmp;
-	char *p;
-	char *token;
-	int i;
-	int n;
-	char *exec_file = NULL;
-	char *varbuf = NULL;
-	char numbuf[64];
-	struct timespec ts;
-	struct passwd *pw;
-	struct group *gr;
-	FILE *fp;
+	वर्ण *tmp;
+	वर्ण *p;
+	वर्ण *token;
+	पूर्णाङ्क i;
+	पूर्णाङ्क n;
+	वर्ण *exec_file = रिक्त;
+	वर्ण *varbuf = रिक्त;
+	वर्ण numbuf[64];
+	संरचना timespec ts;
+	संरचना passwd *pw;
+	संरचना group *gr;
+	खाता *fp;
 	mode_t numask = 022;
-	int child_argc = 0;
-	char **child_argv = NULL;
-	char *str = NULL;
-	char *cmdline = NULL;
-	const char *respawn_delay_str  = "0";
-	const char *respawn_period_str = "12sec";
+	पूर्णाङ्क child_argc = 0;
+	वर्ण **child_argv = रिक्त;
+	वर्ण *str = रिक्त;
+	वर्ण *cmdline = रिक्त;
+	अचर वर्ण *respawn_delay_str  = "0";
+	अचर वर्ण *respawn_period_str = "12sec";
 
 	applet = basename_c(argv[0]);
-	atexit(cleanup);
-	svcname = getenv("RC_SVCNAME");
-	if (!svcname)
+	निकास_पर(cleanup);
+	svcname = दो_पर्या("RC_SVCNAME");
+	यदि (!svcname)
 		eerrorx("%s: The RC_SVCNAME environment variable is not set", applet);
 	openlog(applet, LOG_PID, LOG_DAEMON);
 
-	if (argc <= 1 || strcmp(argv[1], svcname))
+	यदि (argc <= 1 || म_भेद(argv[1], svcname))
 		eerrorx("%s: the first argument is %s and must be %s",
 				applet, argv[1], svcname);
 
-	if ((tmp = getenv("SSD_NICELEVEL")))
-		if (sscanf(tmp, "%d", &nicelevel) != 1)
+	यदि ((tmp = दो_पर्या("SSD_NICELEVEL")))
+		यदि (माला_पूछो(tmp, "%d", &nicelevel) != 1)
 			eerror("%s: invalid nice level `%s' (SSD_NICELEVEL)",
 			    applet, tmp);
-	if ((tmp = getenv("SSD_IONICELEVEL"))) {
-		n = sscanf(tmp, "%d:%d", &ionicec, &ioniced);
-		if (n != 1 && n != 2)
+	यदि ((tmp = दो_पर्या("SSD_IONICELEVEL"))) {
+		n = माला_पूछो(tmp, "%d:%d", &ionicec, &ioniced);
+		यदि (n != 1 && n != 2)
 			eerror("%s: invalid ionice level `%s' (SSD_IONICELEVEL)",
 			    applet, tmp);
-		if (ionicec == 0)
+		यदि (ionicec == 0)
 			ioniced = 0;
-		else if (ionicec == 3)
+		अन्यथा यदि (ionicec == 3)
 			ioniced = 7;
 		ionicec <<= 13; /* class shift */
 	}
-	if ((tmp = getenv("SSD_OOM_SCORE_ADJ")))
-		if (sscanf(tmp, "%d", &oom_score_adj) != 1)
+	यदि ((tmp = दो_पर्या("SSD_OOM_SCORE_ADJ")))
+		यदि (माला_पूछो(tmp, "%d", &oom_score_adj) != 1)
 			eerror("%s: invalid oom_score_adj `%s' (SSD_OOM_SCORE_ADJ)",
 			    applet, tmp);
 
 	/* Get our user name and initial dir */
-	p = getenv("USER");
-	home = getenv("HOME");
-	if (home == NULL || p == NULL) {
+	p = दो_पर्या("USER");
+	home = दो_पर्या("HOME");
+	यदि (home == रिक्त || p == रिक्त) {
 		pw = getpwuid(getuid());
-		if (pw != NULL) {
-			if (p == NULL)
+		यदि (pw != रिक्त) {
+			यदि (p == रिक्त)
 				setenv("USER", pw->pw_name, 1);
-			if (home == NULL) {
+			यदि (home == रिक्त) {
 				setenv("HOME", pw->pw_dir, 1);
 				home = pw->pw_dir;
 			}
@@ -908,423 +908,423 @@ int main(int argc, char **argv)
 	}
 
 	cmdline = make_cmdline(argv);
-	if (svcname) {
+	यदि (svcname) {
 		argc--;
 		argv++;
 	}
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts,
-		    (int *) 0)) != -1)
-		switch (opt) {
-		case 'a':  /* --healthcheck-timer <time> */
-			if (sscanf(optarg, "%d", &healthchecktimer) != 1 || healthchecktimer < 1)
+	जबसम्म ((opt = getopt_long(argc, argv, getoptstring, longopts,
+		    (पूर्णाङ्क *) 0)) != -1)
+		विकल्प (opt) {
+		पक्ष 'a':  /* --healthcheck-timer <time> */
+			यदि (माला_पूछो(optarg, "%d", &healthchecktimer) != 1 || healthchecktimer < 1)
 				eerrorx("%s: invalid health check timer %s", applet, optarg);
-			break;
+			रोक;
 
-		case 'A':  /* --healthcheck-delay <time> */
-			if (sscanf(optarg, "%d", &healthcheckdelay) != 1 || healthcheckdelay < 1)
+		पक्ष 'A':  /* --healthcheck-delay <time> */
+			यदि (माला_पूछो(optarg, "%d", &healthcheckdelay) != 1 || healthcheckdelay < 1)
 				eerrorx("%s: invalid health check delay %s", applet, optarg);
-			break;
+			रोक;
 
-		case LONGOPT_CAPABILITIES:
+		पक्ष LONGOPT_CAPABILITIES:
 #ifdef __linux__
 			cap_iab = cap_iab_from_text(optarg);
-			if (cap_iab == NULL)
-				eerrorx("Could not parse iab: %s", strerror(errno));
-#else
+			यदि (cap_iab == रिक्त)
+				eerrorx("Could not parse iab: %s", म_त्रुटि(त्रुटि_सं));
+#अन्यथा
 			eerrorx("Capabilities support not enabled");
 #endif
-			break;
+			रोक;
 
-		case LONGOPT_SECBITS:
+		पक्ष LONGOPT_SECBITS:
 #ifdef __linux__
-			if (*optarg == '\0')
+			यदि (*optarg == '\0')
 				eerrorx("Secbits are empty");
 
-			tmp = NULL;
-			secbits = strtoul(optarg, &tmp, 0);
-			if (*tmp != '\0')
+			tmp = रिक्त;
+			secbits = म_से_अदीर्घ(optarg, &tmp, 0);
+			यदि (*tmp != '\0')
 				eerrorx("Could not parse secbits: invalid char %c", *tmp);
-#else
+#अन्यथा
 			eerrorx("Capabilities support not enabled");
 #endif
-			break;
+			रोक;
 
-		case LONGOPT_NO_NEW_PRIVS:
+		पक्ष LONGOPT_NO_NEW_PRIVS:
 #ifdef PR_SET_NO_NEW_PRIVS
 			no_new_privs = true;
-#else
+#अन्यथा
 			eerrorx("The No New Privs flag is only supported by Linux (since 3.5)");
 #endif
-			break;
+			रोक;
 
-		case 'D':  /* --respawn-delay time */
+		पक्ष 'D':  /* --respawn-delay time */
 			respawn_delay_str = optarg;
-			break;
+			रोक;
 
-		case 'I': /* --ionice */
-			if (sscanf(optarg, "%d:%d", &ionicec, &ioniced) == 0)
+		पक्ष 'I': /* --ionice */
+			यदि (माला_पूछो(optarg, "%d:%d", &ionicec, &ioniced) == 0)
 				eerrorx("%s: invalid ionice `%s'",
 				    applet, optarg);
-			if (ionicec == 0)
+			यदि (ionicec == 0)
 				ioniced = 0;
-			else if (ionicec == 3)
+			अन्यथा यदि (ionicec == 3)
 				ioniced = 7;
 			ionicec <<= 13; /* class shift */
-			break;
+			रोक;
 
-		case 'K':  /* --stop */
+		पक्ष 'K':  /* --stop */
 			stop = true;
-			break;
+			रोक;
 
-		case 'N':  /* --nice */
-			if (sscanf(optarg, "%d", &nicelevel) != 1)
+		पक्ष 'N':  /* --nice */
+			यदि (माला_पूछो(optarg, "%d", &nicelevel) != 1)
 				eerrorx("%s: invalid nice level `%s'",
 				    applet, optarg);
-			break;
+			रोक;
 
-		case LONGOPT_OOM_SCORE_ADJ: /* --oom-score-adj */
-			if (sscanf(optarg, "%d", &oom_score_adj) != 1)
+		पक्ष LONGOPT_OOM_SCORE_ADJ: /* --oom-score-adj */
+			यदि (माला_पूछो(optarg, "%d", &oom_score_adj) != 1)
 				eerrorx("%s: invalid oom-score-adj `%s'",
 				    applet, optarg);
-			break;
+			रोक;
 
-		case 'P':  /* --respawn-period time */
+		पक्ष 'P':  /* --respawn-period time */
 			respawn_period_str = optarg;
-			break;
+			रोक;
 
-		case 's':  /* --signal */
+		पक्ष 's':  /* --signal */
 			sig = parse_signal(applet, optarg);
 			sendsig = true;
-			break;
-		case 'S':  /* --start */
+			रोक;
+		पक्ष 'S':  /* --start */
 			start = true;
-			break;
+			रोक;
 
-		case 'd':  /* --chdir /new/dir */
+		पक्ष 'd':  /* --chdir /new/dir */
 			ch_dir = optarg;
-			break;
+			रोक;
 
-		case 'e': /* --env */
+		पक्ष 'e': /* --env */
 			putenv(optarg);
-			break;
+			रोक;
 
-		case 'g':  /* --group <group>|<gid> */
-			if (sscanf(optarg, "%d", &tid) != 1)
+		पक्ष 'g':  /* --group <group>|<gid> */
+			यदि (माला_पूछो(optarg, "%d", &tid) != 1)
 				gr = getgrnam(optarg);
-			else
+			अन्यथा
 				gr = getgrgid((gid_t)tid);
-			if (gr == NULL)
+			यदि (gr == रिक्त)
 				eerrorx("%s: group `%s' not found",
 				    applet, optarg);
 			gid = gr->gr_gid;
-			break;
+			रोक;
 
-		case 'G': /* -G */
+		पक्ष 'G': /* -G */
 			stopgroup = true;
-			break;
+			रोक;
 
-		case 'k':
-			if (parse_mode(&numask, optarg))
+		पक्ष 'k':
+			यदि (parse_mode(&numask, optarg))
 				eerrorx("%s: invalid mode `%s'",
 				    applet, optarg);
-			break;
+			रोक;
 
-		case 'm':  /* --respawn-max count */
-			n = sscanf(optarg, "%d", &respawn_max);
-			if (n	!= 1 || respawn_max < 0)
+		पक्ष 'm':  /* --respawn-max count */
+			n = माला_पूछो(optarg, "%d", &respawn_max);
+			यदि (n	!= 1 || respawn_max < 0)
 				eerrorx("Invalid respawn-max value '%s'", optarg);
-			break;
+			रोक;
 
-		case 'p':  /* --pidfile <pid-file> */
+		पक्ष 'p':  /* --pidfile <pid-file> */
 			pidfile = optarg;
-			break;
+			रोक;
 
-		case 'R':  /* --retry <schedule>|timeout */
+		पक्ष 'R':  /* --retry <schedule>|timeout */
 			retry = optarg;
-			break;
-		case 'r':  /* --chroot /new/root */
-			ch_root = optarg;
-			break;
+			रोक;
+		पक्ष 'r':  /* --chroot /new/root */
+			ch_जरा = optarg;
+			रोक;
 
-		case 'u':  /* --user <username>|<uid> */
+		पक्ष 'u':  /* --user <username>|<uid> */
 		{
-			char dummy[2];
+			वर्ण dummy[2];
 			p = optarg;
 			tmp = strsep(&p, ":");
 			changeuser = xstrdup(tmp);
-			if (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
+			यदि (माला_पूछो(tmp, "%d%1s", &tid, dummy) != 1)
 				pw = getpwnam(tmp);
-			else
+			अन्यथा
 				pw = getpwuid((uid_t)tid);
 
-			if (pw == NULL)
+			यदि (pw == रिक्त)
 				eerrorx("%s: user `%s' not found",
 				    applet, tmp);
 			uid = pw->pw_uid;
 			home = pw->pw_dir;
 			unsetenv("HOME");
-			if (pw->pw_dir)
+			यदि (pw->pw_dir)
 				setenv("HOME", pw->pw_dir, 1);
 			unsetenv("USER");
-			if (pw->pw_name)
+			यदि (pw->pw_name)
 				setenv("USER", pw->pw_name, 1);
-			if (gid == 0)
+			यदि (gid == 0)
 				gid = pw->pw_gid;
 
-			if (p) {
+			यदि (p) {
 				tmp = strsep (&p, ":");
-				if (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
+				यदि (माला_पूछो(tmp, "%d%1s", &tid, dummy) != 1)
 					gr = getgrnam(tmp);
-				else
+				अन्यथा
 					gr = getgrgid((gid_t) tid);
 
-				if (gr == NULL)
+				यदि (gr == रिक्त)
 					eerrorx("%s: group `%s'"
 					    " not found",
 					    applet, tmp);
 				gid = gr->gr_gid;
 			}
 		}
-		break;
+		रोक;
 
-		case '0':   /* --stdin /path/to/stdin.input-file */
+		पक्ष '0':   /* --stdin /path/to/stdin.input-file */
 			redirect_stdin = optarg;
-			break;
+			रोक;
 
-		case '1':   /* --stdout /path/to/stdout.lgfile */
+		पक्ष '1':   /* --stdout /path/to/stdout.lgfile */
 			redirect_stdout = optarg;
-			break;
+			रोक;
 
-		case '2':  /* --stderr /path/to/stderr.logfile */
+		पक्ष '2':  /* --stderr /path/to/stderr.logfile */
 			redirect_stderr = optarg;
-			break;
-		case '3':  /* --reexec */
+			रोक;
+		पक्ष '3':  /* --reexec */
 			reexec = true;
-			break;
+			रोक;
 
-		case LONGOPT_STDOUT_LOGGER:   /* --stdout-logger "command to run for stdout logging" */
+		पक्ष LONGOPT_STDOUT_LOGGER:   /* --stdout-logger "command to run for stdout logging" */
 			stdout_process = optarg;
-			break;
+			रोक;
 
-		case LONGOPT_STDERR_LOGGER:  /* --stderr-logger "command to run for stderr logging" */
+		पक्ष LONGOPT_STDERR_LOGGER:  /* --stderr-logger "command to run for stderr logging" */
 			stderr_process = optarg;
-			break;
+			रोक;
 
-		case LONGOPT_NOTIFY:
+		पक्ष LONGOPT_NOTIFY:
 			notify = notify_parse(svcname, optarg);
-			break;
+			रोक;
 
-		case LONGOPT_RESPAWN_DELAY_STEP:
+		पक्ष LONGOPT_RESPAWN_DELAY_STEP:
 			respawn_delay_step = parse_duration(optarg);
-			if (respawn_delay_step < 0)
+			यदि (respawn_delay_step < 0)
 				eerrorx("Invalid respawn-delay-step value '%s'", optarg);
-			break;
+			रोक;
 
-		case LONGOPT_RESPAWN_DELAY_CAP:
+		पक्ष LONGOPT_RESPAWN_DELAY_CAP:
 			respawn_delay_cap = parse_duration(optarg);
-			if (respawn_delay_cap < 0)
+			यदि (respawn_delay_cap < 0)
 				eerrorx("Invalid respawn-delay-cap value '%s'", optarg);
-			break;
+			रोक;
 
 		case_RC_COMMON_GETOPT
 		}
 
-	verbose = rc_yesno(getenv ("EINFO_VERBOSE"));
+	verbose = rc_yesno(दो_पर्या ("EINFO_VERBOSE"));
 	endpwent();
 	argc -= optind;
 	argv += optind;
 	exec = *argv;
 
 	respawn_delay = parse_duration(respawn_delay_str);
-	if (respawn_delay < 0)
+	यदि (respawn_delay < 0)
 		eerrorx("Invalid respawn-delay value '%s'", respawn_delay_str);
 	respawn_period = parse_duration(respawn_period_str);
-	if (respawn_period < 0)
+	यदि (respawn_period < 0)
 		eerrorx("Invalid respawn-period value '%s'", respawn_period_str);
 
 	/* Expand ~ */
-	if (ch_dir && *ch_dir == '~')
+	यदि (ch_dir && *ch_dir == '~')
 		ch_dir = expand_home(home, ch_dir);
-	if (ch_root && *ch_root == '~')
-		ch_root = expand_home(home, ch_root);
+	यदि (ch_जरा && *ch_जरा == '~')
+		ch_जरा = expand_home(home, ch_जरा);
 
 	umask(numask);
-	if (!pidfile)
-		xasprintf(&pidfile, "%s/supervise-%s.pid", rc_is_user() ? getenv("XDG_RUNTIME_DIR") : "/var/run", svcname);
+	यदि (!pidfile)
+		xasprintf(&pidfile, "%s/supervise-%s.pid", rc_is_user() ? दो_पर्या("XDG_RUNTIME_DIR") : "/var/run", svcname);
 	xasprintf(&fifopath, "%s/supervise-%s.ctl", rc_svcdir(), svcname);
-	if (mkfifo(fifopath, 0600) == -1 && errno != EEXIST)
+	यदि (mkfifo(fifopath, 0600) == -1 && त्रुटि_सं != EEXIST)
 		eerrorx("%s: unable to create control fifo: %s",
-				applet, strerror(errno));
+				applet, म_त्रुटि(त्रुटि_सं));
 
-	if (reexec) {
-		str = rc_service_value_get(svcname, "argc");
-		sscanf(str, "%d", &child_argc);
-		child_argv = xmalloc((child_argc + 1) * sizeof(char *));
-		memset(child_argv, 0, (child_argc + 1) * sizeof(char *));
-		for (x = 0; x < child_argc; x++) {
+	यदि (reexec) {
+		str = rc_service_मान_get(svcname, "argc");
+		माला_पूछो(str, "%d", &child_argc);
+		child_argv = xmalloc((child_argc + 1) * परिमाण(वर्ण *));
+		स_रखो(child_argv, 0, (child_argc + 1) * परिमाण(वर्ण *));
+		लागि (x = 0; x < child_argc; x++) {
 			xasprintf(&varbuf, "argv_%d", x);
-			str = rc_service_value_get(svcname, varbuf);
+			str = rc_service_मान_get(svcname, varbuf);
 			child_argv[x] = str;
-			free(varbuf);
-			varbuf = NULL;
+			मुक्त(varbuf);
+			varbuf = रिक्त;
 		}
-		free(str);
-		str = rc_service_value_get(svcname, "child_pid");
-		sscanf(str, "%d", &child_pid);
-		free(str);
-		exec = rc_service_value_get(svcname, "exec");
-		pidfile = rc_service_value_get(svcname, "pidfile");
-		retry = rc_service_value_get(svcname, "retry");
-		if (retry) {
+		मुक्त(str);
+		str = rc_service_मान_get(svcname, "child_pid");
+		माला_पूछो(str, "%d", &child_pid);
+		मुक्त(str);
+		exec = rc_service_मान_get(svcname, "exec");
+		pidfile = rc_service_मान_get(svcname, "pidfile");
+		retry = rc_service_मान_get(svcname, "retry");
+		यदि (retry) {
 			parse_schedule(applet, retry, sig);
-			rc_service_value_set(svcname, "retry", retry);
-		} else
-			parse_schedule(applet, NULL, sig);
+			rc_service_मान_set(svcname, "retry", retry);
+		} अन्यथा
+			parse_schedule(applet, रिक्त, sig);
 
-		str = rc_service_value_get(svcname, "respawn_delay");
+		str = rc_service_मान_get(svcname, "respawn_delay");
 		respawn_delay = parse_duration(str);
-		str = rc_service_value_get(svcname, "respawn_delay_step");
-		sscanf(str, "%"SCNd64, &respawn_delay_step);
-		str = rc_service_value_get(svcname, "respawn_delay_cap");
-		sscanf(str, "%"SCNd64, &respawn_delay_cap);
-		str = rc_service_value_get(svcname, "respawn_max");
-		sscanf(str, "%d", &respawn_max);
+		str = rc_service_मान_get(svcname, "respawn_delay_step");
+		माला_पूछो(str, "%"SCNd64, &respawn_delay_step);
+		str = rc_service_मान_get(svcname, "respawn_delay_cap");
+		माला_पूछो(str, "%"SCNd64, &respawn_delay_cap);
+		str = rc_service_मान_get(svcname, "respawn_max");
+		माला_पूछो(str, "%d", &respawn_max);
 		supervisor(exec, child_argv);
-	} else if (start) {
-		if (exec) {
-			if (*exec == '~')
+	} अन्यथा यदि (start) {
+		यदि (exec) {
+			यदि (*exec == '~')
 				exec = expand_home(home, exec);
 
 			/* Validate that the binary exists if we are starting */
-			if (*exec == '/' || *exec == '.') {
+			यदि (*exec == '/' || *exec == '.') {
 				/* Full or relative path */
-				if (ch_root)
-					xasprintf(&exec_file, "%s/%s", ch_root, exec);
-				else
+				यदि (ch_जरा)
+					xasprintf(&exec_file, "%s/%s", ch_जरा, exec);
+				अन्यथा
 					xasprintf(&exec_file, "%s", exec);
-			} else {
+			} अन्यथा {
 				/* Something in $PATH */
-				p = tmp = xstrdup(getenv("PATH"));
-				exec_file = NULL;
-				while ((token = strsep(&p, ":"))) {
-					if (ch_root)
-						xasprintf(&exec_file, "%s/%s/%s", ch_root, token, exec);
-					else
+				p = tmp = xstrdup(दो_पर्या("PATH"));
+				exec_file = रिक्त;
+				जबसम्म ((token = strsep(&p, ":"))) {
+					यदि (ch_जरा)
+						xasprintf(&exec_file, "%s/%s/%s", ch_जरा, token, exec);
+					अन्यथा
 						xasprintf(&exec_file, "%s/%s", token, exec);
-					if (exec_file && access(exec_file, F_OK) == 0)
-						break;
-					free(exec_file);
-					exec_file = NULL;
+					यदि (exec_file && access(exec_file, F_OK) == 0)
+						रोक;
+					मुक्त(exec_file);
+					exec_file = रिक्त;
 				}
-				free(tmp);
+				मुक्त(tmp);
 			}
-			if (access(exec_file, F_OK) != 0) {
+			यदि (access(exec_file, F_OK) != 0) {
 				eerror("%s: %s does not exist", applet,
 				    exec_file ? exec_file : exec);
-				free(exec_file);
-				exit(EXIT_FAILURE);
+				मुक्त(exec_file);
+				निकास(निकास_त्रुटि);
 			}
-		} else
+		} अन्यथा
 			eerrorx("%s: nothing to start", applet);
 
 		pid = get_pid(applet, pidfile);
-		if (pid != -1)
-			if (do_stop(applet, exec, (const char * const *)argv, pid, uid,
+		यदि (pid != -1)
+			यदि (do_stop(applet, exec, (अचर वर्ण * अचर *)argv, pid, uid,
 						0, false, false, true) > 0)
 				eerrorx("%s: %s is already running", applet, exec);
 
-		if (respawn_period > 0 && respawn_delay * respawn_max > respawn_period)
+		यदि (respawn_period > 0 && respawn_delay * respawn_max > respawn_period)
 			ewarn("%s: Please decrease the value of --respawn-period to less "
 				"than %"PRId64" to avoid infinite respawning", applet,
 				(respawn_delay * respawn_max + 500)/1000);
-		if (respawn_delay_step > 0 && respawn_delay > respawn_delay_cap)
+		यदि (respawn_delay_step > 0 && respawn_delay > respawn_delay_cap)
 			ewarn("%s: Please decrease the value of --respawn-delay (%"PRId64"ms) to less "
 				"than --respawn-delay-cap (%"PRId64"ms)", applet,
 				respawn_delay, respawn_delay_cap);
 
-		if (retry) {
+		यदि (retry) {
 			parse_schedule(applet, retry, sig);
-			rc_service_value_set(svcname, "retry", retry);
-		} else
-			parse_schedule(applet, NULL, sig);
+			rc_service_मान_set(svcname, "retry", retry);
+		} अन्यथा
+			parse_schedule(applet, रिक्त, sig);
 
 		einfov("Detaching to start `%s'", exec);
 		syslog(LOG_INFO, "Supervisor command line: %s", cmdline);
-		free(cmdline);
-		cmdline = NULL;
+		मुक्त(cmdline);
+		cmdline = रिक्त;
 
 		/* Remove existing pidfile */
-		if (pidfile)
+		यदि (pidfile)
 			unlink(pidfile);
 
 		/* Make sure we can write a pid file */
-		fp = fopen(pidfile, "w");
-		if (!fp)
-			eerrorx("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
-		fclose(fp);
+		fp = ख_खोलो(pidfile, "w");
+		यदि (!fp)
+			eerrorx("%s: fopen `%s': %s", applet, pidfile, म_त्रुटि(त्रुटि_सं));
+		ख_बंद(fp);
 
-		rc_service_value_set(svcname, "pidfile", pidfile);
-		rc_service_value_set(svcname, "respawn_delay", respawn_delay_str);
-		rc_service_value_set(svcname, "respawn_period", respawn_period_str);
-		snprintf(numbuf, sizeof(numbuf), "%"PRId64, respawn_delay_step);
-		rc_service_value_set(svcname, "respawn_delay_step", numbuf);
-		snprintf(numbuf, sizeof(numbuf), "%"PRId64, respawn_delay_cap);
-		rc_service_value_set(svcname, "respawn_delay_cap", numbuf);
-		snprintf(numbuf, sizeof(numbuf), "%i", respawn_max);
-		rc_service_value_set(svcname, "respawn_max", numbuf);
-		child_pid = fork();
-		if (child_pid == -1)
-			eerrorx("%s: fork: %s", applet, strerror(errno));
-		if (child_pid != 0)
-			exit(notify_wait(applet, notify) ? EXIT_SUCCESS : EXIT_FAILURE);
+		rc_service_मान_set(svcname, "pidfile", pidfile);
+		rc_service_मान_set(svcname, "respawn_delay", respawn_delay_str);
+		rc_service_मान_set(svcname, "respawn_period", respawn_period_str);
+		snprintf(numbuf, परिमाण(numbuf), "%"PRId64, respawn_delay_step);
+		rc_service_मान_set(svcname, "respawn_delay_step", numbuf);
+		snprintf(numbuf, परिमाण(numbuf), "%"PRId64, respawn_delay_cap);
+		rc_service_मान_set(svcname, "respawn_delay_cap", numbuf);
+		snprintf(numbuf, परिमाण(numbuf), "%i", respawn_max);
+		rc_service_मान_set(svcname, "respawn_max", numbuf);
+		child_pid = विभाजन();
+		यदि (child_pid == -1)
+			eerrorx("%s: fork: %s", applet, म_त्रुटि(त्रुटि_सं));
+		यदि (child_pid != 0)
+			निकास(notify_wait(applet, notify) ? निकास_सफल : निकास_त्रुटि);
 
 #ifdef TIOCNOTTY
-		tty_fd = open("/dev/tty", O_RDWR);
+		tty_fd = खोलो("/dev/tty", O_RDWR);
 #endif
-		devnull_fd = open("/dev/null", O_RDWR);
+		devnull_fd = खोलो("/dev/null", O_RDWR);
 		dup2(devnull_fd, STDIN_FILENO);
 		dup2(devnull_fd, STDOUT_FILENO);
 		dup2(devnull_fd, STDERR_FILENO);
 
-		if (notify.type == NOTIFY_FD)
-			close(notify.pipe[0]);
+		यदि (notify.type == NOTIFY_FD)
+			बंद(notify.pipe[0]);
 
-		child_pid = fork();
-		if (child_pid == -1)
-			eerrorx("%s: fork: %s", applet, strerror(errno));
-		else if (child_pid != 0) {
-			if (notify.type == NOTIFY_FD)
-				close(notify.pipe[1]);
+		child_pid = विभाजन();
+		यदि (child_pid == -1)
+			eerrorx("%s: fork: %s", applet, म_त्रुटि(त्रुटि_सं));
+		अन्यथा यदि (child_pid != 0) {
+			यदि (notify.type == NOTIFY_FD)
+				बंद(notify.pipe[1]);
 			c = argv;
 			x = 0;
-			while (c && *c) {
-				varbuf = NULL;
+			जबसम्म (c && *c) {
+				varbuf = रिक्त;
 				xasprintf(&varbuf, "argv_%-d",x);
-				rc_service_value_set(svcname, varbuf, *c);
-				free(varbuf);
-				varbuf = NULL;
+				rc_service_मान_set(svcname, varbuf, *c);
+				मुक्त(varbuf);
+				varbuf = रिक्त;
 				x++;
 				c++;
 			}
-			snprintf(numbuf, sizeof(numbuf), "%d", x);
-			rc_service_value_set(svcname, "argc", numbuf);
-			rc_service_value_set(svcname, "exec", exec);
+			snprintf(numbuf, परिमाण(numbuf), "%d", x);
+			rc_service_मान_set(svcname, "argc", numbuf);
+			rc_service_मान_set(svcname, "exec", exec);
 			supervisor(exec, argv);
-		} else
+		} अन्यथा
 			child_process(exec, argv);
-	} else if (stop) {
+	} अन्यथा यदि (stop) {
 		pid = get_pid(applet, pidfile);
-		if (pid != -1) {
-			i = kill(pid, SIGTERM);
-			if (i != 0)
+		यदि (pid != -1) {
+			i = समाप्त(pid, संक_इति);
+			यदि (i != 0)
 				/* We failed to send the signal */
 				ewarn("Unable to shut down the supervisor");
-			else {
+			अन्यथा {
 				/* wait for the supervisor to go down */
-				while (kill(pid, 0) == 0) {
+				जबसम्म (समाप्त(pid, 0) == 0) {
 					ts.tv_sec = 0;
 					ts.tv_nsec = 1;
-					nanosleep(&ts, NULL);
+					nanosleep(&ts, रिक्त);
 				}
 			}
 		}
@@ -1333,27 +1333,27 @@ int main(int argc, char **argv)
 		 * remove information about it as it may have unexpectedly
 		 * crashed out. We should also return success as the end
 		 * result would be the same. */
-		if (pidfile)
+		यदि (pidfile)
 			unlink(pidfile);
-		if (svcname) {
+		यदि (svcname) {
 			rc_service_daemon_set(svcname, exec,
-			    (const char *const *)argv,
+			    (अचर वर्ण *अचर *)argv,
 			    pidfile, false);
 			rc_service_mark(svcname, RC_SERVICE_STOPPED);
 		}
-		exit(EXIT_SUCCESS);
-	} else if (sendsig) {
-		fifo_fd = open(fifopath, O_WRONLY |O_NONBLOCK);
-		if (fifo_fd < 0)
-			eerrorx("%s: unable to open control fifo %s", applet, strerror(errno));
+		निकास(निकास_सफल);
+	} अन्यथा यदि (sendsig) {
+		fifo_fd = खोलो(fifopath, O_WRONLY |O_NONBLOCK);
+		यदि (fifo_fd < 0)
+			eerrorx("%s: unable to open control fifo %s", applet, म_त्रुटि(त्रुटि_सं));
 		xasprintf(&str, "sig %d", sig);
-		x = write(fifo_fd, str, strlen(str));
-		if (x == -1) {
-			free(tmp);
+		x = लिख(fifo_fd, str, म_माप(str));
+		यदि (x == -1) {
+			मुक्त(tmp);
 			eerrorx("%s: error writing to control fifo: %s", applet,
-					strerror(errno));
+					म_त्रुटि(त्रुटि_सं));
 		}
-		free(tmp);
-		exit(EXIT_SUCCESS);
+		मुक्त(tmp);
+		निकास(निकास_सफल);
 	}
 }

@@ -12,93 +12,93 @@
 
 #define SYSLOG_NAMES
 
-#include <sys/time.h>
-#include <errno.h>
-#include <ctype.h>
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <strings.h>
+#अन्तर्भाव <sys/time.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <inttypes.h>
+#अन्तर्भाव <stddef.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <syslog.h>
+#अन्तर्भाव <time.h>
+#अन्तर्भाव <strings.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#अन्तर्भाव "einfo.h"
+#अन्तर्भाव "helpers.h"
 
 /* usecs to wait while we poll the file existence  */
 #define WAIT_INTERVAL	20000000
 
-const char *applet = NULL;
+अचर वर्ण *applet = रिक्त;
 
-static int syslog_decode(char *name, const CODE *codetab)
+स्थिर पूर्णाङ्क syslog_decode(वर्ण *name, अचर CODE *codetab)
 {
-	const CODE *c;
+	अचर CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	यदि (है_अंक((अचिन्हित वर्ण)*name))
+		फर्काऊ म_से_प(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	लागि (c = codetab; c->c_name; c++)
+		यदि (!strcasecmp(name, c->c_name))
+			फर्काऊ c->c_val;
 
-	return -1;
+	फर्काऊ -1;
 }
 
-int main(int argc, char **argv)
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
-	size_t l = 0;
-	char *message = NULL;
-	char *p;
-	int level = 0;
-	struct timespec ts;
-	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	पूर्णाङ्क retval = निकास_सफल;
+	पूर्णाङ्क i;
+	माप_प्रकार l = 0;
+	वर्ण *message = रिक्त;
+	वर्ण *p;
+	पूर्णाङ्क level = 0;
+	संरचना timespec ts;
+	संरचना timeval stop, now;
+	पूर्णाङ्क (*e) (अचर वर्ण *, ...) EINFO_PRINTF(1, 2) = रिक्त;
+	पूर्णाङ्क (*ee) (पूर्णाङ्क, अचर वर्ण *, ...) EINFO_PRINTF(2, 3) = रिक्त;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
-		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
+	यदि (म_भेद(applet, "eval_ecolors") == 0) {
+		म_लिखो("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
 		    ecolor(ECOLOR_BAD),
 		    ecolor(ECOLOR_HILITE),
 		    ecolor(ECOLOR_BRACKET),
 		    ecolor(ECOLOR_NORMAL));
-		exit(EXIT_SUCCESS);
+		निकास(निकास_सफल);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
-		    strcmp(applet, "ewend") == 0 ||
-		    strcmp(applet, "veend") == 0 ||
-		    strcmp(applet, "vewend") == 0 ||
-		    strcmp(applet, "ewaitfile") == 0)
+	यदि (argc > 0) {
+		यदि (म_भेद(applet, "eend") == 0 ||
+		    म_भेद(applet, "ewend") == 0 ||
+		    म_भेद(applet, "veend") == 0 ||
+		    म_भेद(applet, "vewend") == 0 ||
+		    म_भेद(applet, "ewaitfile") == 0)
 		{
-			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
-				errno = EINVAL;
-			if (errno)
-				retval = EXIT_FAILURE;
-			else {
+			त्रुटि_सं = 0;
+			retval = (पूर्णाङ्क)strtoimax(argv[0], &p, 0);
+			यदि (!p || *p != '\0')
+				त्रुटि_सं = EINVAL;
+			यदि (त्रुटि_सं)
+				retval = निकास_त्रुटि;
+			अन्यथा {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
-		    strcmp(applet, "elog") == 0) {
-			p = strchr(argv[0], '.');
-			if (!p ||
+		} अन्यथा यदि (म_भेद(applet, "esyslog") == 0 ||
+		    म_भेद(applet, "elog") == 0) {
+			p = म_अक्षर(argv[0], '.');
+			यदि (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			यदि (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,110 +109,110 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	यदि (म_भेद(applet, "ewaitfile") == 0) {
+		यदि (त्रुटि_सं)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		यदि (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
-		gettimeofday(&stop, NULL);
+		gettimeofday(&stop, रिक्त);
 		/* retval stores the timeout */
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		लागि (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
-					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
-				gettimeofday(&now, NULL);
-				if (retval <= 0)
-					continue;
-				if (timercmp(&now, &stop, <))
-					continue;
-				eendv(EXIT_FAILURE,
+			लागि (;;) {
+				यदि (access(argv[i], F_OK) == 0)
+					रोक;
+				यदि (nanosleep(&ts, रिक्त) == -1)
+					फर्काऊ निकास_त्रुटि;
+				gettimeofday(&now, रिक्त);
+				यदि (retval <= 0)
+					जारी;
+				यदि (timercmp(&now, &stop, <))
+					जारी;
+				eendv(निकास_त्रुटि,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				फर्काऊ निकास_त्रुटि;
 			}
-			eendv(EXIT_SUCCESS, NULL);
+			eendv(निकास_सफल, रिक्त);
 		}
-		return EXIT_SUCCESS;
+		फर्काऊ निकास_सफल;
 	}
 
-	if (argc > 0) {
-		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
-				fputc(' ', mem);
-			fputs(argv[i], mem);
+	यदि (argc > 0) {
+		खाता *mem = xopen_memstream(&message, &l);
+		लागि (i = 0; i < argc; i++) {
+			यदि (i > 0)
+				ख_अक्षर_दो(' ', mem);
+			ख_माला_दो(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	यदि (म_भेद(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	अन्यथा यदि (म_भेद(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	अन्यथा यदि (म_भेद(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	अन्यथा यदि (म_भेद(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	अन्यथा यदि (म_भेद(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} अन्यथा यदि (म_भेद(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} अन्यथा यदि (म_भेद(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	अन्यथा यदि (म_भेद(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	अन्यथा यदि (म_भेद(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
+	अन्यथा यदि (म_भेद(applet, "esyslog") == 0) {
 		elog(retval, "%s", message);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} अन्यथा यदि (म_भेद(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	अन्यथा यदि (म_भेद(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	अन्यथा यदि (म_भेद(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	अन्यथा यदि (म_भेद(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	अन्यथा यदि (म_भेद(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	अन्यथा यदि (म_भेद(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	अन्यथा यदि (म_भेद(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	अन्यथा यदि (म_भेद(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	अन्यथा यदि (म_भेद(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	अन्यथा यदि (म_भेद(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	अन्यथा यदि (म_भेद(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	अन्यथा {
 		eerror("%s: unknown applet", applet);
-		retval = EXIT_FAILURE;
+		retval = निकास_त्रुटि;
 	}
 
-	if (message) {
-		if (e)
+	यदि (message) {
+		यदि (e)
 			e("%s", message);
-		else if (ee)
+		अन्यथा यदि (ee)
 			ee(retval, "%s", message);
-	} else {
-		if (e)
-			e(NULL);
-		else if (ee)
-			ee(retval, NULL);
+	} अन्यथा {
+		यदि (e)
+			e(रिक्त);
+		अन्यथा यदि (ee)
+			ee(retval, रिक्त);
 	}
 
-	free(message);
-	return retval;
+	मुक्त(message);
+	फर्काऊ retval;
 }
