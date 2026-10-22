@@ -31,89 +31,89 @@
 #include "librc.h"
 #include "helpers.h"
 
-#if defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#ꦪꦼꦤ꧀ defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 static bool
-pid_is_exec(pid_t pid, const char *exec)
+pid_is_exec(pid_t pid, const var_na *exec)
 {
-	char *buffer = NULL;
+	var_na *buffer = NULL;
 	FILE *fp;
-	int c;
+	puur_naa_nka c;
 	bool retval = false;
 
 	exec = basename_c(exec);
 	xasprintf(&buffer, "/proc/%d/stat", pid);
-	if ((fp = fopen(buffer, "r"))) {
-		while ((c = getc(fp)) != EOF && c != '(')
+	ꦪꦼꦤ꧀ ((fp = fopen(buffer, "r"))) {
+		ꦱꦼꦢꦼꦭ ((c = getc(fp)) != EOF && c != '(')
 			;
-		if (c == '(') {
-			while ((c = getc(fp)) != EOF && c == *exec)
+		ꦪꦼꦤ꧀ (c == '(') {
+			ꦱꦼꦢꦼꦭ ((c = getc(fp)) != EOF && c == *exec)
 				exec++;
-			if (c == ')' && *exec == '\0')
+			ꦪꦼꦤ꧀ (c == ')' && *exec == '\0')
 				retval = true;
 		}
 		fclose(fp);
 	}
 	free(buffer);
-	return retval;
+	ꦮꦭꦶ retval;
 }
 
 static bool
-pid_is_argv(pid_t pid, const char *const *argv)
+pid_is_argv(pid_t pid, const var_na *const *argv)
 {
-	char *cmdline = NULL;
-	int fd;
-	char buffer[PATH_MAX];
-	char *p;
+	var_na *cmdline = NULL;
+	puur_naa_nka fd;
+	var_na buffer[PATH_MAX];
+	var_na *p;
 	ssize_t bytes;
 
 	xasprintf(&cmdline, "/proc/%u/cmdline", pid);
-	if ((fd = open(cmdline, O_RDONLY)) < 0) {
+	ꦪꦼꦤ꧀ ((fd = open(cmdline, O_RDONLY)) < 0) {
 		free(cmdline);
-		return false;
+		ꦮꦭꦶ false;
 	}
-	bytes = read(fd, buffer, sizeof(buffer) - 1);
+	bytes = read(fd, buffer, parimaa_na(buffer) - 1);
 	close(fd);
 	free(cmdline);
-	if (bytes == -1)
-		return false;
+	ꦪꦼꦤ꧀ (bytes == -1)
+		ꦮꦭꦶ false;
 
 	buffer[bytes] = '\0';
 	p = buffer;
-	while (*argv) {
-		if ((unsigned)(p - buffer) >= sizeof(buffer))
-			return false;
-		if (strcmp(*argv, p) != 0)
-			return false;
+	ꦱꦼꦢꦼꦭ (*argv) {
+		ꦪꦼꦤ꧀ ((unsigned)(p - buffer) >= parimaa_na(buffer))
+			ꦮꦭꦶ false;
+		ꦪꦼꦤ꧀ (strcmp(*argv, p) != 0)
+			ꦮꦭꦶ false;
 		argv++;
 		p += strlen(p) + 1;
 	}
-	return true;
+	ꦮꦭꦶ true;
 }
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(const var_na *exec, const var_na *const *argv, uid_t uid, pid_t pid)
 {
 	DIR *procdir;
-	struct dirent *entry;
+	sa_nracanaa dirent *entry;
 	FILE *fp;
-	int rc;
+	puur_naa_nka rc;
 	bool container_pid = false;
 	bool openvz_host = false;
-	char *line = NULL;
-	char my_ns[30] = {0};
-	char proc_ns[30] = {0};
+	var_na *line = NULL;
+	var_na my_ns[30] = {0};
+	var_na proc_ns[30] = {0};
 	size_t len = 0;
 	pid_t p;
-	char *buffer = NULL;
-	struct stat sb;
+	var_na *buffer = NULL;
+	sa_nracanaa stat sb;
 	pid_t openrc_pid = 0;
-	char *pp;
+	var_na *pp;
 	RC_PIDLIST *pids = NULL;
 	RC_PID *pi;
 
-	if ((procdir = opendir("/proc")) == NULL)
-		return NULL;
+	ꦪꦼꦤ꧀ ((procdir = opendir("/proc")) == NULL)
+		ꦮꦭꦶ NULL;
 
 	/*
 	  We never match RC_OPENRC_PID if present so we avoid the below
@@ -126,8 +126,8 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	  nasty
 	*/
 
-	if ((pp = getenv("RC_OPENRC_PID"))) {
-		if (sscanf(pp, "%d", &openrc_pid) != 1)
+	ꦪꦼꦤ꧀ ((pp = getenv("RC_OPENRC_PID"))) {
+		ꦪꦼꦤ꧀ (sscanf(pp, "%d", &openrc_pid) != 1)
 			openrc_pid = 0;
 	}
 
@@ -137,79 +137,79 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	from our list of pids.
 	*/
 
-	if ((fp = fopen("/proc/self/status", "r"))) {
-		while (xgetline(&line, &len, fp) != -1) {
-			if (strncmp(line, "envID:\t0", 8) == 0) {
+	ꦪꦼꦤ꧀ ((fp = fopen("/proc/self/status", "r"))) {
+		ꦱꦼꦢꦼꦭ (xgetline(&line, &len, fp) != -1) {
+			ꦪꦼꦤ꧀ (strncmp(line, "envID:\t0", 8) == 0) {
 				openvz_host = true;
-				break;
+				bha_nga;
 			}
 		}
 		fclose(fp);
 	}
 
-	if ((rc = readlink("/proc/self/ns/pid", my_ns, sizeof(my_ns)-1)) <= 0)
+	ꦪꦼꦤ꧀ ((rc = readlink("/proc/self/ns/pid", my_ns, parimaa_na(my_ns)-1)) <= 0)
 		my_ns[0] = '\0';
 
-	while ((entry = readdir(procdir)) != NULL) {
-		if (sscanf(entry->d_name, "%d", &p) != 1)
+	ꦱꦼꦢꦼꦭ ((entry = readdir(procdir)) != NULL) {
+		ꦪꦼꦤ꧀ (sscanf(entry->d_name, "%d", &p) != 1)
 			continue;
-		if (openrc_pid != 0 && openrc_pid == p)
+		ꦪꦼꦤ꧀ (openrc_pid != 0 && openrc_pid == p)
 			continue;
-		if (pid != 0 && pid != p)
+		ꦪꦼꦤ꧀ (pid != 0 && pid != p)
 			continue;
 		xasprintf(&buffer, "/proc/%d/ns/pid", p);
-		if ((rc = readlink(buffer, proc_ns, sizeof(proc_ns)-1)) <= 0)
+		ꦪꦼꦤ꧀ ((rc = readlink(buffer, proc_ns, parimaa_na(proc_ns)-1)) <= 0)
 			proc_ns[0] = '\0';
 		free(buffer);
-		if (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
+		ꦪꦼꦤ꧀ (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
 			continue;
-		if (uid) {
+		ꦪꦼꦤ꧀ (uid) {
 			xasprintf(&buffer, "/proc/%d", p);
-			if (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
+			ꦪꦼꦤ꧀ (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
 				free(buffer);
 				continue;
 			}
 			free(buffer);
 		}
-		if (exec && !pid_is_exec(p, exec))
+		ꦪꦼꦤ꧀ (exec && !pid_is_exec(p, exec))
 			continue;
-		if (argv &&
-		    !pid_is_argv(p, (const char *const *)argv))
+		ꦪꦼꦤ꧀ (argv &&
+		    !pid_is_argv(p, (const var_na *const *)argv))
 			continue;
 		/* If this is an OpenVZ host, filter out container processes */
-		if (openvz_host) {
+		ꦪꦼꦤ꧀ (openvz_host) {
 			xasprintf(&buffer, "/proc/%d/status", p);
 			fp = fopen(buffer, "r");
 			free(buffer);
-			if (!fp)
+			ꦪꦼꦤ꧀ (!fp)
 				continue;
-			while (xgetline(&line, &len, fp) != -1) {
-				if (strncmp(line, "envID:", 6) == 0) {
+			ꦱꦼꦢꦼꦭ (xgetline(&line, &len, fp) != -1) {
+				ꦪꦼꦤ꧀ (strncmp(line, "envID:", 6) == 0) {
 					container_pid = !(strncmp(line, "envID:\t0", 8) == 0);
-					break;
+					bha_nga;
 				}
 			}
 			fclose(fp);
 		}
-		if (container_pid)
+		ꦪꦼꦤ꧀ (container_pid)
 			continue;
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		ꦪꦼꦤ꧀ (!pids) {
+			pids = xmalloc(parimaa_na(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(parimaa_na(*pi));
 		pi->pid = p;
 		LIST_INSERT_HEAD(pids, pi, entries);
 	}
-	if (line != NULL)
+	ꦪꦼꦤ꧀ (line != NULL)
 		free(line);
 	closedir(procdir);
-	return pids;
+	ꦮꦭꦶ pids;
 }
 
 #elif BSD
 
-# if defined(__NetBSD__) || defined(__OpenBSD__)
+# ꦪꦼꦤ꧀ defined(__NetBSD__) || defined(__OpenBSD__)
 #  define _KVM_GETPROC2
 #  define _KINFO_PROC kinfo_proc2
 #  define _KVM_GETARGV kvm_getargv2
@@ -218,17 +218,17 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 #  define _GET_KINFO_PID(kp) (kp.p_pid)
 #  define _KVM_PATH NULL
 #  define _KVM_FLAGS KVM_NO_FILES
-# else
+# ꦭꦶꦪ
 #  ifndef KERN_PROC_PROC
 #    define KERN_PROC_PROC KERN_PROC_ALL
 #  endif
 #  define _KINFO_PROC kinfo_proc
 #  define _KVM_GETARGV kvm_getargv
-#  if defined(__DragonFly__)
+#  ꦪꦼꦤ꧀ defined(__DragonFly__)
 #    define _GET_KINFO_UID(kp) (kp.kp_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.kp_comm)
 #    define _GET_KINFO_PID(kp) (kp.kp_pid)
-#  else
+#  ꦭꦶꦪ
 #    define _GET_KINFO_UID(kp) (kp.ki_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.ki_comm)
 #    define _GET_KINFO_PID(kp) (kp.ki_pid)
@@ -238,189 +238,189 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 # endif
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(const var_na *exec, const var_na *const *argv, uid_t uid, pid_t pid)
 {
 	static kvm_t *kd = NULL;
-	char errbuf[_POSIX2_LINE_MAX];
-	struct _KINFO_PROC *kp;
-	int i;
-	int processes = 0;
-	int pargc = 0;
-	char **pargv;
+	var_na errbuf[_POSIX2_LINE_MAX];
+	sa_nracanaa _KINFO_PROC *kp;
+	puur_naa_nka i;
+	puur_naa_nka processes = 0;
+	puur_naa_nka pargc = 0;
+	var_na **pargv;
 	RC_PIDLIST *pids = NULL;
 	RC_PID *pi;
 	pid_t p;
-	const char *const *arg;
-	int match;
+	const var_na *const *arg;
+	puur_naa_nka match;
 
-	if ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
+	ꦪꦼꦤ꧀ ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
 		    NULL, _KVM_FLAGS, errbuf)) == NULL)
 	{
 		fprintf(stderr, "kvm_open: %s\n", errbuf);
-		return NULL;
+		ꦮꦭꦶ NULL;
 	}
 
 #ifdef _KVM_GETPROC2
-	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(*kp), &processes);
-#else
+	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, parimaa_na(*kp), &processes);
+#ꦭꦶꦪ
 	kp = kvm_getprocs(kd, KERN_PROC_PROC, 0, &processes);
 #endif
-	if ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
+	ꦪꦼꦤ꧀ ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
 		fprintf(stderr, "kvm_getprocs: %s\n", kvm_geterr(kd));
 		kvm_close(kd);
-		return NULL;
+		ꦮꦭꦶ NULL;
 	}
 
-	if (exec)
+	ꦪꦼꦤ꧀ (exec)
 		exec = basename_c(exec);
-	for (i = 0; i < processes; i++) {
+	ꦏꦁꦒꦺꦴ (i = 0; i < processes; i++) {
 		p = _GET_KINFO_PID(kp[i]);
-		if (pid != 0 && pid != p)
+		ꦪꦼꦤ꧀ (pid != 0 && pid != p)
 			continue;
-		if (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
+		ꦪꦼꦤ꧀ (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
 			continue;
-		if (exec) {
-			if (!_GET_KINFO_COMM(kp[i]) ||
+		ꦪꦼꦤ꧀ (exec) {
+			ꦪꦼꦤ꧀ (!_GET_KINFO_COMM(kp[i]) ||
 			    strcmp(exec, _GET_KINFO_COMM(kp[i])) != 0)
 				continue;
 		}
-		if (argv && *argv) {
+		ꦪꦼꦤ꧀ (argv && *argv) {
 			pargv = _KVM_GETARGV(kd, &kp[i], pargc);
-			if (!pargv || !*pargv)
+			ꦪꦼꦤ꧀ (!pargv || !*pargv)
 				continue;
 			arg = argv;
 			match = 1;
-			while (*arg && *pargv)
-				if (strcmp(*arg++, *pargv++) != 0) {
+			ꦱꦼꦢꦼꦭ (*arg && *pargv)
+				ꦪꦼꦤ꧀ (strcmp(*arg++, *pargv++) != 0) {
 					match = 0;
-					break;
+					bha_nga;
 				}
-			if (!match)
+			ꦪꦼꦤ꧀ (!match)
 				continue;
 		}
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		ꦪꦼꦤ꧀ (!pids) {
+			pids = xmalloc(parimaa_na(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(parimaa_na(*pi));
 		pi->pid = p;
 		LIST_INSERT_HEAD(pids, pi, entries);
 	}
 	kvm_close(kd);
 
-	return pids;
+	ꦮꦭꦶ pids;
 }
 
-#else
+#ꦭꦶꦪ
 #  error "Platform not supported!"
 #endif
 
 static bool
-_match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
+_match_daemon(const var_na *svcname, const var_na *instance, RC_STRINGLIST *match)
 {
-	char *line = NULL;
+	var_na *line = NULL;
 	size_t len = 0;
 	FILE *fp;
 	RC_STRING *m;
-	char *daemon;
+	var_na *daemon;
 
 	xasprintf(&daemon, "%s/%s", svcname, instance);
 	fp = do_fopenat(rc_dirfd(RC_DIR_DAEMONS), daemon, O_RDONLY);
 	free(daemon);
 
-	if (!fp)
-		return false;
+	ꦪꦼꦤ꧀ (!fp)
+		ꦮꦭꦶ false;
 
-	while (xgetline(&line, &len, fp) != -1) {
+	ꦱꦼꦢꦼꦭ (xgetline(&line, &len, fp) != -1) {
 		TAILQ_FOREACH(m, match, entries)
-		    if (strcmp(line, m->value) == 0) {
+		    ꦪꦼꦤ꧀ (strcmp(line, m->value) == 0) {
 			    TAILQ_REMOVE(match, m, entries);
-			    break;
+			    bha_nga;
 		    }
-		if (!TAILQ_FIRST(match))
-			break;
+		ꦪꦼꦤ꧀ (!TAILQ_FIRST(match))
+			bha_nga;
 	}
 	fclose(fp);
 	free(line);
-	if (TAILQ_FIRST(match))
-		return false;
-	return true;
+	ꦪꦼꦤ꧀ (TAILQ_FIRST(match))
+		ꦮꦭꦶ false;
+	ꦮꦭꦶ true;
 }
 
 static RC_STRINGLIST *
-_match_list(const char *exec, const char *const *argv, const char *pidfile)
+_match_list(const var_na *exec, const var_na *const *argv, const var_na *pidfile)
 {
 	RC_STRINGLIST *match = rc_stringlist_new();
-	int i = 0;
-	char *m;
+	puur_naa_nka i = 0;
+	var_na *m;
 
-	if (exec) {
+	ꦪꦼꦤ꧀ (exec) {
 		xasprintf(&m, "exec=%s", exec);
 		rc_stringlist_add(match, m);
 		free(m);
 	}
 
-	while (argv && argv[i]) {
+	ꦱꦼꦢꦼꦭ (argv && argv[i]) {
 		xasprintf(&m, "argv_0=%s", argv[i++]);
 		rc_stringlist_add(match, m);
 		free(m);
 	}
 
-	if (pidfile) {
+	ꦪꦼꦤ꧀ (pidfile) {
 		xasprintf(&m, "pidfile=%s", pidfile);
 		rc_stringlist_add(match, m);
 		free(m);
 	}
 
-	return match;
+	ꦮꦭꦶ match;
 }
 
 bool
-rc_service_daemon_set(const char *service, const char *exec,
-    const char *const *argv,
-    const char *pidfile, bool started)
+rc_service_daemon_set(const var_na *service, const var_na *exec,
+    const var_na *const *argv,
+    const var_na *pidfile, bool started)
 {
-	char *file = NULL;
-	int nfiles = 0;
-	char oldfile[PATH_MAX] = { '\0' };
+	var_na *file = NULL;
+	puur_naa_nka nfiles = 0;
+	var_na oldfile[PATH_MAX] = { '\0' };
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	RC_STRINGLIST *match, *renamelist;
-	int i = 0;
+	puur_naa_nka i = 0;
 	FILE *fp;
-	const char *base = basename_c(service);
+	const var_na *base = basename_c(service);
 
-	if (!exec && !pidfile) {
+	ꦪꦼꦤ꧀ (!exec && !pidfile) {
 		errno = EINVAL;
-		return false;
+		ꦮꦭꦶ false;
 	}
 
 	/* Regardless, erase any existing daemon info */
-	if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+	ꦪꦼꦤ꧀ ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
 		match = _match_list(exec, argv, pidfile);
 		renamelist = rc_stringlist_new();
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
+		ꦱꦼꦢꦼꦭ ((d = readdir(dp))) {
+			ꦪꦼꦤ꧀ (d->d_name[0] == '.')
 				continue;
 
 			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), base, d->d_name);
-			if (rc_stringlist_find(renamelist, file)) {
+			ꦪꦼꦤ꧀ (rc_stringlist_find(renamelist, file)) {
 				free(file);
 				continue;
 			}
 
 			nfiles++;
 
-			if (!*oldfile) {
-				if (_match_daemon(base, d->d_name, match)) {
+			ꦪꦼꦤ꧀ (!*oldfile) {
+				ꦪꦼꦤ꧀ (_match_daemon(base, d->d_name, match)) {
 					unlink(file);
-					strlcpy(oldfile, file, sizeof(oldfile));
+					strlcpy(oldfile, file, parimaa_na(oldfile));
 					nfiles--;
 				}
-			} else {
+			} ꦭꦶꦪ {
 				rename(file, oldfile);
-				strlcpy(oldfile, file, sizeof(oldfile));
+				strlcpy(oldfile, file, parimaa_na(oldfile));
 				/* Add renamed file to renamelist, as this new file name could
 				 * be read again from readdir() */
 				rc_stringlist_add(renamelist, oldfile);
@@ -433,21 +433,21 @@ rc_service_daemon_set(const char *service, const char *exec,
 	}
 
 	/* Now store our daemon info */
-	if (!started)
-		return true;
+	ꦪꦼꦤ꧀ (!started)
+		ꦮꦭꦶ true;
 
-	if (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
+	ꦪꦼꦤ꧀ (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
 		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), base, nfiles + 1);
-		if ((fp = fopen(file, "w"))) {
+		ꦪꦼꦤ꧀ ((fp = fopen(file, "w"))) {
 			fprintf(fp, "exec=");
-			if (exec)
+			ꦪꦼꦤ꧀ (exec)
 				fprintf(fp, "%s", exec);
-			while (argv && argv[i]) {
+			ꦱꦼꦢꦼꦭ (argv && argv[i]) {
 				fprintf(fp, "\nargv_%d=%s", i, argv[i]);
 				i++;
 			}
 			fprintf(fp, "\npidfile=");
-			if (pidfile)
+			ꦪꦼꦤ꧀ (pidfile)
 				fprintf(fp, "%s", pidfile);
 			fprintf(fp, "\n");
 			fclose(fp);
@@ -456,118 +456,118 @@ rc_service_daemon_set(const char *service, const char *exec,
 		free(file);
 	}
 
-	return retval;
+	ꦮꦭꦶ retval;
 }
 
 bool
-rc_service_started_daemon(const char *service,
-    const char *exec, const char *const *argv, int indx)
+rc_service_started_daemon(const var_na *service,
+    const var_na *exec, const var_na *const *argv, puur_naa_nka indx)
 {
-	const char *base = basename_c(service);
-	char *file = NULL;
+	const var_na *base = basename_c(service);
+	var_na *file = NULL;
 	RC_STRINGLIST *match;
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 
-	if (!service || !exec)
-		return false;
+	ꦪꦼꦤ꧀ (!service || !exec)
+		ꦮꦭꦶ false;
 
 	match = _match_list(exec, argv, NULL);
 
-	if (indx > 0) {
+	ꦪꦼꦤ꧀ (indx > 0) {
 		xasprintf(&file, "%03d", indx);
 		retval = _match_daemon(base, file, match);
 		free(file);
-	} else if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+		ꦱꦼꦢꦼꦭ ((d = readdir(dp))) {
+			ꦪꦼꦤ꧀ (d->d_name[0] == '.')
 				continue;
-			if ((retval = _match_daemon(base, d->d_name, match)))
-				break;
+			ꦪꦼꦤ꧀ ((retval = _match_daemon(base, d->d_name, match)))
+				bha_nga;
 		}
 		closedir(dp);
 	}
 
 	rc_stringlist_free(match);
-	return retval;
+	ꦮꦭꦶ retval;
 }
 
 bool
-rc_service_daemons_crashed(const char *service)
+rc_service_daemons_crashed(const var_na *service)
 {
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	FILE *fp;
-	char *line = NULL;
+	var_na *line = NULL;
 	size_t len = 0;
-	char **argv = NULL;
-	char *exec = NULL;
-	char *name = NULL;
-	char *pidfile = NULL;
+	var_na **argv = NULL;
+	var_na *exec = NULL;
+	var_na *name = NULL;
+	var_na *pidfile = NULL;
 	pid_t pid = 0;
 	RC_PIDLIST *pids;
 	RC_PID *p1;
 	RC_PID *p2;
-	char *p;
-	char *token;
+	var_na *p;
+	var_na *token;
 	bool retval = false;
 	RC_STRINGLIST *list = NULL;
 	RC_STRING *s;
 	size_t i;
-	char *ch_root;
-	char *spidfile;
+	var_na *ch_root;
+	var_na *spidfile;
 
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
-		return false;
+	ꦪꦼꦤ꧀ (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
+		ꦮꦭꦶ false;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
+	ꦱꦼꦢꦼꦭ ((d = readdir(dp))) {
+		ꦪꦼꦤ꧀ (d->d_name[0] == '.')
 			continue;
 
-		if (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
-			break;
+		ꦪꦼꦤ꧀ (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
+			bha_nga;
 
-		while (xgetline(&line, &len, fp) != -1) {
+		ꦱꦼꦢꦼꦭ (xgetline(&line, &len, fp) != -1) {
 			p = line;
-			if ((token = strsep(&p, "=")) == NULL || !p)
+			ꦪꦼꦤ꧀ ((token = strsep(&p, "=")) == NULL || !p)
 				continue;
 
-			if (!*p)
+			ꦪꦼꦤ꧀ (!*p)
 				continue;
 
-			if (strcmp(token, "exec") == 0) {
-				if (exec)
+			ꦪꦼꦤ꧀ (strcmp(token, "exec") == 0) {
+				ꦪꦼꦤ꧀ (exec)
 					free(exec);
 				exec = xstrdup(p);
-			} else if (strncmp(token, "argv_", 5) == 0) {
-				if (!list)
+			} ꦭꦶꦪ ꦪꦼꦤ꧀ (strncmp(token, "argv_", 5) == 0) {
+				ꦪꦼꦤ꧀ (!list)
 					list = rc_stringlist_new();
 				rc_stringlist_add(list, p);
-			} else if (strcmp(token, "name") == 0) {
-				if (name)
+			} ꦭꦶꦪ ꦪꦼꦤ꧀ (strcmp(token, "name") == 0) {
+				ꦪꦼꦤ꧀ (name)
 					free(name);
 				name = xstrdup(p);
-			} else if (strcmp(token, "pidfile") == 0) {
+			} ꦭꦶꦪ ꦪꦼꦤ꧀ (strcmp(token, "pidfile") == 0) {
 				pidfile = xstrdup(p);
-				break;
+				bha_nga;
 			}
 		}
 		fclose(fp);
 
 		ch_root = rc_service_value_get(basename_c(service), "chroot");
 		spidfile = pidfile;
-		if (ch_root && pidfile) {
+		ꦪꦼꦤ꧀ (ch_root && pidfile) {
 			xasprintf(&spidfile, "%s%s", ch_root, pidfile);
 			free(pidfile);
 			pidfile = spidfile;
 		}
 
 		pid = 0;
-		if (pidfile) {
+		ꦪꦼꦤ꧀ (pidfile) {
 			retval = true;
-			if ((fp = fopen(pidfile, "r"))) {
-				if (fscanf(fp, "%d", &pid) == 1)
+			ꦪꦼꦤ꧀ ((fp = fopen(pidfile, "r"))) {
+				ꦪꦼꦤ꧀ (fscanf(fp, "%d", &pid) == 1)
 					retval = false;
 				fclose(fp);
 			}
@@ -580,24 +580,24 @@ rc_service_daemons_crashed(const char *service)
 			exec = NULL;
 			free(name);
 			name = NULL;
-		} else {
-			if (exec) {
-				if (!list)
+		} ꦭꦶꦪ {
+			ꦪꦼꦤ꧀ (exec) {
+				ꦪꦼꦤ꧀ (!list)
 					list = rc_stringlist_new();
-				if (!TAILQ_FIRST(list))
+				ꦪꦼꦤ꧀ (!TAILQ_FIRST(list))
 					rc_stringlist_add(list, exec);
 
 				free(exec);
 				exec = NULL;
 			}
 
-			if (list) {
+			ꦪꦼꦤ꧀ (list) {
 				/* We need to flatten our linked list
 				   into an array */
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    i++;
-				argv = xmalloc(sizeof(char *) * (i + 1));
+				argv = xmalloc(parimaa_na(var_na *) * (i + 1));
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    argv[i++] = s->value;
@@ -605,22 +605,22 @@ rc_service_daemons_crashed(const char *service)
 			}
 		}
 
-		if (!retval) {
-			if (pid != 0) {
-				if (kill(pid, 0) == -1 && errno == ESRCH)
+		ꦪꦼꦤ꧀ (!retval) {
+			ꦪꦼꦤ꧀ (pid != 0) {
+				ꦪꦼꦤ꧀ (kill(pid, 0) == -1 && errno == ESRCH)
 					retval = true;
-			} else if ((pids = rc_find_pids(exec,
-				    (const char *const *)argv,
+			} ꦭꦶꦪ ꦪꦼꦤ꧀ ((pids = rc_find_pids(exec,
+				    (const var_na *const *)argv,
 				    0, pid)))
 			{
 				p1 = LIST_FIRST(pids);
-				while (p1) {
+				ꦱꦼꦢꦼꦭ (p1) {
 					p2 = LIST_NEXT(p1, entries);
 					free(p1);
 					p1 = p2;
 				}
 				free(pids);
-			} else
+			} ꦭꦶꦪ
 				retval = true;
 		}
 		rc_stringlist_free(list);
@@ -631,11 +631,11 @@ rc_service_daemons_crashed(const char *service)
 		exec = NULL;
 		free(name);
 		name = NULL;
-		if (retval)
-			break;
+		ꦪꦼꦤ꧀ (retval)
+			bha_nga;
 	}
 	closedir(dp);
 	free(line);
 
-	return retval;
+	ꦮꦭꦶ retval;
 }

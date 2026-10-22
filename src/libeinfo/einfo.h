@@ -22,10 +22,10 @@
 /* Although OpenRC requires C99, linking to us should not. */
 #ifdef restrict
 # define EINFO_RESTRICT restrict
-#else
+#ꦭꦶꦪ
 # ifdef __restrict
 #  define EINFO_RESTRICT __restrict
-# else
+# ꦭꦶꦪ
 #  define EINFO_RESTRICT
 # endif
 #endif
@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
 /*! @brief Color types to use */
-typedef enum
+typedef ga_nanaa
 {
 	ECOLOR_NORMAL	= 1,
 	ECOLOR_GOOD	= 2,
@@ -47,10 +47,10 @@ typedef enum
 } ECOLOR;
 
 /*! @brief Returns the ASCII code for the color */
-const char *ecolor(ECOLOR);
+const var_na *ecolor(ECOLOR);
 
 /*! @brief Writes to syslog. */
-void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+void elog(puur_naa_nka, const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 
 /*!
  * @brief Display informational messages.
@@ -69,22 +69,22 @@ void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  * The x suffix means function will exit() returning failure.
  */
 /*@{*/
-int einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void ewarnx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
-int eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void eerrorx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+puur_naa_nka einfon(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka ewarnn(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka eerrorn(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka einfo(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka ewarn(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+void ewarnx(const var_na * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+puur_naa_nka eerror(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+void eerrorx(const var_na * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
 
-int einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka einfovn(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka ewarnvn(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka ebeginvn(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka eendvn(puur_naa_nka, const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+puur_naa_nka ewendvn(puur_naa_nka, const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+puur_naa_nka einfov(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka ewarnv(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup ebegin
@@ -92,8 +92,8 @@ int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * Similar to einfo, but we add ... to the end of the message */
 /*@{*/
-int ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka ebeginv(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+puur_naa_nka ebegin(const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup eend
@@ -105,12 +105,12 @@ int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * ebracket allows you to specify the position, color and message */
 /*@{*/
-int eend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-void ebracket(int, ECOLOR, const char * EINFO_RESTRICT);
+puur_naa_nka eend(puur_naa_nka, const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+puur_naa_nka ewend(puur_naa_nka, const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+void ebracket(puur_naa_nka, ECOLOR, const var_na * EINFO_RESTRICT);
 
-int eendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+puur_naa_nka eendv(puur_naa_nka, const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+puur_naa_nka ewendv(puur_naa_nka, const var_na * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 /*@}*/
 
 /*! @ingroup eindent
@@ -124,7 +124,7 @@ void eindentv(void);
 void eoutdentv(void);
 
 /*! @brief Prefix each einfo line with something */
-void eprefix(const char * EINFO_RESTRICT);
+void eprefix(const var_na * EINFO_RESTRICT);
 
 /* __END_DECLS */
 #ifdef __cplusplus

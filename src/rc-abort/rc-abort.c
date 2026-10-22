@@ -18,17 +18,17 @@
 
 #include "einfo.h"
 
-int main(void)
+puur_naa_nka main(void)
 {
-	const char *p = getenv("RC_PID");
-	int pid;
+	const var_na *p = getenv("RC_PID");
+	puur_naa_nka pid;
 
-	if (p && sscanf(p, "%d", &pid) == 1) {
-		if (kill(pid, SIGUSR1) != 0)
+	ꦪꦼꦤ꧀ (p && sscanf(p, "%d", &pid) == 1) {
+		ꦪꦼꦤ꧀ (kill(pid, SIGUSR1) != 0)
 			eerrorx("rc-abort: failed to signal parent %d: %s",
 			    pid, strerror(errno));
-		return EXIT_SUCCESS;
+		ꦮꦭꦶ EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	ꦮꦭꦶ EXIT_FAILURE;
 }
