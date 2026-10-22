@@ -15,10 +15,10 @@
 
 static bool init_halt = false;
 
-static void sysvinit_runlevel(int runlevel)
+static void sysvinit_runlevel(정수 runlevel)
 {
 	const char *cmd;
-	int fifo;
+	정수 fifo;
 
 	switch (runlevel) {
 	case '0':
@@ -34,26 +34,26 @@ static void sysvinit_runlevel(int runlevel)
 	case '4':
 	case '5':
 		/* TODO: switch to default runlevel? */
-		return;
+		반환;
 	case '6':
 		/* RB_KEXEC: Gentoo inittab calls /sbin/reboot -k */
 		cmd = "kexec";
 		break;
 	case 'Q':
 	case 'q':
-		return;
+		반환;
 	case 'U':
 	case 'u':
 		cmd = "reexec";
 		break;
 	}
 
-	if ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
+	만약 ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
 		syslog(LOG_ERR, "open: %s", strerror(errno));
-		return;
+		반환;
 	}
 
-	if (write(fifo, cmd, strlen(cmd) + 1) == -1)
+	만약 (write(fifo, cmd, strlen(cmd) + 1) == -1)
 		syslog(LOG_ERR, "write: %s", strerror(errno));
 	close(fifo);
 }
@@ -61,40 +61,40 @@ static void sysvinit_runlevel(int runlevel)
 static void sysvinit_setenv(char *data, size_t size)
 {
 	data[size - 1] = '\0';
-	for (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
+	위해 (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
 		/* We only care about the INIT_HALT variable */
-		if (!strcmp(data, "INIT_HALT=HALT"))
+		만약 (!strcmp(data, "INIT_HALT=HALT"))
 			init_halt = true;
-		else if (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
+		아니면 만약 (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
 			init_halt = false;
 	}
 }
 
-int main(void) {
-	int fifo;
+정수 main(void) {
+	정수 fifo;
 
 	openlog("sysv-initctl", 0, LOG_DAEMON);
 	symlink("/run/initctl", "/dev/initctl");
-	if ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
+	만약 ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
 		syslog(LOG_ERR, "open_rwfifo: %s", strerror(errno));
-		return 1;
+		반환 1;
 	}
 
-	for (;;) {
+	위해 (;;) {
 		struct init_request req;
 		ssize_t count = read(fifo, &req, sizeof(req));
 
-		if (count == -1) {
+		만약 (count == -1) {
 			syslog(LOG_ERR, "read: %s", strerror(errno));
 			continue;
 		}
 
-		if (count != sizeof(req)) {
+		만약 (count != sizeof(req)) {
 			syslog(LOG_ERR, "read: short count");
 			continue;
 		}
 
-		if (req.magic != INIT_MAGIC) {
+		만약 (req.magic != INIT_MAGIC) {
 			syslog(LOG_ERR, "invalid magic bytes");
 			continue;
 		}

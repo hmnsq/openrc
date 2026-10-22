@@ -22,10 +22,10 @@
 /* Although OpenRC requires C99, linking to us should not. */
 #ifdef restrict
 # define EINFO_RESTRICT restrict
-#else
+#아니면
 # ifdef __restrict
 #  define EINFO_RESTRICT __restrict
-# else
+# 아니면
 #  define EINFO_RESTRICT
 # endif
 #endif
@@ -50,7 +50,7 @@ typedef enum
 const char *ecolor(ECOLOR);
 
 /*! @brief Writes to syslog. */
-void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+void elog(정수, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 
 /*!
  * @brief Display informational messages.
@@ -69,22 +69,22 @@ void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  * The x suffix means function will exit() returning failure.
  */
 /*@{*/
-int einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 void ewarnx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
-int eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 void eerrorx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
 
-int einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 eendvn(정수, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+정수 ewendvn(정수, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+정수 einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup ebegin
@@ -92,8 +92,8 @@ int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * Similar to einfo, but we add ... to the end of the message */
 /*@{*/
-int ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+정수 ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup eend
@@ -105,12 +105,12 @@ int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * ebracket allows you to specify the position, color and message */
 /*@{*/
-int eend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-void ebracket(int, ECOLOR, const char * EINFO_RESTRICT);
+정수 eend(정수, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+정수 ewend(정수, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+void ebracket(정수, ECOLOR, const char * EINFO_RESTRICT);
 
-int eendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+정수 eendv(정수, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+정수 ewendv(정수, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 /*@}*/
 
 /*! @ingroup eindent

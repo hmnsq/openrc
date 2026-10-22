@@ -68,9 +68,9 @@ const char *usagestring = ""
 	"   or: rc-service [options] -l\n"
 	"   or: rc-service [options] -r <service>";
 
-int main(int argc, char **argv)
+정수 main(정수 argc, char **argv)
 {
-	int opt;
+	정수 opt;
 	char *service;
 	RC_STRINGLIST *list;
 	RC_STRING *s;
@@ -86,8 +86,8 @@ int main(int argc, char **argv)
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	동안 ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (정수 *) 0)) != -1)
 	{
 		switch (opt) {
 		case 'd':
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 			service = rc_service_resolve(optarg);
 			opt = service ? EXIT_SUCCESS : EXIT_FAILURE;
 			free(service);
-			return opt;
+			반환 opt;
 			/* NOTREACHED */
 		case 'c':
 			if_crashed = true;
@@ -116,21 +116,21 @@ int main(int argc, char **argv)
 			break;
 		case 'l':
 			list = rc_services_in_runlevel(NULL);
-			if (TAILQ_FIRST(list) == NULL)
-				return EXIT_FAILURE;
+			만약 (TAILQ_FIRST(list) == NULL)
+				반환 EXIT_FAILURE;
 			rc_stringlist_sort(&list);
 			TAILQ_FOREACH(s, list, entries)
 			    printf("%s\n", s->value);
 			rc_stringlist_free(list);
-			return EXIT_SUCCESS;
+			반환 EXIT_SUCCESS;
 			/* NOTREACHED */
 		case 'r':
 			service = rc_service_resolve(optarg);
-			if (service == NULL)
-				return EXIT_FAILURE;
+			만약 (service == NULL)
+				반환 EXIT_FAILURE;
 			printf("%s\n", service);
 			free(service);
-			return EXIT_SUCCESS;
+			반환 EXIT_SUCCESS;
 			/* NOTREACHED */
 		case 's':
 			if_started = true;
@@ -148,24 +148,24 @@ int main(int argc, char **argv)
 
 	argc -= optind;
 	argv += optind;
-	if (*argv == NULL)
+	만약 (*argv == NULL)
 		eerrorx("%s: you need to specify a service", applet);
-	if ((service = rc_service_resolve(*argv)) == NULL) {
-		if (if_exists)
-			return 0;
+	만약 ((service = rc_service_resolve(*argv)) == NULL) {
+		만약 (if_exists)
+			반환 0;
 		eerrorx("%s: service `%s' does not exist", applet, *argv);
 	}
 	state = rc_service_state(*argv);
-	if (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
-		return 0;
-	if (if_inactive && !(state & RC_SERVICE_INACTIVE))
-		return 0;
-	if (if_notstarted && (state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_started && !(state & RC_SERVICE_STARTED))
-		return 0;
-	if (if_stopped && !(state & RC_SERVICE_STOPPED))
-		return 0;
+	만약 (if_crashed &&  !(rc_service_daemons_crashed(*argv) && errno != EACCES))
+		반환 0;
+	만약 (if_inactive && !(state & RC_SERVICE_INACTIVE))
+		반환 0;
+	만약 (if_notstarted && (state & RC_SERVICE_STARTED))
+		반환 0;
+	만약 (if_started && !(state & RC_SERVICE_STARTED))
+		반환 0;
+	만약 (if_stopped && !(state & RC_SERVICE_STOPPED))
+		반환 0;
 	env_filter();
 	env_config();
 	*argv = service;

@@ -46,45 +46,45 @@
 
 /* File stream used for plugins to write environ vars to */
 FILE *rc_environ_fd = NULL;
-static int dirfds[RC_DIR_MAX];
+static 정수 dirfds[RC_DIR_MAX];
 
-int rc_dirfd(enum rc_dir dir) {
-	int flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
-	int dirfd;
+정수 rc_dirfd(enum rc_dir dir) {
+	정수 flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
+	정수 dirfd;
 
-	if (dir < 0 || dir >= RC_DIR_MAX)
-		return -1;
-	if (dirfds[dir] <= 0) {
+	만약 (dir < 0 || dir >= RC_DIR_MAX)
+		반환 -1;
+	만약 (dirfds[dir] <= 0) {
 		switch (dir) {
 		case RC_DIR_SYSCONF:
-			return dirfds[dir] = open(rc_sysconfdir(), flags);
+			반환 dirfds[dir] = open(rc_sysconfdir(), flags);
 		case RC_DIR_USRCONF:
-			return dirfds[dir] = open(rc_usrconfdir(), flags);
+			반환 dirfds[dir] = open(rc_usrconfdir(), flags);
 		case RC_DIR_RUNLEVEL:
-			return dirfds[dir] = open(rc_runleveldir(), flags);
+			반환 dirfds[dir] = open(rc_runleveldir(), flags);
 		case RC_DIR_SVCDIR:
-			if (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
-				return -1;
-			return dirfds[dir] = open(rc_svcdir(), flags);
+			만약 (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
+				반환 -1;
+			반환 dirfds[dir] = open(rc_svcdir(), flags);
 		default:
 			assert(dirnames[dir]);
 			dirfd = rc_dirfd(RC_DIR_SVCDIR);
-			if ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
-				if (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
-					return -1;
+			만약 ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
+				만약 (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
+					반환 -1;
 				dirfds[dir] = openat(dirfd, dirnames[dir], flags);
 			}
 			break;
 		}
 	}
-	return dirfds[dir];
+	반환 dirfds[dir];
 }
 
 void clear_dirfds(void) {
-	for (size_t i = 0; i < RC_DIR_MAX; i++) {
+	위해 (size_t i = 0; i < RC_DIR_MAX; i++) {
 		/* dirfd is zero-initialized, though zero is a valid
 		 * FD, dirfd should never contain FDs which are <= 2. */
-		if (dirfds[i] <= 0)
+		만약 (dirfds[i] <= 0)
 			continue;
 
 		close(dirfds[i]);
@@ -95,7 +95,7 @@ void clear_dirfds(void) {
 #define LS_INITD	0x01
 #define LS_DIR		0x02
 static RC_STRINGLIST *
-ls_dir(int targetfd, const char *dir, int options)
+ls_dir(정수 targetfd, const char *dir, 정수 options)
 {
 	DIR *dp;
 	struct dirent *d;
@@ -105,61 +105,61 @@ ls_dir(int targetfd, const char *dir, int options)
 
 	list = rc_stringlist_new();
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return list;
+	만약 (!(dp = do_opendirat(targetfd, dir)))
+		반환 list;
 
-	while (((d = readdir(dp)) != NULL)) {
-		if (d->d_name[0] == '.')
+	동안 (((d = readdir(dp)) != NULL)) {
+		만약 (d->d_name[0] == '.')
 			continue;
-		if (options & LS_INITD) {
+		만약 (options & LS_INITD) {
 			/* Check that our file really exists.
 			 * This is important as a service maybe in a
 			 * runlevel, but could have been removed. */
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
+			만약 (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
 				continue;
 
 			/* .sh files are not init scripts */
 			l = strlen(d->d_name);
-			if (l > 2 && d->d_name[l - 3] == '.' &&
+			만약 (l > 2 && d->d_name[l - 3] == '.' &&
 					d->d_name[l - 2] == 's' &&
 					d->d_name[l - 1] == 'h')
 				continue;
 		}
-		if (options & LS_DIR) {
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
+		만약 (options & LS_DIR) {
+			만약 (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
 				continue;
 		}
 		rc_stringlist_add(list, d->d_name);
 	}
 	closedir(dp);
-	return list;
+	반환 list;
 }
 
 static bool
-rm_dir(int targetfd, const char *pathname, bool top)
+rm_dir(정수 targetfd, const char *pathname, bool top)
 {
 	bool retval = true;
 	struct dirent *d;
 	struct stat s;
 	DIR *dp;
 
-	if (!(dp = do_opendirat(targetfd, pathname)))
-		return false;
+	만약 (!(dp = do_opendirat(targetfd, pathname)))
+		반환 false;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+	동안 ((d = readdir(dp))) {
+		만약 (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
 			continue;
-		if (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
+		만약 (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
 			retval = false;
 			break;
 		}
-		if (S_ISDIR(s.st_mode)) {
-			if (!rm_dir(dirfd(dp), d->d_name, true)) {
+		만약 (S_ISDIR(s.st_mode)) {
+			만약 (!rm_dir(dirfd(dp), d->d_name, true)) {
 				retval = false;
 				break;
 			}
-		} else {
-			if (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
+		} 아니면 {
+			만약 (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
 				retval = false;
 				break;
 			}
@@ -167,13 +167,13 @@ rm_dir(int targetfd, const char *pathname, bool top)
 	}
 	closedir(dp);
 
-	if (!retval)
-		return false;
+	만약 (!retval)
+		반환 false;
 
-	if (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
-		return false;
+	만약 (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
+		반환 false;
 
-	return true;
+	반환 true;
 }
 
 /* Other systems may need this at some point, but for now it's Linux only */
@@ -187,32 +187,32 @@ file_regex(const char *file, const char *regex)
 	ssize_t len = 0;
 	regex_t re;
 	bool retval = true;
-	int result;
+	정수 result;
 
-	if (!(fp = fopen(file, "r")))
-		return false;
+	만약 (!(fp = fopen(file, "r")))
+		반환 false;
 
-	if ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
+	만약 ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
 		char buf[BUFSIZ];
 		fclose(fp);
 		regerror(result, &re, buf, sizeof(buf));
 		fprintf(stderr, "file_regex: %s", buf);
-		return false;
+		반환 false;
 	}
 
-	while ((len = xgetline(&line, &size, fp)) != -1) {
+	동안 ((len = xgetline(&line, &size, fp)) != -1) {
 		char *str = line;
 		/* some /proc files have \0 separated content so we have to
 		   loop through the 'line' */
 		do {
-			if (regexec(&re, str, 0, NULL, 0) == 0)
+			만약 (regexec(&re, str, 0, NULL, 0) == 0)
 				goto found;
 			str += strlen(str) + 1;
 			/* len is the size of allocated buffer and we don't
 			   want call regexec BUFSIZE times. find next str */
-			while (str < line + len && *str == '\0')
+			동안 (str < line + len && *str == '\0')
 				str++;
-		} while (str < line + len);
+		} 동안 (str < line + len);
 	}
 	retval = false;
 found:
@@ -220,7 +220,7 @@ found:
 	free(line);
 	regfree(&re);
 
-	return retval;
+	반환 retval;
 }
 #endif
 
@@ -229,134 +229,134 @@ static const char *
 get_systype(void)
 {
 	char *systype = rc_conf_value("rc_sys");
-	if (systype) {
+	만약 (systype) {
 		char *s = systype;
 		/* Convert to uppercase */
-		while (s && *s) {
-			if (islower((unsigned char) *s))
+		동안 (s && *s) {
+			만약 (islower((unsigned char) *s))
 				*s = toupper((unsigned char) *s);
 			s++;
 		}
 	}
-	return systype;
+	반환 systype;
 }
 
 static const char *
 detect_container(const char *systype RC_UNUSED)
 {
 #ifdef __FreeBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-		       return NULL;
-		if (strcmp(systype, RC_SYS_JAIL) == 0)
-			return RC_SYS_JAIL;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
+	만약 (systype) {
+		만약 (strcmp(systype, RC_SYS_NONE) == 0)
+		       반환 NULL;
+		만약 (strcmp(systype, RC_SYS_JAIL) == 0)
+			반환 RC_SYS_JAIL;
+		만약 (strcmp(systype, RC_SYS_PODMAN) == 0)
+			반환 RC_SYS_PODMAN;
 	}
 
-	int jailed = 0;
+	정수 jailed = 0;
 	size_t len = sizeof(jailed);
 
-	if (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
-		if (jailed == 1)
-			return RC_SYS_JAIL;
+	만약 (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
+		만약 (jailed == 1)
+			반환 RC_SYS_JAIL;
 
-	if (access("/var/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
+	만약 (access("/var/run/.containerenv", F_OK) == 0)
+		반환 RC_SYS_PODMAN;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_UML) == 0)
-			return RC_SYS_UML;
-		if (strcmp(systype, RC_SYS_VSERVER) == 0)
-			return RC_SYS_VSERVER;
-		if (strcmp(systype, RC_SYS_OPENVZ) == 0)
-			return RC_SYS_OPENVZ;
-		if (strcmp(systype, RC_SYS_LXC) == 0)
-			return RC_SYS_LXC;
-		if (strcmp(systype, RC_SYS_RKT) == 0)
-				return RC_SYS_RKT;
-		if (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
-				return RC_SYS_SYSTEMD_NSPAWN;
-		if (strcmp(systype, RC_SYS_DOCKER) == 0)
-				return RC_SYS_DOCKER;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
-		if (strcmp(systype, RC_SYS_WSL) == 0)
-			return RC_SYS_WSL;
+	만약 (systype) {
+		만약 (strcmp(systype, RC_SYS_NONE) == 0)
+			반환 NULL;
+		만약 (strcmp(systype, RC_SYS_UML) == 0)
+			반환 RC_SYS_UML;
+		만약 (strcmp(systype, RC_SYS_VSERVER) == 0)
+			반환 RC_SYS_VSERVER;
+		만약 (strcmp(systype, RC_SYS_OPENVZ) == 0)
+			반환 RC_SYS_OPENVZ;
+		만약 (strcmp(systype, RC_SYS_LXC) == 0)
+			반환 RC_SYS_LXC;
+		만약 (strcmp(systype, RC_SYS_RKT) == 0)
+				반환 RC_SYS_RKT;
+		만약 (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
+				반환 RC_SYS_SYSTEMD_NSPAWN;
+		만약 (strcmp(systype, RC_SYS_DOCKER) == 0)
+				반환 RC_SYS_DOCKER;
+		만약 (strcmp(systype, RC_SYS_PODMAN) == 0)
+			반환 RC_SYS_PODMAN;
+		만약 (strcmp(systype, RC_SYS_WSL) == 0)
+			반환 RC_SYS_WSL;
 	}
-	if (file_regex("/proc/cpuinfo", "UML"))
-		return RC_SYS_UML;
-	else if (file_regex("/proc/self/status",
+	만약 (file_regex("/proc/cpuinfo", "UML"))
+		반환 RC_SYS_UML;
+	아니면 만약 (file_regex("/proc/self/status",
 		"(s_context|VxID):[[:space:]]*[1-9]"))
-		return RC_SYS_VSERVER;
-	else if (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
-		return RC_SYS_OPENVZ;
-	else if (file_regex("/proc/self/status",
+		반환 RC_SYS_VSERVER;
+	아니면 만약 (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
+		반환 RC_SYS_OPENVZ;
+	아니면 만약 (file_regex("/proc/self/status",
 		"envID:[[:space:]]*[1-9]"))
-		return RC_SYS_OPENVZ; /* old test */
-	else if (file_regex("/proc/1/environ", "container=lxc"))
-		return RC_SYS_LXC;
-	else if (file_regex("/proc/1/environ", "container=rkt"))
-		return RC_SYS_RKT;
-	else if (file_regex("/proc/1/environ", "container=systemd-nspawn"))
-		return RC_SYS_SYSTEMD_NSPAWN;
-	else if (access("/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
-	else if (access("/.dockerenv", F_OK) == 0)
-		return RC_SYS_DOCKER;
+		반환 RC_SYS_OPENVZ; /* old test */
+	아니면 만약 (file_regex("/proc/1/environ", "container=lxc"))
+		반환 RC_SYS_LXC;
+	아니면 만약 (file_regex("/proc/1/environ", "container=rkt"))
+		반환 RC_SYS_RKT;
+	아니면 만약 (file_regex("/proc/1/environ", "container=systemd-nspawn"))
+		반환 RC_SYS_SYSTEMD_NSPAWN;
+	아니면 만약 (access("/run/.containerenv", F_OK) == 0)
+		반환 RC_SYS_PODMAN;
+	아니면 만약 (access("/.dockerenv", F_OK) == 0)
+		반환 RC_SYS_DOCKER;
 	/* old test, I'm not sure when this was valid. */
-	else if (file_regex("/proc/1/environ", "container=docker"))
-		return RC_SYS_DOCKER;
-	else if (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
-		return RC_SYS_WSL;
-	else if (getenv("WSL_DISTRO_NAME"))
-		return RC_SYS_WSL;
-	else if (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
-		return RC_SYS_WSL;
+	아니면 만약 (file_regex("/proc/1/environ", "container=docker"))
+		반환 RC_SYS_DOCKER;
+	아니면 만약 (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
+		반환 RC_SYS_WSL;
+	아니면 만약 (getenv("WSL_DISTRO_NAME"))
+		반환 RC_SYS_WSL;
+	아니면 만약 (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
+		반환 RC_SYS_WSL;
 #endif
 
-	return NULL;
+	반환 NULL;
 }
 
 static const char *
 detect_vm(const char *systype RC_UNUSED)
 {
 #ifdef __NetBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	만약 (systype) {
+		만약 (strcmp(systype, RC_SYS_NONE) == 0)
+			반환 NULL;
+		만약 (strcmp(systype, RC_SYS_XEN0) == 0)
+			반환 RC_SYS_XEN0;
+		만약 (strcmp(systype, RC_SYS_XENU) == 0)
+			반환 RC_SYS_XENU;
 	}
-	if (access("/kern/xen/privcmd", F_OK) == 0)
-		return RC_SYS_XEN0;
-	if (access("/kern/xen", F_OK) == 0)
-		return RC_SYS_XENU;
+	만약 (access("/kern/xen/privcmd", F_OK) == 0)
+		반환 RC_SYS_XEN0;
+	만약 (access("/kern/xen", F_OK) == 0)
+		반환 RC_SYS_XENU;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	만약 (systype) {
+		만약 (strcmp(systype, RC_SYS_NONE) == 0)
+			반환 NULL;
+		만약 (strcmp(systype, RC_SYS_XEN0) == 0)
+			반환 RC_SYS_XEN0;
+		만약 (strcmp(systype, RC_SYS_XENU) == 0)
+			반환 RC_SYS_XENU;
 	}
-	if (access("/proc/xen", F_OK) == 0) {
-		if (file_regex("/proc/xen/capabilities", "control_d"))
-			return RC_SYS_XEN0;
-		return RC_SYS_XENU;
+	만약 (access("/proc/xen", F_OK) == 0) {
+		만약 (file_regex("/proc/xen/capabilities", "control_d"))
+			반환 RC_SYS_XEN0;
+		반환 RC_SYS_XENU;
 	}
 #endif
 
-	return NULL;
+	반환 NULL;
 }
 
 const char *
@@ -367,32 +367,32 @@ rc_sys(void)
 
 	systype = get_systype();
 	sys = detect_container(systype);
-	if (!sys) {
+	만약 (!sys) {
 		sys = detect_vm(systype);
 	}
 
-	return sys;
+	반환 sys;
 }
 
 static const char *
 rc_parse_service_state(RC_SERVICE state)
 {
-	int i;
+	정수 i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].name;
+	위해 (i = 0; rc_service_state_names[i].name; i++) {
+		만약 (rc_service_state_names[i].state == state)
+			반환 rc_service_state_names[i].name;
 	}
-	return NULL;
+	반환 NULL;
 }
 
-static int
+static 정수
 rc_parse_service_state_dirfd(RC_SERVICE state)
 {
-	for (size_t i = 0; rc_service_state_names[i].name; i++)
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].dir;
-	return -1;
+	위해 (size_t i = 0; rc_service_state_names[i].name; i++)
+		만약 (rc_service_state_names[i].state == state)
+			반환 rc_service_state_names[i].dir;
+	반환 -1;
 }
 
 /* Returns a list of all the chained runlevels used by the
@@ -409,15 +409,15 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 	 * If we haven't been passed a runlevel or a level list, or
 	 * if the passed runlevel doesn't exist then we're done already!
 	 */
-	if (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
-		return;
+	만약 (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
+		반환;
 
 	/*
 	 * We want to add this runlevel to the list but if
 	 * it is already in the list it needs to go at the
 	 * end again.
 	 */
-	if (rc_stringlist_find(level_list, runlevel))
+	만약 (rc_stringlist_find(level_list, runlevel))
 		rc_stringlist_delete(level_list, runlevel);
 	rc_stringlist_add(level_list, runlevel);
 
@@ -430,7 +430,7 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 		nextlevel = d->value;
 
 		/* Check for loop */
-		if (rc_stringlist_find(ancestor_list, nextlevel)) {
+		만약 (rc_stringlist_find(ancestor_list, nextlevel)) {
 			fprintf(stderr, "Loop detected in stacked runlevels attempting to enter runlevel %s!\n",
 			    nextlevel);
 			fprintf(stderr, "Ancestors:\n");
@@ -452,18 +452,18 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 bool
 rc_runlevel_starting(void)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
+	반환 faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
 }
 
 bool
 rc_runlevel_stopping(void)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
+	반환 faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
 }
 
 RC_STRINGLIST *rc_runlevel_list(void)
 {
-	return ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
+	반환 ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
 }
 
 char *
@@ -473,23 +473,23 @@ rc_runlevel_get(void)
 	char *runlevel = NULL;
 	size_t i;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
+	만약 ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
 		runlevel = xmalloc(sizeof(char) * PATH_MAX);
-		if (fgets(runlevel, PATH_MAX, fp)) {
+		만약 (fgets(runlevel, PATH_MAX, fp)) {
 			i = strlen(runlevel);
-			if (i && runlevel[i - 1] == '\n')
+			만약 (i && runlevel[i - 1] == '\n')
 				runlevel[i - 1] = 0;
-		} else
+		} 아니면
 			*runlevel = '\0';
 		fclose(fp);
 	}
 
-	if (!runlevel || !*runlevel) {
+	만약 (!runlevel || !*runlevel) {
 		free(runlevel);
 		runlevel = NULL;
 	}
 
-	return runlevel;
+	반환 runlevel;
 }
 
 bool
@@ -497,12 +497,12 @@ rc_runlevel_set(const char *runlevel)
 {
 	FILE *fp;
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	만약 (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
+		반환 false;
 
 	fputs(runlevel, fp);
 	fclose(fp);
-	return true;
+	반환 true;
 }
 
 bool
@@ -510,39 +510,39 @@ rc_runlevel_exists(const char *runlevel)
 {
 	struct stat buf;
 
-	if (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
-		return false;
-	if (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
-		return true;
-	return false;
+	만약 (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
+		반환 false;
+	만약 (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
+		반환 true;
+	반환 false;
 }
 
 bool
 rc_runlevel_stack(const char *dst, const char *src)
 {
 	char *d, *s;
-	int r;
+	정수 r;
 
-	if (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
-		return false;
+	만약 (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
+		반환 false;
 	xasprintf(&s, "../%s", src);
 	xasprintf(&d, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = symlink(s, d);
 	free(d);
 	free(s);
-	return (r == 0);
+	반환 (r == 0);
 }
 
 bool
 rc_runlevel_unstack(const char *dst, const char *src)
 {
 	char *path;
-	int r;
+	정수 r;
 
 	xasprintf(&path, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = unlink(path);
 	free(path);
-	return (r == 0);
+	반환 (r == 0);
 }
 
 RC_STRINGLIST *
@@ -554,7 +554,7 @@ rc_runlevel_stacks(const char *runlevel)
 	rc_stringlist_add(ancestor_list, runlevel);
 	get_runlevel_chain(runlevel, stack, ancestor_list);
 	rc_stringlist_free(ancestor_list);
-	return stack;
+	반환 stack;
 }
 
 static const char *config_path[] = { _RC_PATH, NULL };
@@ -567,7 +567,7 @@ static struct {
 static struct {
 	char *buffer;
 	size_t count;
-	int *fds;
+	정수 *fds;
 	const char **entries, **allocd;
 } rc_path;
 
@@ -606,17 +606,17 @@ strnsep(const char **str, size_t *size, const char sep)
 {
 	const char *ret = *str;
 
-	if (!ret)
-		return NULL;
+	만약 (!ret)
+		반환 NULL;
 
 	*str = strchrnul(ret, sep);
 	*size = *str - ret;
-	if (!**str)
+	만약 (!**str)
 		*str = NULL;
-	else
+	아니면
 		*str += 1;
 
-	return ret;
+	반환 ret;
 }
 
 static const char *
@@ -625,17 +625,17 @@ strnullsep(const char **str, size_t *size)
 	const char *ret = *str;
 	size_t len;
 
-	if (!ret)
-		return NULL;
+	만약 (!ret)
+		반환 NULL;
 
 	len = strnlen(ret, *size - 1) + 1;
 
-	if ((*size -= len))
+	만약 ((*size -= len))
 		*str += len;
-	else
+	아니면
 		*str = NULL;
 
-	return ret;
+	반환 ret;
 }
 
 static void
@@ -645,12 +645,12 @@ append_user_path(FILE *fp)
 	size_t size;
 
 	append_path(fp, "%s", rc_dirs.confdir);
-	if (!(xdg = getenv("XDG_CONFIG_DIRS")))
+	만약 (!(xdg = getenv("XDG_CONFIG_DIRS")))
 		append_path(fp, "/etc/xdg/rc");
-	else while ((entry = strnsep(&xdg, &size, ':')))
-		if (size) append_path(fp, "%.*s/rc", (int) size, entry);
+	아니면 동안 ((entry = strnsep(&xdg, &size, ':')))
+		만약 (size) append_path(fp, "%.*s/rc", (정수) size, entry);
 
-	for (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
+	위해 (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
 		append_path(fp, "%s/user", config_path[i]);
 	append_path(fp, "%s", rc_dirs.svcdir);
 }
@@ -662,12 +662,12 @@ append_rc_path(FILE *fp, const char *path, bool user)
 	const char *entry;
 	size_t size;
 
-	while ((entry = strnsep(&path, &size, ':'))) {
-		if (size)
-			append_path(fp, "%.*s%s", (int)size, entry, user ? "/user" : "");
-		else if (user && !has_user)
+	동안 ((entry = strnsep(&path, &size, ':'))) {
+		만약 (size)
+			append_path(fp, "%.*s%s", (정수)size, entry, user ? "/user" : "");
+		아니면 만약 (user && !has_user)
 			append_user_path(fp), has_user = true;
-		else if (!user) while (*rc_path.entries)
+		아니면 만약 (!user) 동안 (*rc_path.entries)
 			append_path(fp, "%s", *rc_path.entries++);
 	}
 }
@@ -679,7 +679,7 @@ load_dynamic_path(bool user)
 	size_t size, count = 0;
 	FILE *fp;
 
-	if (!rc_dirs.set) {
+	만약 (!rc_dirs.set) {
 		atexit(free_rc_dirs);
 		rc_dirs.set = true;
 	}
@@ -687,14 +687,14 @@ load_dynamic_path(bool user)
 	rc_path.entries = config_path;
 	rc_path.count = ARRAY_SIZE(config_path) - 1;
 
-	if (!(path = getenv("RC_PATH")) && !user)
-		return;
+	만약 (!(path = getenv("RC_PATH")) && !user)
+		반환;
 
 	rc_path.count = 0;
 	fp = xopen_memstream(&rc_path.buffer, &size);
-	if (path)
+	만약 (path)
 		append_rc_path(fp, path, user);
-	else
+	아니면
 		append_user_path(fp);
 	xclose_memstream(fp);
 
@@ -702,7 +702,7 @@ load_dynamic_path(bool user)
 
 	path = rc_path.buffer;
 
-	while ((entry = strnullsep(&path, &size)) && count < rc_path.count)
+	동안 ((entry = strnullsep(&path, &size)) && count < rc_path.count)
 		rc_path.entries[count++] = entry;
 	rc_path.entries[rc_path.count] = NULL;
 }
@@ -712,15 +712,15 @@ static bool is_user = false;
 bool
 rc_is_user(void)
 {
-	int _is_user = -1;
+	정수 _is_user = -1;
 
-	if (_is_user == -1) {
+	만약 (_is_user == -1) {
 		char *env = getenv("RC_USER_SERVICES");
 
 		_is_user = env ? rc_yesno(env) : is_user;
 	}
 
-	return _is_user;
+	반환 _is_user;
 }
 
 void
@@ -728,30 +728,30 @@ rc_set_user(void)
 {
 	char *env;
 
-	if (is_user)
-		return;
+	만약 (is_user)
+		반환;
 
-	if (!rc_dirs.set)
+	만약 (!rc_dirs.set)
 		atexit(free_rc_dirs);
-	else
+	아니면
 		free_rc_dirs();
 
 	is_user = true;
 	rc_dirs.set = true;
 	setenv("RC_USER_SERVICES", "yes", true);
 
-	if ((env = getenv("XDG_CONFIG_HOME"))) {
+	만약 ((env = getenv("XDG_CONFIG_HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/rc", env);
-	} else if ((env = getenv("HOME"))) {
+	} 아니면 만약 ((env = getenv("HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/.config/rc", env);
-	} else {
+	} 아니면 {
 		fprintf(stderr, "XDG_CONFIG_HOME and HOME unset.\n");
 		exit(EXIT_FAILURE);
 	}
 
 	xasprintf(&rc_dirs.runleveldir, "%s/runlevels", rc_dirs.confdir);
 
-	if (!(env = getenv("XDG_RUNTIME_DIR"))) {
+	만약 (!(env = getenv("XDG_RUNTIME_DIR"))) {
 		/* FIXME: fallback to something else? */
 		fprintf(stderr, "XDG_RUNTIME_DIR unset.\n");
 		exit(EXIT_FAILURE);
@@ -767,25 +767,25 @@ rc_set_user(void)
 const char * const *
 rc_scriptdirs(void)
 {
-	if (!rc_path.entries)
+	만약 (!rc_path.entries)
 		load_dynamic_path(false);
-	return rc_path.entries;
+	반환 rc_path.entries;
 }
 
 size_t
-rc_scriptdirfds(const int **fds)
+rc_scriptdirfds(const 정수 **fds)
 {
 	static size_t len = 0;
 
-	if (len == 0) {
-		if (!rc_path.entries)
+	만약 (len == 0) {
+		만약 (!rc_path.entries)
 			load_dynamic_path(false);
 
 		rc_path.fds = xmalloc(rc_path.count * sizeof(*rc_path.fds));
-		for (size_t i = 0; i < rc_path.count; i++) {
-			int fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+		위해 (size_t i = 0; i < rc_path.count; i++) {
+			정수 fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 
-			if (fd == -1)
+			만약 (fd == -1)
 				continue;
 
 			rc_path.fds[len++] = fd;
@@ -793,25 +793,25 @@ rc_scriptdirfds(const int **fds)
 	}
 
 	*fds = rc_path.fds;
-	return len;
+	반환 len;
 }
 
 const char *
 rc_sysconfdir(void)
 {
-	return RC_SYSCONFDIR;
+	반환 RC_SYSCONFDIR;
 }
 
 const char *
 rc_usrconfdir(void)
 {
-	return rc_dirs.confdir ? rc_dirs.confdir : NULL;
+	반환 rc_dirs.confdir ? rc_dirs.confdir : NULL;
 }
 
 const char *
 rc_runleveldir(void)
 {
-	return rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
+	반환 rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
 }
 
 const char *
@@ -819,32 +819,32 @@ rc_svcdir(void)
 {
 	static const char *svcdir;
 
-	if (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
+	만약 (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
 		svcdir = RC_SVCDIR;
-	return rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
+	반환 rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
 }
 
 static ssize_t
-safe_readlink(int targetfd, const char *path, char **buf, size_t bufsiz)
+safe_readlink(정수 targetfd, const char *path, char **buf, size_t bufsiz)
 {
 	char *buffer;
 	ssize_t r;
 
-	for (;; bufsiz += PATH_MAX) {
+	위해 (;; bufsiz += PATH_MAX) {
 		buffer = xmalloc(bufsiz);
 		r = readlinkat(targetfd, path, buffer, bufsiz);
-		if (r < 0) {
+		만약 (r < 0) {
 			free(buffer);
-			return -errno;
+			반환 -errno;
 		}
-		if ((size_t)r < bufsiz) {
+		만약 ((size_t)r < bufsiz) {
 			buffer[r] = '\0';
 			*buf = buffer;
-			return r;
+			반환 r;
 		}
 		free(buffer);
-		if (bufsiz >= SSIZE_MAX - PATH_MAX)
-			return -ENOMEM;
+		만약 (bufsiz >= SSIZE_MAX - PATH_MAX)
+			반환 -ENOMEM;
 	}
 }
 
@@ -855,29 +855,29 @@ rc_service_resolve(const char *service)
 	char *buffer;
 	struct stat buf;
 
-	if (!service)
-		return NULL;
+	만약 (!service)
+		반환 NULL;
 
-	if (service[0] == '/')
-		return xstrdup(service);
+	만약 (service[0] == '/')
+		반환 xstrdup(service);
 
 	/* First check started services */
-	if (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
-	if (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
+	만약 (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		만약 (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
+			반환 buffer;
+	만약 (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		만약 (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
+			반환 buffer;
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
+	위해 (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
 		char *file = NULL;
 		xasprintf(&file, "%s/init.d/%s", *dirs, service);
-		if (stat(file, &buf) == 0)
-			return file;
+		만약 (stat(file, &buf) == 0)
+			반환 file;
 		free(file);
 	}
 
-	return NULL;
+	반환 NULL;
 }
 
 bool
@@ -888,34 +888,34 @@ rc_service_exists(const char *service)
 	size_t len;
 	struct stat buf;
 
-	if (!service) {
+	만약 (!service) {
 		errno = EINVAL;
-		return false;
+		반환 false;
 	}
 
 	len = strlen(service);
 
 	/* .sh files are not init scripts */
-	if (len > 2 && service[len - 3] == '.' &&
+	만약 (len > 2 && service[len - 3] == '.' &&
 			service[len - 2] == 's' &&
 			service[len - 1] == 'h') {
 		errno = EINVAL;
-		return false;
+		반환 false;
 	}
 
-	if (!(file = rc_service_resolve(service))) {
+	만약 (!(file = rc_service_resolve(service))) {
 		errno = ENOENT;
-		return false;
+		반환 false;
 	}
 
-	if (stat(file, &buf) == 0) {
-		if (buf.st_mode & S_IXUGO)
+	만약 (stat(file, &buf) == 0) {
+		만약 (buf.st_mode & S_IXUGO)
 			retval = true;
-		else
+		아니면
 			errno = ENOEXEC;
 	}
 	free(file);
-	return retval;
+	반환 retval;
 }
 
 #define OPTSTR \
@@ -933,30 +933,30 @@ rc_service_extra_commands(const char *service)
 	char *p;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	만약 (!(svc = rc_service_resolve(service)))
+		반환 NULL;
 
 	xasprintf(&cmd, OPTSTR, svc);
 	free(svc);
 
-	if (!(fp = popen(cmd, "r"))) {
+	만약 (!(fp = popen(cmd, "r"))) {
 		free(cmd);
-		return NULL;
+		반환 NULL;
 	}
 
-	if (xgetline(&buffer, &len, fp) != -1) {
+	만약 (xgetline(&buffer, &len, fp) != -1) {
 		p = buffer;
 		commands = rc_stringlist_new();
 
-		while ((token = strsep(&p, " ")))
-			if (token[0] != '\0')
+		동안 ((token = strsep(&p, " ")))
+			만약 (token[0] != '\0')
 				rc_stringlist_add(commands, token);
 	}
 
 	pclose(fp);
 	free(buffer);
 	free(cmd);
-	return commands;
+	반환 commands;
 }
 
 #define DESCSTR ". '%s'; echo \"${description%s%s}\""
@@ -969,23 +969,23 @@ rc_service_description(const char *service, const char *option)
 	size_t size = 0;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	만약 (!(svc = rc_service_resolve(service)))
+		반환 NULL;
 
-	if (!option)
+	만약 (!option)
 		option = "";
 
 	xasprintf(&cmd, DESCSTR, svc, *option ? "_" : "", option);
 	free(svc);
-	if ((fp = popen(cmd, "r"))) {
-		if (xgetline(&desc, &size, fp) == -1) {
+	만약 ((fp = popen(cmd, "r"))) {
+		만약 (xgetline(&desc, &size, fp) == -1) {
 			free(desc);
 			desc = NULL;
 		}
 		pclose(fp);
 	}
 	free(cmd);
-	return desc;
+	반환 desc;
 }
 
 bool
@@ -997,47 +997,47 @@ rc_service_in_runlevel(const char *service, const char *runlevel)
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	r = access(file, F_OK) == 0;
 	free(file);
-	return r;
+	반환 r;
 }
 
 bool
 rc_service_mark(const char *service, const RC_SERVICE state)
 {
-	int i = 0;
+	정수 i = 0;
 	const char *base;
 	char *init = rc_service_resolve(service);
 	bool skip_wasinactive = false;
-	int serrno;
+	정수 serrno;
 
-	if (!init)
-		return false;
+	만약 (!init)
+		반환 false;
 
 	base = basename_c(service);
-	if (state != RC_SERVICE_STOPPED) {
-		int state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
-		if (access(init, F_OK) != 0) {
+	만약 (state != RC_SERVICE_STOPPED) {
+		정수 state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
+		만약 (access(init, F_OK) != 0) {
 			free(init);
-			return false;
+			반환 false;
 		}
 
 		unlinkat(state_dirfd, base, 0);
-		if ((symlinkat(init, state_dirfd, base)) != 0) {
+		만약 ((symlinkat(init, state_dirfd, base)) != 0) {
 			free(init);
-			return false;
+			반환 false;
 		}
 	}
 
-	if (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
+	만약 (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
 		free(init);
-		return true;
+		반환 true;
 	}
 
 	/* Remove any old states now */
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		int state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
+	위해 (i = 0; rc_service_state_names[i].name; i++) {
+		정수 state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
 		RC_SERVICE s = rc_service_state_names[i].state;
 
-		if (s == state)
+		만약 (s == state)
 			continue;
 
 		switch (s) {
@@ -1046,32 +1046,32 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 		case RC_SERVICE_SCHEDULED:
 			continue;
 		case RC_SERVICE_WASINACTIVE:
-			if (skip_wasinactive)
+			만약 (skip_wasinactive)
 				continue;
 			/* fall-through */
 		default:
-			if (faccessat(state_dirfd, base, F_OK, 0) != 0)
+			만약 (faccessat(state_dirfd, base, F_OK, 0) != 0)
 				continue;
-			if ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
-				if (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
+			만약 ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
+				만약 (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
 					free(init);
-					return false;
+					반환 false;
 				}
 				skip_wasinactive = true;
 			}
-			if (unlinkat(state_dirfd, base, 0) == -1) {
+			만약 (unlinkat(state_dirfd, base, 0) == -1) {
 				free(init);
-				return false;
+				반환 false;
 			}
 		}
 	}
 
 	/* Remove the exclusive state if we're inactive */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
+	만약 (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
 		unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), base, 0);
 
 	/* Remove any options and daemons the service may have stored */
-	if (state == RC_SERVICE_STOPPED) {
+	만약 (state == RC_SERVICE_STOPPED) {
 		rm_dir(rc_dirfd(RC_DIR_OPTIONS), base, true);
 		rm_dir(rc_dirfd(RC_DIR_DAEMONS), base, true);
 		unlinkat(rc_dirfd(RC_DIR_ENVIRON), base, 0);
@@ -1079,11 +1079,11 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 	}
 
 	/* These are final states, so remove us from scheduled */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
+	만약 (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
+		만약 (dp) {
 			struct dirent *d;
-			while ((d = readdir(dp))) {
+			동안 ((d = readdir(dp))) {
 				char *was;
 
 				xasprintf(&was, "%s/%s", d->d_name, base);
@@ -1099,35 +1099,35 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 		}
 	}
 	free(init);
-	return true;
+	반환 true;
 }
 
 RC_SERVICE
 rc_service_state(const char *service)
 {
 	const char *base = basename_c(service);
-	int state = RC_SERVICE_STOPPED;
-	int i;
+	정수 state = RC_SERVICE_STOPPED;
+	정수 i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
-			if (rc_service_state_names[i].state <= 0x10)
+	위해 (i = 0; rc_service_state_names[i].name; i++) {
+		만약 (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
+			만약 (rc_service_state_names[i].state <= 0x10)
 				state = rc_service_state_names[i].state;
-			else
+			아니면
 				state |= rc_service_state_names[i].state;
 		}
 	}
 
-	if (state & RC_SERVICE_STARTED)
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+	만약 (state & RC_SERVICE_STARTED)
+		만약 (rc_service_daemons_crashed(service) && errno != EACCES)
 			state |= RC_SERVICE_CRASHED;
 
-	if (state & RC_SERVICE_STOPPED) {
+	만약 (state & RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
+		만약 (dp) {
 			struct dirent *d;
-			while ((d = readdir(dp))) {
-				if (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
+			동안 ((d = readdir(dp))) {
+				만약 (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
 					state |= RC_SERVICE_SCHEDULED;
 					break;
 				}
@@ -1137,7 +1137,7 @@ rc_service_state(const char *service)
 		}
 	}
 
-	return state;
+	반환 state;
 }
 
 char *
@@ -1151,33 +1151,33 @@ rc_service_value_get(const char *service, const char *option)
 	rc_getfile(file, &buffer, &len);
 	free(file);
 
-	return buffer;
+	반환 buffer;
 }
 
 bool
 rc_service_value_set(const char *service, const char *option, const char *value)
 {
 	bool ret = true;
-	int optdirfd;
+	정수 optdirfd;
 	FILE *fp;
 
-	if (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
-		return false;
+	만약 (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
+		반환 false;
 
-	if ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
-		return false;
+	만약 ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
+		반환 false;
 
-	if (!value) {
+	만약 (!value) {
 		unlinkat(optdirfd, option, 0);
-	} else if ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
+	} 아니면 만약 ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
 		fprintf(fp, "%s", value);
 		fclose(fp);
-	} else {
+	} 아니면 {
 		ret = false;
 	}
 
 	close(optdirfd);
-	return ret;
+	반환 ret;
 }
 
 bool
@@ -1186,18 +1186,18 @@ rc_service_schedule_start(const char *service, const char *service_to_start)
 	const char *base_to_start = basename_c(service_to_start);
 	const char *base = basename_c(service);
 	bool retval;
-	int schedfd;
+	정수 schedfd;
 	char *init;
 
 	/* service may be a provided service, like net */
-	if (!service || !rc_service_exists(service_to_start))
-		return false;
+	만약 (!service || !rc_service_exists(service_to_start))
+		반환 false;
 
-	if (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
-		return false;
+	만약 (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
+		반환 false;
 
-	if ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
-		return false;
+	만약 ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
+		반환 false;
 
 	init = rc_service_resolve(service_to_start);
 
@@ -1205,13 +1205,13 @@ rc_service_schedule_start(const char *service, const char *service_to_start)
 
 	close(schedfd);
 	free(init);
-	return retval;
+	반환 retval;
 }
 
 bool
 rc_service_schedule_clear(const char *service)
 {
-	return !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
+	반환 !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
 }
 
 RC_STRINGLIST *
@@ -1219,24 +1219,24 @@ rc_services_in_runlevel(const char *runlevel)
 {
 	RC_STRINGLIST *list = NULL;
 
-	if (!runlevel) {
-		const int *scriptdirfds;
+	만약 (!runlevel) {
+		const 정수 *scriptdirfds;
 		list = rc_stringlist_new();
-		for (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
+		위해 (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
 			RC_STRINGLIST *svcs;
 
 			svcs = ls_dir(scriptdirfds[i], "init.d", LS_INITD);
 			TAILQ_CONCAT(list, svcs, entries);
 			rc_stringlist_free(svcs);
 		}
-		return list;
+		반환 list;
 	}
 
 	/* These special levels never contain any services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
-		return rc_stringlist_new();
+	만약 (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
+		반환 rc_stringlist_new();
 
-	return ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
+	반환 ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
 }
 
 RC_STRINGLIST *
@@ -1253,7 +1253,7 @@ rc_services_in_runlevel_stacked(const char *runlevel)
 		rc_stringlist_free(sl);
 	}
 	rc_stringlist_free(stacks);
-	return list;
+	반환 list;
 }
 
 RC_STRINGLIST *
@@ -1264,22 +1264,22 @@ rc_services_in_state(RC_SERVICE state)
 	struct dirent *d;
 	DIR *dp;
 
-	if (state != RC_SERVICE_SCHEDULED)
-		return ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
+	만약 (state != RC_SERVICE_SCHEDULED)
+		반환 ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
 
 	list = rc_stringlist_new();
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
-		return list;
+	만약 (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
+		반환 list;
 
-	while ((d = readdir(dp))) {
-		if (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
+	동안 ((d = readdir(dp))) {
+		만약 (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
 			continue;
 		TAILQ_CONCAT(list, services, entries);
 		rc_stringlist_free(services);
 	}
 	closedir(dp);
 
-	return list;
+	반환 list;
 }
 
 bool
@@ -1292,39 +1292,39 @@ rc_service_add(const char *runlevel, const char *service)
 	char *binit = NULL;
 	char *i;
 
-	if (!rc_runlevel_exists(runlevel)) {
+	만약 (!rc_runlevel_exists(runlevel)) {
 		errno = ENOENT;
-		return false;
+		반환 false;
 	}
 
-	if (rc_service_in_runlevel(service, runlevel)) {
+	만약 (rc_service_in_runlevel(service, runlevel)) {
 		errno = EEXIST;
-		return false;
+		반환 false;
 	}
 
 	i = init = rc_service_resolve(service);
 
 	/* We need to ensure that only things in /etc/init.d are added
 	 * to the boot runlevel -- not applicable for user services. */
-	if (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
+	만약 (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
 		path = realpath(dirname(init), NULL);
-		if (path == NULL) {
+		만약 (path == NULL) {
 			free(init);
-			return false;
+			반환 false;
 		}
 		retval = (strcmp(path, RC_INITDIR) == 0);
 		free(path);
-		if (!retval) {
+		만약 (!retval) {
 			free(init);
 			errno = EPERM;
-			return false;
+			반환 false;
 		}
 		xasprintf(&binit, "%s/%s", RC_INITDIR, service);
 		i = binit;
 	}
 
 	/* We shouldn't add any temporary script to a runlevel */
-	if (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
+	만약 (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
 		errno = ENOENT;
 		retval = false;
 		goto out;
@@ -1337,20 +1337,20 @@ rc_service_add(const char *runlevel, const char *service)
 out:
 	free(binit);
 	free(init);
-	return retval;
+	반환 retval;
 }
 
 bool
 rc_service_delete(const char *runlevel, const char *service)
 {
 	char *file;
-	int r;
+	정수 r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel,
 		basename_c(service));
 	r = unlink(file);
 	free(file);
-	return (r == 0);
+	반환 (r == 0);
 }
 
 RC_STRINGLIST *
@@ -1360,24 +1360,24 @@ rc_services_scheduled_by(const char *service)
 	struct dirent *d;
 	DIR *dp;
 
-	if (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
-		return list;
+	만약 (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
+		반환 list;
 
-	while ((d = readdir(dp))) {
+	동안 ((d = readdir(dp))) {
 		char *file;
 		xasprintf(&file, "%s/%s", d->d_name, service);
-		if (faccessat(dirfd(dp), file, F_OK, 0) == 0)
+		만약 (faccessat(dirfd(dp), file, F_OK, 0) == 0)
 			rc_stringlist_add(list, d->d_name);
 		free(file);
 	}
 
-	return list;
+	반환 list;
 }
 
 RC_STRINGLIST *
 rc_services_scheduled(const char *service)
 {
-	return ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
+	반환 ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
 }
 
 bool
@@ -1385,72 +1385,72 @@ rc_service_putenv(const char *service, const char *env)
 {
 	size_t name_len = strcspn(env, "=");
 	char var[strlen(service) + sizeof("/") + name_len];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	정수 dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	if (env[name_len] != '=')
-		return errno = EINVAL, false;
+	만약 (env[name_len] != '=')
+		반환 errno = EINVAL, false;
 
-	snprintf(var, sizeof(var), "%s/%.*s", service, (int) name_len, env);
+	snprintf(var, sizeof(var), "%s/%.*s", service, (정수) name_len, env);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	만약 (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		반환 false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	만약 (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		반환 false;
 
 	fputs(&env[name_len + 1], fp);
 
-	return fclose(fp) == 0;
+	반환 fclose(fp) == 0;
 }
 
 bool
 rc_service_setenv(const char *service, const char *name, const char *value)
 {
 	char var[strlen(service) + sizeof("/") + strlen(name)];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	정수 dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
 	snprintf(var, sizeof(var), "%s/%s", service, name);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	만약 (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		반환 false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	만약 (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		반환 false;
 
 	fputs(value, fp);
 
-	return fclose(fp) == 0;
+	반환 fclose(fp) == 0;
 }
 
 ssize_t
 rc_service_getenv(const char *service, const char *name, char **buf)
 {
 	char var[strlen(service) + sizeof("/") + strlen(name)], *value;
-	int dfd = rc_dirfd(RC_DIR_ENVIRON);
+	정수 dfd = rc_dirfd(RC_DIR_ENVIRON);
 	struct stat stat;
 	size_t count;
 	FILE *fp;
 
 	snprintf(var, sizeof(var), "%s/%s", service, name);
 
-	if (fstatat(dfd, var, &stat, 0) == -1)
-		return -1;
+	만약 (fstatat(dfd, var, &stat, 0) == -1)
+		반환 -1;
 
-	if (!buf)
-		return stat.st_size;
+	만약 (!buf)
+		반환 stat.st_size;
 
-	if (!(value = xrealloc(*buf, stat.st_size + 1)))
-		return -1;
+	만약 (!(value = xrealloc(*buf, stat.st_size + 1)))
+		반환 -1;
 
-	if (!(fp = do_fopenat(dfd, var, O_RDONLY)))
-		return -1;
+	만약 (!(fp = do_fopenat(dfd, var, O_RDONLY)))
+		반환 -1;
 
 	count = fread(value, 1, stat.st_size, fp);
 	value[count] = '\0';
 
 	fclose(fp);
 	*buf = value;
-	return count;
+	반환 count;
 }

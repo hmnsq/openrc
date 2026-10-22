@@ -29,7 +29,7 @@ rc_stringlist_new(void)
 {
 	RC_STRINGLIST *l = xmalloc(sizeof(*l));
 	TAILQ_INIT(l);
-	return l;
+	반환 l;
 }
 
 RC_STRING *
@@ -39,7 +39,7 @@ rc_stringlist_add(RC_STRINGLIST *list, const char *value)
 
 	s->value = xstrdup(value);
 	TAILQ_INSERT_TAIL(list, s, entries);
-	return s;
+	반환 s;
 }
 
 RC_STRING *
@@ -48,12 +48,12 @@ rc_stringlist_addu(RC_STRINGLIST *list, const char *value)
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    만약 (strcmp(s->value, value) == 0) {
 		    errno = EEXIST;
-		    return NULL;
+		    반환 NULL;
 	    }
 
-	return rc_stringlist_add(list, value);
+	반환 rc_stringlist_add(list, value);
 }
 
 bool
@@ -62,15 +62,15 @@ rc_stringlist_delete(RC_STRINGLIST *list, const char *value)
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    만약 (strcmp(s->value, value) == 0) {
 		    TAILQ_REMOVE(list, s, entries);
 		    free(s->value);
 		    free(s);
-		    return true;
+		    반환 true;
 	    }
 
 	errno = EEXIST;
-	return false;
+	반환 false;
 }
 
 RC_STRING *
@@ -78,12 +78,12 @@ rc_stringlist_find(RC_STRINGLIST *list, const char *value)
 {
 	RC_STRING *s;
 
-	if (list) {
+	만약 (list) {
 		TAILQ_FOREACH(s, list, entries)
-		    if (strcmp(s->value, value) == 0)
-			    return s;
+		    만약 (strcmp(s->value, value) == 0)
+			    반환 s;
 	}
-	return NULL;
+	반환 NULL;
 }
 
 RC_STRINGLIST *
@@ -93,11 +93,11 @@ rc_stringlist_split(const char *value, const char *sep)
 	char *d = xstrdup(value);
 	char *p = d, *token;
 
-	while ((token = strsep(&p, sep)))
+	동안 ((token = strsep(&p, sep)))
 		rc_stringlist_add(list, token);
 	free(d);
 
-	return list;
+	반환 list;
 }
 
 void
@@ -114,13 +114,13 @@ rc_stringlist_sort(RC_STRINGLIST **list)
 		TAILQ_REMOVE(l, s, entries);
 		last = NULL;
 		TAILQ_FOREACH(n, new, entries) {
-			if (strcmp(s->value, n->value) < 0)
+			만약 (strcmp(s->value, n->value) < 0)
 				break;
 			last = n;
 		}
-		if (last)
+		만약 (last)
 			TAILQ_INSERT_AFTER(new, last, s, entries);
-		else
+		아니면
 			TAILQ_INSERT_HEAD(new, s, entries);
 	}
 
@@ -135,11 +135,11 @@ rc_stringlist_free(RC_STRINGLIST *list)
 	RC_STRING *s1;
 	RC_STRING *s2;
 
-	if (!list)
-		return;
+	만약 (!list)
+		반환;
 
 	s1 = TAILQ_FIRST(list);
-	while (s1) {
+	동안 (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
 		free(s1->value);
 		free(s1);

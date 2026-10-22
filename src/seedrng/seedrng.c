@@ -90,8 +90,8 @@ struct blake2s_state {
 	uint32_t t[2];
 	uint32_t f[2];
 	uint8_t buf[BLAKE2S_BLOCK_LEN];
-	unsigned int buflen;
-	unsigned int outlen;
+	unsigned 정수 buflen;
+	unsigned 정수 outlen;
 };
 
 #define le32_to_cpup(a) le32toh(*(a))
@@ -103,25 +103,25 @@ struct blake2s_state {
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 #endif
 
-static inline void cpu_to_le32_array(uint32_t *buf, unsigned int words)
+static inline void cpu_to_le32_array(uint32_t *buf, unsigned 정수 words)
 {
-	while (words--) {
+	동안 (words--) {
 		*buf = cpu_to_le32(*buf);
 		++buf;
 	}
 }
 
-static inline void le32_to_cpu_array(uint32_t *buf, unsigned int words)
+static inline void le32_to_cpu_array(uint32_t *buf, unsigned 정수 words)
 {
-	while (words--) {
+	동안 (words--) {
 		*buf = le32_to_cpup(buf);
 		++buf;
 	}
 }
 
-static inline uint32_t ror32(uint32_t word, unsigned int shift)
+static inline uint32_t ror32(uint32_t word, unsigned 정수 shift)
 {
-	return (word >> (shift & 31)) | (word << ((-shift) & 31));
+	반환 (word >> (shift & 31)) | (word << ((-shift) & 31));
 }
 
 static const uint32_t blake2s_iv[8] = {
@@ -155,10 +155,10 @@ static void blake2s_increment_counter(struct blake2s_state *state, const uint32_
 
 static void blake2s_init_param(struct blake2s_state *state, const uint32_t param)
 {
-	int i;
+	정수 i;
 
 	memset(state, 0, sizeof(*state));
-	for (i = 0; i < 8; ++i)
+	위해 (i = 0; i < 8; ++i)
 		state->h[i] = blake2s_iv[i];
 	state->h[0] ^= param;
 }
@@ -173,9 +173,9 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 {
 	uint32_t m[16];
 	uint32_t v[16];
-	int i;
+	정수 i;
 
-	while (nblocks > 0) {
+	동안 (nblocks > 0) {
 		blake2s_increment_counter(state, inc);
 		memcpy(m, block, BLAKE2S_BLOCK_LEN);
 		le32_to_cpu_array(m, ARRAY_SIZE(m));
@@ -198,7 +198,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	d = ror32(d ^ a, 8); \
 	c += d; \
 	b = ror32(b ^ c, 7); \
-} while (0)
+} 동안 (0)
 
 #define ROUND(r) do { \
 	G(r, 0, v[0], v[ 4], v[ 8], v[12]); \
@@ -209,7 +209,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	G(r, 5, v[1], v[ 6], v[11], v[12]); \
 	G(r, 6, v[2], v[ 7], v[ 8], v[13]); \
 	G(r, 7, v[3], v[ 4], v[ 9], v[14]); \
-} while (0)
+} 동안 (0)
 		ROUND(0);
 		ROUND(1);
 		ROUND(2);
@@ -224,7 +224,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 #undef G
 #undef ROUND
 
-		for (i = 0; i < 8; ++i)
+		위해 (i = 0; i < 8; ++i)
 			state->h[i] ^= v[i] ^ v[i + 8];
 
 		block += BLAKE2S_BLOCK_LEN;
@@ -237,16 +237,16 @@ static void blake2s_update(struct blake2s_state *state, const void *inp, size_t 
 	const size_t fill = BLAKE2S_BLOCK_LEN - state->buflen;
 	const uint8_t *in = inp;
 
-	if (!inlen)
-		return;
-	if (inlen > fill) {
+	만약 (!inlen)
+		반환;
+	만약 (inlen > fill) {
 		memcpy(state->buf + state->buflen, in, fill);
 		blake2s_compress(state, state->buf, 1, BLAKE2S_BLOCK_LEN);
 		state->buflen = 0;
 		in += fill;
 		inlen -= fill;
 	}
-	if (inlen > BLAKE2S_BLOCK_LEN) {
+	만약 (inlen > BLAKE2S_BLOCK_LEN) {
 		const size_t nblocks = DIV_ROUND_UP(inlen, BLAKE2S_BLOCK_LEN);
 		blake2s_compress(state, in, nblocks - 1, BLAKE2S_BLOCK_LEN);
 		in += BLAKE2S_BLOCK_LEN * (nblocks - 1);
@@ -265,196 +265,196 @@ static void blake2s_final(struct blake2s_state *state, uint8_t *out)
 	memcpy(out, state->h, state->outlen);
 }
 
-static ssize_t getrandom_full(void *buf, size_t count, unsigned int flags)
+static ssize_t getrandom_full(void *buf, size_t count, unsigned 정수 flags)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
 	do {
 		ret = getrandom(p, count, flags);
-		if (ret < 0 && errno == EINTR)
+		만약 (ret < 0 && errno == EINTR)
 			continue;
-		else if (ret < 0)
-			return ret;
+		아니면 만약 (ret < 0)
+			반환 ret;
 		total += ret;
 		p += ret;
 		count -= ret;
-	} while (count);
-	return total;
+	} 동안 (count);
+	반환 total;
 }
 
-static ssize_t read_full(int fd, void *buf, size_t count)
+static ssize_t read_full(정수 fd, void *buf, size_t count)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
 	do {
 		ret = read(fd, p, count);
-		if (ret < 0 && errno == EINTR)
+		만약 (ret < 0 && errno == EINTR)
 			continue;
-		else if (ret < 0)
-			return ret;
-		else if (ret == 0)
+		아니면 만약 (ret < 0)
+			반환 ret;
+		아니면 만약 (ret == 0)
 			break;
 		total += ret;
 		p += ret;
 		count -= ret;
-	} while (count);
-	return total;
+	} 동안 (count);
+	반환 total;
 }
 
-static ssize_t write_full(int fd, const void *buf, size_t count)
+static ssize_t write_full(정수 fd, const void *buf, size_t count)
 {
 	ssize_t ret, total = 0;
 	const uint8_t *p = buf;
 
 	do {
 		ret = write(fd, p, count);
-		if (ret < 0 && errno == EINTR)
+		만약 (ret < 0 && errno == EINTR)
 			continue;
-		else if (ret < 0)
-			return ret;
+		아니면 만약 (ret < 0)
+			반환 ret;
 		total += ret;
 		p += ret;
 		count -= ret;
-	} while (count);
-	return total;
+	} 동안 (count);
+	반환 total;
 }
 
 static size_t determine_optimal_seed_len(void)
 {
 	size_t ret = 0;
 	char poolsize_str[11] = { 0 };
-	int fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
+	정수 fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
 
-	if (fd < 0 || read_full(fd, poolsize_str, sizeof(poolsize_str) - 1) < 0) {
+	만약 (fd < 0 || read_full(fd, poolsize_str, sizeof(poolsize_str) - 1) < 0) {
 		ewarn("%s: Unable to determine pool size, falling back to %u bits: %s",
 		      applet, MIN_SEED_LEN * 8, strerror(errno));
 		ret = MIN_SEED_LEN;
-	} else
+	} 아니면
 		ret = DIV_ROUND_UP(strtoul(poolsize_str, NULL, 10), 8);
-	if (fd >= 0)
+	만약 (fd >= 0)
 		close(fd);
-	if (ret < MIN_SEED_LEN)
+	만약 (ret < MIN_SEED_LEN)
 		ret = MIN_SEED_LEN;
-	else if (ret > MAX_SEED_LEN)
+	아니면 만약 (ret > MAX_SEED_LEN)
 		ret = MAX_SEED_LEN;
-	return ret;
+	반환 ret;
 }
 
-static int read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
+static 정수 read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
 {
 	ssize_t ret;
-	int urandom_fd;
+	정수 urandom_fd;
 
 	*is_creditable = false;
 	ret = getrandom_full(seed, len, GRND_NONBLOCK);
-	if (ret == (ssize_t)len) {
+	만약 (ret == (ssize_t)len) {
 		*is_creditable = true;
-		return 0;
-	} else if (ret < 0 && errno == ENOSYS) {
+		반환 0;
+	} 아니면 만약 (ret < 0 && errno == ENOSYS) {
 		struct pollfd random_fd = {
 			.fd = open("/dev/random", O_RDONLY),
 			.events = POLLIN
 		};
-		if (random_fd.fd < 0)
-			return -errno;
+		만약 (random_fd.fd < 0)
+			반환 -errno;
 		*is_creditable = poll(&random_fd, 1, 0) == 1;
 		close(random_fd.fd);
-	} else if (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
-		return 0;
+	} 아니면 만약 (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
+		반환 0;
 	urandom_fd = open("/dev/urandom", O_RDONLY);
-	if (urandom_fd < 0)
-		return -1;
+	만약 (urandom_fd < 0)
+		반환 -1;
 	ret = read_full(urandom_fd, seed, len);
-	if (ret == (ssize_t)len)
+	만약 (ret == (ssize_t)len)
 		ret = 0;
-	else
+	아니면
 		ret = -errno ? -errno : -EIO;
 	close(urandom_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	반환 ret ? -1 : 0;
 }
 
-static int seed_rng(uint8_t *seed, size_t len, bool credit)
+static 정수 seed_rng(uint8_t *seed, size_t len, bool credit)
 {
 	struct {
-		int entropy_count;
-		int buf_size;
+		정수 entropy_count;
+		정수 buf_size;
 		uint8_t buffer[MAX_SEED_LEN];
 	} req = {
 		.entropy_count = credit ? len * 8 : 0,
 		.buf_size = len
 	};
-	int random_fd, ret;
+	정수 random_fd, ret;
 
-	if (len > sizeof(req.buffer)) {
+	만약 (len > sizeof(req.buffer)) {
 		errno = EFBIG;
-		return -1;
+		반환 -1;
 	}
 	memcpy(req.buffer, seed, len);
 
 	random_fd = open("/dev/urandom", O_RDONLY);
-	if (random_fd < 0)
-		return -1;
+	만약 (random_fd < 0)
+		반환 -1;
 	ret = ioctl(random_fd, RNDADDENTROPY, &req);
-	if (ret)
+	만약 (ret)
 		ret = -errno ? -errno : -EIO;
 	close(random_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	반환 ret ? -1 : 0;
 }
 
-static int seed_from_file_if_exists(const char *filename, int dfd, bool credit, struct blake2s_state *hash)
+static 정수 seed_from_file_if_exists(const char *filename, 정수 dfd, bool credit, struct blake2s_state *hash)
 {
 	uint8_t seed[MAX_SEED_LEN];
 	ssize_t seed_len;
-	int fd = -1, ret = 0;
+	정수 fd = -1, ret = 0;
 
 	fd = openat(dfd, filename, O_RDONLY);
-	if (fd < 0 && errno == ENOENT)
-		return 0;
-	else if (fd < 0) {
+	만약 (fd < 0 && errno == ENOENT)
+		반환 0;
+	아니면 만약 (fd < 0) {
 		ret = -errno;
 		eerror("%s: Unable to open seed file: %s", applet, strerror(errno));
 		goto out;
 	}
 	seed_len = read_full(fd, seed, sizeof(seed));
-	if (seed_len < 0) {
+	만약 (seed_len < 0) {
 		ret = -errno;
 		eerror("%s: Unable to read seed file: %s", applet, strerror(errno));
 		goto out;
 	}
-	if ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
+	만약 ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
 		ret = -errno;
 		eerror("%s: Unable to remove seed after reading, so not seeding: %s",
 		       applet, strerror(errno));
 		goto out;
 	}
-	if (!seed_len)
+	만약 (!seed_len)
 		goto out;
 
 	blake2s_update(hash, &seed_len, sizeof(seed_len));
 	blake2s_update(hash, seed, seed_len);
 
 	einfo("Seeding %zd bits %s crediting", seed_len * 8, credit ? "and" : "without");
-	if (seed_rng(seed, seed_len, credit) < 0) {
+	만약 (seed_rng(seed, seed_len, credit) < 0) {
 		ret = -errno;
 		eerror("%s: Unable to seed: %s", applet, strerror(errno));
 	}
 
 out:
-	if (fd >= 0)
+	만약 (fd >= 0)
 		close(fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	반환 ret ? -1 : 0;
 }
 
-int main(int argc, char **argv)
+정수 main(정수 argc, char **argv)
 {
 	static const char seedrng_prefix[] = "SeedRNG v1 Old+New Prefix";
 	static const char seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
-	int opt, fd, dfd, program_ret = 0;
+	정수 opt, fd, dfd, program_ret = 0;
 	const char *seed_dir = NULL;
 	uint8_t new_seed[MAX_SEED_LEN];
 	size_t new_seed_len;
@@ -465,11 +465,11 @@ int main(int argc, char **argv)
 
 	applet = basename_c(argv[0]);
 
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1)
+	동안 ((opt = getopt_long(argc, argv, getoptstring, longopts, (정수 *) 0)) != -1)
 	{
 		switch (opt) {
 		case LONGOPT_SEED_DIR:
-			if (!seed_dir)
+			만약 (!seed_dir)
 				seed_dir = optarg;
 			break;
 		case LONGOPT_SKIP_CREDIT:
@@ -478,9 +478,9 @@ int main(int argc, char **argv)
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (!seed_dir)
+	만약 (!seed_dir)
 		seed_dir = DEFAULT_SEED_DIR;
-	if (getuid())
+	만약 (getuid())
 		eerrorx("%s: superuser access is required", applet);
 	umask(0077);
 
@@ -491,20 +491,20 @@ int main(int argc, char **argv)
 	blake2s_update(&hash, &realtime, sizeof(realtime));
 	blake2s_update(&hash, &boottime, sizeof(boottime));
 
-	if (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
+	만약 (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
 		eerrorx("%s: Unable to create seed directory: %s", applet, strerror(errno));
 
 	dfd = open(seed_dir, O_DIRECTORY | O_RDONLY);
-	if (dfd < 0 || flock(dfd, LOCK_EX) < 0)
+	만약 (dfd < 0 || flock(dfd, LOCK_EX) < 0)
 		eerrorx("%s: Unable to lock seed directory: %s", applet, strerror(errno));
 
-	if (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
+	만약 (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
 		program_ret |= 1 << 1;
-	if (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
+	만약 (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
 		program_ret |= 1 << 2;
 
 	new_seed_len = determine_optimal_seed_len();
-	if (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
+	만약 (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
 		eerror("%s: Unable to read new seed: %s", applet, strerror(errno));
 		new_seed_len = BLAKE2S_HASH_LEN;
 		strncpy((char *)new_seed, seedrng_failure, new_seed_len);
@@ -516,17 +516,17 @@ int main(int argc, char **argv)
 
 	einfo("Saving %zu bits of %s seed for next boot", new_seed_len * 8, new_seed_creditable ? "creditable" : "non-creditable");
 	fd = openat(dfd, NON_CREDITABLE_SEED, O_WRONLY | O_CREAT | O_TRUNC, 0400);
-	if (fd < 0) {
+	만약 (fd < 0) {
 		eerror("%s: Unable to open seed file for writing: %s", applet, strerror(errno));
-		return program_ret | (1 << 4);
+		반환 program_ret | (1 << 4);
 	}
-	if (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
+	만약 (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
 		eerror("%s: Unable to write seed file: %s", applet, strerror(errno));
-		return program_ret | (1 << 5);
+		반환 program_ret | (1 << 5);
 	}
-	if (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
+	만약 (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
 		ewarn("%s: Unable to make new seed creditable: %s", applet, strerror(errno));
-		return program_ret | (1 << 6);
+		반환 program_ret | (1 << 6);
 	}
-	return program_ret;
+	반환 program_ret;
 }

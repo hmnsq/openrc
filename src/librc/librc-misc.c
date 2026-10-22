@@ -35,24 +35,24 @@
 bool
 rc_yesno(const char *value)
 {
-	if (!value) {
+	만약 (!value) {
 		errno = ENOENT;
-		return false;
+		반환 false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
+	만약 (strcasecmp(value, "yes") == 0 ||
 	    strcasecmp(value, "y") == 0 ||
 	    strcasecmp(value, "true") == 0 ||
 	    strcasecmp(value, "1") == 0)
-		return true;
+		반환 true;
 
-	if (strcasecmp(value, "no") != 0 &&
+	만약 (strcasecmp(value, "no") != 0 &&
 	    strcasecmp(value, "n") != 0 &&
 	    strcasecmp(value, "false") != 0 &&
 	    strcasecmp(value, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	반환 false;
 }
 
 
@@ -67,39 +67,39 @@ rc_getfile(const char *file, char **buffer, size_t *len)
 {
 	bool ret = false;
 	FILE *fp;
-	int fd;
+	정수 fd;
 	struct stat st;
 	size_t done, left;
 
 	fp = fopen(file, "re");
-	if (!fp)
-		return false;
+	만약 (!fp)
+		반환 false;
 
 	/* assume fileno() never fails */
 	fd = fileno(fp);
 
-	if (fstat(fd, &st))
+	만약 (fstat(fd, &st))
 		goto finished;
 
 	left = st.st_size;
 	*len = left + 1; /* NUL terminator */
 	*buffer = xrealloc(*buffer, *len);
-	while (left) {
+	동안 (left) {
 		done = fread(*buffer, sizeof(*buffer[0]), left, fp);
-		if (done == 0 && ferror(fp))
+		만약 (done == 0 && ferror(fp))
 			goto finished;
 		left -= done;
 	}
 	ret = true;
 
  finished:
-	if (!ret) {
+	만약 (!ret) {
 		free(*buffer);
 		*len = 0;
-	} else
+	} 아니면
 		(*buffer)[*len - 1] = '\0';
 	fclose(fp);
-	return ret;
+	반환 ret;
 }
 
 char *
@@ -110,39 +110,39 @@ rc_proc_getent(const char *ent RC_UNUSED)
 	char *proc = NULL, *p, *value = NULL, *save;
 	size_t i, len;
 
-	if (!(fp = fopen("/proc/cmdline", "r")))
-		return NULL;
+	만약 (!(fp = fopen("/proc/cmdline", "r")))
+		반환 NULL;
 
 	i = 0;
-	if (xgetline(&proc, &i, fp) == -1)
+	만약 (xgetline(&proc, &i, fp) == -1)
 		goto out;
 	save = proc;
 
 	len = strlen(ent);
-	while ((p = strsep(&save, " "))) {
-		if (strncmp(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
+	동안 ((p = strsep(&save, " "))) {
+		만약 (strncmp(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
 			p += len;
-			if (*p == '=')
+			만약 (*p == '=')
 				p++;
 			value = xstrdup(p);
 		}
 	}
 
-	if (!value)
+	만약 (!value)
 		errno = ENOENT;
 
 out:
 	fclose(fp);
 	free(proc);
 
-	return value;
-#else
-	return NULL;
+	반환 value;
+#아니면
+	반환 NULL;
 #endif
 }
 
 RC_STRINGLIST *
-config_list(int dirfd, const char *pathname)
+config_list(정수 dirfd, const char *pathname)
 {
 	FILE *fp;
 	char *buffer = NULL;
@@ -151,22 +151,22 @@ config_list(int dirfd, const char *pathname)
 	char *token;
 	RC_STRINGLIST *list = rc_stringlist_new();
 
-	if (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
-		return list;
+	만약 (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
+		반환 list;
 
-	while (xgetline(&buffer, &len, fp) != -1) {
+	동안 (xgetline(&buffer, &len, fp) != -1) {
 		p = buffer;
 		/* Strip leading spaces/tabs */
-		while ((*p == ' ') || (*p == '\t'))
+		동안 ((*p == ' ') || (*p == '\t'))
 			p++;
 
 		/* Get entry - we do not want comments */
 		token = strsep(&p, "#");
-		if (token && (strlen(token) > 1)) {
+		만약 (token && (strlen(token) > 1)) {
 			/* If not variable assignment then skip */
-			if (strchr(token, '=')) {
+			만약 (strchr(token, '=')) {
 				/* Strip the newline if present */
-				if (token[strlen(token) - 1] == '\n')
+				만약 (token[strlen(token) - 1] == '\n')
 					token[strlen(token) - 1] = 0;
 
 				rc_stringlist_add(list, token);
@@ -176,13 +176,13 @@ config_list(int dirfd, const char *pathname)
 	free(buffer);
 	fclose(fp);
 
-	return list;
+	반환 list;
 }
 
 RC_STRINGLIST *
 rc_config_list(const char *file)
 {
-	return config_list(AT_FDCWD, file);
+	반환 config_list(AT_FDCWD, file);
 }
 
 static void rc_config_set_value(RC_STRINGLIST *config, char *value)
@@ -195,31 +195,31 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
 	bool replaced;
 	char *token;
 
-	if (!p)
-		return;
-	if (strncmp(p, "export ", 7) == 0)
+	만약 (!p)
+		반환;
+	만약 (strncmp(p, "export ", 7) == 0)
 		p += 7;
-	if (!(token = strsep(&p, "=")))
-		return;
+	만약 (!(token = strsep(&p, "=")))
+		반환;
 
 	entry = xstrdup(token);
 	/* Preserve shell coloring */
-	if (*p == '$')
+	만약 (*p == '$')
 		token = value;
-	else
+	아니면
 		do {
 			/* Bash variables are usually quoted */
 			token = strsep(&p, "\"\'");
-		} while (token && *token == '\0');
+		} 동안 (token && *token == '\0');
 
 	/* Drop a newline if that's all we have */
-	if (token) {
+	만약 (token) {
 		i = strlen(token) - 1;
-		if (token[i] == '\n')
+		만약 (token[i] == '\n')
 			token[i] = 0;
 
 		xasprintf(&newline, "%s=%s", entry, token);
-	} else {
+	} 아니면 {
 		xasprintf(&newline, "%s=", entry);
 	}
 
@@ -228,7 +228,7 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
 	   any prior values we may already have */
 	TAILQ_FOREACH(cline, config, entries) {
 		i = strlen(entry);
-		if (strncmp(entry, cline->value, i) == 0 && cline->value[i] == '=') {
+		만약 (strncmp(entry, cline->value, i) == 0 && cline->value[i] == '=') {
 			/* We have a match now - to save time we directly replace it */
 			free(cline->value);
 			cline->value = newline;
@@ -237,7 +237,7 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
 		}
 	}
 
-	if (!replaced) {
+	만약 (!replaced) {
 		rc_stringlist_add(config, newline);
 		free(newline);
 	}
@@ -270,12 +270,12 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 		value = rc_proc_getent(override->value);
 
 		/* No need to continue if there's nothing to override */
-		if (!value) {
+		만약 (!value) {
 			free(value);
 			continue;
 		}
 
-		if (value != NULL) {
+		만약 (value != NULL) {
 			xasprintf(&tmp, "%s=%s", override->value, value);
 		}
 
@@ -284,7 +284,7 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 		 * duplicates
 		 */
 		TAILQ_FOREACH_SAFE(cline, config, entries, config_np) {
-			if (strncmp(override->value, cline->value, varlen) == 0
+			만약 (strncmp(override->value, cline->value, varlen) == 0
 				&& cline->value[varlen] == '=') {
 				rc_stringlist_delete(config, cline->value);
 				break;
@@ -300,11 +300,11 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 
 	rc_stringlist_free(overrides);
 #endif
-	return config;
+	반환 config;
 }
 
 static void
-rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
+rc_config_directory(RC_STRINGLIST *config, 정수 targetfd, const char *dir)
 {
 	DIR *dp;
 	struct dirent *d;
@@ -313,24 +313,24 @@ rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
 	RC_STRINGLIST *rc_conf_d_list;
 	RC_STRING *line;
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return;
+	만약 (!(dp = do_opendirat(targetfd, dir)))
+		반환;
 
 	rc_conf_d_files = rc_stringlist_new();
-	while ((d = readdir(dp)) != NULL) {
-		if (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
+	동안 ((d = readdir(dp)) != NULL) {
+		만약 (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
 			rc_stringlist_addu(rc_conf_d_files, d->d_name);
 		}
 	}
 
 	rc_stringlist_sort(&rc_conf_d_files);
 	TAILQ_FOREACH(fname, rc_conf_d_files, entries) {
-		if (!fname->value)
+		만약 (!fname->value)
 			continue;
 
 		rc_conf_d_list = config_list(dirfd(dp), fname->value);
 		TAILQ_FOREACH(line, rc_conf_d_list, entries)
-			if (line->value)
+			만약 (line->value)
 				rc_config_set_value(config, line->value);
 		rc_stringlist_free(rc_conf_d_list);
 	}
@@ -338,11 +338,11 @@ rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
 	rc_stringlist_free(rc_conf_d_files);
 	closedir(dp);
 
-	return;
+	반환;
 }
 
 static RC_STRINGLIST *
-config_load(int dirfd, const char *pathname)
+config_load(정수 dirfd, const char *pathname)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *config;
@@ -355,13 +355,13 @@ config_load(int dirfd, const char *pathname)
 	}
 	rc_stringlist_free(list);
 
-	return config;
+	반환 config;
 }
 
 RC_STRINGLIST *
 rc_config_load(const char *file)
 {
-	return config_load(AT_FDCWD, file);
+	반환 config_load(AT_FDCWD, file);
 }
 
 char *
@@ -374,12 +374,12 @@ rc_config_value(RC_STRINGLIST *list, const char *entry)
 	len = strlen(entry);
 	TAILQ_FOREACH(line, list, entries) {
 		p = strchr(line->value, '=');
-		if (p != NULL) {
-			if (strncmp(entry, line->value, len) == 0 && line->value[len] == '=')
-				return ++p;
+		만약 (p != NULL) {
+			만약 (strncmp(entry, line->value, len) == 0 && line->value[len] == '=')
+				반환 ++p;
 		}
 	}
-	return NULL;
+	반환 NULL;
 }
 
 /* Global for caching the strings loaded from rc.conf to avoid reparsing for
@@ -393,7 +393,7 @@ _free_rc_conf(void)
 }
 
 static void
-rc_conf_append(int dirfd)
+rc_conf_append(정수 dirfd)
 {
 	RC_STRINGLIST *conf = config_load(dirfd, "rc.conf");
 	TAILQ_CONCAT(rc_conf, conf, entries);
@@ -403,17 +403,17 @@ rc_conf_append(int dirfd)
 char *
 rc_conf_value(const char *setting)
 {
-	const int *dirfds;
+	const 정수 *dirfds;
 	size_t dir_count = rc_scriptdirfds(&dirfds);
 	RC_STRING *s;
 
-	if (rc_conf)
-		return rc_config_value(rc_conf, setting);
+	만약 (rc_conf)
+		반환 rc_config_value(rc_conf, setting);
 
 	rc_conf = rc_stringlist_new();
 	atexit(_free_rc_conf);
 
-	for (size_t i = 0; i < dir_count; i++) {
+	위해 (size_t i = 0; i < dir_count; i++) {
 		/* load configs in reverse order, so earlier entries override later ones */
 		size_t idx = dir_count - 1 - i;
 		rc_conf_append(dirfds[idx]);
@@ -421,7 +421,7 @@ rc_conf_value(const char *setting)
 	}
 
 	/* Support old configs. */
-	if (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
+	만약 (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
 		RC_STRINGLIST *old_conf = config_load(AT_FDCWD, RC_CONF_OLD);
 		TAILQ_CONCAT(rc_conf, old_conf, entries);
 		rc_stringlist_free(old_conf);
@@ -432,12 +432,12 @@ rc_conf_value(const char *setting)
 	/* Convert old uppercase to lowercase */
 	TAILQ_FOREACH(s, rc_conf, entries) {
 		char *p = s->value;
-		while (p && *p && *p != '=') {
-			if (isupper((unsigned char)*p))
+		동안 (p && *p && *p != '=') {
+			만약 (isupper((unsigned char)*p))
 				*p = tolower((unsigned char)*p);
 			p++;
 		}
 	}
 
-	return rc_config_value(rc_conf, setting);
+	반환 rc_config_value(rc_conf, setting);
 }

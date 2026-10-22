@@ -28,20 +28,20 @@ static bool valid_shell(const char *shell) {
 	char *line = NULL;
 	size_t size;
 
-	if (!fp)
-		return true;
+	만약 (!fp)
+		반환 true;
 
-	while (xgetline(&line, &size, fp) != -1) {
-		if (line[0] == '#')
+	동안 (xgetline(&line, &size, fp) != -1) {
+		만약 (line[0] == '#')
 			continue;
-		if (strcmp(line, shell) == 0) {
+		만약 (strcmp(line, shell) == 0) {
 			ret = true;
 			break;
 		}
 	}
 
 	free(line);
-	return ret;
+	반환 ret;
 }
 
 static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
@@ -64,38 +64,38 @@ static bool spawn_openrc(uid_t uid, gid_t gid, const char *shell, bool start) {
 	args.redirect_stdout = 3;
 	res = do_exec(&args);
 	free(argv0);
-	if (res.pid < 0) {
+	만약 (res.pid < 0) {
 		elog(LOG_ERR, "do_exec: %s", strerror(errno));
-		return false;
+		반환 false;
 	}
-	return rc_waitpid(res.pid) == 0;
+	반환 rc_waitpid(res.pid) == 0;
 }
 
-int main(int argc, char **argv) {
+정수 main(정수 argc, char **argv) {
 	const struct passwd *user;
 	char *log, *shell;
 	sigset_t sigmask;
-	int sig, ret = 0;
+	정수 sig, ret = 0;
 	uid_t uid;
 	gid_t gid;
 #ifdef HAVE_PAM
 	struct pam_conv conv = { NULL, NULL };
 	pam_handle_t *pamh = NULL;
 	bool pam_session = false;
-	int rc;
+	정수 rc;
 #endif
 
 	setenv("EINFO_LOG", "openrc-user", true);
 
-	if (argc != 2) {
+	만약 (argc != 2) {
 		elog(LOG_ERR, "Invalid usage. %s <username>", argv[0]);
-		return -1;
+		반환 -1;
 	}
 	/* We can't rely on the supervisor to drop perms since
 	 * pam modules might need root perms. */
-	if (!(user = getpwnam(argv[1]))) {
+	만약 (!(user = getpwnam(argv[1]))) {
 		elog(LOG_ERR, "Invalid username %s.", argv[1]);
-		return -1;
+		반환 -1;
 	}
 
 	/* sssd's pam module wrongly calls getpwnam, meaning
@@ -117,27 +117,27 @@ int main(int argc, char **argv) {
 	free(log);
 
 #ifdef HAVE_PAM
-	if ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
+	만약 ((rc = pam_start("openrc-user", user->pw_name, &conv, &pamh)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to start pam: %s", pam_strerror(pamh, rc));
-	else if ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	아니면 만약 ((rc = pam_open_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 		elog(LOG_ERR, "Failed to open session: %s", pam_strerror(pamh, rc));
-	else
+	아니면
 		pam_session = true;
 
-	for (char **env = pam_getenvlist(pamh); env && *env; env++) {
-		if (strchr(*env, '='))
+	위해 (char **env = pam_getenvlist(pamh); env && *env; env++) {
+		만약 (strchr(*env, '='))
 			putenv(xstrdup(*env));
-		else
+		아니면
 			unsetenv(*env);
 	}
 
-	if (!pam_session && pamh) {
+	만약 (!pam_session && pamh) {
 		pam_end(pamh, rc);
 		pamh = NULL;
 	}
 #endif
 
-	if (!spawn_openrc(uid, gid, shell, true)) {
+	만약 (!spawn_openrc(uid, gid, shell, true)) {
 		ret = -1;
 		goto out;
 	}
@@ -150,18 +150,18 @@ int main(int argc, char **argv) {
 
 	sigwait(&sigmask, &sig);
 
-	if (!spawn_openrc(uid, gid, shell, false))
+	만약 (!spawn_openrc(uid, gid, shell, false))
 		ret = -1;
 
 out:
 #ifdef HAVE_PAM
-	if (pamh) {
-		if ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
+	만약 (pamh) {
+		만약 ((rc = pam_close_session(pamh, PAM_SILENT)) != PAM_SUCCESS)
 			elog(LOG_ERR, "Failed to close session: %s", pam_strerror(pamh, rc));
 		pam_end(pamh, rc);
 	}
 #endif
 
 	free(shell);
-	return ret;
+	반환 ret;
 }

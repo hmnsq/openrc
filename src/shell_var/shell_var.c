@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+정수 main(정수 argc, char **argv)
 {
-	int i;
+	정수 i;
 	char *p;
-	int c;
+	정수 c;
 
-	for (i = 1; i < argc; i++) {
+	위해 (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		만약 (i != 1)
 			putchar(' ');
-		while (*p) {
+		동안 (*p) {
 			c = (unsigned char)*p++;
-			if (!isalnum(c))
+			만약 (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	반환 EXIT_SUCCESS;
 }

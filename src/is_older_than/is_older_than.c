@@ -14,18 +14,18 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+정수 main(정수 argc, char **argv)
 {
-	int i;
+	정수 i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	만약 (argc < 3)
+		반환 EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	위해 (i = 2; i < argc; ++i)
+		만약 (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			반환 EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	반환 EXIT_FAILURE;
 }

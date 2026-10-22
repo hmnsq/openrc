@@ -32,38 +32,38 @@
 
 const char *applet = NULL;
 
-static int syslog_decode(char *name, const CODE *codetab)
+static 정수 syslog_decode(char *name, const CODE *codetab)
 {
 	const CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	만약 (isdigit((unsigned char)*name))
+		반환 atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	위해 (c = codetab; c->c_name; c++)
+		만약 (!strcasecmp(name, c->c_name))
+			반환 c->c_val;
 
-	return -1;
+	반환 -1;
 }
 
-int main(int argc, char **argv)
+정수 main(정수 argc, char **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	정수 retval = EXIT_SUCCESS;
+	정수 i;
 	size_t l = 0;
 	char *message = NULL;
 	char *p;
-	int level = 0;
+	정수 level = 0;
 	struct timespec ts;
 	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	정수 (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
+	정수 (*ee) (정수, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
+	만약 (strcmp(applet, "eval_ecolors") == 0) {
 		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
@@ -74,31 +74,31 @@ int main(int argc, char **argv)
 		exit(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	만약 (argc > 0) {
+		만약 (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (정수)strtoimax(argv[0], &p, 0);
+			만약 (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			만약 (errno)
 				retval = EXIT_FAILURE;
-			else {
+			아니면 {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} 아니면 만약 (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			만약 (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			만약 (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,10 +109,10 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	만약 (strcmp(applet, "ewaitfile") == 0) {
+		만약 (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		만약 (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
 		gettimeofday(&stop, NULL);
@@ -120,99 +120,99 @@ int main(int argc, char **argv)
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		위해 (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
+			위해 (;;) {
+				만약 (access(argv[i], F_OK) == 0)
 					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
+				만약 (nanosleep(&ts, NULL) == -1)
+					반환 EXIT_FAILURE;
 				gettimeofday(&now, NULL);
-				if (retval <= 0)
+				만약 (retval <= 0)
 					continue;
-				if (timercmp(&now, &stop, <))
+				만약 (timercmp(&now, &stop, <))
 					continue;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				반환 EXIT_FAILURE;
 			}
 			eendv(EXIT_SUCCESS, NULL);
 		}
-		return EXIT_SUCCESS;
+		반환 EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
+	만약 (argc > 0) {
 		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+		위해 (i = 0; i < argc; i++) {
+			만약 (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	만약 (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	아니면 만약 (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	아니면 만약 (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	아니면 만약 (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	아니면 만약 (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} 아니면 만약 (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} 아니면 만약 (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	아니면 만약 (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	아니면 만약 (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
+	아니면 만약 (strcmp(applet, "esyslog") == 0) {
 		elog(retval, "%s", message);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} 아니면 만약 (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	아니면 만약 (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	아니면 만약 (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	아니면 만약 (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	아니면 만약 (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	아니면 만약 (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	아니면 만약 (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	아니면 만약 (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	아니면 만약 (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	아니면 만약 (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	아니면 만약 (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	아니면 {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
+	만약 (message) {
+		만약 (e)
 			e("%s", message);
-		else if (ee)
+		아니면 만약 (ee)
 			ee(retval, "%s", message);
-	} else {
-		if (e)
+	} 아니면 {
+		만약 (e)
 			e(NULL);
-		else if (ee)
+		아니면 만약 (ee)
 			ee(retval, NULL);
 	}
 
 	free(message);
-	return retval;
+	반환 retval;
 }

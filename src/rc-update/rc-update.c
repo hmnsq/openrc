@@ -55,70 +55,70 @@ const char * const longopts_help[] = {
  *   0 = no changes (nothing to do)
  *  1+ = number of runlevels updated
  */
-static int
+static 정수
 add(const char *runlevel, const char *service)
 {
-	int retval = -1;
+	정수 retval = -1;
 
-	if (!rc_service_exists(service)) {
-		if (errno == ENOEXEC)
+	만약 (!rc_service_exists(service)) {
+		만약 (errno == ENOEXEC)
 			eerror("%s: service `%s' is not executable",
 			    applet, service);
-		else
+		아니면
 			eerror("%s: service `%s' does not exist",
 			    applet, service);
-	} else if (rc_service_in_runlevel(service, runlevel)) {
+	} 아니면 만약 (rc_service_in_runlevel(service, runlevel)) {
 		einfo("%s: %s already installed in runlevel `%s'; skipping",
 		    applet, service, runlevel);
 		retval = 0;
-	} else if (rc_service_add(runlevel, service)) {
+	} 아니면 만약 (rc_service_add(runlevel, service)) {
 		einfo("service %s added to runlevel %s", service, runlevel);
 		retval = 1;
-	} else
+	} 아니면
 		eerror("%s: failed to add service `%s' to runlevel `%s': %s",
 		    applet, service, runlevel, strerror (errno));
 
-	return retval;
+	반환 retval;
 }
 
-static int
+static 정수
 delete(const char *runlevel, const char *service)
 {
-	int retval = -1;
+	정수 retval = -1;
 
 	errno = 0;
-	if (rc_service_delete(runlevel, service)) {
+	만약 (rc_service_delete(runlevel, service)) {
 		einfo("service %s deleted from runlevel %s",
 		    service, runlevel);
-		return 1;
+		반환 1;
 	}
 
-	if (errno == ENOENT)
+	만약 (errno == ENOENT)
 		eerror("%s: service `%s' is not in the runlevel `%s'",
 		    applet, service, runlevel);
-	else
+	아니면
 		eerror("%s: failed to delete service `%s' from runlevel `%s': %s",
 		    applet, service, runlevel, strerror (errno));
 
-	return retval;
+	반환 retval;
 }
 
-static int
+static 정수
 addstack(const char *runlevel, const char *stack)
 {
-	if (!rc_runlevel_exists(runlevel)) {
+	만약 (!rc_runlevel_exists(runlevel)) {
 		eerror("%s: runlevel `%s' does not exist", applet, runlevel);
-		return -1;
+		반환 -1;
 	}
-	if (!rc_runlevel_exists(stack)) {
+	만약 (!rc_runlevel_exists(stack)) {
 		eerror("%s: runlevel `%s' does not exist", applet, stack);
-		return -1;
+		반환 -1;
 	}
-	if (strcmp(runlevel, stack) == 0) {
+	만약 (strcmp(runlevel, stack) == 0) {
 		eerror("%s: cannot stack `%s' onto itself", applet, stack);
-		return -1;
+		반환 -1;
 	}
-	if (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
+	만약 (strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
 	    strcmp(stack, RC_LEVEL_SYSINIT) == 0 ||
 	    strcmp(runlevel, RC_LEVEL_BOOT) == 0 ||
 	    strcmp(stack, RC_LEVEL_BOOT) == 0 ||
@@ -129,33 +129,33 @@ addstack(const char *runlevel, const char *stack)
 	{
 		eerror("%s: cannot stack the %s runlevel",
 		    applet, RC_LEVEL_SYSINIT);
-		return -1;
+		반환 -1;
 	}
-	if (!rc_runlevel_stack(runlevel, stack)) {
+	만약 (!rc_runlevel_stack(runlevel, stack)) {
 		eerror("%s: failed to stack `%s' to `%s': %s",
 		    applet, stack, runlevel, strerror(errno));
-		return -1;
+		반환 -1;
 	}
 	einfo("runlevel %s added to runlevel %s", stack, runlevel);
-	return 1;
+	반환 1;
 }
 
-static int
+static 정수
 delstack(const char *runlevel, const char *stack)
 {
-	if (rc_runlevel_unstack(runlevel, stack)) {
+	만약 (rc_runlevel_unstack(runlevel, stack)) {
 		einfo("runlevel %s deleted from runlevel %s", stack, runlevel);
-		return 1;
+		반환 1;
 	}
 
-	if (errno == ENOENT)
+	만약 (errno == ENOENT)
 		eerror("%s: runlevel `%s' is not in the runlevel `%s'",
 		    applet, stack, runlevel);
-	else
+	아니면
 		eerror("%s: failed to delete runlevel `%s' from runlevel `%s': %s",
 		    applet, stack, runlevel, strerror (errno));
 
-	return -1;
+	반환 -1;
 }
 
 static void
@@ -175,12 +175,12 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 		inone = false;
 
 		TAILQ_FOREACH(runlevel, runlevels, entries) {
-			if (rc_service_in_runlevel(service->value,
+			만약 (rc_service_in_runlevel(service->value,
 				runlevel->value))
 			{
 				rc_stringlist_add(in, runlevel->value);
 				inone = true;
-			} else {
+			} 아니면 {
 				l = strlen(runlevel->value);
 				buffer = xmalloc(l+1);
 				memset(buffer, ' ', l);
@@ -190,7 +190,7 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 			}
 		}
 
-		if (inone || verbose) {
+		만약 (inone || verbose) {
 			/* For more information on why padding is 26, see issue 937: */
 			/* https://github.com/OpenRC/openrc/issues/937 */
 			printf(" %26s |", service->value);
@@ -208,24 +208,24 @@ show(RC_STRINGLIST *runlevels, bool verbose)
 #define DODELETE (1 << 2)
 #define DOSHOW   (1 << 3)
 
-int main(int argc, char **argv)
+정수 main(정수 argc, char **argv)
 {
 	RC_DEPTREE *deptree;
 	RC_STRINGLIST *runlevels;
 	RC_STRING *runlevel;
 	char *service = NULL;
 	char *p;
-	int action = 0;
+	정수 action = 0;
 	bool verbose = false, stack = false, all_runlevels = false;
-	int opt;
-	int retval = EXIT_FAILURE;
-	int num_updated = 0;
-	int (*actfunc)(const char *, const char *);
-	int ret;
+	정수 opt;
+	정수 retval = EXIT_FAILURE;
+	정수 num_updated = 0;
+	정수 (*actfunc)(const char *, const char *);
+	정수 ret;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *)0)) != -1)
+	동안 ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (정수 *)0)) != -1)
 		switch (opt) {
 		case 'a':
 		    all_runlevels = true;
@@ -235,50 +235,50 @@ int main(int argc, char **argv)
 		break;
 		case 'u':
 			deptree = _rc_deptree_load(-1, &ret);
-			if (deptree)
+			만약 (deptree)
 				rc_deptree_free(deptree);
-			return ret;
+			반환 ret;
 		case_RC_COMMON_GETOPT
 		}
 
 	verbose = rc_yesno(getenv ("EINFO_VERBOSE"));
 
-	if ((action & DOSHOW   && action != DOSHOW) ||
+	만약 ((action & DOSHOW   && action != DOSHOW) ||
 	    (action & DOADD    && action != DOADD) ||
 	    (action & DODELETE && action != DODELETE))
 		eerrorx("%s: cannot mix commands", applet);
 
 	/* We need to be backwards compatible */
-	if (optind < argc) {
-		if (strcmp(argv[optind], "add") == 0)
+	만약 (optind < argc) {
+		만약 (strcmp(argv[optind], "add") == 0)
 			action = DOADD;
-		else if (strcmp(argv[optind], "delete") == 0 ||
+		아니면 만약 (strcmp(argv[optind], "delete") == 0 ||
 		    strcmp(argv[optind], "del") == 0)
 			action = DODELETE;
-		else if (strcmp(argv[optind], "show") == 0)
+		아니면 만약 (strcmp(argv[optind], "show") == 0)
 			action = DOSHOW;
-		if (action)
+		만약 (action)
 			optind++;
-		else
+		아니면
 			eerrorx("%s: invalid command `%s'",
 			    applet, argv[optind]);
 	}
-	if (!action)
+	만약 (!action)
 		action = DOSHOW;
 
 	runlevels = rc_stringlist_new();
 
-	if (optind >= argc) {
-		if (!(action & DOSHOW))
+	만약 (optind >= argc) {
+		만약 (!(action & DOSHOW))
 			eerrorx("%s: no service specified", applet);
-	} else {
+	} 아니면 {
 		service = argv[optind];
 		optind++;
 
-		while (optind < argc)
-			if (rc_runlevel_exists(argv[optind]))
+		동안 (optind < argc)
+			만약 (rc_runlevel_exists(argv[optind]))
 				rc_stringlist_add(runlevels, argv[optind++]);
-			else {
+			아니면 {
 				rc_stringlist_free(runlevels);
 				eerrorx ("%s: `%s' is not a valid runlevel",
 				    applet, argv[optind]);
@@ -286,38 +286,38 @@ int main(int argc, char **argv)
 	}
 
 	retval = EXIT_SUCCESS;
-	if (action & DOSHOW) {
-		if (service)
+	만약 (action & DOSHOW) {
+		만약 (service)
 			rc_stringlist_add(runlevels, service);
-		if (!TAILQ_FIRST(runlevels)) {
+		만약 (!TAILQ_FIRST(runlevels)) {
 			rc_stringlist_free(runlevels);
 			runlevels = rc_runlevel_list();
 		}
 
 		rc_stringlist_sort(&runlevels);
 		show (runlevels, verbose);
-	} else {
-		if (!service)
+	} 아니면 {
+		만약 (!service)
 			eerror ("%s: no service specified", applet);
-		else {
-			if (action & DOADD) {
-				if (all_runlevels) {
+		아니면 {
+			만약 (action & DOADD) {
+				만약 (all_runlevels) {
 					rc_stringlist_free(runlevels);
 					eerrorx("%s: the -a option is invalid with add", applet);
 				}
 				actfunc = stack ? addstack : add;
-			} else if (action & DODELETE) {
+			} 아니면 만약 (action & DODELETE) {
 				actfunc = stack ? delstack : delete;
-			} else {
+			} 아니면 {
 				rc_stringlist_free(runlevels);
 				eerrorx("%s: invalid action", applet);
 			}
 
-			if (!TAILQ_FIRST(runlevels)) {
-				if (all_runlevels) {
+			만약 (!TAILQ_FIRST(runlevels)) {
+				만약 (all_runlevels) {
 					free(runlevels);
 					runlevels = rc_runlevel_list();
-				} else {
+				} 아니면 {
 					p = rc_runlevel_get();
 					rc_stringlist_add(runlevels,
 					    p ? p : default_runlevel());
@@ -325,25 +325,25 @@ int main(int argc, char **argv)
 				}
 			}
 
-			if (!TAILQ_FIRST(runlevels)) {
+			만약 (!TAILQ_FIRST(runlevels)) {
 				free(runlevels);
 				eerrorx("%s: no runlevels found", applet);
 			}
 
 			TAILQ_FOREACH(runlevel, runlevels, entries) {
-				if (!rc_runlevel_exists(runlevel->value)) {
+				만약 (!rc_runlevel_exists(runlevel->value)) {
 					eerror ("%s: runlevel `%s' does not exist",
 					    applet, runlevel->value);
 					continue;
 				}
 
 				ret = actfunc(runlevel->value, service);
-				if (ret < 0)
+				만약 (ret < 0)
 					retval = EXIT_FAILURE;
 				num_updated += ret;
 			}
 
-			if (retval == EXIT_SUCCESS &&
+			만약 (retval == EXIT_SUCCESS &&
 			    num_updated == 0 && action & DODELETE)
 				ewarnx("%s: service `%s' not found in any"
 				    " of the specified runlevels",
@@ -352,5 +352,5 @@ int main(int argc, char **argv)
 	}
 
 	rc_stringlist_free(runlevels);
-	return retval;
+	반환 retval;
 }

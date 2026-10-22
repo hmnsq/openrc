@@ -16,7 +16,7 @@
 #include "timeutils.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#만약 defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
 #endif
@@ -24,31 +24,31 @@
 static int64_t ts_to_ms(struct timespec tv)
 {
 	int64_t sec_to_ms = 1000, round_up = 500000, ns_to_ms = 1000000;
-	return (tv.tv_sec * sec_to_ms) + ((tv.tv_nsec + round_up) / ns_to_ms);
+	반환 (tv.tv_sec * sec_to_ms) + ((tv.tv_nsec + round_up) / ns_to_ms);
 }
 
 int64_t tm_now(void)
 {
 	struct timespec tv;
 	clock_gettime(CLOCK_MONOTONIC, &tv);
-	return ts_to_ms(tv);
+	반환 ts_to_ms(tv);
 }
 
 int64_t tm_sleep(int64_t ms, enum tm_sleep_flags flags)
 {
-	int ret;
+	정수 ret;
 	struct timespec tv, rem;
 	tv.tv_sec  = ms / 1000;
 	tv.tv_nsec = (ms % 1000) * 1000000l;
-	for (;;) {
+	위해 (;;) {
 		ret = clock_nanosleep(CLOCK_MONOTONIC, 0, &tv, &rem);
-		if (ret < 0 && (!(flags & TM_NO_EINTR) || errno != EINTR))
-			return ts_to_ms(rem);
-		if (ret == 0)
+		만약 (ret < 0 && (!(flags & TM_NO_EINTR) || errno != EINTR))
+			반환 ts_to_ms(rem);
+		만약 (ret == 0)
 			break;
 		tv = rem;
 	}
-	return 0;
+	반환 0;
 }
 
 int64_t parse_duration(const char *duration)
@@ -71,20 +71,20 @@ int64_t parse_duration(const char *duration)
 
 	errno = 0;
 	val = strtol(duration, &end, 10);
-	if (errno == ERANGE || *duration == '\0' || val < 0)
-		return -1;
-	for (size_t i = 0; i < ARRAY_SIZE(exts); ++i) {
-		if (strcmp(end, exts[i].ext) == 0) {
+	만약 (errno == ERANGE || *duration == '\0' || val < 0)
+		반환 -1;
+	위해 (size_t i = 0; i < ARRAY_SIZE(exts); ++i) {
+		만약 (strcmp(end, exts[i].ext) == 0) {
 			unit = exts[i].unit;
 			break;
 		}
 	}
 	switch (unit) {
 	case UNIT_INVALID:
-		return -1;
+		반환 -1;
 	default:
-		if (INT64_MAX/unit < val) /* overflow */
-			return -1;
-		return (int64_t)val * unit;
+		만약 (INT64_MAX/unit < val) /* overflow */
+			반환 -1;
+		반환 (int64_t)val * unit;
 	}
 }

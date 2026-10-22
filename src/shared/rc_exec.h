@@ -34,9 +34,9 @@ enum {
 struct exec_args {
 	const char **argv;
 	const char *cmd;  /* if NULL, argv[0] is used */
-	int redirect_stdin;
-	int redirect_stdout;
-	int redirect_stderr;
+	정수 redirect_stdin;
+	정수 redirect_stdout;
+	정수 redirect_stderr;
 	uid_t uid;
 	gid_t gid;
 	bool setsid : 1;
@@ -45,16 +45,16 @@ struct exec_args {
 struct exec_result {
 	pid_t pid;
 	/* returned in case of RC_EXEC_MKPIPE */
-	int proc_stdin;
-	int proc_stdout;
-	int proc_stderr;
+	정수 proc_stdin;
+	정수 proc_stdout;
+	정수 proc_stderr;
 };
 
 struct exec_args exec_init(const char **argv);
 struct exec_result do_exec(struct exec_args *args);
 
 /* some exec related helplers */
-int rc_waitpid(pid_t pid);
-int rc_pipe_command(const char *cmd, int devnullfd);
+정수 rc_waitpid(pid_t pid);
+정수 rc_pipe_command(const char *cmd, 정수 devnullfd);
 
 #endif
