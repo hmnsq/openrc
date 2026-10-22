@@ -10,20 +10,20 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <getopt.h>
-#include <stdlib.h>
-#include "librc.h"
+#அந்தர்பாவ <getopt.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ "librc.h"
 
 #define getoptstring_COMMON "ChqVvU"
 
 #define longopts_COMMON							      \
-	{ "help",           0, NULL, 'h'},				      \
-	{ "nocolor",        0, NULL, 'C'},				      \
-	{ "version",        0, NULL, 'V'},				      \
-	{ "verbose",        0, NULL, 'v'},				      \
-	{ "quiet",          0, NULL, 'q'},				      \
-	{ "user",           0, NULL, 'U'},				      \
-	{ NULL,             0, NULL,  0 }
+	{ "help",           0, வெற்று, 'h'},				      \
+	{ "nocolor",        0, வெற்று, 'C'},				      \
+	{ "version",        0, வெற்று, 'V'},				      \
+	{ "verbose",        0, வெற்று, 'v'},				      \
+	{ "quiet",          0, வெற்று, 'q'},				      \
+	{ "user",           0, வெற்று, 'U'},				      \
+	{ வெற்று,             0, வெற்று,  0 }
 
 #define longopts_help_COMMON						      \
 	"Display this help output",					      \
@@ -35,28 +35,28 @@
 
 #define case_RC_COMMON_getopt_case_C  setenv ("EINFO_COLOR", "NO", 1);
 #define case_RC_COMMON_getopt_case_h  usage (EXIT_SUCCESS);
-#define case_RC_COMMON_getopt_case_V  if (argc == 2) show_version();
+#define case_RC_COMMON_getopt_case_V  எனில் (argc == 2) show_version();
 #define case_RC_COMMON_getopt_case_v  setenv ("EINFO_VERBOSE", "YES", 1);
 #define case_RC_COMMON_getopt_case_q  set_quiet_options();
 #define case_RC_COMMON_getopt_case_U  rc_set_user();
 #define case_RC_COMMON_getopt_default usage (EXIT_FAILURE);
 
 #define case_RC_COMMON_GETOPT						      \
-	case 'C': case_RC_COMMON_getopt_case_C; break;			      \
-	case 'h': case_RC_COMMON_getopt_case_h; break;			      \
-	case 'V': case_RC_COMMON_getopt_case_V; break;			      \
-	case 'v': case_RC_COMMON_getopt_case_v; break;			      \
-	case 'q': case_RC_COMMON_getopt_case_q; break;			      \
-	case 'U': case_RC_COMMON_getopt_case_U; break;			      \
-	default:  case_RC_COMMON_getopt_default; break;
+	நிலை 'C': case_RC_COMMON_getopt_case_C; நிறுத்து;			      \
+	நிலை 'h': case_RC_COMMON_getopt_case_h; நிறுத்து;			      \
+	நிலை 'V': case_RC_COMMON_getopt_case_V; நிறுத்து;			      \
+	நிலை 'v': case_RC_COMMON_getopt_case_v; நிறுத்து;			      \
+	நிலை 'q': case_RC_COMMON_getopt_case_q; நிறுத்து;			      \
+	நிலை 'U': case_RC_COMMON_getopt_case_U; நிறுத்து;			      \
+	இயல்பு:  case_RC_COMMON_getopt_default; நிறுத்து;
 
-extern const char *applet;
-extern const char *extraopts;
-extern const char getoptstring[];
-extern const struct option longopts[];
-extern const char * const longopts_help[];
-extern const char *usagestring;
+வெளி மாறிலி எழுத்து *applet;
+வெளி மாறிலி எழுத்து *extraopts;
+வெளி மாறிலி எழுத்து getoptstring[];
+வெளி மாறிலி கட்டமைப்பு option longopts[];
+வெளி மாறிலி எழுத்து * மாறிலி longopts_help[];
+வெளி மாறிலி எழுத்து *usagestring;
 
-void set_quiet_options(void);
-void show_version(void);
-void usage(int exit_status);
+வெறுமை set_quiet_options(வெறுமை);
+வெறுமை show_version(வெறுமை);
+வெறுமை usage(முழு exit_status);

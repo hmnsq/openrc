@@ -10,59 +10,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "misc.h"
+#அந்தர்பாவ "helpers.h"
 
-const char *applet = NULL;
+மாறிலி எழுத்து *applet = வெற்று;
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
+	எழுத்து *service;
+	எழுத்து *exec;
+	முழு idx = 0;
 	RC_SERVICE state, bit;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	எனில் (argc > 1)
 		service = argv[1];
-	else
+	இல்லையெனில்
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	எனில் (service == வெற்று || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
 	bit = lookup_service_state(applet);
-	if (bit) {
+	எனில் (bit) {
 		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	} இல்லையெனில் எனில் (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		எனில் (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
 			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+		} இல்லையெனில் எனில் (argc == 3) {
+			எனில் (sscanf(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
-		ok = rc_service_started_daemon(service, exec, NULL, idx);
+		ok = rc_service_started_daemon(service, exec, வெற்று, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} இல்லையெனில் எனில் (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} இல்லையெனில்
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	திரும்பு ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

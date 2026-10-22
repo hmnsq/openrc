@@ -12,58 +12,58 @@
 
 #define SYSLOG_NAMES
 
-#include <sys/time.h>
-#include <errno.h>
-#include <ctype.h>
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <strings.h>
+#அந்தர்பாவ <sys/time.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <inttypes.h>
+#அந்தர்பாவ <stddef.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <syslog.h>
+#அந்தர்பாவ <time.h>
+#அந்தர்பாவ <strings.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "helpers.h"
 
 /* usecs to wait while we poll the file existence  */
 #define WAIT_INTERVAL	20000000
 
-const char *applet = NULL;
+மாறிலி எழுத்து *applet = வெற்று;
 
-static int syslog_decode(char *name, const CODE *codetab)
+நிலையான முழு syslog_decode(எழுத்து *name, மாறிலி CODE *codetab)
 {
-	const CODE *c;
+	மாறிலி CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	எனில் (isdigit((unsigned எழுத்து)*name))
+		திரும்பு atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	க்கு (c = codetab; c->c_name; c++)
+		எனில் (!strcasecmp(name, c->c_name))
+			திரும்பு c->c_val;
 
-	return -1;
+	திரும்பு -1;
 }
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	முழு retval = EXIT_SUCCESS;
+	முழு i;
 	size_t l = 0;
-	char *message = NULL;
-	char *p;
-	int level = 0;
-	struct timespec ts;
-	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	எழுத்து *message = வெற்று;
+	எழுத்து *p;
+	முழு level = 0;
+	கட்டமைப்பு timespec ts;
+	கட்டமைப்பு timeval stop, now;
+	முழு (*e) (மாறிலி எழுத்து *, ...) EINFO_PRINTF(1, 2) = வெற்று;
+	முழு (*ee) (முழு, மாறிலி எழுத்து *, ...) EINFO_PRINTF(2, 3) = வெற்று;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
+	எனில் (strcmp(applet, "eval_ecolors") == 0) {
 		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
@@ -74,31 +74,31 @@ int main(int argc, char **argv)
 		exit(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	எனில் (argc > 0) {
+		எனில் (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (முழு)strtoimax(argv[0], &p, 0);
+			எனில் (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			எனில் (errno)
 				retval = EXIT_FAILURE;
-			else {
+			இல்லையெனில் {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} இல்லையெனில் எனில் (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			எனில் (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			எனில் (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,110 +109,110 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	எனில் (strcmp(applet, "ewaitfile") == 0) {
+		எனில் (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		எனில் (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
-		gettimeofday(&stop, NULL);
+		gettimeofday(&stop, வெற்று);
 		/* retval stores the timeout */
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		க்கு (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
-					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
-				gettimeofday(&now, NULL);
-				if (retval <= 0)
-					continue;
-				if (timercmp(&now, &stop, <))
-					continue;
+			க்கு (;;) {
+				எனில் (access(argv[i], F_OK) == 0)
+					நிறுத்து;
+				எனில் (nanosleep(&ts, வெற்று) == -1)
+					திரும்பு EXIT_FAILURE;
+				gettimeofday(&now, வெற்று);
+				எனில் (retval <= 0)
+					தொடர்;
+				எனில் (timercmp(&now, &stop, <))
+					தொடர்;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				திரும்பு EXIT_FAILURE;
 			}
-			eendv(EXIT_SUCCESS, NULL);
+			eendv(EXIT_SUCCESS, வெற்று);
 		}
-		return EXIT_SUCCESS;
+		திரும்பு EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
+	எனில் (argc > 0) {
 		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+		க்கு (i = 0; i < argc; i++) {
+			எனில் (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	எனில் (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	இல்லையெனில் எனில் (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} இல்லையெனில் எனில் (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} இல்லையெனில் எனில் (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
+	இல்லையெனில் எனில் (strcmp(applet, "esyslog") == 0) {
 		elog(retval, "%s", message);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} இல்லையெனில் எனில் (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	இல்லையெனில் எனில் (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	இல்லையெனில் {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
+	எனில் (message) {
+		எனில் (e)
 			e("%s", message);
-		else if (ee)
+		இல்லையெனில் எனில் (ee)
 			ee(retval, "%s", message);
-	} else {
-		if (e)
-			e(NULL);
-		else if (ee)
-			ee(retval, NULL);
+	} இல்லையெனில் {
+		எனில் (e)
+			e(வெற்று);
+		இல்லையெனில் எனில் (ee)
+			ee(retval, வெற்று);
 	}
 
-	free(message);
-	return retval;
+	விடுவி(message);
+	திரும்பு retval;
 }

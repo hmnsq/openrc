@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
-	int i;
-	char *p;
-	int c;
+	முழு i;
+	எழுத்து *p;
+	முழு c;
 
-	for (i = 1; i < argc; i++) {
+	க்கு (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		எனில் (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		போது (*p) {
+			c = (unsigned எழுத்து)*p++;
+			எனில் (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }

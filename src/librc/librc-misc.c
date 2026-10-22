@@ -15,44 +15,44 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <fnmatch.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <sys/stat.h>
+#அந்தர்பாவ <fnmatch.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <dirent.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <strings.h>
+#அந்தர்பாவ <sys/stat.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
-#include "misc.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "librc.h"
+#அந்தர்பாவ "helpers.h"
+#அந்தர்பாவ "misc.h"
 
 bool
-rc_yesno(const char *value)
+rc_yesno(மாறிலி எழுத்து *மதிப்பு)
 {
-	if (!value) {
+	எனில் (!மதிப்பு) {
 		errno = ENOENT;
-		return false;
+		திரும்பு false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "1") == 0)
-		return true;
+	எனில் (strcasecmp(மதிப்பு, "yes") == 0 ||
+	    strcasecmp(மதிப்பு, "y") == 0 ||
+	    strcasecmp(மதிப்பு, "true") == 0 ||
+	    strcasecmp(மதிப்பு, "1") == 0)
+		திரும்பு true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	எனில் (strcasecmp(மதிப்பு, "no") != 0 &&
+	    strcasecmp(மதிப்பு, "n") != 0 &&
+	    strcasecmp(மதிப்பு, "false") != 0 &&
+	    strcasecmp(மதிப்பு, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	திரும்பு false;
 }
 
 
@@ -63,163 +63,163 @@ rc_yesno(const char *value)
  * Don't forget to free the buffer afterwards!
  */
 bool
-rc_getfile(const char *file, char **buffer, size_t *len)
+rc_getfile(மாறிலி எழுத்து *file, எழுத்து **buffer, size_t *len)
 {
 	bool ret = false;
 	FILE *fp;
-	int fd;
-	struct stat st;
-	size_t done, left;
+	முழு fd;
+	கட்டமைப்பு stat st;
+	size_t done, இடது;
 
 	fp = fopen(file, "re");
-	if (!fp)
-		return false;
+	எனில் (!fp)
+		திரும்பு false;
 
 	/* assume fileno() never fails */
 	fd = fileno(fp);
 
-	if (fstat(fd, &st))
-		goto finished;
+	எனில் (fstat(fd, &st))
+		செல் finished;
 
-	left = st.st_size;
-	*len = left + 1; /* NUL terminator */
+	இடது = st.st_size;
+	*len = இடது + 1; /* NUL terminator */
 	*buffer = xrealloc(*buffer, *len);
-	while (left) {
-		done = fread(*buffer, sizeof(*buffer[0]), left, fp);
-		if (done == 0 && ferror(fp))
-			goto finished;
-		left -= done;
+	போது (இடது) {
+		done = fread(*buffer, அளவு(*buffer[0]), இடது, fp);
+		எனில் (done == 0 && ferror(fp))
+			செல் finished;
+		இடது -= done;
 	}
 	ret = true;
 
  finished:
-	if (!ret) {
-		free(*buffer);
+	எனில் (!ret) {
+		விடுவி(*buffer);
 		*len = 0;
-	} else
+	} இல்லையெனில்
 		(*buffer)[*len - 1] = '\0';
 	fclose(fp);
-	return ret;
+	திரும்பு ret;
 }
 
-char *
-rc_proc_getent(const char *ent RC_UNUSED)
+எழுத்து *
+rc_proc_getent(மாறிலி எழுத்து *ent RC_UNUSED)
 {
 #ifdef __linux__
 	FILE *fp;
-	char *proc = NULL, *p, *value = NULL, *save;
+	எழுத்து *proc = வெற்று, *p, *மதிப்பு = வெற்று, *save;
 	size_t i, len;
 
-	if (!(fp = fopen("/proc/cmdline", "r")))
-		return NULL;
+	எனில் (!(fp = fopen("/proc/cmdline", "r")))
+		திரும்பு வெற்று;
 
 	i = 0;
-	if (xgetline(&proc, &i, fp) == -1)
-		goto out;
+	எனில் (xgetline(&proc, &i, fp) == -1)
+		செல் out;
 	save = proc;
 
 	len = strlen(ent);
-	while ((p = strsep(&save, " "))) {
-		if (strncmp(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
+	போது ((p = strsep(&save, " "))) {
+		எனில் (strncmp(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
 			p += len;
-			if (*p == '=')
+			எனில் (*p == '=')
 				p++;
-			value = xstrdup(p);
+			மதிப்பு = xstrdup(p);
 		}
 	}
 
-	if (!value)
+	எனில் (!மதிப்பு)
 		errno = ENOENT;
 
 out:
 	fclose(fp);
-	free(proc);
+	விடுவி(proc);
 
-	return value;
-#else
-	return NULL;
+	திரும்பு மதிப்பு;
+#இல்லையெனில்
+	திரும்பு வெற்று;
 #endif
 }
 
 RC_STRINGLIST *
-config_list(int dirfd, const char *pathname)
+config_list(முழு dirfd, மாறிலி எழுத்து *pathname)
 {
 	FILE *fp;
-	char *buffer = NULL;
+	எழுத்து *buffer = வெற்று;
 	size_t len = 0;
-	char *p;
-	char *token;
+	எழுத்து *p;
+	எழுத்து *token;
 	RC_STRINGLIST *list = rc_stringlist_new();
 
-	if (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
-		return list;
+	எனில் (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
+		திரும்பு list;
 
-	while (xgetline(&buffer, &len, fp) != -1) {
+	போது (xgetline(&buffer, &len, fp) != -1) {
 		p = buffer;
 		/* Strip leading spaces/tabs */
-		while ((*p == ' ') || (*p == '\t'))
+		போது ((*p == ' ') || (*p == '\t'))
 			p++;
 
 		/* Get entry - we do not want comments */
 		token = strsep(&p, "#");
-		if (token && (strlen(token) > 1)) {
+		எனில் (token && (strlen(token) > 1)) {
 			/* If not variable assignment then skip */
-			if (strchr(token, '=')) {
+			எனில் (strchr(token, '=')) {
 				/* Strip the newline if present */
-				if (token[strlen(token) - 1] == '\n')
+				எனில் (token[strlen(token) - 1] == '\n')
 					token[strlen(token) - 1] = 0;
 
 				rc_stringlist_add(list, token);
 			}
 		}
 	}
-	free(buffer);
+	விடுவி(buffer);
 	fclose(fp);
 
-	return list;
+	திரும்பு list;
 }
 
 RC_STRINGLIST *
-rc_config_list(const char *file)
+rc_config_list(மாறிலி எழுத்து *file)
 {
-	return config_list(AT_FDCWD, file);
+	திரும்பு config_list(AT_FDCWD, file);
 }
 
-static void rc_config_set_value(RC_STRINGLIST *config, char *value)
+நிலையான வெறுமை rc_config_set_மதிப்பு(RC_STRINGLIST *config, எழுத்து *மதிப்பு)
 {
 	RC_STRING *cline;
-	char *entry;
+	எழுத்து *entry;
 	size_t i = 0;
-	char *newline;
-	char *p = value;
+	எழுத்து *newline;
+	எழுத்து *p = மதிப்பு;
 	bool replaced;
-	char *token;
+	எழுத்து *token;
 
-	if (!p)
-		return;
-	if (strncmp(p, "export ", 7) == 0)
+	எனில் (!p)
+		திரும்பு;
+	எனில் (strncmp(p, "export ", 7) == 0)
 		p += 7;
-	if (!(token = strsep(&p, "=")))
-		return;
+	எனில் (!(token = strsep(&p, "=")))
+		திரும்பு;
 
 	entry = xstrdup(token);
 	/* Preserve shell coloring */
-	if (*p == '$')
-		token = value;
-	else
-		do {
+	எனில் (*p == '$')
+		token = மதிப்பு;
+	இல்லையெனில்
+		செய் {
 			/* Bash variables are usually quoted */
 			token = strsep(&p, "\"\'");
-		} while (token && *token == '\0');
+		} போது (token && *token == '\0');
 
 	/* Drop a newline if that's all we have */
-	if (token) {
+	எனில் (token) {
 		i = strlen(token) - 1;
-		if (token[i] == '\n')
+		எனில் (token[i] == '\n')
 			token[i] = 0;
 
 		xasprintf(&newline, "%s=%s", entry, token);
-	} else {
+	} இல்லையெனில் {
 		xasprintf(&newline, "%s=", entry);
 	}
 
@@ -228,20 +228,20 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
 	   any prior values we may already have */
 	TAILQ_FOREACH(cline, config, entries) {
 		i = strlen(entry);
-		if (strncmp(entry, cline->value, i) == 0 && cline->value[i] == '=') {
+		எனில் (strncmp(entry, cline->மதிப்பு, i) == 0 && cline->மதிப்பு[i] == '=') {
 			/* We have a match now - to save time we directly replace it */
-			free(cline->value);
-			cline->value = newline;
+			விடுவி(cline->மதிப்பு);
+			cline->மதிப்பு = newline;
 			replaced = true;
-			break;
+			நிறுத்து;
 		}
 	}
 
-	if (!replaced) {
+	எனில் (!replaced) {
 		rc_stringlist_add(config, newline);
-		free(newline);
+		விடுவி(newline);
 	}
-	free(entry);
+	விடுவி(entry);
 }
 
 /*
@@ -250,13 +250,13 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
  * a patch for this on *BSD or tell me how to write the code to do this,
  * any suggestions are welcome.
  */
-static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
+நிலையான RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 {
 #ifdef __linux__
 	RC_STRINGLIST *overrides;
 	RC_STRING *cline, *override, *config_np;
-	char *tmp = NULL;
-	char *value = NULL;
+	எழுத்து *tmp = வெற்று;
+	எழுத்து *மதிப்பு = வெற்று;
 	size_t varlen = 0;
 
 	overrides = rc_stringlist_new();
@@ -266,17 +266,17 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 	rc_stringlist_add(overrides, "rc_parallel");
 
 	TAILQ_FOREACH(override, overrides, entries) {
-		varlen = strlen(override->value);
-		value = rc_proc_getent(override->value);
+		varlen = strlen(override->மதிப்பு);
+		மதிப்பு = rc_proc_getent(override->மதிப்பு);
 
 		/* No need to continue if there's nothing to override */
-		if (!value) {
-			free(value);
-			continue;
+		எனில் (!மதிப்பு) {
+			விடுவி(மதிப்பு);
+			தொடர்;
 		}
 
-		if (value != NULL) {
-			xasprintf(&tmp, "%s=%s", override->value, value);
+		எனில் (மதிப்பு != வெற்று) {
+			xasprintf(&tmp, "%s=%s", override->மதிப்பு, மதிப்பு);
 		}
 
 		/*
@@ -284,144 +284,144 @@ static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 		 * duplicates
 		 */
 		TAILQ_FOREACH_SAFE(cline, config, entries, config_np) {
-			if (strncmp(override->value, cline->value, varlen) == 0
-				&& cline->value[varlen] == '=') {
-				rc_stringlist_delete(config, cline->value);
-				break;
+			எனில் (strncmp(override->மதிப்பு, cline->மதிப்பு, varlen) == 0
+				&& cline->மதிப்பு[varlen] == '=') {
+				rc_stringlist_delete(config, cline->மதிப்பு);
+				நிறுத்து;
 			}
 		}
 
 		/* Add the option (var/value) to the current config */
 		rc_stringlist_add(config, tmp);
 
-		free(tmp);
-		free(value);
+		விடுவி(tmp);
+		விடுவி(மதிப்பு);
 	}
 
 	rc_stringlist_free(overrides);
 #endif
-	return config;
+	திரும்பு config;
 }
 
-static void
-rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
+நிலையான வெறுமை
+rc_config_directory(RC_STRINGLIST *config, முழு targetfd, மாறிலி எழுத்து *dir)
 {
 	DIR *dp;
-	struct dirent *d;
+	கட்டமைப்பு dirent *d;
 	RC_STRINGLIST *rc_conf_d_files;
 	RC_STRING *fname;
 	RC_STRINGLIST *rc_conf_d_list;
-	RC_STRING *line;
+	RC_STRING *வரி;
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return;
+	எனில் (!(dp = do_opendirat(targetfd, dir)))
+		திரும்பு;
 
 	rc_conf_d_files = rc_stringlist_new();
-	while ((d = readdir(dp)) != NULL) {
-		if (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
+	போது ((d = readdir(dp)) != வெற்று) {
+		எனில் (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
 			rc_stringlist_addu(rc_conf_d_files, d->d_name);
 		}
 	}
 
 	rc_stringlist_sort(&rc_conf_d_files);
 	TAILQ_FOREACH(fname, rc_conf_d_files, entries) {
-		if (!fname->value)
-			continue;
+		எனில் (!fname->மதிப்பு)
+			தொடர்;
 
-		rc_conf_d_list = config_list(dirfd(dp), fname->value);
-		TAILQ_FOREACH(line, rc_conf_d_list, entries)
-			if (line->value)
-				rc_config_set_value(config, line->value);
+		rc_conf_d_list = config_list(dirfd(dp), fname->மதிப்பு);
+		TAILQ_FOREACH(வரி, rc_conf_d_list, entries)
+			எனில் (வரி->மதிப்பு)
+				rc_config_set_மதிப்பு(config, வரி->மதிப்பு);
 		rc_stringlist_free(rc_conf_d_list);
 	}
 
 	rc_stringlist_free(rc_conf_d_files);
 	closedir(dp);
 
-	return;
+	திரும்பு;
 }
 
-static RC_STRINGLIST *
-config_load(int dirfd, const char *pathname)
+நிலையான RC_STRINGLIST *
+config_load(முழு dirfd, மாறிலி எழுத்து *pathname)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *config;
-	RC_STRING *line;
+	RC_STRING *வரி;
 
 	list = config_list(dirfd, pathname);
 	config = rc_stringlist_new();
-	TAILQ_FOREACH(line, list, entries) {
-		rc_config_set_value(config, line->value);
+	TAILQ_FOREACH(வரி, list, entries) {
+		rc_config_set_மதிப்பு(config, வரி->மதிப்பு);
 	}
 	rc_stringlist_free(list);
 
-	return config;
+	திரும்பு config;
 }
 
 RC_STRINGLIST *
-rc_config_load(const char *file)
+rc_config_load(மாறிலி எழுத்து *file)
 {
-	return config_load(AT_FDCWD, file);
+	திரும்பு config_load(AT_FDCWD, file);
 }
 
-char *
-rc_config_value(RC_STRINGLIST *list, const char *entry)
+எழுத்து *
+rc_config_மதிப்பு(RC_STRINGLIST *list, மாறிலி எழுத்து *entry)
 {
-	RC_STRING *line;
-	char *p;
+	RC_STRING *வரி;
+	எழுத்து *p;
 	size_t len;
 
 	len = strlen(entry);
-	TAILQ_FOREACH(line, list, entries) {
-		p = strchr(line->value, '=');
-		if (p != NULL) {
-			if (strncmp(entry, line->value, len) == 0 && line->value[len] == '=')
-				return ++p;
+	TAILQ_FOREACH(வரி, list, entries) {
+		p = strchr(வரி->மதிப்பு, '=');
+		எனில் (p != வெற்று) {
+			எனில் (strncmp(entry, வரி->மதிப்பு, len) == 0 && வரி->மதிப்பு[len] == '=')
+				திரும்பு ++p;
 		}
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
 /* Global for caching the strings loaded from rc.conf to avoid reparsing for
  * each rc_conf_value call */
-static RC_STRINGLIST *rc_conf = NULL;
+நிலையான RC_STRINGLIST *rc_conf = வெற்று;
 
-static void
-_free_rc_conf(void)
+நிலையான வெறுமை
+_free_rc_conf(வெறுமை)
 {
 	rc_stringlist_free(rc_conf);
 }
 
-static void
-rc_conf_append(int dirfd)
+நிலையான வெறுமை
+rc_conf_append(முழு dirfd)
 {
 	RC_STRINGLIST *conf = config_load(dirfd, "rc.conf");
 	TAILQ_CONCAT(rc_conf, conf, entries);
 	rc_stringlist_free(conf);
 }
 
-char *
-rc_conf_value(const char *setting)
+எழுத்து *
+rc_conf_மதிப்பு(மாறிலி எழுத்து *setting)
 {
-	const int *dirfds;
-	size_t dir_count = rc_scriptdirfds(&dirfds);
+	மாறிலி முழு *dirfds;
+	size_t dir_மொத்தம் = rc_scriptdirfds(&dirfds);
 	RC_STRING *s;
 
-	if (rc_conf)
-		return rc_config_value(rc_conf, setting);
+	எனில் (rc_conf)
+		திரும்பு rc_config_மதிப்பு(rc_conf, setting);
 
 	rc_conf = rc_stringlist_new();
 	atexit(_free_rc_conf);
 
-	for (size_t i = 0; i < dir_count; i++) {
+	க்கு (size_t i = 0; i < dir_மொத்தம்; i++) {
 		/* load configs in reverse order, so earlier entries override later ones */
-		size_t idx = dir_count - 1 - i;
+		size_t idx = dir_மொத்தம் - 1 - i;
 		rc_conf_append(dirfds[idx]);
 		rc_config_directory(rc_conf, dirfds[idx], "rc.conf.d");
 	}
 
 	/* Support old configs. */
-	if (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
+	எனில் (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
 		RC_STRINGLIST *old_conf = config_load(AT_FDCWD, RC_CONF_OLD);
 		TAILQ_CONCAT(rc_conf, old_conf, entries);
 		rc_stringlist_free(old_conf);
@@ -431,13 +431,13 @@ rc_conf_value(const char *setting)
 
 	/* Convert old uppercase to lowercase */
 	TAILQ_FOREACH(s, rc_conf, entries) {
-		char *p = s->value;
-		while (p && *p && *p != '=') {
-			if (isupper((unsigned char)*p))
-				*p = tolower((unsigned char)*p);
+		எழுத்து *p = s->மதிப்பு;
+		போது (p && *p && *p != '=') {
+			எனில் (isupper((unsigned எழுத்து)*p))
+				*p = tolower((unsigned எழுத்து)*p);
 			p++;
 		}
 	}
 
-	return rc_config_value(rc_conf, setting);
+	திரும்பு rc_config_மதிப்பு(rc_conf, setting);
 }

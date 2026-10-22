@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <getopt.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "_usage.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "misc.h"
+#அந்தர்பாவ "_usage.h"
+#அந்தர்பாவ "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "aot:suTF:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "starting", 0, NULL, 'a'},
-	{ "stopping", 0, NULL, 'o'},
-	{ "type",     1, NULL, 't'},
-	{ "notrace",  0, NULL, 'T'},
-	{ "strict",   0, NULL, 's'},
-	{ "update",   0, NULL, 'u'},
-	{ "deptree-file", 1, NULL, 'F'},
+மாறிலி எழுத்து *applet = வெற்று;
+மாறிலி எழுத்து *extraopts = வெற்று;
+மாறிலி எழுத்து getoptstring[] = "aot:suTF:" getoptstring_COMMON;
+மாறிலி கட்டமைப்பு option longopts[] = {
+	{ "starting", 0, வெற்று, 'a'},
+	{ "stopping", 0, வெற்று, 'o'},
+	{ "type",     1, வெற்று, 't'},
+	{ "notrace",  0, வெற்று, 'T'},
+	{ "strict",   0, வெற்று, 's'},
+	{ "update",   0, வெற்று, 'u'},
+	{ "deptree-file", 1, வெற்று, 'F'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+மாறிலி எழுத்து * மாறிலி longopts_help[] = {
 	"Order services as if runlevel is starting",
 	"Order services as if runlevel is stopping",
 	"Type(s) of dependency to list",
@@ -53,95 +53,95 @@ const char * const longopts_help[] = {
 	"File to load cached deptree from",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+மாறிலி எழுத்து *usagestring = வெற்று;
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *types;
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *depends;
 	RC_STRING *s;
-	RC_DEPTREE *deptree = NULL;
-	int options = RC_DEP_TRACE, update = 0;
+	RC_DEPTREE *deptree = வெற்று;
+	முழு options = RC_DEP_TRACE, update = 0;
 	bool first = true;
-	char *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
-	int opt;
-	char *token;
-	char *deptree_file = NULL;
+	எழுத்து *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
+	முழு opt;
+	எழுத்து *token;
+	எழுத்து *deptree_file = வெற்று;
 
 	applet = basename_c(argv[0]);
 	types = rc_stringlist_new();
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	போது ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (முழு *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'a':
+		தேர்வு (opt) {
+		நிலை 'a':
 			options |= RC_DEP_START;
-			break;
-		case 'o':
+			நிறுத்து;
+		நிலை 'o':
 			options |= RC_DEP_STOP;
-			break;
-		case 's':
+			நிறுத்து;
+		நிலை 's':
 			options |= RC_DEP_STRICT;
-			break;
-		case 't':
-			while ((token = strsep(&optarg, ",")))
+			நிறுத்து;
+		நிலை 't':
+			போது ((token = strsep(&optarg, ",")))
 				rc_stringlist_add(types, token);
-			break;
-		case 'u':
+			நிறுத்து;
+		நிலை 'u':
 			update = 1;
-			break;
-		case 'T':
+			நிறுத்து;
+		நிலை 'T':
 			options &= RC_DEP_TRACE;
-			break;
-		case 'F':
+			நிறுத்து;
+		நிலை 'F':
 			deptree_file = xstrdup(optarg);
-			break;
+			நிறுத்து;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (deptree_file) {
-		if (!(deptree = rc_deptree_load_file(deptree_file)))
+	எனில் (deptree_file) {
+		எனில் (!(deptree = rc_deptree_load_file(deptree_file)))
 			eerrorx("failed to load deptree");
-	} else {
-		if (!(deptree = _rc_deptree_load(update, NULL)))
+	} இல்லையெனில் {
+		எனில் (!(deptree = _rc_deptree_load(update, வெற்று)))
 			eerrorx("failed to load deptree");
 	}
 
-	if (!runlevel)
+	எனில் (!runlevel)
 		runlevel = default_runlevel();
 
 	services = rc_stringlist_new();
-	while (optind < argc) {
+	போது (optind < argc) {
 		list = rc_stringlist_new();
 		rc_stringlist_add(list, argv[optind]);
 		errno = 0;
-		depends = rc_deptree_depends(deptree, NULL, list, runlevel, 0);
-		if (!depends && errno == ENOENT)
+		depends = rc_deptree_depends(deptree, வெற்று, list, runlevel, 0);
+		எனில் (!depends && errno == ENOENT)
 			eerror("no dependency info for service `%s'",
 			    argv[optind]);
-		else
+		இல்லையெனில்
 			rc_stringlist_add(services, argv[optind]);
 
 		rc_stringlist_free(depends);
 		rc_stringlist_free(list);
 		optind++;
 	}
-	if (!TAILQ_FIRST(services)) {
+	எனில் (!TAILQ_FIRST(services)) {
 		rc_stringlist_free(services);
 		rc_stringlist_free(types);
 		rc_deptree_free(deptree);
-		free(runlevel);
-		if (update)
-			return EXIT_SUCCESS;
+		விடுவி(runlevel);
+		எனில் (update)
+			திரும்பு EXIT_SUCCESS;
 		eerrorx("no services specified");
 	}
 
 	/* If we don't have any types, then supply some defaults */
-	if (!TAILQ_FIRST(types)) {
+	எனில் (!TAILQ_FIRST(types)) {
 		rc_stringlist_add(types, "ineed");
 		rc_stringlist_add(types, "iuse");
 	}
@@ -149,13 +149,13 @@ int main(int argc, char **argv)
 	depends = rc_deptree_depends(deptree, types, services,
 	    runlevel, options);
 
-	if (TAILQ_FIRST(depends)) {
+	எனில் (TAILQ_FIRST(depends)) {
 		TAILQ_FOREACH(s, depends, entries) {
-			if (first)
+			எனில் (first)
 				first = false;
-			else
+			இல்லையெனில்
 				printf (" ");
-			printf ("%s", s->value);
+			printf ("%s", s->மதிப்பு);
 
 		}
 		printf ("\n");
@@ -165,6 +165,6 @@ int main(int argc, char **argv)
 	rc_stringlist_free(services);
 	rc_stringlist_free(depends);
 	rc_deptree_free(deptree);
-	free(runlevel);
-	return EXIT_SUCCESS;
+	விடுவி(runlevel);
+	திரும்பு EXIT_SUCCESS;
 }

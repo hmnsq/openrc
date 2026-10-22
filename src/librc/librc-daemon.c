@@ -15,105 +15,105 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <dirent.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "librc.h"
+#அந்தர்பாவ "helpers.h"
 
-#if defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#எனில் defined(__linux__) || (defined (__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
-static bool
-pid_is_exec(pid_t pid, const char *exec)
+நிலையான bool
+pid_is_exec(pid_t pid, மாறிலி எழுத்து *exec)
 {
-	char *buffer = NULL;
+	எழுத்து *buffer = வெற்று;
 	FILE *fp;
-	int c;
+	முழு c;
 	bool retval = false;
 
 	exec = basename_c(exec);
 	xasprintf(&buffer, "/proc/%d/stat", pid);
-	if ((fp = fopen(buffer, "r"))) {
-		while ((c = getc(fp)) != EOF && c != '(')
+	எனில் ((fp = fopen(buffer, "r"))) {
+		போது ((c = getc(fp)) != EOF && c != '(')
 			;
-		if (c == '(') {
-			while ((c = getc(fp)) != EOF && c == *exec)
+		எனில் (c == '(') {
+			போது ((c = getc(fp)) != EOF && c == *exec)
 				exec++;
-			if (c == ')' && *exec == '\0')
+			எனில் (c == ')' && *exec == '\0')
 				retval = true;
 		}
 		fclose(fp);
 	}
-	free(buffer);
-	return retval;
+	விடுவி(buffer);
+	திரும்பு retval;
 }
 
-static bool
-pid_is_argv(pid_t pid, const char *const *argv)
+நிலையான bool
+pid_is_argv(pid_t pid, மாறிலி எழுத்து *மாறிலி *argv)
 {
-	char *cmdline = NULL;
-	int fd;
-	char buffer[PATH_MAX];
-	char *p;
+	எழுத்து *cmdline = வெற்று;
+	முழு fd;
+	எழுத்து buffer[PATH_MAX];
+	எழுத்து *p;
 	ssize_t bytes;
 
 	xasprintf(&cmdline, "/proc/%u/cmdline", pid);
-	if ((fd = open(cmdline, O_RDONLY)) < 0) {
-		free(cmdline);
-		return false;
+	எனில் ((fd = open(cmdline, O_RDONLY)) < 0) {
+		விடுவி(cmdline);
+		திரும்பு false;
 	}
-	bytes = read(fd, buffer, sizeof(buffer) - 1);
+	bytes = பட(fd, buffer, அளவு(buffer) - 1);
 	close(fd);
-	free(cmdline);
-	if (bytes == -1)
-		return false;
+	விடுவி(cmdline);
+	எனில் (bytes == -1)
+		திரும்பு false;
 
 	buffer[bytes] = '\0';
 	p = buffer;
-	while (*argv) {
-		if ((unsigned)(p - buffer) >= sizeof(buffer))
-			return false;
-		if (strcmp(*argv, p) != 0)
-			return false;
+	போது (*argv) {
+		எனில் ((unsigned)(p - buffer) >= அளவு(buffer))
+			திரும்பு false;
+		எனில் (strcmp(*argv, p) != 0)
+			திரும்பு false;
 		argv++;
 		p += strlen(p) + 1;
 	}
-	return true;
+	திரும்பு true;
 }
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(மாறிலி எழுத்து *exec, மாறிலி எழுத்து *மாறிலி *argv, uid_t uid, pid_t pid)
 {
 	DIR *procdir;
-	struct dirent *entry;
+	கட்டமைப்பு dirent *entry;
 	FILE *fp;
-	int rc;
+	முழு rc;
 	bool container_pid = false;
 	bool openvz_host = false;
-	char *line = NULL;
-	char my_ns[30] = {0};
-	char proc_ns[30] = {0};
+	எழுத்து *வரி = வெற்று;
+	எழுத்து my_ns[30] = {0};
+	எழுத்து proc_ns[30] = {0};
 	size_t len = 0;
 	pid_t p;
-	char *buffer = NULL;
-	struct stat sb;
+	எழுத்து *buffer = வெற்று;
+	கட்டமைப்பு stat sb;
 	pid_t openrc_pid = 0;
-	char *pp;
-	RC_PIDLIST *pids = NULL;
+	எழுத்து *pp;
+	RC_PIDLIST *pids = வெற்று;
 	RC_PID *pi;
 
-	if ((procdir = opendir("/proc")) == NULL)
-		return NULL;
+	எனில் ((procdir = opendir("/proc")) == வெற்று)
+		திரும்பு வெற்று;
 
 	/*
 	  We never match RC_OPENRC_PID if present so we avoid the below
@@ -126,8 +126,8 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	  nasty
 	*/
 
-	if ((pp = getenv("RC_OPENRC_PID"))) {
-		if (sscanf(pp, "%d", &openrc_pid) != 1)
+	எனில் ((pp = getenv("RC_OPENRC_PID"))) {
+		எனில் (sscanf(pp, "%d", &openrc_pid) != 1)
 			openrc_pid = 0;
 	}
 
@@ -137,98 +137,98 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 	from our list of pids.
 	*/
 
-	if ((fp = fopen("/proc/self/status", "r"))) {
-		while (xgetline(&line, &len, fp) != -1) {
-			if (strncmp(line, "envID:\t0", 8) == 0) {
+	எனில் ((fp = fopen("/proc/self/status", "r"))) {
+		போது (xgetline(&வரி, &len, fp) != -1) {
+			எனில் (strncmp(வரி, "envID:\t0", 8) == 0) {
 				openvz_host = true;
-				break;
+				நிறுத்து;
 			}
 		}
 		fclose(fp);
 	}
 
-	if ((rc = readlink("/proc/self/ns/pid", my_ns, sizeof(my_ns)-1)) <= 0)
+	எனில் ((rc = readlink("/proc/self/ns/pid", my_ns, அளவு(my_ns)-1)) <= 0)
 		my_ns[0] = '\0';
 
-	while ((entry = readdir(procdir)) != NULL) {
-		if (sscanf(entry->d_name, "%d", &p) != 1)
-			continue;
-		if (openrc_pid != 0 && openrc_pid == p)
-			continue;
-		if (pid != 0 && pid != p)
-			continue;
+	போது ((entry = readdir(procdir)) != வெற்று) {
+		எனில் (sscanf(entry->d_name, "%d", &p) != 1)
+			தொடர்;
+		எனில் (openrc_pid != 0 && openrc_pid == p)
+			தொடர்;
+		எனில் (pid != 0 && pid != p)
+			தொடர்;
 		xasprintf(&buffer, "/proc/%d/ns/pid", p);
-		if ((rc = readlink(buffer, proc_ns, sizeof(proc_ns)-1)) <= 0)
+		எனில் ((rc = readlink(buffer, proc_ns, அளவு(proc_ns)-1)) <= 0)
 			proc_ns[0] = '\0';
-		free(buffer);
-		if (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
-			continue;
-		if (uid) {
+		விடுவி(buffer);
+		எனில் (pid == 0 && strlen(my_ns) && strlen (proc_ns) && strcmp(my_ns, proc_ns))
+			தொடர்;
+		எனில் (uid) {
 			xasprintf(&buffer, "/proc/%d", p);
-			if (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
-				free(buffer);
-				continue;
+			எனில் (stat(buffer, &sb) != 0 || sb.st_uid != uid) {
+				விடுவி(buffer);
+				தொடர்;
 			}
-			free(buffer);
+			விடுவி(buffer);
 		}
-		if (exec && !pid_is_exec(p, exec))
-			continue;
-		if (argv &&
-		    !pid_is_argv(p, (const char *const *)argv))
-			continue;
+		எனில் (exec && !pid_is_exec(p, exec))
+			தொடர்;
+		எனில் (argv &&
+		    !pid_is_argv(p, (மாறிலி எழுத்து *மாறிலி *)argv))
+			தொடர்;
 		/* If this is an OpenVZ host, filter out container processes */
-		if (openvz_host) {
+		எனில் (openvz_host) {
 			xasprintf(&buffer, "/proc/%d/status", p);
 			fp = fopen(buffer, "r");
-			free(buffer);
-			if (!fp)
-				continue;
-			while (xgetline(&line, &len, fp) != -1) {
-				if (strncmp(line, "envID:", 6) == 0) {
-					container_pid = !(strncmp(line, "envID:\t0", 8) == 0);
-					break;
+			விடுவி(buffer);
+			எனில் (!fp)
+				தொடர்;
+			போது (xgetline(&வரி, &len, fp) != -1) {
+				எனில் (strncmp(வரி, "envID:", 6) == 0) {
+					container_pid = !(strncmp(வரி, "envID:\t0", 8) == 0);
+					நிறுத்து;
 				}
 			}
 			fclose(fp);
 		}
-		if (container_pid)
-			continue;
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		எனில் (container_pid)
+			தொடர்;
+		எனில் (!pids) {
+			pids = xmalloc(அளவு(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(அளவு(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_செருகு_HEAD(pids, pi, entries);
 	}
-	if (line != NULL)
-		free(line);
+	எனில் (வரி != வெற்று)
+		விடுவி(வரி);
 	closedir(procdir);
-	return pids;
+	திரும்பு pids;
 }
 
-#elif BSD
+#அல்லதெனில் BSD
 
-# if defined(__NetBSD__) || defined(__OpenBSD__)
+# எனில் defined(__NetBSD__) || defined(__OpenBSD__)
 #  define _KVM_GETPROC2
 #  define _KINFO_PROC kinfo_proc2
 #  define _KVM_GETARGV kvm_getargv2
 #  define _GET_KINFO_UID(kp) (kp.p_ruid)
 #  define _GET_KINFO_COMM(kp) (kp.p_comm)
 #  define _GET_KINFO_PID(kp) (kp.p_pid)
-#  define _KVM_PATH NULL
+#  define _KVM_PATH வெற்று
 #  define _KVM_FLAGS KVM_NO_FILES
-# else
+# இல்லையெனில்
 #  ifndef KERN_PROC_PROC
 #    define KERN_PROC_PROC KERN_PROC_ALL
 #  endif
 #  define _KINFO_PROC kinfo_proc
 #  define _KVM_GETARGV kvm_getargv
-#  if defined(__DragonFly__)
+#  எனில் defined(__DragonFly__)
 #    define _GET_KINFO_UID(kp) (kp.kp_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.kp_comm)
 #    define _GET_KINFO_PID(kp) (kp.kp_pid)
-#  else
+#  இல்லையெனில்
 #    define _GET_KINFO_UID(kp) (kp.ki_ruid)
 #    define _GET_KINFO_COMM(kp) (kp.ki_comm)
 #    define _GET_KINFO_PID(kp) (kp.ki_pid)
@@ -238,194 +238,194 @@ rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
 # endif
 
 RC_PIDLIST *
-rc_find_pids(const char *exec, const char *const *argv, uid_t uid, pid_t pid)
+rc_find_pids(மாறிலி எழுத்து *exec, மாறிலி எழுத்து *மாறிலி *argv, uid_t uid, pid_t pid)
 {
-	static kvm_t *kd = NULL;
-	char errbuf[_POSIX2_LINE_MAX];
-	struct _KINFO_PROC *kp;
-	int i;
-	int processes = 0;
-	int pargc = 0;
-	char **pargv;
-	RC_PIDLIST *pids = NULL;
+	நிலையான kvm_t *kd = வெற்று;
+	எழுத்து errbuf[_POSIX2_LINE_MAX];
+	கட்டமைப்பு _KINFO_PROC *kp;
+	முழு i;
+	முழு processes = 0;
+	முழு pargc = 0;
+	எழுத்து **pargv;
+	RC_PIDLIST *pids = வெற்று;
 	RC_PID *pi;
 	pid_t p;
-	const char *const *arg;
-	int match;
+	மாறிலி எழுத்து *மாறிலி *arg;
+	முழு match;
 
-	if ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
-		    NULL, _KVM_FLAGS, errbuf)) == NULL)
+	எனில் ((kd = kvm_openfiles(_KVM_PATH, _KVM_PATH,
+		    வெற்று, _KVM_FLAGS, errbuf)) == வெற்று)
 	{
 		fprintf(stderr, "kvm_open: %s\n", errbuf);
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
 #ifdef _KVM_GETPROC2
-	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(*kp), &processes);
-#else
+	kp = kvm_getproc2(kd, KERN_PROC_ALL, 0, அளவு(*kp), &processes);
+#இல்லையெனில்
 	kp = kvm_getprocs(kd, KERN_PROC_PROC, 0, &processes);
 #endif
-	if ((kp == NULL && processes > 0) || (kp != NULL && processes < 0)) {
+	எனில் ((kp == வெற்று && processes > 0) || (kp != வெற்று && processes < 0)) {
 		fprintf(stderr, "kvm_getprocs: %s\n", kvm_geterr(kd));
 		kvm_close(kd);
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
-	if (exec)
+	எனில் (exec)
 		exec = basename_c(exec);
-	for (i = 0; i < processes; i++) {
+	க்கு (i = 0; i < processes; i++) {
 		p = _GET_KINFO_PID(kp[i]);
-		if (pid != 0 && pid != p)
-			continue;
-		if (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
-			continue;
-		if (exec) {
-			if (!_GET_KINFO_COMM(kp[i]) ||
+		எனில் (pid != 0 && pid != p)
+			தொடர்;
+		எனில் (uid != 0 && uid != _GET_KINFO_UID(kp[i]))
+			தொடர்;
+		எனில் (exec) {
+			எனில் (!_GET_KINFO_COMM(kp[i]) ||
 			    strcmp(exec, _GET_KINFO_COMM(kp[i])) != 0)
-				continue;
+				தொடர்;
 		}
-		if (argv && *argv) {
+		எனில் (argv && *argv) {
 			pargv = _KVM_GETARGV(kd, &kp[i], pargc);
-			if (!pargv || !*pargv)
-				continue;
+			எனில் (!pargv || !*pargv)
+				தொடர்;
 			arg = argv;
 			match = 1;
-			while (*arg && *pargv)
-				if (strcmp(*arg++, *pargv++) != 0) {
+			போது (*arg && *pargv)
+				எனில் (strcmp(*arg++, *pargv++) != 0) {
 					match = 0;
-					break;
+					நிறுத்து;
 				}
-			if (!match)
-				continue;
+			எனில் (!match)
+				தொடர்;
 		}
-		if (!pids) {
-			pids = xmalloc(sizeof(*pids));
+		எனில் (!pids) {
+			pids = xmalloc(அளவு(*pids));
 			LIST_INIT(pids);
 		}
-		pi = xmalloc(sizeof(*pi));
+		pi = xmalloc(அளவு(*pi));
 		pi->pid = p;
-		LIST_INSERT_HEAD(pids, pi, entries);
+		LIST_செருகு_HEAD(pids, pi, entries);
 	}
 	kvm_close(kd);
 
-	return pids;
+	திரும்பு pids;
 }
 
-#else
+#இல்லையெனில்
 #  error "Platform not supported!"
 #endif
 
-static bool
-_match_daemon(const char *svcname, const char *instance, RC_STRINGLIST *match)
+நிலையான bool
+_match_daemon(மாறிலி எழுத்து *svcname, மாறிலி எழுத்து *instance, RC_STRINGLIST *match)
 {
-	char *line = NULL;
+	எழுத்து *வரி = வெற்று;
 	size_t len = 0;
 	FILE *fp;
 	RC_STRING *m;
-	char *daemon;
+	எழுத்து *daemon;
 
 	xasprintf(&daemon, "%s/%s", svcname, instance);
 	fp = do_fopenat(rc_dirfd(RC_DIR_DAEMONS), daemon, O_RDONLY);
-	free(daemon);
+	விடுவி(daemon);
 
-	if (!fp)
-		return false;
+	எனில் (!fp)
+		திரும்பு false;
 
-	while (xgetline(&line, &len, fp) != -1) {
+	போது (xgetline(&வரி, &len, fp) != -1) {
 		TAILQ_FOREACH(m, match, entries)
-		    if (strcmp(line, m->value) == 0) {
+		    எனில் (strcmp(வரி, m->மதிப்பு) == 0) {
 			    TAILQ_REMOVE(match, m, entries);
-			    break;
+			    நிறுத்து;
 		    }
-		if (!TAILQ_FIRST(match))
-			break;
+		எனில் (!TAILQ_FIRST(match))
+			நிறுத்து;
 	}
 	fclose(fp);
-	free(line);
-	if (TAILQ_FIRST(match))
-		return false;
-	return true;
+	விடுவி(வரி);
+	எனில் (TAILQ_FIRST(match))
+		திரும்பு false;
+	திரும்பு true;
 }
 
-static RC_STRINGLIST *
-_match_list(const char *exec, const char *const *argv, const char *pidfile)
+நிலையான RC_STRINGLIST *
+_match_list(மாறிலி எழுத்து *exec, மாறிலி எழுத்து *மாறிலி *argv, மாறிலி எழுத்து *pidfile)
 {
 	RC_STRINGLIST *match = rc_stringlist_new();
-	int i = 0;
-	char *m;
+	முழு i = 0;
+	எழுத்து *m;
 
-	if (exec) {
+	எனில் (exec) {
 		xasprintf(&m, "exec=%s", exec);
 		rc_stringlist_add(match, m);
-		free(m);
+		விடுவி(m);
 	}
 
-	while (argv && argv[i]) {
+	போது (argv && argv[i]) {
 		xasprintf(&m, "argv_0=%s", argv[i++]);
 		rc_stringlist_add(match, m);
-		free(m);
+		விடுவி(m);
 	}
 
-	if (pidfile) {
+	எனில் (pidfile) {
 		xasprintf(&m, "pidfile=%s", pidfile);
 		rc_stringlist_add(match, m);
-		free(m);
+		விடுவி(m);
 	}
 
-	return match;
+	திரும்பு match;
 }
 
 bool
-rc_service_daemon_set(const char *service, const char *exec,
-    const char *const *argv,
-    const char *pidfile, bool started)
+rc_service_daemon_set(மாறிலி எழுத்து *service, மாறிலி எழுத்து *exec,
+    மாறிலி எழுத்து *மாறிலி *argv,
+    மாறிலி எழுத்து *pidfile, bool started)
 {
-	char *file = NULL;
-	int nfiles = 0;
-	char oldfile[PATH_MAX] = { '\0' };
+	எழுத்து *file = வெற்று;
+	முழு nfiles = 0;
+	எழுத்து oldfile[PATH_MAX] = { '\0' };
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	கட்டமைப்பு dirent *d;
 	RC_STRINGLIST *match, *renamelist;
-	int i = 0;
+	முழு i = 0;
 	FILE *fp;
-	const char *base = basename_c(service);
+	மாறிலி எழுத்து *base = basename_c(service);
 
-	if (!exec && !pidfile) {
+	எனில் (!exec && !pidfile) {
 		errno = EINVAL;
-		return false;
+		திரும்பு false;
 	}
 
 	/* Regardless, erase any existing daemon info */
-	if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+	எனில் ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
 		match = _match_list(exec, argv, pidfile);
 		renamelist = rc_stringlist_new();
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
+		போது ((d = readdir(dp))) {
+			எனில் (d->d_name[0] == '.')
+				தொடர்;
 
 			xasprintf(&file, "%s/daemons/%s/%s", rc_svcdir(), base, d->d_name);
-			if (rc_stringlist_find(renamelist, file)) {
-				free(file);
-				continue;
+			எனில் (rc_stringlist_find(renamelist, file)) {
+				விடுவி(file);
+				தொடர்;
 			}
 
 			nfiles++;
 
-			if (!*oldfile) {
-				if (_match_daemon(base, d->d_name, match)) {
+			எனில் (!*oldfile) {
+				எனில் (_match_daemon(base, d->d_name, match)) {
 					unlink(file);
-					strlcpy(oldfile, file, sizeof(oldfile));
+					strlcpy(oldfile, file, அளவு(oldfile));
 					nfiles--;
 				}
-			} else {
+			} இல்லையெனில் {
 				rename(file, oldfile);
-				strlcpy(oldfile, file, sizeof(oldfile));
+				strlcpy(oldfile, file, அளவு(oldfile));
 				/* Add renamed file to renamelist, as this new file name could
 				 * be read again from readdir() */
 				rc_stringlist_add(renamelist, oldfile);
 			}
-			free(file);
+			விடுவி(file);
 		}
 		closedir(dp);
 		rc_stringlist_free(match);
@@ -433,209 +433,209 @@ rc_service_daemon_set(const char *service, const char *exec,
 	}
 
 	/* Now store our daemon info */
-	if (!started)
-		return true;
+	எனில் (!started)
+		திரும்பு true;
 
-	if (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
+	எனில் (mkdirat(rc_dirfd(RC_DIR_DAEMONS), base, 0755) == 0 || errno == EEXIST) {
 		xasprintf(&file, "%s/daemons/%s/%03d", rc_svcdir(), base, nfiles + 1);
-		if ((fp = fopen(file, "w"))) {
+		எனில் ((fp = fopen(file, "w"))) {
 			fprintf(fp, "exec=");
-			if (exec)
+			எனில் (exec)
 				fprintf(fp, "%s", exec);
-			while (argv && argv[i]) {
+			போது (argv && argv[i]) {
 				fprintf(fp, "\nargv_%d=%s", i, argv[i]);
 				i++;
 			}
 			fprintf(fp, "\npidfile=");
-			if (pidfile)
+			எனில் (pidfile)
 				fprintf(fp, "%s", pidfile);
 			fprintf(fp, "\n");
 			fclose(fp);
 			retval = true;
 		}
-		free(file);
+		விடுவி(file);
 	}
 
-	return retval;
+	திரும்பு retval;
 }
 
 bool
-rc_service_started_daemon(const char *service,
-    const char *exec, const char *const *argv, int indx)
+rc_service_started_daemon(மாறிலி எழுத்து *service,
+    மாறிலி எழுத்து *exec, மாறிலி எழுத்து *மாறிலி *argv, முழு indx)
 {
-	const char *base = basename_c(service);
-	char *file = NULL;
+	மாறிலி எழுத்து *base = basename_c(service);
+	எழுத்து *file = வெற்று;
 	RC_STRINGLIST *match;
 	bool retval = false;
 	DIR *dp;
-	struct dirent *d;
+	கட்டமைப்பு dirent *d;
 
-	if (!service || !exec)
-		return false;
+	எனில் (!service || !exec)
+		திரும்பு false;
 
-	match = _match_list(exec, argv, NULL);
+	match = _match_list(exec, argv, வெற்று);
 
-	if (indx > 0) {
+	எனில் (indx > 0) {
 		xasprintf(&file, "%03d", indx);
 		retval = _match_daemon(base, file, match);
-		free(file);
-	} else if ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
-		while ((d = readdir(dp))) {
-			if (d->d_name[0] == '.')
-				continue;
-			if ((retval = _match_daemon(base, d->d_name, match)))
-				break;
+		விடுவி(file);
+	} இல்லையெனில் எனில் ((dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), base))) {
+		போது ((d = readdir(dp))) {
+			எனில் (d->d_name[0] == '.')
+				தொடர்;
+			எனில் ((retval = _match_daemon(base, d->d_name, match)))
+				நிறுத்து;
 		}
 		closedir(dp);
 	}
 
 	rc_stringlist_free(match);
-	return retval;
+	திரும்பு retval;
 }
 
 bool
-rc_service_daemons_crashed(const char *service)
+rc_service_daemons_crashed(மாறிலி எழுத்து *service)
 {
 	DIR *dp;
-	struct dirent *d;
+	கட்டமைப்பு dirent *d;
 	FILE *fp;
-	char *line = NULL;
+	எழுத்து *வரி = வெற்று;
 	size_t len = 0;
-	char **argv = NULL;
-	char *exec = NULL;
-	char *name = NULL;
-	char *pidfile = NULL;
+	எழுத்து **argv = வெற்று;
+	எழுத்து *exec = வெற்று;
+	எழுத்து *name = வெற்று;
+	எழுத்து *pidfile = வெற்று;
 	pid_t pid = 0;
 	RC_PIDLIST *pids;
 	RC_PID *p1;
 	RC_PID *p2;
-	char *p;
-	char *token;
+	எழுத்து *p;
+	எழுத்து *token;
 	bool retval = false;
-	RC_STRINGLIST *list = NULL;
+	RC_STRINGLIST *list = வெற்று;
 	RC_STRING *s;
 	size_t i;
-	char *ch_root;
-	char *spidfile;
+	எழுத்து *ch_வேர்;
+	எழுத்து *spidfile;
 
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
-		return false;
+	எனில் (!(dp = do_opendirat(rc_dirfd(RC_DIR_DAEMONS), basename_c(service))))
+		திரும்பு false;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	போது ((d = readdir(dp))) {
+		எனில் (d->d_name[0] == '.')
+			தொடர்;
 
-		if (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
-			break;
+		எனில் (!(fp = do_fopenat(dirfd(dp), d->d_name, O_RDONLY)))
+			நிறுத்து;
 
-		while (xgetline(&line, &len, fp) != -1) {
-			p = line;
-			if ((token = strsep(&p, "=")) == NULL || !p)
-				continue;
+		போது (xgetline(&வரி, &len, fp) != -1) {
+			p = வரி;
+			எனில் ((token = strsep(&p, "=")) == வெற்று || !p)
+				தொடர்;
 
-			if (!*p)
-				continue;
+			எனில் (!*p)
+				தொடர்;
 
-			if (strcmp(token, "exec") == 0) {
-				if (exec)
-					free(exec);
+			எனில் (strcmp(token, "exec") == 0) {
+				எனில் (exec)
+					விடுவி(exec);
 				exec = xstrdup(p);
-			} else if (strncmp(token, "argv_", 5) == 0) {
-				if (!list)
+			} இல்லையெனில் எனில் (strncmp(token, "argv_", 5) == 0) {
+				எனில் (!list)
 					list = rc_stringlist_new();
 				rc_stringlist_add(list, p);
-			} else if (strcmp(token, "name") == 0) {
-				if (name)
-					free(name);
+			} இல்லையெனில் எனில் (strcmp(token, "name") == 0) {
+				எனில் (name)
+					விடுவி(name);
 				name = xstrdup(p);
-			} else if (strcmp(token, "pidfile") == 0) {
+			} இல்லையெனில் எனில் (strcmp(token, "pidfile") == 0) {
 				pidfile = xstrdup(p);
-				break;
+				நிறுத்து;
 			}
 		}
 		fclose(fp);
 
-		ch_root = rc_service_value_get(basename_c(service), "chroot");
+		ch_வேர் = rc_service_மதிப்பு_get(basename_c(service), "chroot");
 		spidfile = pidfile;
-		if (ch_root && pidfile) {
-			xasprintf(&spidfile, "%s%s", ch_root, pidfile);
-			free(pidfile);
+		எனில் (ch_வேர் && pidfile) {
+			xasprintf(&spidfile, "%s%s", ch_வேர், pidfile);
+			விடுவி(pidfile);
 			pidfile = spidfile;
 		}
 
 		pid = 0;
-		if (pidfile) {
+		எனில் (pidfile) {
 			retval = true;
-			if ((fp = fopen(pidfile, "r"))) {
-				if (fscanf(fp, "%d", &pid) == 1)
+			எனில் ((fp = fopen(pidfile, "r"))) {
+				எனில் (fscanf(fp, "%d", &pid) == 1)
 					retval = false;
 				fclose(fp);
 			}
-			free(pidfile);
-			pidfile = NULL;
+			விடுவி(pidfile);
+			pidfile = வெற்று;
 
 			/* We have the pid, so no need to match
 			   on exec or name */
-			free(exec);
-			exec = NULL;
-			free(name);
-			name = NULL;
-		} else {
-			if (exec) {
-				if (!list)
+			விடுவி(exec);
+			exec = வெற்று;
+			விடுவி(name);
+			name = வெற்று;
+		} இல்லையெனில் {
+			எனில் (exec) {
+				எனில் (!list)
 					list = rc_stringlist_new();
-				if (!TAILQ_FIRST(list))
+				எனில் (!TAILQ_FIRST(list))
 					rc_stringlist_add(list, exec);
 
-				free(exec);
-				exec = NULL;
+				விடுவி(exec);
+				exec = வெற்று;
 			}
 
-			if (list) {
+			எனில் (list) {
 				/* We need to flatten our linked list
 				   into an array */
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
 				    i++;
-				argv = xmalloc(sizeof(char *) * (i + 1));
+				argv = xmalloc(அளவு(எழுத்து *) * (i + 1));
 				i = 0;
 				TAILQ_FOREACH(s, list, entries)
-				    argv[i++] = s->value;
-				argv[i] = NULL;
+				    argv[i++] = s->மதிப்பு;
+				argv[i] = வெற்று;
 			}
 		}
 
-		if (!retval) {
-			if (pid != 0) {
-				if (kill(pid, 0) == -1 && errno == ESRCH)
+		எனில் (!retval) {
+			எனில் (pid != 0) {
+				எனில் (kill(pid, 0) == -1 && errno == ESRCH)
 					retval = true;
-			} else if ((pids = rc_find_pids(exec,
-				    (const char *const *)argv,
+			} இல்லையெனில் எனில் ((pids = rc_find_pids(exec,
+				    (மாறிலி எழுத்து *மாறிலி *)argv,
 				    0, pid)))
 			{
 				p1 = LIST_FIRST(pids);
-				while (p1) {
+				போது (p1) {
 					p2 = LIST_NEXT(p1, entries);
-					free(p1);
+					விடுவி(p1);
 					p1 = p2;
 				}
-				free(pids);
-			} else
+				விடுவி(pids);
+			} இல்லையெனில்
 				retval = true;
 		}
 		rc_stringlist_free(list);
-		list = NULL;
-		free(argv);
-		argv = NULL;
-		free(exec);
-		exec = NULL;
-		free(name);
-		name = NULL;
-		if (retval)
-			break;
+		list = வெற்று;
+		விடுவி(argv);
+		argv = வெற்று;
+		விடுவி(exec);
+		exec = வெற்று;
+		விடுவி(name);
+		name = வெற்று;
+		எனில் (retval)
+			நிறுத்து;
 	}
 	closedir(dp);
-	free(line);
+	விடுவி(வரி);
 
-	return retval;
+	திரும்பு retval;
 }

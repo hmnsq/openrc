@@ -15,45 +15,45 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <unistd.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <time.h>
+#அந்தர்பாவ <getopt.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <strings.h>
+#அந்தர்பாவ <unistd.h>
+#அந்தர்பாவ <inttypes.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <time.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "_usage.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "misc.h"
+#அந்தர்பாவ "_usage.h"
+#அந்தர்பாவ "helpers.h"
 
-enum format_t {
+எண்ணிக்கை format_t {
 	FORMAT_DEFAULT,
 	FORMAT_INI,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "acf:i:lmrsSu" getoptstring_COMMON;
-const struct option longopts[] = {
-	{"all",         0, NULL, 'a'},
-	{"crashed",     0, NULL, 'c'},
-	{"format",     1, NULL, 'f'},
-	{"in-state",   1, NULL, 'i'},
-	{"list",        0, NULL, 'l'},
-	{"manual",        0, NULL, 'm'},
-	{"runlevel",    0, NULL, 'r'},
-	{"servicelist", 0, NULL, 's'},
-	{"supervised", 0, NULL, 'S'},
-	{"unused",      0, NULL, 'u'},
+மாறிலி எழுத்து *applet = வெற்று;
+மாறிலி எழுத்து *extraopts = வெற்று;
+மாறிலி எழுத்து getoptstring[] = "acf:i:lmrsSu" getoptstring_COMMON;
+மாறிலி கட்டமைப்பு option longopts[] = {
+	{"all",         0, வெற்று, 'a'},
+	{"crashed",     0, வெற்று, 'c'},
+	{"format",     1, வெற்று, 'f'},
+	{"in-state",   1, வெற்று, 'i'},
+	{"list",        0, வெற்று, 'l'},
+	{"manual",        0, வெற்று, 'm'},
+	{"runlevel",    0, வெற்று, 'r'},
+	{"servicelist", 0, வெற்று, 's'},
+	{"supervised", 0, வெற்று, 'S'},
+	{"unused",      0, வெற்று, 'u'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+மாறிலி எழுத்து * மாறிலி longopts_help[] = {
 	"Show services from all run levels",
 	"Show crashed services",
 	"format status to be parsable (currently arg must be ini)",
@@ -66,195 +66,195 @@ const char * const longopts_help[] = {
 	"Show services not assigned to any runlevel",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+மாறிலி எழுத்து *usagestring = ""
 	"Usage: rc-status [-C] [-f ini] [-i state] [runlevel]\n"
 	"   or: rc-status [-C] [-f ini] [-a | -m | -S | -s | -u]\n"
 	"   or: rc-status [-C] [-c | -l | -r]";
 
-static RC_DEPTREE *deptree;
-static RC_STRINGLIST *types;
+நிலையான RC_DEPTREE *deptree;
+நிலையான RC_STRINGLIST *types;
 
-static RC_STRINGLIST *levels, *services, *tmp, *alist;
-static RC_STRINGLIST *sservices, *nservices, *needsme;
+நிலையான RC_STRINGLIST *levels, *services, *tmp, *alist;
+நிலையான RC_STRINGLIST *sservices, *nservices, *needsme;
 
-static void print_level(const char *prefix, const char *level,
-		enum format_t format)
+நிலையான வெறுமை print_level(மாறிலி எழுத்து *prefix, மாறிலி எழுத்து *level,
+		எண்ணிக்கை format_t format)
 {
-	switch (format) {
-	case FORMAT_DEFAULT:
-		if (prefix)
+	தேர்வு (format) {
+	நிலை FORMAT_DEFAULT:
+		எனில் (prefix)
 			printf("%s ", prefix);
 		printf ("Runlevel: ");
-		if (isatty(fileno(stdout)))
+		எனில் (isatty(fileno(stdout)))
 			printf("%s%s%s\n",
 					ecolor(ECOLOR_HILITE), level, ecolor(ECOLOR_NORMAL));
-		else
+		இல்லையெனில்
 			printf("%s\n", level);
-		break;
-	case FORMAT_INI:
+		நிறுத்து;
+	நிலை FORMAT_INI:
 		printf("%s", "[");
-		if (prefix)
+		எனில் (prefix)
 			printf("%s ", prefix);
 		printf("%s]\n", level);
-		break;
+		நிறுத்து;
 	}
 }
 
-static char *get_uptime(const char *service)
+நிலையான எழுத்து *get_uptime(மாறிலி எழுத்து *service)
 {
 	RC_SERVICE state = rc_service_state(service);
-	char *start_count;
-	char *start_time_string;
+	எழுத்து *start_மொத்தம்;
+	எழுத்து *start_time_string;
 	time_t start_time;
 	int64_t diff_days;
 	int64_t diff_hours;
 	int64_t diff_mins;
 	int64_t diff_secs;
-	char *uptime = NULL;
+	எழுத்து *uptime = வெற்று;
 
-	if (state & RC_SERVICE_STARTED) {
-		start_count = rc_service_value_get(service, "start_count");
-		start_time_string = rc_service_value_get(service, "start_time");
-		if (start_count && start_time_string) {
+	எனில் (state & RC_SERVICE_STARTED) {
+		start_மொத்தம் = rc_service_மதிப்பு_get(service, "start_count");
+		start_time_string = rc_service_மதிப்பு_get(service, "start_time");
+		எனில் (start_மொத்தம் && start_time_string) {
 			start_time = to_time_t(start_time_string);
-			diff_secs = (int64_t) difftime(time(NULL), start_time);
+			diff_secs = (int64_t) difftime(time(வெற்று), start_time);
 			diff_days = diff_secs / 86400;
 			diff_secs = diff_secs % 86400;
 			diff_hours = diff_secs / 3600;
 			diff_secs = diff_secs % 3600;
 			diff_mins = diff_secs / 60;
 			diff_secs = diff_secs % 60;
-			if (diff_days > 0)
+			எனில் (diff_days > 0)
 				xasprintf(&uptime,
 						"%"PRId64" day(s) %02"PRId64":%02"PRId64":%02"PRId64" (%s)",
 						diff_days, diff_hours, diff_mins, diff_secs,
-						start_count);
-			else
+						start_மொத்தம்);
+			இல்லையெனில்
 				xasprintf(&uptime,
 						"%02"PRId64":%02"PRId64":%02"PRId64" (%s)",
-						diff_hours, diff_mins, diff_secs, start_count);
+						diff_hours, diff_mins, diff_secs, start_மொத்தம்);
 		}
-		free(start_count);
-		free(start_time_string);
+		விடுவி(start_மொத்தம்);
+		விடுவி(start_time_string);
 	}
-	return uptime;
+	திரும்பு uptime;
 }
 
-static void print_service(const char *service, enum format_t format,
+நிலையான வெறுமை print_service(மாறிலி எழுத்து *service, எண்ணிக்கை format_t format,
 	RC_SERVICE accept, RC_SERVICE reject)
 {
-	char *status = NULL;
-	char *uptime = NULL;
-	char *child_pid = NULL;
-	char *start_time = NULL;
-	int cols;
-	const char *c = ecolor(ECOLOR_GOOD);
+	எழுத்து *status = வெற்று;
+	எழுத்து *uptime = வெற்று;
+	எழுத்து *child_pid = வெற்று;
+	எழுத்து *start_time = வெற்று;
+	முழு cols;
+	மாறிலி எழுத்து *c = ecolor(ECOLOR_GOOD);
 	RC_SERVICE state = rc_service_state(service);
 	ECOLOR color = ECOLOR_BAD;
 
-	if (!(state & accept) || (state & reject))
-		return;
+	எனில் (!(state & accept) || (state & reject))
+		திரும்பு;
 
-	if (state & RC_SERVICE_STOPPING)
+	எனில் (state & RC_SERVICE_STOPPING)
 		xasprintf(&status, "stopping ");
-	else if (state & RC_SERVICE_STARTING) {
+	இல்லையெனில் எனில் (state & RC_SERVICE_STARTING) {
 		xasprintf(&status, "starting ");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_INACTIVE) {
+	} இல்லையெனில் எனில் (state & RC_SERVICE_INACTIVE) {
 		xasprintf(&status, "inactive ");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_STARTED) {
+	} இல்லையெனில் எனில் (state & RC_SERVICE_STARTED) {
 		errno = 0;
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+		எனில் (rc_service_daemons_crashed(service) && errno != EACCES)
 		{
-			child_pid = rc_service_value_get(service, "child_pid");
-			start_time = rc_service_value_get(service, "start_time");
-			if (start_time && child_pid)
+			child_pid = rc_service_மதிப்பு_get(service, "child_pid");
+			start_time = rc_service_மதிப்பு_get(service, "start_time");
+			எனில் (start_time && child_pid)
 				xasprintf(&status, " unsupervised ");
-			else
+			இல்லையெனில்
 				xasprintf(&status, " crashed ");
-			free(child_pid);
-			free(start_time);
-		} else {
+			விடுவி(child_pid);
+			விடுவி(start_time);
+		} இல்லையெனில் {
 			uptime = get_uptime(service);
-			if (uptime) {
+			எனில் (uptime) {
 				xasprintf(&status, " started %s", uptime);
-				free(uptime);
-			} else
+				விடுவி(uptime);
+			} இல்லையெனில்
 				xasprintf(&status, " started ");
 			color = ECOLOR_GOOD;
 		}
-	} else if (state & RC_SERVICE_SCHEDULED) {
+	} இல்லையெனில் எனில் (state & RC_SERVICE_SCHEDULED) {
 		xasprintf(&status, "scheduled");
 		color = ECOLOR_WARN;
-	} else if (state & RC_SERVICE_FAILED) {
+	} இல்லையெனில் எனில் (state & RC_SERVICE_FAILED) {
 		xasprintf(&status, "failed");
 		color = ECOLOR_WARN;
-	} else
+	} இல்லையெனில்
 		xasprintf(&status, " stopped ");
 
 	errno = 0;
-	switch (format) {
-	case FORMAT_DEFAULT:
+	தேர்வு (format) {
+	நிலை FORMAT_DEFAULT:
 		cols =  printf(" %s", service);
-		if (c && *c && isatty(fileno(stdout)))
+		எனில் (c && *c && isatty(fileno(stdout)))
 			printf("\n");
 		ebracket(cols, color, status);
-		break;
-	case FORMAT_INI:
+		நிறுத்து;
+	நிலை FORMAT_INI:
 		printf("%s = %s\n", service, status);
-		break;
+		நிறுத்து;
 	}
-	free(status);
+	விடுவி(status);
 }
 
-static void print_services_in_state(const char *runlevel, RC_STRINGLIST *svcs,
-		enum format_t format, RC_SERVICE accept, RC_SERVICE reject)
+நிலையான வெறுமை print_services_in_state(மாறிலி எழுத்து *runlevel, RC_STRINGLIST *svcs,
+		எண்ணிக்கை format_t format, RC_SERVICE accept, RC_SERVICE reject)
 {
-	RC_STRINGLIST *l = NULL;
+	RC_STRINGLIST *l = வெற்று;
 	RC_STRING *s;
-	char *r = NULL;
+	எழுத்து *r = வெற்று;
 
-	if (!svcs)
-		return;
-	if (!deptree)
-		deptree = _rc_deptree_load(0, NULL);
-	if (!deptree) {
+	எனில் (!svcs)
+		திரும்பு;
+	எனில் (!deptree)
+		deptree = _rc_deptree_load(0, வெற்று);
+	எனில் (!deptree) {
 		TAILQ_FOREACH(s, svcs, entries)
-			if (!runlevel ||
-			    rc_service_in_runlevel(s->value, runlevel))
-				print_service(s->value, format, accept, reject);
-		return;
+			எனில் (!runlevel ||
+			    rc_service_in_runlevel(s->மதிப்பு, runlevel))
+				print_service(s->மதிப்பு, format, accept, reject);
+		திரும்பு;
 	}
-	if (!types) {
+	எனில் (!types) {
 		types = rc_stringlist_new();
 		rc_stringlist_add(types, "ineed");
 		rc_stringlist_add(types, "iuse");
 		rc_stringlist_add(types, "iafter");
 	}
-	if (!runlevel)
+	எனில் (!runlevel)
 		r = default_runlevel();
 	l = rc_deptree_depends(deptree, types, svcs, r ? r : runlevel,
 			       RC_DEP_STRICT | RC_DEP_TRACE | RC_DEP_START);
-	free(r);
-	if (!l)
-		return;
+	விடுவி(r);
+	எனில் (!l)
+		திரும்பு;
 	TAILQ_FOREACH(s, l, entries) {
-		if (!rc_stringlist_find(svcs, s->value))
-			continue;
-		if (!runlevel || rc_service_in_runlevel(s->value, runlevel))
-			print_service(s->value, format, accept, reject);
+		எனில் (!rc_stringlist_find(svcs, s->மதிப்பு))
+			தொடர்;
+		எனில் (!runlevel || rc_service_in_runlevel(s->மதிப்பு, runlevel))
+			print_service(s->மதிப்பு, format, accept, reject);
 	}
 	rc_stringlist_free(l);
 }
 
-static void print_services(const char *runlevel, RC_STRINGLIST *svcs,
-	enum format_t format)
+நிலையான வெறுமை print_services(மாறிலி எழுத்து *runlevel, RC_STRINGLIST *svcs,
+	எண்ணிக்கை format_t format)
 {
 	print_services_in_state(runlevel, svcs, format, -1, 0);
 }
 
-static void print_stacked_services(const char *runlevel, enum format_t format,
+நிலையான வெறுமை print_stacked_services(மாறிலி எழுத்து *runlevel, எண்ணிக்கை format_t format,
 	RC_SERVICE accept, RC_SERVICE reject)
 {
 	RC_STRINGLIST *stackedlevels, *servicelist;
@@ -262,71 +262,71 @@ static void print_stacked_services(const char *runlevel, enum format_t format,
 
 	stackedlevels = rc_runlevel_stacks(runlevel);
 	TAILQ_FOREACH(stackedlevel, stackedlevels, entries) {
-		if (rc_stringlist_find(levels, stackedlevel->value) != NULL)
-			continue;
-		print_level("Stacked", stackedlevel->value, format);
-		servicelist = rc_services_in_runlevel(stackedlevel->value);
-		print_services_in_state(stackedlevel->value, servicelist,
+		எனில் (rc_stringlist_find(levels, stackedlevel->மதிப்பு) != வெற்று)
+			தொடர்;
+		print_level("Stacked", stackedlevel->மதிப்பு, format);
+		servicelist = rc_services_in_runlevel(stackedlevel->மதிப்பு);
+		print_services_in_state(stackedlevel->மதிப்பு, servicelist,
 			format, accept, reject);
 		rc_stringlist_free(servicelist);
 	}
 	rc_stringlist_free(stackedlevels);
-	stackedlevels = NULL;
+	stackedlevels = வெற்று;
 }
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
 	RC_SERVICE state;
 	RC_SERVICE accept = -1;
 	RC_SERVICE reject = 0;
 	RC_STRING *s, *l, *t, *level;
-	const rc_service_state_name_t *it;
-	enum format_t format = FORMAT_DEFAULT;
+	மாறிலி rc_service_state_name_t *it;
+	எண்ணிக்கை format_t format = FORMAT_DEFAULT;
 	bool levels_given = false;
 	bool show_all = false;
-	char *p, *runlevel = NULL;
-	int opt, retval = 0;
+	எழுத்து *p, *runlevel = வெற்று;
+	முழு opt, retval = 0;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts,
-				  (int *) 0)) != -1)
-		switch (opt) {
-		case 'a':
+	போது ((opt = getopt_long(argc, argv, getoptstring, longopts,
+				  (முழு *) 0)) != -1)
+		தேர்வு (opt) {
+		நிலை 'a':
 			show_all = true;
 			levels = rc_runlevel_list();
-			break;
-		case 'c':
+			நிறுத்து;
+		நிலை 'c':
 			services = rc_services_in_state(RC_SERVICE_STARTED);
 			retval = 1;
 			TAILQ_FOREACH(s, services, entries)
-				if (rc_service_daemons_crashed(s->value)) {
-					printf("%s\n", s->value);
+				எனில் (rc_service_daemons_crashed(s->மதிப்பு)) {
+					printf("%s\n", s->மதிப்பு);
 					retval = 0;
 				}
-			goto exit;
+			செல் exit;
 			/* NOTREACHED */
-		case 'f':
-			if (strcasecmp(optarg, "ini") == 0) {
+		நிலை 'f':
+			எனில் (strcasecmp(optarg, "ini") == 0) {
 				format = FORMAT_INI;
 				setenv("EINFO_QUIET", "YES", 1);
-			} else
+			} இல்லையெனில்
 				eerrorx("%s: invalid argument to --format switch", applet);
-			break;
-		case 'i':
-			if (accept == (RC_SERVICE)-1)
+			நிறுத்து;
+		நிலை 'i':
+			எனில் (accept == (RC_SERVICE)-1)
 				accept = 0;
-			for (it = rc_service_state_names; it->name; ++it) {
+			க்கு (it = rc_service_state_names; it->name; ++it) {
 				/*
 				 * print_service() doesn't print wasinactive
 				 */
-				if (it->state == RC_SERVICE_WASINACTIVE)
-					continue;
-				if (strcmp(optarg, it->name) == 0) {
+				எனில் (it->state == RC_SERVICE_WASINACTIVE)
+					தொடர்;
+				எனில் (strcmp(optarg, it->name) == 0) {
 					state = it->state;
-					break;
+					நிறுத்து;
 				}
 			}
-			if (it->name == NULL)
+			எனில் (it->name == வெற்று)
 				eerrorx("%s: invalid argument to --in-state"
 					" switch: %s", applet, optarg);
 			accept |= state;
@@ -334,155 +334,155 @@ int main(int argc, char **argv)
 			 * for `-i started` we don't want to show crashed
 			 * services unless `-i crashed` was used beforehand
 			 */
-			if (state == RC_SERVICE_STARTED && !(accept & RC_SERVICE_CRASHED)) {
+			எனில் (state == RC_SERVICE_STARTED && !(accept & RC_SERVICE_CRASHED)) {
 				reject |= RC_SERVICE_CRASHED;
-			} else if (state == RC_SERVICE_CRASHED) {
+			} இல்லையெனில் எனில் (state == RC_SERVICE_CRASHED) {
 				/* clear it in case `-i started` set it beforehand */
 				reject &= ~RC_SERVICE_CRASHED;
 			}
 			/* similar situation here with `failed` and `stopped` */
-			if (state == RC_SERVICE_STOPPED && !(accept & RC_SERVICE_FAILED)) {
+			எனில் (state == RC_SERVICE_STOPPED && !(accept & RC_SERVICE_FAILED)) {
 				reject |= RC_SERVICE_FAILED;
-			} else if (state == RC_SERVICE_FAILED) {
+			} இல்லையெனில் எனில் (state == RC_SERVICE_FAILED) {
 				reject &= ~RC_SERVICE_FAILED;
 			}
-			break;
-		case 'l':
+			நிறுத்து;
+		நிலை 'l':
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH(l, levels, entries)
-				printf("%s\n", l->value);
-			goto exit;
+				printf("%s\n", l->மதிப்பு);
+			செல் exit;
 			/* NOTREACHED */
-		case 'm':
-			services = rc_services_in_runlevel(NULL);
+		நிலை 'm':
+			services = rc_services_in_runlevel(வெற்று);
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				TAILQ_FOREACH(l, levels, entries)
-					if (rc_service_in_runlevel(s->value, l->value)) {
+					எனில் (rc_service_in_runlevel(s->மதிப்பு, l->மதிப்பு)) {
 						TAILQ_REMOVE(services, s, entries);
-						free(s->value);
-						free(s);
-						break;
+						விடுவி(s->மதிப்பு);
+						விடுவி(s);
+						நிறுத்து;
 					}
 			}
 			TAILQ_FOREACH_SAFE(s, services, entries, t)
-				if (rc_service_state(s->value) &
+				எனில் (rc_service_state(s->மதிப்பு) &
 					(RC_SERVICE_STOPPED | RC_SERVICE_HOTPLUGGED)) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
-					free(s);
+					விடுவி(s->மதிப்பு);
+					விடுவி(s);
 				}
-			print_services(NULL, services, format);
-			goto exit;
+			print_services(வெற்று, services, format);
+			செல் exit;
 			/* NOTREACHED */
-		case 'r':
+		நிலை 'r':
 			runlevel = rc_runlevel_get();
 			printf("%s\n", runlevel ? runlevel : "");
-			goto exit;
+			செல் exit;
 			/* NOTREACHED */
-		case 'S':
+		நிலை 'S':
 			services = rc_services_in_state(RC_SERVICE_STARTED);
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
-				char *ret = rc_service_value_get(s->value, "child_pid");
-				if (!ret) {
+				எழுத்து *ret = rc_service_மதிப்பு_get(s->மதிப்பு, "child_pid");
+				எனில் (!ret) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
-					free(s);
+					விடுவி(s->மதிப்பு);
+					விடுவி(s);
 				}
-				free(ret);
+				விடுவி(ret);
 			}
-			print_services(NULL, services, format);
-			goto exit;
+			print_services(வெற்று, services, format);
+			செல் exit;
 			/* NOTREACHED */
-		case 's':
-			services = rc_services_in_runlevel(NULL);
-			print_services(NULL, services, format);
-			goto exit;
+		நிலை 's':
+			services = rc_services_in_runlevel(வெற்று);
+			print_services(வெற்று, services, format);
+			செல் exit;
 			/* NOTREACHED */
-		case 'u':
-			services = rc_services_in_runlevel(NULL);
+		நிலை 'u':
+			services = rc_services_in_runlevel(வெற்று);
 			levels = rc_runlevel_list();
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
 				TAILQ_FOREACH(l, levels, entries)
-					if (rc_service_in_runlevel(s->value, l->value)) {
+					எனில் (rc_service_in_runlevel(s->மதிப்பு, l->மதிப்பு)) {
 						TAILQ_REMOVE(services, s, entries);
-						free(s->value);
-						free(s);
-						break;
+						விடுவி(s->மதிப்பு);
+						விடுவி(s);
+						நிறுத்து;
 					}
 			}
-			print_services(NULL, services, format);
-			goto exit;
+			print_services(வெற்று, services, format);
+			செல் exit;
 			/* NOTREACHED */
 
 		case_RC_COMMON_GETOPT
 		}
 
-	if (!levels)
+	எனில் (!levels)
 		levels = rc_stringlist_new();
 	opt = (optind < argc) ? 0 : 1;
-	while (optind < argc) {
-		if (rc_runlevel_exists(argv[optind])) {
+	போது (optind < argc) {
+		எனில் (rc_runlevel_exists(argv[optind])) {
 			levels_given = true;
 			rc_stringlist_add(levels, argv[optind++]);
 			opt++;
-		} else
+		} இல்லையெனில்
 			eerror("runlevel `%s' does not exist", argv[optind++]);
 	}
-	if (opt == 0)
+	எனில் (opt == 0)
 		exit(EXIT_FAILURE);
-	if (!TAILQ_FIRST(levels)) {
+	எனில் (!TAILQ_FIRST(levels)) {
 		runlevel = default_runlevel();
 		rc_stringlist_add(levels, runlevel);
 	}
 
 	/* Output the services in the order in which they would start */
-	deptree = _rc_deptree_load(0, NULL);
+	deptree = _rc_deptree_load(0, வெற்று);
 
 	TAILQ_FOREACH(l, levels, entries) {
-		print_level(NULL, l->value, format);
-		services = rc_services_in_runlevel(l->value);
-		print_services_in_state(l->value, services, format, accept, reject);
-		print_stacked_services(l->value, format, accept, reject);
+		print_level(வெற்று, l->மதிப்பு, format);
+		services = rc_services_in_runlevel(l->மதிப்பு);
+		print_services_in_state(l->மதிப்பு, services, format, accept, reject);
+		print_stacked_services(l->மதிப்பு, format, accept, reject);
 		rc_stringlist_free(nservices);
-		nservices = NULL;
+		nservices = வெற்று;
 		rc_stringlist_free(services);
-		services = NULL;
+		services = வெற்று;
 	}
 
-	if (show_all || !levels_given) {
+	எனில் (show_all || !levels_given) {
 		/* Show hotplugged services */
 		print_level("Dynamic", "hotplugged", format);
 		services = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
-		print_services_in_state(NULL, services, format, accept, reject);
+		print_services_in_state(வெற்று, services, format, accept, reject);
 		rc_stringlist_free(services);
-		services = NULL;
+		services = வெற்று;
 
 		/* Show manually started and unassigned depended services */
-		if (show_all) {
+		எனில் (show_all) {
 			rc_stringlist_free(levels);
 			levels = rc_stringlist_new();
-			if (!runlevel)
+			எனில் (!runlevel)
 				runlevel = default_runlevel();
 			rc_stringlist_add(levels, runlevel);
 		}
 		rc_stringlist_add(levels, RC_LEVEL_SYSINIT);
 		rc_stringlist_add(levels, RC_LEVEL_BOOT);
-		services = rc_services_in_runlevel(NULL);
+		services = rc_services_in_runlevel(வெற்று);
 		sservices = rc_stringlist_new();
 		TAILQ_FOREACH(l, levels, entries) {
-			nservices = rc_services_in_runlevel_stacked(l->value);
+			nservices = rc_services_in_runlevel_stacked(l->மதிப்பு);
 			TAILQ_CONCAT(sservices, nservices, entries);
 			rc_stringlist_free(nservices);
 		}
 		TAILQ_FOREACH_SAFE(s, services, entries, t) {
-			state = rc_service_state(s->value);
-			if ((rc_stringlist_find(sservices, s->value) ||
+			state = rc_service_state(s->மதிப்பு);
+			எனில் ((rc_stringlist_find(sservices, s->மதிப்பு) ||
 			    (state & ( RC_SERVICE_STOPPED | RC_SERVICE_HOTPLUGGED)))) {
-				if (!(state & RC_SERVICE_FAILED)) {
+				எனில் (!(state & RC_SERVICE_FAILED)) {
 					TAILQ_REMOVE(services, s, entries);
-					free(s->value);
-					free(s);
+					விடுவி(s->மதிப்பு);
+					விடுவி(s);
 				}
 			}
 		}
@@ -492,20 +492,20 @@ int main(int argc, char **argv)
 		nservices = rc_stringlist_new();
 		alist = rc_stringlist_new();
 		l = rc_stringlist_add(alist, "");
-		p = l->value;
+		p = l->மதிப்பு;
 		TAILQ_FOREACH(level, levels, entries) {
 			TAILQ_FOREACH_SAFE(s, services, entries, t) {
-				l->value = s->value;
-				setenv("RC_SVCNAME", l->value, 1);
-				tmp = rc_deptree_depends(deptree, needsme, alist, level->value, RC_DEP_TRACE);
-				if (TAILQ_FIRST(tmp)) {
+				l->மதிப்பு = s->மதிப்பு;
+				setenv("RC_SVCNAME", l->மதிப்பு, 1);
+				tmp = rc_deptree_depends(deptree, needsme, alist, level->மதிப்பு, RC_DEP_TRACE);
+				எனில் (TAILQ_FIRST(tmp)) {
 					TAILQ_REMOVE(services, s, entries);
-					TAILQ_INSERT_TAIL(nservices, s, entries);
+					TAILQ_செருகு_TAIL(nservices, s, entries);
 				}
 				rc_stringlist_free(tmp);
 			}
 		}
-		l->value = p;
+		l->மதிப்பு = p;
 		/*
 		 * we are unsetting RC_SVCNAME because last loaded service will not
 		 * be added to the list
@@ -513,13 +513,13 @@ int main(int argc, char **argv)
 		unsetenv("RC_SVCNAME");
 
 		print_level("Dynamic", "needed/wanted", format);
-		print_services_in_state(NULL, nservices, format, accept, reject);
+		print_services_in_state(வெற்று, nservices, format, accept, reject);
 		print_level("Dynamic", "manual", format);
-		print_services_in_state(NULL, services, format, accept, reject);
+		print_services_in_state(வெற்று, services, format, accept, reject);
 	}
 
 exit:
-	free(runlevel);
+	விடுவி(runlevel);
 	rc_stringlist_free(alist);
 	rc_stringlist_free(needsme);
 	rc_stringlist_free(sservices);
@@ -529,5 +529,5 @@ exit:
 	rc_stringlist_free(levels);
 	rc_deptree_free(deptree);
 
-	return retval;
+	திரும்பு retval;
 }

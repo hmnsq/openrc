@@ -21,61 +21,61 @@
 #define ONE_SECOND    1000000000
 #define ONE_MS           1000000
 
-#include <ctype.h>
-#include <errno.h>
-#include <signal.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <sys/types.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <stddef.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <syslog.h>
+#அந்தர்பாவ <time.h>
+#அந்தர்பாவ <sys/types.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "schedules.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "schedules.h"
+#அந்தர்பாவ "helpers.h"
 
-typedef struct scheduleitem {
-	enum {
+வகைவரை கட்டமைப்பு scheduleitem {
+	எண்ணிக்கை {
 		SC_TIMEOUT,
 		SC_SIGNAL,
 		SC_GOTO,
 		SC_FOREVER,
 	} type;
-	int value;
-	struct scheduleitem *gotoitem;
+	முழு மதிப்பு;
+	கட்டமைப்பு scheduleitem *gotoitem;
 	TAILQ_ENTRY(scheduleitem) entries;
 } SCHEDULEITEM;
 
-static TAILQ_HEAD(, scheduleitem) schedule;
+நிலையான TAILQ_HEAD(, scheduleitem) schedule;
 
-void free_schedulelist(void)
+வெறுமை free_schedulelist(வெறுமை)
 {
 	SCHEDULEITEM *s1 = TAILQ_FIRST(&schedule);
 	SCHEDULEITEM *s2;
 
-	while (s1) {
+	போது (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
-		free(s1);
+		விடுவி(s1);
 		s1 = s2;
 	}
 	TAILQ_INIT(&schedule);
 }
 
-int parse_signal(const char *applet, const char *sig)
+முழு parse_signal(மாறிலி எழுத்து *applet, மாறிலி எழுத்து *sig)
 {
-	typedef struct signalpair
+	வகைவரை கட்டமைப்பு signalpair
 	{
-		const char *name;
-		int signal;
+		மாறிலி எழுத்து *name;
+		முழு சமிக்ஞை;
 	} SIGNALPAIR;
 
 #define signalpair_item(name) { #name, SIG##name },
 
-	static const SIGNALPAIR signallist[] = {
+	நிலையான மாறிலி SIGNALPAIR signallist[] = {
 		signalpair_item(HUP)
 		signalpair_item(INT)
 		signalpair_item(QUIT)
@@ -115,233 +115,233 @@ int parse_signal(const char *applet, const char *sig)
 		{ "NULL",	0 },
 	};
 
-	unsigned int i = 0;
-	const char *s;
+	unsigned முழு i = 0;
+	மாறிலி எழுத்து *s;
 
-	if (!sig || *sig == '\0')
-		return -1;
+	எனில் (!sig || *sig == '\0')
+		திரும்பு -1;
 
-	if (sscanf(sig, "%u", &i) == 1) {
-		if (i < NSIG)
-			return i;
+	எனில் (sscanf(sig, "%u", &i) == 1) {
+		எனில் (i < NSIG)
+			திரும்பு i;
 		eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	}
 
-	if (strncmp(sig, "SIG", 3) == 0)
+	எனில் (strncmp(sig, "SIG", 3) == 0)
 		s = sig + 3;
-	else
-		s = NULL;
+	இல்லையெனில்
+		s = வெற்று;
 
-	for (i = 0; i < ARRAY_SIZE(signallist); ++i)
-		if (strcmp(sig, signallist[i].name) == 0 ||
+	க்கு (i = 0; i < ARRAY_SIZE(signallist); ++i)
+		எனில் (strcmp(sig, signallist[i].name) == 0 ||
 		    (s && strcmp(s, signallist[i].name) == 0))
-			return signallist[i].signal;
+			திரும்பு signallist[i].சமிக்ஞை;
 
 	eerrorx("%s: `%s' is not a valid signal", applet, sig);
 	/* NOTREACHED */
 }
 
-static SCHEDULEITEM *parse_schedule_item(const char *applet, const char *string)
+நிலையான SCHEDULEITEM *parse_schedule_item(மாறிலி எழுத்து *applet, மாறிலி எழுத்து *string)
 {
-	const char *after_hyph;
-	int sig;
-	SCHEDULEITEM *item = xmalloc(sizeof(*item));
+	மாறிலி எழுத்து *after_hyph;
+	முழு sig;
+	SCHEDULEITEM *item = xmalloc(அளவு(*item));
 
-	item->value = 0;
-	item->gotoitem = NULL;
-	if (strcmp(string,"forever") == 0)
+	item->மதிப்பு = 0;
+	item->gotoitem = வெற்று;
+	எனில் (strcmp(string,"forever") == 0)
 		item->type = SC_FOREVER;
-	else if (isdigit((unsigned char)string[0])) {
+	இல்லையெனில் எனில் (isdigit((unsigned எழுத்து)string[0])) {
 		item->type = SC_TIMEOUT;
 		errno = 0;
-		if (sscanf(string, "%d", &item->value) != 1)
+		எனில் (sscanf(string, "%d", &item->மதிப்பு) != 1)
 			eerrorx("%s: invalid timeout value in schedule '%s'",
 			    applet, string);
-	} else if ((after_hyph = string + (string[0] == '-')) &&
+	} இல்லையெனில் எனில் ((after_hyph = string + (string[0] == '-')) &&
 	    ((sig = parse_signal(applet, after_hyph)) != -1))
 	{
 		item->type = SC_SIGNAL;
-		item->value = (int)sig;
-	} else
+		item->மதிப்பு = (முழு)sig;
+	} இல்லையெனில்
 		eerrorx("%s: invalid schedule item `%s'", applet, string);
 
-	return item;
+	திரும்பு item;
 }
 
-void parse_schedule(const char *applet, const char *string, int timeout)
+வெறுமை parse_schedule(மாறிலி எழுத்து *applet, மாறிலி எழுத்து *string, முழு timeout)
 {
-	char buffer[20];
-	const char *slash;
-	int count = 0;
-	SCHEDULEITEM *repeatat = NULL;
+	எழுத்து buffer[20];
+	மாறிலி எழுத்து *slash;
+	முழு மொத்தம் = 0;
+	SCHEDULEITEM *repeatat = வெற்று;
 	size_t len;
 	SCHEDULEITEM *item;
 
 	TAILQ_INIT(&schedule);
-	if (string)
-		for (slash = string; *slash; slash++)
-			if (*slash == '/')
-				count++;
+	எனில் (string)
+		க்கு (slash = string; *slash; slash++)
+			எனில் (*slash == '/')
+				மொத்தம்++;
 
 	free_schedulelist();
 
-	if (count == 0) {
-		item = xmalloc(sizeof(*item));
+	எனில் (மொத்தம் == 0) {
+		item = xmalloc(அளவு(*item));
 		item->type = SC_SIGNAL;
-		item->value = timeout;
-		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+		item->மதிப்பு = timeout;
+		item->gotoitem = வெற்று;
+		TAILQ_செருகு_TAIL(&schedule, item, entries);
 
-		item = xmalloc(sizeof(*item));
+		item = xmalloc(அளவு(*item));
 		item->type = SC_TIMEOUT;
-		item->gotoitem = NULL;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (string) {
-			if (sscanf(string, "%d", &item->value) != 1)
+		item->gotoitem = வெற்று;
+		TAILQ_செருகு_TAIL(&schedule, item, entries);
+		எனில் (string) {
+			எனில் (sscanf(string, "%d", &item->மதிப்பு) != 1)
 				eerrorx("%s: invalid timeout value in schedule '%s'",
 					applet, string);
-		} else
-			item->value = 5;
+		} இல்லையெனில்
+			item->மதிப்பு = 5;
 
-		return;
+		திரும்பு;
 	}
 
-	while (string != NULL) {
-		if ((slash = strchr(string, '/')))
+	போது (string != வெற்று) {
+		எனில் ((slash = strchr(string, '/')))
 			len = slash - string;
-		else
+		இல்லையெனில்
 			len = strlen(string);
 
-		if (len >= (ptrdiff_t)sizeof(buffer))
+		எனில் (len >= (ptrdiff_t)அளவு(buffer))
 			eerrorx("%s: invalid schedule item, far too long",
 			    applet);
 
 		memcpy(buffer, string, len);
 		buffer[len] = 0;
-		string = slash ? slash + 1 : NULL;
+		string = slash ? slash + 1 : வெற்று;
 
 		item = parse_schedule_item(applet, buffer);
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
-		if (item->type == SC_FOREVER) {
-			if (repeatat)
+		TAILQ_செருகு_TAIL(&schedule, item, entries);
+		எனில் (item->type == SC_FOREVER) {
+			எனில் (repeatat)
 				eerrorx("%s: invalid schedule, `forever' "
 				    "appears more than once", applet);
 
 			repeatat = item;
-			continue;
+			தொடர்;
 		}
 	}
 
-	if (repeatat) {
-		item = xmalloc(sizeof(*item));
+	எனில் (repeatat) {
+		item = xmalloc(அளவு(*item));
 		item->type = SC_GOTO;
-		item->value = 0;
+		item->மதிப்பு = 0;
 		item->gotoitem = repeatat;
-		TAILQ_INSERT_TAIL(&schedule, item, entries);
+		TAILQ_செருகு_TAIL(&schedule, item, entries);
 	}
 
-	return;
+	திரும்பு;
 }
 
 /* return number of processes killed, -1 on error */
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-    pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet)
+முழு do_stop(மாறிலி எழுத்து *applet, மாறிலி எழுத்து *exec, மாறிலி எழுத்து *மாறிலி *argv,
+    pid_t pid, uid_t uid, முழு sig, bool group, bool test, bool quiet)
 {
-	const char *kind = "PID";
+	மாறிலி எழுத்து *kind = "PID";
 	RC_PIDLIST *pids;
 	RC_PID *pi;
 	RC_PID *np;
 	bool killed;
-	int nkilled = 0;
+	முழு nkilled = 0;
 	uid_t target;
-	if (group)
+	எனில் (group)
 		kind = "GID";
 
-	if (pid > 0)
-		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
+	எனில் (pid > 0)
+		pids = rc_find_pids(வெற்று, வெற்று, 0, pid);
+	இல்லையெனில்
 		pids = rc_find_pids(exec, argv, uid, 0);
 
-	if (!pids)
-		return 0;
+	எனில் (!pids)
+		திரும்பு 0;
 
 	LIST_FOREACH_SAFE(pi, pids, entries, np) {
-		if (test) {
+		எனில் (test) {
 			einfo("Would send signal %d to %s %d", sig, kind, pi->pid);
 			nkilled++;
-		} else {
-			if (sig) {
+		} இல்லையெனில் {
+			எனில் (sig) {
 				syslog(LOG_DEBUG, "Sending signal %d to %s %d", sig, kind, pi->pid);
-				if (!quiet)
+				எனில் (!quiet)
 					ebeginv("Sending signal %d to %s %d", sig, kind, pi->pid);
 			}
 			errno = 0;
-			if (group)
+			எனில் (group)
 				target = -pi->pid;
-			else
+			இல்லையெனில்
 				target = pi->pid;
 			killed = (kill(target, sig) == 0 ||
 			    errno == ESRCH ? true : false);
-			if (!quiet)
+			எனில் (!quiet)
 				eendv(killed ? 0 : 1,
 				"%s: failed to send signal %d to %s %d: %s",
 				applet, sig, kind, pi->pid, strerror(errno));
-			else if (!killed)
+			இல்லையெனில் எனில் (!killed)
 				syslog(LOG_ERR, "Failed to send signal %d to %s %d: %s",
 						sig, kind, pi->pid, strerror(errno));
-			if (!killed) {
+			எனில் (!killed) {
 				nkilled = -1;
-			} else {
-				if (nkilled != -1)
+			} இல்லையெனில் {
+				எனில் (nkilled != -1)
 					nkilled++;
 			}
 		}
-		free(pi);
+		விடுவி(pi);
 	}
 
-	free(pids);
-	return nkilled;
+	விடுவி(pids);
+	திரும்பு nkilled;
 }
 
-int run_stop_schedule(const char *applet,
-		const char *exec, const char *const *argv,
+முழு run_stop_schedule(மாறிலி எழுத்து *applet,
+		மாறிலி எழுத்து *exec, மாறிலி எழுத்து *மாறிலி *argv,
 		pid_t pid, uid_t uid, bool group,
     bool test, bool progress, bool quiet)
 {
 	SCHEDULEITEM *item = TAILQ_FIRST(&schedule);
-	int nkilled = 0;
-	int tkilled = 0;
-	int nrunning = 0;
+	முழு nkilled = 0;
+	முழு tkilled = 0;
+	முழு nrunning = 0;
 	long nloops, nsecs;
-	struct timespec ts;
-	const char *const *p;
+	கட்டமைப்பு timespec ts;
+	மாறிலி எழுத்து *மாறிலி *p;
 	bool progressed = false;
 
-	if (!(pid > 0 || exec || uid || (argv && *argv)))
-		return 0;
+	எனில் (!(pid > 0 || exec || uid || (argv && *argv)))
+		திரும்பு 0;
 
-	if (exec) {
+	எனில் (exec) {
 		einfov("Will stop %s", exec);
 		syslog(LOG_DEBUG, "Will stop %s", exec);
 	}
-	if (pid > 0) {
-		if (!group) {
+	எனில் (pid > 0) {
+		எனில் (!group) {
 			einfov("Will stop PID %d", pid);
 			syslog(LOG_DEBUG, "Will stop PID %d", pid);
-		} else {
+		} இல்லையெனில் {
 			einfov("Will stop GID %d", pid);
 			syslog(LOG_DEBUG, "Will stop GID %d", pid);
 		}
 	}
-	if (uid) {
+	எனில் (uid) {
 		einfov("Will stop processes owned by UID %d", uid);
 		syslog(LOG_DEBUG, "Will stop processes owned by UID %d", uid);
 	}
-	if (argv && *argv) {
+	எனில் (argv && *argv) {
 		einfovn("Will stop processes of `");
-		if (rc_yesno(getenv("EINFO_VERBOSE"))) {
-			for (p = argv; p && *p; p++) {
-				if (p != argv)
+		எனில் (rc_yesno(getenv("EINFO_VERBOSE"))) {
+			க்கு (p = argv; p && *p; p++) {
+				எனில் (p != argv)
 					printf(" ");
 				printf("%s", *p);
 			}
@@ -349,93 +349,93 @@ int run_stop_schedule(const char *applet,
 		}
 	}
 
-	while (item) {
-		switch (item->type) {
-		case SC_GOTO:
+	போது (item) {
+		தேர்வு (item->type) {
+		நிலை SC_GOTO:
 			item = item->gotoitem;
-			continue;
+			தொடர்;
 
-		case SC_SIGNAL:
+		நிலை SC_SIGNAL:
 			nrunning = 0;
-			nkilled = do_stop(applet, exec, argv, pid, uid, item->value, group,
+			nkilled = do_stop(applet, exec, argv, pid, uid, item->மதிப்பு, group,
 					test, quiet);
-			if (nkilled == 0) {
-				if (tkilled == 0) {
-					if (progressed)
+			எனில் (nkilled == 0) {
+				எனில் (tkilled == 0) {
+					எனில் (progressed)
 						printf("\n");
 					eerror("%s: no matching processes found", applet);
 				}
-				return tkilled;
+				திரும்பு tkilled;
 			}
-			else if (nkilled == -1)
-				return 0;
+			இல்லையெனில் எனில் (nkilled == -1)
+				திரும்பு 0;
 
 			tkilled += nkilled;
-			break;
-		case SC_FOREVER:
-		case SC_TIMEOUT:
-			if (item->type == SC_TIMEOUT && item->value < 1) {
-				item = NULL;
-				break;
+			நிறுத்து;
+		நிலை SC_FOREVER:
+		நிலை SC_TIMEOUT:
+			எனில் (item->type == SC_TIMEOUT && item->மதிப்பு < 1) {
+				item = வெற்று;
+				நிறுத்து;
 			}
 
 			ts.tv_sec = 0;
 			ts.tv_nsec = POLL_INTERVAL;
 
-			for (nsecs = 0; item->type == SC_FOREVER || nsecs < item->value; nsecs++) {
-				for (nloops = 0;
+			க்கு (nsecs = 0; item->type == SC_FOREVER || nsecs < item->மதிப்பு; nsecs++) {
+				க்கு (nloops = 0;
 				     nloops < ONE_SECOND / POLL_INTERVAL;
 				     nloops++)
 				{
-					if ((nrunning = do_stop(applet, exec, argv,
+					எனில் ((nrunning = do_stop(applet, exec, argv,
 						    pid, uid, 0, group, test, quiet)) == 0)
-						return 0;
+						திரும்பு 0;
 
 
-					if (nanosleep(&ts, NULL) == -1) {
-						if (progressed) {
+					எனில் (nanosleep(&ts, வெற்று) == -1) {
+						எனில் (progressed) {
 							printf("\n");
 							progressed = false;
 						}
-						if (errno != EINTR) {
+						எனில் (errno != EINTR) {
 							eerror("%s: nanosleep: %s",
 							    applet, strerror(errno));
-							return 0;
+							திரும்பு 0;
 						}
 					}
 				}
-				if (progress) {
+				எனில் (progress) {
 					printf(".");
 					fflush(stdout);
 					progressed = true;
 				}
 			}
-			break;
-		default:
-			if (progressed) {
+			நிறுத்து;
+		இயல்பு:
+			எனில் (progressed) {
 				printf("\n");
 				progressed = false;
 			}
 			eerror("%s: invalid schedule item `%d'",
 			    applet, item->type);
-			return 0;
+			திரும்பு 0;
 		}
 
-		if (item)
+		எனில் (item)
 			item = TAILQ_NEXT(item, entries);
 	}
 
-	if (test || (tkilled > 0 && nrunning == 0))
-		return nkilled;
+	எனில் (test || (tkilled > 0 && nrunning == 0))
+		திரும்பு nkilled;
 
-	if (progressed)
+	எனில் (progressed)
 		printf("\n");
-	if (!quiet) {
-		if (nrunning == 1)
+	எனில் (!quiet) {
+		எனில் (nrunning == 1)
 			eerror("%s: %d process refused to stop", applet, nrunning);
-		else
+		இல்லையெனில்
 			eerror("%s: %d process(es) refused to stop", applet, nrunning);
 	}
 
-	return -nrunning;
+	திரும்பு -nrunning;
 }

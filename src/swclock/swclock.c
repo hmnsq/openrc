@@ -18,85 +18,85 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <utime.h>
-#include <string.h>
+#அந்தர்பாவ <sys/time.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <getopt.h>
+#அந்தர்பாவ <unistd.h>
+#அந்தர்பாவ <utime.h>
+#அந்தர்பாவ <string.h>
 
-#include "einfo.h"
-#include "_usage.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "_usage.h"
+#அந்தர்பாவ "helpers.h"
 
 
-const char *applet = NULL;
-const char *extraopts = "file";
-const char getoptstring[] = "sw" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "save", 0, NULL, 's' },
-	{ "warn", 0, NULL, 'w' },
+மாறிலி எழுத்து *applet = வெற்று;
+மாறிலி எழுத்து *extraopts = "file";
+மாறிலி எழுத்து getoptstring[] = "sw" getoptstring_COMMON;
+மாறிலி கட்டமைப்பு option longopts[] = {
+	{ "save", 0, வெற்று, 's' },
+	{ "warn", 0, வெற்று, 'w' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+மாறிலி எழுத்து * மாறிலி longopts_help[] = {
 	"saves the time",
 	"no error if no reference file",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+மாறிலி எழுத்து *usagestring = வெற்று;
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
-	int opt, sflag = 0, wflag = 0;
-	const char *file = NULL;
-	struct stat sb;
-	struct timeval tv;
+	முழு opt, sflag = 0, wflag = 0;
+	மாறிலி எழுத்து *file = வெற்று;
+	கட்டமைப்பு stat sb;
+	கட்டமைப்பு timeval tv;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	போது ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (முழு *) 0)) != -1)
 	{
-		switch (opt) {
-		case 's':
+		தேர்வு (opt) {
+		நிலை 's':
 			sflag = 1;
-			break;
-		case 'w':
+			நிறுத்து;
+		நிலை 'w':
 			wflag = 1;
-			break;
+			நிறுத்து;
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind < argc)
+	எனில் (optind < argc)
 		file = argv[optind++];
-	else
+	இல்லையெனில்
 		eerrorx("swclock: Reference file was not specified");
 
-	if (sflag) {
-		int fd = open(file, O_WRONLY | O_CREAT, 0644);
-		if (fd == -1)
+	எனில் (sflag) {
+		முழு fd = open(file, O_WRONLY | O_CREAT, 0644);
+		எனில் (fd == -1)
 			eerrorx("swclock: open: %s", strerror(errno));
-		if (futimens(fd, NULL) == -1)
+		எனில் (futimens(fd, வெற்று) == -1)
 			eerrorx("swclock: futimens: %s", strerror(errno));
 		close(fd);
-		return 0;
+		திரும்பு 0;
 	}
 
-	if (stat(file, &sb) == -1) {
-		if (wflag != 0 && errno == ENOENT)
+	எனில் (stat(file, &sb) == -1) {
+		எனில் (wflag != 0 && errno == ENOENT)
 			ewarn("swclock: `%s': %s", file, strerror(errno));
-		else
+		இல்லையெனில்
 			eerrorx("swclock: `%s': %s", file, strerror(errno));
-		return 0;
+		திரும்பு 0;
 	}
 
 	tv.tv_sec = sb.st_mtime;
 	tv.tv_usec = 0;
 
-	if (settimeofday(&tv, NULL) == -1)
+	எனில் (settimeofday(&tv, வெற்று) == -1)
 		eerrorx("swclock: settimeofday: %s", strerror(errno));
 
-	return 0;
+	திரும்பு 0;
 }

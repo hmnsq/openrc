@@ -15,88 +15,88 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <stddef.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <unistd.h>
 
-#include "einfo.h"
-#include "initreq.h"
-#include "sysvinit.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "initreq.h"
+#அந்தர்பாவ "sysvinit.h"
 
-static void sysvinit_send_cmd(struct init_request *request)
+நிலையான வெறுமை sysvinit_send_cmd(கட்டமைப்பு init_request *request)
 {
-	int fd;
-	char *p;
+	முழு fd;
+	எழுத்து *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	எனில் (fd < 0) {
+		எனில் (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		திரும்பு;
 	}
-	p = (char *) request;
-	bytes = sizeof(*request);
-	do {
-		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
-				continue;
+	p = (எழுத்து *) request;
+	bytes = அளவு(*request);
+	செய் {
+		r = லிக(fd, p, bytes);
+		எனில் (r < 0) {
+			எனில் ((errno == EAGAIN) || (errno == EINTR))
+				தொடர்;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			திரும்பு;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} போது (bytes > 0);
 }
 
-void sysvinit_runlevel(char rl)
+வெறுமை sysvinit_runlevel(எழுத்து rl)
 {
-	struct init_request request;
+	கட்டமைப்பு init_request request;
 
-	if (!rl)
-		return;
+	எனில் (!rl)
+		திரும்பு;
 
-	request = (struct init_request) {
+	request = (கட்டமைப்பு init_request) {
 		.magic = INIT_MAGIC,
 		.sleeptime = 0,
 		.cmd = INIT_CMD_RUNLVL,
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		திரும்பு;
 }
 
 /*
  *	Set environment variables in the init process.
  */
-void sysvinit_setenv(const char *name, const char *value)
+வெறுமை sysvinit_setenv(மாறிலி எழுத்து *name, மாறிலி எழுத்து *மதிப்பு)
 {
-	struct init_request	request;
+	கட்டமைப்பு init_request	request;
 	size_t nl;
 	size_t vl;
 
-	memset(&request, 0, sizeof(request));
+	memset(&request, 0, அளவு(request));
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
-		vl = strlen(value);
-else
+	எனில் (மதிப்பு)
+		vl = strlen(மதிப்பு);
+இல்லையெனில்
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	எனில் (nl + vl + 3 >= (முழு)அளவு(request.i.data))
+		திரும்பு;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	எனில் (மதிப்பு) {
 		request.i.data[nl] = '=';
-		memcpy(request.i.data + nl + 1, value, vl);
+		memcpy(request.i.data + nl + 1, மதிப்பு, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	திரும்பு;
 }

@@ -18,76 +18,76 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <pwd.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/reboot.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <poll.h>
-#include <utmp.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <pwd.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <time.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <unistd.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <sys/reboot.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <sys/wait.h>
+#அந்தர்பாவ <poll.h>
+#அந்தர்பாவ <utmp.h>
 
 #ifdef HAVE_SELINUX
 #  include <selinux/selinux.h>
 #endif
 
-#include "rc.h"
-#include "rc_exec.h"
-#include "wtmp.h"
-#include "helpers.h"
-#include "version.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "rc_exec.h"
+#அந்தர்பாவ "wtmp.h"
+#அந்தர்பாவ "helpers.h"
+#அந்தர்பாவ "version.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#எனில் defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
 #endif
 
-static const char *path_default = "/sbin:/usr/sbin:/bin:/usr/bin";
-static const char *rc_default_runlevel = "default";
-static int sigpipe[2] = { -1, -1 };
-static bool quiet = false;
-static const char *progname;
+நிலையான மாறிலி எழுத்து *path_default = "/sbin:/usr/sbin:/bin:/usr/bin";
+நிலையான மாறிலி எழுத்து *rc_default_runlevel = "default";
+நிலையான முழு sigpipe[2] = { -1, -1 };
+நிலையான bool quiet = false;
+நிலையான மாறிலி எழுத்து *progname;
 
-static void do_openrc(const char *runlevel)
+நிலையான வெறுமை do_openrc(மாறிலி எழுத்து *runlevel)
 {
-	const char *argv[] = { "openrc", runlevel, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	மாறிலி எழுத்து *argv[] = { "openrc", runlevel, வெற்று };
+	கட்டமைப்பு exec_result res;
+	கட்டமைப்பு exec_args args = exec_init(argv);
 	args.setsid = 1;
 
-	if (!quiet)
+	எனில் (!quiet)
 		printf("Starting %s runlevel\n", runlevel);
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	எனில் (res.pid < 0) {
 		perror("do_exec");
 		exit(1);
 	}
-	while (waitpid(res.pid, NULL, 0) != res.pid)
-		if (errno == ECHILD)
-			break;
+	போது (waitpid(res.pid, வெற்று, 0) != res.pid)
+		எனில் (errno == ECHILD)
+			நிறுத்து;
 }
 
-static void init(const char *default_runlevel)
+நிலையான வெறுமை init(மாறிலி எழுத்து *default_runlevel)
 {
-	const char *runlevel = NULL;
+	மாறிலி எழுத்து *runlevel = வெற்று;
 	do_openrc("sysinit");
 	do_openrc("boot");
-	if (default_runlevel)
+	எனில் (default_runlevel)
 		runlevel = default_runlevel;
-	else
-		runlevel = rc_conf_value("rc_default_runlevel");
-	if (!runlevel)
+	இல்லையெனில்
+		runlevel = rc_conf_மதிப்பு("rc_default_runlevel");
+	எனில் (!runlevel)
 		runlevel = rc_default_runlevel;
-	if (!rc_runlevel_exists(runlevel)) {
+	எனில் (!rc_runlevel_exists(runlevel)) {
 		fprintf(stderr, "%s is an invalid runlevel\n", runlevel);
 		runlevel = rc_default_runlevel;
 	}
@@ -95,19 +95,19 @@ static void init(const char *default_runlevel)
 	log_wtmp("reboot", "~~", 0, RUN_LVL, "~~");
 }
 
-static void handle_reexec(void)
+நிலையான வெறுமை handle_reexec(வெறுமை)
 {
-	execlp(progname, progname, "reexec", NULL);
-	return;
+	execlp(progname, progname, "reexec", வெற்று);
+	திரும்பு;
 }
 
-static void handle_shutdown(const char *runlevel, int cmd)
+நிலையான வெறுமை handle_shutdown(மாறிலி எழுத்து *runlevel, முழு cmd)
 {
-	const long ms_to_ns = 1000000L;
-	struct timespec start, now, tmp, remain;
+	மாறிலி long ms_to_ns = 1000000L;
+	கட்டமைப்பு timespec start, now, tmp, remain;
 
 	do_openrc(runlevel);
-	if (!quiet)
+	எனில் (!quiet)
 		printf("Sending the final TERM signal\n");
 	kill(-1, SIGTERM);
 	clock_gettime(CLOCK_MONOTONIC, &start);
@@ -115,198 +115,198 @@ static void handle_shutdown(const char *runlevel, int cmd)
 	/* ensure *at least* half a second of grace time before KILL */
 	tmp.tv_sec = 0;
 	tmp.tv_nsec = 500 * ms_to_ns;
-	while (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
+	போது (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
 		tmp = remain;
 
-	for (;;) {
-		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == -1 && errno == ECHILD) {
+	க்கு (;;) {
+		pid_t pid = waitpid(-1, வெற்று, WNOHANG);
+		எனில் (pid == -1 && errno == ECHILD) {
 			/* all children reaped, safe to exit */
-			break;
+			நிறுத்து;
 		}
 
 		clock_gettime(CLOCK_MONOTONIC, &now);
 		timespecsub(&now, &start, &tmp);
-		if (tmp.tv_sec >= 3) {
+		எனில் (tmp.tv_sec >= 3) {
 			/* it's been 3 seconds already, go for the KILL hammer */
-			break;
+			நிறுத்து;
 		}
 
 		tmp.tv_sec = 0;
 		tmp.tv_nsec = 100 * ms_to_ns;
-		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, NULL);
+		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, வெற்று);
 	}
 
-	if (!quiet)
+	எனில் (!quiet)
 		printf("Sending the final KILL signal\n");
 	kill(-1, SIGKILL);
 	sync();
 	reboot(cmd);
 	/* reboot normally if kexec fails */
-	if (cmd == RB_KEXEC)
+	எனில் (cmd == RB_KEXEC)
 		reboot(RB_AUTOBOOT);
 }
 
-static void run_program(const char *prog)
+நிலையான வெறுமை run_program(மாறிலி எழுத்து *prog)
 {
-	const char *argv[] = { prog, NULL };
-	struct exec_args args = exec_init(argv);
-	struct exec_result res = do_exec(&args);
-	if (res.pid < 0 || rc_waitpid(res.pid) == -1)
+	மாறிலி எழுத்து *argv[] = { prog, வெற்று };
+	கட்டமைப்பு exec_args args = exec_init(argv);
+	கட்டமைப்பு exec_result res = do_exec(&args);
+	எனில் (res.pid < 0 || rc_waitpid(res.pid) == -1)
 		perror("init");
 }
 
-static void open_shell(void)
+நிலையான வெறுமை open_shell(வெறுமை)
 {
-	const char *shell;
-	struct passwd *pw;
+	மாறிலி எழுத்து *shell;
+	கட்டமைப்பு passwd *pw;
 
 #ifdef __linux__
-	const char *sys = rc_sys();
+	மாறிலி எழுத்து *sys = rc_sys();
 
 	/* VSERVER systems cannot really drop to shells */
-	if (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
+	எனில் (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
 	{
-		execlp("halt", "halt", "-f", (char *) NULL);
+		execlp("halt", "halt", "-f", (எழுத்து *) வெற்று);
 		perror("init");
-		return;
+		திரும்பு;
 	}
 #endif
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_மதிப்பு("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
-	if (!shell) {
+	எனில் (!shell) {
 		shell = getenv("SHELL");
-		if (!shell) {
+		எனில் (!shell) {
 			pw = getpwuid(getuid());
-			if (pw)
+			எனில் (pw)
 				shell = pw->pw_shell;
-			if (!shell)
+			எனில் (!shell)
 				shell = "/bin/sh";
 		}
 	}
 	run_program(shell);
 }
 
-static void handle_single(void)
+நிலையான வெறுமை handle_single(வெறுமை)
 {
 	do_openrc("single");
 	open_shell();
-	init(NULL);
+	init(வெற்று);
 }
 
-static void dispatch_signal(int sigfd)
+நிலையான வெறுமை dispatch_signal(முழு sigfd)
 {
-	int sig;
-	ssize_t count = read(sigfd, &sig, sizeof(sig));
+	முழு sig;
+	ssize_t மொத்தம் = பட(sigfd, &sig, அளவு(sig));
 
-	if (count < 0) {
+	எனில் (மொத்தம் < 0) {
 		perror("read(sigpipe)");
-		return;
+		திரும்பு;
 	}
 
-	if (count != sizeof(sig)) {
+	எனில் (மொத்தம் != அளவு(sig)) {
 		fputs("bad read from sigpipe\n", stderr);
-		return;
+		திரும்பு;
 	}
 
-	switch (sig) {
-		case SIGINT:
+	தேர்வு (sig) {
+		நிலை SIGINT:
 			handle_shutdown("reboot", RB_AUTOBOOT);
-			break;
-		case SIGTERM:
+			நிறுத்து;
+		நிலை SIGTERM:
 #ifdef SIGPWR
-		case SIGPWR:
+		நிலை SIGPWR:
 #endif
 			handle_shutdown("shutdown", RB_HALT_SYSTEM);
-			break;
-		default:
+			நிறுத்து;
+		இயல்பு:
 			fprintf(stderr, "Unknown signal received, %d\n", sig);
-			break;
+			நிறுத்து;
 	}
 }
 
-static void dispatch_fifo(int fifo)
+நிலையான வெறுமை dispatch_fifo(முழு fifo)
 {
-	char buf[2048];
-	ssize_t count = read(fifo, buf, sizeof(buf) - 1);
+	எழுத்து buf[2048];
+	ssize_t மொத்தம் = பட(fifo, buf, அளவு(buf) - 1);
 
-	if (count < 0) {
+	எனில் (மொத்தம் < 0) {
 		perror("read(fifo)");
-		return;
+		திரும்பு;
 	}
 
-	buf[count] = 0;
+	buf[மொத்தம்] = 0;
 
-	if (!quiet)
+	எனில் (!quiet)
 		printf("PID1: Received \"%s\" from FIFO...\n", buf);
 
-	if (strcmp(buf, "halt") == 0)
+	எனில் (strcmp(buf, "halt") == 0)
 		handle_shutdown("shutdown", RB_HALT_SYSTEM);
-	else if (strcmp(buf, "kexec") == 0)
+	இல்லையெனில் எனில் (strcmp(buf, "kexec") == 0)
 		handle_shutdown("reboot", RB_KEXEC);
-	else if (strcmp(buf, "poweroff") == 0)
+	இல்லையெனில் எனில் (strcmp(buf, "poweroff") == 0)
 		handle_shutdown("shutdown", RB_POWER_OFF);
-	else if (strcmp(buf, "reboot") == 0)
+	இல்லையெனில் எனில் (strcmp(buf, "reboot") == 0)
 		handle_shutdown("reboot", RB_AUTOBOOT);
-	else if (strcmp(buf, "reexec") == 0)
+	இல்லையெனில் எனில் (strcmp(buf, "reexec") == 0)
 		handle_reexec();
-	else if (strcmp(buf, "single") == 0)
+	இல்லையெனில் எனில் (strcmp(buf, "single") == 0)
 		handle_single();
 }
 
-static void signal_handler(int sig)
+நிலையான வெறுமை signal_handler(முழு sig)
 {
-	int saved_errno = errno;
-	write(sigpipe[1], &sig, sizeof(sig));
+	முழு saved_errno = errno;
+	லிக(sigpipe[1], &sig, அளவு(sig));
 	/* ensure the errno doesn't get clobbered in the rare (impossible?)
 	 * case that the write above fails */
 	errno = saved_errno;
 }
 
-static void reap_zombies(int sig RC_UNUSED)
+நிலையான வெறுமை reap_zombies(முழு sig RC_UNUSED)
 {
-	char errmsg[] = "waitpid() failed\n";
-	int saved_errno = errno;
+	எழுத்து errmsg[] = "waitpid() failed\n";
+	முழு saved_errno = errno;
 
-	for (;;) {
-		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == 0)
-			break;
-		else if (pid == -1) {
-			if (errno == ECHILD)
-				break;
-			write(STDERR_FILENO, errmsg, sizeof(errmsg) - 1);
-			continue;
+	க்கு (;;) {
+		pid_t pid = waitpid(-1, வெற்று, WNOHANG);
+		எனில் (pid == 0)
+			நிறுத்து;
+		இல்லையெனில் எனில் (pid == -1) {
+			எனில் (errno == ECHILD)
+				நிறுத்து;
+			லிக(STDERR_FILENO, errmsg, அளவு(errmsg) - 1);
+			தொடர்;
 		}
 	}
 	errno = saved_errno;
 }
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
-	char *cmdline_runlevel = NULL;
-	int fifo;
+	எழுத்து *cmdline_runlevel = வெற்று;
+	முழு fifo;
 	bool reexec = false;
 	sigset_t signals;
-	struct sigaction sa;
+	கட்டமைப்பு sigaction sa;
 #ifdef HAVE_SELINUX
-	int enforce = 0;
+	முழு enforce = 0;
 #endif
 
 	progname = argv[0];
 
-	if (getpid() != 1)
-		return 1;
+	எனில் (getpid() != 1)
+		திரும்பு 1;
 
 #ifdef HAVE_SELINUX
-	if (getenv("SELINUX_INIT") == NULL) {
-		if (is_selinux_enabled() != 1) {
-			if (selinux_init_load_policy(&enforce) == 0) {
+	எனில் (getenv("SELINUX_INIT") == வெற்று) {
+		எனில் (is_selinux_enabled() != 1) {
+			எனில் (selinux_init_load_policy(&enforce) == 0) {
 				setenv("SELINUX_INIT", "YES", 1);
 				execv(argv[0], argv);
-			} else {
-				if (enforce > 0) {
+			} இல்லையெனில் {
+				எனில் (enforce > 0) {
 					/*
 					 * SELinux in enforcing mode but load_policy failed
 					 * At this point, we probably can't open /dev/console,
@@ -324,19 +324,19 @@ int main(int argc, char **argv)
 
 	quiet = rc_yesno(getenv("EINFO_QUIET"));
 
-	if (!quiet)
+	எனில் (!quiet)
 		printf("OpenRC init version %s starting\n", VERSION);
 
-	if (argc > 1) {
-		if (strcmp(argv[1], "reexec") == 0)
+	எனில் (argc > 1) {
+		எனில் (strcmp(argv[1], "reexec") == 0)
 			reexec = true;
-		else
+		இல்லையெனில்
 			cmdline_runlevel = argv[1];
 	}
 
-	if (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
+	எனில் (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
 		perror("pipe2");
-		return 1;
+		திரும்பு 1;
 	}
 
 	/* block all signals we do not handle */
@@ -347,43 +347,43 @@ int main(int argc, char **argv)
 #ifdef SIGPWR
 	sigdelset(&signals, SIGPWR);
 #endif
-	sigprocmask(SIG_SETMASK, &signals, NULL);
+	sigprocmask(SIG_SETMASK, &signals, வெற்று);
 
 	/* install signal  handler */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, அளவு(sa));
 	sa.sa_handler = reap_zombies;
-	sigaction(SIGCHLD, &sa, NULL);
+	sigaction(SIGCHLD, &sa, வெற்று);
 	sa.sa_handler = signal_handler;
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGINT, &sa, வெற்று);
+	sigaction(SIGTERM, &sa, வெற்று);
 #ifdef SIGPWR
-	sigaction(SIGPWR, &sa, NULL);
+	sigaction(SIGPWR, &sa, வெற்று);
 #endif
 	reboot(RB_DISABLE_CAD);
 
 	/* set default path */
 	setenv("PATH", path_default, 1);
 
-	if (!reexec)
+	எனில் (!reexec)
 		init(cmdline_runlevel);
 
-	if ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
+	எனில் ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
 		perror("open_rwfifo");
 
-	for (;;) {
-		enum { FD_FIFO, FD_SIG, FD_COUNT };
-		struct pollfd pfd[] = {
+	க்கு (;;) {
+		எண்ணிக்கை { FD_FIFO, FD_SIG, FD_மொத்தம் };
+		கட்டமைப்பு pollfd pfd[] = {
 			[FD_FIFO] = { .fd = fifo, .events = POLLIN },
 			[FD_SIG] = { .fd = sigpipe[0], .events = POLLIN },
 		};
 
-		poll(pfd, FD_COUNT, -1);
+		poll(pfd, FD_மொத்தம், -1);
 
-		if (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
+		எனில் (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
 			dispatch_signal(sigpipe[0]);
 
-		if (pfd[FD_FIFO].revents & POLLIN)
+		எனில் (pfd[FD_FIFO].revents & POLLIN)
 			dispatch_fifo(fifo);
 	}
-	return 0;
+	திரும்பு 0;
 }

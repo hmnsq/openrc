@@ -37,15 +37,15 @@
  *	This is what BSD 4.4 uses when talking to init.
  *	Linux doesn't use this right now.
  */
-struct init_request_bsd {
-	char	gen_id[8];		/* Beats me.. telnetd uses "fe" */
-	char	tty_id[16];		/* Tty name minus /dev/tty      */
-	char	host[64];	/* Hostname                     */
-	char	term_type[16];		/* Terminal type                */
-	int	signal;			/* Signal to send               */
-	int	pid;			/* Process to send to           */
-	char	exec_name[128];	        /* Program to execute           */
-	char	reserved[128];		/* For future expansion.        */
+கட்டமைப்பு init_request_bsd {
+	எழுத்து	gen_id[8];		/* Beats me.. telnetd uses "fe" */
+	எழுத்து	tty_id[16];		/* Tty name minus /dev/tty      */
+	எழுத்து	host[64];	/* Hostname                     */
+	எழுத்து	term_type[16];		/* Terminal type                */
+	முழு	சமிக்ஞை;			/* Signal to send               */
+	முழு	pid;			/* Process to send to           */
+	எழுத்து	exec_name[128];	        /* Program to execute           */
+	எழுத்து	reserved[128];		/* For future expansion.        */
 };
 
 /*
@@ -55,14 +55,14 @@ struct init_request_bsd {
  *	The weird sizes are because init expects the whole
  *	struct to be 384 bytes.
  */
-struct init_request {
-	int	magic;			/* Magic number                 */
-	int	cmd;			/* What kind of request         */
-	int	runlevel;		/* Runlevel to change to        */
-	int	sleeptime;		/* Time between TERM and KILL   */
-	union {
-		struct init_request_bsd	bsd;
-		char			data[368];
+கட்டமைப்பு init_request {
+	முழு	magic;			/* Magic number                 */
+	முழு	cmd;			/* What kind of request         */
+	முழு	runlevel;		/* Runlevel to change to        */
+	முழு	sleeptime;		/* Time between TERM and KILL   */
+	ஒன்றிப்பு {
+		கட்டமைப்பு init_request_bsd	bsd;
+		எழுத்து			data[368];
 	} i;
 };
 

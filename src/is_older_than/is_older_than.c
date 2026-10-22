@@ -10,22 +10,22 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#அந்தர்பாவ <stdlib.h>
 
-#include "rc.h"
+#அந்தர்பாவ "rc.h"
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
-	int i;
+	முழு i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	எனில் (argc < 3)
+		திரும்பு EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	க்கு (i = 2; i < argc; ++i)
+		எனில் (!rc_newer_than(argv[1], argv[i], வெற்று, வெற்று))
+			திரும்பு EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	திரும்பு EXIT_FAILURE;
 }

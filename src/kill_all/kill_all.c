@@ -16,127 +16,127 @@
  */
 
 
-#include <dirent.h>
-#include <errno.h>
-#include <getopt.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdbool.h>
+#அந்தர்பாவ <dirent.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <getopt.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <syslog.h>
+#அந்தர்பாவ <unistd.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <sys/wait.h>
+#அந்தர்பாவ <stdbool.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "_usage.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "rc_exec.h"
+#அந்தர்பாவ "_usage.h"
+#அந்தர்பாவ "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = "[signal number]";
-const char getoptstring[] = "do:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "dry-run",        0, NULL, 'd' },
-	{ "omit",        1, NULL, 'o' },
+மாறிலி எழுத்து *applet = வெற்று;
+மாறிலி எழுத்து *extraopts = "[signal number]";
+மாறிலி எழுத்து getoptstring[] = "do:" getoptstring_COMMON;
+மாறிலி கட்டமைப்பு option longopts[] = {
+	{ "dry-run",        0, வெற்று, 'd' },
+	{ "omit",        1, வெற்று, 'o' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+மாறிலி எழுத்து * மாறிலி longopts_help[] = {
 	"print what would be done",
 	"omit this pid (can be repeated)",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+மாறிலி எழுத்து *usagestring = வெற்று;
 
-static int mount_proc(void)
+நிலையான முழு mount_proc(வெறுமை)
 {
 	pid_t rc;
-	int status;
-	const char *argv[] = { "mount", "-t", "proc", "proc", "/proc", NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	முழு status;
+	மாறிலி எழுத்து *argv[] = { "mount", "-t", "proc", "proc", "/proc", வெற்று };
+	கட்டமைப்பு exec_result res;
+	கட்டமைப்பு exec_args args = exec_init(argv);
 
-	if (access("/proc/version", F_OK) == 0)
-		return 0;
+	எனில் (access("/proc/version", F_OK) == 0)
+		திரும்பு 0;
 
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	எனில் (res.pid < 0) {
 		syslog(LOG_ERR, "Failed to execute mount");
-		return -1;
+		திரும்பு -1;
 	}
-	while ((rc = wait(&status)) != res.pid)
-		if (rc < 0 && errno == ECHILD)
-			break;
-	if (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	போது ((rc = wait(&status)) != res.pid)
+		எனில் (rc < 0 && errno == ECHILD)
+			நிறுத்து;
+	எனில் (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
 		syslog(LOG_ERR, "mount returned non-zero exit status");
 
-	if (access("/proc/version", F_OK) != 0) {
+	எனில் (access("/proc/version", F_OK) != 0) {
 		syslog(LOG_ERR, "Could not mount /proc");
-		return -1;
+		திரும்பு -1;
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static bool is_user_process(pid_t pid)
+நிலையான bool is_user_process(pid_t pid)
 {
-	char *buf = NULL;
+	எழுத்து *buf = வெற்று;
 	FILE *fp;
-	char *path = NULL;
+	எழுத்து *path = வெற்று;
 	pid_t temp_pid;
 	size_t size;
 	bool user_process = true;
 
-	while (pid >0 && user_process) {
-		if (pid == 2) {
+	போது (pid >0 && user_process) {
+		எனில் (pid == 2) {
 			user_process = false;
-			continue;
+			தொடர்;
 		}
 		xasprintf(&path, "/proc/%d/status", pid);
 		fp = fopen(path, "r");
-		free(path);
+		விடுவி(path);
 		/*
 		 * if we could not open the file, the process disappeared, which
 		 * leaves us no way to determine for sure whether it was a user
 		 * process or kernel thread, so we say it is a kernel thread to
 		 * avoid accidentally killing it.
 		 */
-		if (!fp) {
+		எனில் (!fp) {
 			user_process = false;
-			continue;
+			தொடர்;
 		}
 		temp_pid = -1;
-		while (!feof(fp)) {
-			buf = NULL;
-			if (xgetline(&buf, &size, fp) != -1) {
+		போது (!feof(fp)) {
+			buf = வெற்று;
+			எனில் (xgetline(&buf, &size, fp) != -1) {
 				sscanf(buf, "PPid: %d", &temp_pid);
-				free(buf);
-			} else {
-				free(buf);
-				break;
+				விடுவி(buf);
+			} இல்லையெனில் {
+				விடுவி(buf);
+				நிறுத்து;
 			}
 		}
 		fclose(fp);
-		if (temp_pid == -1) {
+		எனில் (temp_pid == -1) {
 			syslog(LOG_ERR, "Unable to read pid from /proc/%d/status", pid);
 			user_process = false;
-			continue;
+			தொடர்;
 		}
 		pid = temp_pid;
 	}
-	return user_process;
+	திரும்பு user_process;
 }
 
-static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
+நிலையான முழு signal_processes(முழு sig, RC_STRINGLIST *omits, bool dryrun)
 {
 	sigset_t signals;
 	sigset_t oldsigs;
 	DIR *dir;
-	struct dirent	*d;
-	char *buf = NULL;
+	கட்டமைப்பு dirent	*d;
+	எழுத்து *buf = வெற்று;
 	pid_t pid;
-	int sendcount = 0;
+	முழு sendcount = 0;
 
 	kill(-1, SIGSTOP);
 	sigfillset(&signals);
@@ -147,96 +147,96 @@ static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
 	 * CWD must be /proc to avoid problems if / is affected by the killing
 	 * (i.e. depends on fuse).
 	 */
-	if (chdir("/proc") == -1) {
+	எனில் (chdir("/proc") == -1) {
 		syslog(LOG_ERR, "chdir /proc failed");
-		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+		sigprocmask(SIG_SETMASK, &oldsigs, வெற்று);
 		kill(-1, SIGCONT);
-		return -1;
+		திரும்பு -1;
 	}
 	dir = opendir(".");
-	if (!dir) {
+	எனில் (!dir) {
 		syslog(LOG_ERR, "cannot opendir(/proc)");
-		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+		sigprocmask(SIG_SETMASK, &oldsigs, வெற்று);
 		kill(-1, SIGCONT);
-		return -1;
+		திரும்பு -1;
 	}
 
 	/* Walk through the directory. */
-	while ((d = readdir(dir)) != NULL) {
+	போது ((d = readdir(dir)) != வெற்று) {
 		/* Is this a process? */
 		pid = (pid_t) atoi(d->d_name);
-		if (pid == 0)
-			continue;
+		எனில் (pid == 0)
+			தொடர்;
 
 		/* Is this a process we have been requested to omit? */
-		if (buf) {
-			free(buf);
-			buf = NULL;
+		எனில் (buf) {
+			விடுவி(buf);
+			buf = வெற்று;
 		}
 		xasprintf(&buf, "%d", pid);
-		if (rc_stringlist_find(omits, buf))
-			continue;
+		எனில் (rc_stringlist_find(omits, buf))
+			தொடர்;
 
 		/* Is this process in our session? */
-		if (getsid(getpid()) == getsid(pid))
-			continue;
+		எனில் (getsid(getpid()) == getsid(pid))
+			தொடர்;
 
 		/* Is this a kernel thread? */
-		if (!is_user_process(pid))
-			continue;
+		எனில் (!is_user_process(pid))
+			தொடர்;
 
-		if (dryrun)
+		எனில் (dryrun)
 			einfo("Would send signal %d to process %d", sig, pid);
-		else if (kill(pid, sig) == 0)
+		இல்லையெனில் எனில் (kill(pid, sig) == 0)
 			sendcount++;
 	}
 	closedir(dir);
-	sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+	sigprocmask(SIG_SETMASK, &oldsigs, வெற்று);
 	kill(-1, SIGCONT);
-	return sendcount;
+	திரும்பு sendcount;
 }
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
-	char *arg = NULL;
-	int opt;
+	எழுத்து *arg = வெற்று;
+	முழு opt;
 	bool dryrun = false;
 	RC_STRINGLIST *omits = rc_stringlist_new();
-	int sig = SIGKILL;
-	char *here;
-	char *token;
+	முழு sig = SIGKILL;
+	எழுத்து *here;
+	எழுத்து *token;
 
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
 	rc_stringlist_addu(omits, "1");
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	போது ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (முழு *) 0)) != -1)
 	{
-		switch (opt) {
-			case 'd':
+		தேர்வு (opt) {
+			நிலை 'd':
 				dryrun = true;
-				break;
-			case 'o':
+				நிறுத்து;
+			நிலை 'o':
 				here = optarg;
-				while ((token = strsep(&here, ",;:"))) {
-					if ((pid_t) atoi(token) > 0)
+				போது ((token = strsep(&here, ",;:"))) {
+					எனில் ((pid_t) atoi(token) > 0)
 						rc_stringlist_addu(omits, token);
-					else {
+					இல்லையெனில் {
 						eerror("Invalid omit pid value %s", token);
 						usage(EXIT_FAILURE);
 					}
 				}
-				break;
+				நிறுத்து;
 			case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (argc > optind) {
+	எனில் (argc > optind) {
 	arg = argv[optind];
 	sig = atoi(arg);
-	if (sig <= 0 || sig > 31) {
+	எனில் (sig <= 0 || sig > 31) {
 		rc_stringlist_free(omits);
 		eerror("Invalid signal %s", arg);
 		usage(EXIT_FAILURE);
@@ -244,11 +244,11 @@ int main(int argc, char **argv)
 	}
 
 	openlog(applet, LOG_CONS|LOG_PID, LOG_DAEMON);
-	if (mount_proc() != 0) {
+	எனில் (mount_proc() != 0) {
 		rc_stringlist_free(omits);
 		eerrorx("Unable to mount /proc file system");
 	}
 	signal_processes(sig, omits, dryrun);
 	rc_stringlist_free(omits);
-	return 0;
+	திரும்பு 0;
 }

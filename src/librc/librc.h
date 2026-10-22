@@ -20,44 +20,44 @@
 
 #define _IN_LIBRC
 
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <paths.h>
-#include <regex.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <time.h>
-#include <unistd.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <sys/param.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <sys/time.h>
+#அந்தர்பாவ <sys/wait.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <dirent.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <libgen.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <paths.h>
+#அந்தர்பாவ <regex.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <stdarg.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <strings.h>
+#அந்தர்பாவ <time.h>
+#அந்தர்பாவ <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
-  #include <sys/user.h>
+#எனில் defined(BSD) && !defined(__GNU__)
+  #எனில் !defined(__NetBSD__)
+  #அந்தர்பாவ <sys/user.h>
   #endif
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
-#else
-#include <sys/param.h>
+#அந்தர்பாவ <sys/param.h>
+#அந்தர்பாவ <sys/sysctl.h>
+#அந்தர்பாவ <kvm.h>
+#இல்லையெனில்
+#அந்தர்பாவ <sys/param.h>
 #endif
 
-#include "rc.h"
-#include "misc.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "misc.h"
 
-static const char *const dirnames[RC_DIR_SYS_MAX] =
+நிலையான மாறிலி எழுத்து *மாறிலி dirnames[RC_DIR_SYS_MAX] =
 {
 	[RC_DIR_STARTING] = "starting",
 	[RC_DIR_STARTED] = "started",
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
-void clear_dirfds(void);
+RC_STRINGLIST *config_list(முழு dirfd, மாறிலி எழுத்து *pathname);
+வெறுமை clear_dirfds(வெறுமை);
 
 #endif

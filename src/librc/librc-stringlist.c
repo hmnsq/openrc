@@ -15,92 +15,92 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "librc.h"
+#அந்தர்பாவ "helpers.h"
 
 RC_STRINGLIST *
-rc_stringlist_new(void)
+rc_stringlist_new(வெறுமை)
 {
-	RC_STRINGLIST *l = xmalloc(sizeof(*l));
+	RC_STRINGLIST *l = xmalloc(அளவு(*l));
 	TAILQ_INIT(l);
-	return l;
+	திரும்பு l;
 }
 
 RC_STRING *
-rc_stringlist_add(RC_STRINGLIST *list, const char *value)
+rc_stringlist_add(RC_STRINGLIST *list, மாறிலி எழுத்து *மதிப்பு)
 {
-	RC_STRING *s = xmalloc(sizeof(*s));
+	RC_STRING *s = xmalloc(அளவு(*s));
 
-	s->value = xstrdup(value);
-	TAILQ_INSERT_TAIL(list, s, entries);
-	return s;
+	s->மதிப்பு = xstrdup(மதிப்பு);
+	TAILQ_செருகு_TAIL(list, s, entries);
+	திரும்பு s;
 }
 
 RC_STRING *
-rc_stringlist_addu(RC_STRINGLIST *list, const char *value)
+rc_stringlist_addu(RC_STRINGLIST *list, மாறிலி எழுத்து *மதிப்பு)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    எனில் (strcmp(s->மதிப்பு, மதிப்பு) == 0) {
 		    errno = EEXIST;
-		    return NULL;
+		    திரும்பு வெற்று;
 	    }
 
-	return rc_stringlist_add(list, value);
+	திரும்பு rc_stringlist_add(list, மதிப்பு);
 }
 
 bool
-rc_stringlist_delete(RC_STRINGLIST *list, const char *value)
+rc_stringlist_delete(RC_STRINGLIST *list, மாறிலி எழுத்து *மதிப்பு)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    எனில் (strcmp(s->மதிப்பு, மதிப்பு) == 0) {
 		    TAILQ_REMOVE(list, s, entries);
-		    free(s->value);
-		    free(s);
-		    return true;
+		    விடுவி(s->மதிப்பு);
+		    விடுவி(s);
+		    திரும்பு true;
 	    }
 
 	errno = EEXIST;
-	return false;
+	திரும்பு false;
 }
 
 RC_STRING *
-rc_stringlist_find(RC_STRINGLIST *list, const char *value)
+rc_stringlist_find(RC_STRINGLIST *list, மாறிலி எழுத்து *மதிப்பு)
 {
 	RC_STRING *s;
 
-	if (list) {
+	எனில் (list) {
 		TAILQ_FOREACH(s, list, entries)
-		    if (strcmp(s->value, value) == 0)
-			    return s;
+		    எனில் (strcmp(s->மதிப்பு, மதிப்பு) == 0)
+			    திரும்பு s;
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
 RC_STRINGLIST *
-rc_stringlist_split(const char *value, const char *sep)
+rc_stringlist_split(மாறிலி எழுத்து *மதிப்பு, மாறிலி எழுத்து *sep)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	char *d = xstrdup(value);
-	char *p = d, *token;
+	எழுத்து *d = xstrdup(மதிப்பு);
+	எழுத்து *p = d, *token;
 
-	while ((token = strsep(&p, sep)))
+	போது ((token = strsep(&p, sep)))
 		rc_stringlist_add(list, token);
-	free(d);
+	விடுவி(d);
 
-	return list;
+	திரும்பு list;
 }
 
-void
+வெறுமை
 rc_stringlist_sort(RC_STRINGLIST **list)
 {
 	RC_STRINGLIST *l = *list;
@@ -112,38 +112,38 @@ rc_stringlist_sort(RC_STRINGLIST **list)
 
 	TAILQ_FOREACH_SAFE(s, l, entries, sn) {
 		TAILQ_REMOVE(l, s, entries);
-		last = NULL;
+		last = வெற்று;
 		TAILQ_FOREACH(n, new, entries) {
-			if (strcmp(s->value, n->value) < 0)
-				break;
+			எனில் (strcmp(s->மதிப்பு, n->மதிப்பு) < 0)
+				நிறுத்து;
 			last = n;
 		}
-		if (last)
-			TAILQ_INSERT_AFTER(new, last, s, entries);
-		else
-			TAILQ_INSERT_HEAD(new, s, entries);
+		எனில் (last)
+			TAILQ_செருகு_AFTER(new, last, s, entries);
+		இல்லையெனில்
+			TAILQ_செருகு_HEAD(new, s, entries);
 	}
 
 	/* Now we've sorted the list, copy across the new head */
-	free(l);
+	விடுவி(l);
 	*list = new;
 }
 
-void
+வெறுமை
 rc_stringlist_free(RC_STRINGLIST *list)
 {
 	RC_STRING *s1;
 	RC_STRING *s2;
 
-	if (!list)
-		return;
+	எனில் (!list)
+		திரும்பு;
 
 	s1 = TAILQ_FIRST(list);
-	while (s1) {
+	போது (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
-		free(s1->value);
-		free(s1);
+		விடுவி(s1->மதிப்பு);
+		விடுவி(s1);
 		s1 = s2;
 	}
-	free(list);
+	விடுவி(list);
 }

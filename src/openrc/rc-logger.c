@@ -16,220 +16,220 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <time.h>
-#include <unistd.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <poll.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <sys/ioctl.h>
+#அந்தர்பாவ <sys/wait.h>
+#அந்தர்பாவ <termios.h>
+#அந்தர்பாவ <time.h>
+#அந்தர்பாவ <unistd.h>
 
-#if defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#எனில் defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 #  include <pty.h>
-#elif defined(__NetBSD__) || defined(__OpenBSD__)
+#அல்லதெனில் defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <util.h>
-#else
+#இல்லையெனில்
 #  include <libutil.h>
 #endif
 
-#include "einfo.h"
-#include "rc-logger.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "rc-logger.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "misc.h"
+#அந்தர்பாவ "helpers.h"
 
 #define DEFAULTLOG "/var/log/rc.log"
 
-static int signal_pipe[2] = { -1, -1 };
-static int fd_stdout = -1;
-static int fd_stderr = -1;
-static const char *runlevel = NULL;
-static bool in_escape = false;
-static bool in_term = false;
+நிலையான முழு signal_pipe[2] = { -1, -1 };
+நிலையான முழு fd_stdout = -1;
+நிலையான முழு fd_stderr = -1;
+நிலையான மாறிலி எழுத்து *runlevel = வெற்று;
+நிலையான bool in_escape = false;
+நிலையான bool in_term = false;
 
-static char *logbuf = NULL;
-static size_t logbuf_size = 0;
-static size_t logbuf_len = 0;
+நிலையான எழுத்து *logbuf = வெற்று;
+நிலையான size_t logbuf_size = 0;
+நிலையான size_t logbuf_len = 0;
 
 pid_t rc_logger_pid = -1;
-int rc_logger_tty = -1;
+முழு rc_logger_tty = -1;
 bool rc_in_logger = false;
 
-static void
-write_log(int logfd, const char *buffer, size_t bytes)
+நிலையான வெறுமை
+write_log(முழு logfd, மாறிலி எழுத்து *buffer, size_t bytes)
 {
-	const char *p = buffer;
+	மாறிலி எழுத்து *p = buffer;
 
-	while ((size_t)(p - buffer) < bytes) {
-		switch (*p) {
-		case '\r':
-			goto cont;
-		case '\033':
+	போது ((size_t)(p - buffer) < bytes) {
+		தேர்வு (*p) {
+		நிலை '\r':
+			செல் cont;
+		நிலை '\033':
 			in_escape = true;
 			in_term = false;
-			goto cont;
-		case '\n':
+			செல் cont;
+		நிலை '\n':
 			in_escape = in_term = false;
-			break;
-		case '[':
-			if (in_escape)
+			நிறுத்து;
+		நிலை '[':
+			எனில் (in_escape)
 				in_term = true;
-			break;
+			நிறுத்து;
 		}
 
-		if (!in_escape) {
-			if (!isprint((int) *p) && *p != '\n')
-				goto cont;
-			if (write(logfd, p++, 1) == -1)
+		எனில் (!in_escape) {
+			எனில் (!isprint((முழு) *p) && *p != '\n')
+				செல் cont;
+			எனில் (லிக(logfd, p++, 1) == -1)
 				eerror("write: %s", strerror(errno));
-			continue;
+			தொடர்;
 		}
 
-		if (!in_term || isalpha((unsigned char)*p))
+		எனில் (!in_term || isalpha((unsigned எழுத்து)*p))
 			in_escape = in_term = false;
 cont:
 		p++;
 	}
 }
 
-static void
-write_time(FILE *f, const char *s)
+நிலையான வெறுமை
+write_time(FILE *f, மாறிலி எழுத்து *s)
 {
-	time_t now = time(NULL);
-	struct tm *tm = localtime(&now);
+	time_t now = time(வெற்று);
+	கட்டமைப்பு tm *tm = localtime(&now);
 
 	fprintf(f, "\nrc %s logging %s at %s\n", runlevel, s, asctime(tm));
 	fflush(f);
 }
 
-static void
-mkpath(const char *path)
+நிலையான வெறுமை
+mkpath(மாறிலி எழுத்து *path)
 {
-	char *dir = xstrdup(path), *slash = dir;
-	while ((slash = strchr(slash + 1, '/'))) {
+	எழுத்து *dir = xstrdup(path), *slash = dir;
+	போது ((slash = strchr(slash + 1, '/'))) {
 		*slash = '\0';
-		if (mkdir(path, 0755) == -1 && errno != EEXIST)
-			break;
+		எனில் (mkdir(path, 0755) == -1 && errno != EEXIST)
+			நிறுத்து;
 		*slash = '/';
 	}
 	mkdir(path, 0755);
-	free(dir);
+	விடுவி(dir);
 }
 
-void
-rc_logger_close(void)
+வெறுமை
+rc_logger_close(வெறுமை)
 {
-	int sig = SIGTERM;
+	முழு sig = SIGTERM;
 
-	if (signal_pipe[1] > -1) {
-		if (write(signal_pipe[1], &sig, sizeof(sig)) == -1)
+	எனில் (signal_pipe[1] > -1) {
+		எனில் (லிக(signal_pipe[1], &sig, அளவு(sig)) == -1)
 			eerror("write: %s", strerror(errno));
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 	}
 
-	if (rc_logger_pid > 0)
+	எனில் (rc_logger_pid > 0)
 		waitpid(rc_logger_pid, 0, 0);
 
-	if (fd_stdout > -1)
+	எனில் (fd_stdout > -1)
 		dup2(fd_stdout, STDOUT_FILENO);
-	if (fd_stderr > -1)
+	எனில் (fd_stderr > -1)
 		dup2(fd_stderr, STDERR_FILENO);
 }
 
-void
-rc_logger_open(const char *level)
+வெறுமை
+rc_logger_open(மாறிலி எழுத்து *level)
 {
-	int slave_tty;
-	struct termios tt;
-	struct winsize ws;
-	char buffer[BUFSIZ];
-	struct pollfd fd[2];
-	int s = 0;
+	முழு slave_tty;
+	கட்டமைப்பு termios tt;
+	கட்டமைப்பு winsize ws;
+	எழுத்து buffer[BUFSIZ];
+	கட்டமைப்பு pollfd fd[2];
+	முழு s = 0;
 	size_t bytes;
-	FILE *log = NULL;
-	FILE *plog = NULL;
-	const char *logfile;
-	char *tmplog, *usrlog = NULL;
-	int log_error = 0;
+	FILE *log = வெற்று;
+	FILE *plog = வெற்று;
+	மாறிலி எழுத்து *logfile;
+	எழுத்து *tmplog, *usrlog = வெற்று;
+	முழு log_error = 0;
 
-	if (!rc_conf_yesno("rc_logger"))
-		return;
+	எனில் (!rc_conf_yesno("rc_logger"))
+		திரும்பு;
 
-	if (pipe2(signal_pipe, O_CLOEXEC) == -1)
+	எனில் (pipe2(signal_pipe, O_CLOEXEC) == -1)
 		eerrorx("pipe2: %s", strerror(errno));
 
-	if (isatty(STDOUT_FILENO)) {
+	எனில் (isatty(STDOUT_FILENO)) {
 		tcgetattr(STDOUT_FILENO, &tt);
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, &tt, &ws))
-			return;
-	} else
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, NULL, NULL))
-			return;
+		எனில் (openpty(&rc_logger_tty, &slave_tty, வெற்று, &tt, &ws))
+			திரும்பு;
+	} இல்லையெனில்
+		எனில் (openpty(&rc_logger_tty, &slave_tty, வெற்று, வெற்று, வெற்று))
+			திரும்பு;
 
-	if ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
+	எனில் ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
 		fcntl(rc_logger_tty, F_SETFD, s | FD_CLOEXEC);
 
-	if ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
+	எனில் ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
 		fcntl(slave_tty, F_SETFD, s | FD_CLOEXEC);
 
 	rc_logger_pid = fork();
-	switch (rc_logger_pid) {
-	case -1:
+	தேர்வு (rc_logger_pid) {
+	நிலை -1:
 		eerror("fork: %s", strerror(errno));
-		break;
-	case 0:
+		நிறுத்து;
+	நிலை 0:
 		rc_in_logger = true;
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 
 		runlevel = level;
 		xasprintf(&tmplog, "%s/rc.log", rc_svcdir());
-		if ((log = fopen(tmplog, "ae")))
+		எனில் ((log = fopen(tmplog, "ae")))
 			write_time(log, "started");
-		else {
-			free(logbuf);
+		இல்லையெனில் {
+			விடுவி(logbuf);
 			logbuf_size = BUFSIZ * 10;
-			logbuf = xmalloc(sizeof (char) * logbuf_size);
+			logbuf = xmalloc(அளவு (எழுத்து) * logbuf_size);
 			logbuf_len = 0;
 		}
 
 		fd[0].fd = signal_pipe[0];
 		fd[0].events = fd[1].events = POLLIN;
 		fd[0].revents = fd[1].revents = 0;
-		if (rc_logger_tty >= 0)
+		எனில் (rc_logger_tty >= 0)
 			fd[1].fd = rc_logger_tty;
-		for (;;) {
-			if ((s = poll(fd,
+		க்கு (;;) {
+			எனில் ((s = poll(fd,
 				    rc_logger_tty >= 0 ? 2 : 1, -1)) == -1)
 			{
 				eerror("poll: %s", strerror(errno));
-				break;
-			} else if (s == 0)
-				continue;
+				நிறுத்து;
+			} இல்லையெனில் எனில் (s == 0)
+				தொடர்;
 
-			if (fd[1].revents & (POLLIN | POLLHUP)) {
+			எனில் (fd[1].revents & (POLLIN | POLLHUP)) {
 				memset(buffer, 0, BUFSIZ);
-				bytes = read(rc_logger_tty, buffer, BUFSIZ);
-				if (write(STDOUT_FILENO, buffer, bytes) == -1)
+				bytes = பட(rc_logger_tty, buffer, BUFSIZ);
+				எனில் (லிக(STDOUT_FILENO, buffer, bytes) == -1)
 					eerror("write: %s", strerror(errno));
 
-				if (log)
+				எனில் (log)
 					write_log(fileno (log), buffer, bytes);
-				else {
-					if (logbuf_size - logbuf_len < bytes) {
+				இல்லையெனில் {
+					எனில் (logbuf_size - logbuf_len < bytes) {
 						logbuf_size += BUFSIZ * 10;
 						logbuf = xrealloc(logbuf,
-						    sizeof(char ) *
+						    அளவு(எழுத்து ) *
 						    logbuf_size);
 					}
 
@@ -240,31 +240,31 @@ rc_logger_open(const char *level)
 			}
 
 			/* Only SIGTERMS signals come down this pipe */
-			if (fd[0].revents & (POLLIN | POLLHUP))
-				break;
+			எனில் (fd[0].revents & (POLLIN | POLLHUP))
+				நிறுத்து;
 		}
-		if (logbuf) {
-			if ((log = fopen(tmplog, "ae"))) {
+		எனில் (logbuf) {
+			எனில் ((log = fopen(tmplog, "ae"))) {
 				write_time(log, "started");
 				write_log(fileno(log), logbuf, logbuf_len);
 			}
-			free(logbuf);
+			விடுவி(logbuf);
 		}
-		if (log) {
+		எனில் (log) {
 			write_time(log, "stopped");
 			fclose(log);
 		}
 
 		/* Append the temporary log to the real log */
-		logfile = rc_conf_value("rc_log_path");
-		if (logfile == NULL) {
-			if (!rc_is_user()) {
+		logfile = rc_conf_மதிப்பு("rc_log_path");
+		எனில் (logfile == வெற்று) {
+			எனில் (!rc_is_user()) {
 				logfile = DEFAULTLOG;
-			} else {
-				const char *state_home = getenv("XDG_STATE_HOME");
-				if (state_home) {
+			} இல்லையெனில் {
+				மாறிலி எழுத்து *state_home = getenv("XDG_STATE_HOME");
+				எனில் (state_home) {
 					xasprintf(&usrlog, "%s/rc.log", state_home);
-				} else if ((state_home = getenv("HOME"))) {
+				} இல்லையெனில் எனில் ((state_home = getenv("HOME"))) {
 					xasprintf(&usrlog, "%s/.local/state/rc.log", state_home);
 					state_home = ".local/state";
 				}
@@ -272,71 +272,71 @@ rc_logger_open(const char *level)
 				logfile = usrlog;
 			}
 		}
-		if (!strcmp(logfile, tmplog)) {
+		எனில் (!strcmp(logfile, tmplog)) {
 			eerror("Cowardly refusing to concatenate a logfile into itself.");
 			eerrorx("Please change rc_log_path to something other than %s to get rid of this message", tmplog);
 		}
 
-		if ((plog = fopen(logfile, "ae"))) {
-			if ((log = fopen(tmplog, "re"))) {
-				while ((bytes = fread(buffer, sizeof(*buffer), BUFSIZ, log)) > 0) {
-					if (fwrite(buffer, sizeof(*buffer), bytes, plog) < bytes) {
+		எனில் ((plog = fopen(logfile, "ae"))) {
+			எனில் ((log = fopen(tmplog, "re"))) {
+				போது ((bytes = fread(buffer, அளவு(*buffer), BUFSIZ, log)) > 0) {
+					எனில் (fwrite(buffer, அளவு(*buffer), bytes, plog) < bytes) {
 						log_error = 1;
 						eerror("Error: write(%s) failed: %s", logfile, strerror(errno));
-						break;
+						நிறுத்து;
 					}
 				}
 				fclose(log);
-			} else {
+			} இல்லையெனில் {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", tmplog, strerror(errno));
 			}
 
 			fclose(plog);
-		} else {
+		} இல்லையெனில் {
 			/*
 			 * logfile or its basedir may be read-only during sysinit and
 			 * shutdown so skip the error in this case
 			 */
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
+			எனில் (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", logfile, strerror(errno));
 			}
 		}
 
-		free(usrlog);
+		விடுவி(usrlog);
 
 		/* Try to keep the temporary log in case of errors */
-		if (!log_error) {
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
-				if (unlink(tmplog) == -1)
+		எனில் (!log_error) {
+			எனில் (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
+				எனில் (unlink(tmplog) == -1)
 					eerror("Error: unlink(%s) failed: %s", tmplog, strerror(errno));
-		} else if (access(tmplog, F_OK) == 0) {
+		} இல்லையெனில் எனில் (access(tmplog, F_OK) == 0) {
 			eerrorx("Warning: temporary logfile left behind: %s", tmplog);
 		}
 
-		free(tmplog);
+		விடுவி(tmplog);
 
 		exit(0);
 		/* NOTREACHED */
 
-	default:
+	இயல்பு:
 		setpgid(rc_logger_pid, 0);
 		fd_stdout = dup(STDOUT_FILENO);
 		fd_stderr = dup(STDERR_FILENO);
-		if ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
+		எனில் ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
 			fcntl(fd_stdout, F_SETFD, s | FD_CLOEXEC);
 
-		if ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
+		எனில் ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
 			fcntl(fd_stderr, F_SETFD, s | FD_CLOEXEC);
 		dup2(slave_tty, STDOUT_FILENO);
 		dup2(slave_tty, STDERR_FILENO);
-		if (slave_tty != STDIN_FILENO &&
+		எனில் (slave_tty != STDIN_FILENO &&
 		    slave_tty != STDOUT_FILENO &&
 		    slave_tty != STDERR_FILENO)
 			close(slave_tty);
 		close(signal_pipe[0]);
 		signal_pipe[0] = -1;
-		break;
+		நிறுத்து;
 	}
 }

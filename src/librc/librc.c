@@ -15,27 +15,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <assert.h>
-#include <helpers.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <limits.h>
-#include <regex.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#அந்தர்பாவ <assert.h>
+#அந்தர்பாவ <helpers.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <dirent.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <libgen.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <regex.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <sys/param.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <unistd.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "misc.h"
-#include "rc.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "librc.h"
+#அந்தர்பாவ "misc.h"
+#அந்தர்பாவ "rc.h"
 #ifdef __FreeBSD__
 #  include <sys/sysctl.h>
 #endif
@@ -45,47 +45,47 @@
 #endif
 
 /* File stream used for plugins to write environ vars to */
-FILE *rc_environ_fd = NULL;
-static int dirfds[RC_DIR_MAX];
+FILE *rc_environ_fd = வெற்று;
+நிலையான முழு dirfds[RC_DIR_MAX];
 
-int rc_dirfd(enum rc_dir dir) {
-	int flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
-	int dirfd;
+முழு rc_dirfd(எண்ணிக்கை rc_dir dir) {
+	முழு flags = O_RDONLY | O_CLOEXEC | O_DIRECTORY;
+	முழு dirfd;
 
-	if (dir < 0 || dir >= RC_DIR_MAX)
-		return -1;
-	if (dirfds[dir] <= 0) {
-		switch (dir) {
-		case RC_DIR_SYSCONF:
-			return dirfds[dir] = open(rc_sysconfdir(), flags);
-		case RC_DIR_USRCONF:
-			return dirfds[dir] = open(rc_usrconfdir(), flags);
-		case RC_DIR_RUNLEVEL:
-			return dirfds[dir] = open(rc_runleveldir(), flags);
-		case RC_DIR_SVCDIR:
-			if (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
-				return -1;
-			return dirfds[dir] = open(rc_svcdir(), flags);
-		default:
-			assert(dirnames[dir]);
+	எனில் (dir < 0 || dir >= RC_DIR_MAX)
+		திரும்பு -1;
+	எனில் (dirfds[dir] <= 0) {
+		தேர்வு (dir) {
+		நிலை RC_DIR_SYSCONF:
+			திரும்பு dirfds[dir] = open(rc_sysconfdir(), flags);
+		நிலை RC_DIR_USRCONF:
+			திரும்பு dirfds[dir] = open(rc_usrconfdir(), flags);
+		நிலை RC_DIR_RUNLEVEL:
+			திரும்பு dirfds[dir] = open(rc_runleveldir(), flags);
+		நிலை RC_DIR_SVCDIR:
+			எனில் (mkdir(rc_svcdir(), 0755) == -1 && errno != EEXIST)
+				திரும்பு -1;
+			திரும்பு dirfds[dir] = open(rc_svcdir(), flags);
+		இயல்பு:
+			ப்ரதிஜ்ஞா(dirnames[dir]);
 			dirfd = rc_dirfd(RC_DIR_SVCDIR);
-			if ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
-				if (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
-					return -1;
+			எனில் ((dirfds[dir] = openat(dirfd, dirnames[dir], flags)) == -1 && errno == ENOENT) {
+				எனில் (mkdirat(dirfd, dirnames[dir], 0755) == -1 && errno != EEXIST)
+					திரும்பு -1;
 				dirfds[dir] = openat(dirfd, dirnames[dir], flags);
 			}
-			break;
+			நிறுத்து;
 		}
 	}
-	return dirfds[dir];
+	திரும்பு dirfds[dir];
 }
 
-void clear_dirfds(void) {
-	for (size_t i = 0; i < RC_DIR_MAX; i++) {
+வெறுமை clear_dirfds(வெறுமை) {
+	க்கு (size_t i = 0; i < RC_DIR_MAX; i++) {
 		/* dirfd is zero-initialized, though zero is a valid
 		 * FD, dirfd should never contain FDs which are <= 2. */
-		if (dirfds[i] <= 0)
-			continue;
+		எனில் (dirfds[i] <= 0)
+			தொடர்;
 
 		close(dirfds[i]);
 		dirfds[i] = -1;
@@ -94,330 +94,330 @@ void clear_dirfds(void) {
 
 #define LS_INITD	0x01
 #define LS_DIR		0x02
-static RC_STRINGLIST *
-ls_dir(int targetfd, const char *dir, int options)
+நிலையான RC_STRINGLIST *
+ls_dir(முழு targetfd, மாறிலி எழுத்து *dir, முழு options)
 {
 	DIR *dp;
-	struct dirent *d;
-	RC_STRINGLIST *list = NULL;
-	struct stat buf;
+	கட்டமைப்பு dirent *d;
+	RC_STRINGLIST *list = வெற்று;
+	கட்டமைப்பு stat buf;
 	size_t l;
 
 	list = rc_stringlist_new();
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return list;
+	எனில் (!(dp = do_opendirat(targetfd, dir)))
+		திரும்பு list;
 
-	while (((d = readdir(dp)) != NULL)) {
-		if (d->d_name[0] == '.')
-			continue;
-		if (options & LS_INITD) {
+	போது (((d = readdir(dp)) != வெற்று)) {
+		எனில் (d->d_name[0] == '.')
+			தொடர்;
+		எனில் (options & LS_INITD) {
 			/* Check that our file really exists.
 			 * This is important as a service maybe in a
 			 * runlevel, but could have been removed. */
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
-				continue;
+			எனில் (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0)
+				தொடர்;
 
 			/* .sh files are not init scripts */
 			l = strlen(d->d_name);
-			if (l > 2 && d->d_name[l - 3] == '.' &&
+			எனில் (l > 2 && d->d_name[l - 3] == '.' &&
 					d->d_name[l - 2] == 's' &&
 					d->d_name[l - 1] == 'h')
-				continue;
+				தொடர்;
 		}
-		if (options & LS_DIR) {
-			if (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
-				continue;
+		எனில் (options & LS_DIR) {
+			எனில் (fstatat(dirfd(dp), d->d_name, &buf, 0) != 0 || !S_ISDIR(buf.st_mode))
+				தொடர்;
 		}
 		rc_stringlist_add(list, d->d_name);
 	}
 	closedir(dp);
-	return list;
+	திரும்பு list;
 }
 
-static bool
-rm_dir(int targetfd, const char *pathname, bool top)
+நிலையான bool
+rm_dir(முழு targetfd, மாறிலி எழுத்து *pathname, bool உச்சி)
 {
 	bool retval = true;
-	struct dirent *d;
-	struct stat s;
+	கட்டமைப்பு dirent *d;
+	கட்டமைப்பு stat s;
 	DIR *dp;
 
-	if (!(dp = do_opendirat(targetfd, pathname)))
-		return false;
+	எனில் (!(dp = do_opendirat(targetfd, pathname)))
+		திரும்பு false;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
-			continue;
-		if (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
+	போது ((d = readdir(dp))) {
+		எனில் (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+			தொடர்;
+		எனில் (fstatat(dirfd(dp), d->d_name, &s, 0) != 0) {
 			retval = false;
-			break;
+			நிறுத்து;
 		}
-		if (S_ISDIR(s.st_mode)) {
-			if (!rm_dir(dirfd(dp), d->d_name, true)) {
+		எனில் (S_ISDIR(s.st_mode)) {
+			எனில் (!rm_dir(dirfd(dp), d->d_name, true)) {
 				retval = false;
-				break;
+				நிறுத்து;
 			}
-		} else {
-			if (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
+		} இல்லையெனில் {
+			எனில் (unlinkat(dirfd(dp), d->d_name, 0) != 0) {
 				retval = false;
-				break;
+				நிறுத்து;
 			}
 		}
 	}
 	closedir(dp);
 
-	if (!retval)
-		return false;
+	எனில் (!retval)
+		திரும்பு false;
 
-	if (top && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
-		return false;
+	எனில் (உச்சி && unlinkat(targetfd, pathname, AT_REMOVEDIR) != 0)
+		திரும்பு false;
 
-	return true;
+	திரும்பு true;
 }
 
 /* Other systems may need this at some point, but for now it's Linux only */
 #ifdef __linux__
-static bool
-file_regex(const char *file, const char *regex)
+நிலையான bool
+file_regex(மாறிலி எழுத்து *file, மாறிலி எழுத்து *regex)
 {
 	FILE *fp;
-	char *line = NULL;
+	எழுத்து *வரி = வெற்று;
 	size_t size = 0;
 	ssize_t len = 0;
 	regex_t re;
 	bool retval = true;
-	int result;
+	முழு result;
 
-	if (!(fp = fopen(file, "r")))
-		return false;
+	எனில் (!(fp = fopen(file, "r")))
+		திரும்பு false;
 
-	if ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
-		char buf[BUFSIZ];
+	எனில் ((result = regcomp(&re, regex, REG_EXTENDED | REG_NOSUB)) != 0) {
+		எழுத்து buf[BUFSIZ];
 		fclose(fp);
-		regerror(result, &re, buf, sizeof(buf));
+		regerror(result, &re, buf, அளவு(buf));
 		fprintf(stderr, "file_regex: %s", buf);
-		return false;
+		திரும்பு false;
 	}
 
-	while ((len = xgetline(&line, &size, fp)) != -1) {
-		char *str = line;
+	போது ((len = xgetline(&வரி, &size, fp)) != -1) {
+		எழுத்து *str = வரி;
 		/* some /proc files have \0 separated content so we have to
 		   loop through the 'line' */
-		do {
-			if (regexec(&re, str, 0, NULL, 0) == 0)
-				goto found;
+		செய் {
+			எனில் (regexec(&re, str, 0, வெற்று, 0) == 0)
+				செல் found;
 			str += strlen(str) + 1;
 			/* len is the size of allocated buffer and we don't
 			   want call regexec BUFSIZE times. find next str */
-			while (str < line + len && *str == '\0')
+			போது (str < வரி + len && *str == '\0')
 				str++;
-		} while (str < line + len);
+		} போது (str < வரி + len);
 	}
 	retval = false;
 found:
 	fclose(fp);
-	free(line);
+	விடுவி(வரி);
 	regfree(&re);
 
-	return retval;
+	திரும்பு retval;
 }
 #endif
 
 
-static const char *
-get_systype(void)
+நிலையான மாறிலி எழுத்து *
+get_systype(வெறுமை)
 {
-	char *systype = rc_conf_value("rc_sys");
-	if (systype) {
-		char *s = systype;
+	எழுத்து *systype = rc_conf_மதிப்பு("rc_sys");
+	எனில் (systype) {
+		எழுத்து *s = systype;
 		/* Convert to uppercase */
-		while (s && *s) {
-			if (islower((unsigned char) *s))
-				*s = toupper((unsigned char) *s);
+		போது (s && *s) {
+			எனில் (islower((unsigned எழுத்து) *s))
+				*s = toupper((unsigned எழுத்து) *s);
 			s++;
 		}
 	}
-	return systype;
+	திரும்பு systype;
 }
 
-static const char *
-detect_container(const char *systype RC_UNUSED)
+நிலையான மாறிலி எழுத்து *
+detect_container(மாறிலி எழுத்து *systype RC_UNUSED)
 {
 #ifdef __FreeBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-		       return NULL;
-		if (strcmp(systype, RC_SYS_JAIL) == 0)
-			return RC_SYS_JAIL;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
+	எனில் (systype) {
+		எனில் (strcmp(systype, RC_SYS_NONE) == 0)
+		       திரும்பு வெற்று;
+		எனில் (strcmp(systype, RC_SYS_JAIL) == 0)
+			திரும்பு RC_SYS_JAIL;
+		எனில் (strcmp(systype, RC_SYS_PODMAN) == 0)
+			திரும்பு RC_SYS_PODMAN;
 	}
 
-	int jailed = 0;
-	size_t len = sizeof(jailed);
+	முழு jailed = 0;
+	size_t len = அளவு(jailed);
 
-	if (sysctlbyname("security.jail.jailed", &jailed, &len, NULL, 0) == 0)
-		if (jailed == 1)
-			return RC_SYS_JAIL;
+	எனில் (sysctlbyname("security.jail.jailed", &jailed, &len, வெற்று, 0) == 0)
+		எனில் (jailed == 1)
+			திரும்பு RC_SYS_JAIL;
 
-	if (access("/var/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
+	எனில் (access("/var/run/.containerenv", F_OK) == 0)
+		திரும்பு RC_SYS_PODMAN;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_UML) == 0)
-			return RC_SYS_UML;
-		if (strcmp(systype, RC_SYS_VSERVER) == 0)
-			return RC_SYS_VSERVER;
-		if (strcmp(systype, RC_SYS_OPENVZ) == 0)
-			return RC_SYS_OPENVZ;
-		if (strcmp(systype, RC_SYS_LXC) == 0)
-			return RC_SYS_LXC;
-		if (strcmp(systype, RC_SYS_RKT) == 0)
-				return RC_SYS_RKT;
-		if (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
-				return RC_SYS_SYSTEMD_NSPAWN;
-		if (strcmp(systype, RC_SYS_DOCKER) == 0)
-				return RC_SYS_DOCKER;
-		if (strcmp(systype, RC_SYS_PODMAN) == 0)
-			return RC_SYS_PODMAN;
-		if (strcmp(systype, RC_SYS_WSL) == 0)
-			return RC_SYS_WSL;
+	எனில் (systype) {
+		எனில் (strcmp(systype, RC_SYS_NONE) == 0)
+			திரும்பு வெற்று;
+		எனில் (strcmp(systype, RC_SYS_UML) == 0)
+			திரும்பு RC_SYS_UML;
+		எனில் (strcmp(systype, RC_SYS_VSERVER) == 0)
+			திரும்பு RC_SYS_VSERVER;
+		எனில் (strcmp(systype, RC_SYS_OPENVZ) == 0)
+			திரும்பு RC_SYS_OPENVZ;
+		எனில் (strcmp(systype, RC_SYS_LXC) == 0)
+			திரும்பு RC_SYS_LXC;
+		எனில் (strcmp(systype, RC_SYS_RKT) == 0)
+				திரும்பு RC_SYS_RKT;
+		எனில் (strcmp(systype, RC_SYS_SYSTEMD_NSPAWN) == 0)
+				திரும்பு RC_SYS_SYSTEMD_NSPAWN;
+		எனில் (strcmp(systype, RC_SYS_DOCKER) == 0)
+				திரும்பு RC_SYS_DOCKER;
+		எனில் (strcmp(systype, RC_SYS_PODMAN) == 0)
+			திரும்பு RC_SYS_PODMAN;
+		எனில் (strcmp(systype, RC_SYS_WSL) == 0)
+			திரும்பு RC_SYS_WSL;
 	}
-	if (file_regex("/proc/cpuinfo", "UML"))
-		return RC_SYS_UML;
-	else if (file_regex("/proc/self/status",
+	எனில் (file_regex("/proc/cpuinfo", "UML"))
+		திரும்பு RC_SYS_UML;
+	இல்லையெனில் எனில் (file_regex("/proc/self/status",
 		"(s_context|VxID):[[:space:]]*[1-9]"))
-		return RC_SYS_VSERVER;
-	else if (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
-		return RC_SYS_OPENVZ;
-	else if (file_regex("/proc/self/status",
+		திரும்பு RC_SYS_VSERVER;
+	இல்லையெனில் எனில் (access("/proc/vz/veinfo", F_OK) == 0 && access("/proc/vz/version", F_OK) != 0)
+		திரும்பு RC_SYS_OPENVZ;
+	இல்லையெனில் எனில் (file_regex("/proc/self/status",
 		"envID:[[:space:]]*[1-9]"))
-		return RC_SYS_OPENVZ; /* old test */
-	else if (file_regex("/proc/1/environ", "container=lxc"))
-		return RC_SYS_LXC;
-	else if (file_regex("/proc/1/environ", "container=rkt"))
-		return RC_SYS_RKT;
-	else if (file_regex("/proc/1/environ", "container=systemd-nspawn"))
-		return RC_SYS_SYSTEMD_NSPAWN;
-	else if (access("/run/.containerenv", F_OK) == 0)
-		return RC_SYS_PODMAN;
-	else if (access("/.dockerenv", F_OK) == 0)
-		return RC_SYS_DOCKER;
+		திரும்பு RC_SYS_OPENVZ; /* old test */
+	இல்லையெனில் எனில் (file_regex("/proc/1/environ", "container=lxc"))
+		திரும்பு RC_SYS_LXC;
+	இல்லையெனில் எனில் (file_regex("/proc/1/environ", "container=rkt"))
+		திரும்பு RC_SYS_RKT;
+	இல்லையெனில் எனில் (file_regex("/proc/1/environ", "container=systemd-nspawn"))
+		திரும்பு RC_SYS_SYSTEMD_NSPAWN;
+	இல்லையெனில் எனில் (access("/run/.containerenv", F_OK) == 0)
+		திரும்பு RC_SYS_PODMAN;
+	இல்லையெனில் எனில் (access("/.dockerenv", F_OK) == 0)
+		திரும்பு RC_SYS_DOCKER;
 	/* old test, I'm not sure when this was valid. */
-	else if (file_regex("/proc/1/environ", "container=docker"))
-		return RC_SYS_DOCKER;
-	else if (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
-		return RC_SYS_WSL;
-	else if (getenv("WSL_DISTRO_NAME"))
-		return RC_SYS_WSL;
-	else if (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
-		return RC_SYS_WSL;
+	இல்லையெனில் எனில் (file_regex("/proc/1/environ", "container=docker"))
+		திரும்பு RC_SYS_DOCKER;
+	இல்லையெனில் எனில் (file_regex("/proc/sys/kernel/osrelease", "microsoft"))
+		திரும்பு RC_SYS_WSL;
+	இல்லையெனில் எனில் (getenv("WSL_DISTRO_NAME"))
+		திரும்பு RC_SYS_WSL;
+	இல்லையெனில் எனில் (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
+		திரும்பு RC_SYS_WSL;
 #endif
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-static const char *
-detect_vm(const char *systype RC_UNUSED)
+நிலையான மாறிலி எழுத்து *
+detect_vm(மாறிலி எழுத்து *systype RC_UNUSED)
 {
 #ifdef __NetBSD__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	எனில் (systype) {
+		எனில் (strcmp(systype, RC_SYS_NONE) == 0)
+			திரும்பு வெற்று;
+		எனில் (strcmp(systype, RC_SYS_XEN0) == 0)
+			திரும்பு RC_SYS_XEN0;
+		எனில் (strcmp(systype, RC_SYS_XENU) == 0)
+			திரும்பு RC_SYS_XENU;
 	}
-	if (access("/kern/xen/privcmd", F_OK) == 0)
-		return RC_SYS_XEN0;
-	if (access("/kern/xen", F_OK) == 0)
-		return RC_SYS_XENU;
+	எனில் (access("/kern/xen/privcmd", F_OK) == 0)
+		திரும்பு RC_SYS_XEN0;
+	எனில் (access("/kern/xen", F_OK) == 0)
+		திரும்பு RC_SYS_XENU;
 #endif
 
 #ifdef __linux__
-	if (systype) {
-		if (strcmp(systype, RC_SYS_NONE) == 0)
-			return NULL;
-		if (strcmp(systype, RC_SYS_XEN0) == 0)
-			return RC_SYS_XEN0;
-		if (strcmp(systype, RC_SYS_XENU) == 0)
-			return RC_SYS_XENU;
+	எனில் (systype) {
+		எனில் (strcmp(systype, RC_SYS_NONE) == 0)
+			திரும்பு வெற்று;
+		எனில் (strcmp(systype, RC_SYS_XEN0) == 0)
+			திரும்பு RC_SYS_XEN0;
+		எனில் (strcmp(systype, RC_SYS_XENU) == 0)
+			திரும்பு RC_SYS_XENU;
 	}
-	if (access("/proc/xen", F_OK) == 0) {
-		if (file_regex("/proc/xen/capabilities", "control_d"))
-			return RC_SYS_XEN0;
-		return RC_SYS_XENU;
+	எனில் (access("/proc/xen", F_OK) == 0) {
+		எனில் (file_regex("/proc/xen/capabilities", "control_d"))
+			திரும்பு RC_SYS_XEN0;
+		திரும்பு RC_SYS_XENU;
 	}
 #endif
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-const char *
-rc_sys(void)
+மாறிலி எழுத்து *
+rc_sys(வெறுமை)
 {
-	const char *systype;
-	const char *sys;
+	மாறிலி எழுத்து *systype;
+	மாறிலி எழுத்து *sys;
 
 	systype = get_systype();
 	sys = detect_container(systype);
-	if (!sys) {
+	எனில் (!sys) {
 		sys = detect_vm(systype);
 	}
 
-	return sys;
+	திரும்பு sys;
 }
 
-static const char *
+நிலையான மாறிலி எழுத்து *
 rc_parse_service_state(RC_SERVICE state)
 {
-	int i;
+	முழு i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].name;
+	க்கு (i = 0; rc_service_state_names[i].name; i++) {
+		எனில் (rc_service_state_names[i].state == state)
+			திரும்பு rc_service_state_names[i].name;
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-static int
+நிலையான முழு
 rc_parse_service_state_dirfd(RC_SERVICE state)
 {
-	for (size_t i = 0; rc_service_state_names[i].name; i++)
-		if (rc_service_state_names[i].state == state)
-			return rc_service_state_names[i].dir;
-	return -1;
+	க்கு (size_t i = 0; rc_service_state_names[i].name; i++)
+		எனில் (rc_service_state_names[i].state == state)
+			திரும்பு rc_service_state_names[i].dir;
+	திரும்பு -1;
 }
 
 /* Returns a list of all the chained runlevels used by the
  * specified runlevel in dependency order, including the
  * specified runlevel. */
-static void
-get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
+நிலையான வெறுமை
+get_runlevel_chain(மாறிலி எழுத்து *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIST *ancestor_list)
 {
 	RC_STRINGLIST *dirs;
 	RC_STRING *d, *parent;
-	const char *nextlevel;
+	மாறிலி எழுத்து *nextlevel;
 
 	/*
 	 * If we haven't been passed a runlevel or a level list, or
 	 * if the passed runlevel doesn't exist then we're done already!
 	 */
-	if (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
-		return;
+	எனில் (!runlevel || !level_list || !rc_runlevel_exists(runlevel))
+		திரும்பு;
 
 	/*
 	 * We want to add this runlevel to the list but if
 	 * it is already in the list it needs to go at the
 	 * end again.
 	 */
-	if (rc_stringlist_find(level_list, runlevel))
+	எனில் (rc_stringlist_find(level_list, runlevel))
 		rc_stringlist_delete(level_list, runlevel);
 	rc_stringlist_add(level_list, runlevel);
 
@@ -427,15 +427,15 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 	 */
 	dirs = ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_DIR);
 	TAILQ_FOREACH(d, dirs, entries) {
-		nextlevel = d->value;
+		nextlevel = d->மதிப்பு;
 
 		/* Check for loop */
-		if (rc_stringlist_find(ancestor_list, nextlevel)) {
+		எனில் (rc_stringlist_find(ancestor_list, nextlevel)) {
 			fprintf(stderr, "Loop detected in stacked runlevels attempting to enter runlevel %s!\n",
 			    nextlevel);
 			fprintf(stderr, "Ancestors:\n");
 			TAILQ_FOREACH(parent, ancestor_list, entries)
-				fprintf(stderr, "\t%s\n", parent->value);
+				fprintf(stderr, "\t%s\n", parent->மதிப்பு);
 			exit(1);
 		}
 
@@ -450,146 +450,146 @@ get_runlevel_chain(const char *runlevel, RC_STRINGLIST *level_list, RC_STRINGLIS
 }
 
 bool
-rc_runlevel_starting(void)
+rc_runlevel_starting(வெறுமை)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
+	திரும்பு faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.starting", F_OK, 0) == 0;
 }
 
 bool
-rc_runlevel_stopping(void)
+rc_runlevel_stopping(வெறுமை)
 {
-	return faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
+	திரும்பு faccessat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", F_OK, 0) == 0;
 }
 
-RC_STRINGLIST *rc_runlevel_list(void)
+RC_STRINGLIST *rc_runlevel_list(வெறுமை)
 {
-	return ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
+	திரும்பு ls_dir(AT_FDCWD, rc_runleveldir(), LS_DIR);
 }
 
-char *
-rc_runlevel_get(void)
+எழுத்து *
+rc_runlevel_get(வெறுமை)
 {
 	FILE *fp;
-	char *runlevel = NULL;
+	எழுத்து *runlevel = வெற்று;
 	size_t i;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
-		runlevel = xmalloc(sizeof(char) * PATH_MAX);
-		if (fgets(runlevel, PATH_MAX, fp)) {
+	எனில் ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_RDONLY))) {
+		runlevel = xmalloc(அளவு(எழுத்து) * PATH_MAX);
+		எனில் (fgets(runlevel, PATH_MAX, fp)) {
 			i = strlen(runlevel);
-			if (i && runlevel[i - 1] == '\n')
+			எனில் (i && runlevel[i - 1] == '\n')
 				runlevel[i - 1] = 0;
-		} else
+		} இல்லையெனில்
 			*runlevel = '\0';
 		fclose(fp);
 	}
 
-	if (!runlevel || !*runlevel) {
-		free(runlevel);
-		runlevel = NULL;
+	எனில் (!runlevel || !*runlevel) {
+		விடுவி(runlevel);
+		runlevel = வெற்று;
 	}
 
-	return runlevel;
+	திரும்பு runlevel;
 }
 
 bool
-rc_runlevel_set(const char *runlevel)
+rc_runlevel_set(மாறிலி எழுத்து *runlevel)
 {
 	FILE *fp;
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	எனில் (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "softlevel", O_WRONLY | O_CREAT | O_TRUNC)))
+		திரும்பு false;
 
 	fputs(runlevel, fp);
 	fclose(fp);
-	return true;
+	திரும்பு true;
 }
 
 bool
-rc_runlevel_exists(const char *runlevel)
+rc_runlevel_exists(மாறிலி எழுத்து *runlevel)
 {
-	struct stat buf;
+	கட்டமைப்பு stat buf;
 
-	if (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
-		return false;
-	if (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
-		return true;
-	return false;
+	எனில் (!runlevel || strcmp(runlevel, "") == 0 || strcmp(runlevel, ".") == 0 || strcmp(runlevel, "..") == 0)
+		திரும்பு false;
+	எனில் (fstatat(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, &buf, 0) == 0 && S_ISDIR(buf.st_mode))
+		திரும்பு true;
+	திரும்பு false;
 }
 
 bool
-rc_runlevel_stack(const char *dst, const char *src)
+rc_runlevel_அடுக்கு(மாறிலி எழுத்து *dst, மாறிலி எழுத்து *src)
 {
-	char *d, *s;
-	int r;
+	எழுத்து *d, *s;
+	முழு r;
 
-	if (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
-		return false;
+	எனில் (!rc_runlevel_exists(dst) || !rc_runlevel_exists(src))
+		திரும்பு false;
 	xasprintf(&s, "../%s", src);
 	xasprintf(&d, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = symlink(s, d);
-	free(d);
-	free(s);
-	return (r == 0);
+	விடுவி(d);
+	விடுவி(s);
+	திரும்பு (r == 0);
 }
 
 bool
-rc_runlevel_unstack(const char *dst, const char *src)
+rc_runlevel_unstack(மாறிலி எழுத்து *dst, மாறிலி எழுத்து *src)
 {
-	char *path;
-	int r;
+	எழுத்து *path;
+	முழு r;
 
 	xasprintf(&path, "%s/%s/%s", rc_runleveldir(), dst, src);
 	r = unlink(path);
-	free(path);
-	return (r == 0);
+	விடுவி(path);
+	திரும்பு (r == 0);
 }
 
 RC_STRINGLIST *
-rc_runlevel_stacks(const char *runlevel)
+rc_runlevel_stacks(மாறிலி எழுத்து *runlevel)
 {
-	RC_STRINGLIST *stack, *ancestor_list;
-	stack = rc_stringlist_new();
+	RC_STRINGLIST *அடுக்கு, *ancestor_list;
+	அடுக்கு = rc_stringlist_new();
 	ancestor_list = rc_stringlist_new();
 	rc_stringlist_add(ancestor_list, runlevel);
-	get_runlevel_chain(runlevel, stack, ancestor_list);
+	get_runlevel_chain(runlevel, அடுக்கு, ancestor_list);
 	rc_stringlist_free(ancestor_list);
-	return stack;
+	திரும்பு அடுக்கு;
 }
 
-static const char *config_path[] = { _RC_PATH, NULL };
+நிலையான மாறிலி எழுத்து *config_path[] = { _RC_PATH, வெற்று };
 
-static struct {
+நிலையான கட்டமைப்பு {
 	bool set;
-	char *svcdir, *confdir, *runleveldir;
+	எழுத்து *svcdir, *confdir, *runleveldir;
 } rc_dirs;
 
-static struct {
-	char *buffer;
-	size_t count;
-	int *fds;
-	const char **entries, **allocd;
+நிலையான கட்டமைப்பு {
+	எழுத்து *buffer;
+	size_t மொத்தம்;
+	முழு *fds;
+	மாறிலி எழுத்து **entries, **allocd;
 } rc_path;
 
-static void
-free_rc_dirs(void)
+நிலையான வெறுமை
+free_rc_dirs(வெறுமை)
 {
-#define X(ptr) ptr = (free(ptr), NULL)
+#define X(ptr) ptr = (விடுவி(ptr), வெற்று)
 	X(rc_dirs.svcdir);
 	X(rc_dirs.confdir);
 	X(rc_dirs.runleveldir);
 	X(rc_path.allocd);
 	/* entries alias freed allocation */
-	rc_path.entries = NULL;
+	rc_path.entries = வெற்று;
 	X(rc_path.buffer);
 	X(rc_path.fds);
-	rc_path.count = 0;
+	rc_path.மொத்தம் = 0;
 #undef X
 }
 
 __attribute__((__format__(__printf__, 2, 3)))
-static void
-append_path(FILE *fp, const char *fmt, ...)
+நிலையான வெறுமை
+append_path(FILE *fp, மாறிலி எழுத்து *fmt, ...)
 {
 	va_list va;
 
@@ -598,160 +598,160 @@ append_path(FILE *fp, const char *fmt, ...)
 	fputc('\0', fp);
 	va_end(va);
 
-	rc_path.count++;
+	rc_path.மொத்தம்++;
 }
 
-static const char *
-strnsep(const char **str, size_t *size, const char sep)
+நிலையான மாறிலி எழுத்து *
+strnsep(மாறிலி எழுத்து **str, size_t *size, மாறிலி எழுத்து sep)
 {
-	const char *ret = *str;
+	மாறிலி எழுத்து *ret = *str;
 
-	if (!ret)
-		return NULL;
+	எனில் (!ret)
+		திரும்பு வெற்று;
 
 	*str = strchrnul(ret, sep);
 	*size = *str - ret;
-	if (!**str)
-		*str = NULL;
-	else
+	எனில் (!**str)
+		*str = வெற்று;
+	இல்லையெனில்
 		*str += 1;
 
-	return ret;
+	திரும்பு ret;
 }
 
-static const char *
-strnullsep(const char **str, size_t *size)
+நிலையான மாறிலி எழுத்து *
+strnullsep(மாறிலி எழுத்து **str, size_t *size)
 {
-	const char *ret = *str;
+	மாறிலி எழுத்து *ret = *str;
 	size_t len;
 
-	if (!ret)
-		return NULL;
+	எனில் (!ret)
+		திரும்பு வெற்று;
 
 	len = strnlen(ret, *size - 1) + 1;
 
-	if ((*size -= len))
+	எனில் ((*size -= len))
 		*str += len;
-	else
-		*str = NULL;
+	இல்லையெனில்
+		*str = வெற்று;
 
-	return ret;
+	திரும்பு ret;
 }
 
-static void
+நிலையான வெறுமை
 append_user_path(FILE *fp)
 {
-	const char *xdg, *entry;
+	மாறிலி எழுத்து *xdg, *entry;
 	size_t size;
 
 	append_path(fp, "%s", rc_dirs.confdir);
-	if (!(xdg = getenv("XDG_CONFIG_DIRS")))
+	எனில் (!(xdg = getenv("XDG_CONFIG_DIRS")))
 		append_path(fp, "/etc/xdg/rc");
-	else while ((entry = strnsep(&xdg, &size, ':')))
-		if (size) append_path(fp, "%.*s/rc", (int) size, entry);
+	இல்லையெனில் போது ((entry = strnsep(&xdg, &size, ':')))
+		எனில் (size) append_path(fp, "%.*s/rc", (முழு) size, entry);
 
-	for (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
+	க்கு (size_t i = 0; i < ARRAY_SIZE(config_path) - 2; i++)
 		append_path(fp, "%s/user", config_path[i]);
 	append_path(fp, "%s", rc_dirs.svcdir);
 }
 
-static void
-append_rc_path(FILE *fp, const char *path, bool user)
+நிலையான வெறுமை
+append_rc_path(FILE *fp, மாறிலி எழுத்து *path, bool user)
 {
 	bool has_user = false;
-	const char *entry;
+	மாறிலி எழுத்து *entry;
 	size_t size;
 
-	while ((entry = strnsep(&path, &size, ':'))) {
-		if (size)
-			append_path(fp, "%.*s%s", (int)size, entry, user ? "/user" : "");
-		else if (user && !has_user)
+	போது ((entry = strnsep(&path, &size, ':'))) {
+		எனில் (size)
+			append_path(fp, "%.*s%s", (முழு)size, entry, user ? "/user" : "");
+		இல்லையெனில் எனில் (user && !has_user)
 			append_user_path(fp), has_user = true;
-		else if (!user) while (*rc_path.entries)
+		இல்லையெனில் எனில் (!user) போது (*rc_path.entries)
 			append_path(fp, "%s", *rc_path.entries++);
 	}
 }
 
-static void
+நிலையான வெறுமை
 load_dynamic_path(bool user)
 {
-	const char *path, *entry;
-	size_t size, count = 0;
+	மாறிலி எழுத்து *path, *entry;
+	size_t size, மொத்தம் = 0;
 	FILE *fp;
 
-	if (!rc_dirs.set) {
+	எனில் (!rc_dirs.set) {
 		atexit(free_rc_dirs);
 		rc_dirs.set = true;
 	}
 
 	rc_path.entries = config_path;
-	rc_path.count = ARRAY_SIZE(config_path) - 1;
+	rc_path.மொத்தம் = ARRAY_SIZE(config_path) - 1;
 
-	if (!(path = getenv("RC_PATH")) && !user)
-		return;
+	எனில் (!(path = getenv("RC_PATH")) && !user)
+		திரும்பு;
 
-	rc_path.count = 0;
+	rc_path.மொத்தம் = 0;
 	fp = xopen_memstream(&rc_path.buffer, &size);
-	if (path)
+	எனில் (path)
 		append_rc_path(fp, path, user);
-	else
+	இல்லையெனில்
 		append_user_path(fp);
 	xclose_memstream(fp);
 
-	rc_path.allocd = rc_path.entries = calloc(rc_path.count + 1, sizeof(*rc_path.entries));
+	rc_path.allocd = rc_path.entries = calloc(rc_path.மொத்தம் + 1, அளவு(*rc_path.entries));
 
 	path = rc_path.buffer;
 
-	while ((entry = strnullsep(&path, &size)) && count < rc_path.count)
-		rc_path.entries[count++] = entry;
-	rc_path.entries[rc_path.count] = NULL;
+	போது ((entry = strnullsep(&path, &size)) && மொத்தம் < rc_path.மொத்தம்)
+		rc_path.entries[மொத்தம்++] = entry;
+	rc_path.entries[rc_path.மொத்தம்] = வெற்று;
 }
 
-static bool is_user = false;
+நிலையான bool is_user = false;
 
 bool
-rc_is_user(void)
+rc_is_user(வெறுமை)
 {
-	int _is_user = -1;
+	முழு _is_user = -1;
 
-	if (_is_user == -1) {
-		char *env = getenv("RC_USER_SERVICES");
+	எனில் (_is_user == -1) {
+		எழுத்து *env = getenv("RC_USER_SERVICES");
 
 		_is_user = env ? rc_yesno(env) : is_user;
 	}
 
-	return _is_user;
+	திரும்பு _is_user;
 }
 
-void
-rc_set_user(void)
+வெறுமை
+rc_set_user(வெறுமை)
 {
-	char *env;
+	எழுத்து *env;
 
-	if (is_user)
-		return;
+	எனில் (is_user)
+		திரும்பு;
 
-	if (!rc_dirs.set)
+	எனில் (!rc_dirs.set)
 		atexit(free_rc_dirs);
-	else
+	இல்லையெனில்
 		free_rc_dirs();
 
 	is_user = true;
 	rc_dirs.set = true;
 	setenv("RC_USER_SERVICES", "yes", true);
 
-	if ((env = getenv("XDG_CONFIG_HOME"))) {
+	எனில் ((env = getenv("XDG_CONFIG_HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/rc", env);
-	} else if ((env = getenv("HOME"))) {
+	} இல்லையெனில் எனில் ((env = getenv("HOME"))) {
 		xasprintf(&rc_dirs.confdir, "%s/.config/rc", env);
-	} else {
+	} இல்லையெனில் {
 		fprintf(stderr, "XDG_CONFIG_HOME and HOME unset.\n");
 		exit(EXIT_FAILURE);
 	}
 
 	xasprintf(&rc_dirs.runleveldir, "%s/runlevels", rc_dirs.confdir);
 
-	if (!(env = getenv("XDG_RUNTIME_DIR"))) {
+	எனில் (!(env = getenv("XDG_RUNTIME_DIR"))) {
 		/* FIXME: fallback to something else? */
 		fprintf(stderr, "XDG_RUNTIME_DIR unset.\n");
 		exit(EXIT_FAILURE);
@@ -764,314 +764,314 @@ rc_set_user(void)
 	clear_dirfds();
 }
 
-const char * const *
-rc_scriptdirs(void)
+மாறிலி எழுத்து * மாறிலி *
+rc_scriptdirs(வெறுமை)
 {
-	if (!rc_path.entries)
+	எனில் (!rc_path.entries)
 		load_dynamic_path(false);
-	return rc_path.entries;
+	திரும்பு rc_path.entries;
 }
 
 size_t
-rc_scriptdirfds(const int **fds)
+rc_scriptdirfds(மாறிலி முழு **fds)
 {
-	static size_t len = 0;
+	நிலையான size_t len = 0;
 
-	if (len == 0) {
-		if (!rc_path.entries)
+	எனில் (len == 0) {
+		எனில் (!rc_path.entries)
 			load_dynamic_path(false);
 
-		rc_path.fds = xmalloc(rc_path.count * sizeof(*rc_path.fds));
-		for (size_t i = 0; i < rc_path.count; i++) {
-			int fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+		rc_path.fds = xmalloc(rc_path.மொத்தம் * அளவு(*rc_path.fds));
+		க்கு (size_t i = 0; i < rc_path.மொத்தம்; i++) {
+			முழு fd = open(rc_path.entries[i], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
 
-			if (fd == -1)
-				continue;
+			எனில் (fd == -1)
+				தொடர்;
 
 			rc_path.fds[len++] = fd;
 		}
 	}
 
 	*fds = rc_path.fds;
-	return len;
+	திரும்பு len;
 }
 
-const char *
-rc_sysconfdir(void)
+மாறிலி எழுத்து *
+rc_sysconfdir(வெறுமை)
 {
-	return RC_SYSCONFDIR;
+	திரும்பு RC_SYSCONFDIR;
 }
 
-const char *
-rc_usrconfdir(void)
+மாறிலி எழுத்து *
+rc_usrconfdir(வெறுமை)
 {
-	return rc_dirs.confdir ? rc_dirs.confdir : NULL;
+	திரும்பு rc_dirs.confdir ? rc_dirs.confdir : வெற்று;
 }
 
-const char *
-rc_runleveldir(void)
+மாறிலி எழுத்து *
+rc_runleveldir(வெறுமை)
 {
-	return rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
+	திரும்பு rc_dirs.runleveldir ? rc_dirs.runleveldir : RC_RUNLEVELDIR;
 }
 
-const char *
-rc_svcdir(void)
+மாறிலி எழுத்து *
+rc_svcdir(வெறுமை)
 {
-	static const char *svcdir;
+	நிலையான மாறிலி எழுத்து *svcdir;
 
-	if (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
+	எனில் (!rc_dirs.svcdir && !svcdir && !(svcdir = getenv("RC_SVCDIR")))
 		svcdir = RC_SVCDIR;
-	return rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
+	திரும்பு rc_dirs.svcdir ? rc_dirs.svcdir : svcdir;
 }
 
-static ssize_t
-safe_readlink(int targetfd, const char *path, char **buf, size_t bufsiz)
+நிலையான ssize_t
+safe_readlink(முழு targetfd, மாறிலி எழுத்து *path, எழுத்து **buf, size_t bufsiz)
 {
-	char *buffer;
+	எழுத்து *buffer;
 	ssize_t r;
 
-	for (;; bufsiz += PATH_MAX) {
+	க்கு (;; bufsiz += PATH_MAX) {
 		buffer = xmalloc(bufsiz);
 		r = readlinkat(targetfd, path, buffer, bufsiz);
-		if (r < 0) {
-			free(buffer);
-			return -errno;
+		எனில் (r < 0) {
+			விடுவி(buffer);
+			திரும்பு -errno;
 		}
-		if ((size_t)r < bufsiz) {
+		எனில் ((size_t)r < bufsiz) {
 			buffer[r] = '\0';
 			*buf = buffer;
-			return r;
+			திரும்பு r;
 		}
-		free(buffer);
-		if (bufsiz >= SSIZE_MAX - PATH_MAX)
-			return -ENOMEM;
+		விடுவி(buffer);
+		எனில் (bufsiz >= SSIZE_MAX - PATH_MAX)
+			திரும்பு -ENOMEM;
 	}
 }
 
 /* Resolve a service name to its full path */
-char *
-rc_service_resolve(const char *service)
+எழுத்து *
+rc_service_resolve(மாறிலி எழுத்து *service)
 {
-	char *buffer;
-	struct stat buf;
+	எழுத்து *buffer;
+	கட்டமைப்பு stat buf;
 
-	if (!service)
-		return NULL;
+	எனில் (!service)
+		திரும்பு வெற்று;
 
-	if (service[0] == '/')
-		return xstrdup(service);
+	எனில் (service[0] == '/')
+		திரும்பு xstrdup(service);
 
 	/* First check started services */
-	if (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
-	if (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
-		if (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
-			return buffer;
+	எனில் (fstatat(rc_dirfd(RC_DIR_STARTED), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		எனில் (safe_readlink(rc_dirfd(RC_DIR_STARTED), service, &buffer, buf.st_size + 1) >= 0)
+			திரும்பு buffer;
+	எனில் (fstatat(rc_dirfd(RC_DIR_INACTIVE), service, &buf, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(buf.st_mode))
+		எனில் (safe_readlink(rc_dirfd(RC_DIR_INACTIVE), service, &buffer, buf.st_size + 1) >= 0)
+			திரும்பு buffer;
 
-	for (const char * const *dirs = rc_scriptdirs(); *dirs; dirs++) {
-		char *file = NULL;
+	க்கு (மாறிலி எழுத்து * மாறிலி *dirs = rc_scriptdirs(); *dirs; dirs++) {
+		எழுத்து *file = வெற்று;
 		xasprintf(&file, "%s/init.d/%s", *dirs, service);
-		if (stat(file, &buf) == 0)
-			return file;
-		free(file);
+		எனில் (stat(file, &buf) == 0)
+			திரும்பு file;
+		விடுவி(file);
 	}
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
 bool
-rc_service_exists(const char *service)
+rc_service_exists(மாறிலி எழுத்து *service)
 {
-	char *file;
+	எழுத்து *file;
 	bool retval = false;
 	size_t len;
-	struct stat buf;
+	கட்டமைப்பு stat buf;
 
-	if (!service) {
+	எனில் (!service) {
 		errno = EINVAL;
-		return false;
+		திரும்பு false;
 	}
 
 	len = strlen(service);
 
 	/* .sh files are not init scripts */
-	if (len > 2 && service[len - 3] == '.' &&
+	எனில் (len > 2 && service[len - 3] == '.' &&
 			service[len - 2] == 's' &&
 			service[len - 1] == 'h') {
 		errno = EINVAL;
-		return false;
+		திரும்பு false;
 	}
 
-	if (!(file = rc_service_resolve(service))) {
+	எனில் (!(file = rc_service_resolve(service))) {
 		errno = ENOENT;
-		return false;
+		திரும்பு false;
 	}
 
-	if (stat(file, &buf) == 0) {
-		if (buf.st_mode & S_IXUGO)
+	எனில் (stat(file, &buf) == 0) {
+		எனில் (buf.st_mode & S_IXUGO)
 			retval = true;
-		else
+		இல்லையெனில்
 			errno = ENOEXEC;
 	}
-	free(file);
-	return retval;
+	விடுவி(file);
+	திரும்பு retval;
 }
 
 #define OPTSTR \
 ". '%s'; echo $extra_commands $extra_started_commands $extra_stopped_commands"
 
 RC_STRINGLIST *
-rc_service_extra_commands(const char *service)
+rc_service_extra_commands(மாறிலி எழுத்து *service)
 {
-	char *svc;
-	char *cmd = NULL;
-	char *buffer = NULL;
+	எழுத்து *svc;
+	எழுத்து *cmd = வெற்று;
+	எழுத்து *buffer = வெற்று;
 	size_t len = 0;
-	RC_STRINGLIST *commands = NULL;
-	char *token;
-	char *p;
+	RC_STRINGLIST *commands = வெற்று;
+	எழுத்து *token;
+	எழுத்து *p;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	எனில் (!(svc = rc_service_resolve(service)))
+		திரும்பு வெற்று;
 
 	xasprintf(&cmd, OPTSTR, svc);
-	free(svc);
+	விடுவி(svc);
 
-	if (!(fp = popen(cmd, "r"))) {
-		free(cmd);
-		return NULL;
+	எனில் (!(fp = popen(cmd, "r"))) {
+		விடுவி(cmd);
+		திரும்பு வெற்று;
 	}
 
-	if (xgetline(&buffer, &len, fp) != -1) {
+	எனில் (xgetline(&buffer, &len, fp) != -1) {
 		p = buffer;
 		commands = rc_stringlist_new();
 
-		while ((token = strsep(&p, " ")))
-			if (token[0] != '\0')
+		போது ((token = strsep(&p, " ")))
+			எனில் (token[0] != '\0')
 				rc_stringlist_add(commands, token);
 	}
 
 	pclose(fp);
-	free(buffer);
-	free(cmd);
-	return commands;
+	விடுவி(buffer);
+	விடுவி(cmd);
+	திரும்பு commands;
 }
 
 #define DESCSTR ". '%s'; echo \"${description%s%s}\""
-char *
-rc_service_description(const char *service, const char *option)
+எழுத்து *
+rc_service_description(மாறிலி எழுத்து *service, மாறிலி எழுத்து *option)
 {
-	char *svc;
-	char *cmd;
-	char *desc = NULL;
+	எழுத்து *svc;
+	எழுத்து *cmd;
+	எழுத்து *desc = வெற்று;
 	size_t size = 0;
 	FILE *fp;
 
-	if (!(svc = rc_service_resolve(service)))
-		return NULL;
+	எனில் (!(svc = rc_service_resolve(service)))
+		திரும்பு வெற்று;
 
-	if (!option)
+	எனில் (!option)
 		option = "";
 
 	xasprintf(&cmd, DESCSTR, svc, *option ? "_" : "", option);
-	free(svc);
-	if ((fp = popen(cmd, "r"))) {
-		if (xgetline(&desc, &size, fp) == -1) {
-			free(desc);
-			desc = NULL;
+	விடுவி(svc);
+	எனில் ((fp = popen(cmd, "r"))) {
+		எனில் (xgetline(&desc, &size, fp) == -1) {
+			விடுவி(desc);
+			desc = வெற்று;
 		}
 		pclose(fp);
 	}
-	free(cmd);
-	return desc;
+	விடுவி(cmd);
+	திரும்பு desc;
 }
 
 bool
-rc_service_in_runlevel(const char *service, const char *runlevel)
+rc_service_in_runlevel(மாறிலி எழுத்து *service, மாறிலி எழுத்து *runlevel)
 {
-	char *file;
+	எழுத்து *file;
 	bool r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	r = access(file, F_OK) == 0;
-	free(file);
-	return r;
+	விடுவி(file);
+	திரும்பு r;
 }
 
 bool
-rc_service_mark(const char *service, const RC_SERVICE state)
+rc_service_mark(மாறிலி எழுத்து *service, மாறிலி RC_SERVICE state)
 {
-	int i = 0;
-	const char *base;
-	char *init = rc_service_resolve(service);
+	முழு i = 0;
+	மாறிலி எழுத்து *base;
+	எழுத்து *init = rc_service_resolve(service);
 	bool skip_wasinactive = false;
-	int serrno;
+	முழு serrno;
 
-	if (!init)
-		return false;
+	எனில் (!init)
+		திரும்பு false;
 
 	base = basename_c(service);
-	if (state != RC_SERVICE_STOPPED) {
-		int state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
-		if (access(init, F_OK) != 0) {
-			free(init);
-			return false;
+	எனில் (state != RC_SERVICE_STOPPED) {
+		முழு state_dirfd = rc_dirfd(rc_parse_service_state_dirfd(state));
+		எனில் (access(init, F_OK) != 0) {
+			விடுவி(init);
+			திரும்பு false;
 		}
 
 		unlinkat(state_dirfd, base, 0);
-		if ((symlinkat(init, state_dirfd, base)) != 0) {
-			free(init);
-			return false;
+		எனில் ((symlinkat(init, state_dirfd, base)) != 0) {
+			விடுவி(init);
+			திரும்பு false;
 		}
 	}
 
-	if (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
-		free(init);
-		return true;
+	எனில் (state == RC_SERVICE_HOTPLUGGED || state == RC_SERVICE_FAILED) {
+		விடுவி(init);
+		திரும்பு true;
 	}
 
 	/* Remove any old states now */
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		int state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
+	க்கு (i = 0; rc_service_state_names[i].name; i++) {
+		முழு state_dirfd = rc_dirfd(rc_service_state_names[i].dir);
 		RC_SERVICE s = rc_service_state_names[i].state;
 
-		if (s == state)
-			continue;
+		எனில் (s == state)
+			தொடர்;
 
-		switch (s) {
-		case RC_SERVICE_STOPPED:
-		case RC_SERVICE_HOTPLUGGED:
-		case RC_SERVICE_SCHEDULED:
-			continue;
-		case RC_SERVICE_WASINACTIVE:
-			if (skip_wasinactive)
-				continue;
+		தேர்வு (s) {
+		நிலை RC_SERVICE_STOPPED:
+		நிலை RC_SERVICE_HOTPLUGGED:
+		நிலை RC_SERVICE_SCHEDULED:
+			தொடர்;
+		நிலை RC_SERVICE_WASINACTIVE:
+			எனில் (skip_wasinactive)
+				தொடர்;
 			/* fall-through */
-		default:
-			if (faccessat(state_dirfd, base, F_OK, 0) != 0)
-				continue;
-			if ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
-				if (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
-					free(init);
-					return false;
+		இயல்பு:
+			எனில் (faccessat(state_dirfd, base, F_OK, 0) != 0)
+				தொடர்;
+			எனில் ((state == RC_SERVICE_STARTING || state == RC_SERVICE_STOPPING) && s == RC_SERVICE_INACTIVE) {
+				எனில் (symlinkat(init, rc_dirfd(RC_DIR_WASINACTIVE), base) == -1) {
+					விடுவி(init);
+					திரும்பு false;
 				}
 				skip_wasinactive = true;
 			}
-			if (unlinkat(state_dirfd, base, 0) == -1) {
-				free(init);
-				return false;
+			எனில் (unlinkat(state_dirfd, base, 0) == -1) {
+				விடுவி(init);
+				திரும்பு false;
 			}
 		}
 	}
 
 	/* Remove the exclusive state if we're inactive */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
+	எனில் (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED || state == RC_SERVICE_INACTIVE)
 		unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), base, 0);
 
 	/* Remove any options and daemons the service may have stored */
-	if (state == RC_SERVICE_STOPPED) {
+	எனில் (state == RC_SERVICE_STOPPED) {
 		rm_dir(rc_dirfd(RC_DIR_OPTIONS), base, true);
 		rm_dir(rc_dirfd(RC_DIR_DAEMONS), base, true);
 		unlinkat(rc_dirfd(RC_DIR_ENVIRON), base, 0);
@@ -1079,16 +1079,16 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 	}
 
 	/* These are final states, so remove us from scheduled */
-	if (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
+	எனில் (state == RC_SERVICE_STARTED || state == RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				char *was;
+		எனில் (dp) {
+			கட்டமைப்பு dirent *d;
+			போது ((d = readdir(dp))) {
+				எழுத்து *was;
 
 				xasprintf(&was, "%s/%s", d->d_name, base);
 				unlinkat(dirfd(dp), was, 0);
-				free(was);
+				விடுவி(was);
 
 				serrno = errno;
 				unlinkat(dirfd(dp), d->d_name, AT_REMOVEDIR);
@@ -1098,38 +1098,38 @@ rc_service_mark(const char *service, const RC_SERVICE state)
 			closedir(dp);
 		}
 	}
-	free(init);
-	return true;
+	விடுவி(init);
+	திரும்பு true;
 }
 
 RC_SERVICE
-rc_service_state(const char *service)
+rc_service_state(மாறிலி எழுத்து *service)
 {
-	const char *base = basename_c(service);
-	int state = RC_SERVICE_STOPPED;
-	int i;
+	மாறிலி எழுத்து *base = basename_c(service);
+	முழு state = RC_SERVICE_STOPPED;
+	முழு i;
 
-	for (i = 0; rc_service_state_names[i].name; i++) {
-		if (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
-			if (rc_service_state_names[i].state <= 0x10)
+	க்கு (i = 0; rc_service_state_names[i].name; i++) {
+		எனில் (faccessat(rc_dirfd(rc_service_state_names[i].dir), base, F_OK, 0) == 0) {
+			எனில் (rc_service_state_names[i].state <= 0x10)
 				state = rc_service_state_names[i].state;
-			else
+			இல்லையெனில்
 				state |= rc_service_state_names[i].state;
 		}
 	}
 
-	if (state & RC_SERVICE_STARTED)
-		if (rc_service_daemons_crashed(service) && errno != EACCES)
+	எனில் (state & RC_SERVICE_STARTED)
+		எனில் (rc_service_daemons_crashed(service) && errno != EACCES)
 			state |= RC_SERVICE_CRASHED;
 
-	if (state & RC_SERVICE_STOPPED) {
+	எனில் (state & RC_SERVICE_STOPPED) {
 		DIR *dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED));
-		if (dp) {
-			struct dirent *d;
-			while ((d = readdir(dp))) {
-				if (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
+		எனில் (dp) {
+			கட்டமைப்பு dirent *d;
+			போது ((d = readdir(dp))) {
+				எனில் (faccessat(dirfd(dp), service, F_OK, 0) == 0) {
 					state |= RC_SERVICE_SCHEDULED;
-					break;
+					நிறுத்து;
 				}
 			}
 
@@ -1137,123 +1137,123 @@ rc_service_state(const char *service)
 		}
 	}
 
-	return state;
+	திரும்பு state;
 }
 
-char *
-rc_service_value_get(const char *service, const char *option)
+எழுத்து *
+rc_service_மதிப்பு_get(மாறிலி எழுத்து *service, மாறிலி எழுத்து *option)
 {
-	char *buffer = NULL;
+	எழுத்து *buffer = வெற்று;
 	size_t len = 0;
-	char *file;
+	எழுத்து *file;
 
 	xasprintf(&file, "%s/options/%s/%s", rc_svcdir(), service, option);
 	rc_getfile(file, &buffer, &len);
-	free(file);
+	விடுவி(file);
 
-	return buffer;
+	திரும்பு buffer;
 }
 
 bool
-rc_service_value_set(const char *service, const char *option, const char *value)
+rc_service_மதிப்பு_set(மாறிலி எழுத்து *service, மாறிலி எழுத்து *option, மாறிலி எழுத்து *மதிப்பு)
 {
 	bool ret = true;
-	int optdirfd;
+	முழு optdirfd;
 	FILE *fp;
 
-	if (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
-		return false;
+	எனில் (mkdirat(rc_dirfd(RC_DIR_OPTIONS), service, 0755) != 0 && errno != EEXIST)
+		திரும்பு false;
 
-	if ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
-		return false;
+	எனில் ((optdirfd = openat(rc_dirfd(RC_DIR_OPTIONS), service, O_RDONLY | O_DIRECTORY)) == -1)
+		திரும்பு false;
 
-	if (!value) {
+	எனில் (!மதிப்பு) {
 		unlinkat(optdirfd, option, 0);
-	} else if ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
-		fprintf(fp, "%s", value);
+	} இல்லையெனில் எனில் ((fp = do_fopenat(optdirfd, option, O_WRONLY | O_CREAT | O_TRUNC))) {
+		fprintf(fp, "%s", மதிப்பு);
 		fclose(fp);
-	} else {
+	} இல்லையெனில் {
 		ret = false;
 	}
 
 	close(optdirfd);
-	return ret;
+	திரும்பு ret;
 }
 
 bool
-rc_service_schedule_start(const char *service, const char *service_to_start)
+rc_service_schedule_start(மாறிலி எழுத்து *service, மாறிலி எழுத்து *service_to_start)
 {
-	const char *base_to_start = basename_c(service_to_start);
-	const char *base = basename_c(service);
+	மாறிலி எழுத்து *base_to_start = basename_c(service_to_start);
+	மாறிலி எழுத்து *base = basename_c(service);
 	bool retval;
-	int schedfd;
-	char *init;
+	முழு schedfd;
+	எழுத்து *init;
 
 	/* service may be a provided service, like net */
-	if (!service || !rc_service_exists(service_to_start))
-		return false;
+	எனில் (!service || !rc_service_exists(service_to_start))
+		திரும்பு false;
 
-	if (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
-		return false;
+	எனில் (mkdirat(rc_dirfd(RC_DIR_SCHEDULED), base, 0755) != 0 && errno != EEXIST)
+		திரும்பு false;
 
-	if ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
-		return false;
+	எனில் ((schedfd = openat(rc_dirfd(RC_DIR_SCHEDULED), base, O_RDONLY)) == -1)
+		திரும்பு false;
 
 	init = rc_service_resolve(service_to_start);
 
 	retval = (faccessat(schedfd, base_to_start, F_OK, 0) == 0) || (symlinkat(init, schedfd, base_to_start) == 0);
 
 	close(schedfd);
-	free(init);
-	return retval;
+	விடுவி(init);
+	திரும்பு retval;
 }
 
 bool
-rc_service_schedule_clear(const char *service)
+rc_service_schedule_clear(மாறிலி எழுத்து *service)
 {
-	return !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
+	திரும்பு !rm_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), true) && errno == ENOENT;
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel(const char *runlevel)
+rc_services_in_runlevel(மாறிலி எழுத்து *runlevel)
 {
-	RC_STRINGLIST *list = NULL;
+	RC_STRINGLIST *list = வெற்று;
 
-	if (!runlevel) {
-		const int *scriptdirfds;
+	எனில் (!runlevel) {
+		மாறிலி முழு *scriptdirfds;
 		list = rc_stringlist_new();
-		for (size_t i = 0, count = rc_scriptdirfds(&scriptdirfds); i < count; i++) {
+		க்கு (size_t i = 0, மொத்தம் = rc_scriptdirfds(&scriptdirfds); i < மொத்தம்; i++) {
 			RC_STRINGLIST *svcs;
 
 			svcs = ls_dir(scriptdirfds[i], "init.d", LS_INITD);
 			TAILQ_CONCAT(list, svcs, entries);
 			rc_stringlist_free(svcs);
 		}
-		return list;
+		திரும்பு list;
 	}
 
 	/* These special levels never contain any services */
-	if (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
-		return rc_stringlist_new();
+	எனில் (strcmp(runlevel, RC_LEVEL_SINGLE) == 0)
+		திரும்பு rc_stringlist_new();
 
-	return ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
+	திரும்பு ls_dir(rc_dirfd(RC_DIR_RUNLEVEL), runlevel, LS_INITD);
 }
 
 RC_STRINGLIST *
-rc_services_in_runlevel_stacked(const char *runlevel)
+rc_services_in_runlevel_stacked(மாறிலி எழுத்து *runlevel)
 {
 	RC_STRINGLIST *list, *stacks, *sl;
-	RC_STRING *stack;
+	RC_STRING *அடுக்கு;
 
 	list = rc_services_in_runlevel(runlevel);
 	stacks = rc_runlevel_stacks(runlevel);
-	TAILQ_FOREACH(stack, stacks, entries) {
-		sl = rc_services_in_runlevel(stack->value);
+	TAILQ_FOREACH(அடுக்கு, stacks, entries) {
+		sl = rc_services_in_runlevel(அடுக்கு->மதிப்பு);
 		TAILQ_CONCAT(list, sl, entries);
 		rc_stringlist_free(sl);
 	}
 	rc_stringlist_free(stacks);
-	return list;
+	திரும்பு list;
 }
 
 RC_STRINGLIST *
@@ -1261,196 +1261,196 @@ rc_services_in_state(RC_SERVICE state)
 {
 	RC_STRINGLIST *services;
 	RC_STRINGLIST *list;
-	struct dirent *d;
+	கட்டமைப்பு dirent *d;
 	DIR *dp;
 
-	if (state != RC_SERVICE_SCHEDULED)
-		return ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
+	எனில் (state != RC_SERVICE_SCHEDULED)
+		திரும்பு ls_dir(rc_dirfd(RC_DIR_SVCDIR), rc_parse_service_state(state), LS_INITD);
 
 	list = rc_stringlist_new();
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
-		return list;
+	எனில் (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "scheduled")))
+		திரும்பு list;
 
-	while ((d = readdir(dp))) {
-		if (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
-			continue;
+	போது ((d = readdir(dp))) {
+		எனில் (!(services = ls_dir(dirfd(dp), d->d_name, LS_INITD)))
+			தொடர்;
 		TAILQ_CONCAT(list, services, entries);
 		rc_stringlist_free(services);
 	}
 	closedir(dp);
 
-	return list;
+	திரும்பு list;
 }
 
 bool
-rc_service_add(const char *runlevel, const char *service)
+rc_service_add(மாறிலி எழுத்து *runlevel, மாறிலி எழுத்து *service)
 {
 	bool retval;
-	char *init;
-	char *file;
-	char *path;
-	char *binit = NULL;
-	char *i;
+	எழுத்து *init;
+	எழுத்து *file;
+	எழுத்து *path;
+	எழுத்து *binit = வெற்று;
+	எழுத்து *i;
 
-	if (!rc_runlevel_exists(runlevel)) {
+	எனில் (!rc_runlevel_exists(runlevel)) {
 		errno = ENOENT;
-		return false;
+		திரும்பு false;
 	}
 
-	if (rc_service_in_runlevel(service, runlevel)) {
+	எனில் (rc_service_in_runlevel(service, runlevel)) {
 		errno = EEXIST;
-		return false;
+		திரும்பு false;
 	}
 
 	i = init = rc_service_resolve(service);
 
 	/* We need to ensure that only things in /etc/init.d are added
 	 * to the boot runlevel -- not applicable for user services. */
-	if (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
-		path = realpath(dirname(init), NULL);
-		if (path == NULL) {
-			free(init);
-			return false;
+	எனில் (!rc_is_user() && strcmp(runlevel, RC_LEVEL_BOOT) == 0) {
+		path = realpath(dirname(init), வெற்று);
+		எனில் (path == வெற்று) {
+			விடுவி(init);
+			திரும்பு false;
 		}
 		retval = (strcmp(path, RC_INITDIR) == 0);
-		free(path);
-		if (!retval) {
-			free(init);
+		விடுவி(path);
+		எனில் (!retval) {
+			விடுவி(init);
 			errno = EPERM;
-			return false;
+			திரும்பு false;
 		}
 		xasprintf(&binit, "%s/%s", RC_INITDIR, service);
 		i = binit;
 	}
 
 	/* We shouldn't add any temporary script to a runlevel */
-	if (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
+	எனில் (strncmp(i, rc_svcdir(), strlen(rc_svcdir())) == 0) {
 		errno = ENOENT;
 		retval = false;
-		goto out;
+		செல் out;
 	}
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel, basename_c(service));
 	retval = (symlink(i, file) == 0);
-	free(file);
+	விடுவி(file);
 
 out:
-	free(binit);
-	free(init);
-	return retval;
+	விடுவி(binit);
+	விடுவி(init);
+	திரும்பு retval;
 }
 
 bool
-rc_service_delete(const char *runlevel, const char *service)
+rc_service_delete(மாறிலி எழுத்து *runlevel, மாறிலி எழுத்து *service)
 {
-	char *file;
-	int r;
+	எழுத்து *file;
+	முழு r;
 
 	xasprintf(&file, "%s/%s/%s", rc_runleveldir(), runlevel,
 		basename_c(service));
 	r = unlink(file);
-	free(file);
-	return (r == 0);
+	விடுவி(file);
+	திரும்பு (r == 0);
 }
 
 RC_STRINGLIST *
-rc_services_scheduled_by(const char *service)
+rc_services_scheduled_by(மாறிலி எழுத்து *service)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	struct dirent *d;
+	கட்டமைப்பு dirent *d;
 	DIR *dp;
 
-	if (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
-		return list;
+	எனில் (!(dp = do_dopendir(rc_dirfd(RC_DIR_SCHEDULED))))
+		திரும்பு list;
 
-	while ((d = readdir(dp))) {
-		char *file;
+	போது ((d = readdir(dp))) {
+		எழுத்து *file;
 		xasprintf(&file, "%s/%s", d->d_name, service);
-		if (faccessat(dirfd(dp), file, F_OK, 0) == 0)
+		எனில் (faccessat(dirfd(dp), file, F_OK, 0) == 0)
 			rc_stringlist_add(list, d->d_name);
-		free(file);
+		விடுவி(file);
 	}
 
-	return list;
+	திரும்பு list;
 }
 
 RC_STRINGLIST *
-rc_services_scheduled(const char *service)
+rc_services_scheduled(மாறிலி எழுத்து *service)
 {
-	return ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
+	திரும்பு ls_dir(rc_dirfd(RC_DIR_SCHEDULED), basename_c(service), LS_INITD);
 }
 
 bool
-rc_service_putenv(const char *service, const char *env)
+rc_service_putenv(மாறிலி எழுத்து *service, மாறிலி எழுத்து *env)
 {
 	size_t name_len = strcspn(env, "=");
-	char var[strlen(service) + sizeof("/") + name_len];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	எழுத்து var[strlen(service) + அளவு("/") + name_len];
+	முழு dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	if (env[name_len] != '=')
-		return errno = EINVAL, false;
+	எனில் (env[name_len] != '=')
+		திரும்பு errno = EINVAL, false;
 
-	snprintf(var, sizeof(var), "%s/%.*s", service, (int) name_len, env);
+	snprintf(var, அளவு(var), "%s/%.*s", service, (முழு) name_len, env);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	எனில் (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		திரும்பு false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	எனில் (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		திரும்பு false;
 
 	fputs(&env[name_len + 1], fp);
 
-	return fclose(fp) == 0;
+	திரும்பு fclose(fp) == 0;
 }
 
 bool
-rc_service_setenv(const char *service, const char *name, const char *value)
+rc_service_setenv(மாறிலி எழுத்து *service, மாறிலி எழுத்து *name, மாறிலி எழுத்து *மதிப்பு)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)];
-	int dfp = rc_dirfd(RC_DIR_ENVIRON);
+	எழுத்து var[strlen(service) + அளவு("/") + strlen(name)];
+	முழு dfp = rc_dirfd(RC_DIR_ENVIRON);
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, அளவு(var), "%s/%s", service, name);
 
-	if (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
-		return false;
+	எனில் (mkdirat(dfp, service, 0700) == -1 && errno != EEXIST)
+		திரும்பு false;
 
-	if (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
-		return false;
+	எனில் (!(fp = do_fopenat(dfp, var, O_WRONLY | O_CREAT | O_TRUNC)))
+		திரும்பு false;
 
-	fputs(value, fp);
+	fputs(மதிப்பு, fp);
 
-	return fclose(fp) == 0;
+	திரும்பு fclose(fp) == 0;
 }
 
 ssize_t
-rc_service_getenv(const char *service, const char *name, char **buf)
+rc_service_getenv(மாறிலி எழுத்து *service, மாறிலி எழுத்து *name, எழுத்து **buf)
 {
-	char var[strlen(service) + sizeof("/") + strlen(name)], *value;
-	int dfd = rc_dirfd(RC_DIR_ENVIRON);
-	struct stat stat;
-	size_t count;
+	எழுத்து var[strlen(service) + அளவு("/") + strlen(name)], *மதிப்பு;
+	முழு dfd = rc_dirfd(RC_DIR_ENVIRON);
+	கட்டமைப்பு stat stat;
+	size_t மொத்தம்;
 	FILE *fp;
 
-	snprintf(var, sizeof(var), "%s/%s", service, name);
+	snprintf(var, அளவு(var), "%s/%s", service, name);
 
-	if (fstatat(dfd, var, &stat, 0) == -1)
-		return -1;
+	எனில் (fstatat(dfd, var, &stat, 0) == -1)
+		திரும்பு -1;
 
-	if (!buf)
-		return stat.st_size;
+	எனில் (!buf)
+		திரும்பு stat.st_size;
 
-	if (!(value = xrealloc(*buf, stat.st_size + 1)))
-		return -1;
+	எனில் (!(மதிப்பு = xrealloc(*buf, stat.st_size + 1)))
+		திரும்பு -1;
 
-	if (!(fp = do_fopenat(dfd, var, O_RDONLY)))
-		return -1;
+	எனில் (!(fp = do_fopenat(dfd, var, O_RDONLY)))
+		திரும்பு -1;
 
-	count = fread(value, 1, stat.st_size, fp);
-	value[count] = '\0';
+	மொத்தம் = fread(மதிப்பு, 1, stat.st_size, fp);
+	மதிப்பு[மொத்தம்] = '\0';
 
 	fclose(fp);
-	*buf = value;
-	return count;
+	*buf = மதிப்பு;
+	திரும்பு மொத்தம்;
 }

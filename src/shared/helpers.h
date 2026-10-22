@@ -18,28 +18,28 @@
 #ifndef __HELPERS_H__
 #define __HELPERS_H__
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+#அந்தர்பாவ <stdarg.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stddef.h>
+#அந்தர்பாவ <stdint.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <dirent.h>
+#அந்தர்பாவ <unistd.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#define ERRX செய் { fprintf (stderr, "out of memory\n"); exit (1); } போது (0)
 
-#define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
+#define UNCONST(a)		((வெறுமை *)(uintptr_t)(மாறிலி வெறுமை *)(a))
 
 #define RC_UNUSED __attribute__((__unused__))
 #define RC_NORETURN __attribute__((__noreturn__))
 #define RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define ARRAY_SIZE(a) (அளவு(a) / அளவு((a)[0]))
 
 #ifndef HAVE_STRLCPY
 #    define strlcpy(dst, src, size) snprintf(dst, size, "%s", src)
@@ -47,66 +47,66 @@
 
 #ifndef timespecsub
 #define	timespecsub(tsp, usp, vsp)					      \
-	do {								      \
+	செய் {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		எனில் ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
+	} போது (/* CONSTCOND */ 0)
 #endif
 
-RC_UNUSED static void *xmalloc (size_t size)
+RC_UNUSED நிலையான வெறுமை *xmalloc (size_t size)
 {
-	void *value = malloc(size);
+	வெறுமை *மதிப்பு = malloc(size);
 
-	if (value)
-		return (value);
+	எனில் (மதிப்பு)
+		திரும்பு (மதிப்பு);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static void *xrealloc(void *ptr, size_t size)
+RC_UNUSED நிலையான வெறுமை *xrealloc(வெறுமை *ptr, size_t size)
 {
-	void *value = realloc(ptr, size);
+	வெறுமை *மதிப்பு = realloc(ptr, size);
 
-	if (value)
-		return (value);
+	எனில் (மதிப்பு)
+		திரும்பு (மதிப்பு);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static char *xstrdup(const char *str)
+RC_UNUSED நிலையான எழுத்து *xstrdup(மாறிலி எழுத்து *str)
 {
-	char *value;
+	எழுத்து *மதிப்பு;
 
-	if (!str)
-		return (NULL);
+	எனில் (!str)
+		திரும்பு (வெற்று);
 
-	value = strdup(str);
+	மதிப்பு = strdup(str);
 
-	if (value)
-		return (value);
+	எனில் (மதிப்பு)
+		திரும்பு (மதிப்பு);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
+RC_UNUSED நிலையான FILE *xopen_memstream(எழுத்து **ptr, size_t *sizeloc)
 {
 	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	எனில் (f)
+		திரும்பு f;
 	ERRX;
 }
 
-RC_UNUSED static void xclose_memstream(FILE *f)
+RC_UNUSED நிலையான வெறுமை xclose_memstream(FILE *f)
 {
 	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	எனில் (ferror(f) || fclose(f) != 0)
 		ERRX;
 }
 
@@ -116,23 +116,23 @@ RC_UNUSED static void xclose_memstream(FILE *f)
  * basename_c never modifies the argument. As such, if there is a trailing
  * slash then an empty string is returned.
  */
-RC_UNUSED static const char *basename_c(const char *path)
+RC_UNUSED நிலையான மாறிலி எழுத்து *basename_c(மாறிலி எழுத்து *path)
 {
-	const char *slash = strrchr(path, '/');
+	மாறிலி எழுத்து *slash = strrchr(path, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	எனில் (slash)
+		திரும்பு (++slash);
+	திரும்பு (path);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_UNUSED நிலையான FILE *do_fopenat(முழு dirfd, மாறிலி எழுத்து *pathname, முழு mode)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
-	const char *fmode;
+	முழு fd = openat(dirfd, pathname, mode, 0666);
+	மாறிலி எழுத்து *fmode;
 	FILE *fp;
 
-	if (fd == -1)
-		return NULL;
+	எனில் (fd == -1)
+		திரும்பு வெற்று;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	எனில் ((mode & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	இல்லையெனில் எனில் ((mode & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	இல்லையெனில்
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
+	எனில் (!(fp = fdopen(fd, fmode)))
 		close(fd);
-	return fp;
+	திரும்பு fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_UNUSED நிலையான DIR *do_opendirat(முழு dirfd, மாறிலி எழுத்து *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	முழு fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	எனில் (fd == -1)
+		திரும்பு வெற்று;
 
-	if (!(dp = fdopendir(fd)))
+	எனில் (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	திரும்பு dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_UNUSED நிலையான DIR *do_dopendir(முழு dirfd)
 {
-	int fd = dup(dirfd);
+	முழு fd = dup(dirfd);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	எனில் (fd == -1)
+		திரும்பு வெற்று;
 
-	if (!(dp = fdopendir(fd)))
+	எனில் (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	திரும்பு dp;
 }
 
 /*
@@ -188,12 +188,12 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_UNUSED RC_PRINTF(2,3) நிலையான முழு xasprintf(எழுத்து **strp, மாறிலி எழுத்து *fmt, ...)
 {
 	va_list ap;
-	int len;
-	int memlen;
-	char *ret;
+	முழு len;
+	முழு memlen;
+	எழுத்து *ret;
 
 	/*
 	 * Start with a buffer size that should cover the vast majority of uses
@@ -205,7 +205,7 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
 	va_end(ap);
-	if (len >= memlen) {
+	எனில் (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
@@ -215,86 +215,86 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 		len = vsnprintf(ret, len + 1, fmt, ap);
 		va_end(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	எனில் (len < 0 || len >= memlen) {
 		/* Give up! */
 		fprintf(stderr, "xasprintf: unable to format a buffer\n");
-		free(ret);
+		விடுவி(ret);
 		exit(1);
 	}
 	*strp = ret;
-	return len;
+	திரும்பு len;
 }
 
-RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
+RC_UNUSED நிலையான ssize_t xgetline(எழுத்து **restrict lineptr, size_t *restrict n, FILE *restrict stream)
 {
 	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	எனில் (ret <= 0)
+		திரும்பு ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	எனில் ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	திரும்பு ret;
 }
 
-RC_UNUSED static char *env_findvar(const char *name, char **envp)
+RC_UNUSED நிலையான எழுத்து *env_findvar(மாறிலி எழுத்து *name, எழுத்து **envp)
 {
 	size_t len = strlen(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	க்கு (எழுத்து **var = envp; *var; var++)
+		எனில் (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
+			திரும்பு *var;
+	திரும்பு வெற்று;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_UNUSED நிலையான முழு xopen_nonblock(மாறிலி எழுத்து *filename, முழு flags, mode_t mode)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
+	முழு fd = open(filename, flags | O_NONBLOCK, mode);
+	எனில் (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		முழு saved_errno = errno;
 		close(fd);
 		fd = -1;
 		errno = saved_errno;
 	}
-	return fd;
+	திரும்பு fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_UNUSED நிலையான முழு open_rwfifo(மாறிலி எழுத்து *path, bool nonblock)
 {
-	int r, w, err;
+	முழு r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	எனில் (mkfifo(path, 0600) == -1 && errno != EEXIST)
+		திரும்பு -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	எனில் ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		திரும்பு -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+	எனில் ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		err = errno;
-		goto r_err;
+		செல் r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+	எனில் (!nonblock) {
+		முழு flags = fcntl(r, F_GETFL);
+		எனில் (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
 			err = errno;
-			goto w_err;
+			செல் w_err;
 		}
 	}
 
-	return r;
+	திரும்பு r;
 
 w_err:
 	close(w);
 r_err:
 	close(r);
 	errno = err;
-	return -1;
+	திரும்பு -1;
 }
 
 #endif

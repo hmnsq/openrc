@@ -15,114 +15,114 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <fnmatch.h>
-#include <limits.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <fcntl.h>
+#அந்தர்பாவ <fnmatch.h>
+#அந்தர்பாவ <limits.h>
 #ifdef HAVE_LINUX_CLOSE_RANGE_H
 #  include <linux/close_range.h>
 #endif
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <spawn.h>
-#include <sys/file.h>
-#include <sys/time.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <spawn.h>
+#அந்தர்பாவ <sys/file.h>
+#அந்தர்பாவ <sys/time.h>
 #ifdef __linux__
 #  include <sys/syscall.h> /* for close_range */
 #  include <sys/sysinfo.h>
 #endif
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <sys/un.h>
-#include <sys/socket.h>
-#include <time.h>
-#include <unistd.h>
-#include <utime.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <sys/utsname.h>
+#அந்தர்பாவ <sys/un.h>
+#அந்தர்பாவ <sys/socket.h>
+#அந்தர்பாவ <time.h>
+#அந்தர்பாவ <unistd.h>
+#அந்தர்பாவ <utime.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "misc.h"
-#include "version.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "misc.h"
+#அந்தர்பாவ "version.h"
+#அந்தர்பாவ "helpers.h"
 
-extern char **environ;
+வெளி எழுத்து **environ;
 
 bool
-rc_conf_yesno(const char *setting)
+rc_conf_yesno(மாறிலி எழுத்து *setting)
 {
-	return rc_yesno(rc_conf_value (setting));
+	திரும்பு rc_yesno(rc_conf_மதிப்பு (setting));
 }
 
-static const char *const env_allowlist[] = {
+நிலையான மாறிலி எழுத்து *மாறிலி env_allowlist[] = {
 	"EERROR_QUIET", "EINFO_QUIET",
 	"IN_BACKGROUND", "IN_DRYRUN", "IN_HOTPLUG",
 	"RC_DEBUG", "RC_NODEPS", "RC_USER_SERVICES",
 	"RC_SVCDIR", "RC_PATH", "LANG", "LC_MESSAGES",
 	"TERM", "EINFO_COLOR", "EINFO_VERBOSE",
 	"HOSTNAME", "CHARSET", "LC_*",
-	NULL
+	வெற்று
 };
 
-static const char *const usrenv_allowlist[] = {
+நிலையான மாறிலி எழுத்து *மாறிலி usrenv_allowlist[] = {
 	"USER", "LOGNAME", "HOME", "SHELL",
 	"XDG_*", "DIFFTOOL", "LESS", "PAGER",
-	"EDITOR", "VISUAL", NULL
+	"EDITOR", "VISUAL", வெற்று
 };
 
-static bool
-env_allowed(const char *const list[], const char *value)
+நிலையான bool
+env_allowed(மாறிலி எழுத்து *மாறிலி list[], மாறிலி எழுத்து *மதிப்பு)
 {
-	for (size_t i = 0; list[i]; i++)
-		if (fnmatch(list[i], value, FNM_NOESCAPE | FNM_PERIOD) == 0)
-			return true;
-	return false;
+	க்கு (size_t i = 0; list[i]; i++)
+		எனில் (fnmatch(list[i], மதிப்பு, FNM_NOESCAPE | FNM_PERIOD) == 0)
+			திரும்பு true;
+	திரும்பு false;
 }
 
-void
-env_filter(void)
+வெறுமை
+env_filter(வெறுமை)
 {
 	RC_STRINGLIST *env_allow;
 	RC_STRINGLIST *profile;
 	RC_STRINGLIST *env_list;
-	char *profile_path;
+	எழுத்து *profile_path;
 	RC_STRING *env;
-	char *e;
+	எழுத்து *e;
 	size_t i = 0;
 
 	/* Add the user defined list of vars */
-	env_allow = rc_stringlist_split(rc_conf_value("rc_env_allow"), " ");
+	env_allow = rc_stringlist_split(rc_conf_மதிப்பு("rc_env_allow"), " ");
 	/*
 	 * If '*' is an entry in rc_env_allow, do nothing as we are to pass
 	 * through all environment variables.
 	 */
-	if (rc_stringlist_find(env_allow, "*")) {
+	எனில் (rc_stringlist_find(env_allow, "*")) {
 		rc_stringlist_free(env_allow);
-		return;
+		திரும்பு;
 	}
 
 	xasprintf(&profile_path, "%s/profile.env", rc_sysconfdir());
 	profile = rc_config_load(profile_path);
-	free(profile_path);
+	விடுவி(profile_path);
 
-	if (rc_is_user()) {
+	எனில் (rc_is_user()) {
 		RC_STRINGLIST *usrprofile;
 		xasprintf(&profile_path, "%s/profile.env", rc_usrconfdir());
 		usrprofile = rc_config_load(profile_path);
-		free(profile_path);
+		விடுவி(profile_path);
 		TAILQ_CONCAT(profile, usrprofile, entries);
 		rc_stringlist_free(usrprofile);
 	}
 
 	/* Copy the env and work from this so we can manipulate it safely */
 	env_list = rc_stringlist_new();
-	while (environ && environ[i]) {
+	போது (environ && environ[i]) {
 		env = rc_stringlist_add(env_list, environ[i++]);
-		e = strchr(env->value, '=');
-		if (e)
+		e = strchr(env->மதிப்பு, '=');
+		எனில் (e)
 			*e = '\0';
 	}
 
@@ -130,27 +130,27 @@ env_filter(void)
 		RC_STRING *var;
 
 		/* Check the whitelist */
-		if (env_allowed(env_allowlist, env->value))
-			continue;
-		if (rc_is_user() && env_allowed(usrenv_allowlist, env->value))
-			continue;
+		எனில் (env_allowed(env_allowlist, env->மதிப்பு))
+			தொடர்;
+		எனில் (rc_is_user() && env_allowed(usrenv_allowlist, env->மதிப்பு))
+			தொடர்;
 
 		/* Check our user defined list */
 		TAILQ_FOREACH(var, env_allow, entries)
-			if (fnmatch(var->value, env->value, FNM_NOESCAPE | FNM_PERIOD) == 0)
-				goto next;
+			எனில் (fnmatch(var->மதிப்பு, env->மதிப்பு, FNM_NOESCAPE | FNM_PERIOD) == 0)
+				செல் next;
 
 		/* OK, not allowed! */
-		unsetenv(env->value);
+		unsetenv(env->மதிப்பு);
 next:;
 	}
 
 	/* Now add anything missing from the profile */
 	TAILQ_FOREACH(env, profile, entries) {
-		e = strchr(env->value, '=');
+		e = strchr(env->மதிப்பு, '=');
 		*e = '\0';
-		if (!getenv(env->value))
-			setenv(env->value, e + 1, 1);
+		எனில் (!getenv(env->மதிப்பு))
+			setenv(env->மதிப்பு, e + 1, 1);
 	}
 
 	rc_stringlist_free(env_list);
@@ -158,84 +158,84 @@ next:;
 	rc_stringlist_free(profile);
 }
 
-char *
-default_runlevel(void)
+எழுத்து *
+default_runlevel(வெறுமை)
 {
-	char *runlevel = rc_runlevel_get();
+	எழுத்து *runlevel = rc_runlevel_get();
 
-	if (!runlevel)
-		runlevel = xstrdup(rc_conf_value("rc_default_runlevel"));
-	if (!runlevel || !*runlevel) {
-		free(runlevel);
+	எனில் (!runlevel)
+		runlevel = xstrdup(rc_conf_மதிப்பு("rc_default_runlevel"));
+	எனில் (!runlevel || !*runlevel) {
+		விடுவி(runlevel);
 		runlevel = xstrdup(RC_LEVEL_DEFAULT);
 	}
 
-	return runlevel;
+	திரும்பு runlevel;
 }
 
-void
-env_config(void)
+வெறுமை
+env_config(வெறுமை)
 {
 	size_t pplen = strlen(RC_PATH_PREFIX);
-	char *path;
-	char *p;
-	char *e;
+	எழுத்து *path;
+	எழுத்து *p;
+	எழுத்து *e;
 	size_t l;
-	struct utsname uts;
+	கட்டமைப்பு utsname uts;
 	FILE *fp;
-	char *token;
-	char *np;
-	char *npp;
-	char *tok;
-	const char *sys = rc_sys();
-	const char *svcdir = rc_svcdir();
-	const char *const *init_path = rc_scriptdirs();
-	char *buffer = NULL;
-	char *tmpdir;
+	எழுத்து *token;
+	எழுத்து *np;
+	எழுத்து *npp;
+	எழுத்து *tok;
+	மாறிலி எழுத்து *sys = rc_sys();
+	மாறிலி எழுத்து *svcdir = rc_svcdir();
+	மாறிலி எழுத்து *மாறிலி *init_path = rc_scriptdirs();
+	எழுத்து *buffer = வெற்று;
+	எழுத்து *tmpdir;
 	size_t size = 0;
 
 	/* Ensure our PATH is prefixed with the system locations first
 	   for a little extra security */
 	path = getenv("PATH");
-	if (!path)
+	எனில் (!path)
 		setenv("PATH", RC_PATH_PREFIX, 1);
-	else if (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
+	இல்லையெனில் எனில் (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
 		l = strlen(path) + pplen + 3;
-		e = p = xmalloc(sizeof(char) * l);
+		e = p = xmalloc(அளவு(எழுத்து) * l);
 		p += snprintf(p, l, "%s", RC_PATH_PREFIX);
 
 		/* Now go through the env var and only add bits not in our
 		 * PREFIX */
-		while ((token = strsep(&path, ":"))) {
+		போது ((token = strsep(&path, ":"))) {
 			np = npp = xstrdup(RC_PATH_PREFIX);
-			while ((tok = strsep(&npp, ":")))
-				if (strcmp(tok, token) == 0)
-					break;
-			if (!tok)
+			போது ((tok = strsep(&npp, ":")))
+				எனில் (strcmp(tok, token) == 0)
+					நிறுத்து;
+			எனில் (!tok)
 				p += snprintf(p, l - (p - e), ":%s", token);
-			free (np);
+			விடுவி (np);
 		}
 		*p++ = '\0';
 		unsetenv("PATH");
 		setenv("PATH", e, 1);
-		free(e);
+		விடுவி(e);
 	}
 
-	if (!rc_is_user()) {
+	எனில் (!rc_is_user()) {
 		setenv("RC_CACHEDIR", "/var/cache/rc", 1);
-	} else {
-		const char *cache_home = getenv("XDG_CACHE_HOME");
-		char *cachedir = NULL;
+	} இல்லையெனில் {
+		மாறிலி எழுத்து *cache_home = getenv("XDG_CACHE_HOME");
+		எழுத்து *cachedir = வெற்று;
 
-		if (cache_home)
+		எனில் (cache_home)
 			xasprintf(&cachedir, "%s/rc", cache_home);
-		else if ((cache_home = getenv("HOME")))
+		இல்லையெனில் எனில் ((cache_home = getenv("HOME")))
 			xasprintf(&cachedir, "%s/.cache/rc", cache_home);
 
-		if (cachedir)
+		எனில் (cachedir)
 			setenv("RC_CACHEDIR", cachedir, 1);
 
-		free(cachedir);
+		விடுவி(cachedir);
 	}
 
 	xasprintf(&tmpdir, "%s/tmp", svcdir);
@@ -250,72 +250,72 @@ env_config(void)
 
 	fp = xopen_memstream(&path, &size);
 	fputs("RC_PATH=", fp);
-	for (bool first = true; *init_path; init_path++, first = false) {
-		if (!first)
+	க்கு (bool first = true; *init_path; init_path++, first = false) {
+		எனில் (!first)
 			fputc(':', fp);
 		fputs(*init_path, fp);
 	}
 	xclose_memstream(fp);
 	putenv(path);
 
-	free(e);
-	free(tmpdir);
+	விடுவி(e);
+	விடுவி(tmpdir);
 
 	/* krunlevel is a system-wide override; it never applies to
 	 * user sessions. */
-	if (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
-		if (xgetline(&buffer, &size, fp) != -1)
+	எனில் (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
+		எனில் (xgetline(&buffer, &size, fp) != -1)
 			setenv("RC_DEFAULTLEVEL", buffer, 1);
-		else
+		இல்லையெனில்
 			setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
-		free(buffer);
+		விடுவி(buffer);
 		fclose(fp);
-	} else {
+	} இல்லையெனில் {
 		setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
 	}
 
-	if (sys)
+	எனில் (sys)
 		setenv("RC_SYS", sys, 1);
 
 	/* Some scripts may need to take a different code path if
 	   Linux/FreeBSD, etc
 	   To save on calling uname, we store it in an environment variable */
-	if (uname(&uts) == 0)
+	எனில் (uname(&uts) == 0)
 		setenv("RC_UNAME", uts.sysname, 1);
 
 	/* Be quiet or verbose as necessary */
-	if (rc_conf_yesno("rc_quiet"))
+	எனில் (rc_conf_yesno("rc_quiet"))
 		setenv("EINFO_QUIET", "YES", 1);
-	if (rc_conf_yesno("rc_verbose"))
+	எனில் (rc_conf_yesno("rc_verbose"))
 		setenv("EINFO_VERBOSE", "YES", 1);
 
 	errno = 0;
-	if ((!rc_conf_yesno("rc_color") && errno == 0) ||
+	எனில் ((!rc_conf_yesno("rc_color") && errno == 0) ||
 	    rc_conf_yesno("rc_nocolor"))
 		setenv("EINFO_COLOR", "NO", 1);
 }
 
-int
-signal_setup(int sig, void (*handler)(int))
+முழு
+signal_setup(முழு sig, வெறுமை (*handler)(முழு))
 {
-	struct sigaction sa;
+	கட்டமைப்பு sigaction sa;
 
-	memset(&sa, 0, sizeof (sa));
+	memset(&sa, 0, அளவு (sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = handler;
-	return sigaction(sig, &sa, NULL);
+	திரும்பு sigaction(sig, &sa, வெற்று);
 }
 
-int
-svc_lock(const char *applet, bool ignore_lock_failure)
+முழு
+svc_lock(மாறிலி எழுத்து *applet, bool ignore_lock_failure)
 {
-	int fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
+	முழு fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
 
-	if (fd == -1)
-		return -1;
-	if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
-		int saved_errno = errno;
-		if (ignore_lock_failure) {
+	எனில் (fd == -1)
+		திரும்பு -1;
+	எனில் (flock(fd, LOCK_EX | LOCK_NB) == -1) {
+		முழு saved_errno = errno;
+		எனில் (ignore_lock_failure) {
 			/* Two services with a need b, and b's start()
 			 * calling restart --no-deps on a would cause
 			 * harmless errors: just ignore them.
@@ -326,38 +326,38 @@ svc_lock(const char *applet, bool ignore_lock_failure)
 		eerror("Call to flock failed: %s", strerror(errno));
 		close(fd);
 		errno = saved_errno;
-		return -1;
+		திரும்பு -1;
 	}
-	return fd;
+	திரும்பு fd;
 }
 
-int
-svc_unlock(const char *applet, int fd)
+முழு
+svc_unlock(மாறிலி எழுத்து *applet, முழு fd)
 {
 	unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, 0);
 	close(fd);
-	return -1;
+	திரும்பு -1;
 }
 
 pid_t
-exec_service(const char *service, const char *arg)
+exec_service(மாறிலி எழுத்து *service, மாறிலி எழுத்து *arg)
 {
-	char *file, sfd[32];
-	const char *argv[] = { service, "--lockfd", sfd, arg, NULL };
-	int fd = svc_lock(basename_c(service), false);
+	எழுத்து *file, sfd[32];
+	மாறிலி எழுத்து *argv[] = { service, "--lockfd", sfd, arg, வெற்று };
+	முழு fd = svc_lock(basename_c(service), false);
 	posix_spawnattr_t chldmask;
 	sigset_t empty;
 	pid_t pid = 0;
 
-	if (fd == -1)
-		return -1;
-	snprintf(sfd, sizeof(sfd), "%d", fd);
+	எனில் (fd == -1)
+		திரும்பு -1;
+	snprintf(sfd, அளவு(sfd), "%d", fd);
 
 	file = rc_service_resolve(service);
-	if (access(file, F_OK) != 0) {
+	எனில் (access(file, F_OK) != 0) {
 		rc_service_mark(service, RC_SERVICE_STOPPED);
 		svc_unlock(basename_c(service), fd);
-		goto out;
+		செல் out;
 	}
 
 	/* Unmask all signals.
@@ -369,7 +369,7 @@ exec_service(const char *service, const char *arg)
 	posix_spawnattr_setflags(&chldmask, POSIX_SPAWN_SETSIGMASK);
 	posix_spawnattr_setsigmask(&chldmask, &empty);
 
-	if ((errno = posix_spawn(&pid, file, NULL, &chldmask, UNCONST(argv), environ))) {
+	எனில் ((errno = posix_spawn(&pid, file, வெற்று, &chldmask, UNCONST(argv), environ))) {
 		fprintf(stderr, "posix_spawn: %s\n", strerror(errno));
 		svc_unlock(basename_c(service), fd);
 	}
@@ -378,92 +378,92 @@ exec_service(const char *service, const char *arg)
 	close(fd);
 
 out:
-	free(file);
-	return pid;
+	விடுவி(file);
+	திரும்பு pid;
 }
 
-int
-parse_mode(mode_t *mode, char *text)
+முழு
+parse_mode(mode_t *mode, எழுத்து *text)
 {
-	char *p;
+	எழுத்து *p;
 	unsigned long l;
 
 	/* Check for a numeric mode */
-	if ((*text - '0') < 8) {
+	எனில் ((*text - '0') < 8) {
 		l = strtoul(text, &p, 8);
-		if (*p || l > 07777U) {
+		எனில் (*p || l > 07777U) {
 			errno = EINVAL;
-			return -1;
+			திரும்பு -1;
 		}
 		*mode = (mode_t) l;
-		return 0;
+		திரும்பு 0;
 	}
 
 	/* We currently don't check g+w type stuff */
 	errno = EINVAL;
-	return -1;
+	திரும்பு -1;
 }
 
-RC_DEPTREE * _rc_deptree_load(int force, int *regen)
+RC_DEPTREE * _rc_deptree_load(முழு force, முழு *regen)
 {
-	int fd;
-	int retval;
-	int serrno = errno;
-	int merrno;
+	முழு fd;
+	முழு retval;
+	முழு serrno = errno;
+	முழு merrno;
 	time_t t;
-	char file[PATH_MAX];
-	struct stat st;
+	எழுத்து file[PATH_MAX];
+	கட்டமைப்பு stat st;
 	FILE *fp;
 
 	t = 0;
-	if (rc_deptree_update_needed(&t, file) || force != 0) {
-		int svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
+	எனில் (rc_deptree_update_needed(&t, file) || force != 0) {
+		முழு svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
 
 		/* Test if we have permission to update the deptree */
 		fd = openat(svcdirfd, "deptree", O_WRONLY);
 		merrno = errno;
 		errno = serrno;
-		if (fd == -1 && merrno == EACCES)
-			return rc_deptree_load();
+		எனில் (fd == -1 && merrno == EACCES)
+			திரும்பு rc_deptree_load();
 		close(fd);
 
-		if (regen)
+		எனில் (regen)
 			*regen = 1;
 		ebegin("Caching service dependencies");
 		retval = rc_deptree_update() ? 0 : -1;
 		eend(retval, "Failed to update the dependency tree");
 
-		if (retval == 0) {
-			if (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
+		எனில் (retval == 0) {
+			எனில் (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
 				eerror("stat(%s): %s/deptree", rc_svcdir(), strerror(errno));
-				return NULL;
+				திரும்பு வெற்று;
 			}
 
-			if (st.st_mtime >= t) {
+			எனில் (st.st_mtime >= t) {
 				unlinkat(svcdirfd, "clock-skewed", 0);
-				goto out;
+				செல் out;
 			}
 
 			eerror("Clock skew detected with '%s'", file);
 			eerrorn("Adjusting mtime of '%s/deptree' to %s", rc_svcdir(), ctime(&t));
-			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (struct timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
+			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (கட்டமைப்பு timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
 
-			if ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
+			எனில் ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
 				fprintf(fp, "%s\n", file);
 				fclose(fp);
 			}
 		}
 
 out:
-		if (force == -1 && regen != NULL)
+		எனில் (force == -1 && regen != வெற்று)
 			*regen = retval;
 	}
 
-	return rc_deptree_load();
+	திரும்பு rc_deptree_load();
 }
 
-static const struct {
-	const char * const name;
+நிலையான மாறிலி கட்டமைப்பு {
+	மாறிலி எழுத்து * மாறிலி name;
 	RC_SERVICE bit;
 } service_bits[] = {
 	{ "service_started",     RC_SERVICE_STARTED,     },
@@ -477,35 +477,35 @@ static const struct {
 	{ "service_crashed",     RC_SERVICE_CRASHED,     },
 };
 
-RC_SERVICE lookup_service_state(const char *service)
+RC_SERVICE lookup_service_state(மாறிலி எழுத்து *service)
 {
 	size_t i;
-	for (i = 0; i < ARRAY_SIZE(service_bits); ++i)
-		if (!strcmp(service, service_bits[i].name))
-			return service_bits[i].bit;
-	return 0;
+	க்கு (i = 0; i < ARRAY_SIZE(service_bits); ++i)
+		எனில் (!strcmp(service, service_bits[i].name))
+			திரும்பு service_bits[i].bit;
+	திரும்பு 0;
 }
 
-void from_time_t(char *time_string, time_t tv)
+வெறுமை from_time_t(எழுத்து *time_string, time_t tv)
 {
 	strftime(time_string, 20, "%Y-%m-%d %H:%M:%S", localtime(&tv));
 }
 
-time_t to_time_t(char *timestring)
+time_t to_time_t(எழுத்து *timestring)
 {
-	int check = 0;
-	int year = 0;
-	int month = 0;
-	int day = 0;
-	int hour = 0;
-	int min = 0;
-	int sec = 0;
-	struct tm breakdown = {0};
+	முழு check = 0;
+	முழு year = 0;
+	முழு month = 0;
+	முழு day = 0;
+	முழு hour = 0;
+	முழு min = 0;
+	முழு sec = 0;
+	கட்டமைப்பு tm breakdown = {0};
 	time_t result = -1;
 
 	check = sscanf(timestring, "%4d-%2d-%2d %2d:%2d:%2d",
 			&year, &month, &day, &hour, &min, &sec);
-	if (check == 6) {
+	எனில் (check == 6) {
 		breakdown.tm_year = year - 1900; /* years since 1900 */
 		breakdown.tm_mon = month - 1;
 		breakdown.tm_mday = day;
@@ -515,130 +515,130 @@ time_t to_time_t(char *timestring)
 		breakdown.tm_isdst = -1;
 		result = mktime(&breakdown);
 	}
-	return result;
+	திரும்பு result;
 }
 
-pid_t get_pid(const char *applet,const char *pidfile)
+pid_t get_pid(மாறிலி எழுத்து *applet,மாறிலி எழுத்து *pidfile)
 {
 	FILE *fp;
 	pid_t pid;
 
-	if (!pidfile)
-		return -1;
+	எனில் (!pidfile)
+		திரும்பு -1;
 
-	if ((fp = fopen(pidfile, "r")) == NULL) {
+	எனில் ((fp = fopen(pidfile, "r")) == வெற்று) {
 		ewarnv("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
-		return -1;
+		திரும்பு -1;
 	}
 
-	if (fscanf(fp, "%d", &pid) != 1) {
+	எனில் (fscanf(fp, "%d", &pid) != 1) {
 		ewarnv("%s: no pid found in `%s'", applet, pidfile);
 		fclose(fp);
-		return -1;
+		திரும்பு -1;
 	}
 
 	fclose(fp);
 
-	return pid;
+	திரும்பு pid;
 }
 
-struct notify notify_parse(const char *applet, const char *notify_string)
+கட்டமைப்பு notify notify_parse(மாறிலி எழுத்து *applet, மாறிலி எழுத்து *notify_string)
 {
-	struct notify notify = {0};
-	if (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
+	கட்டமைப்பு notify notify = {0};
+	எனில் (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
 		notify.type = NOTIFY_FD;
-		if (pipe(notify.pipe) == -1)
+		எனில் (pipe(notify.pipe) == -1)
 			eerrorx("%s: pipe: %s", applet, strerror(errno));
-	} else if (strncmp(notify_string, "socket", sizeof("socket") - 1) == 0) {
-		union {
-			struct sockaddr header;
-			struct sockaddr_un unix;
+	} இல்லையெனில் எனில் (strncmp(notify_string, "socket", அளவு("socket") - 1) == 0) {
+		ஒன்றிப்பு {
+			கட்டமைப்பு sockaddr header;
+			கட்டமைப்பு sockaddr_un unix;
 		} addr = { .unix = { .sun_family = AF_UNIX } };
-		int written;
-		const char *opts = strchr(notify_string, ':');
+		முழு written;
+		மாறிலி எழுத்து *opts = strchr(notify_string, ':');
 
-		if (!opts || opts[1] == '\0')
-			return notify;
-		if (strcmp(opts + 1, "ready") != 0)
-			return notify;
+		எனில் (!opts || opts[1] == '\0')
+			திரும்பு notify;
+		எனில் (strcmp(opts + 1, "ready") != 0)
+			திரும்பு notify;
 
-		written = snprintf(addr.unix.sun_path, sizeof(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
-		if (written >= (int)sizeof(addr.unix.sun_path))
+		written = snprintf(addr.unix.sun_path, அளவு(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
+		எனில் (written >= (முழு)அளவு(addr.unix.sun_path))
 			eerrorx("%s: socket path '%s/supervise-%s.sock' too long.", applet, rc_svcdir(), applet);
 		setenv("NOTIFY_SOCKET", addr.unix.sun_path, true);
 
 		notify.type = NOTIFY_SOCKET;
-		if ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
+		எனில் ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
 			eerrorx("%s: socket: %s", applet, strerror(errno));
-		if (bind(notify.fd, &addr.header, sizeof(addr.unix)) == -1)
+		எனில் (bind(notify.fd, &addr.header, அளவு(addr.unix)) == -1)
 			eerrorx("%s: bind: %s", applet, strerror(errno));
-	} else {
+	} இல்லையெனில் {
 		eerrorx("%s: invalid ready '%s'.", applet, optarg);
 	}
 
-	return notify;
+	திரும்பு notify;
 }
 
-bool notify_wait(const char *applet, struct notify notify)
+bool notify_wait(மாறிலி எழுத்து *applet, கட்டமைப்பு notify notify)
 {
-	switch (notify.type) {
-	case NOTIFY_NONE:
-		return true;
-	case NOTIFY_FD:
+	தேர்வு (notify.type) {
+	நிலை NOTIFY_NONE:
+		திரும்பு true;
+	நிலை NOTIFY_FD:
 		close(notify.pipe[1]);
 		notify.fd = notify.pipe[0];
-		break;
-	case NOTIFY_SOCKET:
-		break;
+		நிறுத்து;
+	நிலை NOTIFY_SOCKET:
+		நிறுத்து;
 	}
 
-	for (;;) {
-		char buf[BUFSIZ];
-		ssize_t bytes = read(notify.fd, buf, BUFSIZ);
+	க்கு (;;) {
+		எழுத்து buf[BUFSIZ];
+		ssize_t bytes = பட(notify.fd, buf, BUFSIZ);
 
-		if (bytes == 0)
-			return false;
-		if (bytes == -1) {
-			if (errno != EINTR) {
+		எனில் (bytes == 0)
+			திரும்பு false;
+		எனில் (bytes == -1) {
+			எனில் (errno != EINTR) {
 				eerror("%s: read failed '%s'\n", applet, strerror(errno));
-				return false;
+				திரும்பு false;
 			}
-			continue;
+			தொடர்;
 		}
 
-		switch (notify.type) {
-		case NOTIFY_NONE:
-			break;
-		case NOTIFY_FD:
-			if (memchr(buf, '\n', bytes))
-				return true;
-			break;
-		case NOTIFY_SOCKET:
+		தேர்வு (notify.type) {
+		நிலை NOTIFY_NONE:
+			நிறுத்து;
+		நிலை NOTIFY_FD:
+			எனில் (memchr(buf, '\n', bytes))
+				திரும்பு true;
+			நிறுத்து;
+		நிலை NOTIFY_SOCKET:
 			buf[bytes] = '\0';
-			if (strstr(buf, "READY=1")) {
-				char *path;
+			எனில் (strstr(buf, "READY=1")) {
+				எழுத்து *path;
 				xasprintf(&path, "%s/supervise-%s.sock", rc_svcdir(), applet);
 				unlink(path);
-				free(path);
-				return true;
+				விடுவி(path);
+				திரும்பு true;
 			}
-			break;
+			நிறுத்து;
 		}
 	}
 
-	return true;
+	திரும்பு true;
 }
 
 #ifndef HAVE_CLOSE_RANGE
-static inline int close_range(unsigned int first RC_UNUSED,
-			      unsigned int last RC_UNUSED,
-			      unsigned int flags RC_UNUSED)
+நிலையான உள்வரி முழு close_range(unsigned முழு first RC_UNUSED,
+			      unsigned முழு last RC_UNUSED,
+			      unsigned முழு flags RC_UNUSED)
 {
 #ifdef SYS_close_range
-	return syscall(SYS_close_range, first, last, flags);
-#else
+	திரும்பு syscall(SYS_close_range, first, last, flags);
+#இல்லையெனில்
 	errno = ENOSYS;
-	return -1;
+	திரும்பு -1;
 #endif
 }
 #endif
@@ -646,12 +646,12 @@ static inline int close_range(unsigned int first RC_UNUSED,
 # define CLOSE_RANGE_CLOEXEC	(1U << 2)
 #endif
 
-void
-cloexec_fds_from(int first)
+வெறுமை
+cloexec_fds_from(முழு first)
 {
-	int i;
-	if (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
-		for (i = getdtablesize() - 1; i >= first; --i)
+	முழு i;
+	எனில் (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
+		க்கு (i = getdtablesize() - 1; i >= first; --i)
 			fcntl(i, F_SETFD, FD_CLOEXEC);
 	}
 }

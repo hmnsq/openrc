@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <utmp.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <sys/time.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <sys/utsname.h>
+#அந்தர்பாவ <utmp.h>
 
-#include "wtmp.h"
+#அந்தர்பாவ "wtmp.h"
 
-void log_wtmp(const char *user, const char *id, pid_t pid, int type,
-		const char *line)
+வெறுமை log_wtmp(மாறிலி எழுத்து *user, மாறிலி எழுத்து *id, pid_t pid, முழு type,
+		மாறிலி எழுத்து *வரி)
 {
-	struct timeval tv;
-	struct utmp utmp;
-	struct utsname uname_buf;
+	கட்டமைப்பு timeval tv;
+	கட்டமைப்பு utmp utmp;
+	கட்டமைப்பு utsname uname_buf;
 
-	memset(&utmp, 0, sizeof(utmp));
-	gettimeofday(&tv, NULL);
+	memset(&utmp, 0, அளவு(utmp));
+	gettimeofday(&tv, வெற்று);
 	utmp.ut_tv.tv_sec = tv.tv_sec;
 	utmp.ut_tv.tv_usec = tv.tv_usec;
 	utmp.ut_pid  = pid;
 	utmp.ut_type = type;
-	strncpy(utmp.ut_name, user, sizeof(utmp.ut_name));
-	strncpy(utmp.ut_id  , id  , sizeof(utmp.ut_id  ));
-	strncpy(utmp.ut_line, line, sizeof(utmp.ut_line));
+	strncpy(utmp.ut_name, user, அளவு(utmp.ut_name));
+	strncpy(utmp.ut_id  , id  , அளவு(utmp.ut_id  ));
+	strncpy(utmp.ut_line, வரி, அளவு(utmp.ut_line));
 
 	/* Put the OS version in place of the hostname */
-	if (uname(&uname_buf) == 0)
-		strncpy(utmp.ut_host, uname_buf.release, sizeof(utmp.ut_host));
+	எனில் (uname(&uname_buf) == 0)
+		strncpy(utmp.ut_host, uname_buf.release, அளவு(utmp.ut_host));
 
 	updwtmp(WTMP_FILE, &utmp);
 }

@@ -15,65 +15,65 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#if defined(__DragonFly__) || defined(__FreeBSD__)
+#எனில் defined(__DragonFly__) || defined(__FreeBSD__)
 #  include <sys/ucred.h>
 #  include <sys/mount.h>
 
 #  define F_FLAGS f_flags
-#elif defined(__NetBSD__)
+#அல்லதெனில் defined(__NetBSD__)
 #  include <sys/mount.h>
 
 #  define statfs statvfs
 #  define F_FLAGS f_flag
-#elif defined(BSD) && !defined(__GNU__)
+#அல்லதெனில் defined(BSD) && !defined(__GNU__)
 #  include <sys/statvfs.h>
 
 #  define statfs statvfs
 #  define F_FLAGS f_flag
-#elif defined(__linux__) || (defined(__FreeBSD_kernel__) && \
+#அல்லதெனில் defined(__linux__) || (defined(__FreeBSD_kernel__) && \
 	defined(__GLIBC__)) || defined(__GNU__)
 #  include <mntent.h>
 #endif
 
-#include <errno.h>
-#include <getopt.h>
-#include <regex.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <getopt.h>
+#அந்தர்பாவ <regex.h>
+#அந்தர்பாவ <stddef.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdint.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "timeutils.h"
-#include "_usage.h"
-#include "helpers.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "queue.h"
+#அந்தர்பாவ "rc.h"
+#அந்தர்பாவ "rc_exec.h"
+#அந்தர்பாவ "timeutils.h"
+#அந்தர்பாவ "_usage.h"
+#அந்தர்பாவ "helpers.h"
 
-const char *applet = NULL;
-const char *procmounts = "/proc/mounts";
-const char *extraopts = "[mount1] [mount2] ...";
-const char getoptstring[] = "f:F:n:N:o:O:p:P:iste:E:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "fstype-regex",        1, NULL, 'f'},
-	{ "skip-fstype-regex",   1, NULL, 'F'},
-	{ "node-regex",          1, NULL, 'n'},
-	{ "skip-node-regex",     1, NULL, 'N'},
-	{ "options-regex",       1, NULL, 'o'},
-	{ "skip-options-regex",  1, NULL, 'O'},
-	{ "point-regex",         1, NULL, 'p'},
-	{ "skip-point-regex",    1, NULL, 'P'},
-	{ "options",             0, NULL, 'i'},
-	{ "fstype",              0, NULL, 's'},
-	{ "node",                0, NULL, 't'},
-	{ "netdev",              0, NULL, 'e'},
-	{ "nonetdev",            0, NULL, 'E'},
+மாறிலி எழுத்து *applet = வெற்று;
+மாறிலி எழுத்து *procmounts = "/proc/mounts";
+மாறிலி எழுத்து *extraopts = "[mount1] [mount2] ...";
+மாறிலி எழுத்து getoptstring[] = "f:F:n:N:o:O:p:P:iste:E:" getoptstring_COMMON;
+மாறிலி கட்டமைப்பு option longopts[] = {
+	{ "fstype-regex",        1, வெற்று, 'f'},
+	{ "skip-fstype-regex",   1, வெற்று, 'F'},
+	{ "node-regex",          1, வெற்று, 'n'},
+	{ "skip-node-regex",     1, வெற்று, 'N'},
+	{ "options-regex",       1, வெற்று, 'o'},
+	{ "skip-options-regex",  1, வெற்று, 'O'},
+	{ "point-regex",         1, வெற்று, 'p'},
+	{ "skip-point-regex",    1, வெற்று, 'P'},
+	{ "options",             0, வெற்று, 'i'},
+	{ "fstype",              0, வெற்று, 's'},
+	{ "node",                0, வெற்று, 't'},
+	{ "netdev",              0, வெற்று, 'e'},
+	{ "nonetdev",            0, வெற்று, 'E'},
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+மாறிலி எழுத்து * மாறிலி longopts_help[] = {
 	"fstype regex to find",
 	"fstype regex to skip",
 	"node regex to find",
@@ -89,44 +89,44 @@ const char * const longopts_help[] = {
 	"is it not a network device",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+மாறிலி எழுத்து *usagestring = வெற்று;
 
 #define UMOUNT_ARGS_MAX 16
 #define RUN_MAX 32
 #define TRY_MAX 3
 #define TRY_DELAY_MS 1000
 
-struct run_queue {
-	const char *mntpath;
+கட்டமைப்பு run_queue {
+	மாறிலி எழுத்து *mntpath;
 	int64_t last_exec_time;
 	int64_t fuser_exec_time;
 	pid_t pid;
 	pid_t fuser_pid;
-	int try_count;
-	int fuser_stdoutfd;
+	முழு try_மொத்தம்;
+	முழு fuser_stdoutfd;
 };
 
-typedef enum {
+வகைவரை எண்ணிக்கை {
 	mount_from,
 	mount_to,
 	mount_fstype,
 	mount_options
 } mount_type;
 
-typedef enum {
+வகைவரை எண்ணிக்கை {
 	net_ignore,
 	net_yes,
 	net_no
 } net_opts;
 
-struct args;
-typedef int process_func_t(RC_STRINGLIST *, struct args *,
-    char *, char *, char *, char *, int);
+கட்டமைப்பு args;
+வகைவரை முழு process_func_t(RC_STRINGLIST *, கட்டமைப்பு args *,
+    எழுத்து *, எழுத்து *, எழுத்து *, எழுத்து *, முழு);
 
-struct args {
+கட்டமைப்பு args {
 	process_func_t *process;
-	regex_t *node_regex;
-	regex_t *skip_node_regex;
+	regex_t *முனை_regex;
+	regex_t *skip_முனை_regex;
 	regex_t *fstype_regex;
 	regex_t *skip_fstype_regex;
 	regex_t *options_regex;
@@ -134,101 +134,101 @@ struct args {
 	RC_STRINGLIST *mounts;
 	mount_type mount_type;
 	net_opts netdev;
-	const char *check_mntpath;
+	மாறிலி எழுத்து *check_mntpath;
 };
 
-static int
-process_mount(RC_STRINGLIST *list, struct args *args,
-    char *from, char *to, char *fstype, char *options,
-    int netdev)
+நிலையான முழு
+process_mount(RC_STRINGLIST *list, கட்டமைப்பு args *args,
+    எழுத்து *from, எழுத்து *to, எழுத்து *fstype, எழுத்து *options,
+    முழு netdev)
 {
-	char *p;
+	எழுத்து *p;
 	RC_STRING *s;
 
 	errno = ENOENT;
 
 #ifdef __linux__
 	/* Skip the really silly rootfs */
-	if (strcmp(fstype, "rootfs") == 0)
-		return -1;
+	எனில் (strcmp(fstype, "rootfs") == 0)
+		திரும்பு -1;
 #endif
 
-	if (args->netdev == net_yes &&
+	எனில் (args->netdev == net_yes &&
 	    (netdev != -1 || TAILQ_FIRST(args->mounts)))
 	{
-		if (netdev != 0)
-			return 1;
-	} else if (args->netdev == net_no &&
+		எனில் (netdev != 0)
+			திரும்பு 1;
+	} இல்லையெனில் எனில் (args->netdev == net_no &&
 	    (netdev != -1 || TAILQ_FIRST(args->mounts)))
 	{
-		if (netdev != 1)
-			return 1;
-	} else {
-		if (args->node_regex &&
-		    regexec(args->node_regex, from, 0, NULL, 0) != 0)
-			return 1;
-		if (args->skip_node_regex &&
-		    regexec(args->skip_node_regex, from, 0, NULL, 0) == 0)
-			return 1;
+		எனில் (netdev != 1)
+			திரும்பு 1;
+	} இல்லையெனில் {
+		எனில் (args->முனை_regex &&
+		    regexec(args->முனை_regex, from, 0, வெற்று, 0) != 0)
+			திரும்பு 1;
+		எனில் (args->skip_முனை_regex &&
+		    regexec(args->skip_முனை_regex, from, 0, வெற்று, 0) == 0)
+			திரும்பு 1;
 
-		if (args->fstype_regex &&
-		    regexec(args->fstype_regex, fstype, 0, NULL, 0) != 0)
-			return -1;
-		if (args->skip_fstype_regex &&
-		    regexec(args->skip_fstype_regex, fstype, 0, NULL, 0) == 0)
-			return -1;
+		எனில் (args->fstype_regex &&
+		    regexec(args->fstype_regex, fstype, 0, வெற்று, 0) != 0)
+			திரும்பு -1;
+		எனில் (args->skip_fstype_regex &&
+		    regexec(args->skip_fstype_regex, fstype, 0, வெற்று, 0) == 0)
+			திரும்பு -1;
 
-		if (args->options_regex &&
-		    regexec(args->options_regex, options, 0, NULL, 0) != 0)
-			return -1;
-		if (args->skip_options_regex &&
-		    regexec(args->skip_options_regex, options, 0, NULL, 0) == 0)
-			return -1;
+		எனில் (args->options_regex &&
+		    regexec(args->options_regex, options, 0, வெற்று, 0) != 0)
+			திரும்பு -1;
+		எனில் (args->skip_options_regex &&
+		    regexec(args->skip_options_regex, options, 0, வெற்று, 0) == 0)
+			திரும்பு -1;
 	}
 
-	if (TAILQ_FIRST(args->mounts)) {
+	எனில் (TAILQ_FIRST(args->mounts)) {
 		TAILQ_FOREACH(s, args->mounts, entries)
-		    if (strcmp(s->value, to) == 0)
-			    break;
-		if (!s)
-			return -1;
+		    எனில் (strcmp(s->மதிப்பு, to) == 0)
+			    நிறுத்து;
+		எனில் (!s)
+			திரும்பு -1;
 	}
 
-	switch (args->mount_type) {
-	case mount_from:
+	தேர்வு (args->mount_type) {
+	நிலை mount_from:
 		p = from;
-		break;
-	case mount_to:
+		நிறுத்து;
+	நிலை mount_to:
 		p = to;
-		break;
-	case mount_fstype:
+		நிறுத்து;
+	நிலை mount_fstype:
 		p = fstype;
-		break;
-	case mount_options:
+		நிறுத்து;
+	நிலை mount_options:
 		p = options;
-		break;
-	default:
-		p = NULL;
+		நிறுத்து;
+	இயல்பு:
+		p = வெற்று;
 		errno = EINVAL;
-		break;
+		நிறுத்து;
 	}
 
-	if (p) {
+	எனில் (p) {
 		errno = 0;
 		rc_stringlist_add(list, p);
-		return 0;
+		திரும்பு 0;
 	}
 
-	return -1;
+	திரும்பு -1;
 }
 
-#if defined(BSD) && !defined(__GNU__)
+#எனில் defined(BSD) && !defined(__GNU__)
 
 /* Translate the mounted options to english
  * This is taken directly from FreeBSD mount.c */
-static struct opt {
-	int o_opt;
-	const char *o_name;
+நிலையான கட்டமைப்பு opt {
+	முழு o_opt;
+	மாறிலி எழுத்து *o_name;
 } optnames[] = {
 	{ MNT_ASYNC,        "asynchronous" },
 	{ MNT_EXPORTED,     "NFS exported" },
@@ -262,98 +262,98 @@ static struct opt {
 #ifdef MNT_GJOURNAL
 	{ MNT_GJOURNAL,     "gjournal" },
 #endif
-	{ 0, NULL }
+	{ 0, வெற்று }
 };
 
-static RC_STRINGLIST *
-find_mounts(struct args *args, size_t *num_mounts)
+நிலையான RC_STRINGLIST *
+find_mounts(கட்டமைப்பு args *args, size_t *இலக்கம்_mounts)
 {
-	struct statfs *mnts;
-	int nmnts;
-	int i;
+	கட்டமைப்பு statfs *mnts;
+	முழு nmnts;
+	முழு i;
 	RC_STRINGLIST *list;
-	char *options = NULL;
+	எழுத்து *options = வெற்று;
 	uint64_t flags;
-	struct opt *o;
-	int netdev;
-	char *tmp;
+	கட்டமைப்பு opt *o;
+	முழு netdev;
+	எழுத்து *tmp;
 
-	if ((nmnts = getmntinfo(&mnts, MNT_NOWAIT)) == 0)
+	எனில் ((nmnts = getmntinfo(&mnts, MNT_NOWAIT)) == 0)
 		eerrorx("getmntinfo: %s", strerror (errno));
 
 	list = rc_stringlist_new();
-	for (i = 0; i < nmnts; i++) {
+	க்கு (i = 0; i < nmnts; i++) {
 		netdev = 0;
 		flags = mnts[i].F_FLAGS & MNT_VISFLAGMASK;
-		for (o = optnames; flags && o->o_opt; o++) {
-			if (flags & o->o_opt) {
-				if (o->o_opt == MNT_LOCAL)
+		க்கு (o = optnames; flags && o->o_opt; o++) {
+			எனில் (flags & o->o_opt) {
+				எனில் (o->o_opt == MNT_LOCAL)
 					netdev = 1;
-				if (!options)
+				எனில் (!options)
 					options = xstrdup(o->o_name);
-				else {
+				இல்லையெனில் {
 					xasprintf(&tmp, "%s,%s", options, o->o_name);
-					free(options);
+					விடுவி(options);
 					options = tmp;
 				}
 			}
 			flags &= ~o->o_opt;
 		}
 
-		*num_mounts += 0 == args->process(list, args,
+		*இலக்கம்_mounts += 0 == args->process(list, args,
 		    mnts[i].f_mntfromname,
 		    mnts[i].f_mntonname,
 		    mnts[i].f_fstypename,
 		    options,
 		    netdev);
 
-		free(options);
-		options = NULL;
+		விடுவி(options);
+		options = வெற்று;
 	}
 
-	return list;
+	திரும்பு list;
 }
 
-#elif defined(__linux__) || (defined(__FreeBSD_kernel__) && \
+#அல்லதெனில் defined(__linux__) || (defined(__FreeBSD_kernel__) && \
 	defined(__GLIBC__)) || defined(__GNU__)
-static struct mntent *
-getmntfile(const char *file)
+நிலையான கட்டமைப்பு mntent *
+getmntfile(மாறிலி எழுத்து *file)
 {
-	struct mntent *ent = NULL;
+	கட்டமைப்பு mntent *ent = வெற்று;
 	FILE *fp;
 
-	if (!(fp = setmntent("/etc/fstab", "r")))
-		return NULL;
-	while ((ent = getmntent(fp)))
-		if (strcmp(file, ent->mnt_dir) == 0)
-			break;
+	எனில் (!(fp = setmntent("/etc/fstab", "r")))
+		திரும்பு வெற்று;
+	போது ((ent = getmntent(fp)))
+		எனில் (strcmp(file, ent->mnt_dir) == 0)
+			நிறுத்து;
 	endmntent(fp);
 
-	return ent;
+	திரும்பு ent;
 }
 
-static RC_STRINGLIST *
-find_mounts(struct args *args, size_t *num_mounts)
+நிலையான RC_STRINGLIST *
+find_mounts(கட்டமைப்பு args *args, size_t *இலக்கம்_mounts)
 {
 	FILE *fp;
-	char *buffer;
+	எழுத்து *buffer;
 	size_t size;
-	char *p;
-	char *from;
-	char *to;
-	char *fst;
-	char *opts;
-	struct mntent *ent;
-	int netdev;
+	எழுத்து *p;
+	எழுத்து *from;
+	எழுத்து *to;
+	எழுத்து *fst;
+	எழுத்து *opts;
+	கட்டமைப்பு mntent *ent;
+	முழு netdev;
 	RC_STRINGLIST *list;
 
-	if ((fp = fopen(procmounts, "r")) == NULL)
+	எனில் ((fp = fopen(procmounts, "r")) == வெற்று)
 		eerrorx("getmntinfo: %s", strerror(errno));
 
 	list = rc_stringlist_new();
 
-	buffer = NULL;
-	while (xgetline(&buffer, &size, fp) != -1) {
+	buffer = வெற்று;
+	போது (xgetline(&buffer, &size, fp) != -1) {
 		netdev = -1;
 		p = buffer;
 		from = strsep(&p, " ");
@@ -361,361 +361,361 @@ find_mounts(struct args *args, size_t *num_mounts)
 		fst = strsep(&p, " ");
 		opts = strsep(&p, " ");
 
-		if ((ent = getmntfile(to))) {
-			if (strstr(ent->mnt_opts, "_netdev"))
+		எனில் ((ent = getmntfile(to))) {
+			எனில் (strstr(ent->mnt_opts, "_netdev"))
 				netdev = 0;
-			else
+			இல்லையெனில்
 				netdev = 1;
 		}
 
-		*num_mounts += 0 == args->process(list, args,
+		*இலக்கம்_mounts += 0 == args->process(list, args,
 			from, to, fst, opts, netdev);
 
-		free(buffer);
-		buffer = NULL;
+		விடுவி(buffer);
+		buffer = வெற்று;
 	}
-	free(buffer);
+	விடுவி(buffer);
 	fclose(fp);
 
-	return list;
+	திரும்பு list;
 }
 
-#else
+#இல்லையெனில்
 #  error "Operating system not supported!"
 #endif
 
-static int is_prefix(const char *needle, const char *hay)
+நிலையான முழு is_prefix(மாறிலி எழுத்து *needle, மாறிலி எழுத்து *hay)
 {
 	size_t nlen = strlen(needle);
-	if (strncmp(needle, hay, nlen) == 0 && hay[nlen] == '/')
-		return true;
-	return false;
+	எனில் (strncmp(needle, hay, nlen) == 0 && hay[nlen] == '/')
+		திரும்பு true;
+	திரும்பு false;
 }
 
-static char *unescape_octal(char *beg)
+நிலையான எழுத்து *unescape_octal(எழுத்து *beg)
 {
-	int n, i;
-	char *w = beg, *r = beg;
-	while (*r) {
-		if (*r != '\\' || *++r == '\\') {
+	முழு n, i;
+	எழுத்து *w = beg, *r = beg;
+	போது (*r) {
+		எனில் (*r != '\\' || *++r == '\\') {
 			*w++ = *r++;
-		} else {
+		} இல்லையெனில் {
 			/* octal. should have at least 3 bytes,
 			 * but don't choke on malformed input
 			 */
-			for (i = n = 0; i < 3; ++i) {
-				if (*r >= '0' && *r <= '7') {
+			க்கு (i = n = 0; i < 3; ++i) {
+				எனில் (*r >= '0' && *r <= '7') {
 					n <<= 3;
 					n |= *r++ - '0';
-				} else {
-					break;
+				} இல்லையெனில் {
+					நிறுத்து;
 				}
 			}
-			if (n)
+			எனில் (n)
 				*w++ = n;
 		}
 	}
 	*w = '\0';
-	return beg;
+	திரும்பு beg;
 }
 
-static int check_is_mounted(RC_STRINGLIST *list RC_UNUSED, struct args *args,
-    char *from RC_UNUSED, char *to, char *fstype RC_UNUSED,
-    char *options RC_UNUSED, int netdev RC_UNUSED)
+நிலையான முழு check_is_mounted(RC_STRINGLIST *list RC_UNUSED, கட்டமைப்பு args *args,
+    எழுத்து *from RC_UNUSED, எழுத்து *to, எழுத்து *fstype RC_UNUSED,
+    எழுத்து *options RC_UNUSED, முழு netdev RC_UNUSED)
 {
-	return strcmp(args->check_mntpath, unescape_octal(to)) == 0 ? 0 : -1;
+	திரும்பு strcmp(args->check_mntpath, unescape_octal(to)) == 0 ? 0 : -1;
 }
 
-static int is_mounted(const char *mntpath)
+நிலையான முழு is_mounted(மாறிலி எழுத்து *mntpath)
 {
-	size_t num_mounts = 0;
-	struct args args = { .process = check_is_mounted, .check_mntpath = mntpath };
-	RC_STRINGLIST *l = find_mounts(&args, &num_mounts);
+	size_t இலக்கம்_mounts = 0;
+	கட்டமைப்பு args args = { .process = check_is_mounted, .check_mntpath = mntpath };
+	RC_STRINGLIST *l = find_mounts(&args, &இலக்கம்_mounts);
 	rc_stringlist_free(l);
-	return num_mounts > 0;
+	திரும்பு இலக்கம்_mounts > 0;
 }
 
-static pid_t run_umount(const char *mntpath,
-	const char **umount_args, int umount_args_num)
+நிலையான pid_t run_umount(மாறிலி எழுத்து *mntpath,
+	மாறிலி எழுத்து **umount_args, முழு umount_args_இலக்கம்)
 {
-	struct exec_args args;
-	struct exec_result res;
-	const char *argv[UMOUNT_ARGS_MAX + 3];
-	int k, i = 0;
+	கட்டமைப்பு exec_args args;
+	கட்டமைப்பு exec_result res;
+	மாறிலி எழுத்து *argv[UMOUNT_ARGS_MAX + 3];
+	முழு k, i = 0;
 
 	argv[i++] = "umount";
-	for (k = 0; k < umount_args_num; ++k)
+	க்கு (k = 0; k < umount_args_இலக்கம்; ++k)
 		argv[i++] = umount_args[k];
 	argv[i++] = mntpath;
-	argv[i++] = NULL;
+	argv[i++] = வெற்று;
 
 	args = exec_init(argv);
 	args.redirect_stdout = args.redirect_stderr = EXEC_DEVNULL;
 	res = do_exec(&args);
-	if (res.pid < 0)
+	எனில் (res.pid < 0)
 		eerrorx("%s: failed to run umount: %s", applet, strerror(errno));
-	return res.pid;
+	திரும்பு res.pid;
 }
 
-static void fuser_run(struct run_queue *rp, const char *fuser_opt)
+நிலையான வெறுமை fuser_run(கட்டமைப்பு run_queue *rp, மாறிலி எழுத்து *fuser_opt)
 {
-	static int fuser_exec_failed = 0;
-	const char *argv[] = { "fuser", fuser_opt, rp->mntpath, NULL };
-	struct exec_result res;
-	struct exec_args args;
+	நிலையான முழு fuser_exec_failed = 0;
+	மாறிலி எழுத்து *argv[] = { "fuser", fuser_opt, rp->mntpath, வெற்று };
+	கட்டமைப்பு exec_result res;
+	கட்டமைப்பு exec_args args;
 
 	/* if exec failed, fuser likely doesn't exist. so don't retry */
-	if (fuser_exec_failed)
-		return;
+	எனில் (fuser_exec_failed)
+		திரும்பு;
 
 	args = exec_init(argv);
 	args.redirect_stdout = EXEC_MKPIPE;
 	args.redirect_stderr = EXEC_DEVNULL;
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	எனில் (res.pid < 0) {
 		fuser_exec_failed = 1;
-	} else {
+	} இல்லையெனில் {
 		rp->fuser_pid = res.pid;
 		rp->fuser_stdoutfd = res.proc_stdout;
 		rp->fuser_exec_time = tm_now();
 	}
 }
 
-static int fuser_decide(struct run_queue *rp,
-	const char *fuser_opt, const char *fuser_kill_prefix)
+நிலையான முழு fuser_decide(கட்டமைப்பு run_queue *rp,
+	மாறிலி எழுத்து *fuser_opt, மாறிலி எழுத்து *fuser_kill_prefix)
 {
-	static bool has_rc_pid = false;
-	static char *rc_pid;
-	char buf[1<<12];
-	char selfpid[64];
-	int read_maybe_truncated;
+	நிலையான bool has_rc_pid = false;
+	நிலையான எழுத்து *rc_pid;
+	எழுத்து buf[1<<12];
+	எழுத்து selfpid[64];
+	முழு read_maybe_truncated;
 	ssize_t n;
 
-	if (rp->fuser_stdoutfd < 0)
-		return 0;
+	எனில் (rp->fuser_stdoutfd < 0)
+		திரும்பு 0;
 
 	buf[0] = ' ';
-	n = read(rp->fuser_stdoutfd, buf + 1, sizeof buf - 3);
+	n = பட(rp->fuser_stdoutfd, buf + 1, அளவு buf - 3);
 	close(rp->fuser_stdoutfd);
 	rp->fuser_stdoutfd = -1;
-	read_maybe_truncated = (n == sizeof buf - 3);
-	if (n < 0 || read_maybe_truncated)
-		return 0;
-	while (n > 0 && buf[n] == '\n')
+	read_maybe_truncated = (n == அளவு buf - 3);
+	எனில் (n < 0 || read_maybe_truncated)
+		திரும்பு 0;
+	போது (n > 0 && buf[n] == '\n')
 		--n;
 	buf[n+1] = ' ';
 	buf[n+2] = '\0';
-	snprintf(selfpid, sizeof selfpid, " %lld ", (long long)getpid());
+	snprintf(selfpid, அளவு selfpid, " %lld ", (long long)getpid());
 
-	if (!has_rc_pid) {
+	எனில் (!has_rc_pid) {
 		rc_pid = getenv("RC_PID");
 		has_rc_pid = true;
 	}
 
-	if (strstr(buf, selfpid) || (rc_pid && strstr(buf, rc_pid))) {
+	எனில் (strstr(buf, selfpid) || (rc_pid && strstr(buf, rc_pid))) {
 		/* lets not kill ourselves */
 		eerror("Unmounting %s failed because we are using it", rp->mntpath);
-		return -1;
-	} else if (strcmp(buf, "  ") == 0) {
-		if (rp->try_count >= TRY_MAX) {
+		திரும்பு -1;
+	} இல்லையெனில் எனில் (strcmp(buf, "  ") == 0) {
+		எனில் (rp->try_மொத்தம் >= TRY_MAX) {
 			eerror("Unmounting %s failed but fuser finds no one using it", rp->mntpath);
-			return -1;
+			திரும்பு -1;
 		}
 		/* it's possible that whatever was using the mount stopped
 		 * using it now, so allow 1 more retry */
-		rp->try_count = TRY_MAX;
-		return 0;
-	} else {
-		char sig[32];
-		const char *argv[] = {
-			"fuser", sig, "-k", fuser_opt, rp->mntpath, NULL
+		rp->try_மொத்தம் = TRY_MAX;
+		திரும்பு 0;
+	} இல்லையெனில் {
+		எழுத்து sig[32];
+		மாறிலி எழுத்து *argv[] = {
+			"fuser", sig, "-k", fuser_opt, rp->mntpath, வெற்று
 		};
-		struct exec_result res;
-		struct exec_args args = exec_init(argv);
+		கட்டமைப்பு exec_result res;
+		கட்டமைப்பு exec_args args = exec_init(argv);
 		args.redirect_stdout = args.redirect_stderr = EXEC_DEVNULL;
-		snprintf(sig, sizeof sig, "%s%s", fuser_kill_prefix,
-			rp->try_count == TRY_MAX ? "KILL" : "TERM");
+		snprintf(sig, அளவு sig, "%s%s", fuser_kill_prefix,
+			rp->try_மொத்தம் == TRY_MAX ? "KILL" : "TERM");
 		res = do_exec(&args);
-		if (res.pid > 0)
+		எனில் (res.pid > 0)
 			rc_waitpid(res.pid);
-		return 0;
+		திரும்பு 0;
 	}
 }
 
-static regex_t *
-get_regex(const char *string)
+நிலையான regex_t *
+get_regex(மாறிலி எழுத்து *string)
 {
-	regex_t *reg = xmalloc(sizeof (*reg));
-	int result;
-	char buffer[256];
+	regex_t *reg = xmalloc(அளவு (*reg));
+	முழு result;
+	எழுத்து buffer[256];
 
-	if ((result = regcomp(reg, string, REG_EXTENDED | REG_NOSUB)) != 0)
+	எனில் ((result = regcomp(reg, string, REG_EXTENDED | REG_NOSUB)) != 0)
 	{
-		regerror(result, reg, buffer, sizeof(buffer));
+		regerror(result, reg, buffer, அளவு(buffer));
 		eerrorx("%s: invalid regex `%s'", applet, buffer);
 	}
 
-	return reg;
+	திரும்பு reg;
 }
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
-	struct args args;
-	regex_t *point_regex = NULL;
-	regex_t *skip_point_regex = NULL;
+	கட்டமைப்பு args args;
+	regex_t *point_regex = வெற்று;
+	regex_t *skip_point_regex = வெற்று;
 	RC_STRINGLIST *nodes;
 	RC_STRING *s;
-	char *real_path = NULL;
-	int opt;
-	int result;
-	char *this_path, *argv0;
-	const char *tmps;
-	const char *fuser_opt, *fuser_kill_prefix;
-	size_t num_mounts = 0;
+	எழுத்து *real_path = வெற்று;
+	முழு opt;
+	முழு result;
+	எழுத்து *this_path, *argv0;
+	மாறிலி எழுத்து *tmps;
+	மாறிலி எழுத்து *fuser_opt, *fuser_kill_prefix;
+	size_t இலக்கம்_mounts = 0;
 	size_t unmount_index;
-	int doing_unmount = 0;
+	முழு doing_unmount = 0;
 	pid_t pid;
-	int status, flags;
+	முழு status, flags;
 	int64_t tmp, next_retry, now;
 	int64_t rc_fuser_timeout = -1;
-	const char *umount_args[UMOUNT_ARGS_MAX];
-	int umount_args_num = 0;
-	const char **mounts = NULL;
-	struct run_queue running[RUN_MAX] = {0};
-	struct run_queue *rp;
-	size_t num_running = 0, num_waiting = 0;
-	enum { STATE_RUN, STATE_REAP, STATE_RETRY, STATE_END } state;
+	மாறிலி எழுத்து *umount_args[UMOUNT_ARGS_MAX];
+	முழு umount_args_இலக்கம் = 0;
+	மாறிலி எழுத்து **mounts = வெற்று;
+	கட்டமைப்பு run_queue running[RUN_MAX] = {0};
+	கட்டமைப்பு run_queue *rp;
+	size_t இலக்கம்_running = 0, இலக்கம்_waiting = 0;
+	எண்ணிக்கை { STATE_RUN, STATE_REAP, STATE_RETRY, STATE_END } state;
 
 #define DO_REG(_var)							      \
-	if (_var) free(_var);						      \
+	எனில் (_var) விடுவி(_var);						      \
 	_var = get_regex(optarg);
 #define REG_FREE(_var)							      \
-	if (_var) { regfree(_var); free(_var); }
+	எனில் (_var) { regfree(_var); விடுவி(_var); }
 
 	argv0 = argv[0];
 	applet = basename_c(argv[0]);
-	memset (&args, 0, sizeof(args));
+	memset (&args, 0, அளவு(args));
 	args.mount_type = mount_to;
 	args.netdev = net_ignore;
 	args.mounts = rc_stringlist_new();
 	args.process = process_mount;
 
-	if (strcmp(applet, "do_unmount") == 0) {
+	எனில் (strcmp(applet, "do_unmount") == 0) {
 		doing_unmount = 1;
-		while (argv[1]) {
+		போது (argv[1]) {
 			/* shift over */
 			tmps = argv[1];
 			argv[1] = argv0;
 			++argv;
 			--argc;
 
-			if (strcmp(tmps, "--") == 0)
-				break;
-			if (umount_args_num >= (int)ARRAY_SIZE(umount_args))
+			எனில் (strcmp(tmps, "--") == 0)
+				நிறுத்து;
+			எனில் (umount_args_இலக்கம் >= (முழு)ARRAY_SIZE(umount_args))
 				eerrorx("%s: Too many umount arguments", applet);
-			umount_args[umount_args_num++] = tmps;
+			umount_args[umount_args_இலக்கம்++] = tmps;
 		}
 
-		tmps = rc_conf_value("rc_fuser_timeout");
-		if (tmps && (rc_fuser_timeout = parse_duration(tmps)) < 0)
+		tmps = rc_conf_மதிப்பு("rc_fuser_timeout");
+		எனில் (tmps && (rc_fuser_timeout = parse_duration(tmps)) < 0)
 			ewarn("%s: Invalid rc_fuser_timeout value: `%s`. "
 				"Defaulting to 20", applet, tmps);
-		if (rc_fuser_timeout < 0)
+		எனில் (rc_fuser_timeout < 0)
 			rc_fuser_timeout = 20 * 1000;
 
 		tmps = getenv("RC_UNAME");
-		if (!tmps || strcmp(tmps, "Linux") == 0) {
+		எனில் (!tmps || strcmp(tmps, "Linux") == 0) {
 			fuser_opt = "-m";
 			fuser_kill_prefix = "-";
-		} else {
+		} இல்லையெனில் {
 			fuser_opt = "-cm";
 			fuser_kill_prefix = "-s";
 		}
 	}
 
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	போது ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (முழு *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'e':
+		தேர்வு (opt) {
+		நிலை 'e':
 			args.netdev = net_yes;
-			break;
-		case 'E':
+			நிறுத்து;
+		நிலை 'E':
 			args.netdev = net_no;
-			break;
-		case 'f':
+			நிறுத்து;
+		நிலை 'f':
 			DO_REG(args.fstype_regex);
-			break;
-		case 'F':
+			நிறுத்து;
+		நிலை 'F':
 			DO_REG(args.skip_fstype_regex);
-			break;
-		case 'n':
-			DO_REG(args.node_regex);
-			break;
-		case 'N':
-			DO_REG(args.skip_node_regex);
-			break;
-		case 'o':
+			நிறுத்து;
+		நிலை 'n':
+			DO_REG(args.முனை_regex);
+			நிறுத்து;
+		நிலை 'N':
+			DO_REG(args.skip_முனை_regex);
+			நிறுத்து;
+		நிலை 'o':
 			DO_REG(args.options_regex);
-			break;
-		case 'O':
+			நிறுத்து;
+		நிலை 'O':
 			DO_REG(args.skip_options_regex);
-			break;
-		case 'p':
+			நிறுத்து;
+		நிலை 'p':
 			DO_REG(point_regex);
-			break;
-		case 'P':
+			நிறுத்து;
+		நிலை 'P':
 			DO_REG(skip_point_regex);
-			break;
-		case 'i':
+			நிறுத்து;
+		நிலை 'i':
 			args.mount_type = mount_options;
-			break;
-		case 's':
+			நிறுத்து;
+		நிலை 's':
 			args.mount_type = mount_fstype;
-			break;
-		case 't':
+			நிறுத்து;
+		நிலை 't':
 			args.mount_type = mount_from;
-			break;
+			நிறுத்து;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	while (optind < argc) {
-		if (argv[optind][0] != '/')
+	போது (optind < argc) {
+		எனில் (argv[optind][0] != '/')
 			eerrorx("%s: `%s' is not a mount point",
 			    argv[0], argv[optind]);
 		this_path = argv[optind++];
-		real_path = realpath(this_path, NULL);
-		if (real_path)
+		real_path = realpath(this_path, வெற்று);
+		எனில் (real_path)
 			this_path = real_path;
 		rc_stringlist_add(args.mounts, this_path);
-		free(real_path);
-		real_path = NULL;
+		விடுவி(real_path);
+		real_path = வெற்று;
 	}
-	nodes = find_mounts(&args, &num_mounts);
+	nodes = find_mounts(&args, &இலக்கம்_mounts);
 	rc_stringlist_free(args.mounts);
 
-	if (doing_unmount)
-		mounts = xmalloc(num_mounts * sizeof(*mounts));
-	num_mounts = 0;
+	எனில் (doing_unmount)
+		mounts = xmalloc(இலக்கம்_mounts * அளவு(*mounts));
+	இலக்கம்_mounts = 0;
 	result = EXIT_FAILURE;
 	/* We should report the mounts in reverse order to ease unmounting */
 	TAILQ_FOREACH_REVERSE(s, nodes, rc_stringlist, entries) {
-		if (point_regex &&
-		    regexec(point_regex, s->value, 0, NULL, 0) != 0)
-			continue;
-		if (skip_point_regex &&
-		    regexec(skip_point_regex, s->value, 0, NULL, 0) == 0)
-			continue;
-		if (doing_unmount)
-			mounts[num_mounts++] = unescape_octal(s->value);
-		else if (!rc_yesno(getenv("EINFO_QUIET")))
-			printf("%s\n", s->value);
+		எனில் (point_regex &&
+		    regexec(point_regex, s->மதிப்பு, 0, வெற்று, 0) != 0)
+			தொடர்;
+		எனில் (skip_point_regex &&
+		    regexec(skip_point_regex, s->மதிப்பு, 0, வெற்று, 0) == 0)
+			தொடர்;
+		எனில் (doing_unmount)
+			mounts[இலக்கம்_mounts++] = unescape_octal(s->மதிப்பு);
+		இல்லையெனில் எனில் (!rc_yesno(getenv("EINFO_QUIET")))
+			printf("%s\n", s->மதிப்பு);
 		result = EXIT_SUCCESS;
 	}
-	if (!doing_unmount)
-		goto exit;
+	எனில் (!doing_unmount)
+		செல் exit;
 
 	/* STATE_RUN:
 	 * can unmount => stays in STATE_RUN
@@ -740,132 +740,132 @@ int main(int argc, char **argv)
 	 */
 	result = EXIT_SUCCESS;
 	state = STATE_RUN;
-	while (state != STATE_END) switch (state) {
-	case STATE_RUN:
-		for (unmount_index = 0; unmount_index < num_mounts; ++unmount_index) {
-			const char *candidate = mounts[unmount_index];
-			int safe_to_unmount = 1;
-			for (size_t k = 0; safe_to_unmount && k < num_running; ++k)
+	போது (state != STATE_END) தேர்வு (state) {
+	நிலை STATE_RUN:
+		க்கு (unmount_index = 0; unmount_index < இலக்கம்_mounts; ++unmount_index) {
+			மாறிலி எழுத்து *candidate = mounts[unmount_index];
+			முழு safe_to_unmount = 1;
+			க்கு (size_t k = 0; safe_to_unmount && k < இலக்கம்_running; ++k)
 				safe_to_unmount = !is_prefix(candidate, running[k].mntpath);
-			for (size_t k = 0; safe_to_unmount && k < num_mounts; ++k)
+			க்கு (size_t k = 0; safe_to_unmount && k < இலக்கம்_mounts; ++k)
 				safe_to_unmount = !is_prefix(candidate, mounts[k]);
-			if (!safe_to_unmount)
-				continue;
-			if (!is_mounted(candidate)) {
+			எனில் (!safe_to_unmount)
+				தொடர்;
+			எனில் (!is_mounted(candidate)) {
 				/* probably a shared mount and got unmounted, remove */
-				mounts[unmount_index--] = mounts[--num_mounts];
-			} else {
-				break;
+				mounts[unmount_index--] = mounts[--இலக்கம்_mounts];
+			} இல்லையெனில் {
+				நிறுத்து;
 			}
 		}
-		if (num_running == RUN_MAX || unmount_index >= num_mounts) {
+		எனில் (இலக்கம்_running == RUN_MAX || unmount_index >= இலக்கம்_mounts) {
 			state = STATE_REAP;
-			break;
+			நிறுத்து;
 		}
-		rp = running + num_running++;
+		rp = running + இலக்கம்_running++;
 		rp->mntpath = mounts[unmount_index];
 		rp->last_exec_time = tm_now();
-		rp->try_count = 0;
-		rp->pid = run_umount(rp->mntpath, umount_args, umount_args_num);
+		rp->try_மொத்தம் = 0;
+		rp->pid = run_umount(rp->mntpath, umount_args, umount_args_இலக்கம்);
 		rp->fuser_pid = -1;
 		rp->fuser_stdoutfd = -1;
 		rp->fuser_exec_time = -1;
-		mounts[unmount_index] = mounts[--num_mounts];
-		break;
-	case STATE_REAP:
-		flags = (num_waiting > 0) ? WNOHANG : 0;
+		mounts[unmount_index] = mounts[--இலக்கம்_mounts];
+		நிறுத்து;
+	நிலை STATE_REAP:
+		flags = (இலக்கம்_waiting > 0) ? WNOHANG : 0;
 		pid = waitpid(-1, &status, flags);
-		rp = NULL;
-		for (size_t i = 0; i < num_running; ++i) {
+		rp = வெற்று;
+		க்கு (size_t i = 0; i < இலக்கம்_running; ++i) {
 			rp = running + i;
-			if (rp->fuser_pid == pid)
+			எனில் (rp->fuser_pid == pid)
 				rp->fuser_pid = -1;
-			if (rp->pid == pid && pid > 0)
-				break;
-			rp = NULL;
+			எனில் (rp->pid == pid && pid > 0)
+				நிறுத்து;
+			rp = வெற்று;
 		}
-		if (rp) {
-			if ((WIFEXITED(status) && WEXITSTATUS(status) == 0) ||
+		எனில் (rp) {
+			எனில் ((WIFEXITED(status) && WEXITSTATUS(status) == 0) ||
 			    !is_mounted(rp->mntpath)) {
 				einfo("Unmounted %s", rp->mntpath);
-				*rp = running[--num_running];
+				*rp = running[--இலக்கம்_running];
 				state = STATE_RUN;
-			} else if (rp->try_count >= TRY_MAX) {
+			} இல்லையெனில் எனில் (rp->try_மொத்தம் >= TRY_MAX) {
 				eerror("Failed to unmount %s", rp->mntpath);
-				*rp = running[--num_running];
+				*rp = running[--இலக்கம்_running];
 				result = EXIT_FAILURE;
-			} else { /* put into waiting queue */
+			} இல்லையெனில் { /* put into waiting queue */
 				rp->pid = -1;
-				rp->try_count += 1;
-				num_waiting += 1;
+				rp->try_மொத்தம் += 1;
+				இலக்கம்_waiting += 1;
 				fuser_run(rp, fuser_opt);
 			}
-		} else {
+		} இல்லையெனில் {
 			state = STATE_RETRY;
 		}
-		break;
-	case STATE_RETRY:
-		rp = NULL;
+		நிறுத்து;
+	நிலை STATE_RETRY:
+		rp = வெற்று;
 		next_retry = INT64_MAX;
-		for (size_t i = 0; i < num_running; ++i) {
-			if (running[i].pid > 0)
-				continue;
-			if (running[i].fuser_pid > 0)
+		க்கு (size_t i = 0; i < இலக்கம்_running; ++i) {
+			எனில் (running[i].pid > 0)
+				தொடர்;
+			எனில் (running[i].fuser_pid > 0)
 				tmp = running[i].fuser_exec_time + rc_fuser_timeout;
-			else
+			இல்லையெனில்
 				tmp = running[i].last_exec_time + TRY_DELAY_MS;
-			if (tmp < next_retry) {
+			எனில் (tmp < next_retry) {
 				rp = running + i;
 				next_retry = tmp;
 			}
 		}
-		if (!rp) {
-			state = (num_mounts > 0) ? STATE_RUN : STATE_END;
-			break;
+		எனில் (!rp) {
+			state = (இலக்கம்_mounts > 0) ? STATE_RUN : STATE_END;
+			நிறுத்து;
 		}
 		now = tm_now();
-		if ((rp->pid > 0 || rp->fuser_pid > 0) && next_retry > now) {
+		எனில் ((rp->pid > 0 || rp->fuser_pid > 0) && next_retry > now) {
 			int64_t sleep_for = next_retry - now;
 			/* a child may become available for reaping *before* we
 			 * enter sleep. cap the timeout to stay responsive. */
-			if (sleep_for > 500)
+			எனில் (sleep_for > 500)
 				sleep_for = 500;
 			tm_sleep(sleep_for, 0);
 			state = STATE_REAP;
 			now = tm_now();
 		}
-		if ((rp->pid == -1 && rp->fuser_pid == -1) || next_retry <= now) {
-			if (rp->fuser_pid > 0) {
+		எனில் ((rp->pid == -1 && rp->fuser_pid == -1) || next_retry <= now) {
+			எனில் (rp->fuser_pid > 0) {
 				kill(rp->fuser_pid, SIGKILL);
-				waitpid(rp->fuser_pid, NULL, 0);
+				waitpid(rp->fuser_pid, வெற்று, 0);
 				rp->fuser_pid = -1;
 			}
-			if (fuser_decide(rp, fuser_opt, fuser_kill_prefix) < 0) { /* abort */
-				*rp = running[--num_running];
+			எனில் (fuser_decide(rp, fuser_opt, fuser_kill_prefix) < 0) { /* abort */
+				*rp = running[--இலக்கம்_running];
 				result = EXIT_FAILURE;
-			} else { /* retry */
+			} இல்லையெனில் { /* retry */
 				rp->last_exec_time = tm_now();
 				rp->pid = run_umount(rp->mntpath,
-					umount_args, umount_args_num);
+					umount_args, umount_args_இலக்கம்);
 			}
-			num_waiting -= 1;
+			இலக்கம்_waiting -= 1;
 			state = STATE_REAP;
 		}
-		break;
-	default: break;
+		நிறுத்து;
+	இயல்பு: நிறுத்து;
 	}
 
 exit:
-	free(mounts);
+	விடுவி(mounts);
 	rc_stringlist_free(nodes);
 	REG_FREE(args.fstype_regex);
 	REG_FREE(args.skip_fstype_regex);
-	REG_FREE(args.node_regex);
-	REG_FREE(args.skip_node_regex);
+	REG_FREE(args.முனை_regex);
+	REG_FREE(args.skip_முனை_regex);
 	REG_FREE(args.options_regex);
 	REG_FREE(args.skip_options_regex);
 	REG_FREE(point_regex);
 	REG_FREE(skip_point_regex);
 
-	return result;
+	திரும்பு result;
 }

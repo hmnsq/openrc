@@ -1,90 +1,90 @@
-#include <pwd.h>
-#include <grp.h>
-#include <security/pam_modules.h>
-#include <security/pam_appl.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/file.h>
-#include <syslog.h>
-#include <unistd.h>
+#அந்தர்பாவ <pwd.h>
+#அந்தர்பாவ <grp.h>
+#அந்தர்பாவ <security/pam_modules.h>
+#அந்தர்பாவ <security/pam_appl.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <sys/file.h>
+#அந்தர்பாவ <syslog.h>
+#அந்தர்பாவ <unistd.h>
 
-#include "librc.h"
-#include "einfo.h"
-#include "helpers.h"
+#அந்தர்பாவ "librc.h"
+#அந்தர்பாவ "einfo.h"
+#அந்தர்பாவ "helpers.h"
 
-static bool
-import_env(pam_handle_t *pamh, const char *user)
+நிலையான bool
+import_env(pam_handle_t *pamh, மாறிலி எழுத்து *user)
 {
-	char *path, *string = NULL;
+	எழுத்து *path, *string = வெற்று;
 	bool ret = false;
 	size_t size;
 	FILE *fp;
 
 	xasprintf(&path, "user/%s/environ", user);
 
-	if (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), path, O_RDONLY)))
-		goto out;
+	எனில் (!(fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), path, O_RDONLY)))
+		செல் out;
 
-	while (getdelim(&string, &size, '\0', fp) != -1)
+	போது (getdelim(&string, &size, '\0', fp) != -1)
 		pam_putenv(pamh, string);
 
-	free(string);
+	விடுவி(string);
 	fclose(fp);
 
 	ret = true;
 out:
-	free(path);
+	விடுவி(path);
 
-	return ret;
+	திரும்பு ret;
 }
 
-static int
+நிலையான முழு
 exec_openrc(pam_handle_t *pamh, bool opening, bool quiet)
 {
-	char *do_autostart = rc_conf_value("rc_autostart_user");
-	char *svc_name, *pam_lock, *logins, *script = NULL;
-	const char *username = NULL, *session = NULL;
+	எழுத்து *do_autostart = rc_conf_மதிப்பு("rc_autostart_user");
+	எழுத்து *svc_name, *pam_lock, *logins, *script = வெற்று;
+	மாறிலி எழுத்து *username = வெற்று, *session = வெற்று;
 	RC_SERVICE service_status;
-	int count = 0, fd, status;
-	int ret = PAM_SUCCESS;
-	struct passwd *user;
+	முழு மொத்தம் = 0, fd, status;
+	முழு ret = PAM_SUCCESS;
+	கட்டமைப்பு passwd *user;
 	pid_t pid = -1;
 
 	errno = 0;
-	if (!rc_yesno(do_autostart) && errno == 0)
-		return PAM_SUCCESS;
+	எனில் (!rc_yesno(do_autostart) && errno == 0)
+		திரும்பு PAM_SUCCESS;
 
 	setenv("EINFO_LOG", "pam_openrc", true);
 
-	if (quiet) {
+	எனில் (quiet) {
 		setenv("EINFO_QUIET", "yes", true);
 		setenv("EERROR_QUIET", "yes", true);
 	}
 
-	if (pam_get_item(pamh, PAM_SERVICE, (const void **)&session) != PAM_SUCCESS) {
+	எனில் (pam_get_item(pamh, PAM_SERVICE, (மாறிலி வெறுமை **)&session) != PAM_SUCCESS) {
 		elog(LOG_ERR, "Failed to get PAM_SERVICE");
-		return PAM_SESSION_ERR;
+		திரும்பு PAM_SESSION_ERR;
 	}
 
-	if (session && strcmp(session, "openrc-user") == 0)
-		return PAM_SUCCESS;
+	எனில் (session && strcmp(session, "openrc-user") == 0)
+		திரும்பு PAM_SUCCESS;
 
-	if (pam_get_item(pamh, PAM_USER, (const void **)&username) != PAM_SUCCESS)
-		return PAM_SESSION_ERR;
+	எனில் (pam_get_item(pamh, PAM_USER, (மாறிலி வெறுமை **)&username) != PAM_SUCCESS)
+		திரும்பு PAM_SESSION_ERR;
 
-	if (!username) {
+	எனில் (!username) {
 		elog(LOG_ERR, "PAM_USER unset.");
-		return PAM_SESSION_ERR;
+		திரும்பு PAM_SESSION_ERR;
 	}
 
-	if (!(user = getpwnam(username))) {
+	எனில் (!(user = getpwnam(username))) {
 		elog(LOG_ERR, "User '%s' not found.", username);
-		return PAM_SESSION_ERR;
+		திரும்பு PAM_SESSION_ERR;
 	}
 
-	if (user->pw_uid == 0)
-		return PAM_SUCCESS;
+	எனில் (user->pw_uid == 0)
+		திரும்பு PAM_SUCCESS;
 
 	xasprintf(&pam_lock, "pam_openrc[%s]", user->pw_name);
 	setenv("EINFO_LOG", pam_lock, true);
@@ -92,85 +92,85 @@ exec_openrc(pam_handle_t *pamh, bool opening, bool quiet)
 	xasprintf(&svc_name, "user.%s", user->pw_name);
 
 	service_status = rc_service_state(svc_name);
-	if (service_status & RC_SERVICE_STARTED && !(service_status & RC_SERVICE_HOTPLUGGED)) {
+	எனில் (service_status & RC_SERVICE_STARTED && !(service_status & RC_SERVICE_HOTPLUGGED)) {
 		elog(LOG_INFO, "%s started and not hotplugged, skipping session.", svc_name);
-		goto out;
+		செல் out;
 	}
 
 	elog(LOG_INFO, opening ? "starting session" : "stopping session");
 
-	if ((fd = svc_lock(pam_lock, false)) == -1) {
+	எனில் ((fd = svc_lock(pam_lock, false)) == -1) {
 		ret = PAM_SESSION_ERR;
-		goto out;
+		செல் out;
 	}
 
-	if (!(script = rc_service_resolve(svc_name))) {
-		if (!(script = rc_service_resolve("user"))) {
+	எனில் (!(script = rc_service_resolve(svc_name))) {
+		எனில் (!(script = rc_service_resolve("user"))) {
 			elog(LOG_ERR, "Failed to resolve %s.", svc_name);
 			ret = PAM_SESSION_ERR;
-			goto unlock;
+			செல் unlock;
 		}
 
-		if (symlinkat(script, rc_dirfd(RC_DIR_INITD), svc_name) != 0) {
+		எனில் (symlinkat(script, rc_dirfd(RC_DIR_INITD), svc_name) != 0) {
 			elog(LOG_ERR, "symlink: %s", strerror(errno));
 			ret = PAM_SESSION_ERR;
-			goto unlock;
+			செல் unlock;
 		}
 	}
 
-	logins = rc_service_value_get(svc_name, "logins");
-	if (logins)
-		sscanf(logins, "%d", &count);
-	free(logins);
+	logins = rc_service_மதிப்பு_get(svc_name, "logins");
+	எனில் (logins)
+		sscanf(logins, "%d", &மொத்தம்);
+	விடுவி(logins);
 
-	if (opening) {
-		if (count == 0) {
+	எனில் (opening) {
+		எனில் (மொத்தம் == 0) {
 			pid = service_start(svc_name);
 			rc_service_mark(svc_name, RC_SERVICE_HOTPLUGGED);
 		}
-		count++;
-	} else {
-		count--;
-		if (count == 0)
+		மொத்தம்++;
+	} இல்லையெனில் {
+		மொத்தம்--;
+		எனில் (மொத்தம் == 0)
 			pid = service_stop(svc_name);
 	}
 
-	elog(LOG_INFO, "%d sessions", count);
+	elog(LOG_INFO, "%d sessions", மொத்தம்);
 
-	if (pid > 0) {
+	எனில் (pid > 0) {
 		waitpid(pid, &status, 0);
-		if (status != 0)
+		எனில் (status != 0)
 			ret = PAM_SESSION_ERR;
 	}
 
-	xasprintf(&logins, "%d", count);
-	rc_service_value_set(svc_name, "logins", logins);
-	free(logins);
+	xasprintf(&logins, "%d", மொத்தம்);
+	rc_service_மதிப்பு_set(svc_name, "logins", logins);
+	விடுவி(logins);
 
 unlock:
 	svc_unlock(pam_lock, fd);
 out:
-	if (opening)
+	எனில் (opening)
 		import_env(pamh, user->pw_name);
 
-	free(pam_lock);
-	free(svc_name);
-	free(script);
+	விடுவி(pam_lock);
+	விடுவி(svc_name);
+	விடுவி(script);
 	unsetenv("EINFO_LOG");
-	return ret;
+	திரும்பு ret;
 }
 
-PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	(void) argc;
-	(void) argv;
+PAM_EXTERN முழு pam_sm_open_session(pam_handle_t *pamh, முழு flags, முழு argc, மாறிலி எழுத்து **argv) {
+	(வெறுமை) argc;
+	(வெறுமை) argv;
 
-	return exec_openrc(pamh, true, flags & PAM_SILENT);
+	திரும்பு exec_openrc(pamh, true, flags & PAM_SILENT);
 }
 
-PAM_EXTERN int pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	(void) argc;
-	(void) argv;
-	(void) flags;
+PAM_EXTERN முழு pam_sm_close_session(pam_handle_t *pamh, முழு flags, முழு argc, மாறிலி எழுத்து **argv) {
+	(வெறுமை) argc;
+	(வெறுமை) argv;
+	(வெறுமை) flags;
 
-	return exec_openrc(pamh, false, flags & PAM_SILENT);
+	திரும்பு exec_openrc(pamh, false, flags & PAM_SILENT);
 }
