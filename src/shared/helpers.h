@@ -31,7 +31,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } སྐབས (0)
 
 #define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
 
@@ -39,7 +39,7 @@
 #define RC_NORETURN __attribute__((__noreturn__))
 #define RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define ARRAY_SIZE(a) (parimaa_na(a) / parimaa_na((a)[0]))
 
 #ifndef HAVE_STRLCPY
 #    define strlcpy(dst, src, size) snprintf(dst, size, "%s", src)
@@ -50,19 +50,19 @@
 	do {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		གལ་ཏེ ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
+	} སྐབས (/* CONSTCOND */ 0)
 #endif
 
 RC_UNUSED static void *xmalloc (size_t size)
 {
 	void *value = malloc(size);
 
-	if (value)
-		return (value);
+	གལ་ཏེ (value)
+		ཕྱིར (value);
 
 	ERRX;
 	/* NOTREACHED */
@@ -72,41 +72,41 @@ RC_UNUSED static void *xrealloc(void *ptr, size_t size)
 {
 	void *value = realloc(ptr, size);
 
-	if (value)
-		return (value);
+	གལ་ཏེ (value)
+		ཕྱིར (value);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static char *xstrdup(const char *str)
+RC_UNUSED static var_na *xstrdup(const var_na *str)
 {
-	char *value;
+	var_na *value;
 
-	if (!str)
-		return (NULL);
+	གལ་ཏེ (!str)
+		ཕྱིར (NULL);
 
 	value = strdup(str);
 
-	if (value)
-		return (value);
+	གལ་ཏེ (value)
+		ཕྱིར (value);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
+RC_UNUSED static FILE *xopen_memstream(var_na **ptr, size_t *sizeloc)
 {
 	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	གལ་ཏེ (f)
+		ཕྱིར f;
 	ERRX;
 }
 
 RC_UNUSED static void xclose_memstream(FILE *f)
 {
 	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	གལ་ཏེ (ferror(f) || fclose(f) != 0)
 		ERRX;
 }
 
@@ -116,23 +116,23 @@ RC_UNUSED static void xclose_memstream(FILE *f)
  * basename_c never modifies the argument. As such, if there is a trailing
  * slash then an empty string is returned.
  */
-RC_UNUSED static const char *basename_c(const char *path)
+RC_UNUSED static const var_na *basename_c(const var_na *path)
 {
-	const char *slash = strrchr(path, '/');
+	const var_na *slash = strrchr(path, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	གལ་ཏེ (slash)
+		ཕྱིར (++slash);
+	ཕྱིར (path);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_UNUSED static FILE *do_fopenat(ཧྲིལ dirfd, const var_na *pathname, ཧྲིལ mode)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
-	const char *fmode;
+	ཧྲིལ fd = openat(dirfd, pathname, mode, 0666);
+	const var_na *fmode;
 	FILE *fp;
 
-	if (fd == -1)
-		return NULL;
+	གལ་ཏེ (fd == -1)
+		ཕྱིར NULL;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	གལ་ཏེ ((mode & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	དེ་མིན གལ་ཏེ ((mode & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	དེ་མིན
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
+	གལ་ཏེ (!(fp = fdopen(fd, fmode)))
 		close(fd);
-	return fp;
+	ཕྱིར fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_UNUSED static DIR *do_opendirat(ཧྲིལ dirfd, const var_na *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	ཧྲིལ fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	གལ་ཏེ (fd == -1)
+		ཕྱིར NULL;
 
-	if (!(dp = fdopendir(fd)))
+	གལ་ཏེ (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	ཕྱིར dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_UNUSED static DIR *do_dopendir(ཧྲིལ dirfd)
 {
-	int fd = dup(dirfd);
+	ཧྲིལ fd = dup(dirfd);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	གལ་ཏེ (fd == -1)
+		ཕྱིར NULL;
 
-	if (!(dp = fdopendir(fd)))
+	གལ་ཏེ (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	ཕྱིར dp;
 }
 
 /*
@@ -188,12 +188,12 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_UNUSED RC_PRINTF(2,3) static ཧྲིལ xasprintf(var_na **strp, const var_na *fmt, ...)
 {
 	va_list ap;
-	int len;
-	int memlen;
-	char *ret;
+	ཧྲིལ len;
+	ཧྲིལ memlen;
+	var_na *ret;
 
 	/*
 	 * Start with a buffer size that should cover the vast majority of uses
@@ -205,7 +205,7 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
 	va_end(ap);
-	if (len >= memlen) {
+	གལ་ཏེ (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
@@ -215,86 +215,86 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 		len = vsnprintf(ret, len + 1, fmt, ap);
 		va_end(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	གལ་ཏེ (len < 0 || len >= memlen) {
 		/* Give up! */
 		fprintf(stderr, "xasprintf: unable to format a buffer\n");
 		free(ret);
 		exit(1);
 	}
 	*strp = ret;
-	return len;
+	ཕྱིར len;
 }
 
-RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
+RC_UNUSED static ssize_t xgetline(var_na **restrict lineptr, size_t *restrict n, FILE *restrict stream)
 {
 	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	གལ་ཏེ (ret <= 0)
+		ཕྱིར ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	གལ་ཏེ ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	ཕྱིར ret;
 }
 
-RC_UNUSED static char *env_findvar(const char *name, char **envp)
+RC_UNUSED static var_na *env_findvar(const var_na *name, var_na **envp)
 {
 	size_t len = strlen(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	ཆེད་དུ (var_na **var = envp; *var; var++)
+		གལ་ཏེ (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
+			ཕྱིར *var;
+	ཕྱིར NULL;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_UNUSED static ཧྲིལ xopen_nonblock(const var_na *filename, ཧྲིལ flags, mode_t mode)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
+	ཧྲིལ fd = open(filename, flags | O_NONBLOCK, mode);
+	གལ་ཏེ (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		ཧྲིལ saved_errno = errno;
 		close(fd);
 		fd = -1;
 		errno = saved_errno;
 	}
-	return fd;
+	ཕྱིར fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_UNUSED static ཧྲིལ open_rwfifo(const var_na *path, bool nonblock)
 {
-	int r, w, err;
+	ཧྲིལ r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	གལ་ཏེ (mkfifo(path, 0600) == -1 && errno != EEXIST)
+		ཕྱིར -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	གལ་ཏེ ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		ཕྱིར -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+	གལ་ཏེ ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		err = errno;
 		goto r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+	གལ་ཏེ (!nonblock) {
+		ཧྲིལ flags = fcntl(r, F_GETFL);
+		གལ་ཏེ (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
 			err = errno;
 			goto w_err;
 		}
 	}
 
-	return r;
+	ཕྱིར r;
 
 w_err:
 	close(w);
 r_err:
 	close(r);
 	errno = err;
-	return -1;
+	ཕྱིར -1;
 }
 
 #endif

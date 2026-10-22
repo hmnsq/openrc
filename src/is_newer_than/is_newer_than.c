@@ -14,17 +14,17 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+ཧྲིལ གཙོ(ཧྲིལ argc, var_na **argv)
 {
-	int i;
+	ཧྲིལ i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	གལ་ཏེ (argc < 3)
+		ཕྱིར EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	ཆེད་དུ (i = 2; i < argc; ++i)
+		གལ་ཏེ (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			ཕྱིར EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	ཕྱིར EXIT_SUCCESS;
 }

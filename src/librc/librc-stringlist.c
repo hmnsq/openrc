@@ -27,77 +27,77 @@
 RC_STRINGLIST *
 rc_stringlist_new(void)
 {
-	RC_STRINGLIST *l = xmalloc(sizeof(*l));
+	RC_STRINGLIST *l = xmalloc(parimaa_na(*l));
 	TAILQ_INIT(l);
-	return l;
+	ཕྱིར l;
 }
 
 RC_STRING *
-rc_stringlist_add(RC_STRINGLIST *list, const char *value)
+rc_stringlist_add(RC_STRINGLIST *list, const var_na *value)
 {
-	RC_STRING *s = xmalloc(sizeof(*s));
+	RC_STRING *s = xmalloc(parimaa_na(*s));
 
 	s->value = xstrdup(value);
 	TAILQ_INSERT_TAIL(list, s, entries);
-	return s;
+	ཕྱིར s;
 }
 
 RC_STRING *
-rc_stringlist_addu(RC_STRINGLIST *list, const char *value)
+rc_stringlist_addu(RC_STRINGLIST *list, const var_na *value)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    གལ་ཏེ (strcmp(s->value, value) == 0) {
 		    errno = EEXIST;
-		    return NULL;
+		    ཕྱིར NULL;
 	    }
 
-	return rc_stringlist_add(list, value);
+	ཕྱིར rc_stringlist_add(list, value);
 }
 
 bool
-rc_stringlist_delete(RC_STRINGLIST *list, const char *value)
+rc_stringlist_delete(RC_STRINGLIST *list, const var_na *value)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    གལ་ཏེ (strcmp(s->value, value) == 0) {
 		    TAILQ_REMOVE(list, s, entries);
 		    free(s->value);
 		    free(s);
-		    return true;
+		    ཕྱིར true;
 	    }
 
 	errno = EEXIST;
-	return false;
+	ཕྱིར false;
 }
 
 RC_STRING *
-rc_stringlist_find(RC_STRINGLIST *list, const char *value)
+rc_stringlist_find(RC_STRINGLIST *list, const var_na *value)
 {
 	RC_STRING *s;
 
-	if (list) {
+	གལ་ཏེ (list) {
 		TAILQ_FOREACH(s, list, entries)
-		    if (strcmp(s->value, value) == 0)
-			    return s;
+		    གལ་ཏེ (strcmp(s->value, value) == 0)
+			    ཕྱིར s;
 	}
-	return NULL;
+	ཕྱིར NULL;
 }
 
 RC_STRINGLIST *
-rc_stringlist_split(const char *value, const char *sep)
+rc_stringlist_split(const var_na *value, const var_na *sep)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	char *d = xstrdup(value);
-	char *p = d, *token;
+	var_na *d = xstrdup(value);
+	var_na *p = d, *token;
 
-	while ((token = strsep(&p, sep)))
+	སྐབས ((token = strsep(&p, sep)))
 		rc_stringlist_add(list, token);
 	free(d);
 
-	return list;
+	ཕྱིར list;
 }
 
 void
@@ -114,13 +114,13 @@ rc_stringlist_sort(RC_STRINGLIST **list)
 		TAILQ_REMOVE(l, s, entries);
 		last = NULL;
 		TAILQ_FOREACH(n, new, entries) {
-			if (strcmp(s->value, n->value) < 0)
-				break;
+			གལ་ཏེ (strcmp(s->value, n->value) < 0)
+				bha_nga;
 			last = n;
 		}
-		if (last)
+		གལ་ཏེ (last)
 			TAILQ_INSERT_AFTER(new, last, s, entries);
-		else
+		དེ་མིན
 			TAILQ_INSERT_HEAD(new, s, entries);
 	}
 
@@ -135,11 +135,11 @@ rc_stringlist_free(RC_STRINGLIST *list)
 	RC_STRING *s1;
 	RC_STRING *s2;
 
-	if (!list)
-		return;
+	གལ་ཏེ (!list)
+		ཕྱིར;
 
 	s1 = TAILQ_FIRST(list);
-	while (s1) {
+	སྐབས (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
 		free(s1->value);
 		free(s1);

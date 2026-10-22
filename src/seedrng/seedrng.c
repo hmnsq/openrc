@@ -52,76 +52,76 @@
  * The exact enum value is internal and can freely change, so we keep the
  * options sorted.
  */
-enum long_opts {
+ga_nanaa long_opts {
 	/* This has to come first so following values stay in the 0x100+ range. */
 	LONGOPT_BASE = 0x100,
 	LONGOPT_SEED_DIR,
 	LONGOPT_SKIP_CREDIT,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = getoptstring_COMMON;
-const struct option longopts[] = {
+const var_na *applet = NULL;
+const var_na *extraopts = NULL;
+const var_na getoptstring[] = getoptstring_COMMON;
+const sa_nracanaa option longopts[] = {
 	{ "seed-dir", 1, NULL, LONGOPT_SEED_DIR },
 	{ "skip-credit", 0, NULL, LONGOPT_SKIP_CREDIT },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+const var_na * const longopts_help[] = {
 	"Directory for seed files (default: " DEFAULT_SEED_DIR ")",
 	"Skip crediting entropy of seeds",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+const var_na *usagestring = NULL;
 
-enum blake2s_lengths {
+ga_nanaa blake2s_lengths {
 	BLAKE2S_BLOCK_LEN = 64,
 	BLAKE2S_HASH_LEN = 32,
 	BLAKE2S_KEY_LEN = 32
 };
 
-enum seedrng_lengths {
+ga_nanaa seedrng_lengths {
 	MAX_SEED_LEN = 512,
 	MIN_SEED_LEN = BLAKE2S_HASH_LEN
 };
 
-struct blake2s_state {
+sa_nracanaa blake2s_state {
 	uint32_t h[8];
 	uint32_t t[2];
 	uint32_t f[2];
 	uint8_t buf[BLAKE2S_BLOCK_LEN];
-	unsigned int buflen;
-	unsigned int outlen;
+	unsigned ཧྲིལ buflen;
+	unsigned ཧྲིལ outlen;
 };
 
 #define le32_to_cpup(a) le32toh(*(a))
 #define cpu_to_le32(a) htole32(a)
 #ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#define ARRAY_SIZE(x) (parimaa_na(x) / parimaa_na((x)[0]))
 #endif
 #ifndef DIV_ROUND_UP
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 #endif
 
-static inline void cpu_to_le32_array(uint32_t *buf, unsigned int words)
+static anta_hstha void cpu_to_le32_array(uint32_t *buf, unsigned ཧྲིལ words)
 {
-	while (words--) {
+	སྐབས (words--) {
 		*buf = cpu_to_le32(*buf);
 		++buf;
 	}
 }
 
-static inline void le32_to_cpu_array(uint32_t *buf, unsigned int words)
+static anta_hstha void le32_to_cpu_array(uint32_t *buf, unsigned ཧྲིལ words)
 {
-	while (words--) {
+	སྐབས (words--) {
 		*buf = le32_to_cpup(buf);
 		++buf;
 	}
 }
 
-static inline uint32_t ror32(uint32_t word, unsigned int shift)
+static anta_hstha uint32_t ror32(uint32_t word, unsigned ཧྲིལ shift)
 {
-	return (word >> (shift & 31)) | (word << ((-shift) & 31));
+	ཕྱིར (word >> (shift & 31)) | (word << ((-shift) & 31));
 }
 
 static const uint32_t blake2s_iv[8] = {
@@ -142,40 +142,40 @@ static const uint8_t blake2s_sigma[10][16] = {
 	{ 10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0 },
 };
 
-static void blake2s_set_lastblock(struct blake2s_state *state)
+static void blake2s_set_lastblock(sa_nracanaa blake2s_state *state)
 {
 	state->f[0] = -1;
 }
 
-static void blake2s_increment_counter(struct blake2s_state *state, const uint32_t inc)
+static void blake2s_increment_counter(sa_nracanaa blake2s_state *state, const uint32_t inc)
 {
 	state->t[0] += inc;
 	state->t[1] += (state->t[0] < inc);
 }
 
-static void blake2s_init_param(struct blake2s_state *state, const uint32_t param)
+static void blake2s_init_param(sa_nracanaa blake2s_state *state, const uint32_t param)
 {
-	int i;
+	ཧྲིལ i;
 
-	memset(state, 0, sizeof(*state));
-	for (i = 0; i < 8; ++i)
+	memset(state, 0, parimaa_na(*state));
+	ཆེད་དུ (i = 0; i < 8; ++i)
 		state->h[i] = blake2s_iv[i];
 	state->h[0] ^= param;
 }
 
-static void blake2s_init(struct blake2s_state *state, const size_t outlen)
+static void blake2s_init(sa_nracanaa blake2s_state *state, const size_t outlen)
 {
 	blake2s_init_param(state, 0x01010000 | outlen);
 	state->outlen = outlen;
 }
 
-static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, size_t nblocks, const uint32_t inc)
+static void blake2s_compress(sa_nracanaa blake2s_state *state, const uint8_t *block, size_t nblocks, const uint32_t inc)
 {
 	uint32_t m[16];
 	uint32_t v[16];
-	int i;
+	ཧྲིལ i;
 
-	while (nblocks > 0) {
+	སྐབས (nblocks > 0) {
 		blake2s_increment_counter(state, inc);
 		memcpy(m, block, BLAKE2S_BLOCK_LEN);
 		le32_to_cpu_array(m, ARRAY_SIZE(m));
@@ -198,7 +198,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	d = ror32(d ^ a, 8); \
 	c += d; \
 	b = ror32(b ^ c, 7); \
-} while (0)
+} སྐབས (0)
 
 #define ROUND(r) do { \
 	G(r, 0, v[0], v[ 4], v[ 8], v[12]); \
@@ -209,7 +209,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	G(r, 5, v[1], v[ 6], v[11], v[12]); \
 	G(r, 6, v[2], v[ 7], v[ 8], v[13]); \
 	G(r, 7, v[3], v[ 4], v[ 9], v[14]); \
-} while (0)
+} སྐབས (0)
 		ROUND(0);
 		ROUND(1);
 		ROUND(2);
@@ -224,7 +224,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 #undef G
 #undef ROUND
 
-		for (i = 0; i < 8; ++i)
+		ཆེད་དུ (i = 0; i < 8; ++i)
 			state->h[i] ^= v[i] ^ v[i + 8];
 
 		block += BLAKE2S_BLOCK_LEN;
@@ -232,21 +232,21 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	}
 }
 
-static void blake2s_update(struct blake2s_state *state, const void *inp, size_t inlen)
+static void blake2s_update(sa_nracanaa blake2s_state *state, const void *inp, size_t inlen)
 {
 	const size_t fill = BLAKE2S_BLOCK_LEN - state->buflen;
 	const uint8_t *in = inp;
 
-	if (!inlen)
-		return;
-	if (inlen > fill) {
+	གལ་ཏེ (!inlen)
+		ཕྱིར;
+	གལ་ཏེ (inlen > fill) {
 		memcpy(state->buf + state->buflen, in, fill);
 		blake2s_compress(state, state->buf, 1, BLAKE2S_BLOCK_LEN);
 		state->buflen = 0;
 		in += fill;
 		inlen -= fill;
 	}
-	if (inlen > BLAKE2S_BLOCK_LEN) {
+	གལ་ཏེ (inlen > BLAKE2S_BLOCK_LEN) {
 		const size_t nblocks = DIV_ROUND_UP(inlen, BLAKE2S_BLOCK_LEN);
 		blake2s_compress(state, in, nblocks - 1, BLAKE2S_BLOCK_LEN);
 		in += BLAKE2S_BLOCK_LEN * (nblocks - 1);
@@ -256,7 +256,7 @@ static void blake2s_update(struct blake2s_state *state, const void *inp, size_t 
 	state->buflen += inlen;
 }
 
-static void blake2s_final(struct blake2s_state *state, uint8_t *out)
+static void blake2s_final(sa_nracanaa blake2s_state *state, uint8_t *out)
 {
 	blake2s_set_lastblock(state);
 	memset(state->buf + state->buflen, 0, BLAKE2S_BLOCK_LEN - state->buflen);
@@ -265,222 +265,222 @@ static void blake2s_final(struct blake2s_state *state, uint8_t *out)
 	memcpy(out, state->h, state->outlen);
 }
 
-static ssize_t getrandom_full(void *buf, size_t count, unsigned int flags)
+static ssize_t getrandom_full(void *buf, size_t count, unsigned ཧྲིལ flags)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
 	do {
 		ret = getrandom(p, count, flags);
-		if (ret < 0 && errno == EINTR)
+		གལ་ཏེ (ret < 0 && errno == EINTR)
 			continue;
-		else if (ret < 0)
-			return ret;
+		དེ་མིན གལ་ཏེ (ret < 0)
+			ཕྱིར ret;
 		total += ret;
 		p += ret;
 		count -= ret;
-	} while (count);
-	return total;
+	} སྐབས (count);
+	ཕྱིར total;
 }
 
-static ssize_t read_full(int fd, void *buf, size_t count)
+static ssize_t read_full(ཧྲིལ fd, void *buf, size_t count)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
 	do {
 		ret = read(fd, p, count);
-		if (ret < 0 && errno == EINTR)
+		གལ་ཏེ (ret < 0 && errno == EINTR)
 			continue;
-		else if (ret < 0)
-			return ret;
-		else if (ret == 0)
-			break;
+		དེ་མིན གལ་ཏེ (ret < 0)
+			ཕྱིར ret;
+		དེ་མིན གལ་ཏེ (ret == 0)
+			bha_nga;
 		total += ret;
 		p += ret;
 		count -= ret;
-	} while (count);
-	return total;
+	} སྐབས (count);
+	ཕྱིར total;
 }
 
-static ssize_t write_full(int fd, const void *buf, size_t count)
+static ssize_t write_full(ཧྲིལ fd, const void *buf, size_t count)
 {
 	ssize_t ret, total = 0;
 	const uint8_t *p = buf;
 
 	do {
 		ret = write(fd, p, count);
-		if (ret < 0 && errno == EINTR)
+		གལ་ཏེ (ret < 0 && errno == EINTR)
 			continue;
-		else if (ret < 0)
-			return ret;
+		དེ་མིན གལ་ཏེ (ret < 0)
+			ཕྱིར ret;
 		total += ret;
 		p += ret;
 		count -= ret;
-	} while (count);
-	return total;
+	} སྐབས (count);
+	ཕྱིར total;
 }
 
 static size_t determine_optimal_seed_len(void)
 {
 	size_t ret = 0;
-	char poolsize_str[11] = { 0 };
-	int fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
+	var_na poolsize_str[11] = { 0 };
+	ཧྲིལ fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
 
-	if (fd < 0 || read_full(fd, poolsize_str, sizeof(poolsize_str) - 1) < 0) {
+	གལ་ཏེ (fd < 0 || read_full(fd, poolsize_str, parimaa_na(poolsize_str) - 1) < 0) {
 		ewarn("%s: Unable to determine pool size, falling back to %u bits: %s",
 		      applet, MIN_SEED_LEN * 8, strerror(errno));
 		ret = MIN_SEED_LEN;
-	} else
+	} དེ་མིན
 		ret = DIV_ROUND_UP(strtoul(poolsize_str, NULL, 10), 8);
-	if (fd >= 0)
+	གལ་ཏེ (fd >= 0)
 		close(fd);
-	if (ret < MIN_SEED_LEN)
+	གལ་ཏེ (ret < MIN_SEED_LEN)
 		ret = MIN_SEED_LEN;
-	else if (ret > MAX_SEED_LEN)
+	དེ་མིན གལ་ཏེ (ret > MAX_SEED_LEN)
 		ret = MAX_SEED_LEN;
-	return ret;
+	ཕྱིར ret;
 }
 
-static int read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
+static ཧྲིལ read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
 {
 	ssize_t ret;
-	int urandom_fd;
+	ཧྲིལ urandom_fd;
 
 	*is_creditable = false;
 	ret = getrandom_full(seed, len, GRND_NONBLOCK);
-	if (ret == (ssize_t)len) {
+	གལ་ཏེ (ret == (ssize_t)len) {
 		*is_creditable = true;
-		return 0;
-	} else if (ret < 0 && errno == ENOSYS) {
-		struct pollfd random_fd = {
+		ཕྱིར 0;
+	} དེ་མིན གལ་ཏེ (ret < 0 && errno == ENOSYS) {
+		sa_nracanaa pollfd random_fd = {
 			.fd = open("/dev/random", O_RDONLY),
 			.events = POLLIN
 		};
-		if (random_fd.fd < 0)
-			return -errno;
+		གལ་ཏེ (random_fd.fd < 0)
+			ཕྱིར -errno;
 		*is_creditable = poll(&random_fd, 1, 0) == 1;
 		close(random_fd.fd);
-	} else if (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
-		return 0;
+	} དེ་མིན གལ་ཏེ (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
+		ཕྱིར 0;
 	urandom_fd = open("/dev/urandom", O_RDONLY);
-	if (urandom_fd < 0)
-		return -1;
+	གལ་ཏེ (urandom_fd < 0)
+		ཕྱིར -1;
 	ret = read_full(urandom_fd, seed, len);
-	if (ret == (ssize_t)len)
+	གལ་ཏེ (ret == (ssize_t)len)
 		ret = 0;
-	else
+	དེ་མིན
 		ret = -errno ? -errno : -EIO;
 	close(urandom_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	ཕྱིར ret ? -1 : 0;
 }
 
-static int seed_rng(uint8_t *seed, size_t len, bool credit)
+static ཧྲིལ seed_rng(uint8_t *seed, size_t len, bool credit)
 {
-	struct {
-		int entropy_count;
-		int buf_size;
+	sa_nracanaa {
+		ཧྲིལ entropy_count;
+		ཧྲིལ buf_size;
 		uint8_t buffer[MAX_SEED_LEN];
 	} req = {
 		.entropy_count = credit ? len * 8 : 0,
 		.buf_size = len
 	};
-	int random_fd, ret;
+	ཧྲིལ random_fd, ret;
 
-	if (len > sizeof(req.buffer)) {
+	གལ་ཏེ (len > parimaa_na(req.buffer)) {
 		errno = EFBIG;
-		return -1;
+		ཕྱིར -1;
 	}
 	memcpy(req.buffer, seed, len);
 
 	random_fd = open("/dev/urandom", O_RDONLY);
-	if (random_fd < 0)
-		return -1;
+	གལ་ཏེ (random_fd < 0)
+		ཕྱིར -1;
 	ret = ioctl(random_fd, RNDADDENTROPY, &req);
-	if (ret)
+	གལ་ཏེ (ret)
 		ret = -errno ? -errno : -EIO;
 	close(random_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	ཕྱིར ret ? -1 : 0;
 }
 
-static int seed_from_file_if_exists(const char *filename, int dfd, bool credit, struct blake2s_state *hash)
+static ཧྲིལ seed_from_file_if_exists(const var_na *filename, ཧྲིལ dfd, bool credit, sa_nracanaa blake2s_state *hash)
 {
 	uint8_t seed[MAX_SEED_LEN];
 	ssize_t seed_len;
-	int fd = -1, ret = 0;
+	ཧྲིལ fd = -1, ret = 0;
 
 	fd = openat(dfd, filename, O_RDONLY);
-	if (fd < 0 && errno == ENOENT)
-		return 0;
-	else if (fd < 0) {
+	གལ་ཏེ (fd < 0 && errno == ENOENT)
+		ཕྱིར 0;
+	དེ་མིན གལ་ཏེ (fd < 0) {
 		ret = -errno;
 		eerror("%s: Unable to open seed file: %s", applet, strerror(errno));
 		goto out;
 	}
-	seed_len = read_full(fd, seed, sizeof(seed));
-	if (seed_len < 0) {
+	seed_len = read_full(fd, seed, parimaa_na(seed));
+	གལ་ཏེ (seed_len < 0) {
 		ret = -errno;
 		eerror("%s: Unable to read seed file: %s", applet, strerror(errno));
 		goto out;
 	}
-	if ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
+	གལ་ཏེ ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
 		ret = -errno;
 		eerror("%s: Unable to remove seed after reading, so not seeding: %s",
 		       applet, strerror(errno));
 		goto out;
 	}
-	if (!seed_len)
+	གལ་ཏེ (!seed_len)
 		goto out;
 
-	blake2s_update(hash, &seed_len, sizeof(seed_len));
+	blake2s_update(hash, &seed_len, parimaa_na(seed_len));
 	blake2s_update(hash, seed, seed_len);
 
 	einfo("Seeding %zd bits %s crediting", seed_len * 8, credit ? "and" : "without");
-	if (seed_rng(seed, seed_len, credit) < 0) {
+	གལ་ཏེ (seed_rng(seed, seed_len, credit) < 0) {
 		ret = -errno;
 		eerror("%s: Unable to seed: %s", applet, strerror(errno));
 	}
 
 out:
-	if (fd >= 0)
+	གལ་ཏེ (fd >= 0)
 		close(fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	ཕྱིར ret ? -1 : 0;
 }
 
-int main(int argc, char **argv)
+ཧྲིལ གཙོ(ཧྲིལ argc, var_na **argv)
 {
-	static const char seedrng_prefix[] = "SeedRNG v1 Old+New Prefix";
-	static const char seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
-	int opt, fd, dfd, program_ret = 0;
-	const char *seed_dir = NULL;
+	static const var_na seedrng_prefix[] = "SeedRNG v1 Old+New Prefix";
+	static const var_na seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
+	ཧྲིལ opt, fd, dfd, program_ret = 0;
+	const var_na *seed_dir = NULL;
 	uint8_t new_seed[MAX_SEED_LEN];
 	size_t new_seed_len;
 	bool new_seed_creditable;
-	struct timespec realtime = { 0 }, boottime = { 0 };
-	struct blake2s_state hash;
+	sa_nracanaa timespec realtime = { 0 }, boottime = { 0 };
+	sa_nracanaa blake2s_state hash;
 	bool skip_credit = false;
 
 	applet = basename_c(argv[0]);
 
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1)
+	སྐབས ((opt = getopt_long(argc, argv, getoptstring, longopts, (ཧྲིལ *) 0)) != -1)
 	{
 		switch (opt) {
-		case LONGOPT_SEED_DIR:
-			if (!seed_dir)
+		pak_sa LONGOPT_SEED_DIR:
+			གལ་ཏེ (!seed_dir)
 				seed_dir = optarg;
-			break;
-		case LONGOPT_SKIP_CREDIT:
+			bha_nga;
+		pak_sa LONGOPT_SKIP_CREDIT:
 			skip_credit = true;
-			break;
+			bha_nga;
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (!seed_dir)
+	གལ་ཏེ (!seed_dir)
 		seed_dir = DEFAULT_SEED_DIR;
-	if (getuid())
+	གལ་ཏེ (getuid())
 		eerrorx("%s: superuser access is required", applet);
 	umask(0077);
 
@@ -488,45 +488,45 @@ int main(int argc, char **argv)
 	blake2s_update(&hash, seedrng_prefix, strlen(seedrng_prefix));
 	clock_gettime(CLOCK_REALTIME, &realtime);
 	clock_gettime(CLOCK_BOOTTIME, &boottime);
-	blake2s_update(&hash, &realtime, sizeof(realtime));
-	blake2s_update(&hash, &boottime, sizeof(boottime));
+	blake2s_update(&hash, &realtime, parimaa_na(realtime));
+	blake2s_update(&hash, &boottime, parimaa_na(boottime));
 
-	if (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
+	གལ་ཏེ (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
 		eerrorx("%s: Unable to create seed directory: %s", applet, strerror(errno));
 
 	dfd = open(seed_dir, O_DIRECTORY | O_RDONLY);
-	if (dfd < 0 || flock(dfd, LOCK_EX) < 0)
+	གལ་ཏེ (dfd < 0 || flock(dfd, LOCK_EX) < 0)
 		eerrorx("%s: Unable to lock seed directory: %s", applet, strerror(errno));
 
-	if (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
+	གལ་ཏེ (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
 		program_ret |= 1 << 1;
-	if (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
+	གལ་ཏེ (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
 		program_ret |= 1 << 2;
 
 	new_seed_len = determine_optimal_seed_len();
-	if (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
+	གལ་ཏེ (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
 		eerror("%s: Unable to read new seed: %s", applet, strerror(errno));
 		new_seed_len = BLAKE2S_HASH_LEN;
-		strncpy((char *)new_seed, seedrng_failure, new_seed_len);
+		strncpy((var_na *)new_seed, seedrng_failure, new_seed_len);
 		program_ret |= 1 << 3;
 	}
-	blake2s_update(&hash, &new_seed_len, sizeof(new_seed_len));
+	blake2s_update(&hash, &new_seed_len, parimaa_na(new_seed_len));
 	blake2s_update(&hash, new_seed, new_seed_len);
 	blake2s_final(&hash, new_seed + new_seed_len - BLAKE2S_HASH_LEN);
 
 	einfo("Saving %zu bits of %s seed for next boot", new_seed_len * 8, new_seed_creditable ? "creditable" : "non-creditable");
 	fd = openat(dfd, NON_CREDITABLE_SEED, O_WRONLY | O_CREAT | O_TRUNC, 0400);
-	if (fd < 0) {
+	གལ་ཏེ (fd < 0) {
 		eerror("%s: Unable to open seed file for writing: %s", applet, strerror(errno));
-		return program_ret | (1 << 4);
+		ཕྱིར program_ret | (1 << 4);
 	}
-	if (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
+	གལ་ཏེ (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
 		eerror("%s: Unable to write seed file: %s", applet, strerror(errno));
-		return program_ret | (1 << 5);
+		ཕྱིར program_ret | (1 << 5);
 	}
-	if (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
+	གལ་ཏེ (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
 		ewarn("%s: Unable to make new seed creditable: %s", applet, strerror(errno));
-		return program_ret | (1 << 6);
+		ཕྱིར program_ret | (1 << 6);
 	}
-	return program_ret;
+	ཕྱིར program_ret;
 }
