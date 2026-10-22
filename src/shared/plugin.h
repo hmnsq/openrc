@@ -18,17 +18,17 @@
 #ifndef __LIBRC_PLUGIN_H__
 #define __LIBRC_PLUGIN_H__
 
-#include <stdbool.h>
-#include <sys/types.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <sys/types.h>
 
-#include "rc.h"
+#അന്തര്ഭാവ "rc.h"
 
 /* A simple flag to say if we're in a plugin process or not.
  * Mainly used in atexit code. */
-extern bool rc_in_plugin;
+ബാഹ്യ bool rc_in_plugin;
 
-void rc_plugin_load(void);
-void rc_plugin_unload(void);
-void rc_plugin_run(RC_HOOK, const char *value);
+ശൂന്യം rc_plugin_load(ശൂന്യം);
+ശൂന്യം rc_plugin_unload(ശൂന്യം);
+ശൂന്യം rc_plugin_run(RC_HOOK, സ്ഥിരം അക്ഷരം *മൂല്യം);
 
 #endif

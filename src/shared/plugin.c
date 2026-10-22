@@ -15,110 +15,110 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <dirent.h>
-#include <dlfcn.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <sys/wait.h>
+#അന്തര്ഭാവ <dirent.h>
+#അന്തര്ഭാവ <dlfcn.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <fcntl.h>
+#അന്തര്ഭാവ <signal.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "plugin.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "einfo.h"
+#അന്തര്ഭാവ "queue.h"
+#അന്തര്ഭാവ "rc.h"
+#അന്തര്ഭാവ "rc_exec.h"
+#അന്തര്ഭാവ "plugin.h"
+#അന്തര്ഭാവ "helpers.h"
 
 #define RC_PLUGIN_HOOK "rc_plugin_hook"
 
 bool rc_in_plugin = false;
 
-typedef struct plugin
+തരനിർവചനം ഘടന plugin
 {
-	char *name;
-	void *handle;
-	int (*hook)(RC_HOOK, const char *);
+	അക്ഷരം *name;
+	ശൂന്യം *handle;
+	പൂർണ്ണസംഖ്യ (*hook)(RC_HOOK, സ്ഥിരം അക്ഷരം *);
 	TAILQ_ENTRY(plugin) entries;
 } PLUGIN;
 TAILQ_HEAD(, plugin) plugins;
 
-void
-rc_plugin_load(void)
+ശൂന്യം
+rc_plugin_load(ശൂന്യം)
 {
 	DIR *dp;
-	struct dirent *d;
+	ഘടന dirent *d;
 	PLUGIN *plugin;
-	char *file = NULL;
-	void *h;
-	union {
-		void *sym;
-		int (*func)(RC_HOOK, const char *);
+	അക്ഷരം *file = ശൂന്യ;
+	ശൂന്യം *h;
+	സംഘം {
+		ശൂന്യം *sym;
+		പൂർണ്ണസംഖ്യ (*func)(RC_HOOK, സ്ഥിരം അക്ഷരം *);
 	} fptr;
 
 	/* Don't load plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	എങ്കിൽ (rc_in_plugin)
+		തിരികെ;
 
 	TAILQ_INIT(&plugins);
 
-	if (!(dp = opendir(RC_PLUGINDIR)))
-		return;
+	എങ്കിൽ (!(dp = opendir(RC_PLUGINDIR)))
+		തിരികെ;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
-			continue;
+	ആകുമ്പോൾ ((d = readdir(dp))) {
+		എങ്കിൽ (d->d_name[0] == '.')
+			തുടരുക;
 
 		xasprintf(&file, RC_PLUGINDIR "/%s",  d->d_name);
 		h = dlopen(file, RTLD_LAZY);
-		free(file);
-		if (h == NULL) {
+		സ്വതന്ത്രം(file);
+		എങ്കിൽ (h == ശൂന്യ) {
 			eerror("dlopen: %s", dlerror());
-			continue;
+			തുടരുക;
 		}
 
 		fptr.sym = dlsym(h, RC_PLUGIN_HOOK);
-		if (fptr.func == NULL) {
+		എങ്കിൽ (fptr.func == ശൂന്യ) {
 			eerror("%s: cannot find symbol `%s'",
 			    d->d_name, RC_PLUGIN_HOOK);
 			dlclose(h);
-		} else {
-			plugin = xmalloc(sizeof(*plugin));
+		} അല്ലെങ്കിൽ {
+			plugin = xmalloc(വലുപ്പം(*plugin));
 			plugin->name = xstrdup(d->d_name);
 			plugin->handle = h;
 			plugin->hook = fptr.func;
-			TAILQ_INSERT_TAIL(&plugins, plugin, entries);
+			TAILQ_തിരുകുക_TAIL(&plugins, plugin, entries);
 		}
 	}
 	closedir(dp);
 }
 
-void
-rc_plugin_run(RC_HOOK hook, const char *value)
+ശൂന്യം
+rc_plugin_run(RC_HOOK hook, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
 	PLUGIN *plugin;
-	struct sigaction sa;
+	ഘടന sigaction sa;
 	sigset_t empty;
 	sigset_t full;
 	sigset_t old;
-	int pfd[2];
+	പൂർണ്ണസംഖ്യ pfd[2];
 	pid_t pid;
-	char *buffer;
-	char *token;
-	char *p;
+	അക്ഷരം *buffer;
+	അക്ഷരം *token;
+	അക്ഷരം *p;
 	ssize_t nr;
-	int retval;
+	പൂർണ്ണസംഖ്യ retval;
 
 	/* Don't run plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	എങ്കിൽ (rc_in_plugin)
+		തിരികെ;
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, വലുപ്പം(sa));
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
 	sigemptyset(&empty);
@@ -130,81 +130,81 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 		 * O_CLOEXEC to stop any scripts from inheriting us.
 		 * This is actually quite important as without this, the splash
 		 * plugin will probably hang when running in silent mode. */
-		if (pipe2(pfd, O_CLOEXEC) == -1) {
+		എങ്കിൽ (pipe2(pfd, O_CLOEXEC) == -1) {
 			eerror("pipe2: %s", strerror(errno));
-			return;
+			തിരികെ;
 		}
 
 		sigprocmask(SIG_SETMASK, &full, &old);
 
 		/* We run the plugin in a new process so we never crash
 		 * or otherwise affected by it */
-		if ((pid = fork()) == -1) {
+		എങ്കിൽ ((pid = fork()) == -1) {
 			eerror("fork: %s", strerror(errno));
-			break;
+			നിർത്തുക;
 		}
 
-		if (pid == 0) {
+		എങ്കിൽ (pid == 0) {
 			/* Restore default handlers */
-			sigaction(SIGCHLD, &sa, NULL);
-			sigaction(SIGHUP,  &sa, NULL);
-			sigaction(SIGINT,  &sa, NULL);
-			sigaction(SIGQUIT, &sa, NULL);
-			sigaction(SIGTERM, &sa, NULL);
-			sigaction(SIGUSR1, &sa, NULL);
-			sigaction(SIGWINCH, &sa, NULL);
-			sigprocmask(SIG_SETMASK, &old, NULL);
+			sigaction(SIGCHLD, &sa, ശൂന്യ);
+			sigaction(SIGHUP,  &sa, ശൂന്യ);
+			sigaction(SIGINT,  &sa, ശൂന്യ);
+			sigaction(SIGQUIT, &sa, ശൂന്യ);
+			sigaction(SIGTERM, &sa, ശൂന്യ);
+			sigaction(SIGUSR1, &sa, ശൂന്യ);
+			sigaction(SIGWINCH, &sa, ശൂന്യ);
+			sigprocmask(SIG_SETMASK, &old, ശൂന്യ);
 
 			rc_in_plugin = true;
 			close(pfd[0]);
 			rc_environ_fd = fdopen(pfd[1], "w");
-			retval = plugin->hook(hook, value);
+			retval = plugin->hook(hook, മൂല്യം);
 			fclose(rc_environ_fd);
-			rc_environ_fd = NULL;
+			rc_environ_fd = ശൂന്യ;
 
 			/* Just in case the plugin sets this to false */
 			rc_in_plugin = true;
 			exit(retval);
 		}
 
-		sigprocmask(SIG_SETMASK, &old, NULL);
+		sigprocmask(SIG_SETMASK, &old, ശൂന്യ);
 		close(pfd[1]);
-		buffer = xmalloc(sizeof(char) * BUFSIZ);
+		buffer = xmalloc(വലുപ്പം(അക്ഷരം) * BUFSIZ);
 		memset(buffer, 0, BUFSIZ);
 
-		while ((nr = read(pfd[0], buffer, BUFSIZ)) > 0) {
+		ആകുമ്പോൾ ((nr = പഠ(pfd[0], buffer, BUFSIZ)) > 0) {
 			p = buffer;
-			while (*p && p - buffer < nr) {
+			ആകുമ്പോൾ (*p && p - buffer < nr) {
 				token = strsep(&p, "=");
-				if (token) {
+				എങ്കിൽ (token) {
 					unsetenv(token);
-					if (*p) {
+					എങ്കിൽ (*p) {
 						setenv(token, p, 1);
 						p += strlen(p) + 1;
-					} else
+					} അല്ലെങ്കിൽ
 						p++;
 				}
 			}
 		}
 
-		free(buffer);
+		സ്വതന്ത്രം(buffer);
 		close(pfd[0]);
 
 		rc_waitpid(pid);
 	}
 }
 
-void
-rc_plugin_unload(void)
+ശൂന്യം
+rc_plugin_unload(ശൂന്യം)
 {
 	PLUGIN *plugin = TAILQ_FIRST(&plugins);
 	PLUGIN *next;
 
-	while (plugin) {
+	ആകുമ്പോൾ (plugin) {
 		next = TAILQ_NEXT(plugin, entries);
 		dlclose(plugin->handle);
-		free(plugin->name);
-		free(plugin);
+		സ്വതന്ത്രം(plugin->name);
+		സ്വതന്ത്രം(plugin);
 		plugin = next;
 	}
 	TAILQ_INIT(&plugins);

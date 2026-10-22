@@ -16,29 +16,29 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <linux/random.h>
-#include <sys/random.h>
-#include <sys/ioctl.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <poll.h>
-#include <unistd.h>
-#include <time.h>
-#include <errno.h>
-#include <endian.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#അന്തര്ഭാവ <linux/random.h>
+#അന്തര്ഭാവ <sys/random.h>
+#അന്തര്ഭാവ <sys/ioctl.h>
+#അന്തര്ഭാവ <sys/file.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <fcntl.h>
+#അന്തര്ഭാവ <getopt.h>
+#അന്തര്ഭാവ <poll.h>
+#അന്തര്ഭാവ <unistd.h>
+#അന്തര്ഭാവ <time.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <endian.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <stddef.h>
+#അന്തര്ഭാവ <stdint.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
 
-#include "einfo.h"
-#include "helpers.h"
-#include "_usage.h"
+#അന്തര്ഭാവ "einfo.h"
+#അന്തര്ഭാവ "helpers.h"
+#അന്തര്ഭാവ "_usage.h"
 
 #ifndef GRND_INSECURE
 #define GRND_INSECURE 0x0004 /* Apparently some headers don't ship with this yet. */
@@ -52,84 +52,84 @@
  * The exact enum value is internal and can freely change, so we keep the
  * options sorted.
  */
-enum long_opts {
+എണ്ണൽ long_opts {
 	/* This has to come first so following values stay in the 0x100+ range. */
 	LONGOPT_BASE = 0x100,
 	LONGOPT_SEED_DIR,
 	LONGOPT_SKIP_CREDIT,
 };
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "seed-dir", 1, NULL, LONGOPT_SEED_DIR },
-	{ "skip-credit", 0, NULL, LONGOPT_SKIP_CREDIT },
+സ്ഥിരം അക്ഷരം *applet = ശൂന്യ;
+സ്ഥിരം അക്ഷരം *extraopts = ശൂന്യ;
+സ്ഥിരം അക്ഷരം getoptstring[] = getoptstring_COMMON;
+സ്ഥിരം ഘടന option longopts[] = {
+	{ "seed-dir", 1, ശൂന്യ, LONGOPT_SEED_DIR },
+	{ "skip-credit", 0, ശൂന്യ, LONGOPT_SKIP_CREDIT },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+സ്ഥിരം അക്ഷരം * സ്ഥിരം longopts_help[] = {
 	"Directory for seed files (default: " DEFAULT_SEED_DIR ")",
 	"Skip crediting entropy of seeds",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+സ്ഥിരം അക്ഷരം *usagestring = ശൂന്യ;
 
-enum blake2s_lengths {
+എണ്ണൽ blake2s_lengths {
 	BLAKE2S_BLOCK_LEN = 64,
 	BLAKE2S_HASH_LEN = 32,
-	BLAKE2S_KEY_LEN = 32
+	BLAKE2_S_താക്കോൽ_LEN = 32
 };
 
-enum seedrng_lengths {
+എണ്ണൽ seedrng_lengths {
 	MAX_SEED_LEN = 512,
 	MIN_SEED_LEN = BLAKE2S_HASH_LEN
 };
 
-struct blake2s_state {
+ഘടന blake2s_state {
 	uint32_t h[8];
 	uint32_t t[2];
 	uint32_t f[2];
 	uint8_t buf[BLAKE2S_BLOCK_LEN];
-	unsigned int buflen;
-	unsigned int outlen;
+	unsigned പൂർണ്ണസംഖ്യ buflen;
+	unsigned പൂർണ്ണസംഖ്യ outlen;
 };
 
 #define le32_to_cpup(a) le32toh(*(a))
 #define cpu_to_le32(a) htole32(a)
 #ifndef ARRAY_SIZE
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#define ARRAY_SIZE(x) (വലുപ്പം(x) / വലുപ്പം((x)[0]))
 #endif
 #ifndef DIV_ROUND_UP
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 #endif
 
-static inline void cpu_to_le32_array(uint32_t *buf, unsigned int words)
+സ്ഥിതം വരിയിൽ ശൂന്യം cpu_to_le32_array(uint32_t *buf, unsigned പൂർണ്ണസംഖ്യ വാക്കുകൾ)
 {
-	while (words--) {
+	ആകുമ്പോൾ (വാക്കുകൾ--) {
 		*buf = cpu_to_le32(*buf);
 		++buf;
 	}
 }
 
-static inline void le32_to_cpu_array(uint32_t *buf, unsigned int words)
+സ്ഥിതം വരിയിൽ ശൂന്യം le32_to_cpu_array(uint32_t *buf, unsigned പൂർണ്ണസംഖ്യ വാക്കുകൾ)
 {
-	while (words--) {
+	ആകുമ്പോൾ (വാക്കുകൾ--) {
 		*buf = le32_to_cpup(buf);
 		++buf;
 	}
 }
 
-static inline uint32_t ror32(uint32_t word, unsigned int shift)
+സ്ഥിതം വരിയിൽ uint32_t ror32(uint32_t word, unsigned പൂർണ്ണസംഖ്യ shift)
 {
-	return (word >> (shift & 31)) | (word << ((-shift) & 31));
+	തിരികെ (word >> (shift & 31)) | (word << ((-shift) & 31));
 }
 
-static const uint32_t blake2s_iv[8] = {
+സ്ഥിതം സ്ഥിരം uint32_t blake2s_iv[8] = {
 	0x6A09E667UL, 0xBB67AE85UL, 0x3C6EF372UL, 0xA54FF53AUL,
 	0x510E527FUL, 0x9B05688CUL, 0x1F83D9ABUL, 0x5BE0CD19UL
 };
 
-static const uint8_t blake2s_sigma[10][16] = {
+സ്ഥിതം സ്ഥിരം uint8_t blake2s_sigma[10][16] = {
 	{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
 	{ 14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3 },
 	{ 11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4 },
@@ -142,40 +142,40 @@ static const uint8_t blake2s_sigma[10][16] = {
 	{ 10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0 },
 };
 
-static void blake2s_set_lastblock(struct blake2s_state *state)
+സ്ഥിതം ശൂന്യം blake2s_set_lastblock(ഘടന blake2s_state *state)
 {
 	state->f[0] = -1;
 }
 
-static void blake2s_increment_counter(struct blake2s_state *state, const uint32_t inc)
+സ്ഥിതം ശൂന്യം blake2s_increment_counter(ഘടന blake2s_state *state, സ്ഥിരം uint32_t inc)
 {
 	state->t[0] += inc;
 	state->t[1] += (state->t[0] < inc);
 }
 
-static void blake2s_init_param(struct blake2s_state *state, const uint32_t param)
+സ്ഥിതം ശൂന്യം blake2s_init_param(ഘടന blake2s_state *state, സ്ഥിരം uint32_t param)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	memset(state, 0, sizeof(*state));
-	for (i = 0; i < 8; ++i)
+	memset(state, 0, വലുപ്പം(*state));
+	വേണ്ടി (i = 0; i < 8; ++i)
 		state->h[i] = blake2s_iv[i];
 	state->h[0] ^= param;
 }
 
-static void blake2s_init(struct blake2s_state *state, const size_t outlen)
+സ്ഥിതം ശൂന്യം blake2s_init(ഘടന blake2s_state *state, സ്ഥിരം size_t outlen)
 {
 	blake2s_init_param(state, 0x01010000 | outlen);
 	state->outlen = outlen;
 }
 
-static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, size_t nblocks, const uint32_t inc)
+സ്ഥിതം ശൂന്യം blake2s_compress(ഘടന blake2s_state *state, സ്ഥിരം uint8_t *block, size_t nblocks, സ്ഥിരം uint32_t inc)
 {
 	uint32_t m[16];
 	uint32_t v[16];
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	while (nblocks > 0) {
+	ആകുമ്പോൾ (nblocks > 0) {
 		blake2s_increment_counter(state, inc);
 		memcpy(m, block, BLAKE2S_BLOCK_LEN);
 		le32_to_cpu_array(m, ARRAY_SIZE(m));
@@ -189,7 +189,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 		v[14] = blake2s_iv[6] ^ state->f[0];
 		v[15] = blake2s_iv[7] ^ state->f[1];
 
-#define G(r, i, a, b, c, d) do { \
+#define G(r, i, a, b, c, d) ചെയ്യുക { \
 	a += b + m[blake2s_sigma[r][2 * i + 0]]; \
 	d = ror32(d ^ a, 16); \
 	c += d; \
@@ -198,9 +198,9 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	d = ror32(d ^ a, 8); \
 	c += d; \
 	b = ror32(b ^ c, 7); \
-} while (0)
+} ആകുമ്പോൾ (0)
 
-#define ROUND(r) do { \
+#define ROUND(r) ചെയ്യുക { \
 	G(r, 0, v[0], v[ 4], v[ 8], v[12]); \
 	G(r, 1, v[1], v[ 5], v[ 9], v[13]); \
 	G(r, 2, v[2], v[ 6], v[10], v[14]); \
@@ -209,7 +209,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	G(r, 5, v[1], v[ 6], v[11], v[12]); \
 	G(r, 6, v[2], v[ 7], v[ 8], v[13]); \
 	G(r, 7, v[3], v[ 4], v[ 9], v[14]); \
-} while (0)
+} ആകുമ്പോൾ (0)
 		ROUND(0);
 		ROUND(1);
 		ROUND(2);
@@ -224,7 +224,7 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 #undef G
 #undef ROUND
 
-		for (i = 0; i < 8; ++i)
+		വേണ്ടി (i = 0; i < 8; ++i)
 			state->h[i] ^= v[i] ^ v[i + 8];
 
 		block += BLAKE2S_BLOCK_LEN;
@@ -232,22 +232,22 @@ static void blake2s_compress(struct blake2s_state *state, const uint8_t *block, 
 	}
 }
 
-static void blake2s_update(struct blake2s_state *state, const void *inp, size_t inlen)
+സ്ഥിതം ശൂന്യം blake2s_update(ഘടന blake2s_state *state, സ്ഥിരം ശൂന്യം *inp, size_t inlen)
 {
-	const size_t fill = BLAKE2S_BLOCK_LEN - state->buflen;
-	const uint8_t *in = inp;
+	സ്ഥിരം size_t fill = BLAKE2S_BLOCK_LEN - state->buflen;
+	സ്ഥിരം uint8_t *in = inp;
 
-	if (!inlen)
-		return;
-	if (inlen > fill) {
+	എങ്കിൽ (!inlen)
+		തിരികെ;
+	എങ്കിൽ (inlen > fill) {
 		memcpy(state->buf + state->buflen, in, fill);
 		blake2s_compress(state, state->buf, 1, BLAKE2S_BLOCK_LEN);
 		state->buflen = 0;
 		in += fill;
 		inlen -= fill;
 	}
-	if (inlen > BLAKE2S_BLOCK_LEN) {
-		const size_t nblocks = DIV_ROUND_UP(inlen, BLAKE2S_BLOCK_LEN);
+	എങ്കിൽ (inlen > BLAKE2S_BLOCK_LEN) {
+		സ്ഥിരം size_t nblocks = DIV_ROUND_UP(inlen, BLAKE2S_BLOCK_LEN);
 		blake2s_compress(state, in, nblocks - 1, BLAKE2S_BLOCK_LEN);
 		in += BLAKE2S_BLOCK_LEN * (nblocks - 1);
 		inlen -= BLAKE2S_BLOCK_LEN * (nblocks - 1);
@@ -256,7 +256,7 @@ static void blake2s_update(struct blake2s_state *state, const void *inp, size_t 
 	state->buflen += inlen;
 }
 
-static void blake2s_final(struct blake2s_state *state, uint8_t *out)
+സ്ഥിതം ശൂന്യം blake2s_final(ഘടന blake2s_state *state, uint8_t *out)
 {
 	blake2s_set_lastblock(state);
 	memset(state->buf + state->buflen, 0, BLAKE2S_BLOCK_LEN - state->buflen);
@@ -265,222 +265,222 @@ static void blake2s_final(struct blake2s_state *state, uint8_t *out)
 	memcpy(out, state->h, state->outlen);
 }
 
-static ssize_t getrandom_full(void *buf, size_t count, unsigned int flags)
+സ്ഥിതം ssize_t getrandom_full(ശൂന്യം *buf, size_t എണ്ണം, unsigned പൂർണ്ണസംഖ്യ flags)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
-	do {
-		ret = getrandom(p, count, flags);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
+	ചെയ്യുക {
+		ret = getrandom(p, എണ്ണം, flags);
+		എങ്കിൽ (ret < 0 && errno == EINTR)
+			തുടരുക;
+		അല്ലെങ്കിൽ എങ്കിൽ (ret < 0)
+			തിരികെ ret;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		എണ്ണം -= ret;
+	} ആകുമ്പോൾ (എണ്ണം);
+	തിരികെ total;
 }
 
-static ssize_t read_full(int fd, void *buf, size_t count)
+സ്ഥിതം ssize_t read_full(പൂർണ്ണസംഖ്യ fd, ശൂന്യം *buf, size_t എണ്ണം)
 {
 	ssize_t ret, total = 0;
 	uint8_t *p = buf;
 
-	do {
-		ret = read(fd, p, count);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
-		else if (ret == 0)
-			break;
+	ചെയ്യുക {
+		ret = പഠ(fd, p, എണ്ണം);
+		എങ്കിൽ (ret < 0 && errno == EINTR)
+			തുടരുക;
+		അല്ലെങ്കിൽ എങ്കിൽ (ret < 0)
+			തിരികെ ret;
+		അല്ലെങ്കിൽ എങ്കിൽ (ret == 0)
+			നിർത്തുക;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		എണ്ണം -= ret;
+	} ആകുമ്പോൾ (എണ്ണം);
+	തിരികെ total;
 }
 
-static ssize_t write_full(int fd, const void *buf, size_t count)
+സ്ഥിതം ssize_t write_full(പൂർണ്ണസംഖ്യ fd, സ്ഥിരം ശൂന്യം *buf, size_t എണ്ണം)
 {
 	ssize_t ret, total = 0;
-	const uint8_t *p = buf;
+	സ്ഥിരം uint8_t *p = buf;
 
-	do {
-		ret = write(fd, p, count);
-		if (ret < 0 && errno == EINTR)
-			continue;
-		else if (ret < 0)
-			return ret;
+	ചെയ്യുക {
+		ret = ലിഖ(fd, p, എണ്ണം);
+		എങ്കിൽ (ret < 0 && errno == EINTR)
+			തുടരുക;
+		അല്ലെങ്കിൽ എങ്കിൽ (ret < 0)
+			തിരികെ ret;
 		total += ret;
 		p += ret;
-		count -= ret;
-	} while (count);
-	return total;
+		എണ്ണം -= ret;
+	} ആകുമ്പോൾ (എണ്ണം);
+	തിരികെ total;
 }
 
-static size_t determine_optimal_seed_len(void)
+സ്ഥിതം size_t determine_optimal_seed_len(ശൂന്യം)
 {
 	size_t ret = 0;
-	char poolsize_str[11] = { 0 };
-	int fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
+	അക്ഷരം poolsize_str[11] = { 0 };
+	പൂർണ്ണസംഖ്യ fd = open("/proc/sys/kernel/random/poolsize", O_RDONLY);
 
-	if (fd < 0 || read_full(fd, poolsize_str, sizeof(poolsize_str) - 1) < 0) {
+	എങ്കിൽ (fd < 0 || read_full(fd, poolsize_str, വലുപ്പം(poolsize_str) - 1) < 0) {
 		ewarn("%s: Unable to determine pool size, falling back to %u bits: %s",
 		      applet, MIN_SEED_LEN * 8, strerror(errno));
 		ret = MIN_SEED_LEN;
-	} else
-		ret = DIV_ROUND_UP(strtoul(poolsize_str, NULL, 10), 8);
-	if (fd >= 0)
+	} അല്ലെങ്കിൽ
+		ret = DIV_ROUND_UP(strtoul(poolsize_str, ശൂന്യ, 10), 8);
+	എങ്കിൽ (fd >= 0)
 		close(fd);
-	if (ret < MIN_SEED_LEN)
+	എങ്കിൽ (ret < MIN_SEED_LEN)
 		ret = MIN_SEED_LEN;
-	else if (ret > MAX_SEED_LEN)
+	അല്ലെങ്കിൽ എങ്കിൽ (ret > MAX_SEED_LEN)
 		ret = MAX_SEED_LEN;
-	return ret;
+	തിരികെ ret;
 }
 
-static int read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
+സ്ഥിതം പൂർണ്ണസംഖ്യ read_new_seed(uint8_t *seed, size_t len, bool *is_creditable)
 {
 	ssize_t ret;
-	int urandom_fd;
+	പൂർണ്ണസംഖ്യ urandom_fd;
 
 	*is_creditable = false;
 	ret = getrandom_full(seed, len, GRND_NONBLOCK);
-	if (ret == (ssize_t)len) {
+	എങ്കിൽ (ret == (ssize_t)len) {
 		*is_creditable = true;
-		return 0;
-	} else if (ret < 0 && errno == ENOSYS) {
-		struct pollfd random_fd = {
+		തിരികെ 0;
+	} അല്ലെങ്കിൽ എങ്കിൽ (ret < 0 && errno == ENOSYS) {
+		ഘടന pollfd random_fd = {
 			.fd = open("/dev/random", O_RDONLY),
 			.events = POLLIN
 		};
-		if (random_fd.fd < 0)
-			return -errno;
+		എങ്കിൽ (random_fd.fd < 0)
+			തിരികെ -errno;
 		*is_creditable = poll(&random_fd, 1, 0) == 1;
 		close(random_fd.fd);
-	} else if (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
-		return 0;
+	} അല്ലെങ്കിൽ എങ്കിൽ (getrandom_full(seed, len, GRND_INSECURE) == (ssize_t)len)
+		തിരികെ 0;
 	urandom_fd = open("/dev/urandom", O_RDONLY);
-	if (urandom_fd < 0)
-		return -1;
+	എങ്കിൽ (urandom_fd < 0)
+		തിരികെ -1;
 	ret = read_full(urandom_fd, seed, len);
-	if (ret == (ssize_t)len)
+	എങ്കിൽ (ret == (ssize_t)len)
 		ret = 0;
-	else
+	അല്ലെങ്കിൽ
 		ret = -errno ? -errno : -EIO;
 	close(urandom_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	തിരികെ ret ? -1 : 0;
 }
 
-static int seed_rng(uint8_t *seed, size_t len, bool credit)
+സ്ഥിതം പൂർണ്ണസംഖ്യ seed_rng(uint8_t *seed, size_t len, bool credit)
 {
-	struct {
-		int entropy_count;
-		int buf_size;
+	ഘടന {
+		പൂർണ്ണസംഖ്യ entropy_എണ്ണം;
+		പൂർണ്ണസംഖ്യ buf_size;
 		uint8_t buffer[MAX_SEED_LEN];
 	} req = {
-		.entropy_count = credit ? len * 8 : 0,
+		.entropy_എണ്ണം = credit ? len * 8 : 0,
 		.buf_size = len
 	};
-	int random_fd, ret;
+	പൂർണ്ണസംഖ്യ random_fd, ret;
 
-	if (len > sizeof(req.buffer)) {
+	എങ്കിൽ (len > വലുപ്പം(req.buffer)) {
 		errno = EFBIG;
-		return -1;
+		തിരികെ -1;
 	}
 	memcpy(req.buffer, seed, len);
 
 	random_fd = open("/dev/urandom", O_RDONLY);
-	if (random_fd < 0)
-		return -1;
+	എങ്കിൽ (random_fd < 0)
+		തിരികെ -1;
 	ret = ioctl(random_fd, RNDADDENTROPY, &req);
-	if (ret)
+	എങ്കിൽ (ret)
 		ret = -errno ? -errno : -EIO;
 	close(random_fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	തിരികെ ret ? -1 : 0;
 }
 
-static int seed_from_file_if_exists(const char *filename, int dfd, bool credit, struct blake2s_state *hash)
+സ്ഥിതം പൂർണ്ണസംഖ്യ seed_from_file_if_exists(സ്ഥിരം അക്ഷരം *filename, പൂർണ്ണസംഖ്യ dfd, bool credit, ഘടന blake2s_state *hash)
 {
 	uint8_t seed[MAX_SEED_LEN];
 	ssize_t seed_len;
-	int fd = -1, ret = 0;
+	പൂർണ്ണസംഖ്യ fd = -1, ret = 0;
 
 	fd = openat(dfd, filename, O_RDONLY);
-	if (fd < 0 && errno == ENOENT)
-		return 0;
-	else if (fd < 0) {
+	എങ്കിൽ (fd < 0 && errno == ENOENT)
+		തിരികെ 0;
+	അല്ലെങ്കിൽ എങ്കിൽ (fd < 0) {
 		ret = -errno;
 		eerror("%s: Unable to open seed file: %s", applet, strerror(errno));
-		goto out;
+		പോകുക out;
 	}
-	seed_len = read_full(fd, seed, sizeof(seed));
-	if (seed_len < 0) {
+	seed_len = read_full(fd, seed, വലുപ്പം(seed));
+	എങ്കിൽ (seed_len < 0) {
 		ret = -errno;
 		eerror("%s: Unable to read seed file: %s", applet, strerror(errno));
-		goto out;
+		പോകുക out;
 	}
-	if ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
+	എങ്കിൽ ((unlinkat(dfd, filename, 0) < 0 || fsync(dfd) < 0) && seed_len) {
 		ret = -errno;
 		eerror("%s: Unable to remove seed after reading, so not seeding: %s",
 		       applet, strerror(errno));
-		goto out;
+		പോകുക out;
 	}
-	if (!seed_len)
-		goto out;
+	എങ്കിൽ (!seed_len)
+		പോകുക out;
 
-	blake2s_update(hash, &seed_len, sizeof(seed_len));
+	blake2s_update(hash, &seed_len, വലുപ്പം(seed_len));
 	blake2s_update(hash, seed, seed_len);
 
 	einfo("Seeding %zd bits %s crediting", seed_len * 8, credit ? "and" : "without");
-	if (seed_rng(seed, seed_len, credit) < 0) {
+	എങ്കിൽ (seed_rng(seed, seed_len, credit) < 0) {
 		ret = -errno;
 		eerror("%s: Unable to seed: %s", applet, strerror(errno));
 	}
 
 out:
-	if (fd >= 0)
+	എങ്കിൽ (fd >= 0)
 		close(fd);
 	errno = -ret;
-	return ret ? -1 : 0;
+	തിരികെ ret ? -1 : 0;
 }
 
-int main(int argc, char **argv)
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv)
 {
-	static const char seedrng_prefix[] = "SeedRNG v1 Old+New Prefix";
-	static const char seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
-	int opt, fd, dfd, program_ret = 0;
-	const char *seed_dir = NULL;
+	സ്ഥിതം സ്ഥിരം അക്ഷരം seedrng_prefix[] = "SeedRNG v1 Old+New Prefix";
+	സ്ഥിതം സ്ഥിരം അക്ഷരം seedrng_failure[] = "SeedRNG v1 No New Seed Failure";
+	പൂർണ്ണസംഖ്യ opt, fd, dfd, program_ret = 0;
+	സ്ഥിരം അക്ഷരം *seed_dir = ശൂന്യ;
 	uint8_t new_seed[MAX_SEED_LEN];
 	size_t new_seed_len;
 	bool new_seed_creditable;
-	struct timespec realtime = { 0 }, boottime = { 0 };
-	struct blake2s_state hash;
+	ഘടന timespec realtime = { 0 }, boottime = { 0 };
+	ഘടന blake2s_state hash;
 	bool skip_credit = false;
 
 	applet = basename_c(argv[0]);
 
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1)
+	ആകുമ്പോൾ ((opt = getopt_long(argc, argv, getoptstring, longopts, (പൂർണ്ണസംഖ്യ *) 0)) != -1)
 	{
-		switch (opt) {
-		case LONGOPT_SEED_DIR:
-			if (!seed_dir)
+		തിരഞ്ഞെടുപ്പ് (opt) {
+		അവസ്ഥ LONGOPT_SEED_DIR:
+			എങ്കിൽ (!seed_dir)
 				seed_dir = optarg;
-			break;
-		case LONGOPT_SKIP_CREDIT:
+			നിർത്തുക;
+		അവസ്ഥ LONGOPT_SKIP_CREDIT:
 			skip_credit = true;
-			break;
+			നിർത്തുക;
 		case_RC_COMMON_GETOPT
 		}
 	}
-	if (!seed_dir)
+	എങ്കിൽ (!seed_dir)
 		seed_dir = DEFAULT_SEED_DIR;
-	if (getuid())
+	എങ്കിൽ (getuid())
 		eerrorx("%s: superuser access is required", applet);
 	umask(0077);
 
@@ -488,45 +488,45 @@ int main(int argc, char **argv)
 	blake2s_update(&hash, seedrng_prefix, strlen(seedrng_prefix));
 	clock_gettime(CLOCK_REALTIME, &realtime);
 	clock_gettime(CLOCK_BOOTTIME, &boottime);
-	blake2s_update(&hash, &realtime, sizeof(realtime));
-	blake2s_update(&hash, &boottime, sizeof(boottime));
+	blake2s_update(&hash, &realtime, വലുപ്പം(realtime));
+	blake2s_update(&hash, &boottime, വലുപ്പം(boottime));
 
-	if (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
+	എങ്കിൽ (mkdir(seed_dir, 0700) < 0 && errno != EEXIST)
 		eerrorx("%s: Unable to create seed directory: %s", applet, strerror(errno));
 
 	dfd = open(seed_dir, O_DIRECTORY | O_RDONLY);
-	if (dfd < 0 || flock(dfd, LOCK_EX) < 0)
+	എങ്കിൽ (dfd < 0 || flock(dfd, LOCK_EX) < 0)
 		eerrorx("%s: Unable to lock seed directory: %s", applet, strerror(errno));
 
-	if (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
+	എങ്കിൽ (seed_from_file_if_exists(NON_CREDITABLE_SEED, dfd, false, &hash) < 0)
 		program_ret |= 1 << 1;
-	if (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
+	എങ്കിൽ (seed_from_file_if_exists(CREDITABLE_SEED, dfd, !skip_credit, &hash) < 0)
 		program_ret |= 1 << 2;
 
 	new_seed_len = determine_optimal_seed_len();
-	if (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
+	എങ്കിൽ (read_new_seed(new_seed, new_seed_len, &new_seed_creditable) < 0) {
 		eerror("%s: Unable to read new seed: %s", applet, strerror(errno));
 		new_seed_len = BLAKE2S_HASH_LEN;
-		strncpy((char *)new_seed, seedrng_failure, new_seed_len);
+		strncpy((അക്ഷരം *)new_seed, seedrng_failure, new_seed_len);
 		program_ret |= 1 << 3;
 	}
-	blake2s_update(&hash, &new_seed_len, sizeof(new_seed_len));
+	blake2s_update(&hash, &new_seed_len, വലുപ്പം(new_seed_len));
 	blake2s_update(&hash, new_seed, new_seed_len);
 	blake2s_final(&hash, new_seed + new_seed_len - BLAKE2S_HASH_LEN);
 
 	einfo("Saving %zu bits of %s seed for next boot", new_seed_len * 8, new_seed_creditable ? "creditable" : "non-creditable");
 	fd = openat(dfd, NON_CREDITABLE_SEED, O_WRONLY | O_CREAT | O_TRUNC, 0400);
-	if (fd < 0) {
+	എങ്കിൽ (fd < 0) {
 		eerror("%s: Unable to open seed file for writing: %s", applet, strerror(errno));
-		return program_ret | (1 << 4);
+		തിരികെ program_ret | (1 << 4);
 	}
-	if (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
+	എങ്കിൽ (write_full(fd, new_seed, new_seed_len) != (ssize_t)new_seed_len || fsync(fd) < 0) {
 		eerror("%s: Unable to write seed file: %s", applet, strerror(errno));
-		return program_ret | (1 << 5);
+		തിരികെ program_ret | (1 << 5);
 	}
-	if (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
+	എങ്കിൽ (new_seed_creditable && renameat(dfd, NON_CREDITABLE_SEED, dfd, CREDITABLE_SEED) < 0) {
 		ewarn("%s: Unable to make new seed creditable: %s", applet, strerror(errno));
-		return program_ret | (1 << 6);
+		തിരികെ program_ret | (1 << 6);
 	}
-	return program_ret;
+	തിരികെ program_ret;
 }

@@ -16,27 +16,27 @@
 #define EINFO_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 #define EINFO_XPRINTF(a, b) __attribute__((__noreturn__, __format__(__printf__, a, b)))
 
-#include <sys/types.h>
-#include <stdbool.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <stdbool.h>
 
 /* Although OpenRC requires C99, linking to us should not. */
 #ifdef restrict
 # define EINFO_RESTRICT restrict
-#else
+#അല്ലെങ്കിൽ
 # ifdef __restrict
 #  define EINFO_RESTRICT __restrict
-# else
+# അല്ലെങ്കിൽ
 #  define EINFO_RESTRICT
 # endif
 #endif
 
 /* __BEGIN_DECLS */
 #ifdef __cplusplus
-extern "C" {
+ബാഹ്യ "C" {
 #endif
 
 /*! @brief Color types to use */
-typedef enum
+തരനിർവചനം എണ്ണൽ
 {
 	ECOLOR_NORMAL	= 1,
 	ECOLOR_GOOD	= 2,
@@ -47,10 +47,10 @@ typedef enum
 } ECOLOR;
 
 /*! @brief Returns the ASCII code for the color */
-const char *ecolor(ECOLOR);
+സ്ഥിരം അക്ഷരം *ecolor(ECOLOR);
 
 /*! @brief Writes to syslog. */
-void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+ശൂന്യം elog(പൂർണ്ണസംഖ്യ, സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 
 /*!
  * @brief Display informational messages.
@@ -69,22 +69,22 @@ void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  * The x suffix means function will exit() returning failure.
  */
 /*@{*/
-int einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void ewarnx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
-int eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-void eerrorx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+പൂർണ്ണസംഖ്യ einfon(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ ewarnn(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ eerrorn(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ einfo(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ ewarn(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+ശൂന്യം ewarnx(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
+പൂർണ്ണസംഖ്യ eerror(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+ശൂന്യം eerrorx(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
 
-int einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ einfovn(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ ewarnvn(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ ebeginvn(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ eendvn(പൂർണ്ണസംഖ്യ, സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+പൂർണ്ണസംഖ്യ ewendvn(പൂർണ്ണസംഖ്യ, സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+പൂർണ്ണസംഖ്യ einfov(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ ewarnv(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup ebegin
@@ -92,8 +92,8 @@ int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * Similar to einfo, but we add ... to the end of the message */
 /*@{*/
-int ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ ebeginv(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+പൂർണ്ണസംഖ്യ ebegin(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup eend
@@ -105,12 +105,12 @@ int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * ebracket allows you to specify the position, color and message */
 /*@{*/
-int eend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-void ebracket(int, ECOLOR, const char * EINFO_RESTRICT);
+പൂർണ്ണസംഖ്യ eend(പൂർണ്ണസംഖ്യ, സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+പൂർണ്ണസംഖ്യ ewend(പൂർണ്ണസംഖ്യ, സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+ശൂന്യം ebracket(പൂർണ്ണസംഖ്യ, ECOLOR, സ്ഥിരം അക്ഷരം * EINFO_RESTRICT);
 
-int eendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+പൂർണ്ണസംഖ്യ eendv(പൂർണ്ണസംഖ്യ, സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+പൂർണ്ണസംഖ്യ ewendv(പൂർണ്ണസംഖ്യ, സ്ഥിരം അക്ഷരം * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 /*@}*/
 
 /*! @ingroup eindent
@@ -118,13 +118,13 @@ int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  *
  * For each indent you should outdent when done */
 /*@{*/
-void eindent(void);
-void eoutdent(void);
-void eindentv(void);
-void eoutdentv(void);
+ശൂന്യം eindent(ശൂന്യം);
+ശൂന്യം eoutdent(ശൂന്യം);
+ശൂന്യം eindentv(ശൂന്യം);
+ശൂന്യം eoutdentv(ശൂന്യം);
 
 /*! @brief Prefix each einfo line with something */
-void eprefix(const char * EINFO_RESTRICT);
+ശൂന്യം eprefix(സ്ഥിരം അക്ഷരം * EINFO_RESTRICT);
 
 /* __END_DECLS */
 #ifdef __cplusplus

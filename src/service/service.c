@@ -10,59 +10,59 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "misc.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "einfo.h"
+#അന്തര്ഭാവ "rc.h"
+#അന്തര്ഭാവ "misc.h"
+#അന്തര്ഭാവ "helpers.h"
 
-const char *applet = NULL;
+സ്ഥിരം അക്ഷരം *applet = ശൂന്യ;
 
-int main(int argc, char **argv)
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
+	അക്ഷരം *service;
+	അക്ഷരം *exec;
+	പൂർണ്ണസംഖ്യ idx = 0;
 	RC_SERVICE state, bit;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	എങ്കിൽ (argc > 1)
 		service = argv[1];
-	else
+	അല്ലെങ്കിൽ
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	എങ്കിൽ (service == ശൂന്യ || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
 	bit = lookup_service_state(applet);
-	if (bit) {
+	എങ്കിൽ (bit) {
 		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		എങ്കിൽ (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
 			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3) {
+			എങ്കിൽ (sscanf(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
-		ok = rc_service_started_daemon(service, exec, NULL, idx);
+		ok = rc_service_started_daemon(service, exec, ശൂന്യ, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} അല്ലെങ്കിൽ
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	തിരികെ ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

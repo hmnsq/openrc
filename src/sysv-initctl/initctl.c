@@ -1,112 +1,112 @@
-#include <sys/types.h>
-#include <sys/stat.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <sys/stat.h>
 
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdbool.h>
-#include <syslog.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <fcntl.h>
+#അന്തര്ഭാവ <unistd.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <syslog.h>
 
-#include <rc.h>
+#അന്തര്ഭാവ <rc.h>
 
-#include "initreq.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "initreq.h"
+#അന്തര്ഭാവ "helpers.h"
 
-static bool init_halt = false;
+സ്ഥിതം bool init_halt = false;
 
-static void sysvinit_runlevel(int runlevel)
+സ്ഥിതം ശൂന്യം sysvinit_runlevel(പൂർണ്ണസംഖ്യ runlevel)
 {
-	const char *cmd;
-	int fifo;
+	സ്ഥിരം അക്ഷരം *cmd;
+	പൂർണ്ണസംഖ്യ fifo;
 
-	switch (runlevel) {
-	case '0':
+	തിരഞ്ഞെടുപ്പ് (runlevel) {
+	അവസ്ഥ '0':
 		cmd = init_halt ? "halt" : "poweroff";
-		break;
-	case '1':
-	case 'S':
-	case 's':
+		നിർത്തുക;
+	അവസ്ഥ '1':
+	അവസ്ഥ 'S':
+	അവസ്ഥ 's':
 		cmd = "single";
-		break;
-	case '2':
-	case '3':
-	case '4':
-	case '5':
+		നിർത്തുക;
+	അവസ്ഥ '2':
+	അവസ്ഥ '3':
+	അവസ്ഥ '4':
+	അവസ്ഥ '5':
 		/* TODO: switch to default runlevel? */
-		return;
-	case '6':
+		തിരികെ;
+	അവസ്ഥ '6':
 		/* RB_KEXEC: Gentoo inittab calls /sbin/reboot -k */
 		cmd = "kexec";
-		break;
-	case 'Q':
-	case 'q':
-		return;
-	case 'U':
-	case 'u':
+		നിർത്തുക;
+	അവസ്ഥ 'Q':
+	അവസ്ഥ 'q':
+		തിരികെ;
+	അവസ്ഥ 'U':
+	അവസ്ഥ 'u':
 		cmd = "reexec";
-		break;
+		നിർത്തുക;
 	}
 
-	if ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
+	എങ്കിൽ ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
 		syslog(LOG_ERR, "open: %s", strerror(errno));
-		return;
+		തിരികെ;
 	}
 
-	if (write(fifo, cmd, strlen(cmd) + 1) == -1)
+	എങ്കിൽ (ലിഖ(fifo, cmd, strlen(cmd) + 1) == -1)
 		syslog(LOG_ERR, "write: %s", strerror(errno));
 	close(fifo);
 }
 
-static void sysvinit_setenv(char *data, size_t size)
+സ്ഥിതം ശൂന്യം sysvinit_setenv(അക്ഷരം *data, size_t size)
 {
 	data[size - 1] = '\0';
-	for (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
+	വേണ്ടി (അക്ഷരം *end = data + size; data < end && *data; data += strlen(data) + 1) {
 		/* We only care about the INIT_HALT variable */
-		if (!strcmp(data, "INIT_HALT=HALT"))
+		എങ്കിൽ (!strcmp(data, "INIT_HALT=HALT"))
 			init_halt = true;
-		else if (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
 			init_halt = false;
 	}
 }
 
-int main(void) {
-	int fifo;
+പൂർണ്ണസംഖ്യ പ്രധാന(ശൂന്യം) {
+	പൂർണ്ണസംഖ്യ fifo;
 
 	openlog("sysv-initctl", 0, LOG_DAEMON);
 	symlink("/run/initctl", "/dev/initctl");
-	if ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
+	എങ്കിൽ ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
 		syslog(LOG_ERR, "open_rwfifo: %s", strerror(errno));
-		return 1;
+		തിരികെ 1;
 	}
 
-	for (;;) {
-		struct init_request req;
-		ssize_t count = read(fifo, &req, sizeof(req));
+	വേണ്ടി (;;) {
+		ഘടന init_request req;
+		ssize_t എണ്ണം = പഠ(fifo, &req, വലുപ്പം(req));
 
-		if (count == -1) {
+		എങ്കിൽ (എണ്ണം == -1) {
 			syslog(LOG_ERR, "read: %s", strerror(errno));
-			continue;
+			തുടരുക;
 		}
 
-		if (count != sizeof(req)) {
+		എങ്കിൽ (എണ്ണം != വലുപ്പം(req)) {
 			syslog(LOG_ERR, "read: short count");
-			continue;
+			തുടരുക;
 		}
 
-		if (req.magic != INIT_MAGIC) {
+		എങ്കിൽ (req.magic != INIT_MAGIC) {
 			syslog(LOG_ERR, "invalid magic bytes");
-			continue;
+			തുടരുക;
 		}
 
-		switch (req.cmd) {
-		case INIT_CMD_RUNLVL:
+		തിരഞ്ഞെടുപ്പ് (req.cmd) {
+		അവസ്ഥ INIT_CMD_RUNLVL:
 			sysvinit_runlevel(req.runlevel);
-			break;
-		case INIT_CMD_SETENV:
-		case INIT_CMD_UNSETENV:
-			sysvinit_setenv(req.i.data, sizeof(req.i.data));
-			break;
+			നിർത്തുക;
+		അവസ്ഥ INIT_CMD_SETENV:
+		അവസ്ഥ INIT_CMD_UNSETENV:
+			sysvinit_setenv(req.i.data, വലുപ്പം(req.i.data));
+			നിർത്തുക;
 		}
 	}
 }

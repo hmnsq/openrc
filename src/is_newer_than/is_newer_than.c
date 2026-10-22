@@ -10,21 +10,21 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#അന്തര്ഭാവ <stdlib.h>
 
-#include "rc.h"
+#അന്തര്ഭാവ "rc.h"
 
-int main(int argc, char **argv)
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	എങ്കിൽ (argc < 3)
+		തിരികെ EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	വേണ്ടി (i = 2; i < argc; ++i)
+		എങ്കിൽ (!rc_newer_than(argv[1], argv[i], ശൂന്യ, ശൂന്യ))
+			തിരികെ EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }

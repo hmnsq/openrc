@@ -14,52 +14,52 @@
  */
 
 
-#include <fcntl.h>
-#include <paths.h>
-#include <pwd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/sysmacros.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <time.h>
-#include <unistd.h>
-#include <utmpx.h>
+#അന്തര്ഭാവ <fcntl.h>
+#അന്തര്ഭാവ <paths.h>
+#അന്തര്ഭാവ <pwd.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <sys/sysmacros.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <sys/utsname.h>
+#അന്തര്ഭാവ <time.h>
+#അന്തര്ഭാവ <unistd.h>
+#അന്തര്ഭാവ <utmpx.h>
 
-#include "broadcast.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "broadcast.h"
+#അന്തര്ഭാവ "helpers.h"
 
 #ifndef _PATH_DEV
 # define _PATH_DEV	"/dev/"
 #endif
 
 
-static void getuidtty(char **userp, char **ttyp)
+സ്ഥിതം ശൂന്യം getuidtty(അക്ഷരം **userp, അക്ഷരം **ttyp)
 {
-	struct passwd 		*pwd;
+	ഘടന passwd 		*pwd;
 	uid_t			uid;
-	char			*tty;
-	static char		uidbuf[32];
-	char		*ttynm = NULL;
+	അക്ഷരം			*tty;
+	സ്ഥിതം അക്ഷരം		uidbuf[32];
+	അക്ഷരം		*ttynm = ശൂന്യ;
 
 	uid = getuid();
-	if ((pwd = getpwuid(uid)) != NULL) {
+	എങ്കിൽ ((pwd = getpwuid(uid)) != ശൂന്യ) {
 		uidbuf[0] = 0;
-		strncat(uidbuf, pwd->pw_name, sizeof(uidbuf) - 1);
-	} else {
-		if (uid)
-			sprintf(uidbuf, "uid %d", (int) uid);
-		else
+		strncat(uidbuf, pwd->pw_name, വലുപ്പം(uidbuf) - 1);
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (uid)
+			sprintf(uidbuf, "uid %d", (പൂർണ്ണസംഖ്യ) uid);
+		അല്ലെങ്കിൽ
 			sprintf(uidbuf, "root");
 	}
 
-	if ((tty = ttyname(0)) != NULL) {
-		const size_t plen = strlen(_PATH_DEV);
-		if (strncmp(tty, _PATH_DEV, plen) == 0) {
+	എങ്കിൽ ((tty = ttyname(0)) != ശൂന്യ) {
+		സ്ഥിരം size_t plen = strlen(_PATH_DEV);
+		എങ്കിൽ (strncmp(tty, _PATH_DEV, plen) == 0) {
 			tty += plen;
-			if (tty[0] == '/')
+			എങ്കിൽ (tty[0] == '/')
 				tty++;
 		}
 		xasprintf(&ttynm, "(%s) ", tty);
@@ -72,16 +72,16 @@ static void getuidtty(char **userp, char **ttyp)
 /*
  *	Check whether the given filename looks like a tty device.
  */
-static int file_isatty(const char *fname)
+സ്ഥിതം പൂർണ്ണസംഖ്യ file_isatty(സ്ഥിരം അക്ഷരം *fname)
 {
-	struct stat		st;
-	int			major;
+	ഘടന stat		st;
+	പൂർണ്ണസംഖ്യ			major;
 
-	if (stat(fname, &st) < 0)
-		return 0;
+	എങ്കിൽ (stat(fname, &st) < 0)
+		തിരികെ 0;
 
-	if (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
-		return 0;
+	എങ്കിൽ (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
+		തിരികെ 0;
 
 	/*
 	 *	It would be an impossible task to list all major/minors
@@ -90,12 +90,12 @@ static int file_isatty(const char *fname)
 	 *	printers and tapes.
 	 */
 	major = major(st.st_dev);
-	if (major == 1 || major == 2 || major == 6 || major == 9 ||
+	എങ്കിൽ (major == 1 || major == 2 || major == 6 || major == 9 ||
 	    major == 12 || major == 16 || major == 21 || major == 27 ||
 	    major == 37 || major == 96 || major == 97 || major == 206 ||
 	    major == 230)
-		return 0;
-	return 1;
+		തിരികെ 0;
+	തിരികെ 1;
 }
 
 /*
@@ -103,19 +103,19 @@ static int file_isatty(const char *fname)
  *
  *	NB: Not multithread safe.
  */
-void broadcast(char *text)
+ശൂന്യം broadcast(അക്ഷരം *text)
 {
-	char *tty;
-	char *user;
-	struct utsname name;
+	അക്ഷരം *tty;
+	അക്ഷരം *user;
+	ഘടന utsname name;
 	time_t t;
-	char *date;
-	char *p;
-	char *line = NULL;
-	int len;
-	int fd;
-	char *term = NULL;
-	struct utmpx *utmp;
+	അക്ഷരം *date;
+	അക്ഷരം *p;
+	അക്ഷരം *വരി = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ len;
+	പൂർണ്ണസംഖ്യ fd;
+	അക്ഷരം *term = ശൂന്യ;
+	ഘടന utmpx *utmp;
 
 	getuidtty(&user, &tty);
 
@@ -129,42 +129,42 @@ void broadcast(char *text)
 	time(&t);
 	date = ctime(&t);
 	p = strchr(date, '\n');
-	if (p)
+	എങ്കിൽ (p)
 		*p = 0;
 
-	len = xasprintf(&line, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
+	len = xasprintf(&വരി, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
 			user, name.nodename, tty, date, text);
-	free(tty);
+	സ്വതന്ത്രം(tty);
 
 	/*
 	 *	Fork to avoid hanging in a write()
 	 */
-	if (fork() != 0)
-		return;
+	എങ്കിൽ (fork() != 0)
+		തിരികെ;
 
 	setutxent();
 
-	while ((utmp = getutxent()) != NULL) {
-		if (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
-			continue;
-		if (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
+	ആകുമ്പോൾ ((utmp = getutxent()) != ശൂന്യ) {
+		എങ്കിൽ (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
+			തുടരുക;
+		എങ്കിൽ (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
 			xasprintf(&term, "%s", utmp->ut_line);
-		else
+		അല്ലെങ്കിൽ
 			xasprintf(&term, "%s%s", _PATH_DEV, utmp->ut_line);
-		if (strstr(term, "/../")) {
-			free(term);
-			continue;
+		എങ്കിൽ (strstr(term, "/../")) {
+			സ്വതന്ത്രം(term);
+			തുടരുക;
 		}
 
 		/* Open it non-delay */
-		if (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
-			if (isatty(fd))
-				write(fd, line, len);
+		എങ്കിൽ (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
+			എങ്കിൽ (isatty(fd))
+				ലിഖ(fd, വരി, len);
 			close(fd);
 		}
-		free(term);
+		സ്വതന്ത്രം(term);
 	}
 	endutxent();
-	free(line);
+	സ്വതന്ത്രം(വരി);
 	exit(0);
 }

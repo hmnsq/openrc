@@ -1,27 +1,27 @@
-#include <einfo.h>
-#include <errno.h>
-#include <getopt.h>
-#include <rc.h>
-#include <queue.h>
-#include <string.h>
+#അന്തര്ഭാവ <einfo.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <getopt.h>
+#അന്തര്ഭാവ <rc.h>
+#അന്തര്ഭാവ <queue.h>
+#അന്തര്ഭാവ <string.h>
 
-#include "_usage.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "_usage.h"
+#അന്തര്ഭാവ "helpers.h"
 
-const char *applet;
-const char *extraopts;
-const char *usagestring = "rc-environ [-s <service> ...] [-r <runlevel> ...] [-en0]\n";
-const char getoptstring[] = "ens:r:0" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "export",          no_argument, NULL, 'e' },
-	{ "no-escape",       no_argument, NULL, 'n' },
-	{ "null",            no_argument, NULL, '0' },
-	{ "service",   required_argument, NULL, 's' },
-	{ "runlevel",  required_argument, NULL, 'r' },
+സ്ഥിരം അക്ഷരം *applet;
+സ്ഥിരം അക്ഷരം *extraopts;
+സ്ഥിരം അക്ഷരം *usagestring = "rc-environ [-s <service> ...] [-r <runlevel> ...] [-en0]\n";
+സ്ഥിരം അക്ഷരം getoptstring[] = "ens:r:0" getoptstring_COMMON;
+സ്ഥിരം ഘടന option longopts[] = {
+	{ "export",          no_argument, ശൂന്യ, 'e' },
+	{ "no-escape",       no_argument, ശൂന്യ, 'n' },
+	{ "null",            no_argument, ശൂന്യ, '0' },
+	{ "service",   required_argument, ശൂന്യ, 's' },
+	{ "runlevel",  required_argument, ശൂന്യ, 'r' },
 	longopts_COMMON
 };
 
-const char *const longopts_help[] = {
+സ്ഥിരം അക്ഷരം *സ്ഥിരം longopts_help[] = {
 	"Prepend \"export\" to printed variables",
 	"Do not perform shell sensitive escape on variable values",
 	"End each output line with NUL, not newline",
@@ -30,133 +30,133 @@ const char *const longopts_help[] = {
 	longopts_help_COMMON
 };
 
-static int
-set_environment(const char *service, char *vars[])
+സ്ഥിതം പൂർണ്ണസംഖ്യ
+set_environment(സ്ഥിരം അക്ഷരം *service, അക്ഷരം *vars[])
 {
-	RC_DEPTREE *deptree = _rc_deptree_load(0, NULL);
+	RC_DEPTREE *deptree = _rc_deptree_load(0, ശൂന്യ);
 	RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service, "reexport");
 	RC_STRING *reexport;
 
-	if (!(rc_service_state(service) & RC_SERVICE_STARTING)) {
+	എങ്കിൽ (!(rc_service_state(service) & RC_SERVICE_STARTING)) {
 		eerror("service %s is not in the starting state", service);
-		return 1;
+		തിരികെ 1;
 	}
 
-	for (const char *var; (var = *vars); vars++) {
+	വേണ്ടി (സ്ഥിരം അക്ഷരം *var; (var = *vars); vars++) {
 		size_t name_len = strcspn(var, "=");
 
 		TAILQ_FOREACH(reexport, reexports, entries) {
-			if (strncmp(reexport->value, var, name_len) != 0)
-				continue;
-			if (var[name_len] == '=')
+			എങ്കിൽ (strncmp(reexport->മൂല്യം, var, name_len) != 0)
+				തുടരുക;
+			എങ്കിൽ (var[name_len] == '=')
 				rc_service_putenv(service, var);
-			else
+			അല്ലെങ്കിൽ
 				rc_service_setenv(service, var, getenv(var));
-			goto next;
+			പോകുക next;
 		}
 
-		ewarn("service %s does not reexport %.*s, skipping", service, (int)name_len, var);
+		ewarn("service %s does not reexport %.*s, skipping", service, (പൂർണ്ണസംഖ്യ)name_len, var);
 next:;
 	}
 
 	rc_stringlist_free(reexports);
 	rc_deptree_free(deptree);
-	return 0;
+	തിരികെ 0;
 }
 
-static void escape_variable(const char *value) {
-	char ch;
+സ്ഥിതം ശൂന്യം escape_variable(സ്ഥിരം അക്ഷരം *മൂല്യം) {
+	അക്ഷരം ch;
 
 	printf("$'");
-	for (const char *p = value; *p; p++) {
-		switch ((ch = *p)) {
-		case '\a': ch = 'a'; break;
-		case '\b': ch = 'b'; break;
-		case '\f': ch = 'f'; break;
-		case '\n': ch = 'n'; break;
-		case '\r': ch = 'r'; break;
-		case '\t': ch = 't'; break;
-		case '\v': ch = 'v'; break;
+	വേണ്ടി (സ്ഥിരം അക്ഷരം *p = മൂല്യം; *p; p++) {
+		തിരഞ്ഞെടുപ്പ് ((ch = *p)) {
+		അവസ്ഥ '\a': ch = 'a'; നിർത്തുക;
+		അവസ്ഥ '\b': ch = 'b'; നിർത്തുക;
+		അവസ്ഥ '\f': ch = 'f'; നിർത്തുക;
+		അവസ്ഥ '\n': ch = 'n'; നിർത്തുക;
+		അവസ്ഥ '\r': ch = 'r'; നിർത്തുക;
+		അവസ്ഥ '\t': ch = 't'; നിർത്തുക;
+		അവസ്ഥ '\v': ch = 'v'; നിർത്തുക;
 		/* \e is non-standard. */
-		case 0x1b: ch = 'e'; break;
-		case '"':
-		case '\'':
-		case '\\':
-			break;
-		default:
+		അവസ്ഥ 0x1b: ch = 'e'; നിർത്തുക;
+		അവസ്ഥ '"':
+		അവസ്ഥ '\'':
+		അവസ്ഥ '\\':
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			putchar(ch);
-			continue;
+			തുടരുക;
 		}
 		printf("\\%c", ch);
 	}
 	printf("\'");
 }
 
-static int
-print_environment(RC_STRINGLIST *services, bool escape, bool export, char sep)
+സ്ഥിതം പൂർണ്ണസംഖ്യ
+print_environment(RC_STRINGLIST *services, bool escape, bool export, അക്ഷരം sep)
 {
 	/* from POSIX.2024 Shell Command Language 2.2, excluding `=` */
-	static const char special_chars[] = "|&;<>()$`\\\"' \t\n*?[]^-!#~%{},";
-	RC_DEPTREE *deptree = _rc_deptree_load(0, NULL);
+	സ്ഥിതം സ്ഥിരം അക്ഷരം special_chars[] = "|&;<>()$`\\\"' \t\n*?[]^-!#~%{},";
+	RC_DEPTREE *deptree = _rc_deptree_load(0, ശൂന്യ);
 	RC_STRING *service;
-	char *value = NULL;
-	int ret = 0;
+	അക്ഷരം *മൂല്യം = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ ret = 0;
 
-	if (!services)
+	എങ്കിൽ (!services)
 		services = rc_services_in_state(RC_SERVICE_STARTED);
 
 	TAILQ_FOREACH(service, services, entries) {
-		RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service->value, "reexport");
+		RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service->മൂല്യം, "reexport");
 		RC_STRING *reexport;
 
 		TAILQ_FOREACH(reexport, reexports, entries) {
-			if (rc_service_getenv(service->value, reexport->value, &value) == -1) {
+			എങ്കിൽ (rc_service_getenv(service->മൂല്യം, reexport->മൂല്യം, &മൂല്യം) == -1) {
 				ewarn("%s: failed to read variable '%s' for '%s': %s",
-					applet, reexport->value, service->value, strerror(errno));
+					applet, reexport->മൂല്യം, service->മൂല്യം, strerror(errno));
 				ret = 1;
-				continue;
+				തുടരുക;
 			}
 
-			if (export)
+			എങ്കിൽ (export)
 				fputs("export ", stdout);
-			printf("%s=", reexport->value);
-			if (escape && strpbrk(value, special_chars))
-				escape_variable(value);
-			else
-				fputs(value, stdout);
+			printf("%s=", reexport->മൂല്യം);
+			എങ്കിൽ (escape && strpbrk(മൂല്യം, special_chars))
+				escape_variable(മൂല്യം);
+			അല്ലെങ്കിൽ
+				fputs(മൂല്യം, stdout);
 			fputc(sep, stdout);
 		}
 
 		rc_stringlist_free(reexports);
 	}
 
-	free(value);
+	സ്വതന്ത്രം(മൂല്യം);
 	rc_deptree_free(deptree);
-	return ret;
+	തിരികെ ret;
 }
 
-int main(int argc, char **argv) {
-	RC_STRINGLIST *services = NULL, *in_runlevel;
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv) {
+	RC_STRINGLIST *services = ശൂന്യ, *in_runlevel;
 	bool export = false, escape = true;
-	char sep = '\n';
+	അക്ഷരം sep = '\n';
 
-	for (int opt; (opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1;) {
-		switch (opt) {
-		case 'e': export = true; break;
-		case 'n': escape = false; break;
-		case '0': sep = '\0'; break;
-		case 'r':
-			if (!services)
+	വേണ്ടി (പൂർണ്ണസംഖ്യ opt; (opt = getopt_long(argc, argv, getoptstring, longopts, ശൂന്യ)) != -1;) {
+		തിരഞ്ഞെടുപ്പ് (opt) {
+		അവസ്ഥ 'e': export = true; നിർത്തുക;
+		അവസ്ഥ 'n': escape = false; നിർത്തുക;
+		അവസ്ഥ '0': sep = '\0'; നിർത്തുക;
+		അവസ്ഥ 'r':
+			എങ്കിൽ (!services)
 				services = rc_stringlist_new();
 			in_runlevel = rc_services_in_runlevel(optarg);
 			TAILQ_CONCAT(services, in_runlevel, entries);
 			rc_stringlist_free(in_runlevel);
-			break;
-		case 's':
-			if (!services)
+			നിർത്തുക;
+		അവസ്ഥ 's':
+			എങ്കിൽ (!services)
 				services = rc_stringlist_new();
 			rc_stringlist_addu(services, optarg);
-			break;
+			നിർത്തുക;
 		case_RC_COMMON_GETOPT
 		}
 	}
@@ -164,8 +164,8 @@ int main(int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
-	if (!argc)
-		return print_environment(services, escape, export, sep);
+	എങ്കിൽ (!argc)
+		തിരികെ print_environment(services, escape, export, sep);
 
-	return set_environment(argv[0], &argv[1]);
+	തിരികെ set_environment(argv[0], &argv[1]);
 }

@@ -18,76 +18,76 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <pwd.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/reboot.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <poll.h>
-#include <utmp.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <pwd.h>
+#അന്തര്ഭാവ <signal.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <time.h>
+#അന്തര്ഭാവ <fcntl.h>
+#അന്തര്ഭാവ <unistd.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <sys/reboot.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <sys/wait.h>
+#അന്തര്ഭാവ <poll.h>
+#അന്തര്ഭാവ <utmp.h>
 
 #ifdef HAVE_SELINUX
 #  include <selinux/selinux.h>
 #endif
 
-#include "rc.h"
-#include "rc_exec.h"
-#include "wtmp.h"
-#include "helpers.h"
-#include "version.h"
+#അന്തര്ഭാവ "rc.h"
+#അന്തര്ഭാവ "rc_exec.h"
+#അന്തര്ഭാവ "wtmp.h"
+#അന്തര്ഭാവ "helpers.h"
+#അന്തര്ഭാവ "version.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#എങ്കിൽ defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
 #endif
 
-static const char *path_default = "/sbin:/usr/sbin:/bin:/usr/bin";
-static const char *rc_default_runlevel = "default";
-static int sigpipe[2] = { -1, -1 };
-static bool quiet = false;
-static const char *progname;
+സ്ഥിതം സ്ഥിരം അക്ഷരം *path_default = "/sbin:/usr/sbin:/bin:/usr/bin";
+സ്ഥിതം സ്ഥിരം അക്ഷരം *rc_default_runlevel = "default";
+സ്ഥിതം പൂർണ്ണസംഖ്യ sigpipe[2] = { -1, -1 };
+സ്ഥിതം bool quiet = false;
+സ്ഥിതം സ്ഥിരം അക്ഷരം *progname;
 
-static void do_openrc(const char *runlevel)
+സ്ഥിതം ശൂന്യം do_openrc(സ്ഥിരം അക്ഷരം *runlevel)
 {
-	const char *argv[] = { "openrc", runlevel, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	സ്ഥിരം അക്ഷരം *argv[] = { "openrc", runlevel, ശൂന്യ };
+	ഘടന exec_result res;
+	ഘടന exec_args args = exec_init(argv);
 	args.setsid = 1;
 
-	if (!quiet)
+	എങ്കിൽ (!quiet)
 		printf("Starting %s runlevel\n", runlevel);
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	എങ്കിൽ (res.pid < 0) {
 		perror("do_exec");
 		exit(1);
 	}
-	while (waitpid(res.pid, NULL, 0) != res.pid)
-		if (errno == ECHILD)
-			break;
+	ആകുമ്പോൾ (waitpid(res.pid, ശൂന്യ, 0) != res.pid)
+		എങ്കിൽ (errno == ECHILD)
+			നിർത്തുക;
 }
 
-static void init(const char *default_runlevel)
+സ്ഥിതം ശൂന്യം init(സ്ഥിരം അക്ഷരം *default_runlevel)
 {
-	const char *runlevel = NULL;
+	സ്ഥിരം അക്ഷരം *runlevel = ശൂന്യ;
 	do_openrc("sysinit");
 	do_openrc("boot");
-	if (default_runlevel)
+	എങ്കിൽ (default_runlevel)
 		runlevel = default_runlevel;
-	else
-		runlevel = rc_conf_value("rc_default_runlevel");
-	if (!runlevel)
+	അല്ലെങ്കിൽ
+		runlevel = rc_conf_മൂല്യം("rc_default_runlevel");
+	എങ്കിൽ (!runlevel)
 		runlevel = rc_default_runlevel;
-	if (!rc_runlevel_exists(runlevel)) {
+	എങ്കിൽ (!rc_runlevel_exists(runlevel)) {
 		fprintf(stderr, "%s is an invalid runlevel\n", runlevel);
 		runlevel = rc_default_runlevel;
 	}
@@ -95,19 +95,19 @@ static void init(const char *default_runlevel)
 	log_wtmp("reboot", "~~", 0, RUN_LVL, "~~");
 }
 
-static void handle_reexec(void)
+സ്ഥിതം ശൂന്യം handle_reexec(ശൂന്യം)
 {
-	execlp(progname, progname, "reexec", NULL);
-	return;
+	execlp(progname, progname, "reexec", ശൂന്യ);
+	തിരികെ;
 }
 
-static void handle_shutdown(const char *runlevel, int cmd)
+സ്ഥിതം ശൂന്യം handle_shutdown(സ്ഥിരം അക്ഷരം *runlevel, പൂർണ്ണസംഖ്യ cmd)
 {
-	const long ms_to_ns = 1000000L;
-	struct timespec start, now, tmp, remain;
+	സ്ഥിരം long ms_to_ns = 1000000L;
+	ഘടന timespec start, now, tmp, remain;
 
 	do_openrc(runlevel);
-	if (!quiet)
+	എങ്കിൽ (!quiet)
 		printf("Sending the final TERM signal\n");
 	kill(-1, SIGTERM);
 	clock_gettime(CLOCK_MONOTONIC, &start);
@@ -115,198 +115,198 @@ static void handle_shutdown(const char *runlevel, int cmd)
 	/* ensure *at least* half a second of grace time before KILL */
 	tmp.tv_sec = 0;
 	tmp.tv_nsec = 500 * ms_to_ns;
-	while (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
+	ആകുമ്പോൾ (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
 		tmp = remain;
 
-	for (;;) {
-		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == -1 && errno == ECHILD) {
+	വേണ്ടി (;;) {
+		pid_t pid = waitpid(-1, ശൂന്യ, WNOHANG);
+		എങ്കിൽ (pid == -1 && errno == ECHILD) {
 			/* all children reaped, safe to exit */
-			break;
+			നിർത്തുക;
 		}
 
 		clock_gettime(CLOCK_MONOTONIC, &now);
 		timespecsub(&now, &start, &tmp);
-		if (tmp.tv_sec >= 3) {
+		എങ്കിൽ (tmp.tv_sec >= 3) {
 			/* it's been 3 seconds already, go for the KILL hammer */
-			break;
+			നിർത്തുക;
 		}
 
 		tmp.tv_sec = 0;
 		tmp.tv_nsec = 100 * ms_to_ns;
-		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, NULL);
+		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, ശൂന്യ);
 	}
 
-	if (!quiet)
+	എങ്കിൽ (!quiet)
 		printf("Sending the final KILL signal\n");
 	kill(-1, SIGKILL);
 	sync();
 	reboot(cmd);
 	/* reboot normally if kexec fails */
-	if (cmd == RB_KEXEC)
+	എങ്കിൽ (cmd == RB_KEXEC)
 		reboot(RB_AUTOBOOT);
 }
 
-static void run_program(const char *prog)
+സ്ഥിതം ശൂന്യം run_program(സ്ഥിരം അക്ഷരം *prog)
 {
-	const char *argv[] = { prog, NULL };
-	struct exec_args args = exec_init(argv);
-	struct exec_result res = do_exec(&args);
-	if (res.pid < 0 || rc_waitpid(res.pid) == -1)
+	സ്ഥിരം അക്ഷരം *argv[] = { prog, ശൂന്യ };
+	ഘടന exec_args args = exec_init(argv);
+	ഘടന exec_result res = do_exec(&args);
+	എങ്കിൽ (res.pid < 0 || rc_waitpid(res.pid) == -1)
 		perror("init");
 }
 
-static void open_shell(void)
+സ്ഥിതം ശൂന്യം open_shell(ശൂന്യം)
 {
-	const char *shell;
-	struct passwd *pw;
+	സ്ഥിരം അക്ഷരം *shell;
+	ഘടന passwd *pw;
 
 #ifdef __linux__
-	const char *sys = rc_sys();
+	സ്ഥിരം അക്ഷരം *sys = rc_sys();
 
 	/* VSERVER systems cannot really drop to shells */
-	if (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
+	എങ്കിൽ (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
 	{
-		execlp("halt", "halt", "-f", (char *) NULL);
+		execlp("halt", "halt", "-f", (അക്ഷരം *) ശൂന്യ);
 		perror("init");
-		return;
+		തിരികെ;
 	}
 #endif
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_മൂല്യം("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
-	if (!shell) {
+	എങ്കിൽ (!shell) {
 		shell = getenv("SHELL");
-		if (!shell) {
+		എങ്കിൽ (!shell) {
 			pw = getpwuid(getuid());
-			if (pw)
+			എങ്കിൽ (pw)
 				shell = pw->pw_shell;
-			if (!shell)
+			എങ്കിൽ (!shell)
 				shell = "/bin/sh";
 		}
 	}
 	run_program(shell);
 }
 
-static void handle_single(void)
+സ്ഥിതം ശൂന്യം handle_single(ശൂന്യം)
 {
 	do_openrc("single");
 	open_shell();
-	init(NULL);
+	init(ശൂന്യ);
 }
 
-static void dispatch_signal(int sigfd)
+സ്ഥിതം ശൂന്യം dispatch_signal(പൂർണ്ണസംഖ്യ sigfd)
 {
-	int sig;
-	ssize_t count = read(sigfd, &sig, sizeof(sig));
+	പൂർണ്ണസംഖ്യ sig;
+	ssize_t എണ്ണം = പഠ(sigfd, &sig, വലുപ്പം(sig));
 
-	if (count < 0) {
+	എങ്കിൽ (എണ്ണം < 0) {
 		perror("read(sigpipe)");
-		return;
+		തിരികെ;
 	}
 
-	if (count != sizeof(sig)) {
+	എങ്കിൽ (എണ്ണം != വലുപ്പം(sig)) {
 		fputs("bad read from sigpipe\n", stderr);
-		return;
+		തിരികെ;
 	}
 
-	switch (sig) {
-		case SIGINT:
+	തിരഞ്ഞെടുപ്പ് (sig) {
+		അവസ്ഥ SIGINT:
 			handle_shutdown("reboot", RB_AUTOBOOT);
-			break;
-		case SIGTERM:
+			നിർത്തുക;
+		അവസ്ഥ SIGTERM:
 #ifdef SIGPWR
-		case SIGPWR:
+		അവസ്ഥ SIGPWR:
 #endif
 			handle_shutdown("shutdown", RB_HALT_SYSTEM);
-			break;
-		default:
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			fprintf(stderr, "Unknown signal received, %d\n", sig);
-			break;
+			നിർത്തുക;
 	}
 }
 
-static void dispatch_fifo(int fifo)
+സ്ഥിതം ശൂന്യം dispatch_fifo(പൂർണ്ണസംഖ്യ fifo)
 {
-	char buf[2048];
-	ssize_t count = read(fifo, buf, sizeof(buf) - 1);
+	അക്ഷരം buf[2048];
+	ssize_t എണ്ണം = പഠ(fifo, buf, വലുപ്പം(buf) - 1);
 
-	if (count < 0) {
+	എങ്കിൽ (എണ്ണം < 0) {
 		perror("read(fifo)");
-		return;
+		തിരികെ;
 	}
 
-	buf[count] = 0;
+	buf[എണ്ണം] = 0;
 
-	if (!quiet)
+	എങ്കിൽ (!quiet)
 		printf("PID1: Received \"%s\" from FIFO...\n", buf);
 
-	if (strcmp(buf, "halt") == 0)
+	എങ്കിൽ (strcmp(buf, "halt") == 0)
 		handle_shutdown("shutdown", RB_HALT_SYSTEM);
-	else if (strcmp(buf, "kexec") == 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(buf, "kexec") == 0)
 		handle_shutdown("reboot", RB_KEXEC);
-	else if (strcmp(buf, "poweroff") == 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(buf, "poweroff") == 0)
 		handle_shutdown("shutdown", RB_POWER_OFF);
-	else if (strcmp(buf, "reboot") == 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(buf, "reboot") == 0)
 		handle_shutdown("reboot", RB_AUTOBOOT);
-	else if (strcmp(buf, "reexec") == 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(buf, "reexec") == 0)
 		handle_reexec();
-	else if (strcmp(buf, "single") == 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(buf, "single") == 0)
 		handle_single();
 }
 
-static void signal_handler(int sig)
+സ്ഥിതം ശൂന്യം signal_handler(പൂർണ്ണസംഖ്യ sig)
 {
-	int saved_errno = errno;
-	write(sigpipe[1], &sig, sizeof(sig));
+	പൂർണ്ണസംഖ്യ saved_errno = errno;
+	ലിഖ(sigpipe[1], &sig, വലുപ്പം(sig));
 	/* ensure the errno doesn't get clobbered in the rare (impossible?)
 	 * case that the write above fails */
 	errno = saved_errno;
 }
 
-static void reap_zombies(int sig RC_UNUSED)
+സ്ഥിതം ശൂന്യം reap_zombies(പൂർണ്ണസംഖ്യ sig RC_UNUSED)
 {
-	char errmsg[] = "waitpid() failed\n";
-	int saved_errno = errno;
+	അക്ഷരം errmsg[] = "waitpid() failed\n";
+	പൂർണ്ണസംഖ്യ saved_errno = errno;
 
-	for (;;) {
-		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == 0)
-			break;
-		else if (pid == -1) {
-			if (errno == ECHILD)
-				break;
-			write(STDERR_FILENO, errmsg, sizeof(errmsg) - 1);
-			continue;
+	വേണ്ടി (;;) {
+		pid_t pid = waitpid(-1, ശൂന്യ, WNOHANG);
+		എങ്കിൽ (pid == 0)
+			നിർത്തുക;
+		അല്ലെങ്കിൽ എങ്കിൽ (pid == -1) {
+			എങ്കിൽ (errno == ECHILD)
+				നിർത്തുക;
+			ലിഖ(STDERR_FILENO, errmsg, വലുപ്പം(errmsg) - 1);
+			തുടരുക;
 		}
 	}
 	errno = saved_errno;
 }
 
-int main(int argc, char **argv)
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv)
 {
-	char *cmdline_runlevel = NULL;
-	int fifo;
+	അക്ഷരം *cmdline_runlevel = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ fifo;
 	bool reexec = false;
 	sigset_t signals;
-	struct sigaction sa;
+	ഘടന sigaction sa;
 #ifdef HAVE_SELINUX
-	int enforce = 0;
+	പൂർണ്ണസംഖ്യ enforce = 0;
 #endif
 
 	progname = argv[0];
 
-	if (getpid() != 1)
-		return 1;
+	എങ്കിൽ (getpid() != 1)
+		തിരികെ 1;
 
 #ifdef HAVE_SELINUX
-	if (getenv("SELINUX_INIT") == NULL) {
-		if (is_selinux_enabled() != 1) {
-			if (selinux_init_load_policy(&enforce) == 0) {
+	എങ്കിൽ (getenv("SELINUX_INIT") == ശൂന്യ) {
+		എങ്കിൽ (is_selinux_enabled() != 1) {
+			എങ്കിൽ (selinux_init_load_policy(&enforce) == 0) {
 				setenv("SELINUX_INIT", "YES", 1);
 				execv(argv[0], argv);
-			} else {
-				if (enforce > 0) {
+			} അല്ലെങ്കിൽ {
+				എങ്കിൽ (enforce > 0) {
 					/*
 					 * SELinux in enforcing mode but load_policy failed
 					 * At this point, we probably can't open /dev/console,
@@ -324,19 +324,19 @@ int main(int argc, char **argv)
 
 	quiet = rc_yesno(getenv("EINFO_QUIET"));
 
-	if (!quiet)
+	എങ്കിൽ (!quiet)
 		printf("OpenRC init version %s starting\n", VERSION);
 
-	if (argc > 1) {
-		if (strcmp(argv[1], "reexec") == 0)
+	എങ്കിൽ (argc > 1) {
+		എങ്കിൽ (strcmp(argv[1], "reexec") == 0)
 			reexec = true;
-		else
+		അല്ലെങ്കിൽ
 			cmdline_runlevel = argv[1];
 	}
 
-	if (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
+	എങ്കിൽ (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
 		perror("pipe2");
-		return 1;
+		തിരികെ 1;
 	}
 
 	/* block all signals we do not handle */
@@ -347,43 +347,43 @@ int main(int argc, char **argv)
 #ifdef SIGPWR
 	sigdelset(&signals, SIGPWR);
 #endif
-	sigprocmask(SIG_SETMASK, &signals, NULL);
+	sigprocmask(SIG_SETMASK, &signals, ശൂന്യ);
 
 	/* install signal  handler */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, വലുപ്പം(sa));
 	sa.sa_handler = reap_zombies;
-	sigaction(SIGCHLD, &sa, NULL);
+	sigaction(SIGCHLD, &sa, ശൂന്യ);
 	sa.sa_handler = signal_handler;
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGINT, &sa, ശൂന്യ);
+	sigaction(SIGTERM, &sa, ശൂന്യ);
 #ifdef SIGPWR
-	sigaction(SIGPWR, &sa, NULL);
+	sigaction(SIGPWR, &sa, ശൂന്യ);
 #endif
 	reboot(RB_DISABLE_CAD);
 
 	/* set default path */
 	setenv("PATH", path_default, 1);
 
-	if (!reexec)
+	എങ്കിൽ (!reexec)
 		init(cmdline_runlevel);
 
-	if ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
+	എങ്കിൽ ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
 		perror("open_rwfifo");
 
-	for (;;) {
-		enum { FD_FIFO, FD_SIG, FD_COUNT };
-		struct pollfd pfd[] = {
+	വേണ്ടി (;;) {
+		എണ്ണൽ { FD_FIFO, FD_SIG, FD_എണ്ണം };
+		ഘടന pollfd pfd[] = {
 			[FD_FIFO] = { .fd = fifo, .events = POLLIN },
 			[FD_SIG] = { .fd = sigpipe[0], .events = POLLIN },
 		};
 
-		poll(pfd, FD_COUNT, -1);
+		poll(pfd, FD_എണ്ണം, -1);
 
-		if (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
+		എങ്കിൽ (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
 			dispatch_signal(sigpipe[0]);
 
-		if (pfd[FD_FIFO].revents & POLLIN)
+		എങ്കിൽ (pfd[FD_FIFO].revents & POLLIN)
 			dispatch_fifo(fifo);
 	}
-	return 0;
+	തിരികെ 0;
 }

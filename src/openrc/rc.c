@@ -20,52 +20,52 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <dirent.h>
-#include <getopt.h>
-#include <libgen.h>
-#include <pwd.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <sys/wait.h>
-#include <termios.h>
-#include <unistd.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <dirent.h>
+#അന്തര്ഭാവ <getopt.h>
+#അന്തര്ഭാവ <libgen.h>
+#അന്തര്ഭാവ <pwd.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <signal.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <sys/ioctl.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <sys/utsname.h>
+#അന്തര്ഭാവ <sys/wait.h>
+#അന്തര്ഭാവ <termios.h>
+#അന്തര്ഭാവ <unistd.h>
 
-#include "einfo.h"
-#include "queue.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "rc-logger.h"
-#include "misc.h"
-#include "plugin.h"
-#include "version.h"
-#include "_usage.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "einfo.h"
+#അന്തര്ഭാവ "queue.h"
+#അന്തര്ഭാവ "rc.h"
+#അന്തര്ഭാവ "rc_exec.h"
+#അന്തര്ഭാവ "rc-logger.h"
+#അന്തര്ഭാവ "misc.h"
+#അന്തര്ഭാവ "plugin.h"
+#അന്തര്ഭാവ "version.h"
+#അന്തര്ഭാവ "_usage.h"
+#അന്തര്ഭാവ "helpers.h"
 
-const char *extraopts = NULL;
-const char getoptstring[] = "a:no:s:S" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "no-stop", 0, NULL, 'n' },
-	{ "override",    1, NULL, 'o' },
-	{ "service",     1, NULL, 's' },
-	{ "sys",         0, NULL, 'S' },
+സ്ഥിരം അക്ഷരം *extraopts = ശൂന്യ;
+സ്ഥിരം അക്ഷരം getoptstring[] = "a:no:s:S" getoptstring_COMMON;
+സ്ഥിരം ഘടന option longopts[] = {
+	{ "no-stop", 0, ശൂന്യ, 'n' },
+	{ "override",    1, ശൂന്യ, 'o' },
+	{ "service",     1, ശൂന്യ, 's' },
+	{ "sys",         0, ശൂന്യ, 'S' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+സ്ഥിരം അക്ഷരം * സ്ഥിരം longopts_help[] = {
 	"do not stop any services",
 	"override the next runlevel to change into\nwhen leaving single user or boot runlevels",
 	"runs the service specified with the rest\nof the arguments",
 	"output the RC system type, if any",
 	longopts_help_COMMON
 };
-const char *usagestring = ""
+സ്ഥിരം അക്ഷരം *usagestring = ""
 	"Usage: openrc [options] [<runlevel>]";
 
 #define INITSH                  RC_LIBEXECDIR "/sh/init.sh"
@@ -73,54 +73,54 @@ const char *usagestring = ""
 
 #define DEVBOOT			"/dev/.rcboot"
 
-const char *applet = NULL;
-static RC_STRINGLIST *main_hotplugged_services;
-static RC_STRINGLIST *main_stop_services;
-static RC_STRINGLIST *main_start_services;
-static RC_STRINGLIST *main_types_nw;
-static RC_STRINGLIST *main_types_nwua;
-static RC_DEPTREE *main_deptree;
-static char *runlevel;
+സ്ഥിരം അക്ഷരം *applet = ശൂന്യ;
+സ്ഥിതം RC_STRINGLIST *main_hotplugged_services;
+സ്ഥിതം RC_STRINGLIST *main_stop_services;
+സ്ഥിതം RC_STRINGLIST *main_start_services;
+സ്ഥിതം RC_STRINGLIST *main_types_nw;
+സ്ഥിതം RC_STRINGLIST *main_types_nwua;
+സ്ഥിതം RC_DEPTREE *main_deptree;
+സ്ഥിതം അക്ഷരം *runlevel;
 
-struct termios *termios_orig = NULL;
+ഘടന termios *termios_orig = ശൂന്യ;
 
 RC_PIDLIST service_pids;
 RC_PIDLIST free_these_pids;
 
-static void
-clean_failed(void)
+സ്ഥിതം ശൂന്യം
+clean_failed(ശൂന്യം)
 {
 	DIR *dp;
-	struct dirent *d;
+	ഘടന dirent *d;
 
 	/* Clean the failed services state dir now */
-	if (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "failed")))
-		return;
+	എങ്കിൽ (!(dp = do_opendirat(rc_dirfd(RC_DIR_SVCDIR), "failed")))
+		തിരികെ;
 
-	while ((d = readdir(dp))) {
-		if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
-			continue;
+	ആകുമ്പോൾ ((d = readdir(dp))) {
+		എങ്കിൽ (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0)
+			തുടരുക;
 
-		if (unlinkat(dirfd(dp), d->d_name, 0) == -1)
+		എങ്കിൽ (unlinkat(dirfd(dp), d->d_name, 0) == -1)
 			eerror("%s: unlink '%s/failed/%s': %s", applet, rc_svcdir(), d->d_name, strerror(errno));
 	}
 	closedir(dp);
 }
 
-static void
-cleanup(void)
+സ്ഥിതം ശൂന്യം
+cleanup(ശൂന്യം)
 {
-	int svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
+	പൂർണ്ണസംഖ്യ svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
 	RC_PID *p, *tmp;
 
-	if (!rc_in_logger && !rc_in_plugin &&
+	എങ്കിൽ (!rc_in_logger && !rc_in_plugin &&
 	    applet && (strcmp(applet, "rc") == 0 || strcmp(applet, "openrc") == 0))
 	{
 		rc_plugin_unload();
 
-		if (termios_orig) {
+		എങ്കിൽ (termios_orig) {
 			tcsetattr(STDIN_FILENO, TCSANOW, termios_orig);
-			free(termios_orig);
+			സ്വതന്ത്രം(termios_orig);
 		}
 
 		/* Clean runlevel start, stop markers */
@@ -133,11 +133,11 @@ cleanup(void)
 
 	LIST_FOREACH_SAFE(p, &service_pids, entries, tmp) {
 		LIST_REMOVE(p, entries);
-		free(p);
+		സ്വതന്ത്രം(p);
 	}
 	LIST_FOREACH_SAFE(p, &free_these_pids, entries, tmp) {
 		LIST_REMOVE(p, entries);
-		free(p);
+		സ്വതന്ത്രം(p);
 	}
 
 	rc_stringlist_free(main_hotplugged_services);
@@ -146,210 +146,210 @@ cleanup(void)
 	rc_stringlist_free(main_types_nw);
 	rc_stringlist_free(main_types_nwua);
 	rc_deptree_free(main_deptree);
-	free(runlevel);
+	സ്വതന്ത്രം(runlevel);
 }
 
-static char
-read_key(bool block)
+സ്ഥിതം അക്ഷരം
+read_താക്കോൽ(bool block)
 {
-	struct termios termios;
-	char c = 0;
-	int fd = STDIN_FILENO;
+	ഘടന termios termios;
+	അക്ഷരം c = 0;
+	പൂർണ്ണസംഖ്യ fd = STDIN_FILENO;
 
-	if (!isatty(fd))
-		return false;
+	എങ്കിൽ (!isatty(fd))
+		തിരികെ false;
 
 	/* Now save our terminal settings. We need to restore them at exit as
 	   we will be changing it for non-blocking reads for Interactive */
-	if (!termios_orig) {
-		termios_orig = xmalloc(sizeof(*termios_orig));
+	എങ്കിൽ (!termios_orig) {
+		termios_orig = xmalloc(വലുപ്പം(*termios_orig));
 		tcgetattr(fd, termios_orig);
 	}
 
 	tcgetattr(fd, &termios);
 	termios.c_lflag &= ~(ICANON | ECHO);
-	if (block)
+	എങ്കിൽ (block)
 		termios.c_cc[VMIN] = 1;
-	else {
+	അല്ലെങ്കിൽ {
 		termios.c_cc[VMIN] = 0;
 		termios.c_cc[VTIME] = 0;
 	}
 	tcsetattr(fd, TCSANOW, &termios);
-	if (read(fd, &c, 1) == -1)
+	എങ്കിൽ (പഠ(fd, &c, 1) == -1)
 		eerror("read: %s", strerror(errno));
 	tcsetattr(fd, TCSANOW, termios_orig);
-	return c;
+	തിരികെ c;
 }
 
-static bool
-want_interactive(void)
+സ്ഥിതം bool
+want_interactive(ശൂന്യം)
 {
-	char c;
-	static bool gotinteractive;
-	static bool interactive;
+	അക്ഷരം c;
+	സ്ഥിതം bool gotinteractive;
+	സ്ഥിതം bool interactive;
 
-	if (rc_yesno(getenv("EINFO_QUIET")))
-		return false;
-	if (!gotinteractive) {
+	എങ്കിൽ (rc_yesno(getenv("EINFO_QUIET")))
+		തിരികെ false;
+	എങ്കിൽ (!gotinteractive) {
 		gotinteractive = true;
 		interactive = rc_conf_yesno("rc_interactive");
 	}
-	if (!interactive)
-		return false;
-	c = read_key(false);
-	return (c == 'I' || c == 'i') ? true : false;
+	എങ്കിൽ (!interactive)
+		തിരികെ false;
+	c = read_താക്കോൽ(false);
+	തിരികെ (c == 'I' || c == 'i') ? true : false;
 }
 
-static void
-mark_interactive(void)
+സ്ഥിതം ശൂന്യം
+mark_interactive(ശൂന്യം)
 {
 	FILE *fp;
 
-	if ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "interactive", O_WRONLY | O_CREAT | O_TRUNC)))
+	എങ്കിൽ ((fp = do_fopenat(rc_dirfd(RC_DIR_SVCDIR), "interactive", O_WRONLY | O_CREAT | O_TRUNC)))
 		fclose(fp);
 }
 
-static void
-run_program(const char *prog)
+സ്ഥിതം ശൂന്യം
+run_program(സ്ഥിരം അക്ഷരം *prog)
 {
-	struct sigaction sa;
+	ഘടന sigaction sa;
 	sigset_t full;
 	sigset_t old;
 	pid_t pid;
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, വലുപ്പം(sa));
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
 	pid = fork();
 
-	if (pid == -1) {
+	എങ്കിൽ (pid == -1) {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_START_OUT, runlevel);
 		eerrorx("%s: fork: %s", applet, strerror(errno));
 	}
-	if (pid == 0) {
+	എങ്കിൽ (pid == 0) {
 		/* Restore default handlers */
-		sigaction(SIGCHLD, &sa, NULL);
-		sigaction(SIGHUP, &sa, NULL);
-		sigaction(SIGINT, &sa, NULL);
-		sigaction(SIGQUIT, &sa, NULL);
-		sigaction(SIGTERM, &sa, NULL);
-		sigaction(SIGUSR1, &sa, NULL);
-		sigaction(SIGWINCH, &sa, NULL);
+		sigaction(SIGCHLD, &sa, ശൂന്യ);
+		sigaction(SIGHUP, &sa, ശൂന്യ);
+		sigaction(SIGINT, &sa, ശൂന്യ);
+		sigaction(SIGQUIT, &sa, ശൂന്യ);
+		sigaction(SIGTERM, &sa, ശൂന്യ);
+		sigaction(SIGUSR1, &sa, ശൂന്യ);
+		sigaction(SIGWINCH, &sa, ശൂന്യ);
 
 		/* Unmask signals */
-		sigprocmask(SIG_SETMASK, &old, NULL);
+		sigprocmask(SIG_SETMASK, &old, ശൂന്യ);
 
-		if (termios_orig)
+		എങ്കിൽ (termios_orig)
 			tcsetattr(STDIN_FILENO, TCSANOW, termios_orig);
 
-		execl(prog, prog, (char *)NULL);
+		execl(prog, prog, (അക്ഷരം *)ശൂന്യ);
 		eerror("%s: unable to exec `%s': %s", applet, prog,
 		    strerror(errno));
 		_exit(EXIT_FAILURE);
 	}
 
 	/* Unmask signals and wait for child */
-	sigprocmask(SIG_SETMASK, &old, NULL);
-	if (rc_waitpid(pid) == -1) {
+	sigprocmask(SIG_SETMASK, &old, ശൂന്യ);
+	എങ്കിൽ (rc_waitpid(pid) == -1) {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_START_OUT, runlevel);
 		eerrorx("%s: failed to exec `%s'", applet, prog);
 	}
 }
 
-static void
-open_shell(void)
+സ്ഥിതം ശൂന്യം
+open_shell(ശൂന്യം)
 {
-	const char *shell;
-	struct passwd *pw;
+	സ്ഥിരം അക്ഷരം *shell;
+	ഘടന passwd *pw;
 
 #ifdef __linux__
-	const char *sys = rc_sys();
+	സ്ഥിരം അക്ഷരം *sys = rc_sys();
 
 	/* VSERVER systems cannot really drop to shells */
-	if (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
+	എങ്കിൽ (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
 	{
-		execlp("halt", "halt", "-f", (char *) NULL);
+		execlp("halt", "halt", "-f", (അക്ഷരം *) ശൂന്യ);
 		eerrorx("%s: unable to exec `halt -f': %s",
 		    applet, strerror(errno));
 	}
 #endif
 
-	shell = rc_conf_value("rc_shell");
+	shell = rc_conf_മൂല്യം("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
-	if (shell == NULL) {
+	എങ്കിൽ (shell == ശൂന്യ) {
 		shell = getenv("SHELL");
-		if (shell == NULL) {
+		എങ്കിൽ (shell == ശൂന്യ) {
 			pw = getpwuid(getuid());
-			if (pw)
+			എങ്കിൽ (pw)
 				shell = pw->pw_shell;
-			if (shell == NULL)
+			എങ്കിൽ (shell == ശൂന്യ)
 				shell = "/bin/sh";
 		}
 	}
 	run_program(shell);
 }
 
-static bool
-set_krunlevel(const char *level)
+സ്ഥിതം bool
+set_krunlevel(സ്ഥിരം അക്ഷരം *level)
 {
 	FILE *fp;
 
-	if (rc_is_user())
-		return true;
+	എങ്കിൽ (rc_is_user())
+		തിരികെ true;
 
-	if (!level ||
+	എങ്കിൽ (!level ||
 	    strcmp(level, getenv ("RC_BOOTLEVEL")) == 0 ||
 	    strcmp(level, RC_LEVEL_SINGLE) == 0 ||
 	    strcmp(level, RC_LEVEL_SYSINIT) == 0)
 	{
-		if (access(RC_KRUNLEVEL, F_OK) == 0 && unlink(RC_KRUNLEVEL) != 0)
+		എങ്കിൽ (access(RC_KRUNLEVEL, F_OK) == 0 && unlink(RC_KRUNLEVEL) != 0)
 			eerror("unlink `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return false;
+		തിരികെ false;
 	}
 
-	if (!(fp = fopen(RC_KRUNLEVEL, "w"))) {
+	എങ്കിൽ (!(fp = fopen(RC_KRUNLEVEL, "w"))) {
 		eerror("fopen `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return false;
+		തിരികെ false;
 	}
 
 	fprintf(fp, "%s", level);
 	fclose(fp);
-	return true;
+	തിരികെ true;
 }
 
-static char *get_krunlevel(void)
+സ്ഥിതം അക്ഷരം *get_krunlevel(ശൂന്യം)
 {
-	char *buffer = NULL;
+	അക്ഷരം *buffer = ശൂന്യ;
 	FILE *fp;
 	size_t i = 0;
 
-	if (rc_is_user())
-		return NULL;
+	എങ്കിൽ (rc_is_user())
+		തിരികെ ശൂന്യ;
 
-	if (access(RC_KRUNLEVEL, F_OK) != 0)
-		return NULL;
-	if (!(fp = fopen(RC_KRUNLEVEL, "r"))) {
+	എങ്കിൽ (access(RC_KRUNLEVEL, F_OK) != 0)
+		തിരികെ ശൂന്യ;
+	എങ്കിൽ (!(fp = fopen(RC_KRUNLEVEL, "r"))) {
 		eerror("fopen `%s': %s", RC_KRUNLEVEL, strerror(errno));
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 
-	if (xgetline(&buffer, &i, fp) == -1) {
-		free(buffer);
-		buffer = NULL;
+	എങ്കിൽ (xgetline(&buffer, &i, fp) == -1) {
+		സ്വതന്ത്രം(buffer);
+		buffer = ശൂന്യ;
 	}
 
 	fclose(fp);
-	return buffer;
+	തിരികെ buffer;
 }
 
-static void
+സ്ഥിതം ശൂന്യം
 add_pid(pid_t pid)
 {
 	sigset_t sset, old;
-	RC_PID *p = xmalloc(sizeof(*p));
+	RC_PID *p = xmalloc(വലുപ്പം(*p));
 	p->pid = pid;
 
 	/* this list will be accessed inside the SIGCHLD signal handler.
@@ -359,11 +359,11 @@ add_pid(pid_t pid)
 	sigemptyset(&sset);
 	sigaddset(&sset, SIGCHLD);
 	sigprocmask(SIG_SETMASK, &sset, &old);
-	LIST_INSERT_HEAD(&service_pids, p, entries);
-	sigprocmask(SIG_SETMASK, &old, NULL);
+	LIST_തിരുകുക_HEAD(&service_pids, p, entries);
+	sigprocmask(SIG_SETMASK, &old, ശൂന്യ);
 }
 
-static void
+സ്ഥിതം ശൂന്യം
 remove_pid(pid_t pid, bool inside_signal)
 {
 	sigset_t sset, old;
@@ -374,99 +374,99 @@ remove_pid(pid_t pid, bool inside_signal)
 	sigaddset(&sset, SIGCHLD);
 	sigprocmask(SIG_SETMASK, &sset, &old);
 	LIST_FOREACH(p, &service_pids, entries) {
-		if (p->pid == pid) {
+		എങ്കിൽ (p->pid == pid) {
 			LIST_REMOVE(p, entries);
-			LIST_INSERT_HEAD(&free_these_pids, p, entries);
-			break;
+			LIST_തിരുകുക_HEAD(&free_these_pids, p, entries);
+			നിർത്തുക;
 		}
 	}
 	/* only call free if we're not inside a signal handler */
-	if (!inside_signal) {
+	എങ്കിൽ (!inside_signal) {
 		LIST_FOREACH_SAFE(p, &free_these_pids, entries, tmp) {
 			LIST_REMOVE(p, entries);
-			free(p);
+			സ്വതന്ത്രം(p);
 		}
 	}
-	sigprocmask(SIG_SETMASK, &old, NULL);
+	sigprocmask(SIG_SETMASK, &old, ശൂന്യ);
 }
 
-static void
-wait_for_services(void)
+സ്ഥിതം ശൂന്യം
+wait_for_services(ശൂന്യം)
 {
-	for (;;) {
-		while (waitpid(0, 0, 0) != -1)
+	വേണ്ടി (;;) {
+		ആകുമ്പോൾ (waitpid(0, 0, 0) != -1)
 			;
-		if (errno != EINTR)
-			break;
+		എങ്കിൽ (errno != EINTR)
+			നിർത്തുക;
 	}
 }
 
-static void
-handle_signal(int sig)
+സ്ഥിതം ശൂന്യം
+handle_signal(പൂർണ്ണസംഖ്യ sig)
 {
-	int serrno = errno;
-	const char *signame = NULL;
+	പൂർണ്ണസംഖ്യ serrno = errno;
+	സ്ഥിരം അക്ഷരം *signame = ശൂന്യ;
 	pid_t pid;
 	RC_PID *pi;
-	int status = 0;
-	struct winsize ws;
+	പൂർണ്ണസംഖ്യ status = 0;
+	ഘടന winsize ws;
 	sigset_t sset;
 
-	switch (sig) {
-	case SIGCHLD:
-		do {
+	തിരഞ്ഞെടുപ്പ് (sig) {
+	അവസ്ഥ SIGCHLD:
+		ചെയ്യുക {
 			pid = waitpid(-1, &status, WNOHANG);
-			if (pid < 0) {
-				if (errno != ECHILD)
+			എങ്കിൽ (pid < 0) {
+				എങ്കിൽ (errno != ECHILD)
 					eerror("waitpid: %s", strerror(errno));
-				return;
+				തിരികെ;
 			}
-		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+		} ആകുമ്പോൾ (!WIFEXITED(status) && !WIFSIGNALED(status));
 
 		/* Remove that pid from our list */
-		if (pid > 0)
+		എങ്കിൽ (pid > 0)
 			remove_pid(pid, true);
-		break;
+		നിർത്തുക;
 
-	case SIGWINCH:
-		if (rc_logger_tty >= 0) {
+	അവസ്ഥ SIGWINCH:
+		എങ്കിൽ (rc_logger_tty >= 0) {
 			ioctl(STDIN_FILENO, TIOCGWINSZ, &ws);
 			ioctl(rc_logger_tty, TIOCSWINSZ, &ws);
 		}
-		break;
+		നിർത്തുക;
 
-	case SIGINT:
-		if (!signame)
+	അവസ്ഥ SIGINT:
+		എങ്കിൽ (!signame)
 			signame = "SIGINT";
 		/* FALLTHROUGH */
-	case SIGTERM:
-		if (!signame)
+	അവസ്ഥ SIGTERM:
+		എങ്കിൽ (!signame)
 			signame = "SIGTERM";
 		/* FALLTHROUGH */
-	case SIGQUIT:
-		if (!signame)
+	അവസ്ഥ SIGQUIT:
+		എങ്കിൽ (!signame)
 			signame = "SIGQUIT";
 		eerrorx("%s: caught %s, aborting", applet, signame);
 		/* NOTREACHED */
-	case SIGUSR1:
+	അവസ്ഥ SIGUSR1:
 		eerror("rc: Aborting!");
 
 		/* Block child signals */
 		sigemptyset(&sset);
 		sigaddset(&sset, SIGCHLD);
-		sigprocmask(SIG_BLOCK, &sset, NULL);
+		sigprocmask(SIG_BLOCK, &sset, ശൂന്യ);
 
 		/* Kill any running services we have started */
 		LIST_FOREACH(pi, &service_pids, entries)
 		    kill(pi->pid, SIGTERM);
 
 		/* Notify plugins we are aborting */
-		rc_plugin_run(RC_HOOK_ABORT, NULL);
+		rc_plugin_run(RC_HOOK_ABORT, ശൂന്യ);
 
 		exit(EXIT_FAILURE);
 		/* NOTREACHED */
 
-	default:
+	സ്ഥിരസ്ഥിതി:
 		eerror("%s: caught unknown signal %d", applet, sig);
 	}
 
@@ -474,26 +474,26 @@ handle_signal(int sig)
 	errno = serrno;
 }
 
-static void
-do_sysinit(void)
+സ്ഥിതം ശൂന്യം
+do_sysinit(ശൂന്യം)
 {
-	struct utsname uts;
-	const char *sys;
+	ഘടന utsname uts;
+	സ്ഥിരം അക്ഷരം *sys;
 
 	/* exec init-early.sh if it exists
 	 * This should just setup the console to use the correct
 	 * font. Maybe it should setup the keyboard too? */
-	if (access(INITEARLYSH, F_OK) == 0)
+	എങ്കിൽ (access(INITEARLYSH, F_OK) == 0)
 		run_program(INITEARLYSH);
 
 	uname(&uts);
-	if (!rc_yesno(getenv("EINFO_QUIET"))) {
+	എങ്കിൽ (!rc_yesno(getenv("EINFO_QUIET"))) {
 		printf("\n   %sOpenRC %s" VERSION "%s is starting up %s",
 		    ecolor(ECOLOR_GOOD), ecolor(ECOLOR_HILITE),
 		    ecolor(ECOLOR_NORMAL), ecolor(ECOLOR_BRACKET));
 #ifdef BRANDING
 		printf(BRANDING " (%s)", uts.machine);
-#else
+#അല്ലെങ്കിൽ
 		printf("%s %s (%s)",
 		    uts.sysname,
 		    uts.release,
@@ -501,12 +501,12 @@ do_sysinit(void)
 #endif
 	}
 
-	if ((sys = rc_sys()))
+	എങ്കിൽ ((sys = rc_sys()))
 		printf(" [%s]", sys);
 
 	printf("%s\n\n", ecolor(ECOLOR_NORMAL));
 
-	if (!rc_yesno(getenv ("EINFO_QUIET")) &&
+	എങ്കിൽ (!rc_yesno(getenv ("EINFO_QUIET")) &&
 	    rc_conf_yesno("rc_interactive"))
 		printf("Press %sI%s to enter interactive boot mode\n\n",
 		    ecolor(ECOLOR_GOOD), ecolor(ECOLOR_NORMAL));
@@ -516,41 +516,41 @@ do_sysinit(void)
 
 	/* init may have mounted /proc so we can now detect or real
 	 * sys */
-	if ((sys = rc_sys()))
+	എങ്കിൽ ((sys = rc_sys()))
 		setenv("RC_SYS", sys, 1);
-	if ((main_deptree = _rc_deptree_load(false, NULL)) == NULL)
+	എങ്കിൽ ((main_deptree = _rc_deptree_load(false, ശൂന്യ)) == ശൂന്യ)
 		eerrorx("failed to load deptree");
 }
 
-static bool
-runlevel_config(const char *service, const char *level)
+സ്ഥിതം bool
+runlevel_config(സ്ഥിരം അക്ഷരം *service, സ്ഥിരം അക്ഷരം *level)
 {
-	char *init = rc_service_resolve(service);
-	char *conf, *dir;
+	അക്ഷരം *init = rc_service_resolve(service);
+	അക്ഷരം *conf, *dir;
 	bool retval;
 
 	dir = dirname(dirname(init));
 	xasprintf(&conf, "%s/conf.d/%s.%s", dir, service, level);
 	retval = access(conf, F_OK) == 0;
-	free(conf);
-	free(init);
-	return retval;
+	സ്വതന്ത്രം(conf);
+	സ്വതന്ത്രം(init);
+	തിരികെ retval;
 }
 
-static void
+സ്ഥിതം ശൂന്യം
 do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
-				 const RC_STRINGLIST *stop_services, const RC_DEPTREE *deptree,
-				 const char *newlevel, bool parallel, bool going_down)
+				 സ്ഥിരം RC_STRINGLIST *stop_services, സ്ഥിരം RC_DEPTREE *deptree,
+				 സ്ഥിരം അക്ഷരം *newlevel, bool parallel, bool going_down)
 {
 	pid_t pid;
 	RC_STRING *service, *svc1, *svc2;
 	RC_STRINGLIST *deporder, *tmplist, *kwords;
-	RC_STRINGLIST *types_nw_save = NULL;
+	RC_STRINGLIST *types_nw_save = ശൂന്യ;
 	RC_SERVICE state;
 	RC_STRINGLIST *nostop;
 	bool crashed, nstop;
 
-	if (!types_nw) {
+	എങ്കിൽ (!types_nw) {
 		types_nw = types_nw_save = rc_stringlist_new();
 		rc_stringlist_add(types_nw, "needsme");
 		rc_stringlist_add(types_nw, "wantsme");
@@ -558,97 +558,97 @@ do_stop_services(RC_STRINGLIST *types_nw, RC_STRINGLIST *start_services,
 
 	crashed = rc_conf_yesno("rc_crashed_stop");
 
-	nostop = rc_stringlist_split(rc_conf_value("rc_nostop"), " ");
+	nostop = rc_stringlist_split(rc_conf_മൂല്യം("rc_nostop"), " ");
 	TAILQ_FOREACH_REVERSE(service, stop_services, rc_stringlist, entries)
 	{
-		state = rc_service_state(service->value);
-		if (state & RC_SERVICE_STOPPED || state & RC_SERVICE_FAILED)
-			continue;
+		state = rc_service_state(service->മൂല്യം);
+		എങ്കിൽ (state & RC_SERVICE_STOPPED || state & RC_SERVICE_FAILED)
+			തുടരുക;
 
 		/* Sometimes we don't ever want to stop a service. */
-		if (rc_stringlist_find(nostop, service->value)) {
-			rc_service_mark(service->value, RC_SERVICE_FAILED);
-			continue;
+		എങ്കിൽ (rc_stringlist_find(nostop, service->മൂല്യം)) {
+			rc_service_mark(service->മൂല്യം, RC_SERVICE_FAILED);
+			തുടരുക;
 		}
-		kwords = rc_deptree_depend(deptree, service->value, "keyword");
-		if (rc_stringlist_find(kwords, "-stop") ||
+		kwords = rc_deptree_depend(deptree, service->മൂല്യം, "keyword");
+		എങ്കിൽ (rc_stringlist_find(kwords, "-stop") ||
 		    rc_stringlist_find(kwords, "nostop") ||
 		    (going_down &&
 			(rc_stringlist_find(kwords, "-shutdown") ||
 			    rc_stringlist_find(kwords, "noshutdown"))))
 			nstop = true;
-		else
+		അല്ലെങ്കിൽ
 			nstop = false;
 		rc_stringlist_free(kwords);
-		if (nstop) {
-			rc_service_mark(service->value, RC_SERVICE_FAILED);
-			continue;
+		എങ്കിൽ (nstop) {
+			rc_service_mark(service->മൂല്യം, RC_SERVICE_FAILED);
+			തുടരുക;
 		}
 
 		/* If the service has crashed, skip further checks and just stop
 		   it */
-		if (crashed &&
-		    rc_service_daemons_crashed(service->value))
-			goto stop;
+		എങ്കിൽ (crashed &&
+		    rc_service_daemons_crashed(service->മൂല്യം))
+			പോകുക stop;
 
 		/* If we're in the start list then don't bother stopping us */
-		svc1 = rc_stringlist_find(start_services, service->value);
-		if (svc1) {
-			if (newlevel && strcmp(runlevel, newlevel) != 0) {
+		svc1 = rc_stringlist_find(start_services, service->മൂല്യം);
+		എങ്കിൽ (svc1) {
+			എങ്കിൽ (newlevel && strcmp(runlevel, newlevel) != 0) {
 				/* So we're in the start list. But we should
 				 * be stopped if we have a runlevel
 				 * configuration file for either the current
 				 * or next so we use the correct one. */
-				if (!runlevel_config(service->value,runlevel) &&
-				    !runlevel_config(service->value,newlevel))
-					continue;
+				എങ്കിൽ (!runlevel_config(service->മൂല്യം,runlevel) &&
+				    !runlevel_config(service->മൂല്യം,newlevel))
+					തുടരുക;
 			}
-			else
-				continue;
+			അല്ലെങ്കിൽ
+				തുടരുക;
 		}
 
 		/* We got this far. Last check is to see if any service
 		 * that going to be started depends on us */
-		if (!svc1) {
+		എങ്കിൽ (!svc1) {
 			tmplist = rc_stringlist_new();
-			rc_stringlist_add(tmplist, service->value);
+			rc_stringlist_add(tmplist, service->മൂല്യം);
 			deporder = rc_deptree_depends(deptree, types_nw,
 			    tmplist, newlevel ? newlevel : runlevel,
 			    RC_DEP_STRICT | RC_DEP_TRACE);
 			rc_stringlist_free(tmplist);
-			svc2 = NULL;
+			svc2 = ശൂന്യ;
 			TAILQ_FOREACH(svc1, deporder, entries) {
 				svc2 = rc_stringlist_find(start_services,
-				    svc1->value);
-				if (svc2)
-					break;
+				    svc1->മൂല്യം);
+				എങ്കിൽ (svc2)
+					നിർത്തുക;
 			}
 			rc_stringlist_free(deporder);
 
-			if (svc2)
-				continue;
+			എങ്കിൽ (svc2)
+				തുടരുക;
 		}
 
 stop:
 		/* After all that we can finally stop the blighter! */
-		pid = service_stop(service->value);
-		if (pid > 0) {
+		pid = service_stop(service->മൂല്യം);
+		എങ്കിൽ (pid > 0) {
 			add_pid(pid);
-			if (!parallel) {
+			എങ്കിൽ (!parallel) {
 				rc_waitpid(pid);
 				remove_pid(pid, false);
 			}
 		}
 	}
 
-	if (types_nw_save)
+	എങ്കിൽ (types_nw_save)
 		rc_stringlist_free(types_nw_save);
 
 	rc_stringlist_free(nostop);
 }
 
-static void
-do_start_services(const RC_STRINGLIST *start_services, bool parallel)
+സ്ഥിതം ശൂന്യം
+do_start_services(സ്ഥിരം RC_STRINGLIST *start_services, bool parallel)
 {
 	RC_STRING *service;
 	pid_t pid;
@@ -656,54 +656,54 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 	RC_SERVICE state;
 	bool crashed = false;
 
-	if (!rc_yesno(getenv("EINFO_QUIET")))
+	എങ്കിൽ (!rc_yesno(getenv("EINFO_QUIET")))
 		interactive = faccessat(rc_dirfd(RC_DIR_SVCDIR), "interactive", F_OK, 0) == 0;
 	errno = 0;
 	crashed = rc_conf_yesno("rc_crashed_start");
-	if (errno == ENOENT)
+	എങ്കിൽ (errno == ENOENT)
 		crashed = true;
 
 	TAILQ_FOREACH(service, start_services, entries) {
-		state = rc_service_state(service->value);
-		if (state & RC_SERVICE_FAILED)
-			continue;
-		if (!(state & RC_SERVICE_STOPPED)) {
-			if (crashed &&
-			    rc_service_daemons_crashed(service->value))
-				rc_service_mark(service->value,
+		state = rc_service_state(service->മൂല്യം);
+		എങ്കിൽ (state & RC_SERVICE_FAILED)
+			തുടരുക;
+		എങ്കിൽ (!(state & RC_SERVICE_STOPPED)) {
+			എങ്കിൽ (crashed &&
+			    rc_service_daemons_crashed(service->മൂല്യം))
+				rc_service_mark(service->മൂല്യം,
 				    RC_SERVICE_STOPPED);
-			else
-			    continue;
+			അല്ലെങ്കിൽ
+			    തുടരുക;
 		}
-		if (!interactive)
+		എങ്കിൽ (!interactive)
 			interactive = want_interactive();
 
-		if (interactive) {
+		എങ്കിൽ (interactive) {
 	interactive_retry:
 			printf("\n");
 			einfo("About to start the service %s",
-			    service->value);
+			    service->മൂല്യം);
 			eindent();
 			einfo("1) Start the service\t\t2) Skip the service");
 			einfo("3) Continue boot process\t\t4) Exit to shell");
 			eoutdent();
 	interactive_option:
-			switch (read_key(true)) {
-			case '1': break;
-			case '2': continue;
-			case '3': interactive = false; break;
-			case '4': open_shell(); goto interactive_retry;
-			default: goto interactive_option;
+			തിരഞ്ഞെടുപ്പ് (read_താക്കോൽ(true)) {
+			അവസ്ഥ '1': നിർത്തുക;
+			അവസ്ഥ '2': തുടരുക;
+			അവസ്ഥ '3': interactive = false; നിർത്തുക;
+			അവസ്ഥ '4': open_shell(); പോകുക interactive_retry;
+			സ്ഥിരസ്ഥിതി: പോകുക interactive_option;
 			}
 		}
 
-		pid = service_start(service->value);
-		if (pid == -1)
-			break;
+		pid = service_start(service->മൂല്യം);
+		എങ്കിൽ (pid == -1)
+			നിർത്തുക;
 		/* Remember the pid if we're running in parallel */
-		if (pid > 0) {
+		എങ്കിൽ (pid > 0) {
 			add_pid(pid);
-			if (!parallel) {
+			എങ്കിൽ (!parallel) {
 				rc_waitpid(pid);
 				remove_pid(pid, false);
 			}
@@ -711,33 +711,33 @@ do_start_services(const RC_STRINGLIST *start_services, bool parallel)
 	}
 
 	/* Store our interactive status for boot */
-	if (interactive &&
+	എങ്കിൽ (interactive &&
 			(strcmp(runlevel, RC_LEVEL_SYSINIT) == 0 ||
 			 strcmp(runlevel, getenv("RC_BOOTLEVEL")) == 0))
 		mark_interactive();
-	else
+	അല്ലെങ്കിൽ
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "interactive", 0);
 }
 
 #ifdef RC_DEBUG
-RC_NORETURN static void
-handle_bad_signal(int sig)
+RC_NORETURN സ്ഥിതം ശൂന്യം
+handle_bad_signal(പൂർണ്ണസംഖ്യ sig)
 {
-	char pid[10];
-	int status;
+	അക്ഷരം pid[10];
+	പൂർണ്ണസംഖ്യ status;
 	pid_t crashed_pid = getpid();
 
-	switch (fork()) {
-	case -1:
+	തിരഞ്ഞെടുപ്പ് (fork()) {
+	അവസ്ഥ -1:
 		_exit(sig);
 		/* NOTREACHED */
-	case 0:
+	അവസ്ഥ 0:
 		sprintf(pid, "%i", crashed_pid);
 		printf("\nAuto launching gdb!\n\n");
 		_exit(execlp("gdb", "gdb", "--quiet", "--pid", pid,
-			"-ex", "bt full", NULL));
+			"-ex", "bt full", ശൂന്യ));
 		/* NOTREACHED */
-	default:
+	സ്ഥിരസ്ഥിതി:
 		wait(&status);
 	}
 	_exit(1);
@@ -745,27 +745,27 @@ handle_bad_signal(int sig)
 }
 #endif
 
-int main(int argc, char **argv)
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv)
 {
-	const char *bootlevel = NULL;
-	char *newlevel = NULL;
-	const char *systype = NULL;
-	RC_STRINGLIST *deporder = NULL;
+	സ്ഥിരം അക്ഷരം *bootlevel = ശൂന്യ;
+	അക്ഷരം *newlevel = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *systype = ശൂന്യ;
+	RC_STRINGLIST *deporder = ശൂന്യ;
 	RC_STRINGLIST *tmplist;
 	RC_STRING *service;
 	bool going_down = false;
-	int depoptions = RC_DEP_STRICT | RC_DEP_TRACE;
-	char *krunlevel = NULL;
-	const char *workingdir = "/";
-	char *pidstr = NULL;
-	int opt;
+	പൂർണ്ണസംഖ്യ depoptions = RC_DEP_STRICT | RC_DEP_TRACE;
+	അക്ഷരം *krunlevel = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *workingdir = "/";
+	അക്ഷരം *pidstr = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ opt;
 	bool parallel;
-	int regen = 0;
+	പൂർണ്ണസംഖ്യ regen = 0;
 	bool nostop = false;
 #ifdef __linux__
-	char *proc;
-	char *p;
-	char *token;
+	അക്ഷരം *proc;
+	അക്ഷരം *p;
+	അക്ഷരം *token;
 #endif
 
 #ifdef RC_DEBUG
@@ -777,44 +777,44 @@ int main(int argc, char **argv)
 	applet = basename_c(argv[0]);
 	LIST_INIT(&service_pids);
 	LIST_INIT(&free_these_pids);
-	if (!applet)
+	എങ്കിൽ (!applet)
 		eerrorx("arguments required");
 
 	argc--;
 	argv++;
 
 	/* complain about old configuration settings if they exist */
-	if (access(RC_CONF_OLD, F_OK) == 0) {
+	എങ്കിൽ (access(RC_CONF_OLD, F_OK) == 0) {
 		ewarn("%s still exists on your system and should be removed.", RC_CONF_OLD);
 		ewarn("Please migrate to the appropriate settings in %s", RC_CONF);
 	}
 
 	argc++;
 	argv--;
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ആകുമ്പോൾ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (പൂർണ്ണസംഖ്യ *) 0)) != -1)
 	{
-		switch (opt) {
-		case 'n':
+		തിരഞ്ഞെടുപ്പ് (opt) {
+		അവസ്ഥ 'n':
 			nostop = true;
-			break;
-		case 'o':
-			if (*optarg == '\0')
-				optarg = NULL;
-			if (!rc_runlevel_exists(optarg)) {
+			നിർത്തുക;
+		അവസ്ഥ 'o':
+			എങ്കിൽ (*optarg == '\0')
+				optarg = ശൂന്യ;
+			എങ്കിൽ (!rc_runlevel_exists(optarg)) {
 				eerror("runlevel `%s' does not exist", optarg);
 				exit(EXIT_FAILURE);
 			}
-			if (rc_is_user())
+			എങ്കിൽ (rc_is_user())
 				eerrorx("user services do not currently support --override");
-			if (!set_krunlevel(optarg))
+			എങ്കിൽ (!set_krunlevel(optarg))
 				exit(EXIT_FAILURE);
 			einfo("Overriding next runlevel to %s", optarg);
 			exit(EXIT_SUCCESS);
 			/* NOTREACHED */
-		case 's':
+		അവസ്ഥ 's':
 			newlevel = rc_service_resolve(optarg);
-			if (!newlevel)
+			എങ്കിൽ (!newlevel)
 				eerrorx("%s: service `%s' does not exist",
 				    applet, optarg);
 			argv += optind - 1;
@@ -822,9 +822,9 @@ int main(int argc, char **argv)
 			execv(*argv, argv);
 			eerrorx("%s: %s", applet, strerror(errno));
 			/* NOTREACHED */
-		case 'S':
+		അവസ്ഥ 'S':
 			systype = rc_sys();
-			if (systype)
+			എങ്കിൽ (systype)
 				printf("%s\n", systype);
 			exit(EXIT_SUCCESS);
 			/* NOTREACHED */
@@ -834,10 +834,10 @@ int main(int argc, char **argv)
 
 	/* Change dir to / to ensure all init scripts don't use stuff in pwd
 	 * For user services, change to the user's HOME instead. */
-	if (rc_is_user() && !(workingdir = getenv("HOME")))
+	എങ്കിൽ (rc_is_user() && !(workingdir = getenv("HOME")))
 		eerrorx("HOME is unset.");
 
-	if (chdir(workingdir) == -1)
+	എങ്കിൽ (chdir(workingdir) == -1)
 		eerror("chdir: %s", strerror(errno));
 
 	/* Ensure our environment is pure
@@ -849,11 +849,11 @@ int main(int argc, char **argv)
 	/* To make life easier, we only have the shutdown runlevel as
 	 * nothing really needs to know that we're rebooting.
 	 * But for those that do, you can test against RC_REBOOT. */
-	if (newlevel) {
-		if (rc_is_user() && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0)
+	എങ്കിൽ (newlevel) {
+		എങ്കിൽ (rc_is_user() && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0)
 			eerrorx("%s: the sysinit runlevel can't be used for user services.", applet);
 
-		if (strcmp(newlevel, "reboot") == 0) {
+		എങ്കിൽ (strcmp(newlevel, "reboot") == 0) {
 			newlevel = UNCONST(RC_LEVEL_SHUTDOWN);
 			setenv("RC_REBOOT", "YES", 1);
 		}
@@ -867,7 +867,7 @@ int main(int argc, char **argv)
 	/* Export our PID */
 	xasprintf(&pidstr, "%d", getpid());
 	setenv("RC_PID", pidstr, 1);
-	free(pidstr);
+	സ്വതന്ത്രം(pidstr);
 
 	/* Create a list of all services which should be started for the new or
 	* current runlevel including those in boot, sysinit and hotplugged
@@ -887,9 +887,9 @@ int main(int argc, char **argv)
 	signal_setup(SIGWINCH, handle_signal);
 
 	/* Run any special sysinit foo */
-	if (newlevel && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
+	എങ്കിൽ (newlevel && strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
 		do_sysinit();
-		free(runlevel);
+		സ്വതന്ത്രം(runlevel);
 		runlevel = default_runlevel();
 	}
 
@@ -898,50 +898,50 @@ int main(int argc, char **argv)
 	/* Now we start handling our children */
 	signal_setup(SIGCHLD, handle_signal);
 
-	if (newlevel &&
+	എങ്കിൽ (newlevel &&
 	    (strcmp(newlevel, RC_LEVEL_SHUTDOWN) == 0 ||
 		strcmp(newlevel, RC_LEVEL_SINGLE) == 0))
 	{
 		going_down = true;
-		if (access(RC_KRUNLEVEL, F_OK) != 0)
+		എങ്കിൽ (access(RC_KRUNLEVEL, F_OK) != 0)
 			set_krunlevel(runlevel);
 		rc_runlevel_set(newlevel);
 		setenv("RC_RUNLEVEL", newlevel, 1);
 		setenv("RC_GOINGDOWN", "YES", 1);
-	} else {
+	} അല്ലെങ്കിൽ {
 		/* We should not use krunlevel in sysinit or boot runlevels */
-		if (!newlevel ||
+		എങ്കിൽ (!newlevel ||
 		    (strcmp(newlevel, RC_LEVEL_SYSINIT) != 0 &&
 			strcmp(newlevel, getenv("RC_BOOTLEVEL")) != 0))
 		{
 			krunlevel = get_krunlevel();
-			if (krunlevel) {
+			എങ്കിൽ (krunlevel) {
 				newlevel = krunlevel;
-				set_krunlevel(NULL);
+				set_krunlevel(ശൂന്യ);
 			}
 		}
 
-		if (newlevel) {
-			if (strcmp(runlevel, newlevel) != 0 &&
+		എങ്കിൽ (newlevel) {
+			എങ്കിൽ (strcmp(runlevel, newlevel) != 0 &&
 			    !rc_runlevel_exists(newlevel))
 				eerrorx("%s: not a valid runlevel", newlevel);
 
 #ifdef __linux__
-			if (strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
+			എങ്കിൽ (strcmp(newlevel, RC_LEVEL_SYSINIT) == 0) {
 				/* If we requested a runlevel, save it now */
 				p = rc_proc_getent("rc_runlevel");
-				if (p == NULL)
+				എങ്കിൽ (p == ശൂന്യ)
 					p = rc_proc_getent("softlevel");
-				if (p != NULL) {
+				എങ്കിൽ (p != ശൂന്യ) {
 					set_krunlevel(p);
-					free(p);
+					സ്വതന്ത്രം(p);
 				}
 			}
 #endif
 		}
 	}
 
-	if (going_down) {
+	എങ്കിൽ (going_down) {
 #ifdef __FreeBSD__
 		/* FIXME: we shouldn't have todo this */
 		/* For some reason, wait_for_services waits for the logger
@@ -951,31 +951,31 @@ int main(int argc, char **argv)
 #endif
 
 		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_IN, newlevel);
-	} else {
+	} അല്ലെങ്കിൽ {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_IN, runlevel);
 	}
 
 	/* Check if runlevel is valid if we're changing */
-	if (newlevel && strcmp(runlevel, newlevel) != 0 && !going_down) {
-		if (!rc_runlevel_exists(newlevel)) {
+	എങ്കിൽ (newlevel && strcmp(runlevel, newlevel) != 0 && !going_down) {
+		എങ്കിൽ (!rc_runlevel_exists(newlevel)) {
 			rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
 			eerrorx("%s: is not a valid runlevel", newlevel);
 		}
 	}
 
 	/* Load our deptree */
-	if ((main_deptree = _rc_deptree_load(0, &regen)) == NULL) {
+	എങ്കിൽ ((main_deptree = _rc_deptree_load(0, &regen)) == ശൂന്യ) {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
 		eerrorx("failed to load deptree");
 	}
 
-	if (faccessat(rc_dirfd(RC_DIR_SVCDIR), "clock-skewed", F_OK, 0) == 0)
+	എങ്കിൽ (faccessat(rc_dirfd(RC_DIR_SVCDIR), "clock-skewed", F_OK, 0) == 0)
 		ewarn("WARNING: clock skew detected!");
 
 	/* Clean the failed services state dir */
 	clean_failed();
 
-	if (mkdirat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", 0755) != 0) {
+	എങ്കിൽ (mkdirat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", 0755) != 0) {
 		rc_plugin_run(RC_HOOK_RUNLEVEL_STOP_OUT, runlevel);
 		eerrorx("%s: failed to create stopping dir '%s/rc.stopping': %s", applet, rc_svcdir(), strerror(errno));
 	}
@@ -990,11 +990,11 @@ int main(int argc, char **argv)
 	main_stop_services = rc_services_in_state(RC_SERVICE_STARTED);
 	tmplist = rc_services_in_state(RC_SERVICE_INACTIVE);
 	TAILQ_CONCAT(main_stop_services, tmplist, entries);
-	free(tmplist);
+	സ്വതന്ത്രം(tmplist);
 	tmplist = rc_services_in_state(RC_SERVICE_STARTING);
 	TAILQ_CONCAT(main_stop_services, tmplist, entries);
-	free(tmplist);
-	if (main_stop_services)
+	സ്വതന്ത്രം(tmplist);
+	എങ്കിൽ (main_stop_services)
 		rc_stringlist_sort(&main_stop_services);
 
 	main_types_nwua = rc_stringlist_new();
@@ -1003,7 +1003,7 @@ int main(int argc, char **argv)
 	rc_stringlist_add(main_types_nwua, "iuse");
 	rc_stringlist_add(main_types_nwua, "iafter");
 
-	if (main_stop_services) {
+	എങ്കിൽ (main_stop_services) {
 		tmplist = rc_deptree_depends(main_deptree, main_types_nwua, main_stop_services,
 		    runlevel, depoptions | RC_DEP_STOP);
 		rc_stringlist_free(main_stop_services);
@@ -1018,29 +1018,29 @@ int main(int argc, char **argv)
 	main_hotplugged_services = rc_services_in_state(RC_SERVICE_HOTPLUGGED);
 	main_start_services = rc_services_in_runlevel_stacked(newlevel ?
 	    newlevel : runlevel);
-	if (strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SHUTDOWN) != 0 &&
+	എങ്കിൽ (strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SHUTDOWN) != 0 &&
 	    strcmp(newlevel ? newlevel : runlevel, RC_LEVEL_SYSINIT) != 0)
 	{
 		tmplist = rc_services_in_runlevel(RC_LEVEL_SYSINIT);
 		TAILQ_CONCAT(main_start_services, tmplist, entries);
-		free(tmplist);
+		സ്വതന്ത്രം(tmplist);
 		/* If we are NOT headed for the single-user runlevel... */
-		if (strcmp(newlevel ? newlevel : runlevel,
+		എങ്കിൽ (strcmp(newlevel ? newlevel : runlevel,
 			RC_LEVEL_SINGLE) != 0)
 		{
 			/* If we are NOT headed for the boot runlevel... */
-			if (strcmp(newlevel ? newlevel : runlevel,
+			എങ്കിൽ (strcmp(newlevel ? newlevel : runlevel,
 				bootlevel) != 0)
 			{
 				tmplist = rc_services_in_runlevel(bootlevel);
 				TAILQ_CONCAT(main_start_services, tmplist, entries);
-				free(tmplist);
+				സ്വതന്ത്രം(tmplist);
 			}
-			if (main_hotplugged_services) {
+			എങ്കിൽ (main_hotplugged_services) {
 				TAILQ_FOREACH(service, main_hotplugged_services,
 				    entries)
 				    rc_stringlist_addu(main_start_services,
-					service->value);
+					service->മൂല്യം);
 			}
 		}
 	}
@@ -1048,7 +1048,7 @@ int main(int argc, char **argv)
 	parallel = rc_conf_yesno("rc_parallel");
 
 	/* Now stop the services that shouldn't be running */
-	if (main_stop_services && !nostop)
+	എങ്കിൽ (main_stop_services && !nostop)
 		do_stop_services(main_types_nw, main_start_services, main_stop_services, main_deptree, newlevel, parallel, going_down);
 
 	/* Wait for our services to finish */
@@ -1061,9 +1061,9 @@ int main(int argc, char **argv)
 	unlinkat(rc_dirfd(RC_DIR_SVCDIR), "rc.stopping", AT_REMOVEDIR);
 
 	/* Store the new runlevel */
-	if (newlevel) {
+	എങ്കിൽ (newlevel) {
 		rc_runlevel_set(newlevel);
-		free(runlevel);
+		സ്വതന്ത്രം(runlevel);
 		runlevel = xstrdup(newlevel);
 		setenv("RC_RUNLEVEL", runlevel, 1);
 	}
@@ -1071,7 +1071,7 @@ int main(int argc, char **argv)
 #ifdef __linux__
 	/* We can't log beyond this point as the shutdown runlevel
 	 * will mount / readonly. */
-	if (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
+	എങ്കിൽ (strcmp(runlevel, RC_LEVEL_SHUTDOWN) == 0)
 		rc_logger_close();
 #endif
 
@@ -1080,24 +1080,24 @@ int main(int argc, char **argv)
 	rc_plugin_run(RC_HOOK_RUNLEVEL_START_IN, runlevel);
 
 	/* Re-add our hotplugged services if they stopped */
-	if (main_hotplugged_services)
+	എങ്കിൽ (main_hotplugged_services)
 		TAILQ_FOREACH(service, main_hotplugged_services, entries)
-		    rc_service_mark(service->value, RC_SERVICE_HOTPLUGGED);
+		    rc_service_mark(service->മൂല്യം, RC_SERVICE_HOTPLUGGED);
 
 #ifdef __linux__
 	/* If the "noinit" parameter was passed on the kernel command line then
 	 * mark the specified services as started so they will not be started
 	 * by us. */
 	proc = p = rc_proc_getent("noinit");
-	if (proc) {
-		while ((token = strsep(&p, ",")))
+	എങ്കിൽ (proc) {
+		ആകുമ്പോൾ ((token = strsep(&p, ",")))
 			rc_service_mark(token, RC_SERVICE_STARTED);
-		free(proc);
+		സ്വതന്ത്രം(proc);
 	}
 #endif
 
 	/* If we have a list of services to start then... */
-	if (main_start_services) {
+	എങ്കിൽ (main_start_services) {
 		/* Get a list of the chained runlevels which compose the target runlevel */
 		RC_STRINGLIST *runlevel_chain = rc_runlevel_stacks(runlevel);
 
@@ -1106,11 +1106,11 @@ int main(int argc, char **argv)
 		TAILQ_FOREACH_REVERSE(rlevel, runlevel_chain, rc_stringlist, entries)
 		{
 			/* Get a list of all the services in that runlevel */
-			RC_STRINGLIST *run_services = rc_services_in_runlevel(rlevel->value);
+			RC_STRINGLIST *run_services = rc_services_in_runlevel(rlevel->മൂല്യം);
 
 			/* Start those services. */
 			rc_stringlist_sort(&run_services);
-			deporder = rc_deptree_depends(main_deptree, main_types_nwua, run_services, rlevel->value, depoptions | RC_DEP_START);
+			deporder = rc_deptree_depends(main_deptree, main_types_nwua, run_services, rlevel->മൂല്യം, depoptions | RC_DEP_START);
 			rc_stringlist_free(run_services);
 			run_services = deporder;
 			do_start_services(run_services, parallel);
@@ -1129,10 +1129,10 @@ int main(int argc, char **argv)
 	 * mark the specified services as stopped so that our records reflect
 	 * reality.	 */
 	proc = p = rc_proc_getent("noinit");
-	if (proc) {
-		while ((token = strsep(&p, ",")))
+	എങ്കിൽ (proc) {
+		ആകുമ്പോൾ ((token = strsep(&p, ",")))
 			rc_service_mark(token, RC_SERVICE_STOPPED);
-		free(proc);
+		സ്വതന്ത്രം(proc);
 	}
 
 #endif
@@ -1143,8 +1143,8 @@ int main(int argc, char **argv)
 	 * we need to delete them so that they are regenerated again in the
 	 * default runlevel as they may depend on things that are now
 	 * available */
-	if (regen && strcmp(runlevel, bootlevel) == 0)
+	എങ്കിൽ (regen && strcmp(runlevel, bootlevel) == 0)
 		unlinkat(rc_dirfd(RC_DIR_SVCDIR), "deptree", 0);
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }

@@ -10,25 +10,25 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <signal.h>
+#അന്തര്ഭാവ <string.h>
 
-#include "einfo.h"
+#അന്തര്ഭാവ "einfo.h"
 
-int main(void)
+പൂർണ്ണസംഖ്യ പ്രധാന(ശൂന്യം)
 {
-	const char *p = getenv("RC_PID");
-	int pid;
+	സ്ഥിരം അക്ഷരം *p = getenv("RC_PID");
+	പൂർണ്ണസംഖ്യ pid;
 
-	if (p && sscanf(p, "%d", &pid) == 1) {
-		if (kill(pid, SIGUSR1) != 0)
+	എങ്കിൽ (p && sscanf(p, "%d", &pid) == 1) {
+		എങ്കിൽ (kill(pid, SIGUSR1) != 0)
 			eerrorx("rc-abort: failed to signal parent %d: %s",
 			    pid, strerror(errno));
-		return EXIT_SUCCESS;
+		തിരികെ EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	തിരികെ EXIT_FAILURE;
 }

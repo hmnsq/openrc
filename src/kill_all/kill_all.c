@@ -16,127 +16,127 @@
  */
 
 
-#include <dirent.h>
-#include <errno.h>
-#include <getopt.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdbool.h>
+#അന്തര്ഭാവ <dirent.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <getopt.h>
+#അന്തര്ഭാവ <signal.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <syslog.h>
+#അന്തര്ഭാവ <unistd.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <sys/wait.h>
+#അന്തര്ഭാവ <stdbool.h>
 
-#include "einfo.h"
-#include "rc.h"
-#include "rc_exec.h"
-#include "_usage.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "einfo.h"
+#അന്തര്ഭാവ "rc.h"
+#അന്തര്ഭാവ "rc_exec.h"
+#അന്തര്ഭാവ "_usage.h"
+#അന്തര്ഭാവ "helpers.h"
 
-const char *applet = NULL;
-const char *extraopts = "[signal number]";
-const char getoptstring[] = "do:" getoptstring_COMMON;
-const struct option longopts[] = {
-	{ "dry-run",        0, NULL, 'd' },
-	{ "omit",        1, NULL, 'o' },
+സ്ഥിരം അക്ഷരം *applet = ശൂന്യ;
+സ്ഥിരം അക്ഷരം *extraopts = "[signal number]";
+സ്ഥിരം അക്ഷരം getoptstring[] = "do:" getoptstring_COMMON;
+സ്ഥിരം ഘടന option longopts[] = {
+	{ "dry-run",        0, ശൂന്യ, 'd' },
+	{ "omit",        1, ശൂന്യ, 'o' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+സ്ഥിരം അക്ഷരം * സ്ഥിരം longopts_help[] = {
 	"print what would be done",
 	"omit this pid (can be repeated)",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+സ്ഥിരം അക്ഷരം *usagestring = ശൂന്യ;
 
-static int mount_proc(void)
+സ്ഥിതം പൂർണ്ണസംഖ്യ mount_proc(ശൂന്യം)
 {
 	pid_t rc;
-	int status;
-	const char *argv[] = { "mount", "-t", "proc", "proc", "/proc", NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	പൂർണ്ണസംഖ്യ status;
+	സ്ഥിരം അക്ഷരം *argv[] = { "mount", "-t", "proc", "proc", "/proc", ശൂന്യ };
+	ഘടന exec_result res;
+	ഘടന exec_args args = exec_init(argv);
 
-	if (access("/proc/version", F_OK) == 0)
-		return 0;
+	എങ്കിൽ (access("/proc/version", F_OK) == 0)
+		തിരികെ 0;
 
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	എങ്കിൽ (res.pid < 0) {
 		syslog(LOG_ERR, "Failed to execute mount");
-		return -1;
+		തിരികെ -1;
 	}
-	while ((rc = wait(&status)) != res.pid)
-		if (rc < 0 && errno == ECHILD)
-			break;
-	if (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	ആകുമ്പോൾ ((rc = wait(&status)) != res.pid)
+		എങ്കിൽ (rc < 0 && errno == ECHILD)
+			നിർത്തുക;
+	എങ്കിൽ (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
 		syslog(LOG_ERR, "mount returned non-zero exit status");
 
-	if (access("/proc/version", F_OK) != 0) {
+	എങ്കിൽ (access("/proc/version", F_OK) != 0) {
 		syslog(LOG_ERR, "Could not mount /proc");
-		return -1;
+		തിരികെ -1;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static bool is_user_process(pid_t pid)
+സ്ഥിതം bool is_user_process(pid_t pid)
 {
-	char *buf = NULL;
+	അക്ഷരം *buf = ശൂന്യ;
 	FILE *fp;
-	char *path = NULL;
+	അക്ഷരം *path = ശൂന്യ;
 	pid_t temp_pid;
 	size_t size;
 	bool user_process = true;
 
-	while (pid >0 && user_process) {
-		if (pid == 2) {
+	ആകുമ്പോൾ (pid >0 && user_process) {
+		എങ്കിൽ (pid == 2) {
 			user_process = false;
-			continue;
+			തുടരുക;
 		}
 		xasprintf(&path, "/proc/%d/status", pid);
 		fp = fopen(path, "r");
-		free(path);
+		സ്വതന്ത്രം(path);
 		/*
 		 * if we could not open the file, the process disappeared, which
 		 * leaves us no way to determine for sure whether it was a user
 		 * process or kernel thread, so we say it is a kernel thread to
 		 * avoid accidentally killing it.
 		 */
-		if (!fp) {
+		എങ്കിൽ (!fp) {
 			user_process = false;
-			continue;
+			തുടരുക;
 		}
 		temp_pid = -1;
-		while (!feof(fp)) {
-			buf = NULL;
-			if (xgetline(&buf, &size, fp) != -1) {
+		ആകുമ്പോൾ (!feof(fp)) {
+			buf = ശൂന്യ;
+			എങ്കിൽ (xgetline(&buf, &size, fp) != -1) {
 				sscanf(buf, "PPid: %d", &temp_pid);
-				free(buf);
-			} else {
-				free(buf);
-				break;
+				സ്വതന്ത്രം(buf);
+			} അല്ലെങ്കിൽ {
+				സ്വതന്ത്രം(buf);
+				നിർത്തുക;
 			}
 		}
 		fclose(fp);
-		if (temp_pid == -1) {
+		എങ്കിൽ (temp_pid == -1) {
 			syslog(LOG_ERR, "Unable to read pid from /proc/%d/status", pid);
 			user_process = false;
-			continue;
+			തുടരുക;
 		}
 		pid = temp_pid;
 	}
-	return user_process;
+	തിരികെ user_process;
 }
 
-static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
+സ്ഥിതം പൂർണ്ണസംഖ്യ signal_processes(പൂർണ്ണസംഖ്യ sig, RC_STRINGLIST *omits, bool dryrun)
 {
 	sigset_t signals;
 	sigset_t oldsigs;
 	DIR *dir;
-	struct dirent	*d;
-	char *buf = NULL;
+	ഘടന dirent	*d;
+	അക്ഷരം *buf = ശൂന്യ;
 	pid_t pid;
-	int sendcount = 0;
+	പൂർണ്ണസംഖ്യ sendcount = 0;
 
 	kill(-1, SIGSTOP);
 	sigfillset(&signals);
@@ -147,96 +147,96 @@ static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
 	 * CWD must be /proc to avoid problems if / is affected by the killing
 	 * (i.e. depends on fuse).
 	 */
-	if (chdir("/proc") == -1) {
+	എങ്കിൽ (chdir("/proc") == -1) {
 		syslog(LOG_ERR, "chdir /proc failed");
-		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+		sigprocmask(SIG_SETMASK, &oldsigs, ശൂന്യ);
 		kill(-1, SIGCONT);
-		return -1;
+		തിരികെ -1;
 	}
 	dir = opendir(".");
-	if (!dir) {
+	എങ്കിൽ (!dir) {
 		syslog(LOG_ERR, "cannot opendir(/proc)");
-		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+		sigprocmask(SIG_SETMASK, &oldsigs, ശൂന്യ);
 		kill(-1, SIGCONT);
-		return -1;
+		തിരികെ -1;
 	}
 
 	/* Walk through the directory. */
-	while ((d = readdir(dir)) != NULL) {
+	ആകുമ്പോൾ ((d = readdir(dir)) != ശൂന്യ) {
 		/* Is this a process? */
 		pid = (pid_t) atoi(d->d_name);
-		if (pid == 0)
-			continue;
+		എങ്കിൽ (pid == 0)
+			തുടരുക;
 
 		/* Is this a process we have been requested to omit? */
-		if (buf) {
-			free(buf);
-			buf = NULL;
+		എങ്കിൽ (buf) {
+			സ്വതന്ത്രം(buf);
+			buf = ശൂന്യ;
 		}
 		xasprintf(&buf, "%d", pid);
-		if (rc_stringlist_find(omits, buf))
-			continue;
+		എങ്കിൽ (rc_stringlist_find(omits, buf))
+			തുടരുക;
 
 		/* Is this process in our session? */
-		if (getsid(getpid()) == getsid(pid))
-			continue;
+		എങ്കിൽ (getsid(getpid()) == getsid(pid))
+			തുടരുക;
 
 		/* Is this a kernel thread? */
-		if (!is_user_process(pid))
-			continue;
+		എങ്കിൽ (!is_user_process(pid))
+			തുടരുക;
 
-		if (dryrun)
+		എങ്കിൽ (dryrun)
 			einfo("Would send signal %d to process %d", sig, pid);
-		else if (kill(pid, sig) == 0)
+		അല്ലെങ്കിൽ എങ്കിൽ (kill(pid, sig) == 0)
 			sendcount++;
 	}
 	closedir(dir);
-	sigprocmask(SIG_SETMASK, &oldsigs, NULL);
+	sigprocmask(SIG_SETMASK, &oldsigs, ശൂന്യ);
 	kill(-1, SIGCONT);
-	return sendcount;
+	തിരികെ sendcount;
 }
 
-int main(int argc, char **argv)
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv)
 {
-	char *arg = NULL;
-	int opt;
+	അക്ഷരം *arg = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ opt;
 	bool dryrun = false;
 	RC_STRINGLIST *omits = rc_stringlist_new();
-	int sig = SIGKILL;
-	char *here;
-	char *token;
+	പൂർണ്ണസംഖ്യ sig = SIGKILL;
+	അക്ഷരം *here;
+	അക്ഷരം *token;
 
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
 	rc_stringlist_addu(omits, "1");
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ആകുമ്പോൾ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (പൂർണ്ണസംഖ്യ *) 0)) != -1)
 	{
-		switch (opt) {
-			case 'd':
+		തിരഞ്ഞെടുപ്പ് (opt) {
+			അവസ്ഥ 'd':
 				dryrun = true;
-				break;
-			case 'o':
+				നിർത്തുക;
+			അവസ്ഥ 'o':
 				here = optarg;
-				while ((token = strsep(&here, ",;:"))) {
-					if ((pid_t) atoi(token) > 0)
+				ആകുമ്പോൾ ((token = strsep(&here, ",;:"))) {
+					എങ്കിൽ ((pid_t) atoi(token) > 0)
 						rc_stringlist_addu(omits, token);
-					else {
+					അല്ലെങ്കിൽ {
 						eerror("Invalid omit pid value %s", token);
 						usage(EXIT_FAILURE);
 					}
 				}
-				break;
+				നിർത്തുക;
 			case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (argc > optind) {
+	എങ്കിൽ (argc > optind) {
 	arg = argv[optind];
 	sig = atoi(arg);
-	if (sig <= 0 || sig > 31) {
+	എങ്കിൽ (sig <= 0 || sig > 31) {
 		rc_stringlist_free(omits);
 		eerror("Invalid signal %s", arg);
 		usage(EXIT_FAILURE);
@@ -244,11 +244,11 @@ int main(int argc, char **argv)
 	}
 
 	openlog(applet, LOG_CONS|LOG_PID, LOG_DAEMON);
-	if (mount_proc() != 0) {
+	എങ്കിൽ (mount_proc() != 0) {
 		rc_stringlist_free(omits);
 		eerrorx("Unable to mount /proc file system");
 	}
 	signal_processes(sig, omits, dryrun);
 	rc_stringlist_free(omits);
-	return 0;
+	തിരികെ 0;
 }

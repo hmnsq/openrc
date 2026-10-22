@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#അന്തര്ഭാവ <ctype.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
 
-int main(int argc, char **argv)
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv)
 {
-	int i;
-	char *p;
-	int c;
+	പൂർണ്ണസംഖ്യ i;
+	അക്ഷരം *p;
+	പൂർണ്ണസംഖ്യ c;
 
-	for (i = 1; i < argc; i++) {
+	വേണ്ടി (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		എങ്കിൽ (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		ആകുമ്പോൾ (*p) {
+			c = (unsigned അക്ഷരം)*p++;
+			എങ്കിൽ (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }

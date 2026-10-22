@@ -15,92 +15,92 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "queue.h"
+#അന്തര്ഭാവ "librc.h"
+#അന്തര്ഭാവ "helpers.h"
 
 RC_STRINGLIST *
-rc_stringlist_new(void)
+rc_stringlist_new(ശൂന്യം)
 {
-	RC_STRINGLIST *l = xmalloc(sizeof(*l));
+	RC_STRINGLIST *l = xmalloc(വലുപ്പം(*l));
 	TAILQ_INIT(l);
-	return l;
+	തിരികെ l;
 }
 
 RC_STRING *
-rc_stringlist_add(RC_STRINGLIST *list, const char *value)
+rc_stringlist_add(RC_STRINGLIST *list, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
-	RC_STRING *s = xmalloc(sizeof(*s));
+	RC_STRING *s = xmalloc(വലുപ്പം(*s));
 
-	s->value = xstrdup(value);
-	TAILQ_INSERT_TAIL(list, s, entries);
-	return s;
+	s->മൂല്യം = xstrdup(മൂല്യം);
+	TAILQ_തിരുകുക_TAIL(list, s, entries);
+	തിരികെ s;
 }
 
 RC_STRING *
-rc_stringlist_addu(RC_STRINGLIST *list, const char *value)
+rc_stringlist_addu(RC_STRINGLIST *list, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    എങ്കിൽ (strcmp(s->മൂല്യം, മൂല്യം) == 0) {
 		    errno = EEXIST;
-		    return NULL;
+		    തിരികെ ശൂന്യ;
 	    }
 
-	return rc_stringlist_add(list, value);
+	തിരികെ rc_stringlist_add(list, മൂല്യം);
 }
 
 bool
-rc_stringlist_delete(RC_STRINGLIST *list, const char *value)
+rc_stringlist_delete(RC_STRINGLIST *list, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
 	RC_STRING *s;
 
 	TAILQ_FOREACH(s, list, entries)
-	    if (strcmp(s->value, value) == 0) {
+	    എങ്കിൽ (strcmp(s->മൂല്യം, മൂല്യം) == 0) {
 		    TAILQ_REMOVE(list, s, entries);
-		    free(s->value);
-		    free(s);
-		    return true;
+		    സ്വതന്ത്രം(s->മൂല്യം);
+		    സ്വതന്ത്രം(s);
+		    തിരികെ true;
 	    }
 
 	errno = EEXIST;
-	return false;
+	തിരികെ false;
 }
 
 RC_STRING *
-rc_stringlist_find(RC_STRINGLIST *list, const char *value)
+rc_stringlist_find(RC_STRINGLIST *list, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
 	RC_STRING *s;
 
-	if (list) {
+	എങ്കിൽ (list) {
 		TAILQ_FOREACH(s, list, entries)
-		    if (strcmp(s->value, value) == 0)
-			    return s;
+		    എങ്കിൽ (strcmp(s->മൂല്യം, മൂല്യം) == 0)
+			    തിരികെ s;
 	}
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
 RC_STRINGLIST *
-rc_stringlist_split(const char *value, const char *sep)
+rc_stringlist_split(സ്ഥിരം അക്ഷരം *മൂല്യം, സ്ഥിരം അക്ഷരം *sep)
 {
 	RC_STRINGLIST *list = rc_stringlist_new();
-	char *d = xstrdup(value);
-	char *p = d, *token;
+	അക്ഷരം *d = xstrdup(മൂല്യം);
+	അക്ഷരം *p = d, *token;
 
-	while ((token = strsep(&p, sep)))
+	ആകുമ്പോൾ ((token = strsep(&p, sep)))
 		rc_stringlist_add(list, token);
-	free(d);
+	സ്വതന്ത്രം(d);
 
-	return list;
+	തിരികെ list;
 }
 
-void
+ശൂന്യം
 rc_stringlist_sort(RC_STRINGLIST **list)
 {
 	RC_STRINGLIST *l = *list;
@@ -112,38 +112,38 @@ rc_stringlist_sort(RC_STRINGLIST **list)
 
 	TAILQ_FOREACH_SAFE(s, l, entries, sn) {
 		TAILQ_REMOVE(l, s, entries);
-		last = NULL;
+		last = ശൂന്യ;
 		TAILQ_FOREACH(n, new, entries) {
-			if (strcmp(s->value, n->value) < 0)
-				break;
+			എങ്കിൽ (strcmp(s->മൂല്യം, n->മൂല്യം) < 0)
+				നിർത്തുക;
 			last = n;
 		}
-		if (last)
-			TAILQ_INSERT_AFTER(new, last, s, entries);
-		else
-			TAILQ_INSERT_HEAD(new, s, entries);
+		എങ്കിൽ (last)
+			TAILQ_തിരുകുക_AFTER(new, last, s, entries);
+		അല്ലെങ്കിൽ
+			TAILQ_തിരുകുക_HEAD(new, s, entries);
 	}
 
 	/* Now we've sorted the list, copy across the new head */
-	free(l);
+	സ്വതന്ത്രം(l);
 	*list = new;
 }
 
-void
+ശൂന്യം
 rc_stringlist_free(RC_STRINGLIST *list)
 {
 	RC_STRING *s1;
 	RC_STRING *s2;
 
-	if (!list)
-		return;
+	എങ്കിൽ (!list)
+		തിരികെ;
 
 	s1 = TAILQ_FIRST(list);
-	while (s1) {
+	ആകുമ്പോൾ (s1) {
 		s2 = TAILQ_NEXT(s1, entries);
-		free(s1->value);
-		free(s1);
+		സ്വതന്ത്രം(s1->മൂല്യം);
+		സ്വതന്ത്രം(s1);
 		s1 = s2;
 	}
-	free(list);
+	സ്വതന്ത്രം(list);
 }

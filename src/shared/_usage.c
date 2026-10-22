@@ -10,38 +10,38 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#അന്തര്ഭാവ <ctype.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
 
-#include "rc.h"
-#include "_usage.h"
-#include "version.h"
-#include "helpers.h"
+#അന്തര്ഭാവ "rc.h"
+#അന്തര്ഭാവ "_usage.h"
+#അന്തര്ഭാവ "version.h"
+#അന്തര്ഭാവ "helpers.h"
 
 
-void set_quiet_options(void)
+ശൂന്യം set_quiet_options(ശൂന്യം)
 {
-	static int qcount = 0;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ qcount = 0;
 
 	qcount ++;
-	switch (qcount) {
-	case 1:
+	തിരഞ്ഞെടുപ്പ് (qcount) {
+	അവസ്ഥ 1:
 		setenv ("EINFO_QUIET", "YES", 1);
-		break;
-	case 2:
+		നിർത്തുക;
+	അവസ്ഥ 2:
 		setenv ("EERROR_QUIET", "YES", 1);
-		break;
+		നിർത്തുക;
 	}
 }
 
-RC_NORETURN void show_version(void)
+RC_NORETURN ശൂന്യം show_version(ശൂന്യം)
 {
-	const char *systype = NULL;
+	സ്ഥിരം അക്ഷരം *systype = ശൂന്യ;
 
 	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
+	എങ്കിൽ ((systype = rc_sys()))
 		printf(" [%s]", systype);
 	printf(") %s", VERSION);
 #ifdef BRANDING
@@ -51,39 +51,39 @@ RC_NORETURN void show_version(void)
 	exit(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN ശൂന്യം usage(പൂർണ്ണസംഖ്യ exit_status)
 {
-	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
-	char *lo;
-	char *p;
-	char *token;
-	char val[4] = "-?,";
+	സ്ഥിരം അക്ഷരം * സ്ഥിരം has_arg[] = { "", "<arg>", "[arg]" };
+	പൂർണ്ണസംഖ്യ i;
+	പൂർണ്ണസംഖ്യ len;
+	അക്ഷരം *lo;
+	അക്ഷരം *p;
+	അക്ഷരം *token;
+	അക്ഷരം val[4] = "-?,";
 
-	if (usagestring)
+	എങ്കിൽ (usagestring)
 		printf("%s", usagestring);
-	else
+	അല്ലെങ്കിൽ
 		printf("Usage: %s [options] ", applet);
 
-	if (extraopts)
+	എങ്കിൽ (extraopts)
 		printf("%s", extraopts);
 
 	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	വേണ്ടി (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
 		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		ആകുമ്പോൾ ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
+			എങ്കിൽ (len > 0)
 				printf("%*s", len, "");
 			puts(token);
 			len = 0;
 		}
-		free(lo);
+		സ്വതന്ത്രം(lo);
 	}
 	exit(exit_status);
 }
