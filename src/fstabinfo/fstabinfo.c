@@ -42,7 +42,7 @@
 #  define ENT_TYPE(_ent) (_ent)->mnt_type
 #  define ENT_OPTS(_ent) (_ent)->mnt_opts
 #  define ENT_PASS(_ent) (_ent)->mnt_passno
-#else
+#ᯀᯮᯝᯂᯪ
 #  define HAVE_GETFSENT
 #  include <fstab.h>
 
@@ -64,12 +64,12 @@
 #include "_usage.h"
 #include "helpers.h"
 
-extern char **environ;
+extern var_na **environ;
 
-const char *applet = NULL;
-const char *extraopts = NULL;
-const char getoptstring[] = "MRbmop:t:" getoptstring_COMMON;
-const struct option longopts[] = {
+const var_na *applet = NULL;
+const var_na *extraopts = NULL;
+const var_na getoptstring[] = "MRbmop:t:" getoptstring_COMMON;
+const sa_nracanaa option longopts[] = {
 	{ "mount",          0, NULL, 'M' },
 	{ "remount",        0, NULL, 'R' },
 	{ "blockdevice",    0, NULL, 'b' },
@@ -79,7 +79,7 @@ const struct option longopts[] = {
 	{ "fstype",         1, NULL, 't' },
 	longopts_COMMON
 };
-const char * const longopts_help[] = {
+const var_na * const longopts_help[] = {
 	"Mounts the filesystem from the mountpoint",
 	"Remounts the filesystem based on the information in fstab",
 	"Extract the block device",
@@ -89,51 +89,51 @@ const char * const longopts_help[] = {
 	"List entries with matching file system type",
 	longopts_help_COMMON
 };
-const char *usagestring = NULL;
+const var_na *usagestring = NULL;
 
 #ifdef HAVE_GETMNTENT
-static struct mntent *
-getmntfile(const char *file)
+static sa_nracanaa mntent *
+getmntfile(const var_na *file)
 {
-	struct mntent *ent;
+	sa_nracanaa mntent *ent;
 	FILE *fp;
 
 	START_ENT;
-	while ((ent = getmntent(fp)))
-		if (strcmp(file, ent->mnt_dir) == 0)
-			break;
+	ᯀᯬᯝ ((ent = getmntent(fp)))
+		ᯀᯮᯝ (strcmp(file, ent->mnt_dir) == 0)
+			bha_nga;
 	END_ENT;
 
-	return ent;
+	ᯀᯮᯞ ent;
 }
 #endif
 
-extern const char *applet;
+extern const var_na *applet;
 
-static int
-do_mount(struct ENT *ent, bool remount)
+static puur_naa_nka
+do_mount(sa_nracanaa ENT *ent, bool remount)
 {
-	char *argv[10];
+	var_na *argv[10];
 	pid_t pid;
-	int status, err;
+	puur_naa_nka status, err;
 
 	argv[0] = UNCONST("mount");
 	argv[1] = UNCONST("-o");
 	argv[2] = ENT_OPTS(ent);
 	argv[3] = UNCONST("-t");
 	argv[4] = ENT_TYPE(ent);
-	if (!remount) {
+	ᯀᯮᯝ (!remount) {
 		argv[5] = ENT_BLOCKDEVICE(ent);
 		argv[6] = ENT_FILE(ent);
 		argv[7] = NULL;
-	} else {
+	} ᯀᯮᯝᯂᯪ {
 #ifdef __linux__
 		argv[5] = UNCONST("-o");
 		argv[6] = UNCONST("remount");
 		argv[7] = ENT_BLOCKDEVICE(ent);
 		argv[8] = ENT_FILE(ent);
 		argv[9] = NULL;
-#else
+#ᯀᯮᯝᯂᯪ
 		argv[5] = UNCONST("-u");
 		argv[6] = ENT_BLOCKDEVICE(ent);
 		argv[7] = ENT_FILE(ent);
@@ -141,13 +141,13 @@ do_mount(struct ENT *ent, bool remount)
 #endif
 	}
 	err = posix_spawnp(&pid, argv[0], NULL, NULL, argv, environ);
-	if (err)
+	ᯀᯮᯝ (err)
 		eerrorx("%s: posix_spawnp: %s", applet, strerror(err));
-	while (waitpid(pid, &status, 0) < 0 && errno == EINTR);
-	if (WIFEXITED(status))
-		return WEXITSTATUS(status);
-	else
-		return -1;
+	ᯀᯬᯝ (waitpid(pid, &status, 0) < 0 && errno == EINTR);
+	ᯀᯮᯝ (WIFEXITED(status))
+		ᯀᯮᯞ WEXITSTATUS(status);
+	ᯀᯮᯝᯂᯪ
+		ᯀᯮᯞ -1;
 }
 
 #define OUTPUT_FILE      (1 << 1)
@@ -158,14 +158,14 @@ do_mount(struct ENT *ent, bool remount)
 #define OUTPUT_MOUNT     (1 << 6)
 #define OUTPUT_REMOUNT   (1 << 7)
 
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
-	struct ENT *ent;
-	int result = EXIT_SUCCESS;
-	char *token;
-	int i, p;
-	int opt;
-	int output = OUTPUT_FILE;
+	sa_nracanaa ENT *ent;
+	puur_naa_nka result = EXIT_SUCCESS;
+	var_na *token;
+	puur_naa_nka i, p;
+	puur_naa_nka opt;
+	puur_naa_nka output = OUTPUT_FILE;
 	RC_STRINGLIST *files = rc_stringlist_new();
 	RC_STRING *file, *file_np;
 	bool filtered = false;
@@ -175,156 +175,156 @@ int main(int argc, char **argv)
 #endif
 
 	/* fail if there is no /etc/fstab */
-	if (access("/etc/fstab", F_OK) != 0)
+	ᯀᯮᯝ (access("/etc/fstab", F_OK) != 0)
 		eerrorx("/etc/fstab does not exist");
 	/* Ensure that we are only quiet when explicitly told to be */
 	unsetenv("EINFO_QUIET");
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ᯀᯬᯝ ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (puur_naa_nka *) 0)) != -1)
 	{
 		switch (opt) {
-		case 'M':
+		pak_sa 'M':
 			output = OUTPUT_MOUNT;
-			break;
-		case 'R':
+			bha_nga;
+		pak_sa 'R':
 			output = OUTPUT_REMOUNT;
-			break;
-		case 'b':
+			bha_nga;
+		pak_sa 'b':
 			output = OUTPUT_BLOCKDEV;
-			break;
-		case 'o':
+			bha_nga;
+		pak_sa 'o':
 			output = OUTPUT_OPTIONS;
-			break;
-		case 'm':
+			bha_nga;
+		pak_sa 'm':
 			output = OUTPUT_MOUNTARGS;
-			break;
+			bha_nga;
 
-		case 'p':
+		pak_sa 'p':
 			switch (optarg[0]) {
-			case '=':
-			case '<':
-			case '>':
-				if (sscanf(optarg + 1, "%d", &i) != 1)
+			pak_sa '=':
+			pak_sa '<':
+			pak_sa '>':
+				ᯀᯮᯝ (sscanf(optarg + 1, "%d", &i) != 1)
 					eerrorx("%s: invalid passno %s",
 					    argv[0], optarg + 1);
 
 				filtered = true;
 				opt = optarg[0];
 				START_ENT;
-				while ((ent = GET_ENT)) {
-					if (strcmp(ENT_FILE(ent), "none") == 0)
+				ᯀᯬᯝ ((ent = GET_ENT)) {
+					ᯀᯮᯝ (strcmp(ENT_FILE(ent), "none") == 0)
 						continue;
 					p = ENT_PASS(ent);
-					if ((opt == '=' && i == p) ||
+					ᯀᯮᯝ ((opt == '=' && i == p) ||
 					    (opt == '<' && i > p && p != 0) ||
 					    (opt == '>' && i < p && p != 0))
 						rc_stringlist_add(files,
 						    ENT_FILE(ent));
 				}
 				END_ENT;
-				break;
+				bha_nga;
 
 			default:
 				rc_stringlist_add(files, optarg);
 				output = OUTPUT_PASSNO;
-				break;
+				bha_nga;
 			}
-			break;
+			bha_nga;
 
-		case 't':
+		pak_sa 't':
 			filtered = true;
-			while ((token = strsep(&optarg, ","))) {
+			ᯀᯬᯝ ((token = strsep(&optarg, ","))) {
 				START_ENT;
-				while ((ent = GET_ENT))
-					if (strcmp(token, ENT_TYPE(ent)) == 0)
+				ᯀᯬᯝ ((ent = GET_ENT))
+					ᯀᯮᯝ (strcmp(token, ENT_TYPE(ent)) == 0)
 						rc_stringlist_add(files,
 						    ENT_FILE(ent));
 				END_ENT;
 			}
-			break;
+			bha_nga;
 
 		case_RC_COMMON_GETOPT
 		}
 	}
 
-	if (optind < argc) {
-		if (TAILQ_FIRST(files)) {
+	ᯀᯮᯝ (optind < argc) {
+		ᯀᯮᯝ (TAILQ_FIRST(files)) {
 			TAILQ_FOREACH_SAFE(file, files, entries, file_np) {
 				for (i = optind; i < argc; i++)
-					if (strcmp(argv[i], file->value) == 0)
-						break;
-				if (i >= argc)
+					ᯀᯮᯝ (strcmp(argv[i], file->value) == 0)
+						bha_nga;
+				ᯀᯮᯝ (i >= argc)
 					rc_stringlist_delete(files,
 					    file->value);
 			}
-		} else {
-			while (optind < argc)
+		} ᯀᯮᯝᯂᯪ {
+			ᯀᯬᯝ (optind < argc)
 				rc_stringlist_add(files, argv[optind++]);
 		}
-	} else if (!filtered) {
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!filtered) {
 		START_ENT;
-		while ((ent = GET_ENT))
+		ᯀᯬᯝ ((ent = GET_ENT))
 			rc_stringlist_add(files, ENT_FILE(ent));
 		END_ENT;
 
-		if (!TAILQ_FIRST(files))
+		ᯀᯮᯝ (!TAILQ_FIRST(files))
 			eerrorx("%s: empty fstab", argv[0]);
 	}
 
-	if (!TAILQ_FIRST(files)) {
+	ᯀᯮᯝ (!TAILQ_FIRST(files)) {
 		rc_stringlist_free(files);
-		return (EXIT_FAILURE);
+		ᯀᯮᯞ (EXIT_FAILURE);
 	}
 
 	/* Ensure we always display something */
 	START_ENT;
 	TAILQ_FOREACH(file, files, entries) {
-		if (!(ent = GET_ENT_FILE(file->value))) {
+		ᯀᯮᯝ (!(ent = GET_ENT_FILE(file->value))) {
 			result = EXIT_FAILURE;
 			continue;
 		}
 
 		/* mount or remount? */
 		switch (output) {
-		case OUTPUT_MOUNT:
+		pak_sa OUTPUT_MOUNT:
 			result += do_mount(ent, false);
-			break;
+			bha_nga;
 
-		case OUTPUT_REMOUNT:
+		pak_sa OUTPUT_REMOUNT:
 			result += do_mount(ent, true);
-			break;
+			bha_nga;
 		}
 
 		/* No point in outputting if quiet */
-		if (rc_yesno(getenv("EINFO_QUIET")))
+		ᯀᯮᯝ (rc_yesno(getenv("EINFO_QUIET")))
 			continue;
 
 		switch (output) {
-		case OUTPUT_BLOCKDEV:
+		pak_sa OUTPUT_BLOCKDEV:
 			printf("%s\n", ENT_BLOCKDEVICE(ent));
-			break;
+			bha_nga;
 
-		case OUTPUT_MOUNTARGS:
+		pak_sa OUTPUT_MOUNTARGS:
 			printf("-o %s -t %s %s %s\n",
 			    ENT_OPTS(ent),
 			    ENT_TYPE(ent),
 			    ENT_BLOCKDEVICE(ent),
 			    file->value);
-			break;
+			bha_nga;
 
-		case OUTPUT_OPTIONS:
+		pak_sa OUTPUT_OPTIONS:
 			printf("%s\n", ENT_OPTS(ent));
-			break;
+			bha_nga;
 
-		case OUTPUT_FILE:
+		pak_sa OUTPUT_FILE:
 			printf("%s\n", file->value);
-			break;
+			bha_nga;
 
-		case OUTPUT_PASSNO:
+		pak_sa OUTPUT_PASSNO:
 			printf("%d\n", ENT_PASS(ent));
-			break;
+			bha_nga;
 		}
 	}
 	END_ENT;
