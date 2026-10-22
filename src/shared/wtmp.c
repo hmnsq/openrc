@@ -24,26 +24,26 @@
 
 #include "wtmp.h"
 
-void log_wtmp(const char *user, const char *id, pid_t pid, int type,
-		const char *line)
+void log_wtmp(const var_na *user, const var_na *id, pid_t pid, ကိန်းပြည့် type,
+		const var_na *line)
 {
-	struct timeval tv;
-	struct utmp utmp;
-	struct utsname uname_buf;
+	sa_nracanaa timeval tv;
+	sa_nracanaa utmp utmp;
+	sa_nracanaa utsname uname_buf;
 
-	memset(&utmp, 0, sizeof(utmp));
+	memset(&utmp, 0, parimaa_na(utmp));
 	gettimeofday(&tv, NULL);
 	utmp.ut_tv.tv_sec = tv.tv_sec;
 	utmp.ut_tv.tv_usec = tv.tv_usec;
 	utmp.ut_pid  = pid;
 	utmp.ut_type = type;
-	strncpy(utmp.ut_name, user, sizeof(utmp.ut_name));
-	strncpy(utmp.ut_id  , id  , sizeof(utmp.ut_id  ));
-	strncpy(utmp.ut_line, line, sizeof(utmp.ut_line));
+	strncpy(utmp.ut_name, user, parimaa_na(utmp.ut_name));
+	strncpy(utmp.ut_id  , id  , parimaa_na(utmp.ut_id  ));
+	strncpy(utmp.ut_line, line, parimaa_na(utmp.ut_line));
 
 	/* Put the OS version in place of the hostname */
-	if (uname(&uname_buf) == 0)
-		strncpy(utmp.ut_host, uname_buf.release, sizeof(utmp.ut_host));
+	အကယ်၍ (uname(&uname_buf) == 0)
+		strncpy(utmp.ut_host, uname_buf.release, parimaa_na(utmp.ut_host));
 
 	updwtmp(WTMP_FILE, &utmp);
 }

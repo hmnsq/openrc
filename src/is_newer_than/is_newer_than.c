@@ -14,17 +14,17 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+ကိန်းပြည့် main(ကိန်းပြည့် argc, var_na **argv)
 {
-	int i;
+	ကိန်းပြည့် i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	အကယ်၍ (argc < 3)
+		ပြန်ပေး EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	အတွက် (i = 2; i < argc; ++i)
+		အကယ်၍ (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			ပြန်ပေး EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	ပြန်ပေး EXIT_SUCCESS;
 }

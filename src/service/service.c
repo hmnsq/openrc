@@ -21,48 +21,48 @@
 #include "misc.h"
 #include "helpers.h"
 
-const char *applet = NULL;
+const var_na *applet = NULL;
 
-int main(int argc, char **argv)
+ကိန်းပြည့် main(ကိန်းပြည့် argc, var_na **argv)
 {
 	bool ok = false;
-	char *service;
-	char *exec;
-	int idx = 0;
+	var_na *service;
+	var_na *exec;
+	ကိန်းပြည့် idx = 0;
 	RC_SERVICE state, bit;
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	အကယ်၍ (argc > 1)
 		service = argv[1];
-	else
+	မဟုတ်ပါက
 		service = getenv("RC_SVCNAME");
 
-	if (service == NULL || *service == '\0')
+	အကယ်၍ (service == NULL || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
 	state = rc_service_state(service);
 	bit = lookup_service_state(applet);
-	if (bit) {
+	အကယ်၍ (bit) {
 		ok = (state & bit);
-	} else if (strcmp(applet, "service_started_daemon") == 0) {
+	} မဟုတ်ပါက အကယ်၍ (strcmp(applet, "service_started_daemon") == 0) {
 		service = getenv("RC_SVCNAME");
 		exec = argv[1];
-		if (argc > 3) {
+		အကယ်၍ (argc > 3) {
 			service = argv[1];
 			exec = argv[2];
 			sscanf(argv[3], "%d", &idx);
-		} else if (argc == 3) {
-			if (sscanf(argv[2], "%d", &idx) != 1) {
+		} မဟုတ်ပါက အကယ်၍ (argc == 3) {
+			အကယ်၍ (sscanf(argv[2], "%d", &idx) != 1) {
 				service = argv[1];
 				exec = argv[2];
 			}
 		}
 		ok = rc_service_started_daemon(service, exec, NULL, idx);
 
-	} else if (strcmp(applet, "service_crashed") == 0) {
+	} မဟုတ်ပါက အကယ်၍ (strcmp(applet, "service_crashed") == 0) {
 		ok = ( rc_service_daemons_crashed(service) && errno != EACCES);
-	} else
+	} မဟုတ်ပါက
 		eerrorx("%s: unknown applet", applet);
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	ပြန်ပေး ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -22,7 +22,7 @@
  * here instead of ad-hoc coding fork+exec yourself.
  */
 
-enum {
+ga_nanaa {
 	/* default */
 	EXEC_NO_REDIRECT = -1,
 	/* make a pipe and redirect to it */
@@ -31,30 +31,30 @@ enum {
 	EXEC_DEVNULL = -3,
 };
 
-struct exec_args {
-	const char **argv;
-	const char *cmd;  /* if NULL, argv[0] is used */
-	int redirect_stdin;
-	int redirect_stdout;
-	int redirect_stderr;
+sa_nracanaa exec_args {
+	const var_na **argv;
+	const var_na *cmd;  /* if NULL, argv[0] is used */
+	ကိန်းပြည့် redirect_stdin;
+	ကိန်းပြည့် redirect_stdout;
+	ကိန်းပြည့် redirect_stderr;
 	uid_t uid;
 	gid_t gid;
 	bool setsid : 1;
 };
 
-struct exec_result {
+sa_nracanaa exec_result {
 	pid_t pid;
 	/* returned in case of RC_EXEC_MKPIPE */
-	int proc_stdin;
-	int proc_stdout;
-	int proc_stderr;
+	ကိန်းပြည့် proc_stdin;
+	ကိန်းပြည့် proc_stdout;
+	ကိန်းပြည့် proc_stderr;
 };
 
-struct exec_args exec_init(const char **argv);
-struct exec_result do_exec(struct exec_args *args);
+sa_nracanaa exec_args exec_init(const var_na **argv);
+sa_nracanaa exec_result do_exec(sa_nracanaa exec_args *args);
 
 /* some exec related helplers */
-int rc_waitpid(pid_t pid);
-int rc_pipe_command(const char *cmd, int devnullfd);
+ကိန်းပြည့် rc_waitpid(pid_t pid);
+ကိန်းပြည့် rc_pipe_command(const var_na *cmd, ကိန်းပြည့် devnullfd);
 
 #endif

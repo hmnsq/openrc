@@ -21,50 +21,50 @@
 #include "rc.h"
 #include "helpers.h"
 
-const char *applet = NULL;
-extern char **environ;
+const var_na *applet = NULL;
+extern var_na **environ;
 
-int main(int argc, char **argv)
+ကိန်းပြည့် main(ကိန်းပြည့် argc, var_na **argv)
 {
-	char *service = getenv("RC_SVCNAME");
-	enum { GET, SET, EXPORT } action;
-	char *option = NULL;
+	var_na *service = getenv("RC_SVCNAME");
+	ga_nanaa { GET, SET, EXPORT } action;
+	var_na *option = NULL;
 
 	applet = basename_c(argv[0]);
-	if (service == NULL)
+	အကယ်၍ (service == NULL)
 		eerrorx("%s: no service specified", applet);
 
-	if (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
+	အကယ်၍ (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
 		action = GET;
-	else if (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
+	မဟုတ်ပါက အကယ်၍ (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
 		action = SET;
-	else if (strcmp(applet, "service_export") == 0)
+	မဟုတ်ပါက အကယ်၍ (strcmp(applet, "service_export") == 0)
 		action = EXPORT;
-	else
+	မဟုတ်ပါက
 		eerrorx("%s: unknown applet", applet);
 
-	if (argc < 2 || !argv[1] || *argv[1] == '\0')
+	အကယ်၍ (argc < 2 || !argv[1] || *argv[1] == '\0')
 		eerrorx("%s: no %s specified", applet, action == EXPORT ? "variable" : "option");
 
 	switch (action) {
-	case GET:
-		if (!(option = rc_service_value_get(service, argv[1])))
-			return EXIT_FAILURE;
+	pak_sa GET:
+		အကယ်၍ (!(option = rc_service_value_get(service, argv[1])))
+			ပြန်ပေး EXIT_FAILURE;
 		printf("%s", option);
 		free(option);
-		return EXIT_SUCCESS;
-	case SET:
-		return rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
-	case EXPORT:
-		for (int i = 1; i < argc; i++) {
-			char *var;
-			if (rc_service_getenv(service, argv[i], NULL) > 0)
+		ပြန်ပေး EXIT_SUCCESS;
+	pak_sa SET:
+		ပြန်ပေး rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
+	pak_sa EXPORT:
+		အတွက် (ကိန်းပြည့် i = 1; i < argc; i++) {
+			var_na *var;
+			အကယ်၍ (rc_service_getenv(service, argv[i], NULL) > 0)
 				continue;
-			else if ((var = getenv(argv[i])))
+			မဟုတ်ပါက အကယ်၍ ((var = getenv(argv[i])))
 				rc_service_setenv(service, argv[i], var);
-			else
+			မဟုတ်ပါက
 				ewarn("%s: Missing reexport variable '%s'", service, argv[i]);
 		}
-		return EXIT_SUCCESS;
+		ပြန်ပေး EXIT_SUCCESS;
 	}
 }

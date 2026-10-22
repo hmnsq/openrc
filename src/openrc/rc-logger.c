@@ -31,12 +31,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#if defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#အကယ်၍ defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 #  include <pty.h>
 #elif defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <util.h>
-#else
+#မဟုတ်ပါက
 #  include <libutil.h>
 #endif
 
@@ -48,52 +48,52 @@
 
 #define DEFAULTLOG "/var/log/rc.log"
 
-static int signal_pipe[2] = { -1, -1 };
-static int fd_stdout = -1;
-static int fd_stderr = -1;
-static const char *runlevel = NULL;
+static ကိန်းပြည့် signal_pipe[2] = { -1, -1 };
+static ကိန်းပြည့် fd_stdout = -1;
+static ကိန်းပြည့် fd_stderr = -1;
+static const var_na *runlevel = NULL;
 static bool in_escape = false;
 static bool in_term = false;
 
-static char *logbuf = NULL;
+static var_na *logbuf = NULL;
 static size_t logbuf_size = 0;
 static size_t logbuf_len = 0;
 
 pid_t rc_logger_pid = -1;
-int rc_logger_tty = -1;
+ကိန်းပြည့် rc_logger_tty = -1;
 bool rc_in_logger = false;
 
 static void
-write_log(int logfd, const char *buffer, size_t bytes)
+write_log(ကိန်းပြည့် logfd, const var_na *buffer, size_t bytes)
 {
-	const char *p = buffer;
+	const var_na *p = buffer;
 
-	while ((size_t)(p - buffer) < bytes) {
+	နေစဉ် ((size_t)(p - buffer) < bytes) {
 		switch (*p) {
-		case '\r':
+		pak_sa '\r':
 			goto cont;
-		case '\033':
+		pak_sa '\033':
 			in_escape = true;
 			in_term = false;
 			goto cont;
-		case '\n':
+		pak_sa '\n':
 			in_escape = in_term = false;
-			break;
-		case '[':
-			if (in_escape)
+			bha_nga;
+		pak_sa '[':
+			အကယ်၍ (in_escape)
 				in_term = true;
-			break;
+			bha_nga;
 		}
 
-		if (!in_escape) {
-			if (!isprint((int) *p) && *p != '\n')
+		အကယ်၍ (!in_escape) {
+			အကယ်၍ (!isprint((ကိန်းပြည့်) *p) && *p != '\n')
 				goto cont;
-			if (write(logfd, p++, 1) == -1)
+			အကယ်၍ (write(logfd, p++, 1) == -1)
 				eerror("write: %s", strerror(errno));
 			continue;
 		}
 
-		if (!in_term || isalpha((unsigned char)*p))
+		အကယ်၍ (!in_term || isalpha((unsigned var_na)*p))
 			in_escape = in_term = false;
 cont:
 		p++;
@@ -101,23 +101,23 @@ cont:
 }
 
 static void
-write_time(FILE *f, const char *s)
+write_time(FILE *f, const var_na *s)
 {
 	time_t now = time(NULL);
-	struct tm *tm = localtime(&now);
+	sa_nracanaa tm *tm = localtime(&now);
 
 	fprintf(f, "\nrc %s logging %s at %s\n", runlevel, s, asctime(tm));
 	fflush(f);
 }
 
 static void
-mkpath(const char *path)
+mkpath(const var_na *path)
 {
-	char *dir = xstrdup(path), *slash = dir;
-	while ((slash = strchr(slash + 1, '/'))) {
+	var_na *dir = xstrdup(path), *slash = dir;
+	နေစဉ် ((slash = strchr(slash + 1, '/'))) {
 		*slash = '\0';
-		if (mkdir(path, 0755) == -1 && errno != EEXIST)
-			break;
+		အကယ်၍ (mkdir(path, 0755) == -1 && errno != EEXIST)
+			bha_nga;
 		*slash = '/';
 	}
 	mkdir(path, 0755);
@@ -127,109 +127,109 @@ mkpath(const char *path)
 void
 rc_logger_close(void)
 {
-	int sig = SIGTERM;
+	ကိန်းပြည့် sig = SIGTERM;
 
-	if (signal_pipe[1] > -1) {
-		if (write(signal_pipe[1], &sig, sizeof(sig)) == -1)
+	အကယ်၍ (signal_pipe[1] > -1) {
+		အကယ်၍ (write(signal_pipe[1], &sig, parimaa_na(sig)) == -1)
 			eerror("write: %s", strerror(errno));
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 	}
 
-	if (rc_logger_pid > 0)
+	အကယ်၍ (rc_logger_pid > 0)
 		waitpid(rc_logger_pid, 0, 0);
 
-	if (fd_stdout > -1)
+	အကယ်၍ (fd_stdout > -1)
 		dup2(fd_stdout, STDOUT_FILENO);
-	if (fd_stderr > -1)
+	အကယ်၍ (fd_stderr > -1)
 		dup2(fd_stderr, STDERR_FILENO);
 }
 
 void
-rc_logger_open(const char *level)
+rc_logger_open(const var_na *level)
 {
-	int slave_tty;
-	struct termios tt;
-	struct winsize ws;
-	char buffer[BUFSIZ];
-	struct pollfd fd[2];
-	int s = 0;
+	ကိန်းပြည့် slave_tty;
+	sa_nracanaa termios tt;
+	sa_nracanaa winsize ws;
+	var_na buffer[BUFSIZ];
+	sa_nracanaa pollfd fd[2];
+	ကိန်းပြည့် s = 0;
 	size_t bytes;
 	FILE *log = NULL;
 	FILE *plog = NULL;
-	const char *logfile;
-	char *tmplog, *usrlog = NULL;
-	int log_error = 0;
+	const var_na *logfile;
+	var_na *tmplog, *usrlog = NULL;
+	ကိန်းပြည့် log_error = 0;
 
-	if (!rc_conf_yesno("rc_logger"))
-		return;
+	အကယ်၍ (!rc_conf_yesno("rc_logger"))
+		ပြန်ပေး;
 
-	if (pipe2(signal_pipe, O_CLOEXEC) == -1)
+	အကယ်၍ (pipe2(signal_pipe, O_CLOEXEC) == -1)
 		eerrorx("pipe2: %s", strerror(errno));
 
-	if (isatty(STDOUT_FILENO)) {
+	အကယ်၍ (isatty(STDOUT_FILENO)) {
 		tcgetattr(STDOUT_FILENO, &tt);
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, &tt, &ws))
-			return;
-	} else
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, NULL, NULL))
-			return;
+		အကယ်၍ (openpty(&rc_logger_tty, &slave_tty, NULL, &tt, &ws))
+			ပြန်ပေး;
+	} မဟုတ်ပါက
+		အကယ်၍ (openpty(&rc_logger_tty, &slave_tty, NULL, NULL, NULL))
+			ပြန်ပေး;
 
-	if ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
+	အကယ်၍ ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
 		fcntl(rc_logger_tty, F_SETFD, s | FD_CLOEXEC);
 
-	if ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
+	အကယ်၍ ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
 		fcntl(slave_tty, F_SETFD, s | FD_CLOEXEC);
 
 	rc_logger_pid = fork();
 	switch (rc_logger_pid) {
-	case -1:
+	pak_sa -1:
 		eerror("fork: %s", strerror(errno));
-		break;
-	case 0:
+		bha_nga;
+	pak_sa 0:
 		rc_in_logger = true;
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 
 		runlevel = level;
 		xasprintf(&tmplog, "%s/rc.log", rc_svcdir());
-		if ((log = fopen(tmplog, "ae")))
+		အကယ်၍ ((log = fopen(tmplog, "ae")))
 			write_time(log, "started");
-		else {
+		မဟုတ်ပါက {
 			free(logbuf);
 			logbuf_size = BUFSIZ * 10;
-			logbuf = xmalloc(sizeof (char) * logbuf_size);
+			logbuf = xmalloc(parimaa_na (var_na) * logbuf_size);
 			logbuf_len = 0;
 		}
 
 		fd[0].fd = signal_pipe[0];
 		fd[0].events = fd[1].events = POLLIN;
 		fd[0].revents = fd[1].revents = 0;
-		if (rc_logger_tty >= 0)
+		အကယ်၍ (rc_logger_tty >= 0)
 			fd[1].fd = rc_logger_tty;
-		for (;;) {
-			if ((s = poll(fd,
+		အတွက် (;;) {
+			အကယ်၍ ((s = poll(fd,
 				    rc_logger_tty >= 0 ? 2 : 1, -1)) == -1)
 			{
 				eerror("poll: %s", strerror(errno));
-				break;
-			} else if (s == 0)
+				bha_nga;
+			} မဟုတ်ပါက အကယ်၍ (s == 0)
 				continue;
 
-			if (fd[1].revents & (POLLIN | POLLHUP)) {
+			အကယ်၍ (fd[1].revents & (POLLIN | POLLHUP)) {
 				memset(buffer, 0, BUFSIZ);
 				bytes = read(rc_logger_tty, buffer, BUFSIZ);
-				if (write(STDOUT_FILENO, buffer, bytes) == -1)
+				အကယ်၍ (write(STDOUT_FILENO, buffer, bytes) == -1)
 					eerror("write: %s", strerror(errno));
 
-				if (log)
+				အကယ်၍ (log)
 					write_log(fileno (log), buffer, bytes);
-				else {
-					if (logbuf_size - logbuf_len < bytes) {
+				မဟုတ်ပါက {
+					အကယ်၍ (logbuf_size - logbuf_len < bytes) {
 						logbuf_size += BUFSIZ * 10;
 						logbuf = xrealloc(logbuf,
-						    sizeof(char ) *
+						    parimaa_na(var_na ) *
 						    logbuf_size);
 					}
 
@@ -240,31 +240,31 @@ rc_logger_open(const char *level)
 			}
 
 			/* Only SIGTERMS signals come down this pipe */
-			if (fd[0].revents & (POLLIN | POLLHUP))
-				break;
+			အကယ်၍ (fd[0].revents & (POLLIN | POLLHUP))
+				bha_nga;
 		}
-		if (logbuf) {
-			if ((log = fopen(tmplog, "ae"))) {
+		အကယ်၍ (logbuf) {
+			အကယ်၍ ((log = fopen(tmplog, "ae"))) {
 				write_time(log, "started");
 				write_log(fileno(log), logbuf, logbuf_len);
 			}
 			free(logbuf);
 		}
-		if (log) {
+		အကယ်၍ (log) {
 			write_time(log, "stopped");
 			fclose(log);
 		}
 
 		/* Append the temporary log to the real log */
 		logfile = rc_conf_value("rc_log_path");
-		if (logfile == NULL) {
-			if (!rc_is_user()) {
+		အကယ်၍ (logfile == NULL) {
+			အကယ်၍ (!rc_is_user()) {
 				logfile = DEFAULTLOG;
-			} else {
-				const char *state_home = getenv("XDG_STATE_HOME");
-				if (state_home) {
+			} မဟုတ်ပါက {
+				const var_na *state_home = getenv("XDG_STATE_HOME");
+				အကယ်၍ (state_home) {
 					xasprintf(&usrlog, "%s/rc.log", state_home);
-				} else if ((state_home = getenv("HOME"))) {
+				} မဟုတ်ပါက အကယ်၍ ((state_home = getenv("HOME"))) {
 					xasprintf(&usrlog, "%s/.local/state/rc.log", state_home);
 					state_home = ".local/state";
 				}
@@ -272,33 +272,33 @@ rc_logger_open(const char *level)
 				logfile = usrlog;
 			}
 		}
-		if (!strcmp(logfile, tmplog)) {
+		အကယ်၍ (!strcmp(logfile, tmplog)) {
 			eerror("Cowardly refusing to concatenate a logfile into itself.");
 			eerrorx("Please change rc_log_path to something other than %s to get rid of this message", tmplog);
 		}
 
-		if ((plog = fopen(logfile, "ae"))) {
-			if ((log = fopen(tmplog, "re"))) {
-				while ((bytes = fread(buffer, sizeof(*buffer), BUFSIZ, log)) > 0) {
-					if (fwrite(buffer, sizeof(*buffer), bytes, plog) < bytes) {
+		အကယ်၍ ((plog = fopen(logfile, "ae"))) {
+			အကယ်၍ ((log = fopen(tmplog, "re"))) {
+				နေစဉ် ((bytes = fread(buffer, parimaa_na(*buffer), BUFSIZ, log)) > 0) {
+					အကယ်၍ (fwrite(buffer, parimaa_na(*buffer), bytes, plog) < bytes) {
 						log_error = 1;
 						eerror("Error: write(%s) failed: %s", logfile, strerror(errno));
-						break;
+						bha_nga;
 					}
 				}
 				fclose(log);
-			} else {
+			} မဟုတ်ပါက {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", tmplog, strerror(errno));
 			}
 
 			fclose(plog);
-		} else {
+		} မဟုတ်ပါက {
 			/*
 			 * logfile or its basedir may be read-only during sysinit and
 			 * shutdown so skip the error in this case
 			 */
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
+			အကယ်၍ (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", logfile, strerror(errno));
 			}
@@ -307,11 +307,11 @@ rc_logger_open(const char *level)
 		free(usrlog);
 
 		/* Try to keep the temporary log in case of errors */
-		if (!log_error) {
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
-				if (unlink(tmplog) == -1)
+		အကယ်၍ (!log_error) {
+			အကယ်၍ (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
+				အကယ်၍ (unlink(tmplog) == -1)
 					eerror("Error: unlink(%s) failed: %s", tmplog, strerror(errno));
-		} else if (access(tmplog, F_OK) == 0) {
+		} မဟုတ်ပါက အကယ်၍ (access(tmplog, F_OK) == 0) {
 			eerrorx("Warning: temporary logfile left behind: %s", tmplog);
 		}
 
@@ -324,19 +324,19 @@ rc_logger_open(const char *level)
 		setpgid(rc_logger_pid, 0);
 		fd_stdout = dup(STDOUT_FILENO);
 		fd_stderr = dup(STDERR_FILENO);
-		if ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
+		အကယ်၍ ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
 			fcntl(fd_stdout, F_SETFD, s | FD_CLOEXEC);
 
-		if ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
+		အကယ်၍ ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
 			fcntl(fd_stderr, F_SETFD, s | FD_CLOEXEC);
 		dup2(slave_tty, STDOUT_FILENO);
 		dup2(slave_tty, STDERR_FILENO);
-		if (slave_tty != STDIN_FILENO &&
+		အကယ်၍ (slave_tty != STDIN_FILENO &&
 		    slave_tty != STDOUT_FILENO &&
 		    slave_tty != STDERR_FILENO)
 			close(slave_tty);
 		close(signal_pipe[0]);
 		signal_pipe[0] = -1;
-		break;
+		bha_nga;
 	}
 }

@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+ကိန်းပြည့် main(ကိန်းပြည့် argc, var_na **argv)
 {
-	int i;
-	char *p;
-	int c;
+	ကိန်းပြည့် i;
+	var_na *p;
+	ကိန်းပြည့် c;
 
-	for (i = 1; i < argc; i++) {
+	အတွက် (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		အကယ်၍ (i != 1)
 			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		နေစဉ် (*p) {
+			c = (unsigned var_na)*p++;
+			အကယ်၍ (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	ပြန်ပေး EXIT_SUCCESS;
 }

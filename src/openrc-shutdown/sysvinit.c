@@ -26,77 +26,77 @@
 #include "initreq.h"
 #include "sysvinit.h"
 
-static void sysvinit_send_cmd(struct init_request *request)
+static void sysvinit_send_cmd(sa_nracanaa init_request *request)
 {
-	int fd;
-	char *p;
+	ကိန်းပြည့် fd;
+	var_na *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	အကယ်၍ (fd < 0) {
+		အကယ်၍ (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		ပြန်ပေး;
 	}
-	p = (char *) request;
-	bytes = sizeof(*request);
+	p = (var_na *) request;
+	bytes = parimaa_na(*request);
 	do {
 		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
+		အကယ်၍ (r < 0) {
+			အကယ်၍ ((errno == EAGAIN) || (errno == EINTR))
 				continue;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			ပြန်ပေး;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} နေစဉ် (bytes > 0);
 }
 
-void sysvinit_runlevel(char rl)
+void sysvinit_runlevel(var_na rl)
 {
-	struct init_request request;
+	sa_nracanaa init_request request;
 
-	if (!rl)
-		return;
+	အကယ်၍ (!rl)
+		ပြန်ပေး;
 
-	request = (struct init_request) {
+	request = (sa_nracanaa init_request) {
 		.magic = INIT_MAGIC,
 		.sleeptime = 0,
 		.cmd = INIT_CMD_RUNLVL,
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		ပြန်ပေး;
 }
 
 /*
  *	Set environment variables in the init process.
  */
-void sysvinit_setenv(const char *name, const char *value)
+void sysvinit_setenv(const var_na *name, const var_na *value)
 {
-	struct init_request	request;
+	sa_nracanaa init_request	request;
 	size_t nl;
 	size_t vl;
 
-	memset(&request, 0, sizeof(request));
+	memset(&request, 0, parimaa_na(request));
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
+	အကယ်၍ (value)
 		vl = strlen(value);
-else
+မဟုတ်ပါက
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	အကယ်၍ (nl + vl + 3 >= (ကိန်းပြည့်)parimaa_na(request.i.data))
+		ပြန်ပေး;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	အကယ်၍ (value) {
 		request.i.data[nl] = '=';
 		memcpy(request.i.data + nl + 1, value, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	ပြန်ပေး;
 }
