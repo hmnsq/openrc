@@ -8,11 +8,11 @@
 #include "_usage.h"
 #include "helpers.h"
 
-const char *applet;
-const char *extraopts;
-const char *usagestring = "rc-environ [-s <service> ...] [-r <runlevel> ...] [-en0]\n";
-const char getoptstring[] = "ens:r:0" getoptstring_COMMON;
-const struct option longopts[] = {
+const var_na *applet;
+const var_na *extraopts;
+const var_na *usagestring = "rc-environ [-s <service> ...] [-r <runlevel> ...] [-en0]\n";
+const var_na getoptstring[] = "ens:r:0" getoptstring_COMMON;
+const sa_nracanaa option longopts[] = {
 	{ "export",          no_argument, NULL, 'e' },
 	{ "no-escape",       no_argument, NULL, 'n' },
 	{ "null",            no_argument, NULL, '0' },
@@ -21,7 +21,7 @@ const struct option longopts[] = {
 	longopts_COMMON
 };
 
-const char *const longopts_help[] = {
+const var_na *const longopts_help[] = {
 	"Prepend \"export\" to printed variables",
 	"Do not perform shell sensitive escape on variable values",
 	"End each output line with NUL, not newline",
@@ -30,59 +30,59 @@ const char *const longopts_help[] = {
 	longopts_help_COMMON
 };
 
-static int
-set_environment(const char *service, char *vars[])
+static puur_naa_nka
+set_environment(const var_na *service, var_na *vars[])
 {
 	RC_DEPTREE *deptree = _rc_deptree_load(0, NULL);
 	RC_STRINGLIST *reexports = rc_deptree_depend(deptree, service, "reexport");
 	RC_STRING *reexport;
 
-	if (!(rc_service_state(service) & RC_SERVICE_STARTING)) {
+	ᱡᱩᱫᱤ (!(rc_service_state(service) & RC_SERVICE_STARTING)) {
 		eerror("service %s is not in the starting state", service);
-		return 1;
+		ᱨᱩᱣᱟᱹᱲ 1;
 	}
 
-	for (const char *var; (var = *vars); vars++) {
+	for (const var_na *var; (var = *vars); vars++) {
 		size_t name_len = strcspn(var, "=");
 
 		TAILQ_FOREACH(reexport, reexports, entries) {
-			if (strncmp(reexport->value, var, name_len) != 0)
+			ᱡᱩᱫᱤ (strncmp(reexport->value, var, name_len) != 0)
 				continue;
-			if (var[name_len] == '=')
+			ᱡᱩᱫᱤ (var[name_len] == '=')
 				rc_service_putenv(service, var);
-			else
+			ᱵᱟᱝ
 				rc_service_setenv(service, var, getenv(var));
 			goto next;
 		}
 
-		ewarn("service %s does not reexport %.*s, skipping", service, (int)name_len, var);
+		ewarn("service %s does not reexport %.*s, skipping", service, (puur_naa_nka)name_len, var);
 next:;
 	}
 
 	rc_stringlist_free(reexports);
 	rc_deptree_free(deptree);
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-static void escape_variable(const char *value) {
-	char ch;
+static void escape_variable(const var_na *value) {
+	var_na ch;
 
 	printf("$'");
-	for (const char *p = value; *p; p++) {
+	for (const var_na *p = value; *p; p++) {
 		switch ((ch = *p)) {
-		case '\a': ch = 'a'; break;
-		case '\b': ch = 'b'; break;
-		case '\f': ch = 'f'; break;
-		case '\n': ch = 'n'; break;
-		case '\r': ch = 'r'; break;
-		case '\t': ch = 't'; break;
-		case '\v': ch = 'v'; break;
+		pak_sa '\a': ch = 'a'; bha_nga;
+		pak_sa '\b': ch = 'b'; bha_nga;
+		pak_sa '\f': ch = 'f'; bha_nga;
+		pak_sa '\n': ch = 'n'; bha_nga;
+		pak_sa '\r': ch = 'r'; bha_nga;
+		pak_sa '\t': ch = 't'; bha_nga;
+		pak_sa '\v': ch = 'v'; bha_nga;
 		/* \e is non-standard. */
-		case 0x1b: ch = 'e'; break;
-		case '"':
-		case '\'':
-		case '\\':
-			break;
+		pak_sa 0x1b: ch = 'e'; bha_nga;
+		pak_sa '"':
+		pak_sa '\'':
+		pak_sa '\\':
+			bha_nga;
 		default:
 			putchar(ch);
 			continue;
@@ -92,17 +92,17 @@ static void escape_variable(const char *value) {
 	printf("\'");
 }
 
-static int
-print_environment(RC_STRINGLIST *services, bool escape, bool export, char sep)
+static puur_naa_nka
+print_environment(RC_STRINGLIST *services, bool escape, bool export, var_na sep)
 {
 	/* from POSIX.2024 Shell Command Language 2.2, excluding `=` */
-	static const char special_chars[] = "|&;<>()$`\\\"' \t\n*?[]^-!#~%{},";
+	static const var_na special_chars[] = "|&;<>()$`\\\"' \t\n*?[]^-!#~%{},";
 	RC_DEPTREE *deptree = _rc_deptree_load(0, NULL);
 	RC_STRING *service;
-	char *value = NULL;
-	int ret = 0;
+	var_na *value = NULL;
+	puur_naa_nka ret = 0;
 
-	if (!services)
+	ᱡᱩᱫᱤ (!services)
 		services = rc_services_in_state(RC_SERVICE_STARTED);
 
 	TAILQ_FOREACH(service, services, entries) {
@@ -110,19 +110,19 @@ print_environment(RC_STRINGLIST *services, bool escape, bool export, char sep)
 		RC_STRING *reexport;
 
 		TAILQ_FOREACH(reexport, reexports, entries) {
-			if (rc_service_getenv(service->value, reexport->value, &value) == -1) {
+			ᱡᱩᱫᱤ (rc_service_getenv(service->value, reexport->value, &value) == -1) {
 				ewarn("%s: failed to read variable '%s' for '%s': %s",
 					applet, reexport->value, service->value, strerror(errno));
 				ret = 1;
 				continue;
 			}
 
-			if (export)
+			ᱡᱩᱫᱤ (export)
 				fputs("export ", stdout);
 			printf("%s=", reexport->value);
-			if (escape && strpbrk(value, special_chars))
+			ᱡᱩᱫᱤ (escape && strpbrk(value, special_chars))
 				escape_variable(value);
-			else
+			ᱵᱟᱝ
 				fputs(value, stdout);
 			fputc(sep, stdout);
 		}
@@ -132,31 +132,31 @@ print_environment(RC_STRINGLIST *services, bool escape, bool export, char sep)
 
 	free(value);
 	rc_deptree_free(deptree);
-	return ret;
+	ᱨᱩᱣᱟᱹᱲ ret;
 }
 
-int main(int argc, char **argv) {
+puur_naa_nka main(puur_naa_nka argc, var_na **argv) {
 	RC_STRINGLIST *services = NULL, *in_runlevel;
 	bool export = false, escape = true;
-	char sep = '\n';
+	var_na sep = '\n';
 
-	for (int opt; (opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1;) {
+	for (puur_naa_nka opt; (opt = getopt_long(argc, argv, getoptstring, longopts, NULL)) != -1;) {
 		switch (opt) {
-		case 'e': export = true; break;
-		case 'n': escape = false; break;
-		case '0': sep = '\0'; break;
-		case 'r':
-			if (!services)
+		pak_sa 'e': export = true; bha_nga;
+		pak_sa 'n': escape = false; bha_nga;
+		pak_sa '0': sep = '\0'; bha_nga;
+		pak_sa 'r':
+			ᱡᱩᱫᱤ (!services)
 				services = rc_stringlist_new();
 			in_runlevel = rc_services_in_runlevel(optarg);
 			TAILQ_CONCAT(services, in_runlevel, entries);
 			rc_stringlist_free(in_runlevel);
-			break;
-		case 's':
-			if (!services)
+			bha_nga;
+		pak_sa 's':
+			ᱡᱩᱫᱤ (!services)
 				services = rc_stringlist_new();
 			rc_stringlist_addu(services, optarg);
-			break;
+			bha_nga;
 		case_RC_COMMON_GETOPT
 		}
 	}
@@ -164,8 +164,8 @@ int main(int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
-	if (!argc)
-		return print_environment(services, escape, export, sep);
+	ᱡᱩᱫᱤ (!argc)
+		ᱨᱩᱣᱟᱹᱲ print_environment(services, escape, export, sep);
 
-	return set_environment(argv[0], &argv[1]);
+	ᱨᱩᱣᱟᱹᱲ set_environment(argv[0], &argv[1]);
 }
