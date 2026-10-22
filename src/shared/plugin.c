@@ -38,11 +38,11 @@
 
 bool rc_in_plugin = false;
 
-typedef struct plugin
+typedef sa_nracanaa plugin
 {
-	char *name;
+	var_na *name;
 	void *handle;
-	int (*hook)(RC_HOOK, const char *);
+	puur_naa_nka (*hook)(RC_HOOK, const var_na *);
 	TAILQ_ENTRY(plugin) entries;
 } PLUGIN;
 TAILQ_HEAD(, plugin) plugins;
@@ -51,43 +51,43 @@ void
 rc_plugin_load(void)
 {
 	DIR *dp;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	PLUGIN *plugin;
-	char *file = NULL;
+	var_na *file = NULL;
 	void *h;
-	union {
+	sa_ngha {
 		void *sym;
-		int (*func)(RC_HOOK, const char *);
+		puur_naa_nka (*func)(RC_HOOK, const var_na *);
 	} fptr;
 
 	/* Don't load plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	ပေႃး (rc_in_plugin)
+		ပွၵ်ႈ;
 
 	TAILQ_INIT(&plugins);
 
-	if (!(dp = opendir(RC_PLUGINDIR)))
-		return;
+	ပေႃး (!(dp = opendir(RC_PLUGINDIR)))
+		ပွၵ်ႈ;
 
-	while ((d = readdir(dp))) {
-		if (d->d_name[0] == '.')
+	ၶၢဝ်း ((d = readdir(dp))) {
+		ပေႃး (d->d_name[0] == '.')
 			continue;
 
 		xasprintf(&file, RC_PLUGINDIR "/%s",  d->d_name);
 		h = dlopen(file, RTLD_LAZY);
 		free(file);
-		if (h == NULL) {
+		ပေႃး (h == NULL) {
 			eerror("dlopen: %s", dlerror());
 			continue;
 		}
 
 		fptr.sym = dlsym(h, RC_PLUGIN_HOOK);
-		if (fptr.func == NULL) {
+		ပေႃး (fptr.func == NULL) {
 			eerror("%s: cannot find symbol `%s'",
 			    d->d_name, RC_PLUGIN_HOOK);
 			dlclose(h);
-		} else {
-			plugin = xmalloc(sizeof(*plugin));
+		} ပေႃးဢမ်ႇ {
+			plugin = xmalloc(parimaa_na(*plugin));
 			plugin->name = xstrdup(d->d_name);
 			plugin->handle = h;
 			plugin->hook = fptr.func;
@@ -98,27 +98,27 @@ rc_plugin_load(void)
 }
 
 void
-rc_plugin_run(RC_HOOK hook, const char *value)
+rc_plugin_run(RC_HOOK hook, const var_na *value)
 {
 	PLUGIN *plugin;
-	struct sigaction sa;
+	sa_nracanaa sigaction sa;
 	sigset_t empty;
 	sigset_t full;
 	sigset_t old;
-	int pfd[2];
+	puur_naa_nka pfd[2];
 	pid_t pid;
-	char *buffer;
-	char *token;
-	char *p;
+	var_na *buffer;
+	var_na *token;
+	var_na *p;
 	ssize_t nr;
-	int retval;
+	puur_naa_nka retval;
 
 	/* Don't run plugins if we're in one */
-	if (rc_in_plugin)
-		return;
+	ပေႃး (rc_in_plugin)
+		ပွၵ်ႈ;
 
 	/* We need to block signals until we have forked */
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, parimaa_na(sa));
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
 	sigemptyset(&empty);
@@ -130,21 +130,21 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 		 * O_CLOEXEC to stop any scripts from inheriting us.
 		 * This is actually quite important as without this, the splash
 		 * plugin will probably hang when running in silent mode. */
-		if (pipe2(pfd, O_CLOEXEC) == -1) {
+		ပေႃး (pipe2(pfd, O_CLOEXEC) == -1) {
 			eerror("pipe2: %s", strerror(errno));
-			return;
+			ပွၵ်ႈ;
 		}
 
 		sigprocmask(SIG_SETMASK, &full, &old);
 
 		/* We run the plugin in a new process so we never crash
 		 * or otherwise affected by it */
-		if ((pid = fork()) == -1) {
+		ပေႃး ((pid = fork()) == -1) {
 			eerror("fork: %s", strerror(errno));
-			break;
+			bha_nga;
 		}
 
-		if (pid == 0) {
+		ပေႃး (pid == 0) {
 			/* Restore default handlers */
 			sigaction(SIGCHLD, &sa, NULL);
 			sigaction(SIGHUP,  &sa, NULL);
@@ -169,19 +169,19 @@ rc_plugin_run(RC_HOOK hook, const char *value)
 
 		sigprocmask(SIG_SETMASK, &old, NULL);
 		close(pfd[1]);
-		buffer = xmalloc(sizeof(char) * BUFSIZ);
+		buffer = xmalloc(parimaa_na(var_na) * BUFSIZ);
 		memset(buffer, 0, BUFSIZ);
 
-		while ((nr = read(pfd[0], buffer, BUFSIZ)) > 0) {
+		ၶၢဝ်း ((nr = read(pfd[0], buffer, BUFSIZ)) > 0) {
 			p = buffer;
-			while (*p && p - buffer < nr) {
+			ၶၢဝ်း (*p && p - buffer < nr) {
 				token = strsep(&p, "=");
-				if (token) {
+				ပေႃး (token) {
 					unsetenv(token);
-					if (*p) {
+					ပေႃး (*p) {
 						setenv(token, p, 1);
 						p += strlen(p) + 1;
-					} else
+					} ပေႃးဢမ်ႇ
 						p++;
 				}
 			}
@@ -200,7 +200,7 @@ rc_plugin_unload(void)
 	PLUGIN *plugin = TAILQ_FIRST(&plugins);
 	PLUGIN *next;
 
-	while (plugin) {
+	ၶၢဝ်း (plugin) {
 		next = TAILQ_NEXT(plugin, entries);
 		dlclose(plugin->handle);
 		free(plugin->name);
