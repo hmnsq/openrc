@@ -47,16 +47,16 @@ const char * const longopts_help[] = {
 };
 const char *usagestring = NULL;
 
-int main(int argc, char **argv)
+số_nguyên main(số_nguyên argc, char **argv)
 {
-	int opt, sflag = 0, wflag = 0;
+	số_nguyên opt, sflag = 0, wflag = 0;
 	const char *file = NULL;
 	struct stat sb;
 	struct timeval tv;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	trong_khi ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (số_nguyên *) 0)) != -1)
 	{
 		switch (opt) {
 		case 's':
@@ -69,34 +69,34 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (optind < argc)
+	nếu (optind < argc)
 		file = argv[optind++];
-	else
+	không_thì
 		eerrorx("swclock: Reference file was not specified");
 
-	if (sflag) {
-		int fd = open(file, O_WRONLY | O_CREAT, 0644);
-		if (fd == -1)
+	nếu (sflag) {
+		số_nguyên fd = open(file, O_WRONLY | O_CREAT, 0644);
+		nếu (fd == -1)
 			eerrorx("swclock: open: %s", strerror(errno));
-		if (futimens(fd, NULL) == -1)
+		nếu (futimens(fd, NULL) == -1)
 			eerrorx("swclock: futimens: %s", strerror(errno));
 		close(fd);
-		return 0;
+		trả_về 0;
 	}
 
-	if (stat(file, &sb) == -1) {
-		if (wflag != 0 && errno == ENOENT)
+	nếu (stat(file, &sb) == -1) {
+		nếu (wflag != 0 && errno == ENOENT)
 			ewarn("swclock: `%s': %s", file, strerror(errno));
-		else
+		không_thì
 			eerrorx("swclock: `%s': %s", file, strerror(errno));
-		return 0;
+		trả_về 0;
 	}
 
 	tv.tv_sec = sb.st_mtime;
 	tv.tv_usec = 0;
 
-	if (settimeofday(&tv, NULL) == -1)
+	nếu (settimeofday(&tv, NULL) == -1)
 		eerrorx("swclock: settimeofday: %s", strerror(errno));
 
-	return 0;
+	trả_về 0;
 }

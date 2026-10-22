@@ -14,17 +14,17 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+số_nguyên main(số_nguyên argc, char **argv)
 {
-	int i;
+	số_nguyên i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	nếu (argc < 3)
+		trả_về EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	cho (i = 2; i < argc; ++i)
+		nếu (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			trả_về EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	trả_về EXIT_SUCCESS;
 }

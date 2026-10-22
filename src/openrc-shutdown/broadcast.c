@@ -45,21 +45,21 @@ static void getuidtty(char **userp, char **ttyp)
 	char		*ttynm = NULL;
 
 	uid = getuid();
-	if ((pwd = getpwuid(uid)) != NULL) {
+	nếu ((pwd = getpwuid(uid)) != NULL) {
 		uidbuf[0] = 0;
 		strncat(uidbuf, pwd->pw_name, sizeof(uidbuf) - 1);
-	} else {
-		if (uid)
-			sprintf(uidbuf, "uid %d", (int) uid);
-		else
+	} không_thì {
+		nếu (uid)
+			sprintf(uidbuf, "uid %d", (số_nguyên) uid);
+		không_thì
 			sprintf(uidbuf, "root");
 	}
 
-	if ((tty = ttyname(0)) != NULL) {
+	nếu ((tty = ttyname(0)) != NULL) {
 		const size_t plen = strlen(_PATH_DEV);
-		if (strncmp(tty, _PATH_DEV, plen) == 0) {
+		nếu (strncmp(tty, _PATH_DEV, plen) == 0) {
 			tty += plen;
-			if (tty[0] == '/')
+			nếu (tty[0] == '/')
 				tty++;
 		}
 		xasprintf(&ttynm, "(%s) ", tty);
@@ -72,16 +72,16 @@ static void getuidtty(char **userp, char **ttyp)
 /*
  *	Check whether the given filename looks like a tty device.
  */
-static int file_isatty(const char *fname)
+static số_nguyên file_isatty(const char *fname)
 {
 	struct stat		st;
-	int			major;
+	số_nguyên			major;
 
-	if (stat(fname, &st) < 0)
-		return 0;
+	nếu (stat(fname, &st) < 0)
+		trả_về 0;
 
-	if (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
-		return 0;
+	nếu (st.st_nlink != 1 || !S_ISCHR(st.st_mode))
+		trả_về 0;
 
 	/*
 	 *	It would be an impossible task to list all major/minors
@@ -90,12 +90,12 @@ static int file_isatty(const char *fname)
 	 *	printers and tapes.
 	 */
 	major = major(st.st_dev);
-	if (major == 1 || major == 2 || major == 6 || major == 9 ||
+	nếu (major == 1 || major == 2 || major == 6 || major == 9 ||
 	    major == 12 || major == 16 || major == 21 || major == 27 ||
 	    major == 37 || major == 96 || major == 97 || major == 206 ||
 	    major == 230)
-		return 0;
-	return 1;
+		trả_về 0;
+	trả_về 1;
 }
 
 /*
@@ -112,8 +112,8 @@ void broadcast(char *text)
 	char *date;
 	char *p;
 	char *line = NULL;
-	int len;
-	int fd;
+	số_nguyên len;
+	số_nguyên fd;
 	char *term = NULL;
 	struct utmpx *utmp;
 
@@ -129,7 +129,7 @@ void broadcast(char *text)
 	time(&t);
 	date = ctime(&t);
 	p = strchr(date, '\n');
-	if (p)
+	nếu (p)
 		*p = 0;
 
 	len = xasprintf(&line, "\007\r\nBroadcast message from %s@%s %s(%s):\r\n\r\n%s",
@@ -139,26 +139,26 @@ void broadcast(char *text)
 	/*
 	 *	Fork to avoid hanging in a write()
 	 */
-	if (fork() != 0)
-		return;
+	nếu (fork() != 0)
+		trả_về;
 
 	setutxent();
 
-	while ((utmp = getutxent()) != NULL) {
-		if (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
+	trong_khi ((utmp = getutxent()) != NULL) {
+		nếu (utmp->ut_type != USER_PROCESS || utmp->ut_user[0] == 0)
 			continue;
-		if (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
+		nếu (strncmp(utmp->ut_line, _PATH_DEV, strlen(_PATH_DEV)) == 0)
 			xasprintf(&term, "%s", utmp->ut_line);
-		else
+		không_thì
 			xasprintf(&term, "%s%s", _PATH_DEV, utmp->ut_line);
-		if (strstr(term, "/../")) {
+		nếu (strstr(term, "/../")) {
 			free(term);
 			continue;
 		}
 
 		/* Open it non-delay */
-		if (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
-			if (isatty(fd))
+		nếu (file_isatty(term) && (fd = open(term, O_WRONLY|O_NDELAY|O_NOCTTY)) >= 0) {
+			nếu (isatty(fd))
 				write(fd, line, len);
 			close(fd);
 		}

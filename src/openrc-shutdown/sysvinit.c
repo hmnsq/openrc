@@ -28,38 +28,38 @@
 
 static void sysvinit_send_cmd(struct init_request *request)
 {
-	int fd;
+	số_nguyên fd;
 	char *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	nếu (fd < 0) {
+		nếu (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		trả_về;
 	}
 	p = (char *) request;
 	bytes = sizeof(*request);
 	do {
 		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
+		nếu (r < 0) {
+			nếu ((errno == EAGAIN) || (errno == EINTR))
 				continue;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			trả_về;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} trong_khi (bytes > 0);
 }
 
 void sysvinit_runlevel(char rl)
 {
 	struct init_request request;
 
-	if (!rl)
-		return;
+	nếu (!rl)
+		trả_về;
 
 	request = (struct init_request) {
 		.magic = INIT_MAGIC,
@@ -68,7 +68,7 @@ void sysvinit_runlevel(char rl)
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		trả_về;
 }
 
 /*
@@ -84,19 +84,19 @@ void sysvinit_setenv(const char *name, const char *value)
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
+	nếu (value)
 		vl = strlen(value);
-else
+không_thì
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	nếu (nl + vl + 3 >= (số_nguyên)sizeof(request.i.data))
+		trả_về;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	nếu (value) {
 		request.i.data[nl] = '=';
 		memcpy(request.i.data + nl + 1, value, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	trả_về;
 }

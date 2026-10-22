@@ -24,47 +24,47 @@
 const char *applet = NULL;
 extern char **environ;
 
-int main(int argc, char **argv)
+số_nguyên main(số_nguyên argc, char **argv)
 {
 	char *service = getenv("RC_SVCNAME");
 	enum { GET, SET, EXPORT } action;
 	char *option = NULL;
 
 	applet = basename_c(argv[0]);
-	if (service == NULL)
+	nếu (service == NULL)
 		eerrorx("%s: no service specified", applet);
 
-	if (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
+	nếu (strcmp(applet, "service_get_value") == 0 || strcmp(applet, "get_options") == 0)
 		action = GET;
-	else if (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
+	không_thì nếu (strcmp(applet, "service_set_value") == 0 || strcmp(applet, "save_options") == 0)
 		action = SET;
-	else if (strcmp(applet, "service_export") == 0)
+	không_thì nếu (strcmp(applet, "service_export") == 0)
 		action = EXPORT;
-	else
+	không_thì
 		eerrorx("%s: unknown applet", applet);
 
-	if (argc < 2 || !argv[1] || *argv[1] == '\0')
+	nếu (argc < 2 || !argv[1] || *argv[1] == '\0')
 		eerrorx("%s: no %s specified", applet, action == EXPORT ? "variable" : "option");
 
 	switch (action) {
 	case GET:
-		if (!(option = rc_service_value_get(service, argv[1])))
-			return EXIT_FAILURE;
+		nếu (!(option = rc_service_value_get(service, argv[1])))
+			trả_về EXIT_FAILURE;
 		printf("%s", option);
 		free(option);
-		return EXIT_SUCCESS;
+		trả_về EXIT_SUCCESS;
 	case SET:
-		return rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
+		trả_về rc_service_value_set(service, argv[1], argv[2]) ? EXIT_SUCCESS : EXIT_FAILURE;
 	case EXPORT:
-		for (int i = 1; i < argc; i++) {
+		cho (số_nguyên i = 1; i < argc; i++) {
 			char *var;
-			if (rc_service_getenv(service, argv[i], NULL) > 0)
+			nếu (rc_service_getenv(service, argv[i], NULL) > 0)
 				continue;
-			else if ((var = getenv(argv[i])))
+			không_thì nếu ((var = getenv(argv[i])))
 				rc_service_setenv(service, argv[i], var);
-			else
+			không_thì
 				ewarn("%s: Missing reexport variable '%s'", service, argv[i]);
 		}
-		return EXIT_SUCCESS;
+		trả_về EXIT_SUCCESS;
 	}
 }

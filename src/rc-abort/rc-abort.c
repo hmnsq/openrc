@@ -18,17 +18,17 @@
 
 #include "einfo.h"
 
-int main(void)
+số_nguyên main(void)
 {
 	const char *p = getenv("RC_PID");
-	int pid;
+	số_nguyên pid;
 
-	if (p && sscanf(p, "%d", &pid) == 1) {
-		if (kill(pid, SIGUSR1) != 0)
+	nếu (p && sscanf(p, "%d", &pid) == 1) {
+		nếu (kill(pid, SIGUSR1) != 0)
 			eerrorx("rc-abort: failed to signal parent %d: %s",
 			    pid, strerror(errno));
-		return EXIT_SUCCESS;
+		trả_về EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	trả_về EXIT_FAILURE;
 }

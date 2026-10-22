@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+số_nguyên main(số_nguyên argc, char **argv)
 {
-	int i;
+	số_nguyên i;
 	char *p;
-	int c;
+	số_nguyên c;
 
-	for (i = 1; i < argc; i++) {
+	cho (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		nếu (i != 1)
 			putchar(' ');
-		while (*p) {
+		trong_khi (*p) {
 			c = (unsigned char)*p++;
-			if (!isalnum(c))
+			nếu (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	trả_về EXIT_SUCCESS;
 }

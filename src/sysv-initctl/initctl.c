@@ -15,10 +15,10 @@
 
 static bool init_halt = false;
 
-static void sysvinit_runlevel(int runlevel)
+static void sysvinit_runlevel(số_nguyên runlevel)
 {
 	const char *cmd;
-	int fifo;
+	số_nguyên fifo;
 
 	switch (runlevel) {
 	case '0':
@@ -34,26 +34,26 @@ static void sysvinit_runlevel(int runlevel)
 	case '4':
 	case '5':
 		/* TODO: switch to default runlevel? */
-		return;
+		trả_về;
 	case '6':
 		/* RB_KEXEC: Gentoo inittab calls /sbin/reboot -k */
 		cmd = "kexec";
 		break;
 	case 'Q':
 	case 'q':
-		return;
+		trả_về;
 	case 'U':
 	case 'u':
 		cmd = "reexec";
 		break;
 	}
 
-	if ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
+	nếu ((fifo = open(RC_INIT_FIFO, O_WRONLY | O_NONBLOCK)) == -1) {
 		syslog(LOG_ERR, "open: %s", strerror(errno));
-		return;
+		trả_về;
 	}
 
-	if (write(fifo, cmd, strlen(cmd) + 1) == -1)
+	nếu (write(fifo, cmd, strlen(cmd) + 1) == -1)
 		syslog(LOG_ERR, "write: %s", strerror(errno));
 	close(fifo);
 }
@@ -61,40 +61,40 @@ static void sysvinit_runlevel(int runlevel)
 static void sysvinit_setenv(char *data, size_t size)
 {
 	data[size - 1] = '\0';
-	for (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
+	cho (char *end = data + size; data < end && *data; data += strlen(data) + 1) {
 		/* We only care about the INIT_HALT variable */
-		if (!strcmp(data, "INIT_HALT=HALT"))
+		nếu (!strcmp(data, "INIT_HALT=HALT"))
 			init_halt = true;
-		else if (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
+		không_thì nếu (!strcmp(data, "INIT_HALT") || !strncmp(data, "INIT_HALT=", 10))
 			init_halt = false;
 	}
 }
 
-int main(void) {
-	int fifo;
+số_nguyên main(void) {
+	số_nguyên fifo;
 
 	openlog("sysv-initctl", 0, LOG_DAEMON);
 	symlink("/run/initctl", "/dev/initctl");
-	if ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
+	nếu ((fifo = open_rwfifo("/run/initctl", false)) == -1) {
 		syslog(LOG_ERR, "open_rwfifo: %s", strerror(errno));
-		return 1;
+		trả_về 1;
 	}
 
-	for (;;) {
+	cho (;;) {
 		struct init_request req;
 		ssize_t count = read(fifo, &req, sizeof(req));
 
-		if (count == -1) {
+		nếu (count == -1) {
 			syslog(LOG_ERR, "read: %s", strerror(errno));
 			continue;
 		}
 
-		if (count != sizeof(req)) {
+		nếu (count != sizeof(req)) {
 			syslog(LOG_ERR, "read: short count");
 			continue;
 		}
 
-		if (req.magic != INIT_MAGIC) {
+		nếu (req.magic != INIT_MAGIC) {
 			syslog(LOG_ERR, "invalid magic bytes");
 			continue;
 		}

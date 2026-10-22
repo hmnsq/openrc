@@ -54,7 +54,7 @@ extern char **environ;
 bool
 rc_conf_yesno(const char *setting)
 {
-	return rc_yesno(rc_conf_value (setting));
+	trả_về rc_yesno(rc_conf_value (setting));
 }
 
 static const char *const env_allowlist[] = {
@@ -76,10 +76,10 @@ static const char *const usrenv_allowlist[] = {
 static bool
 env_allowed(const char *const list[], const char *value)
 {
-	for (size_t i = 0; list[i]; i++)
-		if (fnmatch(list[i], value, FNM_NOESCAPE | FNM_PERIOD) == 0)
-			return true;
-	return false;
+	cho (size_t i = 0; list[i]; i++)
+		nếu (fnmatch(list[i], value, FNM_NOESCAPE | FNM_PERIOD) == 0)
+			trả_về true;
+	trả_về false;
 }
 
 void
@@ -99,16 +99,16 @@ env_filter(void)
 	 * If '*' is an entry in rc_env_allow, do nothing as we are to pass
 	 * through all environment variables.
 	 */
-	if (rc_stringlist_find(env_allow, "*")) {
+	nếu (rc_stringlist_find(env_allow, "*")) {
 		rc_stringlist_free(env_allow);
-		return;
+		trả_về;
 	}
 
 	xasprintf(&profile_path, "%s/profile.env", rc_sysconfdir());
 	profile = rc_config_load(profile_path);
 	free(profile_path);
 
-	if (rc_is_user()) {
+	nếu (rc_is_user()) {
 		RC_STRINGLIST *usrprofile;
 		xasprintf(&profile_path, "%s/profile.env", rc_usrconfdir());
 		usrprofile = rc_config_load(profile_path);
@@ -119,10 +119,10 @@ env_filter(void)
 
 	/* Copy the env and work from this so we can manipulate it safely */
 	env_list = rc_stringlist_new();
-	while (environ && environ[i]) {
+	trong_khi (environ && environ[i]) {
 		env = rc_stringlist_add(env_list, environ[i++]);
 		e = strchr(env->value, '=');
-		if (e)
+		nếu (e)
 			*e = '\0';
 	}
 
@@ -130,14 +130,14 @@ env_filter(void)
 		RC_STRING *var;
 
 		/* Check the whitelist */
-		if (env_allowed(env_allowlist, env->value))
+		nếu (env_allowed(env_allowlist, env->value))
 			continue;
-		if (rc_is_user() && env_allowed(usrenv_allowlist, env->value))
+		nếu (rc_is_user() && env_allowed(usrenv_allowlist, env->value))
 			continue;
 
 		/* Check our user defined list */
 		TAILQ_FOREACH(var, env_allow, entries)
-			if (fnmatch(var->value, env->value, FNM_NOESCAPE | FNM_PERIOD) == 0)
+			nếu (fnmatch(var->value, env->value, FNM_NOESCAPE | FNM_PERIOD) == 0)
 				goto next;
 
 		/* OK, not allowed! */
@@ -149,7 +149,7 @@ next:;
 	TAILQ_FOREACH(env, profile, entries) {
 		e = strchr(env->value, '=');
 		*e = '\0';
-		if (!getenv(env->value))
+		nếu (!getenv(env->value))
 			setenv(env->value, e + 1, 1);
 	}
 
@@ -163,14 +163,14 @@ default_runlevel(void)
 {
 	char *runlevel = rc_runlevel_get();
 
-	if (!runlevel)
+	nếu (!runlevel)
 		runlevel = xstrdup(rc_conf_value("rc_default_runlevel"));
-	if (!runlevel || !*runlevel) {
+	nếu (!runlevel || !*runlevel) {
 		free(runlevel);
 		runlevel = xstrdup(RC_LEVEL_DEFAULT);
 	}
 
-	return runlevel;
+	trả_về runlevel;
 }
 
 void
@@ -197,21 +197,21 @@ env_config(void)
 	/* Ensure our PATH is prefixed with the system locations first
 	   for a little extra security */
 	path = getenv("PATH");
-	if (!path)
+	nếu (!path)
 		setenv("PATH", RC_PATH_PREFIX, 1);
-	else if (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
+	không_thì nếu (strncmp (RC_PATH_PREFIX, path, pplen) != 0) {
 		l = strlen(path) + pplen + 3;
 		e = p = xmalloc(sizeof(char) * l);
 		p += snprintf(p, l, "%s", RC_PATH_PREFIX);
 
 		/* Now go through the env var and only add bits not in our
 		 * PREFIX */
-		while ((token = strsep(&path, ":"))) {
+		trong_khi ((token = strsep(&path, ":"))) {
 			np = npp = xstrdup(RC_PATH_PREFIX);
-			while ((tok = strsep(&npp, ":")))
-				if (strcmp(tok, token) == 0)
+			trong_khi ((tok = strsep(&npp, ":")))
+				nếu (strcmp(tok, token) == 0)
 					break;
-			if (!tok)
+			nếu (!tok)
 				p += snprintf(p, l - (p - e), ":%s", token);
 			free (np);
 		}
@@ -221,18 +221,18 @@ env_config(void)
 		free(e);
 	}
 
-	if (!rc_is_user()) {
+	nếu (!rc_is_user()) {
 		setenv("RC_CACHEDIR", "/var/cache/rc", 1);
-	} else {
+	} không_thì {
 		const char *cache_home = getenv("XDG_CACHE_HOME");
 		char *cachedir = NULL;
 
-		if (cache_home)
+		nếu (cache_home)
 			xasprintf(&cachedir, "%s/rc", cache_home);
-		else if ((cache_home = getenv("HOME")))
+		không_thì nếu ((cache_home = getenv("HOME")))
 			xasprintf(&cachedir, "%s/.cache/rc", cache_home);
 
-		if (cachedir)
+		nếu (cachedir)
 			setenv("RC_CACHEDIR", cachedir, 1);
 
 		free(cachedir);
@@ -250,8 +250,8 @@ env_config(void)
 
 	fp = xopen_memstream(&path, &size);
 	fputs("RC_PATH=", fp);
-	for (bool first = true; *init_path; init_path++, first = false) {
-		if (!first)
+	cho (bool first = true; *init_path; init_path++, first = false) {
+		nếu (!first)
 			fputc(':', fp);
 		fputs(*init_path, fp);
 	}
@@ -263,59 +263,59 @@ env_config(void)
 
 	/* krunlevel is a system-wide override; it never applies to
 	 * user sessions. */
-	if (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
-		if (xgetline(&buffer, &size, fp) != -1)
+	nếu (!rc_is_user() && (fp = fopen(RC_KRUNLEVEL, "r"))) {
+		nếu (xgetline(&buffer, &size, fp) != -1)
 			setenv("RC_DEFAULTLEVEL", buffer, 1);
-		else
+		không_thì
 			setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
 		free(buffer);
 		fclose(fp);
-	} else {
+	} không_thì {
 		setenv("RC_DEFAULTLEVEL", default_runlevel(), 1);
 	}
 
-	if (sys)
+	nếu (sys)
 		setenv("RC_SYS", sys, 1);
 
 	/* Some scripts may need to take a different code path if
 	   Linux/FreeBSD, etc
 	   To save on calling uname, we store it in an environment variable */
-	if (uname(&uts) == 0)
+	nếu (uname(&uts) == 0)
 		setenv("RC_UNAME", uts.sysname, 1);
 
 	/* Be quiet or verbose as necessary */
-	if (rc_conf_yesno("rc_quiet"))
+	nếu (rc_conf_yesno("rc_quiet"))
 		setenv("EINFO_QUIET", "YES", 1);
-	if (rc_conf_yesno("rc_verbose"))
+	nếu (rc_conf_yesno("rc_verbose"))
 		setenv("EINFO_VERBOSE", "YES", 1);
 
 	errno = 0;
-	if ((!rc_conf_yesno("rc_color") && errno == 0) ||
+	nếu ((!rc_conf_yesno("rc_color") && errno == 0) ||
 	    rc_conf_yesno("rc_nocolor"))
 		setenv("EINFO_COLOR", "NO", 1);
 }
 
-int
-signal_setup(int sig, void (*handler)(int))
+số_nguyên
+signal_setup(số_nguyên sig, void (*handler)(số_nguyên))
 {
 	struct sigaction sa;
 
 	memset(&sa, 0, sizeof (sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = handler;
-	return sigaction(sig, &sa, NULL);
+	trả_về sigaction(sig, &sa, NULL);
 }
 
-int
+số_nguyên
 svc_lock(const char *applet, bool ignore_lock_failure)
 {
-	int fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
+	số_nguyên fd = openat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, O_WRONLY | O_CREAT | O_NONBLOCK, 0664);
 
-	if (fd == -1)
-		return -1;
-	if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
-		int saved_errno = errno;
-		if (ignore_lock_failure) {
+	nếu (fd == -1)
+		trả_về -1;
+	nếu (flock(fd, LOCK_EX | LOCK_NB) == -1) {
+		số_nguyên saved_errno = errno;
+		nếu (ignore_lock_failure) {
 			/* Two services with a need b, and b's start()
 			 * calling restart --no-deps on a would cause
 			 * harmless errors: just ignore them.
@@ -326,17 +326,17 @@ svc_lock(const char *applet, bool ignore_lock_failure)
 		eerror("Call to flock failed: %s", strerror(errno));
 		close(fd);
 		errno = saved_errno;
-		return -1;
+		trả_về -1;
 	}
-	return fd;
+	trả_về fd;
 }
 
-int
-svc_unlock(const char *applet, int fd)
+số_nguyên
+svc_unlock(const char *applet, số_nguyên fd)
 {
 	unlinkat(rc_dirfd(RC_DIR_EXCLUSIVE), applet, 0);
 	close(fd);
-	return -1;
+	trả_về -1;
 }
 
 pid_t
@@ -344,17 +344,17 @@ exec_service(const char *service, const char *arg)
 {
 	char *file, sfd[32];
 	const char *argv[] = { service, "--lockfd", sfd, arg, NULL };
-	int fd = svc_lock(basename_c(service), false);
+	số_nguyên fd = svc_lock(basename_c(service), false);
 	posix_spawnattr_t chldmask;
 	sigset_t empty;
 	pid_t pid = 0;
 
-	if (fd == -1)
-		return -1;
+	nếu (fd == -1)
+		trả_về -1;
 	snprintf(sfd, sizeof(sfd), "%d", fd);
 
 	file = rc_service_resolve(service);
-	if (access(file, F_OK) != 0) {
+	nếu (access(file, F_OK) != 0) {
 		rc_service_mark(service, RC_SERVICE_STOPPED);
 		svc_unlock(basename_c(service), fd);
 		goto out;
@@ -369,7 +369,7 @@ exec_service(const char *service, const char *arg)
 	posix_spawnattr_setflags(&chldmask, POSIX_SPAWN_SETSIGMASK);
 	posix_spawnattr_setsigmask(&chldmask, &empty);
 
-	if ((errno = posix_spawn(&pid, file, NULL, &chldmask, UNCONST(argv), environ))) {
+	nếu ((errno = posix_spawn(&pid, file, NULL, &chldmask, UNCONST(argv), environ))) {
 		fprintf(stderr, "posix_spawn: %s\n", strerror(errno));
 		svc_unlock(basename_c(service), fd);
 	}
@@ -379,67 +379,67 @@ exec_service(const char *service, const char *arg)
 
 out:
 	free(file);
-	return pid;
+	trả_về pid;
 }
 
-int
+số_nguyên
 parse_mode(mode_t *mode, char *text)
 {
 	char *p;
 	unsigned long l;
 
 	/* Check for a numeric mode */
-	if ((*text - '0') < 8) {
+	nếu ((*text - '0') < 8) {
 		l = strtoul(text, &p, 8);
-		if (*p || l > 07777U) {
+		nếu (*p || l > 07777U) {
 			errno = EINVAL;
-			return -1;
+			trả_về -1;
 		}
 		*mode = (mode_t) l;
-		return 0;
+		trả_về 0;
 	}
 
 	/* We currently don't check g+w type stuff */
 	errno = EINVAL;
-	return -1;
+	trả_về -1;
 }
 
-RC_DEPTREE * _rc_deptree_load(int force, int *regen)
+RC_DEPTREE * _rc_deptree_load(số_nguyên force, số_nguyên *regen)
 {
-	int fd;
-	int retval;
-	int serrno = errno;
-	int merrno;
+	số_nguyên fd;
+	số_nguyên retval;
+	số_nguyên serrno = errno;
+	số_nguyên merrno;
 	time_t t;
 	char file[PATH_MAX];
 	struct stat st;
 	FILE *fp;
 
 	t = 0;
-	if (rc_deptree_update_needed(&t, file) || force != 0) {
-		int svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
+	nếu (rc_deptree_update_needed(&t, file) || force != 0) {
+		số_nguyên svcdirfd = rc_dirfd(RC_DIR_SVCDIR);
 
 		/* Test if we have permission to update the deptree */
 		fd = openat(svcdirfd, "deptree", O_WRONLY);
 		merrno = errno;
 		errno = serrno;
-		if (fd == -1 && merrno == EACCES)
-			return rc_deptree_load();
+		nếu (fd == -1 && merrno == EACCES)
+			trả_về rc_deptree_load();
 		close(fd);
 
-		if (regen)
+		nếu (regen)
 			*regen = 1;
 		ebegin("Caching service dependencies");
 		retval = rc_deptree_update() ? 0 : -1;
 		eend(retval, "Failed to update the dependency tree");
 
-		if (retval == 0) {
-			if (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
+		nếu (retval == 0) {
+			nếu (fstatat(svcdirfd, "deptree", &st, 0) != 0) {
 				eerror("stat(%s): %s/deptree", rc_svcdir(), strerror(errno));
-				return NULL;
+				trả_về NULL;
 			}
 
-			if (st.st_mtime >= t) {
+			nếu (st.st_mtime >= t) {
 				unlinkat(svcdirfd, "clock-skewed", 0);
 				goto out;
 			}
@@ -448,18 +448,18 @@ RC_DEPTREE * _rc_deptree_load(int force, int *regen)
 			eerrorn("Adjusting mtime of '%s/deptree' to %s", rc_svcdir(), ctime(&t));
 			utimensat(rc_dirfd(RC_DIR_SVCDIR), "deptree", (struct timespec[]) {{ .tv_sec = t }, { .tv_sec = t }}, 0);
 
-			if ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
+			nếu ((fp = do_fopenat(svcdirfd, "clock-skewed", O_WRONLY | O_CREAT | O_TRUNC))) {
 				fprintf(fp, "%s\n", file);
 				fclose(fp);
 			}
 		}
 
 out:
-		if (force == -1 && regen != NULL)
+		nếu (force == -1 && regen != NULL)
 			*regen = retval;
 	}
 
-	return rc_deptree_load();
+	trả_về rc_deptree_load();
 }
 
 static const struct {
@@ -480,10 +480,10 @@ static const struct {
 RC_SERVICE lookup_service_state(const char *service)
 {
 	size_t i;
-	for (i = 0; i < ARRAY_SIZE(service_bits); ++i)
-		if (!strcmp(service, service_bits[i].name))
-			return service_bits[i].bit;
-	return 0;
+	cho (i = 0; i < ARRAY_SIZE(service_bits); ++i)
+		nếu (!strcmp(service, service_bits[i].name))
+			trả_về service_bits[i].bit;
+	trả_về 0;
 }
 
 void from_time_t(char *time_string, time_t tv)
@@ -493,19 +493,19 @@ void from_time_t(char *time_string, time_t tv)
 
 time_t to_time_t(char *timestring)
 {
-	int check = 0;
-	int year = 0;
-	int month = 0;
-	int day = 0;
-	int hour = 0;
-	int min = 0;
-	int sec = 0;
+	số_nguyên check = 0;
+	số_nguyên year = 0;
+	số_nguyên month = 0;
+	số_nguyên day = 0;
+	số_nguyên hour = 0;
+	số_nguyên min = 0;
+	số_nguyên sec = 0;
 	struct tm breakdown = {0};
 	time_t result = -1;
 
 	check = sscanf(timestring, "%4d-%2d-%2d %2d:%2d:%2d",
 			&year, &month, &day, &hour, &min, &sec);
-	if (check == 6) {
+	nếu (check == 6) {
 		breakdown.tm_year = year - 1900; /* years since 1900 */
 		breakdown.tm_mon = month - 1;
 		breakdown.tm_mday = day;
@@ -515,7 +515,7 @@ time_t to_time_t(char *timestring)
 		breakdown.tm_isdst = -1;
 		result = mktime(&breakdown);
 	}
-	return result;
+	trả_về result;
 }
 
 pid_t get_pid(const char *applet,const char *pidfile)
@@ -523,67 +523,67 @@ pid_t get_pid(const char *applet,const char *pidfile)
 	FILE *fp;
 	pid_t pid;
 
-	if (!pidfile)
-		return -1;
+	nếu (!pidfile)
+		trả_về -1;
 
-	if ((fp = fopen(pidfile, "r")) == NULL) {
+	nếu ((fp = fopen(pidfile, "r")) == NULL) {
 		ewarnv("%s: fopen `%s': %s", applet, pidfile, strerror(errno));
-		return -1;
+		trả_về -1;
 	}
 
-	if (fscanf(fp, "%d", &pid) != 1) {
+	nếu (fscanf(fp, "%d", &pid) != 1) {
 		ewarnv("%s: no pid found in `%s'", applet, pidfile);
 		fclose(fp);
-		return -1;
+		trả_về -1;
 	}
 
 	fclose(fp);
 
-	return pid;
+	trả_về pid;
 }
 
 struct notify notify_parse(const char *applet, const char *notify_string)
 {
 	struct notify notify = {0};
-	if (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
+	nếu (sscanf(notify_string, "fd:%d", &notify.fd) == 1) {
 		notify.type = NOTIFY_FD;
-		if (pipe(notify.pipe) == -1)
+		nếu (pipe(notify.pipe) == -1)
 			eerrorx("%s: pipe: %s", applet, strerror(errno));
-	} else if (strncmp(notify_string, "socket", sizeof("socket") - 1) == 0) {
+	} không_thì nếu (strncmp(notify_string, "socket", sizeof("socket") - 1) == 0) {
 		union {
 			struct sockaddr header;
 			struct sockaddr_un unix;
 		} addr = { .unix = { .sun_family = AF_UNIX } };
-		int written;
+		số_nguyên written;
 		const char *opts = strchr(notify_string, ':');
 
-		if (!opts || opts[1] == '\0')
-			return notify;
-		if (strcmp(opts + 1, "ready") != 0)
-			return notify;
+		nếu (!opts || opts[1] == '\0')
+			trả_về notify;
+		nếu (strcmp(opts + 1, "ready") != 0)
+			trả_về notify;
 
 		written = snprintf(addr.unix.sun_path, sizeof(addr.unix.sun_path), "%s/supervise-%s.sock", rc_svcdir(), applet);
-		if (written >= (int)sizeof(addr.unix.sun_path))
+		nếu (written >= (số_nguyên)sizeof(addr.unix.sun_path))
 			eerrorx("%s: socket path '%s/supervise-%s.sock' too long.", applet, rc_svcdir(), applet);
 		setenv("NOTIFY_SOCKET", addr.unix.sun_path, true);
 
 		notify.type = NOTIFY_SOCKET;
-		if ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
+		nếu ((notify.fd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
 			eerrorx("%s: socket: %s", applet, strerror(errno));
-		if (bind(notify.fd, &addr.header, sizeof(addr.unix)) == -1)
+		nếu (bind(notify.fd, &addr.header, sizeof(addr.unix)) == -1)
 			eerrorx("%s: bind: %s", applet, strerror(errno));
-	} else {
+	} không_thì {
 		eerrorx("%s: invalid ready '%s'.", applet, optarg);
 	}
 
-	return notify;
+	trả_về notify;
 }
 
 bool notify_wait(const char *applet, struct notify notify)
 {
 	switch (notify.type) {
 	case NOTIFY_NONE:
-		return true;
+		trả_về true;
 	case NOTIFY_FD:
 		close(notify.pipe[1]);
 		notify.fd = notify.pipe[0];
@@ -592,16 +592,16 @@ bool notify_wait(const char *applet, struct notify notify)
 		break;
 	}
 
-	for (;;) {
+	cho (;;) {
 		char buf[BUFSIZ];
 		ssize_t bytes = read(notify.fd, buf, BUFSIZ);
 
-		if (bytes == 0)
-			return false;
-		if (bytes == -1) {
-			if (errno != EINTR) {
+		nếu (bytes == 0)
+			trả_về false;
+		nếu (bytes == -1) {
+			nếu (errno != EINTR) {
 				eerror("%s: read failed '%s'\n", applet, strerror(errno));
-				return false;
+				trả_về false;
 			}
 			continue;
 		}
@@ -610,35 +610,35 @@ bool notify_wait(const char *applet, struct notify notify)
 		case NOTIFY_NONE:
 			break;
 		case NOTIFY_FD:
-			if (memchr(buf, '\n', bytes))
-				return true;
+			nếu (memchr(buf, '\n', bytes))
+				trả_về true;
 			break;
 		case NOTIFY_SOCKET:
 			buf[bytes] = '\0';
-			if (strstr(buf, "READY=1")) {
+			nếu (strstr(buf, "READY=1")) {
 				char *path;
 				xasprintf(&path, "%s/supervise-%s.sock", rc_svcdir(), applet);
 				unlink(path);
 				free(path);
-				return true;
+				trả_về true;
 			}
 			break;
 		}
 	}
 
-	return true;
+	trả_về true;
 }
 
 #ifndef HAVE_CLOSE_RANGE
-static inline int close_range(unsigned int first RC_UNUSED,
-			      unsigned int last RC_UNUSED,
-			      unsigned int flags RC_UNUSED)
+static inline số_nguyên close_range(unsigned số_nguyên first RC_UNUSED,
+			      unsigned số_nguyên last RC_UNUSED,
+			      unsigned số_nguyên flags RC_UNUSED)
 {
 #ifdef SYS_close_range
-	return syscall(SYS_close_range, first, last, flags);
-#else
+	trả_về syscall(SYS_close_range, first, last, flags);
+#không_thì
 	errno = ENOSYS;
-	return -1;
+	trả_về -1;
 #endif
 }
 #endif
@@ -647,11 +647,11 @@ static inline int close_range(unsigned int first RC_UNUSED,
 #endif
 
 void
-cloexec_fds_from(int first)
+cloexec_fds_from(số_nguyên first)
 {
-	int i;
-	if (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
-		for (i = getdtablesize() - 1; i >= first; --i)
+	số_nguyên i;
+	nếu (close_range(first, UINT_MAX, CLOSE_RANGE_CLOEXEC) < 0) {
+		cho (i = getdtablesize() - 1; i >= first; --i)
 			fcntl(i, F_SETFD, FD_CLOEXEC);
 	}
 }

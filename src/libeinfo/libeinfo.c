@@ -62,7 +62,7 @@
 #define _ASSIGN_CAP(_v) do {						      \
 		_v = p;							      \
 		p += strlcpy(p, tmp, sizeof(ebuffer) - (p - ebuffer)) + 1;    \
-	} while (0)
+	} trong_khi (0)
 
 /* A pointer to a string to prefix to einfo/ewarn/eerror messages */
 static const char *_eprefix = NULL;
@@ -71,7 +71,7 @@ static const char *_eprefix = NULL;
 static char ebuffer[100];
 struct ecolor {
 	ECOLOR color;
-	int def;
+	số_nguyên def;
 	const char *name;
 };
 static char nullstr = '\0';
@@ -148,16 +148,16 @@ strlcat(char *dst, const char *src, size_t size)
 	size_t src_n = size;
 	size_t dst_n;
 
-	while (src_n-- != 0 && *d != '\0')
+	trong_khi (src_n-- != 0 && *d != '\0')
 		d++;
 	dst_n = d - dst;
 	src_n = size - dst_n;
 
-	if (src_n == 0)
-		return dst_n + strlen(src);
+	nếu (src_n == 0)
+		trả_về dst_n + strlen(src);
 
-	while (*s != '\0') {
-		if (src_n != 1) {
+	trong_khi (*s != '\0') {
+		nếu (src_n != 1) {
 			*d++ = *s;
 			src_n--;
 		}
@@ -165,85 +165,85 @@ strlcat(char *dst, const char *src, size_t size)
 	}
 	*d = '\0';
 
-	return dst_n + (s - src);
+	trả_về dst_n + (s - src);
 }
 #endif
 
 static bool
 yesno(const char *value)
 {
-	if (!value) {
+	nếu (!value) {
 		errno = ENOENT;
-		return false;
+		trả_về false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
+	nếu (strcasecmp(value, "yes") == 0 ||
 	    strcasecmp(value, "y") == 0 ||
 	    strcasecmp(value, "true") == 0 ||
 	    strcasecmp(value, "on") == 0 ||
 	    strcasecmp(value, "1") == 0)
-		return true;
+		trả_về true;
 
-	if (strcasecmp(value, "no") != 0 &&
+	nếu (strcasecmp(value, "no") != 0 &&
 	    strcasecmp(value, "n") != 0 &&
 	    strcasecmp(value, "false") != 0 &&
 	    strcasecmp(value, "off") != 0 &&
 	    strcasecmp(value, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	trả_về false;
 }
 
 static bool
 noyes(const char *value)
 {
-	int serrno = errno;
+	số_nguyên serrno = errno;
 	bool retval;
 
 	errno = 0;
 	retval = yesno(value);
-	if (errno == 0) {
+	nếu (errno == 0) {
 		retval = !retval;
 		errno = serrno;
 	}
 
-	return retval;
+	trả_về retval;
 }
 
 static bool
 is_quiet(void)
 {
-	return yesno(getenv("EINFO_QUIET"));
+	trả_về yesno(getenv("EINFO_QUIET"));
 }
 
 static bool
 is_really_quiet(void)
 {
-	return yesno(getenv("EERROR_QUIET"));
+	trả_về yesno(getenv("EERROR_QUIET"));
 }
 
 static bool
 is_verbose(void)
 {
-	return yesno(getenv ("EINFO_VERBOSE"));
+	trả_về yesno(getenv ("EINFO_VERBOSE"));
 }
 
 /* Fake tgoto call - very crapy, but works for our needs */
 static char *
-tgoto(const char *cap, int col, int line)
+tgoto(const char *cap, số_nguyên col, số_nguyên line)
 {
 	static char buf[20];
 	char *p, *e, c, dbuf[6];
-	int oncol = 0, which = line, i;
+	số_nguyên oncol = 0, which = line, i;
 
 	p = buf;
 	e = p + sizeof(buf);
-	while ((c = *cap++)) {
-		if (c != '%' || ((c = *cap++) == '%')) {
+	trong_khi ((c = *cap++)) {
+		nếu (c != '%' || ((c = *cap++) == '%')) {
 			*p++ = c;
-			if (p >= e) {
+			nếu (p >= e) {
 				errno = E2BIG;
-				return NULL;
+				trả_về NULL;
 			}
 			continue;
 		}
@@ -254,23 +254,23 @@ tgoto(const char *cap, int col, int line)
 			i = 0;
 			do
 				dbuf[i++] = which % 10 | '0';
-			while ((which /= 10));
-			if (c != 'd') {
+			trong_khi ((which /= 10));
+			nếu (c != 'd') {
 				c -= '0';
-				if (i > c) {
+				nếu (i > c) {
 					errno = EINVAL;
-					return NULL;
+					trả_về NULL;
 				}
-				while (i < c)
+				trong_khi (i < c)
 					dbuf[i++] = '0';
 			}
-			if (p + i >= e) {
+			nếu (p + i >= e) {
 				errno = E2BIG;
-				return NULL;
+				trả_về NULL;
 			}
 			do
 				*p++ = dbuf[--i];
-			while (i);
+			trong_khi (i);
 			break;
 		case 'r':
 			oncol = 0;
@@ -282,101 +282,101 @@ tgoto(const char *cap, int col, int line)
 			continue;
 		default:
 			errno = EINVAL;
-			return NULL;
+			trả_về NULL;
 		}
 
 		oncol = 1 - oncol;
 		which = oncol ? col : line;
 	}
 	*p = '\0';
-	return buf;
+	trả_về buf;
 }
 
 static bool
 colour_terminal(FILE * EINFO_RESTRICT f)
 {
-	static int in_colour = -1;
+	static số_nguyên in_colour = -1;
 	char *e, *ee, *end, *d, *p;
-	int c;
+	số_nguyên c;
 	const char *_af = NULL, *_ce = NULL, *_ch = NULL;
 	const char *_md = NULL, *_me = NULL, *_up = NULL;
 	const char *bold;
 	char tmp[100];
-	unsigned int i = 0;
+	unsigned số_nguyên i = 0;
 
-	if (f && !isatty(fileno(f)))
-		return false;
+	nếu (f && !isatty(fileno(f)))
+		trả_về false;
 
-	if (noyes(getenv("EINFO_COLOR")))
-		return false;
+	nếu (noyes(getenv("EINFO_COLOR")))
+		trả_về false;
 
-	if (in_colour == 0)
-		return false;
-	if (in_colour == 1)
-		return true;
+	nếu (in_colour == 0)
+		trả_về false;
+	nếu (in_colour == 1)
+		trả_về true;
 
 	term_is_cons25 = false;
-	if (!term) {
+	nếu (!term) {
 		term = getenv("TERM");
-		if (!term)
-			return false;
+		nếu (!term)
+			trả_về false;
 	}
-	if (strcmp(term, "cons25") == 0)
+	nếu (strcmp(term, "cons25") == 0)
 		term_is_cons25 = true;
 
-	if (strstr(term, "color"))
+	nếu (strstr(term, "color"))
 		in_colour = 1;
 
-	while (color_terms[i] && in_colour != 1) {
-		if (strcmp(color_terms[i], term) == 0) {
+	trong_khi (color_terms[i] && in_colour != 1) {
+		nếu (strcmp(color_terms[i], term) == 0) {
 			in_colour = 1;
 		}
 		i++;
 	}
 
-	if (in_colour != 1) {
+	nếu (in_colour != 1) {
 		in_colour = 0;
-		return false;
+		trả_về false;
 	}
 
-	if (!_af)
+	nếu (!_af)
 		_af = AF;
-	if (!_ce)
+	nếu (!_ce)
 		_ce = CE;
-	if (!_ch)
+	nếu (!_ch)
 		_ch = CH;
-	if (!_md)
+	nếu (!_md)
 		_md = MD;
-	if (!_me)
+	nếu (!_me)
 		_me = ME;
-	if (!_up)
+	nếu (!_up)
 		_up = UP;
 
 	/* Now setup our colours */
 	p = ebuffer;
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i) {
+	cho (i = 0; i < ARRAY_SIZE(ecolors); ++i) {
 		tmp[0] = '\0';
-		if (ecolors[i].name) {
+		nếu (ecolors[i].name) {
 			bold = _md;
 			c = ecolors[i].def;
 
 			/* See if the user wants to override the colour
 			 * We use a :col;bold: format like 2;1: for bold green
 			 * and 1;0: for a normal red */
-			if ((e = getenv("EINFO_COLOR"))) {
+			nếu ((e = getenv("EINFO_COLOR"))) {
 				ee = strstr(e, ecolors[i].name);
-				if (ee)
+				nếu (ee)
 					ee += strlen(ecolors[i].name);
 
-				if (ee && *ee == '=') {
+				nếu (ee && *ee == '=') {
 					d = strdup(ee + 1);
-					if (d) {
+					nếu (d) {
 						end = strchr(d, ':');
-						if (end)
+						nếu (end)
 							*end = '\0';
 						c = atoi(d);
 						end = strchr(d, ';');
-						if (end && *++end == '0')
+						nếu (end && *++end == '0')
 							bold = _me;
 						free(d);
 					}
@@ -384,12 +384,12 @@ colour_terminal(FILE * EINFO_RESTRICT f)
 			}
 			strlcpy(tmp, tgoto(bold, 0, 0), sizeof(tmp));
 			strlcat(tmp, tgoto(_af, 0, c & 0x07), sizeof(tmp));
-		} else
+		} không_thì
 			_GET_CAP(tmp, _me);
 
-		if (tmp[0])
+		nếu (tmp[0])
 			_ASSIGN_CAP(ecolors_str[i]);
-		else
+		không_thì
 			ecolors_str[i] = &nullstr;
 	}
 
@@ -401,27 +401,27 @@ colour_terminal(FILE * EINFO_RESTRICT f)
 	_ASSIGN_CAP(goto_column);
 
 	in_colour = 1;
-	return true;
+	trả_về true;
 }
 
-static int
+static số_nguyên
 get_term_columns(FILE * EINFO_RESTRICT stream)
 {
 	struct winsize ws;
 	char *env = getenv("COLUMNS");
 	char *p;
-	int i;
+	số_nguyên i;
 
-	if (env) {
+	nếu (env) {
 		i = strtoimax(env, &p, 10);
-		if (!*p)
-			return i;
+		nếu (!*p)
+			trả_về i;
 	}
 
-	if (ioctl(fileno(stream), TIOCGWINSZ, &ws) == 0)
-		return ws.ws_col;
+	nếu (ioctl(fileno(stream), TIOCGWINSZ, &ws) == 0)
+		trả_về ws.ws_col;
 
-	return DEFAULT_COLS;
+	trả_về DEFAULT_COLS;
 }
 
 void
@@ -431,12 +431,12 @@ eprefix(const char *EINFO_RESTRICT prefix)
 }
 
 static void EINFO_PRINTF(2, 0)
-elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
+elogv(số_nguyên level, const char *EINFO_RESTRICT fmt, va_list ap)
 {
 	char *e = getenv("EINFO_LOG");
 	va_list apc;
 
-	if (fmt && e) {
+	nếu (fmt && e) {
 		closelog();
 		openlog(e, LOG_PID, LOG_DAEMON);
 		va_copy(apc, ap);
@@ -447,7 +447,7 @@ elogv(int level, const char *EINFO_RESTRICT fmt, va_list ap)
 }
 
 void
-elog(int level, const char *EINFO_RESTRICT fmt, ...)
+elog(số_nguyên level, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
@@ -456,36 +456,36 @@ elog(int level, const char *EINFO_RESTRICT fmt, ...)
 	va_end(ap);
 }
 
-static int
+static số_nguyên
 _eindent(FILE * EINFO_RESTRICT stream)
 {
 	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	số_nguyên amount = 0;
 
-	if (env) {
+	nếu (env) {
 		errno = 0;
 		amount = strtoimax(env, NULL, 0);
-		if (errno != 0 || amount < 0)
+		nếu (errno != 0 || amount < 0)
 			amount = 0;
-		else if (amount > INDENT_MAX)
+		không_thì nếu (amount > INDENT_MAX)
 			amount = INDENT_MAX;
 	}
 
-	return fprintf(stream, "%*s", amount, "");
+	trả_về fprintf(stream, "%*s", amount, "");
 }
 
 static const char *
 _ecolor(FILE * EINFO_RESTRICT f, ECOLOR color)
 {
-	unsigned int i;
+	unsigned số_nguyên i;
 
-	if (!colour_terminal(f))
-		return "";
+	nếu (!colour_terminal(f))
+		trả_về "";
 
-	for (i = 0; i < ARRAY_SIZE(ecolors); ++i)
-		if (ecolors[i].color == color)
-			return ecolors_str[i];
-	return "";
+	cho (i = 0; i < ARRAY_SIZE(ecolors); ++i)
+		nếu (ecolors[i].color == color)
+			trả_về ecolors_str[i];
+	trả_về "";
 }
 
 const char *
@@ -494,16 +494,16 @@ ecolor(ECOLOR color)
 	FILE *f = stdout;
 
 	/* Try and guess a valid tty */
-	if (!isatty(fileno(f))) {
+	nếu (!isatty(fileno(f))) {
 		f = stderr;
-		if (!isatty(fileno(f))) {
+		nếu (!isatty(fileno(f))) {
 			f = stdin;
-			if (!isatty(fileno(f)))
+			nếu (!isatty(fileno(f)))
 				f = NULL;
 		}
 	}
 
-	return _ecolor(f, color);
+	trả_về _ecolor(f, color);
 }
 
 #define LASTCMD(_cmd) {							      \
@@ -511,111 +511,111 @@ ecolor(ECOLOR color)
 		setenv("EINFO_LASTCMD", _cmd, 1);			      \
 	}
 
-static int EINFO_PRINTF(3, 0)
+static số_nguyên EINFO_PRINTF(3, 0)
 	_einfo(FILE *f, ECOLOR color, const char *EINFO_RESTRICT fmt, va_list va)
 {
-	int retval = 0;
+	số_nguyên retval = 0;
 	char *last = getenv("EINFO_LASTCMD");
 	va_list ap;
 
-	if (last &&
+	nếu (last &&
 	    *last &&
 	    !colour_terminal(f) &&
 	    strcmp(last, "ewarn") != 0 &&
 	    last[strlen(last) - 1] == 'n')
 		fprintf(f, "\n");
-	if (_eprefix)
+	nếu (_eprefix)
 		fprintf(f, "%s%s%s|", _ecolor(f, color), _eprefix, _ecolor(f, ECOLOR_NORMAL));
 	fprintf(f, " %s*%s ", _ecolor(f, color), _ecolor(f, ECOLOR_NORMAL));
 	retval += _eindent(f);
 	va_copy(ap, va);
 	retval += vfprintf(f, fmt, ap) + 3;
 	va_end(ap); \
-	if (colour_terminal(f))
+	nếu (colour_terminal(f))
 		fprintf(f, "%s", flush);
-	return retval;
+	trả_về retval;
 }
 
 #define _einfovn(fmt, ap) _einfo(stdout, ECOLOR_GOOD, fmt, ap)
 #define _ewarnvn(fmt, ap) _einfo(stderr, ECOLOR_WARN, fmt, ap)
 #define _eerrorvn(fmt, ap) _einfo(stderr, ECOLOR_BAD, fmt, ap)
 
-int
+số_nguyên
 einfon(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	nếu (!fmt || is_quiet())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfon");
-	return retval;
+	trả_về retval;
 }
 
-int
+số_nguyên
 ewarnn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	nếu (!fmt || is_quiet())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnn");
-	return retval;
+	trả_về retval;
 }
 
-int
+số_nguyên
 eerrorn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	nếu (!fmt || is_really_quiet())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("errorn");
-	return retval;
+	trả_về retval;
 }
 
-int
+số_nguyên
 einfo(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	nếu (!fmt || is_quiet())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("einfo");
-	return retval;
+	trả_về retval;
 }
 
-int
+số_nguyên
 ewarn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	nếu (!fmt || is_quiet())
+		trả_về 0;
 	va_start(ap, fmt);
 	elogv(LOG_WARNING, fmt, ap);
 	retval = _ewarnvn(fmt, ap);
 	retval += fprintf(stderr, "\n");
 	va_end(ap);
 	LASTCMD("ewarn");
-	return retval;
+	trả_về retval;
 }
 
 void
@@ -623,7 +623,7 @@ ewarnx(const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_quiet()) {
+	nếu (fmt && !is_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_WARNING, fmt, ap);
 		_ewarnvn(fmt, ap);
@@ -633,21 +633,21 @@ ewarnx(const char *EINFO_RESTRICT fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
-int
+số_nguyên
 eerror(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || is_really_quiet())
-		return 0;
+	nếu (!fmt || is_really_quiet())
+		trả_về 0;
 	va_start(ap, fmt);
 	elogv(LOG_ERR, fmt, ap);
 	retval = _eerrorvn(fmt, ap);
 	va_end(ap);
 	retval += fprintf(stderr, "\n");
 	LASTCMD("eerror");
-	return retval;
+	trả_về retval;
 }
 
 void
@@ -655,7 +655,7 @@ eerrorx(const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (fmt && !is_really_quiet()) {
+	nếu (fmt && !is_really_quiet()) {
 		va_start(ap, fmt);
 		elogv(LOG_ERR, fmt, ap);
 		_eerrorvn(fmt, ap);
@@ -665,73 +665,73 @@ eerrorx(const char *EINFO_RESTRICT fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
-int
+số_nguyên
 ebegin(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || is_quiet())
-		return 0;
+	nếu (!fmt || is_quiet())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	retval += printf(" ...");
-	if (colour_terminal(stdout))
+	nếu (colour_terminal(stdout))
 		retval += printf("\n");
 	LASTCMD("ebegin");
-	return retval;
+	trả_về retval;
 }
 
 static void
-_eend(FILE * EINFO_RESTRICT fp, int col, ECOLOR color, const char *msg)
+_eend(FILE * EINFO_RESTRICT fp, số_nguyên col, ECOLOR color, const char *msg)
 {
-	int i;
-	int cols;
+	số_nguyên i;
+	số_nguyên cols;
 
-	if (!msg)
-		return;
+	nếu (!msg)
+		trả_về;
 
 	cols = get_term_columns(fp) - (strlen(msg) + 5);
 
 	/* cons25 is special - we need to remove one char, otherwise things
 	 * do not align properly at all. */
-	if (!term) {
+	nếu (!term) {
 		term = getenv("TERM");
-		if (term && strcmp(term, "cons25") == 0)
+		nếu (term && strcmp(term, "cons25") == 0)
 			term_is_cons25 = true;
-		else
+		không_thì
 			term_is_cons25 = false;
 	}
-	if (term_is_cons25)
+	nếu (term_is_cons25)
 		cols--;
 
-	if (cols > 0 && colour_terminal(fp)) {
+	nếu (cols > 0 && colour_terminal(fp)) {
 		fprintf(fp, "%s%s %s[%s %s %s]%s\n", up, tgoto(goto_column, 0, cols),
 		    ecolor(ECOLOR_BRACKET), ecolor(color), msg,
 		    ecolor(ECOLOR_BRACKET), ecolor(ECOLOR_NORMAL));
-	} else {
-		if (col > 0)
-			for (i = 0; i < cols - col; i++)
+	} không_thì {
+		nếu (col > 0)
+			cho (i = 0; i < cols - col; i++)
 				fprintf(fp, " ");
 		fprintf(fp, " [ %s ]\n", msg);
 	}
 }
 
-static int EINFO_PRINTF(3, 0)
-_do_eend(const char *cmd, int retval,
+static số_nguyên EINFO_PRINTF(3, 0)
+_do_eend(const char *cmd, số_nguyên retval,
     const char *EINFO_RESTRICT fmt, va_list ap)
 {
-	int col = 0;
+	số_nguyên col = 0;
 	FILE *fp = stdout;
 	va_list apc;
 
-	if (fmt && *fmt != '\0' && retval != 0) {
+	nếu (fmt && *fmt != '\0' && retval != 0) {
 		fp = stderr;
 		va_copy(apc, ap);
-		if (strcmp(cmd, "ewend") == 0)
+		nếu (strcmp(cmd, "ewend") == 0)
 			col = _ewarnvn(fmt, apc);
-		else
+		không_thì
 			col = _eerrorvn(fmt, apc);
 		col += fprintf(fp, "\n");
 		va_end(apc);
@@ -739,39 +739,39 @@ _do_eend(const char *cmd, int retval,
 	_eend(fp, col,
 	    retval == 0 ? ECOLOR_GOOD : ECOLOR_BAD,
 	    retval == 0 ? OK : NOT_OK);
-	return retval;
+	trả_về retval;
 }
 
-int
-eend(int retval, const char *EINFO_RESTRICT fmt, ...)
+số_nguyên
+eend(số_nguyên retval, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	nếu (is_quiet())
+		trả_về retval;
 	va_start(ap, fmt);
 	_do_eend("eend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eend");
-	return retval;
+	trả_về retval;
 }
 
-int
-ewend(int retval, const char *EINFO_RESTRICT fmt, ...)
+số_nguyên
+ewend(số_nguyên retval, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (is_quiet())
-		return retval;
+	nếu (is_quiet())
+		trả_về retval;
 	va_start(ap, fmt);
 	_do_eend("ewend", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewend");
-	return retval;
+	trả_về retval;
 }
 
 void
-ebracket(int col, ECOLOR color, const char *msg)
+ebracket(số_nguyên col, ECOLOR color, const char *msg)
 {
 	_eend(stdout, col, color, msg);
 }
@@ -780,13 +780,13 @@ void
 eindent(void)
 {
 	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	số_nguyên amount = 0;
 	char *num;
 
-	if (env) {
+	nếu (env) {
 		errno = 0;
 		amount = strtoimax(env, NULL, 0);
-		if (errno != 0)
+		nếu (errno != 0)
 			amount = 0;
 	}
 	amount += INDENT_WIDTH;
@@ -798,21 +798,21 @@ eindent(void)
 void eoutdent(void)
 {
 	char *env = getenv("EINFO_INDENT");
-	int amount = 0;
+	số_nguyên amount = 0;
 	char *num = NULL;
-	int serrno = errno;
+	số_nguyên serrno = errno;
 
-	if (!env)
-		return;
+	nếu (!env)
+		trả_về;
 	errno = 0;
 	amount = strtoimax(env, NULL, 0);
-	if (errno != 0)
+	nếu (errno != 0)
 		amount = 0;
-	else
+	không_thì
 		amount -= INDENT_WIDTH;
-	if (amount <= 0)
+	nếu (amount <= 0)
 		unsetenv("EINFO_INDENT");
-	else {
+	không_thì {
 		xasprintf(&num, "%08d", amount);
 		setenv("EINFO_INDENT", num, 1);
 		free(num);
@@ -820,125 +820,125 @@ void eoutdent(void)
 	errno = serrno;
 }
 
-int
+số_nguyên
 einfovn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	nếu (!fmt || !is_verbose())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	va_end(ap);
 	LASTCMD("einfovn");
-	return retval;
+	trả_về retval;
 }
 
-int
+số_nguyên
 ewarnvn(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	nếu (!fmt || !is_verbose())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	va_end(ap);
 	LASTCMD("ewarnvn");
-	return retval;
+	trả_về retval;
 }
 
-int
+số_nguyên
 einfov(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	nếu (!fmt || !is_verbose())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("einfov");
-	return retval;
+	trả_về retval;
 }
 
-int
+số_nguyên
 ewarnv(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	nếu (!fmt || !is_verbose())
+		trả_về 0;
 	va_start(ap, fmt);
 	retval = _ewarnvn(fmt, ap);
 	retval += printf("\n");
 	va_end(ap);
 	LASTCMD("ewarnv");
-	return retval;
+	trả_về retval;
 }
 
-int
+số_nguyên
 ebeginv(const char *EINFO_RESTRICT fmt, ...)
 {
-	int retval;
+	số_nguyên retval;
 	va_list ap;
 
-	if (!fmt || !is_verbose())
-		return 0;
+	nếu (!fmt || !is_verbose())
+		trả_về 0;
 
 	va_start(ap, fmt);
 	retval = _einfovn(fmt, ap);
 	retval += printf(" ...");
-	if (colour_terminal(stdout))
+	nếu (colour_terminal(stdout))
 		retval += printf("\n");
 	va_end(ap);
 	LASTCMD("ebeginv");
-	return retval;
+	trả_về retval;
 }
 
-int
-eendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+số_nguyên
+eendv(số_nguyên retval, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	nếu (!is_verbose())
+		trả_về 0;
 	va_start(ap, fmt);
 	_do_eend("eendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("eendv");
-	return retval;
+	trả_về retval;
 }
 
-int
-ewendv(int retval, const char *EINFO_RESTRICT fmt, ...)
+số_nguyên
+ewendv(số_nguyên retval, const char *EINFO_RESTRICT fmt, ...)
 {
 	va_list ap;
 
-	if (!is_verbose())
-		return 0;
+	nếu (!is_verbose())
+		trả_về 0;
 	va_start(ap, fmt);
 	_do_eend("ewendv", retval, fmt, ap);
 	va_end(ap);
 	LASTCMD("ewendv");
-	return retval;
+	trả_về retval;
 }
 
 void
 eindentv(void)
 {
-	if (is_verbose())
+	nếu (is_verbose())
 		eindent();
 }
 
 void
 eoutdentv(void)
 {
-	if (is_verbose())
+	nếu (is_verbose())
 		eoutdent();
 }
