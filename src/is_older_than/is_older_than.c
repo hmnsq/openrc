@@ -14,18 +14,18 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+цяло main(цяло argc, char **argv)
 {
-	int i;
+	цяло i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ако (argc < 3)
+		върни EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	за (i = 2; i < argc; ++i)
+		ако (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			върни EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	върни EXIT_FAILURE;
 }

@@ -21,7 +21,7 @@
 
 #define ONE_MS           1000000
 
-#if defined(__linux__) && !defined(_GNU_SOURCE)
+#ако defined(__linux__) && !defined(_GNU_SOURCE)
 /* For extra SCHED_* defines. */
 # define _GNU_SOURCE
 #endif
@@ -186,18 +186,18 @@ static char *changeuser, *ch_root, *ch_dir;
 
 extern char **environ;
 
-#if !defined(SYS_ioprio_set) && defined(__NR_ioprio_set)
+#ако !defined(SYS_ioprio_set) && defined(__NR_ioprio_set)
 # define SYS_ioprio_set __NR_ioprio_set
 #endif
-#if !defined(__DragonFly__)
-static inline int ioprio_set(int which RC_UNUSED,
-			     int who RC_UNUSED,
-			     int ioprio RC_UNUSED)
+#ако !defined(__DragonFly__)
+static inline цяло ioprio_set(цяло which RC_UNUSED,
+			     цяло who RC_UNUSED,
+			     цяло ioprio RC_UNUSED)
 {
 #ifdef SYS_ioprio_set
-	return syscall(SYS_ioprio_set, which, who, ioprio);
-#else
-	return 0;
+	върни syscall(SYS_ioprio_set, which, who, ioprio);
+#иначе
+	върни 0;
 #endif
 }
 #endif
@@ -211,31 +211,31 @@ cleanup(void)
 }
 
 static void
-handle_signal(int sig)
+handle_signal(цяло sig)
 {
-	int status;
-	int serrno = errno;
+	цяло status;
+	цяло serrno = errno;
 	const char *signame = NULL;
 
 	switch (sig) {
 	case SIGINT:
-		if (!signame)
+		ако (!signame)
 			signame = "SIGINT";
 		/* FALLTHROUGH */
 	case SIGTERM:
-		if (!signame)
+		ако (!signame)
 			signame = "SIGTERM";
 		/* FALLTHROUGH */
 	case SIGQUIT:
-		if (!signame)
+		ако (!signame)
 			signame = "SIGQUIT";
 		eerrorx("%s: caught %s, aborting", applet, signame);
 		/* NOTREACHED */
 
 	case SIGCHLD:
-		for (;;) {
-			if (waitpid(-1, &status, WNOHANG) < 0) {
-				if (errno != ECHILD)
+		за (;;) {
+			ако (waitpid(-1, &status, WNOHANG) < 0) {
+				ако (errno != ECHILD)
 					eerror("%s: waitpid: %s",
 					    applet, strerror(errno));
 				break;
@@ -257,53 +257,53 @@ expand_home(const char *home, const char *path)
 	char *opath, *ppath, *p, *nh;
 	struct passwd *pw;
 
-	if (!path || *path != '~')
-		return xstrdup(path);
+	ако (!path || *path != '~')
+		върни xstrdup(path);
 
 	opath = ppath = xstrdup(path);
-	if (ppath[1] != '/' && ppath[1] != '\0') {
+	ако (ppath[1] != '/' && ppath[1] != '\0') {
 		p = strchr(ppath + 1, '/');
-		if (p)
+		ако (p)
 			*p = '\0';
 		pw = getpwnam(ppath + 1);
-		if (pw) {
+		ако (pw) {
 			home = pw->pw_dir;
 			ppath = p;
-			if (ppath)
+			ако (ppath)
 				*ppath = '/';
-		} else
+		} иначе
 			home = NULL;
-	} else
+	} иначе
 		ppath++;
 
-	if (!home) {
+	ако (!home) {
 	free(opath);
-		return xstrdup(path);
+		върни xstrdup(path);
 	}
-	if (!ppath) {
+	ако (!ppath) {
 		free(opath);
-		return xstrdup(home);
+		върни xstrdup(home);
 	}
 
 	xasprintf(&nh, "%s%s", home, ppath);
 	free(opath);
-	return nh;
+	върни nh;
 }
 
-int main(int argc, char **argv)
+цяло main(цяло argc, char **argv)
 {
-	int devnull_fd = -1;
+	цяло devnull_fd = -1;
 #ifdef TIOCNOTTY
-	int tty_fd = -1;
+	цяло tty_fd = -1;
 #endif
 
 #ifdef HAVE_PAM
 	pam_handle_t *pamh = NULL;
-	int pamr;
+	цяло pamr;
 	const char *const *pamenv = NULL;
 #endif
 
-	int opt;
+	цяло opt;
 	size_t size = 0;
 	bool start = false;
 	bool stop = false;
@@ -314,9 +314,9 @@ int main(int argc, char **argv)
 	char *name = NULL;
 	char *pidfile = NULL;
 	char *retry = NULL;
-	int sig = -1;
-	int nicelevel = INT_MIN, ionicec = -1, ioniced = 0;
-	int oom_score_adj = INT_MIN;
+	цяло sig = -1;
+	цяло nicelevel = INT_MIN, ionicec = -1, ioniced = 0;
+	цяло oom_score_adj = INT_MIN;
 	bool background = false;
 	bool makepidfile = false;
 	bool interpreted = false;
@@ -324,18 +324,18 @@ int main(int argc, char **argv)
 	uid_t uid = 0;
 	gid_t gid = 0;
 	char *home = NULL;
-	int tid = 0;
+	цяло tid = 0;
 	char *redirect_stdin = NULL;
 	char *redirect_stderr = NULL;
 	char *redirect_stdout = NULL;
 	char *stderr_process = NULL;
 	char *stdout_process = NULL;
-	int stdin_fd;
-	int stdout_fd;
-	int stderr_fd;
+	цяло stdin_fd;
+	цяло stdout_fd;
+	цяло stderr_fd;
 	pid_t pid, spid;
 	RC_PIDLIST *pids;
-	int i;
+	цяло i;
 	char *svcname = getenv("RC_SVCNAME");
 	RC_STRINGLIST *env_list;
 	RC_STRING *env;
@@ -351,9 +351,9 @@ int main(int argc, char **argv)
 	size_t len;
 	mode_t numask = 022;
 	char **margv;
-	unsigned int start_wait = 0;
+	unsigned цяло start_wait = 0;
 	const char *scheduler = NULL;
-	int sched_prio = -1;
+	цяло sched_prio = -1;
 #ifdef __linux__
 	cap_iab_t cap_iab = NULL;
 	unsigned secbits = 0;
@@ -361,11 +361,11 @@ int main(int argc, char **argv)
 #ifdef PR_SET_NO_NEW_PRIVS
 	bool no_new_privs = false;
 #endif
-	int pipefd[2];
+	цяло pipefd[2];
 	char readbuf[1];
 	ssize_t ss;
 	struct notify notify = {0};
-	int ret = EXIT_SUCCESS;
+	цяло ret = EXIT_SUCCESS;
 
 	applet = basename_c(argv[0]);
 	atexit(cleanup);
@@ -376,64 +376,64 @@ int main(int argc, char **argv)
 
 	openlog(applet, LOG_PID, LOG_DAEMON);
 
-	if ((tmp = getenv("SSD_NICELEVEL")))
-		if (sscanf(tmp, "%d", &nicelevel) != 1)
+	ако ((tmp = getenv("SSD_NICELEVEL")))
+		ако (sscanf(tmp, "%d", &nicelevel) != 1)
 			eerror("%s: invalid nice level `%s' (SSD_NICELEVEL)",
 			    applet, tmp);
-	if ((tmp = getenv("SSD_IONICELEVEL"))) {
-		int n = sscanf(tmp, "%d:%d", &ionicec, &ioniced);
-		if (n != 1 && n != 2)
+	ако ((tmp = getenv("SSD_IONICELEVEL"))) {
+		цяло n = sscanf(tmp, "%d:%d", &ionicec, &ioniced);
+		ако (n != 1 && n != 2)
 			eerror("%s: invalid ionice level `%s' (SSD_IONICELEVEL)",
 			    applet, tmp);
-		if (ionicec == 0)
+		ако (ionicec == 0)
 			ioniced = 0;
-		else if (ionicec == 3)
+		иначе ако (ionicec == 3)
 			ioniced = 7;
 		ionicec <<= 13; /* class shift */
 	}
-	if ((tmp = getenv("SSD_OOM_SCORE_ADJ")))
-		if (sscanf(tmp, "%d", &oom_score_adj) != 1)
+	ако ((tmp = getenv("SSD_OOM_SCORE_ADJ")))
+		ако (sscanf(tmp, "%d", &oom_score_adj) != 1)
 			eerror("%s: invalid oom_score_adj `%s' (SSD_OOM_SCORE_ADJ)",
 			    applet, tmp);
 
 	/* Get our user name and initial dir */
 	p = getenv("USER");
 	home = getenv("HOME");
-	if (home == NULL || p == NULL) {
+	ако (home == NULL || p == NULL) {
 		pw = getpwuid(getuid());
-		if (pw != NULL) {
-			if (p == NULL)
+		ако (pw != NULL) {
+			ако (p == NULL)
 				setenv("USER", pw->pw_name, 1);
-			if (home == NULL) {
+			ако (home == NULL) {
 				setenv("HOME", pw->pw_dir, 1);
 				home = pw->pw_dir;
 			}
 		}
 	}
 
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts,
-		    (int *) 0)) != -1)
+	докато ((opt = getopt_long(argc, argv, getoptstring, longopts,
+		    (цяло *) 0)) != -1)
 		switch (opt) {
 		case LONGOPT_CAPABILITIES:
 #ifdef __linux__
 			cap_iab = cap_iab_from_text(optarg);
-			if (cap_iab == NULL)
+			ако (cap_iab == NULL)
 				eerrorx("Could not parse iab: %s", strerror(errno));
-#else
+#иначе
 			eerrorx("Capabilities support not enabled");
 #endif
 			break;
 
 		case LONGOPT_SECBITS:
 #ifdef __linux__
-			if (*optarg == '\0')
+			ако (*optarg == '\0')
 				eerrorx("Secbits are empty");
 
 			tmp = NULL;
 			secbits = strtoul(optarg, &tmp, 0);
-			if (*tmp != '\0')
+			ако (*tmp != '\0')
 				eerrorx("Could not parse secbits: invalid char %c", *tmp);
-#else
+#иначе
 			eerrorx("Capabilities support not enabled");
 #endif
 			break;
@@ -441,18 +441,18 @@ int main(int argc, char **argv)
 		case LONGOPT_NO_NEW_PRIVS:
 #ifdef PR_SET_NO_NEW_PRIVS
 			no_new_privs = true;
-#else
+#иначе
 			eerrorx("The No New Privs flag is only supported by Linux (since 3.5)");
 #endif
 			break;
 
 		case 'I': /* --ionice */
-			if (sscanf(optarg, "%d:%d", &ionicec, &ioniced) == 0)
+			ако (sscanf(optarg, "%d:%d", &ionicec, &ioniced) == 0)
 				eerrorx("%s: invalid ionice `%s'",
 				    applet, optarg);
-			if (ionicec == 0)
+			ако (ionicec == 0)
 				ioniced = 0;
-			else if (ionicec == 3)
+			иначе ако (ionicec == 3)
 				ioniced = 7;
 			ionicec <<= 13; /* class shift */
 			break;
@@ -466,13 +466,13 @@ int main(int argc, char **argv)
 			break;
 
 		case 'N':  /* --nice */
-			if (sscanf(optarg, "%d", &nicelevel) != 1)
+			ако (sscanf(optarg, "%d", &nicelevel) != 1)
 				eerrorx("%s: invalid nice level `%s'",
 				    applet, optarg);
 			break;
 
 		case LONGOPT_OOM_SCORE_ADJ: /* --oom-score-adj */
-			if (sscanf(optarg, "%d", &oom_score_adj) != 1)
+			ако (sscanf(optarg, "%d", &oom_score_adj) != 1)
 				eerrorx("%s: invalid oom-score-adj `%s'",
 				    applet, optarg);
 			break;
@@ -503,33 +503,33 @@ int main(int argc, char **argv)
 			p = optarg;
 			tmp = strsep(&p, ":");
 			changeuser = xstrdup(tmp);
-			if (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
+			ако (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
 				pw = getpwnam(tmp);
-			else
+			иначе
 				pw = getpwuid((uid_t)tid);
 
-			if (pw == NULL)
+			ако (pw == NULL)
 				eerrorx("%s: user `%s' not found",
 				    applet, tmp);
 			uid = pw->pw_uid;
 			home = pw->pw_dir;
 			unsetenv("HOME");
-			if (pw->pw_dir)
+			ако (pw->pw_dir)
 				setenv("HOME", pw->pw_dir, 1);
 			unsetenv("USER");
-			if (pw->pw_name)
+			ако (pw->pw_name)
 				setenv("USER", pw->pw_name, 1);
-			if (gid == 0)
+			ако (gid == 0)
 				gid = pw->pw_gid;
 
-			if (p) {
+			ако (p) {
 				tmp = strsep (&p, ":");
-				if (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
+				ако (sscanf(tmp, "%d%1s", &tid, dummy) != 1)
 					gr = getgrnam(tmp);
-				else
+				иначе
 					gr = getgrgid((gid_t) tid);
 
-				if (gr == NULL)
+				ако (gr == NULL)
 					eerrorx("%s: group `%s'"
 					    " not found",
 					    applet, tmp);
@@ -547,11 +547,11 @@ int main(int argc, char **argv)
 			break;
 
 		case 'g':  /* --group <group>|<gid> */
-			if (sscanf(optarg, "%d", &tid) != 1)
+			ако (sscanf(optarg, "%d", &tid) != 1)
 				gr = getgrnam(optarg);
-			else
+			иначе
 				gr = getgrgid((gid_t)tid);
-			if (gr == NULL)
+			ако (gr == NULL)
 				eerrorx("%s: group `%s' not found",
 				    applet, optarg);
 			gid = gr->gr_gid;
@@ -562,7 +562,7 @@ int main(int argc, char **argv)
 			break;
 
 		case 'k':
-			if (parse_mode(&numask, optarg))
+			ако (parse_mode(&numask, optarg))
 				eerrorx("%s: invalid mode `%s'",
 				    applet, optarg);
 			break;
@@ -603,7 +603,7 @@ int main(int argc, char **argv)
 			startas = optarg;
 			break;
 		case 'w':
-			if (sscanf(optarg, "%u", &start_wait) != 1)
+			ако (sscanf(optarg, "%u", &start_wait) != 1)
 				eerrorx("%s: `%s' not a number",
 				    applet, optarg);
 			break;
@@ -652,7 +652,7 @@ int main(int argc, char **argv)
 
 	/* Allow start-stop-daemon --signal HUP --exec /usr/sbin/dnsmasq
 	 * instead of forcing --stop --oknodo as well */
-	if (!start &&
+	ако (!start &&
 	    !stop &&
 	    sig != SIGINT &&
 	    sig != SIGTERM &&
@@ -660,92 +660,92 @@ int main(int argc, char **argv)
 	    sig != SIGKILL)
 		oknodo = true;
 
-	if (!exec)
+	ако (!exec)
 		exec = startas;
-	else if (!name)
+	иначе ако (!name)
 		name = startas;
 
-	if (!exec) {
+	ако (!exec) {
 		exec = *argv;
-		if (!exec)
+		ако (!exec)
 			exec = name;
-		if (name && start)
+		ако (name && start)
 			*argv = name;
-	} else if (name) {
+	} иначе ако (name) {
 		*--argv = name;
 		++argc;
-	} else if (exec) {
+	} иначе ако (exec) {
 		*--argv = exec;
 		++argc;
 	};
 
-	if (stop || sig != -1) {
-		if (sig == -1)
+	ако (stop || sig != -1) {
+		ако (sig == -1)
 			sig = SIGTERM;
-		if (!*argv && !pidfile && !name && !uid)
+		ако (!*argv && !pidfile && !name && !uid)
 			eerrorx("%s: --stop needs --exec, --pidfile,"
 			    " --name or --user", applet);
-		if (background)
+		ако (background)
 			eerrorx("%s: --background is only relevant with"
 			    " --start", applet);
-		if (makepidfile)
+		ако (makepidfile)
 			eerrorx("%s: --make-pidfile is only relevant with"
 			    " --start", applet);
-		if (redirect_stdout || redirect_stderr)
+		ако (redirect_stdout || redirect_stderr)
 			eerrorx("%s: --stdout and --stderr are only relevant"
 			    " with --start", applet);
-		if (stdout_process || stderr_process)
+		ако (stdout_process || stderr_process)
 			eerrorx("%s: --stdout-logger and --stderr-logger are only relevant"
 			    " with --start", applet);
-		if (start_wait)
+		ако (start_wait)
 			ewarn("using --wait with --stop has no effect,"
 			    " use --retry instead");
-	} else {
-		if (!exec)
+	} иначе {
+		ако (!exec)
 			eerrorx("%s: nothing to start", applet);
-		if (makepidfile && !pidfile)
+		ако (makepidfile && !pidfile)
 			eerrorx("%s: --make-pidfile is only relevant with"
 			    " --pidfile", applet);
-		if ((redirect_stdout || redirect_stderr) && !background)
+		ако ((redirect_stdout || redirect_stderr) && !background)
 			eerrorx("%s: --stdout and --stderr are only relevant"
 			    " with --background", applet);
-		if ((stdout_process || stderr_process) && !background)
+		ако ((stdout_process || stderr_process) && !background)
 			eerrorx("%s: --stdout-logger and --stderr-logger are only relevant"
 			    " with --background", applet);
-		if (redirect_stdout && stdout_process)
+		ако (redirect_stdout && stdout_process)
 			eerrorx("%s: do not use --stdout and --stdout-logger together",
 					applet);
-		if (redirect_stderr && stderr_process)
+		ако (redirect_stderr && stderr_process)
 			eerrorx("%s: do not use --stderr and --stderr-logger together",
 					applet);
 	}
 
 	/* Expand ~ */
-	if (ch_dir && *ch_dir == '~')
+	ако (ch_dir && *ch_dir == '~')
 		ch_dir = expand_home(home, ch_dir);
-	if (ch_root && *ch_root == '~')
+	ако (ch_root && *ch_root == '~')
 		ch_root = expand_home(home, ch_root);
-	if (exec) {
-		if (*exec == '~')
+	ако (exec) {
+		ако (*exec == '~')
 			exec = expand_home(home, exec);
 
 		/* Validate that the binary exists if we are starting */
-		if (*exec == '/' || *exec == '.') {
+		ако (*exec == '/' || *exec == '.') {
 			/* Full or relative path */
-			if (ch_root)
+			ако (ch_root)
 				xasprintf(&exec_file, "%s/%s", ch_root, exec);
-			else
+			иначе
 				xasprintf(&exec_file, "%s", exec);
-		} else {
+		} иначе {
 			/* Something in $PATH */
 			p = tmp = xstrdup(getenv("PATH"));
 			exec_file = NULL;
-			while ((token = strsep(&p, ":"))) {
-				if (ch_root)
+			докато ((token = strsep(&p, ":"))) {
+				ако (ch_root)
 					xasprintf(&exec_file, "%s/%s/%s", ch_root, token, exec);
-				else
+				иначе
 					xasprintf(&exec_file, "%s/%s", token, exec);
-				if (exec_file && access(exec_file, F_OK) == 0)
+				ако (exec_file && access(exec_file, F_OK) == 0)
 					break;
 				free(exec_file);
 				exec_file = NULL;
@@ -753,44 +753,44 @@ int main(int argc, char **argv)
 			free(tmp);
 		}
 	}
-	if (start && access(exec_file, F_OK) != 0) {
+	ако (start && access(exec_file, F_OK) != 0) {
 		eerror("%s: %s does not exist", applet,
 		    exec_file ? exec_file : exec);
 		free(exec_file);
 		exit(EXIT_FAILURE);
 	}
-	if (start && retry)
+	ако (start && retry)
 		ewarn("using --retry with --start has no effect,"
 		    " use --wait instead");
 
 	/* If we don't have a pidfile we should check if it's interpreted
 	 * or not. If it we, we need to pass the interpreter through
 	 * to our daemon calls to find it correctly. */
-	if (interpreted && !pidfile) {
+	ако (interpreted && !pidfile) {
 		fp = fopen(exec_file, "r");
-		if (fp) {
+		ако (fp) {
 			line = NULL;
-			if (xgetline(&line, &size, fp) == -1)
+			ако (xgetline(&line, &size, fp) == -1)
 				eerrorx("%s: %s", applet, strerror(errno));
 			p = line;
 			fclose(fp);
-			if (p != NULL && line[0] == '#' && line[1] == '!') {
+			ако (p != NULL && line[0] == '#' && line[1] == '!') {
 				p = line + 2;
 				/* Strip leading spaces */
-				while (*p == ' ' || *p == '\t')
+				докато (*p == ' ' || *p == '\t')
 					p++;
 				token = strsep(&p, " ");
 				free(exec_file);
 				xasprintf(&exec_file, "%s", token);
 				opt = 0;
-				for (nav = argv; *nav; nav++)
+				за (nav = argv; *nav; nav++)
 					opt++;
 				nav = xmalloc(sizeof(char *) * (opt + 3));
 				nav[0] = exec_file;
 				len = 1;
-				if (p)
+				ако (p)
 					nav[len++] = p;
-				for (i = 0; i < opt; i++)
+				за (i = 0; i < opt; i++)
 					nav[i + len] = argv[i];
 				nav[i + len] = NULL;
 			}
@@ -798,79 +798,79 @@ int main(int argc, char **argv)
 	}
 	margv = nav ? nav : argv;
 
-	if (stop || sig != -1) {
-		if (sig == -1)
+	ако (stop || sig != -1) {
+		ако (sig == -1)
 			sig = SIGTERM;
-		if (!stop)
+		ако (!stop)
 			oknodo = true;
-		if (retry)
+		ако (retry)
 			parse_schedule(applet, retry, sig);
-		else if (test || oknodo)
+		иначе ако (test || oknodo)
 			parse_schedule(applet, "0", sig);
-		else
+		иначе
 			parse_schedule(applet, NULL, sig);
-		if (pidfile) {
+		ако (pidfile) {
 			pid = get_pid(applet, pidfile);
-			if (pid == -1 && errno != ENOENT)
+			ако (pid == -1 && errno != ENOENT)
 				exit(EXIT_FAILURE);
-		} else {
+		} иначе {
 			pid = 0;
 		}
 		i = run_stop_schedule(applet, exec, (const char *const *)margv,
 		    pid, uid, stopgroup, test, progress, false);
 
-		if (i < 0)
+		ако (i < 0)
 			/* We failed to stop something */
 			exit(EXIT_FAILURE);
-		if (test || oknodo)
-			return i > 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+		ако (test || oknodo)
+			върни i > 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 
 		/* Even if we have not actually killed anything, we should
 		 * remove information about it as it may have unexpectedly
 		 * crashed out. We should also return success as the end
 		 * result would be the same. */
-		if (pidfile)
+		ако (pidfile)
 			unlink(pidfile);
-		if (svcname)
+		ако (svcname)
 			rc_service_daemon_set(svcname, exec,
 			    (const char *const *)argv,
 			    pidfile, false);
 		exit(EXIT_SUCCESS);
 	}
 
-	if (pidfile)
+	ако (pidfile)
 		pid = get_pid(applet, pidfile);
-	else
+	иначе
 		pid = 0;
 
-	if (pid)
+	ако (pid)
 		pids = rc_find_pids(NULL, NULL, 0, pid);
-	else
+	иначе
 		pids = rc_find_pids(exec, (const char * const *) argv, uid, 0);
-	if (pids)
+	ако (pids)
 		eerrorx("%s: %s is already running", applet, exec);
 
 	free(pids);
-	if (test) {
-		if (rc_yesno(getenv("EINFO_QUIET")))
+	ако (test) {
+		ако (rc_yesno(getenv("EINFO_QUIET")))
 			exit (EXIT_SUCCESS);
 
 		einfon("Would start");
-		while (argc-- > 0)
+		докато (argc-- > 0)
 			printf(" %s", *argv++);
 		printf("\n");
 		eindent();
-		if (uid != 0)
+		ако (uid != 0)
 			einfo("as user id %"PRIuMAX, (uintmax_t)uid);
-		if (gid != 0)
+		ако (gid != 0)
 			einfo("as group id %"PRIuMAX, (uintmax_t)gid);
-		if (ch_root)
+		ако (ch_root)
 			einfo("in root `%s'", ch_root);
-		if (ch_dir)
+		ако (ch_dir)
 			einfo("in dir `%s'", ch_dir);
-		if (nicelevel != 0)
+		ако (nicelevel != 0)
 			einfo("with a priority of %d", nicelevel);
-		if (name)
+		ако (name)
 			einfo ("with a process name of %s", name);
 		eoutdent();
 		exit(EXIT_SUCCESS);
@@ -880,23 +880,23 @@ int main(int argc, char **argv)
 	eindentv();
 
 	/* Remove existing pidfile */
-	if (pidfile)
+	ако (pidfile)
 		unlink(pidfile);
 
-	if (background)
+	ако (background)
 		signal_setup(SIGCHLD, handle_signal);
 
 	/* Use a pipe to sync the parent/child processes. */
-	if (pipe2(pipefd, O_CLOEXEC) == -1)
+	ако (pipe2(pipefd, O_CLOEXEC) == -1)
 		eerrorx("%s: pipe2: %s", applet, strerror(errno));
 
-	if ((pid = fork()) == -1)
+	ако ((pid = fork()) == -1)
 		eerrorx("%s: fork: %s", applet, strerror(errno));
 
 	/* Child process - lets go! */
-	if (pid == 0) {
+	ако (pid == 0) {
 		gid_t group_buf[32], *group_list = group_buf;
-		int group_count = ARRAY_SIZE(group_buf);
+		цяло group_count = ARRAY_SIZE(group_buf);
 		pid_t mypid = getpid();
 		close(pipefd[0]); /* Close the read end of the pipe. */
 		umask(numask);
@@ -911,29 +911,29 @@ int main(int argc, char **argv)
 		 * but after opening tty_fd. */
 		setsid();
 
-		if (nicelevel != INT_MIN) {
-			if (setpriority(PRIO_PROCESS, mypid, nicelevel) == -1)
+		ако (nicelevel != INT_MIN) {
+			ако (setpriority(PRIO_PROCESS, mypid, nicelevel) == -1)
 				eerrorx("%s: setpriority %d: %s",
 				    applet, nicelevel,
 				    strerror(errno));
 			/* Open in "r+" mode to avoid creating if non-existent. */
 			fp = fopen("/proc/self/autogroup", "r+");
-			if (fp) {
+			ако (fp) {
 				fprintf(fp, "%d\n", nicelevel);
 				fclose(fp);
-			} else if (errno != ENOENT)
+			} иначе ако (errno != ENOENT)
 				eerrorx("%s: autogroup nice %d: %s", applet,
 				    nicelevel, strerror(errno));
 		}
 
-		if (ionicec != -1 &&
+		ако (ionicec != -1 &&
 		    ioprio_set(1, mypid, ionicec | ioniced) == -1)
 			eerrorx("%s: ioprio_set %d %d: %s", applet,
 			    ionicec, ioniced, strerror(errno));
 
-		if (oom_score_adj != INT_MIN) {
+		ако (oom_score_adj != INT_MIN) {
 			fp = fopen("/proc/self/oom_score_adj", "w");
-			if (!fp)
+			ако (!fp)
 				eerrorx("%s: oom_score_adj %d: %s", applet,
 				    oom_score_adj, strerror(errno));
 			fprintf(fp, "%d\n", oom_score_adj);
@@ -941,39 +941,39 @@ int main(int argc, char **argv)
 		}
 
 #ifdef HAVE_PAM
-		if (changeuser != NULL) {
+		ако (changeuser != NULL) {
 			pamr = pam_start("start-stop-daemon",
 			    changeuser, &conv, &pamh);
 
-			if (pamr == PAM_SUCCESS)
+			ако (pamr == PAM_SUCCESS)
 				pamr = pam_acct_mgmt(pamh, PAM_SILENT);
-			if (pamr == PAM_SUCCESS)
+			ако (pamr == PAM_SUCCESS)
 				pamr = pam_open_session(pamh, PAM_SILENT);
-			if (pamr != PAM_SUCCESS)
+			ако (pamr != PAM_SUCCESS)
 				eerrorx("%s: pam error: %s",
 					applet, pam_strerror(pamh, pamr));
 		}
 #endif
-		if (changeuser && getgrouplist(changeuser, gid, group_list, &group_count) < 0) {
+		ако (changeuser && getgrouplist(changeuser, gid, group_list, &group_count) < 0) {
 			group_list = xmalloc(group_count * sizeof(*group_list));
-			if (getgrouplist(changeuser, gid, group_list, &group_count) < 0)
+			ако (getgrouplist(changeuser, gid, group_list, &group_count) < 0)
 				eerrorx("%s: getgrouplist(%s, %"PRIuMAX")", applet, changeuser, (uintmax_t)gid);
 		}
 
 		/* Close any fd's to the passwd database */
 		endpwent();
 
-		if (ch_root && chroot(ch_root) < 0)
+		ако (ch_root && chroot(ch_root) < 0)
 			eerrorx("%s: chroot `%s': %s",
 			    applet, ch_root, strerror(errno));
 
-		if (ch_dir && chdir(ch_dir) < 0)
+		ако (ch_dir && chdir(ch_dir) < 0)
 			eerrorx("%s: chdir `%s': %s",
 			    applet, ch_dir, strerror(errno));
 
-		if (makepidfile && pidfile) {
+		ако (makepidfile && pidfile) {
 			fp = fopen(pidfile, "w");
-			if (!fp)
+			ако (!fp)
 				eerrorx("%s: fopen `%s': %s", applet, pidfile,
 				    strerror(errno));
 			fprintf(fp, "%d\n", mypid);
@@ -981,41 +981,41 @@ int main(int argc, char **argv)
 		}
 
 
-		if (gid && setgid(gid))
+		ако (gid && setgid(gid))
 			eerrorx("%s: unable to set groupid to %"PRIuMAX,
 			    applet, (uintmax_t)gid);
-		if (changeuser && setgroups(group_count, group_list))
+		ако (changeuser && setgroups(group_count, group_list))
 			eerrorx("%s: setgroups() failed", applet);
-		if (group_list != group_buf)
+		ако (group_list != group_buf)
 			free(group_list);
 #ifdef __linux__
-		if (uid && cap_setuid(uid))
-#else
-		if (uid && setuid(uid))
+		ако (uid && cap_setuid(uid))
+#иначе
+		ако (uid && setuid(uid))
 #endif
 			eerrorx ("%s: unable to set userid to %"PRIuMAX,
 			    applet, (uintmax_t)uid);
 
 #ifdef __linux__
-		if (cap_iab != NULL) {
+		ако (cap_iab != NULL) {
 			i = cap_iab_set_proc(cap_iab);
 
-			if (cap_free(cap_iab) != 0)
+			ако (cap_free(cap_iab) != 0)
 				eerrorx("Could not releasable memory: %s", strerror(errno));
 
-			if (i != 0)
+			ако (i != 0)
 				eerrorx("Could not set iab: %s", strerror(errno));
 		}
 
-		if (secbits != 0) {
-			if (cap_set_secbits(secbits) < 0)
+		ако (secbits != 0) {
+			ако (cap_set_secbits(secbits) < 0)
 				eerrorx("Could not set securebits to 0x%x: %s", secbits, strerror(errno));
 		}
 #endif
 
 #ifdef PR_SET_NO_NEW_PRIVS
-		if (no_new_privs) {
-			if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1)
+		ако (no_new_privs) {
+			ако (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1)
 				eerrorx("Could not set No New Privs flag: %s", strerror(errno));
 		}
 #endif
@@ -1029,18 +1029,18 @@ int main(int argc, char **argv)
 		/* Clean the environment of any RC_ variables */
 		env_list = rc_stringlist_new();
 		i = 0;
-		while (environ[i])
+		докато (environ[i])
 			rc_stringlist_add(env_list, environ[i++]);
 
 #ifdef HAVE_PAM
-		if (changeuser != NULL) {
+		ако (changeuser != NULL) {
 			pamenv = (const char *const *)pam_getenvlist(pamh);
-			if (pamenv) {
-				while (*pamenv) {
+			ако (pamenv) {
+				докато (*pamenv) {
 					/* Don't add strings unless they set a var */
-					if (strchr(*pamenv, '='))
+					ако (strchr(*pamenv, '='))
 						putenv(xstrdup(*pamenv));
-					else
+					иначе
 						unsetenv(*pamenv);
 					pamenv++;
 				}
@@ -1050,7 +1050,7 @@ int main(int argc, char **argv)
 
 		unsetenv("SVCNAME");
 		TAILQ_FOREACH(env, env_list, entries) {
-			if (strncmp(env->value, "RC_", 3) == 0
+			ако (strncmp(env->value, "RC_", 3) == 0
 					|| strncmp(env->value, "SSD_", 4) == 0
 					|| strncmp(env->value, "EINFO_", 6) == 0) {
 				*strchr(env->value, '=') = '\0';
@@ -1060,21 +1060,21 @@ int main(int argc, char **argv)
 		rc_stringlist_free(env_list);
 
 		/* For the path, remove the rcscript bin dir from it */
-		if ((token = getenv("PATH"))) {
+		ако ((token = getenv("PATH"))) {
 			len = strlen(token);
 			newpath = np = xmalloc(len + 1);
-			while (token && *token) {
+			докато (token && *token) {
 				p = strchr(token, ':');
-				if (p) {
+				ако (p) {
 					*p++ = '\0';
-					while (*p == ':')
+					докато (*p == ':')
 						p++;
 				}
-				if (strcmp(token, RC_LIBEXECDIR "/bin") != 0 &&
+				ако (strcmp(token, RC_LIBEXECDIR "/bin") != 0 &&
 				    strcmp(token, RC_LIBEXECDIR "/sbin") != 0)
 				{
 					len = strlen(token);
-					if (np != newpath)
+					ако (np != newpath)
 						*np++ = ':';
 					memcpy(np, token, len);
 					np += len;
@@ -1089,106 +1089,106 @@ int main(int argc, char **argv)
 		stdin_fd = devnull_fd;
 		stdout_fd = devnull_fd;
 		stderr_fd = devnull_fd;
-		if (redirect_stdin) {
-			if ((stdin_fd = xopen_nonblock(redirect_stdin,
+		ако (redirect_stdin) {
+			ако ((stdin_fd = xopen_nonblock(redirect_stdin,
 				    O_RDONLY, 0)) == -1)
 				eerrorx("%s: unable to redirect the input file"
 				    " for stdin `%s': %s",
 				    applet, redirect_stdin, strerror(errno));
 		}
-		if (redirect_stdout) {
-			if ((stdout_fd = xopen_nonblock(redirect_stdout,
+		ако (redirect_stdout) {
+			ако ((stdout_fd = xopen_nonblock(redirect_stdout,
 				    O_WRONLY | O_CREAT | O_APPEND,
 				    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)) == -1)
 				eerrorx("%s: unable to redirect the logfile"
 				    " for stdout `%s': %s",
 				    applet, redirect_stdout, strerror(errno));
-		}else if (stdout_process) {
+		}иначе ако (stdout_process) {
 			stdout_fd = rc_pipe_command(stdout_process, devnull_fd);
-			if (stdout_fd == -1)
+			ако (stdout_fd == -1)
 				eerrorx("%s: unable to open the logging process"
 				    " for stdout `%s': %s",
 				    applet, stdout_process, strerror(errno));
 		}
-		if (redirect_stderr) {
-			if ((stderr_fd = xopen_nonblock(redirect_stderr,
+		ако (redirect_stderr) {
+			ако ((stderr_fd = xopen_nonblock(redirect_stderr,
 				    O_WRONLY | O_CREAT | O_APPEND,
 				    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)) == -1)
 				eerrorx("%s: unable to redirect the logfile"
 				    " for stderr `%s': %s",
 				    applet, redirect_stderr, strerror(errno));
-		}else if (stderr_process) {
+		}иначе ако (stderr_process) {
 			stderr_fd = rc_pipe_command(stderr_process, devnull_fd);
-			if (stderr_fd == -1)
+			ако (stderr_fd == -1)
 				eerrorx("%s: unable to open the logging process"
 				    " for stderr `%s': %s",
 				    applet, stderr_process, strerror(errno));
 		}
 
-		if (background)
+		ако (background)
 			dup2(stdin_fd, STDIN_FILENO);
-		if (background || redirect_stdout || stdout_process
+		ако (background || redirect_stdout || stdout_process
 				|| rc_yesno(getenv("EINFO_QUIET")))
 			dup2(stdout_fd, STDOUT_FILENO);
-		if (background || redirect_stderr || stderr_process
+		ако (background || redirect_stderr || stderr_process
 				|| rc_yesno(getenv("EINFO_QUIET")))
 			dup2(stderr_fd, STDERR_FILENO);
 
 		cloexec_fds_from(3); /* FIXME: this is problematic, see right below */
 
-		if (notify.type == NOTIFY_FD) {
-			if (close(notify.pipe[0]) == -1)
+		ако (notify.type == NOTIFY_FD) {
+			ако (close(notify.pipe[0]) == -1)
 				eerrorx("%s: failed to close notify pipe[0]: %s", applet, strerror(errno));
-			if (dup2(notify.pipe[1], notify.fd) == -1)
+			ако (dup2(notify.pipe[1], notify.fd) == -1)
 				eerrorx("%s: failed to initialize notify fd: %s", applet, strerror(errno));
 
 			/* if notify.pipe[1] == notify.fd then the FD_CLOEXEC flag is not cleared by dup2,
 			   leading to failure. The workaround here is to clear it manually, but the
 			   real fix is that we should never close/cloexec fds in bulk like this */
-			if (notify.pipe[1] == notify.fd) {
-				int flags = fcntl(notify.fd, F_GETFD, 0);
-				if (flags == -1)
+			ако (notify.pipe[1] == notify.fd) {
+				цяло flags = fcntl(notify.fd, F_GETFD, 0);
+				ако (flags == -1)
 					eerrorx("%s: failed to get flags for notify fd: %s", applet, strerror(errno));
-				if (fcntl(notify.fd, F_SETFD, flags & ~FD_CLOEXEC) == -1)
+				ако (fcntl(notify.fd, F_SETFD, flags & ~FD_CLOEXEC) == -1)
 					eerrorx("%s: failed to set flags for notify fd: %s", applet, strerror(errno));
 			}
 
 		}
 
-		if (scheduler != NULL) {
-			int scheduler_index;
+		ако (scheduler != NULL) {
+			цяло scheduler_index;
 			struct sched_param sched =  {.sched_priority = sched_prio};
-			if (strcmp(scheduler, "fifo") == 0)
+			ако (strcmp(scheduler, "fifo") == 0)
 				scheduler_index = SCHED_FIFO;
-			else if (strcmp(scheduler, "rr") == 0)
+			иначе ако (strcmp(scheduler, "rr") == 0)
 				scheduler_index = SCHED_RR;
-			else if (strcmp(scheduler, "other") == 0)
+			иначе ако (strcmp(scheduler, "other") == 0)
 				scheduler_index = SCHED_OTHER;
 #ifdef SCHED_BATCH
-			else if (strcmp(scheduler, "batch") == 0)
+			иначе ако (strcmp(scheduler, "batch") == 0)
 				scheduler_index = SCHED_BATCH;
 #endif
 #ifdef SCHED_IDLE
-			else if (strcmp(scheduler, "idle") == 0)
+			иначе ако (strcmp(scheduler, "idle") == 0)
 				scheduler_index = SCHED_IDLE;
 #endif
-			else if (sscanf(scheduler, "%d", &scheduler_index) != 1)
+			иначе ако (sscanf(scheduler, "%d", &scheduler_index) != 1)
 				eerrorx("Unknown scheduler: %s", scheduler);
 
-			if (sched_prio == -1)
+			ако (sched_prio == -1)
 				sched.sched_priority = sched_get_priority_min(scheduler_index);
 
-			if (pthread_setschedparam(pthread_self(), scheduler_index, &sched))
+			ако (pthread_setschedparam(pthread_self(), scheduler_index, &sched))
 				eerrorx("Failed to set scheduler: %s", strerror(errno));
-		} else if (sched_prio != -1) {
+		} иначе ако (sched_prio != -1) {
 			const struct sched_param sched =  {.sched_priority = sched_prio};
-			if (sched_setparam(mypid, &sched))
+			ако (sched_setparam(mypid, &sched))
 				eerrorx("Failed to set scheduler parameters: %s", strerror(errno));
 		}
 
 		execvp(exec, argv);
 #ifdef HAVE_PAM
-		if (changeuser != NULL && pamr == PAM_SUCCESS)
+		ако (changeuser != NULL && pamr == PAM_SUCCESS)
 			pam_close_session(pamh, PAM_SILENT);
 #endif
 		eerrorx("%s: failed to exec `%s': %s",
@@ -1201,14 +1201,14 @@ int main(int argc, char **argv)
 
 	/* The child never writes to the pipe, so this read will block until
 	 * the child calls exec or exits. */
-	while ((ss = read(pipefd[0], readbuf, 1)) == -1 && errno == EINTR);
-	if (ss == -1)
+	докато ((ss = read(pipefd[0], readbuf, 1)) == -1 && errno == EINTR);
+	ако (ss == -1)
 		eerrorx("%s: failed to read from pipe: %s",
 			applet, strerror(errno));
 
 	close(pipefd[0]);
 
-	if (!background) {
+	ако (!background) {
 		/* As we're not backgrounding the process, wait for our pid
 		 * to return */
 		i = 0;
@@ -1216,13 +1216,13 @@ int main(int argc, char **argv)
 
 		do {
 			pid = waitpid(spid, &i, 0);
-			if (pid < 1) {
+			ако (pid < 1) {
 				eerror("waitpid %d: %s",
 				    spid, strerror(errno));
-				return -1;
+				върни -1;
 			}
-		} while (!WIFEXITED(i) && !WIFSIGNALED(i));
-		if (!WIFEXITED(i) || WEXITSTATUS(i) != 0) {
+		} докато (!WIFEXITED(i) && !WIFSIGNALED(i));
+		ако (!WIFEXITED(i) || WEXITSTATUS(i) != 0) {
 			eerror("%s: failed to start `%s'", applet, exec);
 			exit(EXIT_FAILURE);
 		}
@@ -1231,54 +1231,54 @@ int main(int argc, char **argv)
 
 	/* Wait a little bit and check that process is still running
 	   We do this as some badly written daemons fork and then barf */
-	if (start_wait == 0 &&
+	ако (start_wait == 0 &&
 	    ((p = getenv("SSD_STARTWAIT")) ||
 		(p = rc_conf_value("rc_start_wait"))))
 	{
-		if (sscanf(p, "%u", &start_wait) != 1)
+		ако (sscanf(p, "%u", &start_wait) != 1)
 			start_wait = 0;
 	}
 
-	if (notify.type != NOTIFY_NONE) {
-		if (!notify_wait(applet, notify))
+	ако (notify.type != NOTIFY_NONE) {
+		ако (!notify_wait(applet, notify))
 			ret = EXIT_FAILURE;
-	} else if (start_wait > 0) {
+	} иначе ако (start_wait > 0) {
 		struct timespec ts;
 		bool alive = false;
 
 		ts.tv_sec = start_wait / 1000;
 		ts.tv_nsec = (start_wait % 1000) * ONE_MS;
-		if (nanosleep(&ts, NULL) == -1) {
-			if (errno != EINTR) {
+		ако (nanosleep(&ts, NULL) == -1) {
+			ако (errno != EINTR) {
 				eerror("%s: nanosleep: %s",
 				    applet, strerror(errno));
-				return 0;
+				върни 0;
 			}
 		}
-		if (background) {
-			if (kill(pid, 0) == 0)
+		ако (background) {
+			ако (kill(pid, 0) == 0)
 				alive = true;
-		} else {
-			if (pidfile) {
+		} иначе {
+			ако (pidfile) {
 				pid = get_pid(applet, pidfile);
-				if (pid == -1) {
+				ако (pid == -1) {
 					eerrorx("%s: did not "
 					    "create a valid"
 					    " pid in `%s'",
 					    applet, pidfile);
 				}
-			} else
+			} иначе
 				pid = 0;
-			if (do_stop(applet, exec, (const char *const *)margv,
+			ако (do_stop(applet, exec, (const char *const *)margv,
 				pid, uid, 0, false, test, false) > 0)
 				alive = true;
 		}
 
-		if (!alive)
+		ако (!alive)
 			eerrorx("%s: %s died", applet, exec);
 	}
 
-	if (svcname)
+	ако (svcname)
 		rc_service_daemon_set(svcname, exec,
 		    (const char *const *)margv, pidfile, true);
 

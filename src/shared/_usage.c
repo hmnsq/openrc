@@ -23,7 +23,7 @@
 
 void set_quiet_options(void)
 {
-	static int qcount = 0;
+	static цяло qcount = 0;
 
 	qcount ++;
 	switch (qcount) {
@@ -41,7 +41,7 @@ RC_NORETURN void show_version(void)
 	const char *systype = NULL;
 
 	printf("%s (OpenRC", applet);
-	if ((systype = rc_sys()))
+	ако ((systype = rc_sys()))
 		printf(" [%s]", systype);
 	printf(") %s", VERSION);
 #ifdef BRANDING
@@ -51,34 +51,34 @@ RC_NORETURN void show_version(void)
 	exit(EXIT_SUCCESS);
 }
 
-RC_NORETURN void usage(int exit_status)
+RC_NORETURN void usage(цяло exit_status)
 {
 	const char * const has_arg[] = { "", "<arg>", "[arg]" };
-	int i;
-	int len;
+	цяло i;
+	цяло len;
 	char *lo;
 	char *p;
 	char *token;
 	char val[4] = "-?,";
 
-	if (usagestring)
+	ако (usagestring)
 		printf("%s", usagestring);
-	else
+	иначе
 		printf("Usage: %s [options] ", applet);
 
-	if (extraopts)
+	ако (extraopts)
 		printf("%s", extraopts);
 
 	printf("\n\nOptions: [ %s ]\n", getoptstring);
-	for (i = 0; longopts[i].name; ++i) {
+	за (i = 0; longopts[i].name; ++i) {
 		val[1] = longopts[i].val;
 		len = printf("  %3s --%s %s", isprint(longopts[i].val) ? val : "",
 		    longopts[i].name, has_arg[longopts[i].has_arg]);
 
 		lo = p = xstrdup(longopts_help[i]);
-		while ((token = strsep(&p, "\n"))) {
+		докато ((token = strsep(&p, "\n"))) {
 			len = 36 - len;
-			if (len > 0)
+			ако (len > 0)
 				printf("%*s", len, "");
 			puts(token);
 			len = 0;

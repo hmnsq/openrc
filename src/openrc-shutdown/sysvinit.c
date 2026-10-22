@@ -28,38 +28,38 @@
 
 static void sysvinit_send_cmd(struct init_request *request)
 {
-	int fd;
+	цяло fd;
 	char *p;
 	size_t bytes;
 	ssize_t r;
 
 	fd = open("/run/initctl", O_WRONLY|O_NONBLOCK|O_CLOEXEC|O_NOCTTY);
-	if (fd < 0) {
-		if (errno != ENOENT)
+	ако (fd < 0) {
+		ако (errno != ENOENT)
 			eerror("Failed to open initctl fifo: %s", strerror(errno));
-		return;
+		върни;
 	}
 	p = (char *) request;
 	bytes = sizeof(*request);
 	do {
 		r = write(fd, p, bytes);
-		if (r < 0) {
-			if ((errno == EAGAIN) || (errno == EINTR))
+		ако (r < 0) {
+			ако ((errno == EAGAIN) || (errno == EINTR))
 				continue;
 			eerror("Failed to write to /run/initctl: %s", strerror(errno));
-			return;
+			върни;
 		}
 		p += r;
 		bytes -= r;
-	} while (bytes > 0);
+	} докато (bytes > 0);
 }
 
 void sysvinit_runlevel(char rl)
 {
 	struct init_request request;
 
-	if (!rl)
-		return;
+	ако (!rl)
+		върни;
 
 	request = (struct init_request) {
 		.magic = INIT_MAGIC,
@@ -68,7 +68,7 @@ void sysvinit_runlevel(char rl)
 		.runlevel = rl,
 	};
 	sysvinit_send_cmd(&request);
-		return;
+		върни;
 }
 
 /*
@@ -84,19 +84,19 @@ void sysvinit_setenv(const char *name, const char *value)
 	request.magic = INIT_MAGIC;
 	request.cmd = INIT_CMD_SETENV;
 	nl = strlen(name);
-	if (value)
+	ако (value)
 		vl = strlen(value);
-else
+иначе
 		vl = 0;
 
-	if (nl + vl + 3 >= (int)sizeof(request.i.data))
-		return;
+	ако (nl + vl + 3 >= (цяло)sizeof(request.i.data))
+		върни;
 
 	memcpy(request.i.data, name, nl);
-	if (value) {
+	ако (value) {
 		request.i.data[nl] = '=';
 		memcpy(request.i.data + nl + 1, value, vl);
 	}
 	sysvinit_send_cmd(&request);
-	return;
+	върни;
 }

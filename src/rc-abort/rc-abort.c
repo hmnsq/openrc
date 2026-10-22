@@ -18,17 +18,17 @@
 
 #include "einfo.h"
 
-int main(void)
+цяло main(void)
 {
 	const char *p = getenv("RC_PID");
-	int pid;
+	цяло pid;
 
-	if (p && sscanf(p, "%d", &pid) == 1) {
-		if (kill(pid, SIGUSR1) != 0)
+	ако (p && sscanf(p, "%d", &pid) == 1) {
+		ако (kill(pid, SIGUSR1) != 0)
 			eerrorx("rc-abort: failed to signal parent %d: %s",
 			    pid, strerror(errno));
-		return EXIT_SUCCESS;
+		върни EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	върни EXIT_FAILURE;
 }

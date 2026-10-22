@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+цяло main(цяло argc, char **argv)
 {
-	int i;
+	цяло i;
 	char *p;
-	int c;
+	цяло c;
 
-	for (i = 1; i < argc; i++) {
+	за (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		ако (i != 1)
 			putchar(' ');
-		while (*p) {
+		докато (*p) {
 			c = (unsigned char)*p++;
-			if (!isalnum(c))
+			ако (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	върни EXIT_SUCCESS;
 }
