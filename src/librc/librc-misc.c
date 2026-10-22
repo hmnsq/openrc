@@ -15,44 +15,44 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <fnmatch.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-#include <sys/stat.h>
+#ضمن <fnmatch.h>
+#ضمن <ctype.h>
+#ضمن <dirent.h>
+#ضمن <errno.h>
+#ضمن <limits.h>
+#ضمن <stdbool.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <strings.h>
+#ضمن <sys/stat.h>
 
-#include "queue.h"
-#include "librc.h"
-#include "helpers.h"
-#include "misc.h"
+#ضمن "queue.h"
+#ضمن "librc.h"
+#ضمن "helpers.h"
+#ضمن "misc.h"
 
 bool
-rc_yesno(const char *value)
+rc_yesno(ثابت حرف *قدر)
 {
-	if (!value) {
+	إذا (!قدر) {
 		errno = ENOENT;
-		return false;
+		أرجع false;
 	}
 
-	if (strcasecmp(value, "yes") == 0 ||
-	    strcasecmp(value, "y") == 0 ||
-	    strcasecmp(value, "true") == 0 ||
-	    strcasecmp(value, "1") == 0)
-		return true;
+	إذا (strcasecmp(قدر, "yes") == 0 ||
+	    strcasecmp(قدر, "y") == 0 ||
+	    strcasecmp(قدر, "true") == 0 ||
+	    strcasecmp(قدر, "1") == 0)
+		أرجع true;
 
-	if (strcasecmp(value, "no") != 0 &&
-	    strcasecmp(value, "n") != 0 &&
-	    strcasecmp(value, "false") != 0 &&
-	    strcasecmp(value, "0") != 0)
+	إذا (strcasecmp(قدر, "no") != 0 &&
+	    strcasecmp(قدر, "n") != 0 &&
+	    strcasecmp(قدر, "false") != 0 &&
+	    strcasecmp(قدر, "0") != 0)
 		errno = EINVAL;
 
-	return false;
+	أرجع false;
 }
 
 
@@ -63,185 +63,185 @@ rc_yesno(const char *value)
  * Don't forget to free the buffer afterwards!
  */
 bool
-rc_getfile(const char *file, char **buffer, size_t *len)
+rc_getfile(ثابت حرف *file, حرف **بفر, size_t *len)
 {
 	bool ret = false;
 	FILE *fp;
-	int fd;
-	struct stat st;
-	size_t done, left;
+	صحيح fd;
+	بنية stat st;
+	size_t پورو, کاٻو;
 
 	fp = fopen(file, "re");
-	if (!fp)
-		return false;
+	إذا (!fp)
+		أرجع false;
 
 	/* assume fileno() never fails */
 	fd = fileno(fp);
 
-	if (fstat(fd, &st))
-		goto finished;
+	إذا (fstat(fd, &st))
+		اذهب ختم;
 
-	left = st.st_size;
-	*len = left + 1; /* NUL terminator */
-	*buffer = xrealloc(*buffer, *len);
-	while (left) {
-		done = fread(*buffer, sizeof(*buffer[0]), left, fp);
-		if (done == 0 && ferror(fp))
-			goto finished;
-		left -= done;
+	کاٻو = st.st_size;
+	*len = کاٻو + 1; /* NUL terminator */
+	*بفر = xrealloc(*بفر, *len);
+	طالما (کاٻو) {
+		پورو = fread(*بفر, حجم(*بفر[0]), کاٻو, fp);
+		إذا (پورو == 0 && ferror(fp))
+			اذهب ختم;
+		کاٻو -= پورو;
 	}
 	ret = true;
 
- finished:
-	if (!ret) {
-		free(*buffer);
+ ختم:
+	إذا (!ret) {
+		حرر(*بفر);
 		*len = 0;
-	} else
-		(*buffer)[*len - 1] = '\0';
+	} وإلا
+		(*بفر)[*len - 1] = '\0';
 	fclose(fp);
-	return ret;
+	أرجع ret;
 }
 
-char *
-rc_proc_getent(const char *ent RC_UNUSED)
+حرف *
+rc_proc_getent(ثابت حرف *ent RC_اڻ_استعمال_ٿيل)
 {
-#ifdef __linux__
+#جيڪڏهن_وصف_ٿيل __linux__
 	FILE *fp;
-	char *proc = NULL, *p, *value = NULL, *save;
+	حرف *proc = عدم, *p, *قدر = عدم, *save;
 	size_t i, len;
 
-	if (!(fp = fopen("/proc/cmdline", "r")))
-		return NULL;
+	إذا (!(fp = fopen("/proc/cmdline", "r")))
+		أرجع عدم;
 
 	i = 0;
-	if (xgetline(&proc, &i, fp) == -1)
-		goto out;
+	إذا (xgetline(&proc, &i, fp) == -1)
+		اذهب ٻاهريون;
 	save = proc;
 
-	len = strlen(ent);
-	while ((p = strsep(&save, " "))) {
-		if (strncmp(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
+	len = لڙي_ڊيگهه(ent);
+	طالما ((p = strsep(&save, " "))) {
+		إذا (لڙي_ڀيٽ(ent, p, len) == 0 && (p[len] == '\0' || p[len] == ' ' || p[len] == '=')) {
 			p += len;
-			if (*p == '=')
+			إذا (*p == '=')
 				p++;
-			value = xstrdup(p);
+			قدر = xstrdup(p);
 		}
 	}
 
-	if (!value)
+	إذا (!قدر)
 		errno = ENOENT;
 
-out:
+ٻاهريون:
 	fclose(fp);
-	free(proc);
+	حرر(proc);
 
-	return value;
-#else
-	return NULL;
-#endif
+	أرجع قدر;
+#وإلا
+	أرجع عدم;
+#جيڪڏهن_پورو
 }
 
 RC_STRINGLIST *
-config_list(int dirfd, const char *pathname)
+config_list(صحيح dirfd, ثابت حرف *pathname)
 {
 	FILE *fp;
-	char *buffer = NULL;
+	حرف *بفر = عدم;
 	size_t len = 0;
-	char *p;
-	char *token;
+	حرف *p;
+	حرف *token;
 	RC_STRINGLIST *list = rc_stringlist_new();
 
-	if (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
-		return list;
+	إذا (!(fp = do_fopenat(dirfd, pathname, O_RDONLY)))
+		أرجع list;
 
-	while (xgetline(&buffer, &len, fp) != -1) {
-		p = buffer;
+	طالما (xgetline(&بفر, &len, fp) != -1) {
+		p = بفر;
 		/* Strip leading spaces/tabs */
-		while ((*p == ' ') || (*p == '\t'))
+		طالما ((*p == ' ') || (*p == '\t'))
 			p++;
 
 		/* Get entry - we do not want comments */
 		token = strsep(&p, "#");
-		if (token && (strlen(token) > 1)) {
+		إذا (token && (لڙي_ڊيگهه(token) > 1)) {
 			/* If not variable assignment then skip */
-			if (strchr(token, '=')) {
+			إذا (strchr(token, '=')) {
 				/* Strip the newline if present */
-				if (token[strlen(token) - 1] == '\n')
-					token[strlen(token) - 1] = 0;
+				إذا (token[لڙي_ڊيگهه(token) - 1] == '\n')
+					token[لڙي_ڊيگهه(token) - 1] = 0;
 
-				rc_stringlist_add(list, token);
+				rc_stringlist_جوڙيو(list, token);
 			}
 		}
 	}
-	free(buffer);
+	حرر(بفر);
 	fclose(fp);
 
-	return list;
+	أرجع list;
 }
 
 RC_STRINGLIST *
-rc_config_list(const char *file)
+rc_config_list(ثابت حرف *file)
 {
-	return config_list(AT_FDCWD, file);
+	أرجع config_list(AT_FDCWD, file);
 }
 
-static void rc_config_set_value(RC_STRINGLIST *config, char *value)
+ساكن فراغ rc_config_سيٽ_قدر(RC_STRINGLIST *config, حرف *قدر)
 {
 	RC_STRING *cline;
-	char *entry;
+	حرف *داخلا;
 	size_t i = 0;
-	char *newline;
-	char *p = value;
+	حرف *newline;
+	حرف *p = قدر;
 	bool replaced;
-	char *token;
+	حرف *token;
 
-	if (!p)
-		return;
-	if (strncmp(p, "export ", 7) == 0)
+	إذا (!p)
+		أرجع;
+	إذا (لڙي_ڀيٽ(p, "export ", 7) == 0)
 		p += 7;
-	if (!(token = strsep(&p, "=")))
-		return;
+	إذا (!(token = strsep(&p, "=")))
+		أرجع;
 
-	entry = xstrdup(token);
+	داخلا = xstrdup(token);
 	/* Preserve shell coloring */
-	if (*p == '$')
-		token = value;
-	else
-		do {
+	إذا (*p == '$')
+		token = قدر;
+	وإلا
+		افعل {
 			/* Bash variables are usually quoted */
 			token = strsep(&p, "\"\'");
-		} while (token && *token == '\0');
+		} طالما (token && *token == '\0');
 
 	/* Drop a newline if that's all we have */
-	if (token) {
-		i = strlen(token) - 1;
-		if (token[i] == '\n')
+	إذا (token) {
+		i = لڙي_ڊيگهه(token) - 1;
+		إذا (token[i] == '\n')
 			token[i] = 0;
 
-		xasprintf(&newline, "%s=%s", entry, token);
-	} else {
-		xasprintf(&newline, "%s=", entry);
+		xasprintf(&newline, "%s=%s", داخلا, token);
+	} وإلا {
+		xasprintf(&newline, "%s=", داخلا);
 	}
 
 	replaced = false;
 	/* In shells the last item takes precedence, so we need to remove
 	   any prior values we may already have */
 	TAILQ_FOREACH(cline, config, entries) {
-		i = strlen(entry);
-		if (strncmp(entry, cline->value, i) == 0 && cline->value[i] == '=') {
+		i = لڙي_ڊيگهه(داخلا);
+		إذا (لڙي_ڀيٽ(داخلا, cline->قدر, i) == 0 && cline->قدر[i] == '=') {
 			/* We have a match now - to save time we directly replace it */
-			free(cline->value);
-			cline->value = newline;
+			حرر(cline->قدر);
+			cline->قدر = newline;
 			replaced = true;
-			break;
+			اكسر;
 		}
 	}
 
-	if (!replaced) {
-		rc_stringlist_add(config, newline);
-		free(newline);
+	إذا (!replaced) {
+		rc_stringlist_جوڙيو(config, newline);
+		حرر(newline);
 	}
-	free(entry);
+	حرر(داخلا);
 }
 
 /*
@@ -250,179 +250,179 @@ static void rc_config_set_value(RC_STRINGLIST *config, char *value)
  * a patch for this on *BSD or tell me how to write the code to do this,
  * any suggestions are welcome.
  */
-static RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
+ساكن RC_STRINGLIST *rc_config_kcl(RC_STRINGLIST *config)
 {
-#ifdef __linux__
+#جيڪڏهن_وصف_ٿيل __linux__
 	RC_STRINGLIST *overrides;
 	RC_STRING *cline, *override, *config_np;
-	char *tmp = NULL;
-	char *value = NULL;
+	حرف *tmp = عدم;
+	حرف *قدر = عدم;
 	size_t varlen = 0;
 
 	overrides = rc_stringlist_new();
 
 	/* A list of variables which may be overridden on the kernel command line */
-	rc_stringlist_add(overrides, "rc_interactive");
-	rc_stringlist_add(overrides, "rc_parallel");
+	rc_stringlist_جوڙيو(overrides, "rc_interactive");
+	rc_stringlist_جوڙيو(overrides, "rc_parallel");
 
 	TAILQ_FOREACH(override, overrides, entries) {
-		varlen = strlen(override->value);
-		value = rc_proc_getent(override->value);
+		varlen = لڙي_ڊيگهه(override->قدر);
+		قدر = rc_proc_getent(override->قدر);
 
 		/* No need to continue if there's nothing to override */
-		if (!value) {
-			free(value);
-			continue;
+		إذا (!قدر) {
+			حرر(قدر);
+			استمر;
 		}
 
-		if (value != NULL) {
-			xasprintf(&tmp, "%s=%s", override->value, value);
+		إذا (قدر != عدم) {
+			xasprintf(&tmp, "%s=%s", override->قدر, قدر);
 		}
 
 		/*
 		 * Whenever necessary remove the old config entry first to prevent
 		 * duplicates
 		 */
-		TAILQ_FOREACH_SAFE(cline, config, entries, config_np) {
-			if (strncmp(override->value, cline->value, varlen) == 0
-				&& cline->value[varlen] == '=') {
-				rc_stringlist_delete(config, cline->value);
-				break;
+		TAILQ_FOREACH_محفوظ(cline, config, entries, config_np) {
+			إذا (لڙي_ڀيٽ(override->قدر, cline->قدر, varlen) == 0
+				&& cline->قدر[varlen] == '=') {
+				rc_stringlist_delete(config, cline->قدر);
+				اكسر;
 			}
 		}
 
 		/* Add the option (var/value) to the current config */
-		rc_stringlist_add(config, tmp);
+		rc_stringlist_جوڙيو(config, tmp);
 
-		free(tmp);
-		free(value);
+		حرر(tmp);
+		حرر(قدر);
 	}
 
 	rc_stringlist_free(overrides);
-#endif
-	return config;
+#جيڪڏهن_پورو
+	أرجع config;
 }
 
-static void
-rc_config_directory(RC_STRINGLIST *config, int targetfd, const char *dir)
+ساكن فراغ
+rc_config_directory(RC_STRINGLIST *config, صحيح targetfd, ثابت حرف *dir)
 {
 	DIR *dp;
-	struct dirent *d;
+	بنية dirent *d;
 	RC_STRINGLIST *rc_conf_d_files;
 	RC_STRING *fname;
 	RC_STRINGLIST *rc_conf_d_list;
-	RC_STRING *line;
+	RC_STRING *سٽ;
 
-	if (!(dp = do_opendirat(targetfd, dir)))
-		return;
+	إذا (!(dp = do_opendirat(targetfd, dir)))
+		أرجع;
 
 	rc_conf_d_files = rc_stringlist_new();
-	while ((d = readdir(dp)) != NULL) {
-		if (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
+	طالما ((d = readdir(dp)) != عدم) {
+		إذا (fnmatch("*.conf", d->d_name, FNM_PATHNAME) == 0) {
 			rc_stringlist_addu(rc_conf_d_files, d->d_name);
 		}
 	}
 
-	rc_stringlist_sort(&rc_conf_d_files);
+	rc_stringlist_ترتيب_ڏيو(&rc_conf_d_files);
 	TAILQ_FOREACH(fname, rc_conf_d_files, entries) {
-		if (!fname->value)
-			continue;
+		إذا (!fname->قدر)
+			استمر;
 
-		rc_conf_d_list = config_list(dirfd(dp), fname->value);
-		TAILQ_FOREACH(line, rc_conf_d_list, entries)
-			if (line->value)
-				rc_config_set_value(config, line->value);
+		rc_conf_d_list = config_list(dirfd(dp), fname->قدر);
+		TAILQ_FOREACH(سٽ, rc_conf_d_list, entries)
+			إذا (سٽ->قدر)
+				rc_config_سيٽ_قدر(config, سٽ->قدر);
 		rc_stringlist_free(rc_conf_d_list);
 	}
 
 	rc_stringlist_free(rc_conf_d_files);
 	closedir(dp);
 
-	return;
+	أرجع;
 }
 
-static RC_STRINGLIST *
-config_load(int dirfd, const char *pathname)
+ساكن RC_STRINGLIST *
+config_ڀريو(صحيح dirfd, ثابت حرف *pathname)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *config;
-	RC_STRING *line;
+	RC_STRING *سٽ;
 
 	list = config_list(dirfd, pathname);
 	config = rc_stringlist_new();
-	TAILQ_FOREACH(line, list, entries) {
-		rc_config_set_value(config, line->value);
+	TAILQ_FOREACH(سٽ, list, entries) {
+		rc_config_سيٽ_قدر(config, سٽ->قدر);
 	}
 	rc_stringlist_free(list);
 
-	return config;
+	أرجع config;
 }
 
 RC_STRINGLIST *
-rc_config_load(const char *file)
+rc_config_ڀريو(ثابت حرف *file)
 {
-	return config_load(AT_FDCWD, file);
+	أرجع config_ڀريو(AT_FDCWD, file);
 }
 
-char *
-rc_config_value(RC_STRINGLIST *list, const char *entry)
+حرف *
+rc_config_قدر(RC_STRINGLIST *list, ثابت حرف *داخلا)
 {
-	RC_STRING *line;
-	char *p;
+	RC_STRING *سٽ;
+	حرف *p;
 	size_t len;
 
-	len = strlen(entry);
-	TAILQ_FOREACH(line, list, entries) {
-		p = strchr(line->value, '=');
-		if (p != NULL) {
-			if (strncmp(entry, line->value, len) == 0 && line->value[len] == '=')
-				return ++p;
+	len = لڙي_ڊيگهه(داخلا);
+	TAILQ_FOREACH(سٽ, list, entries) {
+		p = strchr(سٽ->قدر, '=');
+		إذا (p != عدم) {
+			إذا (لڙي_ڀيٽ(داخلا, سٽ->قدر, len) == 0 && سٽ->قدر[len] == '=')
+				أرجع ++p;
 		}
 	}
-	return NULL;
+	أرجع عدم;
 }
 
 /* Global for caching the strings loaded from rc.conf to avoid reparsing for
  * each rc_conf_value call */
-static RC_STRINGLIST *rc_conf = NULL;
+ساكن RC_STRINGLIST *rc_conf = عدم;
 
-static void
-_free_rc_conf(void)
+ساكن فراغ
+_free_rc_conf(فراغ)
 {
 	rc_stringlist_free(rc_conf);
 }
 
-static void
-rc_conf_append(int dirfd)
+ساكن فراغ
+rc_conf_append(صحيح dirfd)
 {
-	RC_STRINGLIST *conf = config_load(dirfd, "rc.conf");
+	RC_STRINGLIST *conf = config_ڀريو(dirfd, "rc.conf");
 	TAILQ_CONCAT(rc_conf, conf, entries);
 	rc_stringlist_free(conf);
 }
 
-char *
-rc_conf_value(const char *setting)
+حرف *
+rc_conf_قدر(ثابت حرف *setting)
 {
-	const int *dirfds;
-	size_t dir_count = rc_scriptdirfds(&dirfds);
+	ثابت صحيح *dirfds;
+	size_t dir_ڳڻپ = rc_scriptdirfds(&dirfds);
 	RC_STRING *s;
 
-	if (rc_conf)
-		return rc_config_value(rc_conf, setting);
+	إذا (rc_conf)
+		أرجع rc_config_قدر(rc_conf, setting);
 
 	rc_conf = rc_stringlist_new();
 	atexit(_free_rc_conf);
 
-	for (size_t i = 0; i < dir_count; i++) {
+	لكل (size_t i = 0; i < dir_ڳڻپ; i++) {
 		/* load configs in reverse order, so earlier entries override later ones */
-		size_t idx = dir_count - 1 - i;
+		size_t idx = dir_ڳڻپ - 1 - i;
 		rc_conf_append(dirfds[idx]);
 		rc_config_directory(rc_conf, dirfds[idx], "rc.conf.d");
 	}
 
 	/* Support old configs. */
-	if (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
-		RC_STRINGLIST *old_conf = config_load(AT_FDCWD, RC_CONF_OLD);
+	إذا (!rc_is_user() && access(RC_CONF_OLD, F_OK) == 0) {
+		RC_STRINGLIST *old_conf = config_ڀريو(AT_FDCWD, RC_CONF_OLD);
 		TAILQ_CONCAT(rc_conf, old_conf, entries);
 		rc_stringlist_free(old_conf);
 	}
@@ -431,13 +431,13 @@ rc_conf_value(const char *setting)
 
 	/* Convert old uppercase to lowercase */
 	TAILQ_FOREACH(s, rc_conf, entries) {
-		char *p = s->value;
-		while (p && *p && *p != '=') {
-			if (isupper((unsigned char)*p))
-				*p = tolower((unsigned char)*p);
+		حرف *p = s->قدر;
+		طالما (p && *p && *p != '=') {
+			إذا (isupper((بنانشان حرف)*p))
+				*p = tolower((بنانشان حرف)*p);
 			p++;
 		}
 	}
 
-	return rc_config_value(rc_conf, setting);
+	أرجع rc_config_قدر(rc_conf, setting);
 }

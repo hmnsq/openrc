@@ -10,95 +10,95 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#define SYSLOG_NAMES
+#وصف_ڪريو SYSLOG_نالا
 
-#include <sys/time.h>
-#include <errno.h>
-#include <ctype.h>
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
-#include <time.h>
-#include <strings.h>
+#ضمن <sys/time.h>
+#ضمن <errno.h>
+#ضمن <ctype.h>
+#ضمن <inttypes.h>
+#ضمن <stddef.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <syslog.h>
+#ضمن <time.h>
+#ضمن <strings.h>
 
-#include "einfo.h"
-#include "helpers.h"
+#ضمن "einfo.h"
+#ضمن "helpers.h"
 
 /* usecs to wait while we poll the file existence  */
-#define WAIT_INTERVAL	20000000
+#وصف_ڪريو WAIT_INTERVAL	20000000
 
-const char *applet = NULL;
+ثابت حرف *applet = عدم;
 
-static int syslog_decode(char *name, const CODE *codetab)
+ساكن صحيح syslog_decode(حرف *name, ثابت CODE *codetab)
 {
-	const CODE *c;
+	ثابت CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	إذا (انگ_آهي((بنانشان حرف)*name))
+		أرجع atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	لكل (c = codetab; c->c_name; c++)
+		إذا (!strcasecmp(name, c->c_name))
+			أرجع c->c_val;
 
-	return -1;
+	أرجع -1;
 }
 
-int main(int argc, char **argv)
+صحيح مکيه(صحيح argc, حرف **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	صحيح retval = EXIT_SUCCESS;
+	صحيح i;
 	size_t l = 0;
-	char *message = NULL;
-	char *p;
-	int level = 0;
-	struct timespec ts;
-	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	حرف *پيغام = عدم;
+	حرف *p;
+	صحيح level = 0;
+	بنية timespec ts;
+	بنية timeval stop, now;
+	صحيح (*e) (ثابت حرف *, ...) EINFO_PRINTF(1, 2) = عدم;
+	صحيح (*ee) (صحيح, ثابت حرف *, ...) EINFO_PRINTF(2, 3) = عدم;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
-		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
+	إذا (strcmp(applet, "eval_ecolors") == 0) {
+		لکو("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
 		    ecolor(ECOLOR_BAD),
 		    ecolor(ECOLOR_HILITE),
 		    ecolor(ECOLOR_BRACKET),
-		    ecolor(ECOLOR_NORMAL));
-		exit(EXIT_SUCCESS);
+		    ecolor(ECOLOR_عام));
+		ٻاهر_نڪرو(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	إذا (argc > 0) {
+		إذا (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (صحيح)strtoimax(argv[0], &p, 0);
+			إذا (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			إذا (errno)
 				retval = EXIT_FAILURE;
-			else {
+			وإلا {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} وإلا إذا (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			إذا (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			إذا (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,110 +109,110 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	إذا (strcmp(applet, "ewaitfile") == 0) {
+		إذا (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		إذا (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
-		gettimeofday(&stop, NULL);
+		gettimeofday(&stop, عدم);
 		/* retval stores the timeout */
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		لكل (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
-					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
-				gettimeofday(&now, NULL);
-				if (retval <= 0)
-					continue;
-				if (timercmp(&now, &stop, <))
-					continue;
+			لكل (;;) {
+				إذا (access(argv[i], F_OK) == 0)
+					اكسر;
+				إذا (nanosleep(&ts, عدم) == -1)
+					أرجع EXIT_FAILURE;
+				gettimeofday(&now, عدم);
+				إذا (retval <= 0)
+					استمر;
+				إذا (timercmp(&now, &stop, <))
+					استمر;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				أرجع EXIT_FAILURE;
 			}
-			eendv(EXIT_SUCCESS, NULL);
+			eendv(EXIT_SUCCESS, عدم);
 		}
-		return EXIT_SUCCESS;
+		أرجع EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
-		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+	إذا (argc > 0) {
+		FILE *mem = xopen_memstream(&پيغام, &l);
+		لكل (i = 0; i < argc; i++) {
+			إذا (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	إذا (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	وإلا إذا (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	وإلا إذا (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	وإلا إذا (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	وإلا إذا (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} وإلا إذا (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} وإلا إذا (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	وإلا إذا (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	وإلا إذا (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
-		elog(retval, "%s", message);
+	وإلا إذا (strcmp(applet, "esyslog") == 0) {
+		elog(retval, "%s", پيغام);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} وإلا إذا (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	وإلا إذا (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	وإلا إذا (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	وإلا إذا (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	وإلا إذا (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	وإلا إذا (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	وإلا إذا (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	وإلا إذا (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	وإلا إذا (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	وإلا إذا (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	وإلا إذا (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	وإلا {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
-			e("%s", message);
-		else if (ee)
-			ee(retval, "%s", message);
-	} else {
-		if (e)
-			e(NULL);
-		else if (ee)
-			ee(retval, NULL);
+	إذا (پيغام) {
+		إذا (e)
+			e("%s", پيغام);
+		وإلا إذا (ee)
+			ee(retval, "%s", پيغام);
+	} وإلا {
+		إذا (e)
+			e(عدم);
+		وإلا إذا (ee)
+			ee(retval, عدم);
 	}
 
-	free(message);
-	return retval;
+	حرر(پيغام);
+	أرجع retval;
 }

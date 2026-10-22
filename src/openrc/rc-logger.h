@@ -10,17 +10,17 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#ifndef RC_LOGGER_H
-#define RC_LOGGER_H
+#جيڪڏهن_وصف_نه_ٿيل RC_LOGGER_H
+#وصف_ڪريو RC_LOGGER_H
 
-#include <stdbool.h>
-#include <sys/types.h>
+#ضمن <stdbool.h>
+#ضمن <sys/types.h>
 
-extern pid_t rc_logger_pid;
-extern int rc_logger_tty;
-extern bool rc_in_logger;
+خارجي pid_t rc_logger_pid;
+خارجي صحيح rc_logger_tty;
+خارجي bool rc_اندريون_logger;
 
-void rc_logger_open(const char *runlevel);
-void rc_logger_close(void);
+فراغ rc_logger_open(ثابت حرف *runlevel);
+فراغ rc_logger_close(فراغ);
 
-#endif
+#جيڪڏهن_پورو
