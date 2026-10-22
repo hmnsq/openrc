@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+целое основной(целое argc, char **argv)
 {
-	int i;
+	целое i;
 	char *p;
-	int c;
+	целое c;
 
-	for (i = 1; i < argc; i++) {
+	для (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		если (i != 1)
 			putchar(' ');
-		while (*p) {
+		пока (*p) {
 			c = (unsigned char)*p++;
-			if (!isalnum(c))
+			если (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	вернуть EXIT_SUCCESS;
 }

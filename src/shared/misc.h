@@ -40,9 +40,9 @@ bool rc_conf_yesno(const char *var);
 char *default_runlevel(void);
 void env_filter(void);
 void env_config(void);
-int signal_setup(int sig, void (*handler)(int));
-int svc_lock(const char *, bool);
-int svc_unlock(const char *, int);
+целое signal_setup(целое sig, void (*handler)(целое));
+целое svc_lock(const char *, bool);
+целое svc_unlock(const char *, целое);
 pid_t exec_service(const char *, const char *);
 
 typedef struct rc_service_state_name {
@@ -70,17 +70,17 @@ static const rc_service_state_name_t rc_service_state_names[] = {
 #define service_start(service) exec_service(service, "start")
 #define service_stop(service)  exec_service(service, "stop")
 
-int parse_mode(mode_t *, char *);
+целое parse_mode(mode_t *, char *);
 
 /* Handy function so we can wrap einfo around our deptree */
-RC_DEPTREE *_rc_deptree_load (int, int *);
+RC_DEPTREE *_rc_deptree_load (целое, целое *);
 
 RC_SERVICE lookup_service_state(const char *service);
 void from_time_t(char *time_string, time_t tv);
 time_t to_time_t(char *timestring);
 pid_t get_pid(const char *applet, const char *pidfile);
 
-void cloexec_fds_from(int);
+void cloexec_fds_from(целое);
 
 struct notify {
 	enum {
@@ -90,8 +90,8 @@ struct notify {
 	} type;
 
 	char *path;
-	int pipe[2];
-	int fd;
+	целое pipe[2];
+	целое fd;
 };
 
 struct notify notify_parse(const char *applet, const char *ready_string);

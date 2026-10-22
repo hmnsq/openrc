@@ -22,10 +22,10 @@
 /* Although OpenRC requires C99, linking to us should not. */
 #ifdef restrict
 # define EINFO_RESTRICT restrict
-#else
+#иначе
 # ifdef __restrict
 #  define EINFO_RESTRICT __restrict
-# else
+# иначе
 #  define EINFO_RESTRICT
 # endif
 #endif
@@ -50,7 +50,7 @@ typedef enum
 const char *ecolor(ECOLOR);
 
 /*! @brief Writes to syslog. */
-void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+void elog(целое, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 
 /*!
  * @brief Display informational messages.
@@ -69,22 +69,22 @@ void elog(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
  * The x suffix means function will exit() returning failure.
  */
 /*@{*/
-int einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое einfon(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое ewarnn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое eerrorn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое einfo(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое ewarn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 void ewarnx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
-int eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое eerror(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 void eerrorx(const char * EINFO_RESTRICT, ...) EINFO_XPRINTF(1, 2);
 
-int einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int eendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendvn(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое einfovn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое ewarnvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое ebeginvn(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое eendvn(целое, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+целое ewendvn(целое, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+целое einfov(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup ebegin
@@ -92,8 +92,8 @@ int ewarnv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * Similar to einfo, but we add ... to the end of the message */
 /*@{*/
-int ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
-int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое ebeginv(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
+целое ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
 /*@}*/
 
 /*! @ingroup eend
@@ -105,12 +105,12 @@ int ebegin(const char * EINFO_RESTRICT, ...) EINFO_PRINTF(1, 2);
  *
  * ebracket allows you to specify the position, color and message */
 /*@{*/
-int eend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewend(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-void ebracket(int, ECOLOR, const char * EINFO_RESTRICT);
+целое eend(целое, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+целое ewend(целое, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+void ebracket(целое, ECOLOR, const char * EINFO_RESTRICT);
 
-int eendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
-int ewendv(int, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+целое eendv(целое, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
+целое ewendv(целое, const char * EINFO_RESTRICT, ...) EINFO_PRINTF(2, 3);
 /*@}*/
 
 /*! @ingroup eindent

@@ -47,16 +47,16 @@ const char * const longopts_help[] = {
 };
 const char *usagestring = NULL;
 
-int main(int argc, char **argv)
+целое основной(целое argc, char **argv)
 {
-	int opt, sflag = 0, wflag = 0;
+	целое opt, sflag = 0, wflag = 0;
 	const char *file = NULL;
 	struct stat sb;
 	struct timeval tv;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	пока ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (целое *) 0)) != -1)
 	{
 		switch (opt) {
 		case 's':
@@ -69,34 +69,34 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (optind < argc)
+	если (optind < argc)
 		file = argv[optind++];
-	else
+	иначе
 		eerrorx("swclock: Reference file was not specified");
 
-	if (sflag) {
-		int fd = open(file, O_WRONLY | O_CREAT, 0644);
-		if (fd == -1)
+	если (sflag) {
+		целое fd = open(file, O_WRONLY | O_CREAT, 0644);
+		если (fd == -1)
 			eerrorx("swclock: open: %s", strerror(errno));
-		if (futimens(fd, NULL) == -1)
+		если (futimens(fd, NULL) == -1)
 			eerrorx("swclock: futimens: %s", strerror(errno));
 		close(fd);
-		return 0;
+		вернуть 0;
 	}
 
-	if (stat(file, &sb) == -1) {
-		if (wflag != 0 && errno == ENOENT)
+	если (stat(file, &sb) == -1) {
+		если (wflag != 0 && errno == ENOENT)
 			ewarn("swclock: `%s': %s", file, strerror(errno));
-		else
+		иначе
 			eerrorx("swclock: `%s': %s", file, strerror(errno));
-		return 0;
+		вернуть 0;
 	}
 
 	tv.tv_sec = sb.st_mtime;
 	tv.tv_usec = 0;
 
-	if (settimeofday(&tv, NULL) == -1)
+	если (settimeofday(&tv, NULL) == -1)
 		eerrorx("swclock: settimeofday: %s", strerror(errno));
 
-	return 0;
+	вернуть 0;
 }

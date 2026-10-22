@@ -31,7 +31,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } пока (0)
 
 #define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
 
@@ -50,19 +50,19 @@
 	do {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		если ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
+	} пока (/* CONSTCOND */ 0)
 #endif
 
 RC_UNUSED static void *xmalloc (size_t size)
 {
 	void *value = malloc(size);
 
-	if (value)
-		return (value);
+	если (value)
+		вернуть (value);
 
 	ERRX;
 	/* NOTREACHED */
@@ -72,8 +72,8 @@ RC_UNUSED static void *xrealloc(void *ptr, size_t size)
 {
 	void *value = realloc(ptr, size);
 
-	if (value)
-		return (value);
+	если (value)
+		вернуть (value);
 
 	ERRX;
 	/* NOTREACHED */
@@ -83,13 +83,13 @@ RC_UNUSED static char *xstrdup(const char *str)
 {
 	char *value;
 
-	if (!str)
-		return (NULL);
+	если (!str)
+		вернуть (NULL);
 
 	value = strdup(str);
 
-	if (value)
-		return (value);
+	если (value)
+		вернуть (value);
 
 	ERRX;
 	/* NOTREACHED */
@@ -98,15 +98,15 @@ RC_UNUSED static char *xstrdup(const char *str)
 RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
 {
 	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	если (f)
+		вернуть f;
 	ERRX;
 }
 
 RC_UNUSED static void xclose_memstream(FILE *f)
 {
 	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	если (ferror(f) || fclose(f) != 0)
 		ERRX;
 }
 
@@ -120,19 +120,19 @@ RC_UNUSED static const char *basename_c(const char *path)
 {
 	const char *slash = strrchr(path, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	если (slash)
+		вернуть (++slash);
+	вернуть (path);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_UNUSED static FILE *do_fopenat(целое dirfd, const char *pathname, целое mode)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
+	целое fd = openat(dirfd, pathname, mode, 0666);
 	const char *fmode;
 	FILE *fp;
 
-	if (fd == -1)
-		return NULL;
+	если (fd == -1)
+		вернуть NULL;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	если ((mode & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	иначе если ((mode & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	иначе
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
+	если (!(fp = fdopen(fd, fmode)))
 		close(fd);
-	return fp;
+	вернуть fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_UNUSED static DIR *do_opendirat(целое dirfd, const char *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	целое fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	если (fd == -1)
+		вернуть NULL;
 
-	if (!(dp = fdopendir(fd)))
+	если (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	вернуть dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_UNUSED static DIR *do_dopendir(целое dirfd)
 {
-	int fd = dup(dirfd);
+	целое fd = dup(dirfd);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	если (fd == -1)
+		вернуть NULL;
 
-	if (!(dp = fdopendir(fd)))
+	если (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	вернуть dp;
 }
 
 /*
@@ -188,11 +188,11 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_UNUSED RC_PRINTF(2,3) static целое xasprintf(char **strp, const char *fmt, ...)
 {
 	va_list ap;
-	int len;
-	int memlen;
+	целое len;
+	целое memlen;
 	char *ret;
 
 	/*
@@ -205,7 +205,7 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
 	va_end(ap);
-	if (len >= memlen) {
+	если (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
@@ -215,86 +215,86 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 		len = vsnprintf(ret, len + 1, fmt, ap);
 		va_end(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	если (len < 0 || len >= memlen) {
 		/* Give up! */
 		fprintf(stderr, "xasprintf: unable to format a buffer\n");
 		free(ret);
 		exit(1);
 	}
 	*strp = ret;
-	return len;
+	вернуть len;
 }
 
 RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
 {
 	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	если (ret <= 0)
+		вернуть ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	если ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	вернуть ret;
 }
 
 RC_UNUSED static char *env_findvar(const char *name, char **envp)
 {
 	size_t len = strlen(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	для (char **var = envp; *var; var++)
+		если (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
+			вернуть *var;
+	вернуть NULL;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_UNUSED static целое xopen_nonblock(const char *filename, целое flags, mode_t mode)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
+	целое fd = open(filename, flags | O_NONBLOCK, mode);
+	если (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		целое saved_errno = errno;
 		close(fd);
 		fd = -1;
 		errno = saved_errno;
 	}
-	return fd;
+	вернуть fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_UNUSED static целое open_rwfifo(const char *path, bool nonblock)
 {
-	int r, w, err;
+	целое r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	если (mkfifo(path, 0600) == -1 && errno != EEXIST)
+		вернуть -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	если ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		вернуть -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+	если ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		err = errno;
 		goto r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+	если (!nonblock) {
+		целое flags = fcntl(r, F_GETFL);
+		если (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
 			err = errno;
 			goto w_err;
 		}
 	}
 
-	return r;
+	вернуть r;
 
 w_err:
 	close(w);
 r_err:
 	close(r);
 	errno = err;
-	return -1;
+	вернуть -1;
 }
 
 #endif

@@ -14,18 +14,18 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+целое основной(целое argc, char **argv)
 {
-	int i;
+	целое i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	если (argc < 3)
+		вернуть EXIT_FAILURE;
 
 	/* This test is perverted - historically the baselayout function
 	 * returns 0 on *failure*, which is plain wrong */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_SUCCESS;
+	для (i = 2; i < argc; ++i)
+		если (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			вернуть EXIT_SUCCESS;
 
-	return EXIT_FAILURE;
+	вернуть EXIT_FAILURE;
 }

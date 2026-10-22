@@ -31,12 +31,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#if defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
+#если defined(__linux__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__)) \
 	|| defined(__GNU__)
 #  include <pty.h>
 #elif defined(__NetBSD__) || defined(__OpenBSD__)
 #  include <util.h>
-#else
+#иначе
 #  include <libutil.h>
 #endif
 
@@ -48,9 +48,9 @@
 
 #define DEFAULTLOG "/var/log/rc.log"
 
-static int signal_pipe[2] = { -1, -1 };
-static int fd_stdout = -1;
-static int fd_stderr = -1;
+static целое signal_pipe[2] = { -1, -1 };
+static целое fd_stdout = -1;
+static целое fd_stderr = -1;
 static const char *runlevel = NULL;
 static bool in_escape = false;
 static bool in_term = false;
@@ -60,15 +60,15 @@ static size_t logbuf_size = 0;
 static size_t logbuf_len = 0;
 
 pid_t rc_logger_pid = -1;
-int rc_logger_tty = -1;
+целое rc_logger_tty = -1;
 bool rc_in_logger = false;
 
 static void
-write_log(int logfd, const char *buffer, size_t bytes)
+write_log(целое logfd, const char *buffer, size_t bytes)
 {
 	const char *p = buffer;
 
-	while ((size_t)(p - buffer) < bytes) {
+	пока ((size_t)(p - buffer) < bytes) {
 		switch (*p) {
 		case '\r':
 			goto cont;
@@ -80,20 +80,20 @@ write_log(int logfd, const char *buffer, size_t bytes)
 			in_escape = in_term = false;
 			break;
 		case '[':
-			if (in_escape)
+			если (in_escape)
 				in_term = true;
 			break;
 		}
 
-		if (!in_escape) {
-			if (!isprint((int) *p) && *p != '\n')
+		если (!in_escape) {
+			если (!isprint((целое) *p) && *p != '\n')
 				goto cont;
-			if (write(logfd, p++, 1) == -1)
+			если (write(logfd, p++, 1) == -1)
 				eerror("write: %s", strerror(errno));
 			continue;
 		}
 
-		if (!in_term || isalpha((unsigned char)*p))
+		если (!in_term || isalpha((unsigned char)*p))
 			in_escape = in_term = false;
 cont:
 		p++;
@@ -114,9 +114,9 @@ static void
 mkpath(const char *path)
 {
 	char *dir = xstrdup(path), *slash = dir;
-	while ((slash = strchr(slash + 1, '/'))) {
+	пока ((slash = strchr(slash + 1, '/'))) {
 		*slash = '\0';
-		if (mkdir(path, 0755) == -1 && errno != EEXIST)
+		если (mkdir(path, 0755) == -1 && errno != EEXIST)
 			break;
 		*slash = '/';
 	}
@@ -127,59 +127,59 @@ mkpath(const char *path)
 void
 rc_logger_close(void)
 {
-	int sig = SIGTERM;
+	целое sig = SIGTERM;
 
-	if (signal_pipe[1] > -1) {
-		if (write(signal_pipe[1], &sig, sizeof(sig)) == -1)
+	если (signal_pipe[1] > -1) {
+		если (write(signal_pipe[1], &sig, sizeof(sig)) == -1)
 			eerror("write: %s", strerror(errno));
 		close(signal_pipe[1]);
 		signal_pipe[1] = -1;
 	}
 
-	if (rc_logger_pid > 0)
+	если (rc_logger_pid > 0)
 		waitpid(rc_logger_pid, 0, 0);
 
-	if (fd_stdout > -1)
+	если (fd_stdout > -1)
 		dup2(fd_stdout, STDOUT_FILENO);
-	if (fd_stderr > -1)
+	если (fd_stderr > -1)
 		dup2(fd_stderr, STDERR_FILENO);
 }
 
 void
 rc_logger_open(const char *level)
 {
-	int slave_tty;
+	целое slave_tty;
 	struct termios tt;
 	struct winsize ws;
 	char buffer[BUFSIZ];
 	struct pollfd fd[2];
-	int s = 0;
+	целое s = 0;
 	size_t bytes;
 	FILE *log = NULL;
 	FILE *plog = NULL;
 	const char *logfile;
 	char *tmplog, *usrlog = NULL;
-	int log_error = 0;
+	целое log_error = 0;
 
-	if (!rc_conf_yesno("rc_logger"))
-		return;
+	если (!rc_conf_yesno("rc_logger"))
+		вернуть;
 
-	if (pipe2(signal_pipe, O_CLOEXEC) == -1)
+	если (pipe2(signal_pipe, O_CLOEXEC) == -1)
 		eerrorx("pipe2: %s", strerror(errno));
 
-	if (isatty(STDOUT_FILENO)) {
+	если (isatty(STDOUT_FILENO)) {
 		tcgetattr(STDOUT_FILENO, &tt);
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, &tt, &ws))
-			return;
-	} else
-		if (openpty(&rc_logger_tty, &slave_tty, NULL, NULL, NULL))
-			return;
+		если (openpty(&rc_logger_tty, &slave_tty, NULL, &tt, &ws))
+			вернуть;
+	} иначе
+		если (openpty(&rc_logger_tty, &slave_tty, NULL, NULL, NULL))
+			вернуть;
 
-	if ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
+	если ((s = fcntl(rc_logger_tty, F_GETFD, 0)) == 0)
 		fcntl(rc_logger_tty, F_SETFD, s | FD_CLOEXEC);
 
-	if ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
+	если ((s = fcntl(slave_tty, F_GETFD, 0)) == 0)
 		fcntl(slave_tty, F_SETFD, s | FD_CLOEXEC);
 
 	rc_logger_pid = fork();
@@ -194,9 +194,9 @@ rc_logger_open(const char *level)
 
 		runlevel = level;
 		xasprintf(&tmplog, "%s/rc.log", rc_svcdir());
-		if ((log = fopen(tmplog, "ae")))
+		если ((log = fopen(tmplog, "ae")))
 			write_time(log, "started");
-		else {
+		иначе {
 			free(logbuf);
 			logbuf_size = BUFSIZ * 10;
 			logbuf = xmalloc(sizeof (char) * logbuf_size);
@@ -206,27 +206,27 @@ rc_logger_open(const char *level)
 		fd[0].fd = signal_pipe[0];
 		fd[0].events = fd[1].events = POLLIN;
 		fd[0].revents = fd[1].revents = 0;
-		if (rc_logger_tty >= 0)
+		если (rc_logger_tty >= 0)
 			fd[1].fd = rc_logger_tty;
-		for (;;) {
-			if ((s = poll(fd,
+		для (;;) {
+			если ((s = poll(fd,
 				    rc_logger_tty >= 0 ? 2 : 1, -1)) == -1)
 			{
 				eerror("poll: %s", strerror(errno));
 				break;
-			} else if (s == 0)
+			} иначе если (s == 0)
 				continue;
 
-			if (fd[1].revents & (POLLIN | POLLHUP)) {
+			если (fd[1].revents & (POLLIN | POLLHUP)) {
 				memset(buffer, 0, BUFSIZ);
 				bytes = read(rc_logger_tty, buffer, BUFSIZ);
-				if (write(STDOUT_FILENO, buffer, bytes) == -1)
+				если (write(STDOUT_FILENO, buffer, bytes) == -1)
 					eerror("write: %s", strerror(errno));
 
-				if (log)
+				если (log)
 					write_log(fileno (log), buffer, bytes);
-				else {
-					if (logbuf_size - logbuf_len < bytes) {
+				иначе {
+					если (logbuf_size - logbuf_len < bytes) {
 						logbuf_size += BUFSIZ * 10;
 						logbuf = xrealloc(logbuf,
 						    sizeof(char ) *
@@ -240,31 +240,31 @@ rc_logger_open(const char *level)
 			}
 
 			/* Only SIGTERMS signals come down this pipe */
-			if (fd[0].revents & (POLLIN | POLLHUP))
+			если (fd[0].revents & (POLLIN | POLLHUP))
 				break;
 		}
-		if (logbuf) {
-			if ((log = fopen(tmplog, "ae"))) {
+		если (logbuf) {
+			если ((log = fopen(tmplog, "ae"))) {
 				write_time(log, "started");
 				write_log(fileno(log), logbuf, logbuf_len);
 			}
 			free(logbuf);
 		}
-		if (log) {
+		если (log) {
 			write_time(log, "stopped");
 			fclose(log);
 		}
 
 		/* Append the temporary log to the real log */
 		logfile = rc_conf_value("rc_log_path");
-		if (logfile == NULL) {
-			if (!rc_is_user()) {
+		если (logfile == NULL) {
+			если (!rc_is_user()) {
 				logfile = DEFAULTLOG;
-			} else {
+			} иначе {
 				const char *state_home = getenv("XDG_STATE_HOME");
-				if (state_home) {
+				если (state_home) {
 					xasprintf(&usrlog, "%s/rc.log", state_home);
-				} else if ((state_home = getenv("HOME"))) {
+				} иначе если ((state_home = getenv("HOME"))) {
 					xasprintf(&usrlog, "%s/.local/state/rc.log", state_home);
 					state_home = ".local/state";
 				}
@@ -272,33 +272,33 @@ rc_logger_open(const char *level)
 				logfile = usrlog;
 			}
 		}
-		if (!strcmp(logfile, tmplog)) {
+		если (!strcmp(logfile, tmplog)) {
 			eerror("Cowardly refusing to concatenate a logfile into itself.");
 			eerrorx("Please change rc_log_path to something other than %s to get rid of this message", tmplog);
 		}
 
-		if ((plog = fopen(logfile, "ae"))) {
-			if ((log = fopen(tmplog, "re"))) {
-				while ((bytes = fread(buffer, sizeof(*buffer), BUFSIZ, log)) > 0) {
-					if (fwrite(buffer, sizeof(*buffer), bytes, plog) < bytes) {
+		если ((plog = fopen(logfile, "ae"))) {
+			если ((log = fopen(tmplog, "re"))) {
+				пока ((bytes = fread(buffer, sizeof(*buffer), BUFSIZ, log)) > 0) {
+					если (fwrite(buffer, sizeof(*buffer), bytes, plog) < bytes) {
 						log_error = 1;
 						eerror("Error: write(%s) failed: %s", logfile, strerror(errno));
 						break;
 					}
 				}
 				fclose(log);
-			} else {
+			} иначе {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", tmplog, strerror(errno));
 			}
 
 			fclose(plog);
-		} else {
+		} иначе {
 			/*
 			 * logfile or its basedir may be read-only during sysinit and
 			 * shutdown so skip the error in this case
 			 */
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
+			если (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0))) {
 				log_error = 1;
 				eerror("Error: fopen(%s) failed: %s", logfile, strerror(errno));
 			}
@@ -307,11 +307,11 @@ rc_logger_open(const char *level)
 		free(usrlog);
 
 		/* Try to keep the temporary log in case of errors */
-		if (!log_error) {
-			if (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
-				if (unlink(tmplog) == -1)
+		если (!log_error) {
+			если (errno != EROFS && ((strcmp(level, RC_LEVEL_SHUTDOWN) != 0) && (strcmp(level, RC_LEVEL_SYSINIT) != 0)))
+				если (unlink(tmplog) == -1)
 					eerror("Error: unlink(%s) failed: %s", tmplog, strerror(errno));
-		} else if (access(tmplog, F_OK) == 0) {
+		} иначе если (access(tmplog, F_OK) == 0) {
 			eerrorx("Warning: temporary logfile left behind: %s", tmplog);
 		}
 
@@ -324,14 +324,14 @@ rc_logger_open(const char *level)
 		setpgid(rc_logger_pid, 0);
 		fd_stdout = dup(STDOUT_FILENO);
 		fd_stderr = dup(STDERR_FILENO);
-		if ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
+		если ((s = fcntl(fd_stdout, F_GETFD, 0)) == 0)
 			fcntl(fd_stdout, F_SETFD, s | FD_CLOEXEC);
 
-		if ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
+		если ((s = fcntl(fd_stderr, F_GETFD, 0)) == 0)
 			fcntl(fd_stderr, F_SETFD, s | FD_CLOEXEC);
 		dup2(slave_tty, STDOUT_FILENO);
 		dup2(slave_tty, STDERR_FILENO);
-		if (slave_tty != STDIN_FILENO &&
+		если (slave_tty != STDIN_FILENO &&
 		    slave_tty != STDOUT_FILENO &&
 		    slave_tty != STDERR_FILENO)
 			close(slave_tty);

@@ -43,14 +43,14 @@
 #include <time.h>
 #include <unistd.h>
 
-#if defined(BSD) && !defined(__GNU__)
-  #if !defined(__NetBSD__)
+#если defined(BSD) && !defined(__GNU__)
+  #если !defined(__NetBSD__)
   #include <sys/user.h>
   #endif
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <kvm.h>
-#else
+#иначе
 #include <sys/param.h>
 #endif
 
@@ -75,7 +75,7 @@ static const char *const dirnames[RC_DIR_SYS_MAX] =
 	[RC_DIR_ENVIRON] = "environ",
 };
 
-RC_STRINGLIST *config_list(int dirfd, const char *pathname);
+RC_STRINGLIST *config_list(целое dirfd, const char *pathname);
 void clear_dirfds(void);
 
 #endif

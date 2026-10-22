@@ -50,33 +50,33 @@ const char * const longopts_help[] = {
 };
 const char *usagestring = NULL;
 
-static int mount_proc(void)
+static целое mount_proc(void)
 {
 	pid_t rc;
-	int status;
+	целое status;
 	const char *argv[] = { "mount", "-t", "proc", "proc", "/proc", NULL };
 	struct exec_result res;
 	struct exec_args args = exec_init(argv);
 
-	if (access("/proc/version", F_OK) == 0)
-		return 0;
+	если (access("/proc/version", F_OK) == 0)
+		вернуть 0;
 
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	если (res.pid < 0) {
 		syslog(LOG_ERR, "Failed to execute mount");
-		return -1;
+		вернуть -1;
 	}
-	while ((rc = wait(&status)) != res.pid)
-		if (rc < 0 && errno == ECHILD)
+	пока ((rc = wait(&status)) != res.pid)
+		если (rc < 0 && errno == ECHILD)
 			break;
-	if (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	если (rc != res.pid || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
 		syslog(LOG_ERR, "mount returned non-zero exit status");
 
-	if (access("/proc/version", F_OK) != 0) {
+	если (access("/proc/version", F_OK) != 0) {
 		syslog(LOG_ERR, "Could not mount /proc");
-		return -1;
+		вернуть -1;
 	}
-	return 0;
+	вернуть 0;
 }
 
 static bool is_user_process(pid_t pid)
@@ -88,8 +88,8 @@ static bool is_user_process(pid_t pid)
 	size_t size;
 	bool user_process = true;
 
-	while (pid >0 && user_process) {
-		if (pid == 2) {
+	пока (pid >0 && user_process) {
+		если (pid == 2) {
 			user_process = false;
 			continue;
 		}
@@ -102,33 +102,33 @@ static bool is_user_process(pid_t pid)
 		 * process or kernel thread, so we say it is a kernel thread to
 		 * avoid accidentally killing it.
 		 */
-		if (!fp) {
+		если (!fp) {
 			user_process = false;
 			continue;
 		}
 		temp_pid = -1;
-		while (!feof(fp)) {
+		пока (!feof(fp)) {
 			buf = NULL;
-			if (xgetline(&buf, &size, fp) != -1) {
+			если (xgetline(&buf, &size, fp) != -1) {
 				sscanf(buf, "PPid: %d", &temp_pid);
 				free(buf);
-			} else {
+			} иначе {
 				free(buf);
 				break;
 			}
 		}
 		fclose(fp);
-		if (temp_pid == -1) {
+		если (temp_pid == -1) {
 			syslog(LOG_ERR, "Unable to read pid from /proc/%d/status", pid);
 			user_process = false;
 			continue;
 		}
 		pid = temp_pid;
 	}
-	return user_process;
+	вернуть user_process;
 }
 
-static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
+static целое signal_processes(целое sig, RC_STRINGLIST *omits, bool dryrun)
 {
 	sigset_t signals;
 	sigset_t oldsigs;
@@ -136,7 +136,7 @@ static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
 	struct dirent	*d;
 	char *buf = NULL;
 	pid_t pid;
-	int sendcount = 0;
+	целое sendcount = 0;
 
 	kill(-1, SIGSTOP);
 	sigfillset(&signals);
@@ -147,62 +147,62 @@ static int signal_processes(int sig, RC_STRINGLIST *omits, bool dryrun)
 	 * CWD must be /proc to avoid problems if / is affected by the killing
 	 * (i.e. depends on fuse).
 	 */
-	if (chdir("/proc") == -1) {
+	если (chdir("/proc") == -1) {
 		syslog(LOG_ERR, "chdir /proc failed");
 		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
 		kill(-1, SIGCONT);
-		return -1;
+		вернуть -1;
 	}
 	dir = opendir(".");
-	if (!dir) {
+	если (!dir) {
 		syslog(LOG_ERR, "cannot opendir(/proc)");
 		sigprocmask(SIG_SETMASK, &oldsigs, NULL);
 		kill(-1, SIGCONT);
-		return -1;
+		вернуть -1;
 	}
 
 	/* Walk through the directory. */
-	while ((d = readdir(dir)) != NULL) {
+	пока ((d = readdir(dir)) != NULL) {
 		/* Is this a process? */
 		pid = (pid_t) atoi(d->d_name);
-		if (pid == 0)
+		если (pid == 0)
 			continue;
 
 		/* Is this a process we have been requested to omit? */
-		if (buf) {
+		если (buf) {
 			free(buf);
 			buf = NULL;
 		}
 		xasprintf(&buf, "%d", pid);
-		if (rc_stringlist_find(omits, buf))
+		если (rc_stringlist_find(omits, buf))
 			continue;
 
 		/* Is this process in our session? */
-		if (getsid(getpid()) == getsid(pid))
+		если (getsid(getpid()) == getsid(pid))
 			continue;
 
 		/* Is this a kernel thread? */
-		if (!is_user_process(pid))
+		если (!is_user_process(pid))
 			continue;
 
-		if (dryrun)
+		если (dryrun)
 			einfo("Would send signal %d to process %d", sig, pid);
-		else if (kill(pid, sig) == 0)
+		иначе если (kill(pid, sig) == 0)
 			sendcount++;
 	}
 	closedir(dir);
 	sigprocmask(SIG_SETMASK, &oldsigs, NULL);
 	kill(-1, SIGCONT);
-	return sendcount;
+	вернуть sendcount;
 }
 
-int main(int argc, char **argv)
+целое основной(целое argc, char **argv)
 {
 	char *arg = NULL;
-	int opt;
+	целое opt;
 	bool dryrun = false;
 	RC_STRINGLIST *omits = rc_stringlist_new();
-	int sig = SIGKILL;
+	целое sig = SIGKILL;
 	char *here;
 	char *token;
 
@@ -211,8 +211,8 @@ int main(int argc, char **argv)
 
 	applet = basename_c(argv[0]);
 	rc_stringlist_addu(omits, "1");
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	пока ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (целое *) 0)) != -1)
 	{
 		switch (opt) {
 			case 'd':
@@ -220,10 +220,10 @@ int main(int argc, char **argv)
 				break;
 			case 'o':
 				here = optarg;
-				while ((token = strsep(&here, ",;:"))) {
-					if ((pid_t) atoi(token) > 0)
+				пока ((token = strsep(&here, ",;:"))) {
+					если ((pid_t) atoi(token) > 0)
 						rc_stringlist_addu(omits, token);
-					else {
+					иначе {
 						eerror("Invalid omit pid value %s", token);
 						usage(EXIT_FAILURE);
 					}
@@ -233,10 +233,10 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (argc > optind) {
+	если (argc > optind) {
 	arg = argv[optind];
 	sig = atoi(arg);
-	if (sig <= 0 || sig > 31) {
+	если (sig <= 0 || sig > 31) {
 		rc_stringlist_free(omits);
 		eerror("Invalid signal %s", arg);
 		usage(EXIT_FAILURE);
@@ -244,11 +244,11 @@ int main(int argc, char **argv)
 	}
 
 	openlog(applet, LOG_CONS|LOG_PID, LOG_DAEMON);
-	if (mount_proc() != 0) {
+	если (mount_proc() != 0) {
 		rc_stringlist_free(omits);
 		eerrorx("Unable to mount /proc file system");
 	}
 	signal_processes(sig, omits, dryrun);
 	rc_stringlist_free(omits);
-	return 0;
+	вернуть 0;
 }

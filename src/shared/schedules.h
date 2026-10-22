@@ -17,11 +17,11 @@
 #include <sys/types.h>
 
 void free_schedulelist(void);
-int parse_signal(const char *applet, const char *sig);
-void parse_schedule(const char *applet, const char *string, int timeout);
-int do_stop(const char *applet, const char *exec, const char *const *argv,
-		pid_t pid, uid_t uid, int sig, bool group, bool test, bool quiet);
-int run_stop_schedule(const char *applet,
+целое parse_signal(const char *applet, const char *sig);
+void parse_schedule(const char *applet, const char *string, целое timeout);
+целое do_stop(const char *applet, const char *exec, const char *const *argv,
+		pid_t pid, uid_t uid, целое sig, bool group, bool test, bool quiet);
+целое run_stop_schedule(const char *applet,
 		const char *exec, const char *const *argv,
 		pid_t pid, uid_t uid, bool group,
 		bool test, bool progress, bool quiet);

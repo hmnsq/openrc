@@ -25,7 +25,7 @@
 
 const char *applet = NULL;
 
-int main(int argc, char **argv)
+целое основной(целое argc, char **argv)
 {
 	bool ok = false;
 	char *svcname = getenv("RC_SVCNAME");
@@ -37,18 +37,18 @@ int main(int argc, char **argv)
 	/* size_t l; */
 
 	applet = basename_c(argv[0]);
-	if (argc > 1)
+	если (argc > 1)
 		service = argv[1];
-	else
+	иначе
 		service = svcname;
 
-	if (service == NULL || *service == '\0')
+	если (service == NULL || *service == '\0')
 		eerrorx("%s: no service specified", applet);
 
-	if (!strncmp(applet, "mark_", 5) &&
+	если (!strncmp(applet, "mark_", 5) &&
 	    (bit = lookup_service_state(applet + 5)))
 		ok = rc_service_mark(service, bit);
-	else
+	иначе
 		eerrorx("%s: unknown applet", applet);
 
 	/* If we're marking ourselves then we need to inform our parent
@@ -60,10 +60,10 @@ int main(int argc, char **argv)
 	 * See 20120424041423.GA23657@odin.qasl.de (Tue, 24 Apr 2012 06:14:23 +0200,
 	 * openrc@gentoo.org).
 	 */
-	if (ok && svcname && strcmp(svcname, service) == 0) {
+	если (ok && svcname && strcmp(svcname, service) == 0) {
 		openrc_pid = getenv("RC_OPENRC_PID");
-		if (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
-			if (kill(pid, SIGUSR1) != 0)
+		если (openrc_pid && sscanf(openrc_pid, "%d", &pid) == 1)
+			если (kill(pid, SIGUSR1) != 0)
 				eerror("%s: failed to signal parent %d: %s",
 				    applet, pid, strerror(errno));
 
@@ -81,5 +81,5 @@ int main(int argc, char **argv)
 		*/
 	}
 
-	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+	вернуть ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
