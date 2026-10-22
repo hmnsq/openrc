@@ -55,7 +55,7 @@ const char * const longopts_help[] = {
 };
 const char *usagestring = NULL;
 
-int main(int argc, char **argv)
+整数 メインページ(整数 argc, char **argv)
 {
 	RC_STRINGLIST *list;
 	RC_STRINGLIST *types;
@@ -63,17 +63,17 @@ int main(int argc, char **argv)
 	RC_STRINGLIST *depends;
 	RC_STRING *s;
 	RC_DEPTREE *deptree = NULL;
-	int options = RC_DEP_TRACE, update = 0;
+	整数 options = RC_DEP_TRACE, update = 0;
 	bool first = true;
 	char *runlevel = xstrdup(getenv("RC_RUNLEVEL"));
-	int opt;
+	整数 opt;
 	char *token;
 	char *deptree_file = NULL;
 
 	applet = basename_c(argv[0]);
 	types = rc_stringlist_new();
-	while ((opt = getopt_long(argc, argv, getoptstring,
-		    longopts, (int *) 0)) != -1)
+	ながら ((opt = getopt_long(argc, argv, getoptstring,
+		    longopts, (整数 *) 0)) != -1)
 	{
 		switch (opt) {
 		case 'a':
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 			options |= RC_DEP_STRICT;
 			break;
 		case 't':
-			while ((token = strsep(&optarg, ",")))
+			ながら ((token = strsep(&optarg, ",")))
 				rc_stringlist_add(types, token);
 			break;
 		case 'u':
@@ -103,45 +103,45 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (deptree_file) {
-		if (!(deptree = rc_deptree_load_file(deptree_file)))
+	もし (deptree_file) {
+		もし (!(deptree = rc_deptree_load_file(deptree_file)))
 			eerrorx("failed to load deptree");
-	} else {
-		if (!(deptree = _rc_deptree_load(update, NULL)))
+	} 否则 {
+		もし (!(deptree = _rc_deptree_load(update, NULL)))
 			eerrorx("failed to load deptree");
 	}
 
-	if (!runlevel)
+	もし (!runlevel)
 		runlevel = default_runlevel();
 
 	services = rc_stringlist_new();
-	while (optind < argc) {
+	ながら (optind < argc) {
 		list = rc_stringlist_new();
 		rc_stringlist_add(list, argv[optind]);
 		errno = 0;
 		depends = rc_deptree_depends(deptree, NULL, list, runlevel, 0);
-		if (!depends && errno == ENOENT)
+		もし (!depends && errno == ENOENT)
 			eerror("no dependency info for service `%s'",
 			    argv[optind]);
-		else
+		否则
 			rc_stringlist_add(services, argv[optind]);
 
 		rc_stringlist_free(depends);
 		rc_stringlist_free(list);
 		optind++;
 	}
-	if (!TAILQ_FIRST(services)) {
+	もし (!TAILQ_FIRST(services)) {
 		rc_stringlist_free(services);
 		rc_stringlist_free(types);
 		rc_deptree_free(deptree);
 		free(runlevel);
-		if (update)
-			return EXIT_SUCCESS;
+		もし (update)
+			戻る EXIT_SUCCESS;
 		eerrorx("no services specified");
 	}
 
 	/* If we don't have any types, then supply some defaults */
-	if (!TAILQ_FIRST(types)) {
+	もし (!TAILQ_FIRST(types)) {
 		rc_stringlist_add(types, "ineed");
 		rc_stringlist_add(types, "iuse");
 	}
@@ -149,11 +149,11 @@ int main(int argc, char **argv)
 	depends = rc_deptree_depends(deptree, types, services,
 	    runlevel, options);
 
-	if (TAILQ_FIRST(depends)) {
+	もし (TAILQ_FIRST(depends)) {
 		TAILQ_FOREACH(s, depends, entries) {
-			if (first)
+			もし (first)
 				first = false;
-			else
+			否则
 				printf (" ");
 			printf ("%s", s->value);
 
@@ -166,5 +166,5 @@ int main(int argc, char **argv)
 	rc_stringlist_free(depends);
 	rc_deptree_free(deptree);
 	free(runlevel);
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }

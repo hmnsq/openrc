@@ -14,17 +14,17 @@
 
 #include "rc.h"
 
-int main(int argc, char **argv)
+整数 メインページ(整数 argc, char **argv)
 {
-	int i;
+	整数 i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	もし (argc < 3)
+		戻る EXIT_FAILURE;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	ために (i = 2; i < argc; ++i)
+		もし (!rc_newer_than(argv[1], argv[i], NULL, NULL))
+			戻る EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }

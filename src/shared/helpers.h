@@ -31,7 +31,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } ながら (0)
 
 #define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
 
@@ -50,19 +50,19 @@
 	do {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		もし ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
+	} ながら (/* CONSTCOND */ 0)
 #endif
 
 RC_UNUSED static void *xmalloc (size_t size)
 {
 	void *value = malloc(size);
 
-	if (value)
-		return (value);
+	もし (value)
+		戻る (value);
 
 	ERRX;
 	/* NOTREACHED */
@@ -72,8 +72,8 @@ RC_UNUSED static void *xrealloc(void *ptr, size_t size)
 {
 	void *value = realloc(ptr, size);
 
-	if (value)
-		return (value);
+	もし (value)
+		戻る (value);
 
 	ERRX;
 	/* NOTREACHED */
@@ -83,13 +83,13 @@ RC_UNUSED static char *xstrdup(const char *str)
 {
 	char *value;
 
-	if (!str)
-		return (NULL);
+	もし (!str)
+		戻る (NULL);
 
 	value = strdup(str);
 
-	if (value)
-		return (value);
+	もし (value)
+		戻る (value);
 
 	ERRX;
 	/* NOTREACHED */
@@ -98,15 +98,15 @@ RC_UNUSED static char *xstrdup(const char *str)
 RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
 {
 	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	もし (f)
+		戻る f;
 	ERRX;
 }
 
 RC_UNUSED static void xclose_memstream(FILE *f)
 {
 	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	もし (ferror(f) || fclose(f) != 0)
 		ERRX;
 }
 
@@ -120,19 +120,19 @@ RC_UNUSED static const char *basename_c(const char *path)
 {
 	const char *slash = strrchr(path, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	もし (slash)
+		戻る (++slash);
+	戻る (path);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_UNUSED static FILE *do_fopenat(整数 dirfd, const char *pathname, 整数 mode)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
+	整数 fd = openat(dirfd, pathname, mode, 0666);
 	const char *fmode;
 	FILE *fp;
 
-	if (fd == -1)
-		return NULL;
+	もし (fd == -1)
+		戻る NULL;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	もし ((mode & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	否则 もし ((mode & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	否则
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
+	もし (!(fp = fdopen(fd, fmode)))
 		close(fd);
-	return fp;
+	戻る fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_UNUSED static DIR *do_opendirat(整数 dirfd, const char *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	整数 fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	もし (fd == -1)
+		戻る NULL;
 
-	if (!(dp = fdopendir(fd)))
+	もし (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	戻る dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_UNUSED static DIR *do_dopendir(整数 dirfd)
 {
-	int fd = dup(dirfd);
+	整数 fd = dup(dirfd);
 	DIR *dp;
 
-	if (fd == -1)
-		return NULL;
+	もし (fd == -1)
+		戻る NULL;
 
-	if (!(dp = fdopendir(fd)))
+	もし (!(dp = fdopendir(fd)))
 		close(fd);
 
-	return dp;
+	戻る dp;
 }
 
 /*
@@ -188,11 +188,11 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_UNUSED RC_PRINTF(2,3) static 整数 xasprintf(char **strp, const char *fmt, ...)
 {
 	va_list ap;
-	int len;
-	int memlen;
+	整数 len;
+	整数 memlen;
 	char *ret;
 
 	/*
@@ -205,7 +205,7 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	va_start(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
 	va_end(ap);
-	if (len >= memlen) {
+	もし (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
@@ -215,86 +215,86 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 		len = vsnprintf(ret, len + 1, fmt, ap);
 		va_end(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	もし (len < 0 || len >= memlen) {
 		/* Give up! */
 		fprintf(stderr, "xasprintf: unable to format a buffer\n");
 		free(ret);
 		exit(1);
 	}
 	*strp = ret;
-	return len;
+	戻る len;
 }
 
 RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
 {
 	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	もし (ret <= 0)
+		戻る ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	もし ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	戻る ret;
 }
 
 RC_UNUSED static char *env_findvar(const char *name, char **envp)
 {
 	size_t len = strlen(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	ために (char **var = envp; *var; var++)
+		もし (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
+			戻る *var;
+	戻る NULL;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_UNUSED static 整数 xopen_nonblock(const char *filename, 整数 flags, mode_t mode)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
+	整数 fd = open(filename, flags | O_NONBLOCK, mode);
+	もし (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		整数 saved_errno = errno;
 		close(fd);
 		fd = -1;
 		errno = saved_errno;
 	}
-	return fd;
+	戻る fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_UNUSED static 整数 open_rwfifo(const char *path, bool nonblock)
 {
-	int r, w, err;
+	整数 r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	もし (mkfifo(path, 0600) == -1 && errno != EEXIST)
+		戻る -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	もし ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		戻る -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+	もし ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
 		err = errno;
 		goto r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+	もし (!nonblock) {
+		整数 flags = fcntl(r, F_GETFL);
+		もし (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
 			err = errno;
 			goto w_err;
 		}
 	}
 
-	return r;
+	戻る r;
 
 w_err:
 	close(w);
 r_err:
 	close(r);
 	errno = err;
-	return -1;
+	戻る -1;
 }
 
 #endif

@@ -14,23 +14,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+整数 メインページ(整数 argc, char **argv)
 {
-	int i;
+	整数 i;
 	char *p;
-	int c;
+	整数 c;
 
-	for (i = 1; i < argc; i++) {
+	ために (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
+		もし (i != 1)
 			putchar(' ');
-		while (*p) {
+		ながら (*p) {
 			c = (unsigned char)*p++;
-			if (!isalnum(c))
+			もし (!isalnum(c))
 				c = '_';
 			putchar(c);
 		}
 	}
 	putchar('\n');
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }

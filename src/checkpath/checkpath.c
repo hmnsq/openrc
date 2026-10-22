@@ -71,21 +71,21 @@ const char * const longopts_help[] = {
 };
 const char *usagestring = NULL;
 
-static int get_dirfd(char *path, bool symlinks)
+static 整数 get_dirfd(char *path, bool symlinks)
 {
 	char *ch, *item, *path_dupe, *str, *linkpath = NULL;
-	int components = 0, dirfd, flags = 0, new_dirfd;
+	整数 components = 0, dirfd, flags = 0, new_dirfd;
 	ssize_t linksize;
 	struct stat st;
 
-	if (!path || *path != '/')
+	もし (!path || *path != '/')
 		eerrorx("%s: empty or relative path", applet);
 	dirfd = openat(AT_FDCWD, "/", O_RDONLY);
-	if (dirfd == -1)
+	もし (dirfd == -1)
 		eerrorx("%s: unable to open the root directory: %s", applet, strerror(errno));
 	ch = path;
-	while (*ch) {
-		if (*ch == '/')
+	ながら (*ch) {
+		もし (*ch == '/')
 			components++;
 		ch++;
 	}
@@ -94,31 +94,31 @@ static int get_dirfd(char *path, bool symlinks)
 #ifdef O_PATH
 	flags |= O_PATH;
 #endif
-	if (!symlinks)
+	もし (!symlinks)
 		flags |= O_NOFOLLOW;
 	flags |= O_RDONLY;
-	while (dirfd > 0 && item && components > 1) {
+	ながら (dirfd > 0 && item && components > 1) {
 		str = xstrdup(linkpath ? linkpath : item);
 		new_dirfd = openat(dirfd, str, flags);
-		if (new_dirfd == -1)
+		もし (new_dirfd == -1)
 			eerrorx("%s: %s: could not open %s: %s", applet, path, str, strerror(errno));
-		if (fstat(new_dirfd, &st) == -1)
+		もし (fstat(new_dirfd, &st) == -1)
 			eerrorx("%s: %s: unable to stat %s: %s", applet, path, item, strerror(errno));
-		if (S_ISLNK(st.st_mode) ) {
-			if (st.st_uid != 0)
+		もし (S_ISLNK(st.st_mode) ) {
+			もし (st.st_uid != 0)
 				eerrorx("%s: %s: symbolic link %s not owned by root", applet, path, str);
 			linksize = st.st_size+1;
-			if (linkpath)
+			もし (linkpath)
 				free(linkpath);
 			linkpath = xmalloc(linksize);
 			memset(linkpath, 0, linksize);
-			if (readlinkat(new_dirfd, "", linkpath, linksize) != st.st_size)
+			もし (readlinkat(new_dirfd, "", linkpath, linksize) != st.st_size)
 				eerrorx("%s: symbolic link destination changed", applet);
 			/*
 			 * now follow the symlink.
 			 */
 			close(new_dirfd);
-		} else {
+		} 否则 {
 			/* now walk down the directory path */
 			close(dirfd);
 			dirfd = new_dirfd;
@@ -132,7 +132,7 @@ static int get_dirfd(char *path, bool symlinks)
 	}
 	free(path_dupe);
 	free(linkpath);
-	return dirfd;
+	戻る dirfd;
 }
 
 static char *clean_path(char *path)
@@ -142,31 +142,31 @@ static char *clean_path(char *path)
 	str = xmalloc(strlen(path) + 1);
 	ch = path;
 	ch2 = str;
-	while (true) {
+	ながら (true) {
 		*ch2 = *ch;
 		ch++;
 		ch2++;
-		if (!*(ch-1))
+		もし (!*(ch-1))
 			break;
-		while (*(ch - 1) == '/' && *ch == '/')
+		ながら (*(ch - 1) == '/' && *ch == '/')
 			ch++;
 	}
 	/* get rid of trailing / characters */
-	while ((ch = strrchr(str, '/'))) {
-		if (ch == str)
+	ながら ((ch = strrchr(str, '/'))) {
+		もし (ch == str)
 			break;
-		if (!*(ch+1))
+		もし (!*(ch+1))
 			*ch = 0;
-		else
+		否则
 			break;
 	}
-	return str;
+	戻る str;
 }
 
-static int do_create(inode_t type, const char *path, int dirfd, const char *name, int flags, mode_t mode)
+static 整数 do_create(inode_t type, const char *path, 整数 dirfd, const char *name, 整数 flags, mode_t mode)
 {
-	int mask = umask(0);
-	int fd;
+	整数 mask = umask(0);
+	整数 fd;
 
 	static const mode_t default_mode[] = {
 		[inode_file] = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, /* 664 */
@@ -175,7 +175,7 @@ static int do_create(inode_t type, const char *path, int dirfd, const char *name
 		[inode_unknown] = 0,
 	};
 
-	if (!mode)
+	もし (!mode)
 		mode = default_mode[type];
 
 	switch (type) {
@@ -187,18 +187,18 @@ static int do_create(inode_t type, const char *path, int dirfd, const char *name
 		einfo("%s: creating directory", path);
 
 		/* We do not recursively create parents */
-		if (mkdirat(dirfd, name, mode) == -1 && errno != EEXIST) {
+		もし (mkdirat(dirfd, name, mode) == -1 && errno != EEXIST) {
 			eerror("%s: mkdirat: %s", applet, strerror (errno));
-			return -1;
+			戻る -1;
 		}
 
 		break;
 	case inode_fifo:
 		einfo("%s: creating fifo", path);
 
-		if (mkfifoat(dirfd, name, mode) == -1 && errno != EEXIST) {
+		もし (mkfifoat(dirfd, name, mode) == -1 && errno != EEXIST) {
 			eerror("%s: mkfifo: %s", applet, strerror (errno));
-			return -1;
+			戻る -1;
 		}
 
 		break;
@@ -207,142 +207,142 @@ static int do_create(inode_t type, const char *path, int dirfd, const char *name
 	}
 	umask(mask);
 
-	if ((fd = openat(dirfd, name, flags, mode)) == -1) {
+	もし ((fd = openat(dirfd, name, flags, mode)) == -1) {
 		eerror("%s: open: %s", applet, strerror(errno));
-		return -1;
+		戻る -1;
 	}
-	return fd;
+	戻る fd;
 }
 
-static int do_check(char *path, uid_t uid, gid_t gid, mode_t mode, inode_t type,
+static 整数 do_check(char *path, uid_t uid, gid_t gid, mode_t mode, inode_t type,
 		bool trunc, bool chowner, bool writable, bool symlinks, bool selinux_on)
 {
-	int flags = O_NDELAY | O_NOCTTY | O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
+	整数 flags = O_NDELAY | O_NOCTTY | O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
 	const char *name = basename_c(path);
 	struct stat st;
-	int dirfd, fd;
+	整数 dirfd, fd;
 
-	if (writable) {
-		if (access(path, W_OK) == 0)
-			return 0;
-		if (errno != ENOENT || type == inode_unknown)
-			return -1;
+	もし (writable) {
+		もし (access(path, W_OK) == 0)
+			戻る 0;
+		もし (errno != ENOENT || type == inode_unknown)
+			戻る -1;
 	}
 
-	if (trunc && type == inode_file)
+	もし (trunc && type == inode_file)
 		flags |= O_TRUNC;
 
 	dirfd = get_dirfd(path, symlinks);
-	if ((fd = openat(dirfd, name, flags)) == -1 &&
+	もし ((fd = openat(dirfd, name, flags)) == -1 &&
 			(fd = do_create(type, path, dirfd, name, flags, mode)) == -1)
-		return -1;
+		戻る -1;
 
-	if (fstat(fd, &st) == -1) {
+	もし (fstat(fd, &st) == -1) {
 		eerror("fstat: %s: %s", path, strerror(errno));
 		goto err;
 	}
 
-	if (type != inode_dir && S_ISDIR(st.st_mode)) {
+	もし (type != inode_dir && S_ISDIR(st.st_mode)) {
 		eerror("%s: is a directory", path);
 		goto err;
 	}
 
-	if (type != inode_file && S_ISREG(st.st_mode)) {
+	もし (type != inode_file && S_ISREG(st.st_mode)) {
 		eerror("%s: is a file", path);
 		goto err;
 	}
 
-	if (type != inode_fifo && S_ISFIFO(st.st_mode)) {
+	もし (type != inode_fifo && S_ISFIFO(st.st_mode)) {
 		eerror("%s: is a fifo", path);
 		goto err;
 	}
 
-	if (mode && (st.st_mode & 07777) != mode) {
-		if ((type != inode_dir) && (st.st_nlink > 1)) {
+	もし (mode && (st.st_mode & 07777) != mode) {
+		もし ((type != inode_dir) && (st.st_nlink > 1)) {
 			eerror("%s: chmod: Too many hard links to %s", applet, path);
 			goto err;
 		}
 
-		if (S_ISLNK(st.st_mode)) {
+		もし (S_ISLNK(st.st_mode)) {
 			eerror("%s: chmod: %s is a symbolic link", applet, path);
 			goto err;
 		}
 
 		einfo("%s: correcting mode", path);
-		if (fchmod(fd, mode)) {
+		もし (fchmod(fd, mode)) {
 			eerror("%s: chmod: %s", applet, strerror(errno));
 			goto err;
 		}
 	}
 
-	if (chowner && (st.st_uid != uid || st.st_gid != gid)) {
-		if ((type != inode_dir) && (st.st_nlink > 1)) {
+	もし (chowner && (st.st_uid != uid || st.st_gid != gid)) {
+		もし ((type != inode_dir) && (st.st_nlink > 1)) {
 			eerror("%s: chown: Too many hardlinks to %s", applet, path);
 			goto err;
 		}
 
-		if (S_ISLNK(st.st_mode)) {
+		もし (S_ISLNK(st.st_mode)) {
 			eerror("%s: chown: %s is a symbolic link", applet, path);
 			goto err;
 		}
 
 		einfo("%s: correcting owner", path);
-		if (fchown(fd, uid, gid)) {
+		もし (fchown(fd, uid, gid)) {
 			eerror("%s: chown: %s", applet, strerror(errno));
 			goto err;
 		}
 	}
 
-	if (selinux_on)
+	もし (selinux_on)
 		selinux_util_label(path);
 	close(fd);
 
-	return 0;
+	戻る 0;
 err:
 	close(fd);
-	return -1;
+	戻る -1;
 }
 
-static int parse_owner(struct passwd **user, struct group **group, const char *owner)
+static 整数 parse_owner(struct passwd **user, struct group **group, const char *owner)
 {
 	char *u = xstrdup(owner), *g = strchr(u, ':');
-	int id = 0, retval = 0;
+	整数 id = 0, retval = 0;
 
-	if (g)
+	もし (g)
 		*g++ = '\0';
 
-	if (user && *u) {
-		if (sscanf(u, "%d", &id) == 1)
+	もし (user && *u) {
+		もし (sscanf(u, "%d", &id) == 1)
 			*user = getpwuid((uid_t) id);
-		else
+		否则
 			*user = getpwnam(u);
-		if (*user == NULL)
+		もし (*user == NULL)
 			retval = -1;
 	}
 
-	if (group && g && *g) {
-		if (sscanf(g, "%d", &id) == 1)
+	もし (group && g && *g) {
+		もし (sscanf(g, "%d", &id) == 1)
 			*group = getgrgid((gid_t) id);
-		else
+		否则
 			*group = getgrnam(g);
-		if (*group == NULL)
+		もし (*group == NULL)
 			retval = -1;
 	}
 
 	free(u);
-	return retval;
+	戻る retval;
 }
 
-int main(int argc, char **argv)
+整数 メインページ(整数 argc, char **argv)
 {
-	int opt;
+	整数 opt;
 	uid_t uid = geteuid();
 	gid_t gid = getgid();
 	mode_t mode = 0;
 	struct passwd *pw = NULL;
 	struct group *gr = NULL;
 	inode_t type = inode_unknown;
-	int retval = EXIT_SUCCESS;
+	整数 retval = EXIT_SUCCESS;
 	bool trunc = false;
 	bool chowner = false;
 	bool symlinks = false;
@@ -351,7 +351,7 @@ int main(int argc, char **argv)
 	char *path = NULL;
 
 	applet = basename_c(argv[0]);
-	while ((opt = getopt_long(argc, argv, getoptstring, longopts, (int *) 0)) != -1) {
+	ながら ((opt = getopt_long(argc, argv, getoptstring, longopts, (整数 *) 0)) != -1) {
 		switch (opt) {
 		case 'D':
 			trunc = true;
@@ -369,12 +369,12 @@ int main(int argc, char **argv)
 			type = inode_fifo;
 			break;
 		case 'm':
-			if (parse_mode(&mode, optarg) != 0)
+			もし (parse_mode(&mode, optarg) != 0)
 				eerrorx("%s: invalid mode '%s'", applet, optarg);
 			break;
 		case 'o':
 			chowner = true;
-			if (parse_owner(&pw, &gr, optarg) != 0)
+			もし (parse_owner(&pw, &gr, optarg) != 0)
 				eerrorx("%s: owner '%s' not found", applet, optarg);
 			break;
 		case 's':
@@ -390,29 +390,29 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (optind >= argc)
+	もし (optind >= argc)
 		usage(EXIT_FAILURE);
 
-	if (pw) {
+	もし (pw) {
 		uid = pw->pw_uid;
 		gid = pw->pw_gid;
 	}
-	if (gr)
+	もし (gr)
 		gid = gr->gr_gid;
 
-	if (selinux_util_open() == 1)
+	もし (selinux_util_open() == 1)
 		selinux_on = true;
 
-	while (optind < argc) {
+	ながら (optind < argc) {
 		path = clean_path(argv[optind]);
-		if (do_check(path, uid, gid, mode, type, trunc, chowner, writable, symlinks, selinux_on))
+		もし (do_check(path, uid, gid, mode, type, trunc, chowner, writable, symlinks, selinux_on))
 			retval = EXIT_FAILURE;
 		optind++;
 		free(path);
 	}
 
-	if (selinux_on)
+	もし (selinux_on)
 		selinux_util_close();
 
-	return retval;
+	戻る retval;
 }

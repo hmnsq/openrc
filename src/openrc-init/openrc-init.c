@@ -46,14 +46,14 @@
 #include "version.h"
 
 /* on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior. */
-#if defined(__linux__)
+#もし defined(__linux__)
 #  undef  CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC CLOCK_BOOTTIME
 #endif
 
 static const char *path_default = "/sbin:/usr/sbin:/bin:/usr/bin";
 static const char *rc_default_runlevel = "default";
-static int sigpipe[2] = { -1, -1 };
+static 整数 sigpipe[2] = { -1, -1 };
 static bool quiet = false;
 static const char *progname;
 
@@ -64,15 +64,15 @@ static void do_openrc(const char *runlevel)
 	struct exec_args args = exec_init(argv);
 	args.setsid = 1;
 
-	if (!quiet)
+	もし (!quiet)
 		printf("Starting %s runlevel\n", runlevel);
 	res = do_exec(&args);
-	if (res.pid < 0) {
+	もし (res.pid < 0) {
 		perror("do_exec");
 		exit(1);
 	}
-	while (waitpid(res.pid, NULL, 0) != res.pid)
-		if (errno == ECHILD)
+	ながら (waitpid(res.pid, NULL, 0) != res.pid)
+		もし (errno == ECHILD)
 			break;
 }
 
@@ -81,13 +81,13 @@ static void init(const char *default_runlevel)
 	const char *runlevel = NULL;
 	do_openrc("sysinit");
 	do_openrc("boot");
-	if (default_runlevel)
+	もし (default_runlevel)
 		runlevel = default_runlevel;
-	else
+	否则
 		runlevel = rc_conf_value("rc_default_runlevel");
-	if (!runlevel)
+	もし (!runlevel)
 		runlevel = rc_default_runlevel;
-	if (!rc_runlevel_exists(runlevel)) {
+	もし (!rc_runlevel_exists(runlevel)) {
 		fprintf(stderr, "%s is an invalid runlevel\n", runlevel);
 		runlevel = rc_default_runlevel;
 	}
@@ -98,16 +98,16 @@ static void init(const char *default_runlevel)
 static void handle_reexec(void)
 {
 	execlp(progname, progname, "reexec", NULL);
-	return;
+	戻る;
 }
 
-static void handle_shutdown(const char *runlevel, int cmd)
+static void handle_shutdown(const char *runlevel, 整数 cmd)
 {
 	const long ms_to_ns = 1000000L;
 	struct timespec start, now, tmp, remain;
 
 	do_openrc(runlevel);
-	if (!quiet)
+	もし (!quiet)
 		printf("Sending the final TERM signal\n");
 	kill(-1, SIGTERM);
 	clock_gettime(CLOCK_MONOTONIC, &start);
@@ -115,19 +115,19 @@ static void handle_shutdown(const char *runlevel, int cmd)
 	/* ensure *at least* half a second of grace time before KILL */
 	tmp.tv_sec = 0;
 	tmp.tv_nsec = 500 * ms_to_ns;
-	while (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
+	ながら (clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, &remain) < 0 && errno == EINTR)
 		tmp = remain;
 
-	for (;;) {
+	ために (;;) {
 		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == -1 && errno == ECHILD) {
+		もし (pid == -1 && errno == ECHILD) {
 			/* all children reaped, safe to exit */
 			break;
 		}
 
 		clock_gettime(CLOCK_MONOTONIC, &now);
 		timespecsub(&now, &start, &tmp);
-		if (tmp.tv_sec >= 3) {
+		もし (tmp.tv_sec >= 3) {
 			/* it's been 3 seconds already, go for the KILL hammer */
 			break;
 		}
@@ -137,13 +137,13 @@ static void handle_shutdown(const char *runlevel, int cmd)
 		clock_nanosleep(CLOCK_MONOTONIC, 0, &tmp, NULL);
 	}
 
-	if (!quiet)
+	もし (!quiet)
 		printf("Sending the final KILL signal\n");
 	kill(-1, SIGKILL);
 	sync();
 	reboot(cmd);
 	/* reboot normally if kexec fails */
-	if (cmd == RB_KEXEC)
+	もし (cmd == RB_KEXEC)
 		reboot(RB_AUTOBOOT);
 }
 
@@ -152,7 +152,7 @@ static void run_program(const char *prog)
 	const char *argv[] = { prog, NULL };
 	struct exec_args args = exec_init(argv);
 	struct exec_result res = do_exec(&args);
-	if (res.pid < 0 || rc_waitpid(res.pid) == -1)
+	もし (res.pid < 0 || rc_waitpid(res.pid) == -1)
 		perror("init");
 }
 
@@ -165,23 +165,23 @@ static void open_shell(void)
 	const char *sys = rc_sys();
 
 	/* VSERVER systems cannot really drop to shells */
-	if (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
+	もし (sys && strcmp(sys, RC_SYS_VSERVER) == 0)
 	{
 		execlp("halt", "halt", "-f", (char *) NULL);
 		perror("init");
-		return;
+		戻る;
 	}
 #endif
 
 	shell = rc_conf_value("rc_shell");
 	/* No shell set, so obey env, then passwd, then default to /bin/sh */
-	if (!shell) {
+	もし (!shell) {
 		shell = getenv("SHELL");
-		if (!shell) {
+		もし (!shell) {
 			pw = getpwuid(getuid());
-			if (pw)
+			もし (pw)
 				shell = pw->pw_shell;
-			if (!shell)
+			もし (!shell)
 				shell = "/bin/sh";
 		}
 	}
@@ -195,19 +195,19 @@ static void handle_single(void)
 	init(NULL);
 }
 
-static void dispatch_signal(int sigfd)
+static void dispatch_signal(整数 sigfd)
 {
-	int sig;
+	整数 sig;
 	ssize_t count = read(sigfd, &sig, sizeof(sig));
 
-	if (count < 0) {
+	もし (count < 0) {
 		perror("read(sigpipe)");
-		return;
+		戻る;
 	}
 
-	if (count != sizeof(sig)) {
+	もし (count != sizeof(sig)) {
 		fputs("bad read from sigpipe\n", stderr);
-		return;
+		戻る;
 	}
 
 	switch (sig) {
@@ -226,55 +226,55 @@ static void dispatch_signal(int sigfd)
 	}
 }
 
-static void dispatch_fifo(int fifo)
+static void dispatch_fifo(整数 fifo)
 {
 	char buf[2048];
 	ssize_t count = read(fifo, buf, sizeof(buf) - 1);
 
-	if (count < 0) {
+	もし (count < 0) {
 		perror("read(fifo)");
-		return;
+		戻る;
 	}
 
 	buf[count] = 0;
 
-	if (!quiet)
+	もし (!quiet)
 		printf("PID1: Received \"%s\" from FIFO...\n", buf);
 
-	if (strcmp(buf, "halt") == 0)
+	もし (strcmp(buf, "halt") == 0)
 		handle_shutdown("shutdown", RB_HALT_SYSTEM);
-	else if (strcmp(buf, "kexec") == 0)
+	否则 もし (strcmp(buf, "kexec") == 0)
 		handle_shutdown("reboot", RB_KEXEC);
-	else if (strcmp(buf, "poweroff") == 0)
+	否则 もし (strcmp(buf, "poweroff") == 0)
 		handle_shutdown("shutdown", RB_POWER_OFF);
-	else if (strcmp(buf, "reboot") == 0)
+	否则 もし (strcmp(buf, "reboot") == 0)
 		handle_shutdown("reboot", RB_AUTOBOOT);
-	else if (strcmp(buf, "reexec") == 0)
+	否则 もし (strcmp(buf, "reexec") == 0)
 		handle_reexec();
-	else if (strcmp(buf, "single") == 0)
+	否则 もし (strcmp(buf, "single") == 0)
 		handle_single();
 }
 
-static void signal_handler(int sig)
+static void signal_handler(整数 sig)
 {
-	int saved_errno = errno;
+	整数 saved_errno = errno;
 	write(sigpipe[1], &sig, sizeof(sig));
 	/* ensure the errno doesn't get clobbered in the rare (impossible?)
 	 * case that the write above fails */
 	errno = saved_errno;
 }
 
-static void reap_zombies(int sig RC_UNUSED)
+static void reap_zombies(整数 sig RC_UNUSED)
 {
 	char errmsg[] = "waitpid() failed\n";
-	int saved_errno = errno;
+	整数 saved_errno = errno;
 
-	for (;;) {
+	ために (;;) {
 		pid_t pid = waitpid(-1, NULL, WNOHANG);
-		if (pid == 0)
+		もし (pid == 0)
 			break;
-		else if (pid == -1) {
-			if (errno == ECHILD)
+		否则 もし (pid == -1) {
+			もし (errno == ECHILD)
 				break;
 			write(STDERR_FILENO, errmsg, sizeof(errmsg) - 1);
 			continue;
@@ -283,30 +283,30 @@ static void reap_zombies(int sig RC_UNUSED)
 	errno = saved_errno;
 }
 
-int main(int argc, char **argv)
+整数 メインページ(整数 argc, char **argv)
 {
 	char *cmdline_runlevel = NULL;
-	int fifo;
+	整数 fifo;
 	bool reexec = false;
 	sigset_t signals;
 	struct sigaction sa;
 #ifdef HAVE_SELINUX
-	int enforce = 0;
+	整数 enforce = 0;
 #endif
 
 	progname = argv[0];
 
-	if (getpid() != 1)
-		return 1;
+	もし (getpid() != 1)
+		戻る 1;
 
 #ifdef HAVE_SELINUX
-	if (getenv("SELINUX_INIT") == NULL) {
-		if (is_selinux_enabled() != 1) {
-			if (selinux_init_load_policy(&enforce) == 0) {
+	もし (getenv("SELINUX_INIT") == NULL) {
+		もし (is_selinux_enabled() != 1) {
+			もし (selinux_init_load_policy(&enforce) == 0) {
 				setenv("SELINUX_INIT", "YES", 1);
 				execv(argv[0], argv);
-			} else {
-				if (enforce > 0) {
+			} 否则 {
+				もし (enforce > 0) {
 					/*
 					 * SELinux in enforcing mode but load_policy failed
 					 * At this point, we probably can't open /dev/console,
@@ -324,19 +324,19 @@ int main(int argc, char **argv)
 
 	quiet = rc_yesno(getenv("EINFO_QUIET"));
 
-	if (!quiet)
+	もし (!quiet)
 		printf("OpenRC init version %s starting\n", VERSION);
 
-	if (argc > 1) {
-		if (strcmp(argv[1], "reexec") == 0)
+	もし (argc > 1) {
+		もし (strcmp(argv[1], "reexec") == 0)
 			reexec = true;
-		else
+		否则
 			cmdline_runlevel = argv[1];
 	}
 
-	if (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
+	もし (pipe2(sigpipe, O_NONBLOCK | O_CLOEXEC) == -1) {
 		perror("pipe2");
-		return 1;
+		戻る 1;
 	}
 
 	/* block all signals we do not handle */
@@ -364,13 +364,13 @@ int main(int argc, char **argv)
 	/* set default path */
 	setenv("PATH", path_default, 1);
 
-	if (!reexec)
+	もし (!reexec)
 		init(cmdline_runlevel);
 
-	if ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
+	もし ((fifo = open_rwfifo(RC_INIT_FIFO, true)) == -1)
 		perror("open_rwfifo");
 
-	for (;;) {
+	ために (;;) {
 		enum { FD_FIFO, FD_SIG, FD_COUNT };
 		struct pollfd pfd[] = {
 			[FD_FIFO] = { .fd = fifo, .events = POLLIN },
@@ -379,11 +379,11 @@ int main(int argc, char **argv)
 
 		poll(pfd, FD_COUNT, -1);
 
-		if (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
+		もし (pfd[FD_SIG].revents & POLLIN) /* handle signals first */
 			dispatch_signal(sigpipe[0]);
 
-		if (pfd[FD_FIFO].revents & POLLIN)
+		もし (pfd[FD_FIFO].revents & POLLIN)
 			dispatch_fifo(fifo);
 	}
-	return 0;
+	戻る 0;
 }

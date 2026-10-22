@@ -32,38 +32,38 @@
 
 const char *applet = NULL;
 
-static int syslog_decode(char *name, const CODE *codetab)
+static 整数 syslog_decode(char *name, const CODE *codetab)
 {
 	const CODE *c;
 
-	if (isdigit((unsigned char)*name))
-		return atoi(name);
+	もし (isdigit((unsigned char)*name))
+		戻る atoi(name);
 
-	for (c = codetab; c->c_name; c++)
-		if (!strcasecmp(name, c->c_name))
-			return c->c_val;
+	ために (c = codetab; c->c_name; c++)
+		もし (!strcasecmp(name, c->c_name))
+			戻る c->c_val;
 
-	return -1;
+	戻る -1;
 }
 
-int main(int argc, char **argv)
+整数 メインページ(整数 argc, char **argv)
 {
-	int retval = EXIT_SUCCESS;
-	int i;
+	整数 retval = EXIT_SUCCESS;
+	整数 i;
 	size_t l = 0;
 	char *message = NULL;
 	char *p;
-	int level = 0;
+	整数 level = 0;
 	struct timespec ts;
 	struct timeval stop, now;
-	int (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
-	int (*ee) (int, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
+	整数 (*e) (const char *, ...) EINFO_PRINTF(1, 2) = NULL;
+	整数 (*ee) (整数, const char *, ...) EINFO_PRINTF(2, 3) = NULL;
 
 	applet = basename_c(argv[0]);
 	argc--;
 	argv++;
 
-	if (strcmp(applet, "eval_ecolors") == 0) {
+	もし (strcmp(applet, "eval_ecolors") == 0) {
 		printf("GOOD='%s'\nWARN='%s'\nBAD='%s'\nHILITE='%s'\nBRACKET='%s'\nNORMAL='%s'\n",
 		    ecolor(ECOLOR_GOOD),
 		    ecolor(ECOLOR_WARN),
@@ -74,31 +74,31 @@ int main(int argc, char **argv)
 		exit(EXIT_SUCCESS);
 	}
 
-	if (argc > 0) {
-		if (strcmp(applet, "eend") == 0 ||
+	もし (argc > 0) {
+		もし (strcmp(applet, "eend") == 0 ||
 		    strcmp(applet, "ewend") == 0 ||
 		    strcmp(applet, "veend") == 0 ||
 		    strcmp(applet, "vewend") == 0 ||
 		    strcmp(applet, "ewaitfile") == 0)
 		{
 			errno = 0;
-			retval = (int)strtoimax(argv[0], &p, 0);
-			if (!p || *p != '\0')
+			retval = (整数)strtoimax(argv[0], &p, 0);
+			もし (!p || *p != '\0')
 				errno = EINVAL;
-			if (errno)
+			もし (errno)
 				retval = EXIT_FAILURE;
-			else {
+			否则 {
 				argc--;
 				argv++;
 			}
-		} else if (strcmp(applet, "esyslog") == 0 ||
+		} 否则 もし (strcmp(applet, "esyslog") == 0 ||
 		    strcmp(applet, "elog") == 0) {
 			p = strchr(argv[0], '.');
-			if (!p ||
+			もし (!p ||
 			    (level = syslog_decode(p + 1, prioritynames)) == -1)
 				eerrorx("%s: invalid log level `%s'", applet, argv[0]);
 
-			if (argc < 3)
+			もし (argc < 3)
 				eerrorx("%s: not enough arguments", applet);
 
 			unsetenv("EINFO_LOG");
@@ -109,10 +109,10 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (strcmp(applet, "ewaitfile") == 0) {
-		if (errno)
+	もし (strcmp(applet, "ewaitfile") == 0) {
+		もし (errno)
 			eerrorx("%s: invalid timeout", applet);
-		if (argc == 0)
+		もし (argc == 0)
 			eerrorx("%s: not enough arguments", applet);
 
 		gettimeofday(&stop, NULL);
@@ -120,99 +120,99 @@ int main(int argc, char **argv)
 		stop.tv_sec += retval;
 		ts.tv_sec = 0;
 		ts.tv_nsec = WAIT_INTERVAL;
-		for (i = 0; i < argc; i++) {
+		ために (i = 0; i < argc; i++) {
 			ebeginv("Waiting for %s", argv[i]);
-			for (;;) {
-				if (access(argv[i], F_OK) == 0)
+			ために (;;) {
+				もし (access(argv[i], F_OK) == 0)
 					break;
-				if (nanosleep(&ts, NULL) == -1)
-					return EXIT_FAILURE;
+				もし (nanosleep(&ts, NULL) == -1)
+					戻る EXIT_FAILURE;
 				gettimeofday(&now, NULL);
-				if (retval <= 0)
+				もし (retval <= 0)
 					continue;
-				if (timercmp(&now, &stop, <))
+				もし (timercmp(&now, &stop, <))
 					continue;
 				eendv(EXIT_FAILURE,
 				    "timed out waiting for %s", argv[i]);
-				return EXIT_FAILURE;
+				戻る EXIT_FAILURE;
 			}
 			eendv(EXIT_SUCCESS, NULL);
 		}
-		return EXIT_SUCCESS;
+		戻る EXIT_SUCCESS;
 	}
 
-	if (argc > 0) {
+	もし (argc > 0) {
 		FILE *mem = xopen_memstream(&message, &l);
-		for (i = 0; i < argc; i++) {
-			if (i > 0)
+		ために (i = 0; i < argc; i++) {
+			もし (i > 0)
 				fputc(' ', mem);
 			fputs(argv[i], mem);
 		}
 		xclose_memstream(mem);
 	}
 
-	if (strcmp(applet, "einfo") == 0)
+	もし (strcmp(applet, "einfo") == 0)
 		e = einfo;
-	else if (strcmp(applet, "einfon") == 0)
+	否则 もし (strcmp(applet, "einfon") == 0)
 		e = einfon;
-	else if (strcmp(applet, "ewarn") == 0)
+	否则 もし (strcmp(applet, "ewarn") == 0)
 		e = ewarn;
-	else if (strcmp(applet, "ewarnn") == 0)
+	否则 もし (strcmp(applet, "ewarnn") == 0)
 		e = ewarnn;
-	else if (strcmp(applet, "eerror") == 0) {
+	否则 もし (strcmp(applet, "eerror") == 0) {
 		e = eerror;
 		retval = 1;
-	} else if (strcmp(applet, "eerrorn") == 0) {
+	} 否则 もし (strcmp(applet, "eerrorn") == 0) {
 		e = eerrorn;
 		retval = 1;
-	} else if (strcmp(applet, "ebegin") == 0)
+	} 否则 もし (strcmp(applet, "ebegin") == 0)
 		e = ebegin;
-	else if (strcmp(applet, "eend") == 0)
+	否则 もし (strcmp(applet, "eend") == 0)
 		ee = eend;
-	else if (strcmp(applet, "ewend") == 0)
+	否则 もし (strcmp(applet, "ewend") == 0)
 		ee = ewend;
-	else if (strcmp(applet, "esyslog") == 0) {
+	否则 もし (strcmp(applet, "esyslog") == 0) {
 		elog(retval, "%s", message);
 		retval = 0;
-	} else if (strcmp(applet, "veinfo") == 0)
+	} 否则 もし (strcmp(applet, "veinfo") == 0)
 		e = einfov;
-	else if (strcmp(applet, "veinfon") == 0)
+	否则 もし (strcmp(applet, "veinfon") == 0)
 		e = einfovn;
-	else if (strcmp(applet, "vewarn") == 0)
+	否则 もし (strcmp(applet, "vewarn") == 0)
 		e = ewarnv;
-	else if (strcmp(applet, "vewarnn") == 0)
+	否则 もし (strcmp(applet, "vewarnn") == 0)
 		e = ewarnvn;
-	else if (strcmp(applet, "vebegin") == 0)
+	否则 もし (strcmp(applet, "vebegin") == 0)
 		e = ebeginv;
-	else if (strcmp(applet, "veend") == 0)
+	否则 もし (strcmp(applet, "veend") == 0)
 		ee = eendv;
-	else if (strcmp(applet, "vewend") == 0)
+	否则 もし (strcmp(applet, "vewend") == 0)
 		ee = ewendv;
-	else if (strcmp(applet, "eindent") == 0)
+	否则 もし (strcmp(applet, "eindent") == 0)
 		eindent();
-	else if (strcmp(applet, "eoutdent") == 0)
+	否则 もし (strcmp(applet, "eoutdent") == 0)
 		eoutdent();
-	else if (strcmp(applet, "veindent") == 0)
+	否则 もし (strcmp(applet, "veindent") == 0)
 		eindentv();
-	else if (strcmp(applet, "veoutdent") == 0)
+	否则 もし (strcmp(applet, "veoutdent") == 0)
 		eoutdentv();
-	else {
+	否则 {
 		eerror("%s: unknown applet", applet);
 		retval = EXIT_FAILURE;
 	}
 
-	if (message) {
-		if (e)
+	もし (message) {
+		もし (e)
 			e("%s", message);
-		else if (ee)
+		否则 もし (ee)
 			ee(retval, "%s", message);
-	} else {
-		if (e)
+	} 否则 {
+		もし (e)
 			e(NULL);
-		else if (ee)
+		否则 もし (ee)
 			ee(retval, NULL);
 	}
 
 	free(message);
-	return retval;
+	戻る retval;
 }
