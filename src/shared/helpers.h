@@ -18,28 +18,28 @@
 #ifndef __HELPERS_H__
 #define __HELPERS_H__
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+#अन्तर्भाव <stdarg.h>
+#अन्तर्भाव <stdbool.h>
+#अन्तर्भाव <stddef.h>
+#अन्तर्भाव <stdint.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <dirent.h>
+#अन्तर्भाव <unistd.h>
+#अन्तर्भाव <fcntl.h>
+#अन्तर्भाव <errno.h>
 
-#define ERRX do { fprintf (stderr, "out of memory\n"); exit (1); } while (0)
+#define ERRX करा { ख_लिखो (मानक_त्रुटि, "out of memory\n"); निकास (1); } पर्यंत (0)
 
-#define UNCONST(a)		((void *)(uintptr_t)(const void *)(a))
+#define UNCONST(a)		((शून्य *)(uintptr_t)(स्थिरांक शून्य *)(a))
 
 #define RC_UNUSED __attribute__((__unused__))
 #define RC_NORETURN __attribute__((__noreturn__))
 #define RC_PRINTF(a, b)  __attribute__((__format__(__printf__, a, b)))
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define ARRAY_SIZE(a) (आकार(a) / आकार((a)[0]))
 
 #ifndef HAVE_STRLCPY
 #    define strlcpy(dst, src, size) snprintf(dst, size, "%s", src)
@@ -47,66 +47,66 @@
 
 #ifndef timespecsub
 #define	timespecsub(tsp, usp, vsp)					      \
-	do {								      \
+	करा {								      \
 		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		      \
 		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	      \
-		if ((vsp)->tv_nsec < 0) {				      \
+		जर ((vsp)->tv_nsec < 0) {				      \
 			(vsp)->tv_sec--;				      \
 			(vsp)->tv_nsec += 1000000000L;			      \
 		}							      \
-	} while (/* CONSTCOND */ 0)
+	} पर्यंत (/* CONSTCOND */ 0)
 #endif
 
-RC_UNUSED static void *xmalloc (size_t size)
+RC_UNUSED स्थिर शून्य *xmalloc (माप_प्रकार size)
 {
-	void *value = malloc(size);
+	शून्य *मूल्य = दो_स्मृति(size);
 
-	if (value)
-		return (value);
+	जर (मूल्य)
+		परत (मूल्य);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static void *xrealloc(void *ptr, size_t size)
+RC_UNUSED स्थिर शून्य *xrealloc(शून्य *ptr, माप_प्रकार size)
 {
-	void *value = realloc(ptr, size);
+	शून्य *मूल्य = पुनः_स्मृति(ptr, size);
 
-	if (value)
-		return (value);
+	जर (मूल्य)
+		परत (मूल्य);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static char *xstrdup(const char *str)
+RC_UNUSED स्थिर अक्षर *xstrdup(स्थिरांक अक्षर *str)
 {
-	char *value;
+	अक्षर *मूल्य;
 
-	if (!str)
-		return (NULL);
+	जर (!str)
+		परत (रिक्त);
 
-	value = strdup(str);
+	मूल्य = strdup(str);
 
-	if (value)
-		return (value);
+	जर (मूल्य)
+		परत (मूल्य);
 
 	ERRX;
 	/* NOTREACHED */
 }
 
-RC_UNUSED static FILE *xopen_memstream(char **ptr, size_t *sizeloc)
+RC_UNUSED स्थिर खाता *xopen_memstream(अक्षर **ptr, माप_प्रकार *sizeloc)
 {
-	FILE *f = open_memstream(ptr, sizeloc);
-	if (f)
-		return f;
+	खाता *f = open_memstream(ptr, sizeloc);
+	जर (f)
+		परत f;
 	ERRX;
 }
 
-RC_UNUSED static void xclose_memstream(FILE *f)
+RC_UNUSED स्थिर शून्य xclose_memstream(खाता *f)
 {
-	fflush(f);
-	if (ferror(f) || fclose(f) != 0)
+	ख_साफ(f);
+	जर (ख_त्रुटि(f) || ख_बंद(f) != 0)
 		ERRX;
 }
 
@@ -116,23 +116,23 @@ RC_UNUSED static void xclose_memstream(FILE *f)
  * basename_c never modifies the argument. As such, if there is a trailing
  * slash then an empty string is returned.
  */
-RC_UNUSED static const char *basename_c(const char *path)
+RC_UNUSED स्थिर स्थिरांक अक्षर *basename_c(स्थिरांक अक्षर *path)
 {
-	const char *slash = strrchr(path, '/');
+	स्थिरांक अक्षर *slash = म_खोजप(path, '/');
 
-	if (slash)
-		return (++slash);
-	return (path);
+	जर (slash)
+		परत (++slash);
+	परत (path);
 }
 
-RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
+RC_UNUSED स्थिर खाता *do_fopenat(पूर्णांक dirfd, स्थिरांक अक्षर *pathname, पूर्णांक mode)
 {
-	int fd = openat(dirfd, pathname, mode, 0666);
-	const char *fmode;
-	FILE *fp;
+	पूर्णांक fd = openat(dirfd, pathname, mode, 0666);
+	स्थिरांक अक्षर *fmode;
+	खाता *fp;
 
-	if (fd == -1)
-		return NULL;
+	जर (fd == -1)
+		परत रिक्त;
 
 	/* O_CREAT and O_TRUNC in modes 'a', 'w+', 'a+' don't
 	 * really matter after the file has been opened.
@@ -140,44 +140,44 @@ RC_UNUSED static FILE *do_fopenat(int dirfd, const char *pathname, int mode)
 	 * Some implementations have O_RDONLY defined to zero,
 	 * thus making it impossible to detect, so, we default
 	 * to "r" if no other mask fully matches. */
-	if ((mode & O_RDWR) == O_RDWR)
+	जर ((mode & O_RDWR) == O_RDWR)
 		fmode = "r+";
-	else if ((mode & O_WRONLY) == O_WRONLY)
+	अन्यथा जर ((mode & O_WRONLY) == O_WRONLY)
 		fmode = "w";
-	else
+	अन्यथा
 		fmode = "r";
 
-	if (!(fp = fdopen(fd, fmode)))
-		close(fd);
-	return fp;
+	जर (!(fp = fdopen(fd, fmode)))
+		बंद(fd);
+	परत fp;
 }
 
-RC_UNUSED static DIR *do_opendirat(int dirfd, const char *pathname)
+RC_UNUSED स्थिर सूची *do_opendirat(पूर्णांक dirfd, स्थिरांक अक्षर *pathname)
 {
-	int fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
-	DIR *dp;
+	पूर्णांक fd = openat(dirfd, pathname, O_RDONLY | O_DIRECTORY);
+	सूची *dp;
 
-	if (fd == -1)
-		return NULL;
+	जर (fd == -1)
+		परत रिक्त;
 
-	if (!(dp = fdopendir(fd)))
-		close(fd);
+	जर (!(dp = fdopendir(fd)))
+		बंद(fd);
 
-	return dp;
+	परत dp;
 }
 
-RC_UNUSED static DIR *do_dopendir(int dirfd)
+RC_UNUSED स्थिर सूची *do_dopendir(पूर्णांक dirfd)
 {
-	int fd = dup(dirfd);
-	DIR *dp;
+	पूर्णांक fd = dup(dirfd);
+	सूची *dp;
 
-	if (fd == -1)
-		return NULL;
+	जर (fd == -1)
+		परत रिक्त;
 
-	if (!(dp = fdopendir(fd)))
-		close(fd);
+	जर (!(dp = fdopendir(fd)))
+		बंद(fd);
 
-	return dp;
+	परत dp;
 }
 
 /*
@@ -188,12 +188,12 @@ RC_UNUSED static DIR *do_dopendir(int dirfd)
  * functions to handle memory allocation.
  * this function was originally written by Mike Frysinger.
  */
-RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
+RC_UNUSED RC_PRINTF(2,3) स्थिर पूर्णांक xasprintf(अक्षर **strp, स्थिरांक अक्षर *fmt, ...)
 {
-	va_list ap;
-	int len;
-	int memlen;
-	char *ret;
+	बहु_सूची ap;
+	पूर्णांक len;
+	पूर्णांक memlen;
+	अक्षर *ret;
 
 	/*
 	 * Start with a buffer size that should cover the vast majority of uses
@@ -202,99 +202,99 @@ RC_UNUSED RC_PRINTF(2,3) static int xasprintf(char **strp, const char *fmt, ...)
 	memlen = 4096;
 	ret = xmalloc(memlen);
 
-	va_start(ap, fmt);
+	बहु_शुरू(ap, fmt);
 	len = vsnprintf(ret, memlen, fmt, ap);
-	va_end(ap);
-	if (len >= memlen) {
+	बहु_पूर्ण(ap);
+	जर (len >= memlen) {
 		/*
 		 * Output was truncated, so increase buffer to exactly what we need.
 		 */
 		memlen = len + 1;
 		ret = xrealloc(ret, memlen);
-		va_start(ap, fmt);
+		बहु_शुरू(ap, fmt);
 		len = vsnprintf(ret, len + 1, fmt, ap);
-		va_end(ap);
+		बहु_पूर्ण(ap);
 	}
-	if (len < 0 || len >= memlen) {
+	जर (len < 0 || len >= memlen) {
 		/* Give up! */
-		fprintf(stderr, "xasprintf: unable to format a buffer\n");
-		free(ret);
-		exit(1);
+		ख_लिखो(मानक_त्रुटि, "xasprintf: unable to format a buffer\n");
+		मुक्त(ret);
+		निकास(1);
 	}
 	*strp = ret;
-	return len;
+	परत len;
 }
 
-RC_UNUSED static ssize_t xgetline(char **restrict lineptr, size_t *restrict n, FILE *restrict stream)
+RC_UNUSED स्थिर ssize_t xgetline(अक्षर **restrict lineptr, माप_प्रकार *restrict n, खाता *restrict stream)
 {
 	ssize_t ret = getline(lineptr, n, stream);
-	if (ret <= 0)
-		return ret;
+	जर (ret <= 0)
+		परत ret;
 
-	if ((*lineptr)[ret - 1] == '\n')
+	जर ((*lineptr)[ret - 1] == '\n')
 		(*lineptr)[--ret] = '\0';
 
-	return ret;
+	परत ret;
 }
 
-RC_UNUSED static char *env_findvar(const char *name, char **envp)
+RC_UNUSED स्थिर अक्षर *env_findvar(स्थिरांक अक्षर *name, अक्षर **envp)
 {
-	size_t len = strlen(name);
+	माप_प्रकार len = म_माप(name);
 
-	for (char **var = envp; *var; var++)
-		if (strncmp(name, *var, len) == 0 && (*var)[len] == '=')
-			return *var;
-	return NULL;
+	साठी (अक्षर **var = envp; *var; var++)
+		जर (म_भेदन(name, *var, len) == 0 && (*var)[len] == '=')
+			परत *var;
+	परत रिक्त;
 }
 
-RC_UNUSED static int xopen_nonblock(const char *filename, int flags, mode_t mode)
+RC_UNUSED स्थिर पूर्णांक xopen_nonblock(स्थिरांक अक्षर *filename, पूर्णांक flags, mode_t mode)
 {
-	int fd = open(filename, flags | O_NONBLOCK, mode);
-	if (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
-		int saved_errno = errno;
-		close(fd);
+	पूर्णांक fd = खोलो(filename, flags | O_NONBLOCK, mode);
+	जर (fd >= 0 && fcntl(fd, F_SETFL, flags & ~O_NONBLOCK) < 0) {
+		पूर्णांक saved_errno = त्रुटि_सं;
+		बंद(fd);
 		fd = -1;
-		errno = saved_errno;
+		त्रुटि_सं = saved_errno;
 	}
-	return fd;
+	परत fd;
 }
 
-RC_UNUSED static int open_rwfifo(const char *path, bool nonblock)
+RC_UNUSED स्थिर पूर्णांक open_rwfifo(स्थिरांक अक्षर *path, bool nonblock)
 {
-	int r, w, err;
+	पूर्णांक r, w, err;
 
-	if (mkfifo(path, 0600) == -1 && errno != EEXIST)
-		return -1;
+	जर (mkfifo(path, 0600) == -1 && त्रुटि_सं != EEXIST)
+		परत -1;
 
-	if ((r = open(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
-		return -1;
+	जर ((r = खोलो(path, O_RDONLY | O_NONBLOCK | O_CLOEXEC)) == -1)
+		परत -1;
 
 	/* Leak an open writeable fd for the life of the process
 	 * to keep the read end valid after a client disconnects.
 	 * On linux, opening O_RDWR would solve this, but posix
 	 * leaves that behaviour undefined, and for example, hurd
 	 * does not properly handle it. */
-	if ((w = open(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
-		err = errno;
-		goto r_err;
+	जर ((w = खोलो(path, O_WRONLY | O_NONBLOCK | O_CLOEXEC)) == -1) {
+		err = त्रुटि_सं;
+		जा r_err;
 	}
 
-	if (!nonblock) {
-		int flags = fcntl(r, F_GETFL);
-		if (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
-			err = errno;
-			goto w_err;
+	जर (!nonblock) {
+		पूर्णांक flags = fcntl(r, F_GETFL);
+		जर (flags == -1 || fcntl(r, F_SETFL, flags & ~O_NONBLOCK) == -1) {
+			err = त्रुटि_सं;
+			जा w_err;
 		}
 	}
 
-	return r;
+	परत r;
 
 w_err:
-	close(w);
+	बंद(w);
 r_err:
-	close(r);
-	errno = err;
-	return -1;
+	बंद(r);
+	त्रुटि_सं = err;
+	परत -1;
 }
 
 #endif

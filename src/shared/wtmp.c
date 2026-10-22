@@ -15,35 +15,35 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <utmp.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <sys/time.h>
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <sys/utsname.h>
+#अन्तर्भाव <utmp.h>
 
-#include "wtmp.h"
+#अन्तर्भाव "wtmp.h"
 
-void log_wtmp(const char *user, const char *id, pid_t pid, int type,
-		const char *line)
+शून्य log_wtmp(स्थिरांक अक्षर *user, स्थिरांक अक्षर *id, pid_t pid, पूर्णांक type,
+		स्थिरांक अक्षर *ओळ)
 {
-	struct timeval tv;
-	struct utmp utmp;
-	struct utsname uname_buf;
+	संरचना timeval tv;
+	संरचना utmp utmp;
+	संरचना utsname uname_buf;
 
-	memset(&utmp, 0, sizeof(utmp));
-	gettimeofday(&tv, NULL);
+	स_रखो(&utmp, 0, आकार(utmp));
+	gettimeofday(&tv, रिक्त);
 	utmp.ut_tv.tv_sec = tv.tv_sec;
 	utmp.ut_tv.tv_usec = tv.tv_usec;
 	utmp.ut_pid  = pid;
 	utmp.ut_type = type;
-	strncpy(utmp.ut_name, user, sizeof(utmp.ut_name));
-	strncpy(utmp.ut_id  , id  , sizeof(utmp.ut_id  ));
-	strncpy(utmp.ut_line, line, sizeof(utmp.ut_line));
+	म_नकलन(utmp.ut_name, user, आकार(utmp.ut_name));
+	म_नकलन(utmp.ut_id  , id  , आकार(utmp.ut_id  ));
+	म_नकलन(utmp.ut_line, ओळ, आकार(utmp.ut_line));
 
 	/* Put the OS version in place of the hostname */
-	if (uname(&uname_buf) == 0)
-		strncpy(utmp.ut_host, uname_buf.release, sizeof(utmp.ut_host));
+	जर (uname(&uname_buf) == 0)
+		म_नकलन(utmp.ut_host, uname_buf.release, आकार(utmp.ut_host));
 
 	updwtmp(WTMP_FILE, &utmp);
 }

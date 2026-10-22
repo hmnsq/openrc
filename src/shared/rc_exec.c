@@ -10,170 +10,170 @@
  * except according to the terms contained in the LICENSE file.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <fcntl.h>
+#अन्तर्भाव <signal.h>
+#अन्तर्भाव <sys/wait.h>
+#अन्तर्भाव <unistd.h>
 
-#include "rc_exec.h"
-#include "helpers.h"
+#अन्तर्भाव "rc_exec.h"
+#अन्तर्भाव "helpers.h"
 
-static void checked_close(int fd)
+स्थिर शून्य checked_close(पूर्णांक fd)
 {
-	if (fd >= 0)
-		close(fd);
+	जर (fd >= 0)
+		बंद(fd);
 }
 
-static int devnull(void)
+स्थिर पूर्णांक devnull(शून्य)
 {
-	static int devnullfd = -1;
-	if (devnullfd < 0)
-		devnullfd = open("/dev/null", O_RDWR | O_CLOEXEC);
-	if (devnullfd < 0) {
-		fprintf(stderr, "Failed to open /dev/null: %s", strerror(errno));
+	स्थिर पूर्णांक devnullfd = -1;
+	जर (devnullfd < 0)
+		devnullfd = खोलो("/dev/null", O_RDWR | O_CLOEXEC);
+	जर (devnullfd < 0) {
+		ख_लिखो(मानक_त्रुटि, "Failed to open /dev/null: %s", म_त्रुटि(त्रुटि_सं));
 		_exit(1);
 	}
-	return devnullfd;
+	परत devnullfd;
 }
 
-struct exec_args exec_init(const char **argv)
+संरचना exec_args exec_init(स्थिरांक अक्षर **argv)
 {
-	struct exec_args args = {0};
+	संरचना exec_args args = {0};
 	args.argv = argv;
 	args.redirect_stdin  = EXEC_NO_REDIRECT;
 	args.redirect_stdout = EXEC_NO_REDIRECT;
 	args.redirect_stderr = EXEC_NO_REDIRECT;
 	args.uid = (uid_t)-1;
 	args.gid = (gid_t)-1;
-	return args;
+	परत args;
 }
 
-struct exec_result do_exec(struct exec_args *args)
+संरचना exec_result do_exec(संरचना exec_args *args)
 {
-	struct exec_result res = { .pid = -1 };
+	संरचना exec_result res = { .pid = -1 };
 	sigset_t full, old;
-	int saved_errno, err, n;
-	int execpipe[2] = {-1, -1};
-	int stdin_pipe[2] = {-1, -1};
-	int stdout_pipe[2] = {-1, -1};
-	int stderr_pipe[2] = {-1, -1};
-	const char *cmd = args->cmd ? args->cmd : args->argv[0];
+	पूर्णांक saved_errno, err, n;
+	पूर्णांक execpipe[2] = {-1, -1};
+	पूर्णांक stdin_pipe[2] = {-1, -1};
+	पूर्णांक stdout_pipe[2] = {-1, -1};
+	पूर्णांक stderr_pipe[2] = {-1, -1};
+	स्थिरांक अक्षर *cmd = args->cmd ? args->cmd : args->argv[0];
 
-	if (pipe2(execpipe, O_CLOEXEC) < 0)
-		goto exit;
-	if (args->redirect_stdin == EXEC_MKPIPE) {
-		if (pipe2(stdin_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	जर (pipe2(execpipe, O_CLOEXEC) < 0)
+		जा निकास;
+	जर (args->redirect_stdin == EXEC_MKPIPE) {
+		जर (pipe2(stdin_pipe, O_CLOEXEC) < 0)
+			जा निकास;
 		args->redirect_stdin = stdin_pipe[0];
 	}
-	if (args->redirect_stdout == EXEC_MKPIPE) {
-		if (pipe2(stdout_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	जर (args->redirect_stdout == EXEC_MKPIPE) {
+		जर (pipe2(stdout_pipe, O_CLOEXEC) < 0)
+			जा निकास;
 		args->redirect_stdout = stdout_pipe[1];
 	}
-	if (args->redirect_stderr == EXEC_MKPIPE) {
-		if (pipe2(stderr_pipe, O_CLOEXEC) < 0)
-			goto exit;
+	जर (args->redirect_stderr == EXEC_MKPIPE) {
+		जर (pipe2(stderr_pipe, O_CLOEXEC) < 0)
+			जा निकास;
 		args->redirect_stderr = stderr_pipe[1];
 	}
 
-	if (args->redirect_stdin == EXEC_DEVNULL)
+	जर (args->redirect_stdin == EXEC_DEVNULL)
 		args->redirect_stdin = devnull();
-	if (args->redirect_stdout == EXEC_DEVNULL)
+	जर (args->redirect_stdout == EXEC_DEVNULL)
 		args->redirect_stdout = devnull();
-	if (args->redirect_stderr == EXEC_DEVNULL)
+	जर (args->redirect_stderr == EXEC_DEVNULL)
 		args->redirect_stderr = devnull();
 
 	sigfillset(&full);
 	sigprocmask(SIG_SETMASK, &full, &old);
-	res.pid = fork();
+	res.pid = विभाजन();
 
-	if (res.pid < 0) {
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		goto exit;
-	} else if (res.pid == 0) {
+	जर (res.pid < 0) {
+		sigprocmask(SIG_SETMASK, &old, रिक्त);
+		जा निकास;
+	} अन्यथा जर (res.pid == 0) {
 		/* child */
-		if (args->redirect_stdin != EXEC_NO_REDIRECT &&
+		जर (args->redirect_stdin != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stdin, STDIN_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stdout != EXEC_NO_REDIRECT &&
+			जा child_err;
+		जर (args->redirect_stdout != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stdout, STDOUT_FILENO) < 0)
-			goto child_err;
-		if (args->redirect_stderr != EXEC_NO_REDIRECT &&
+			जा child_err;
+		जर (args->redirect_stderr != EXEC_NO_REDIRECT &&
 		    dup2(args->redirect_stderr, STDERR_FILENO) < 0)
-			goto child_err;
-		if (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
-			goto child_err;
-		if (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
-			goto child_err;
-		if (args->setsid && setsid() < 0)
-			goto child_err;
-		sigprocmask(SIG_SETMASK, &old, NULL);
+			जा child_err;
+		जर (args->gid != (gid_t)-1 && setgid(args->gid) < 0)
+			जा child_err;
+		जर (args->uid != (uid_t)-1 && setuid(args->uid) < 0)
+			जा child_err;
+		जर (args->setsid && setsid() < 0)
+			जा child_err;
+		sigprocmask(SIG_SETMASK, &old, रिक्त);
 		execvp(cmd, UNCONST(args->argv));
 child_err:
-		saved_errno = errno;
-		write(execpipe[1], &saved_errno, sizeof saved_errno);
+		saved_errno = त्रुटि_सं;
+		लिख(execpipe[1], &saved_errno, आकार saved_errno);
 		_exit(1);
-	} else {
+	} अन्यथा {
 		/* parent */
-		close(execpipe[1]);
+		बंद(execpipe[1]);
 		execpipe[1] = -1;
-		n = read(execpipe[0], &err, sizeof err);
-		if (n != 0) {
+		n = पठ(execpipe[0], &err, आकार err);
+		जर (n != 0) {
 			/* exec failed, reap the child and cleanup */
-			waitpid(res.pid, NULL, 0); /* do we care about waitpid failures? */
+			waitpid(res.pid, रिक्त, 0); /* do we care about waitpid failures? */
 			res.pid = -1;
 		}
-		sigprocmask(SIG_SETMASK, &old, NULL);
-		if (res.pid < 0) {
-			errno = (n == sizeof err) ? err : EINVAL;
-			goto exit;
+		sigprocmask(SIG_SETMASK, &old, रिक्त);
+		जर (res.pid < 0) {
+			त्रुटि_सं = (n == आकार err) ? err : EINVAL;
+			जा निकास;
 		}
 
-		if (stdin_pipe[0] >= 0) {
+		जर (stdin_pipe[0] >= 0) {
 			res.proc_stdin = stdin_pipe[1];
 			stdin_pipe[1] = -1; /* to avoid closing it below */
 		}
-		if (stdout_pipe[0] >= 0) {
+		जर (stdout_pipe[0] >= 0) {
 			res.proc_stdout = stdout_pipe[0];
 			stdout_pipe[0] = -1;
 		}
-		if (stderr_pipe[0] >= 0) {
+		जर (stderr_pipe[0] >= 0) {
 			res.proc_stderr = stderr_pipe[0];
 			stderr_pipe[0] = -1;
 		}
 	}
 
-exit:
-	saved_errno = errno;
+निकास:
+	saved_errno = त्रुटि_सं;
 	checked_close(execpipe[0]); checked_close(execpipe[1]);
 	checked_close(stdin_pipe[0]); checked_close(stdin_pipe[1]);
 	checked_close(stdout_pipe[0]); checked_close(stdout_pipe[1]);
 	checked_close(stderr_pipe[0]); checked_close(stderr_pipe[1]);
-	errno = saved_errno;
-	return res;
+	त्रुटि_सं = saved_errno;
+	परत res;
 }
 
-int rc_waitpid(pid_t pid)
+पूर्णांक rc_waitpid(pid_t pid)
 {
-	int status;
-	while (waitpid(pid, &status, 0) == -1) {
-		if (errno != EINTR) {
+	पूर्णांक status;
+	पर्यंत (waitpid(pid, &status, 0) == -1) {
+		जर (त्रुटि_सं != EINTR) {
 			status = -1;
-			break;
+			थांबा;
 		}
 	}
-	return status;
+	परत status;
 }
 
-int rc_pipe_command(const char *cmd, int devnullfd)
+पूर्णांक rc_pipe_command(स्थिरांक अक्षर *cmd, पूर्णांक devnullfd)
 {
-	const char *argv[] = { "/bin/sh", "-c", cmd, NULL };
-	struct exec_result res;
-	struct exec_args args = exec_init(argv);
+	स्थिरांक अक्षर *argv[] = { "/bin/sh", "-c", cmd, रिक्त };
+	संरचना exec_result res;
+	संरचना exec_args args = exec_init(argv);
 	args.redirect_stdin = EXEC_MKPIPE;
 	args.redirect_stdout = args.redirect_stderr = devnullfd;
 	res = do_exec(&args);
-	return (res.pid > 0) ? res.proc_stdin : -1;
+	परत (res.pid > 0) ? res.proc_stdin : -1;
 }

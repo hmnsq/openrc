@@ -17,7 +17,7 @@
 #ifndef _RC_SYSVINIT_H
 #define _RC_SYSVINIT_H
 
-void sysvinit_runlevel(char rl);
-void sysvinit_setenv(const char *name, const char *value);
+शून्य sysvinit_runlevel(अक्षर rl);
+शून्य sysvinit_setenv(स्थिरांक अक्षर *name, स्थिरांक अक्षर *मूल्य);
 
 #endif

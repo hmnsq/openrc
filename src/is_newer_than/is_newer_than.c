@@ -10,21 +10,21 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <stdlib.h>
+#अन्तर्भाव <stdlib.h>
 
-#include "rc.h"
+#अन्तर्भाव "rc.h"
 
-int main(int argc, char **argv)
+पूर्णांक main(पूर्णांक argc, अक्षर **argv)
 {
-	int i;
+	पूर्णांक i;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	जर (argc < 3)
+		परत निकास_त्रुटि;
 
 	/* This test is correct as it's not present in baselayout */
-	for (i = 2; i < argc; ++i)
-		if (!rc_newer_than(argv[1], argv[i], NULL, NULL))
-			return EXIT_FAILURE;
+	साठी (i = 2; i < argc; ++i)
+		जर (!rc_newer_than(argv[1], argv[i], रिक्त, रिक्त))
+			परत निकास_त्रुटि;
 
-	return EXIT_SUCCESS;
+	परत निकास_सफल;
 }

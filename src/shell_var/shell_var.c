@@ -10,27 +10,27 @@
  *    except according to the terms contained in the LICENSE file.
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
 
-int main(int argc, char **argv)
+पूर्णांक main(पूर्णांक argc, अक्षर **argv)
 {
-	int i;
-	char *p;
-	int c;
+	पूर्णांक i;
+	अक्षर *p;
+	पूर्णांक c;
 
-	for (i = 1; i < argc; i++) {
+	साठी (i = 1; i < argc; i++) {
 		p = argv[i];
-		if (i != 1)
-			putchar(' ');
-		while (*p) {
-			c = (unsigned char)*p++;
-			if (!isalnum(c))
+		जर (i != 1)
+			अक्षर_दो(' ');
+		पर्यंत (*p) {
+			c = (अचिन्हित अक्षर)*p++;
+			जर (!है_अक्षर_अंक(c))
 				c = '_';
-			putchar(c);
+			अक्षर_दो(c);
 		}
 	}
-	putchar('\n');
-	return EXIT_SUCCESS;
+	अक्षर_दो('\n');
+	परत निकास_सफल;
 }
