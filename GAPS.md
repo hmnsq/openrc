@@ -1,0 +1,588 @@
+# What is still missing
+
+76 languages. Each line says in how many languages it is missing.
+
+## Files in languages BURP cannot read yet
+
+
+## Keywords with no word in a language's table
+
+- guru:__FILE__: 75
+- guru:_exit: 75
+- guru:errno: 71
+- guru:strerror: 71
+- guru:size_t: 71
+- guru:getenv: 71
+- guru:FILE: 71
+- guru:EXIT_FAILURE: 71
+- guru:fprintf: 71
+- guru:close: 71
+- guru:fclose: 71
+- guru:EXIT_SUCCESS: 71
+- guru:stderr: 71
+- guru:fopen: 71
+- guru:va_list: 71
+- guru:SIGTERM: 71
+- guru:va_end: 71
+- guru:strchr: 71
+- guru:va_start: 71
+- guru:DIR: 71
+- guru:kill: 71
+- guru:time_t: 71
+- guru:readdir: 71
+- guru:stdout: 71
+- guru:fputs: 71
+- guru:closedir: 71
+- guru:BUFSIZ: 71
+- guru:SIGINT: 71
+- guru:fork: 71
+- guru:perror: 71
+- guru:INT_MIN: 71
+- guru:atoi: 71
+- guru:time: 71
+- guru:atexit: 71
+- guru:fputc: 71
+- guru:chdir: 71
+- guru:mkdir: 71
+- guru:tm: 71
+- guru:sprintf: 71
+- guru:strncpy: 71
+- guru:SIG_DFL: 71
+- guru:strtoul: 71
+- guru:fstat: 71
+- guru:opendir: 71
+- guru:tolower: 71
+- guru:fread: 71
+- guru:dirname: 71
+- guru:localtime: 71
+- guru:fflush: 71
+- guru:ctime: 71
+- guru:strtok: 71
+- guru:strrchr: 71
+- guru:vfprintf: 71
+- guru:getc: 71
+- guru:EOF: 71
+- guru:fscanf: 71
+- guru:ferror: 71
+- guru:strcspn: 71
+- guru:isprint: 71
+- guru:fwrite: 71
+- guru:offsetof: 71
+- guru:sig_atomic_t: 71
+- guru:feof: 71
+- guru:stdin: 71
+- guru:rename: 71
+- guru:isupper: 71
+- guru:islower: 71
+- guru:fgets: 71
+- guru:asctime: 71
+- guru:SIGILL: 71
+- guru:SIGSEGV: 71
+- guru:strncat: 71
+- guru:difftime: 71
+- guru:realloc: 71
+- guru:strftime: 71
+- guru:mktime: 71
+- guru:memchr: 71
+- guru:UINT_MAX: 71
+- guru:ptrdiff_t: 71
+- guru:strtol: 71
+- guru:ERANGE: 71
+- guru:strcmp: 70
+- guru:open: 70
+- guru:memset: 70
+- guru:wait: 70
+- guru:strcpy: 70
+- guru:puts: 70
+- guru:log: 67
+- guru:restrict: 67
+- guru:#define: 66
+- guru:#endif: 66
+- guru:#ifdef: 66
+- guru:#ifndef: 66
+- guru:#undef: 66
+- guru:printf: 62
+- guru:exit: 62
+- guru:strlen: 62
+- guru:sscanf: 62
+- guru:unsigned: 62
+- guru:strncmp: 62
+- guru:memcpy: 62
+- guru:strstr: 62
+- guru:long: 62
+- guru:putchar: 62
+- guru:isdigit: 62
+- guru:malloc: 62
+- guru:isalpha: 62
+- guru:isspace: 62
+- guru:toupper: 62
+- guru:calloc: 62
+- guru:isalnum: 62
+- guru:main: 54
+- guru:NULL: 25
+- guru:const: 25
+- guru:static: 25
+- guru:void: 25
+- guru:free: 25
+- guru:continue: 25
+- guru:goto: 25
+- guru:do: 25
+- guru:switch: 25
+- guru:default: 25
+- guru:extern: 25
+- guru:write: 25
+- guru:read: 25
+- guru:typedef: 25
+- guru:#elif: 25
+- guru:assert: 25
+- guru:for: 9
+- guru:char: 9
+- guru:break: 9
+- guru:case: 9
+- guru:struct: 9
+- guru:sizeof: 9
+- guru:enum: 9
+- guru:inline: 9
+- guru:volatile: 9
+- guru:signal: 9
+- guru:union: 9
+- guru:if: 1
+- guru:return: 1
+- guru:int: 1
+- guru:else: 1
+- guru:while: 1
+- guru:#else: 1
+- guru:#if: 1
+
+## Names with no dictionary entry (the most common first)
+
+- `applet`: 76
+- `i`: 76
+- `p`: 76
+- `argv`: 76
+- `service`: 76
+- `fp`: 76
+- `runlevel`: 76
+- `elm`: 76
+- `eerrorx`: 76
+- `pid`: 76
+- `retval`: 76
+- `entries`: 76
+- `state`: 76
+- `ret`: 76
+- `fd`: 76
+- `RC_STRINGLIST`: 76
+- `s`: 76
+- `type`: 76
+- `rc_stringlist_free`: 76
+- `services`: 76
+- `exec`: 76
+- `eerror`: 76
+- `buf`: 76
+- `len`: 76
+- `list`: 76
+- `file`: 76
+- `var`: 76
+- `tmp`: 76
+- `argc`: 76
+- `ap`: 76
+- `deptree`: 76
+- `token`: 76
+- `xasprintf`: 76
+- `d`: 76
+- `fmt`: 76
+- `TAILQ_FOREACH`: 76
+- `sig`: 76
+- `svc`: 76
+- `name`: 76
+- `dp`: 76
+- `sa`: 76
+- `l`: 76
+- `rc_dirfd`: 76
+- `rc_stringlist_new`: 76
+- `pidfile`: 76
+- `uid`: 76
+- `e`: 76
+- `svcname`: 76
+- `RC_STRING`: 76
+- `dt`: 76
+- `env`: 76
+- `opt`: 76
+- `define`: 76
+- `c`: 76
+- `depinfo`: 76
+- `pw`: 76
+- `rp`: 76
+- `flags`: 76
+- `EINFO_RESTRICT`: 76
+- `str`: 76
+- `r`: 76
+- `newlevel`: 76
+- `dirfd`: 76
+- `defined`: 76
+- `notify`: 76
+- `xstrdup`: 76
+- `di`: 76
+- `res`: 76
+- `tmplist`: 76
+- `v`: 76
+- `cmd`: 76
+- `listelm`: 76
+- `gid`: 76
+- `ent`: 76
+- `pamh`: 76
+- `basename_c`: 76
+- `providers`: 76
+- `types`: 76
+- `xmalloc`: 76
+- `f`: 76
+- `options`: 76
+- `RC_SERVICE_STOPPED`: 76
+- `systype`: 76
+- `st`: 76
+- `user`: 76
+- `longopts`: 76
+- `deptype`: 76
+- `RC_SERVICE`: 76
+- `rc_service_state`: 76
+- `ch`: 76
+- `RC_SERVICE_STARTED`: 76
+- `n`: 76
+- `dir`: 76
+- `getoptstring`: 76
+- `einfo`: 76
+- `ewarn`: 76
+- `exec_file`: 76
+- `option`: 76
+- `level`: 76
+- `string`: 76
+- `home`: 76
+- `pids`: 76
+- `kp`: 76
+- `RC_DIR_SVCDIR`: 76
+- `shell`: 76
+- `redirect_stdout`: 76
+- `bootlevel`: 76
+- `rc_service_mark`: 76
+- `init`: 76
+- `redirect_stderr`: 76
+- `t`: 76
+- `format`: 76
+- `EINFO_PRINTF`: 76
+- `ecolor`: 76
+- `tv`: 76
+- `rc_yesno`: 76
+- `rc_svcdir`: 76
+- `RC_DEPTREE`: 76
+- `RC_SERVICE_INACTIVE`: 76
+- `config`: 76
+- `sys`: 76
+- `signame`: 76
+- `action`: 76
+- `changeuser`: 76
+- `ppath`: 76
+- `ionicec`: 76
+- `pi`: 76
+- `old`: 76
+- `gr`: 76
+- `depends`: 76
+- `rc_dirs`: 76
+- `handle_signal`: 76
+- `runlevels`: 76
+- `netdev`: 76
+- `signal_pipe`: 76
+- `_ent`: 76
+- `a`: 76
+- `color`: 76
+- `serrno`: 76
+- `m`: 76
+- `RC_LEVEL_SYSINIT`: 76
+- `TAILQ_CONCAT`: 76
+- `dirfds`: 76
+- `RC_SERVICE_FAILED`: 76
+- `mounts`: 76
+- `plugin`: 76
+- `curelm`: 76
+- `ch_dir`: 76
+- `extraopts`: 76
+- `usagestring`: 76
+- `xgetline`: 76
+- `get_deptype`: 76
+- `slave_tty`: 76
+- `exclusive_fd`: 76
+- `PAM_SUCCESS`: 76
+- `np`: 76
+- `head2`: 76
+- `redirect_stdin`: 76
+- `longopts_help`: 76
+- `amount`: 76
+- `rc_deptree_depends`: 76
+- `rc_conf_yesno`: 76
+- `quiet`: 76
+- `fifo`: 76
+- `accept`: 76
+- `CIRCLEQ_ENDC`: 76
+- `nkilled`: 76
+- `pamr`: 76
+- `nicelevel`: 76
+- `ioniced`: 76
+- `getoptstring_COMMON`: 76
+- `longopts_COMMON`: 76
+- `longopts_help_COMMON`: 76
+- `case_RC_COMMON_GETOPT`: 76
+- `mem`: 76
+- `elog`: 76
+- `LASTCMD`: 76
+- `cmdline`: 76
+- `ok`: 76
+- `RC_SERVICE_STARTING`: 76
+- `depend`: 76
+- `slash`: 76
+- `tty`: 76
+- `reject`: 76
+- `x`: 76
+- `devnull_fd`: 76
+- `ts`: 76
+- `ee`: 76
+- `environ`: 76
+- `rc`: 76
+- `do_fopenat`: 76
+- `RC_SERVICE_HOTPLUGGED`: 76
+- `svcs`: 76
+- `list2`: 76
+- `newer`: 76
+- `rc_is_user`: 76
+- `rc_service_resolve`: 76
+- `dfd`: 76
+- `mntpath`: 76
+- `depoptions`: 76
+- `default_runlevel`: 76
+- `major`: 76
+- `shutdown_delay`: 76
+- `request`: 76
+- `HAVE_PAM`: 76
+- `QUEUEDEBUG_ABORT`: 76
+- `pamenv`: 76
+- `stop`: 76
+- `ws`: 76
+- `RC_DEPINFO`: 76
+- `RC_DEP_TRACE`: 76
+- `mtime`: 76
+- `k`: 76
+- `svcdir`: 76
+- `restart_services`: 76
+- `env_list`: 76
+- `elm2`: 76
+- `test`: 76
+- `stderr_process`: 76
+- `stdout_process`: 76
+- `now`: 76
+- `files`: 76
+- `TAILQ_REMOVE`: 76
+- `pathname`: 76
+- `sorted`: 76
+- `rc_runlevel_exists`: 76
+- `saved_errno`: 76
+- `master_tty`: 76
+- `h`: 76
+- `head1`: 76
+- `retry`: 76
+- `tid`: 76
+- `usage`: 76
+- `rc_stringlist_delete`: 76
+- `b`: 76
+- `dirs`: 76
+- `s2`: 76
+- `rc_waitpid`: 76
+- `tmplog`: 76
+- `main_stop_services`: 76
+- `applet_list`: 76
+- `deps`: 76
+- `svc_name`: 76
+- `diff_secs`: 76
+- `req`: 76
+- `hash`: 76
+- `numbuf`: 76
+- `src`: 76
+- `RC_DEPTYPE`: 76
+- `get_provided1`: 76
+- `uts`: 76
+- `rc_conf`: 76
+- `s1`: 76
+- `fuser_pid`: 76
+- `running`: 76
+- `rc_logger_tty`: 76
+- `sset`: 76
+- `svc2`: 76
+- `reexport`: 76
+- `pipe`: 76
+- `nav`: 76
+- `oom_score_adj`: 76
+- `stdout_fd`: 76
+- `stderr_fd`: 76
+- `cap_iab`: 76
+- `linkpath`: 76
+- `UNCONST`: 76
+- `RC_LIBEXECDIR`: 76
+- `rc_deptree_free`: 76
+- `get_depinfo`: 76
+- `RC_LEVEL_SHUTDOWN`: 76
+- `proc`: 76
+- `cline`: 76
+- `ancestor_list`: 76
+- `RC_SERVICE_WASINACTIVE`: 76
+- `tmps`: 76
+- `termios_orig`: 76
+- `RC_KRUNLEVEL`: 76
+- `pfd`: 76
+- `use_services`: 76
+- `background`: 76
+- `exec_init`: 76
+- `do_exec`: 76
+- `arg`: 76
+- `rc_stringlist_addu`: 76
+- `ECOLOR`: 76
+- `dst`: 76
+- `is_verbose`: 76
+- `RC_PID`: 76
+- `do_opendirat`: 76
+- `TAILQ_INIT`: 76
+- `RC_SERVICE_STOPPING`: 76
+- `deep_mtime_check`: 76
+- `file_regex`: 76
+- `interactive`: 76
+- `ibsave`: 76
+- `resolve_deptype`: 76
+- `ll`: 76
+- `PAM_SILENT`: 76
+- `nservices`: 76
+
+## Comments with no translation
+
+- CONSTCOND: 76
+- NOTREACHED: 76
+- FALLTHROUGH: 76
+- first element: 76
+- next element: 76
+- Restore errno: 76
+- class shift: 76
+- falls through: 76
+- Ensure that we are only quiet when explicitly told to be: 76
+- .sh files are not init scripts: 76
+- We need to block signals until we have forked: 76
+- Restore default handlers: 76
+- Use long option value that is out of range for 8 bit getopt values.
+ * The exact enum value is inter: 76
+- This has to come first so following values stay in the 0x100+ range.: 76
+- addr of last next element: 76
+- DEPRECATED: 76
+- Sanity: 76
+- Unmask signals: 76
+- VSERVER systems cannot really drop to shells: 76
+- No shell set, so obey env, then passwd, then default to /bin/sh: 76
+- Change dir to / to ensure all init scripts don't use stuff in pwd
+	 * For user services, change to t: 76
+- Setup a signal handler: 76
+- Wait for our services to finish: 76
+- If the "noinit" parameter was passed on the kernel command line then
+	 * mark the specified services: 76
+- on linux CLOCK_BOOTTIME provides proper POSIX CLOCK_MONOTONIC behavior.: 76
+- block all signals we do not handle: 76
+- install signal  handler: 76
+- Service has been stopped already: 76
+- address of previous next element: 76
+- assume a reasonable default, rather than bailing out: 76
+- For io priority: 76
+- For prctl: 76
+- We are not supporting authentication conversations: 76
+- Get our user name and initial dir: 76
+- --ionice: 76
+- --stop: 76
+- --nice: 76
+- --oom-score-adj: 76
+- --start: 76
+- --user <username>|<uid>: 76
+- --chdir /new/dir: 76
+- --env: 76
+- --group <group>|<gid>: 76
+- --pidfile <pid-file>: 76
+- --chroot /new/root: 76
+- --stdin /path/to/stdin.input-file: 76
+- --stdout /path/to/stdout.lgfile: 76
+- --stderr /path/to/stderr.logfile: 76
+- --stdout-logger "command to run for stdout logging": 76
+- --stderr-logger "command to run for stderr logging": 76
+- Expand ~: 76
+- Validate that the binary exists if we are starting: 76
+- Full or relative path: 76
+- Something in $PATH: 76
+- Even if we have not actually killed anything, we should
+		 * remove information about it as it may h: 76
+- Remove existing pidfile: 76
+- Open in "r+" mode to avoid creating if non-existent.: 76
+- Close any fd's to the passwd database: 76
+- Clean the environment of any RC_ variables: 76
+- Don't add strings unless they set a var: 76
+- For the path, remove the rcscript bin dir from it: 76
+- default set inside main(): 76
+- remove the controlling tty: 76
+- * checkpath.c
+ * Checks for the existence of a file or directory and creates it
+ * if necessary. It : 76
+- * now follow the symlink.: 76
+- now walk down the directory path: 76
+- get rid of trailing / characters: 76
+- We do not recursively create parents: 76
+- usecs to wait while we poll the file existence: 76
+- retval stores the timeout: 76
+- * fstabinfo.c
+ * Gets information about /etc/fstab.: 76
+- Yay for linux and its non liking of POSIX functions.
+   Okay, we could use getfsent but the man page: 76
+- fail if there is no /etc/fstab: 76
+- Ensure we always display something: 76
+- mount or remount?: 76
+- No point in outputting if quiet: 76
+- This test is correct as it's not present in baselayout: 76
+- This test is perverted - historically the baselayout function
+	 * returns 0 on *failure*, which is p: 76
+- * kill_all.c
+ * Sends a signal to all processes on the system.: 76
+- * if we could not open the file, the process disappeared, which
+		 * leaves us no way to determine f: 76
+- * Open the /proc directory.
+	 * CWD must be /proc to avoid problems if / is affected by the killing
+: 76
+- Walk through the directory.: 76
+- Is this a process?: 76
+- Is this a process we have been requested to omit?: 76
+- Is this process in our session?: 76
+- Is this a kernel thread?: 76
+- Although OpenRC requires C99, linking to us should not.: 76
+- __BEGIN_DECLS: 76
+- ! @brief Color types to use: 76
+- ! @brief Returns the ASCII code for the color: 76
+- ! @brief Writes to syslog.: 76
+- !
+ * @brief Display informational messages.
+ *
+ * The einfo family of functions display messages in : 76
+- ! @ingroup ebegin
+ * @brief Display informational messages that may take some time.
+ *
+ * Similar to: 76
+- ! @ingroup eend
+ * @brief End an ebegin.
+ *
+ * If you ebegin, you should eend also.
+ * eend places [: 76
+- ! @ingroup eindent
+ * @brief Indents the einfo lines.
+ *
+ * For each indent you should outdent when : 76
+- ! @brief Prefix each einfo line with something: 76
+- __END_DECLS: 76
+- einfo.c
+  Informational functions: 76
+- In case we cannot work out how many columns from ioctl, supply a default: 76
+- Number of spaces for an indent: 76
